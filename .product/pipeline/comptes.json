@@ -93,7 +93,12 @@
       ],
       "controles": "Cookies HttpOnly / SameSite=Lax / Secure en https, contrôle d'origine (CSRF), URL de retour limitée aux origines connues, hôte vérifié, routes Better Auth en liste blanche, aucun secret côté client, aucune adresse e-mail ni code dans les journaux de production, entrées validées par Zod, aucune requête SQL construite à la main."
     },
-    "push": { "status": "in_progress" }
+    "push": {
+      "status": "completed",
+      "gates": "lint, format:check, typecheck, test:coverage (727 tests, 98 fichiers), build : verts sur l'arbre fusionné avec origin/master (73c46dd)",
+      "pr": "ouverte depuis feat/comptes, merge automatique armé (gh pr merge --auto --merge)",
+      "note": "_routes.json n'est plus dans public/ : le plugin l'écrit avec _worker.js, seulement si DEKLIC_COMPTES=1 (aucun changement de déploiement pour master avant la mise en service)."
+    }
   },
   "post_mortem": {
     "blockers_encountered": [

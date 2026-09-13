@@ -36,7 +36,7 @@ npm run test:e2e      # vite build puis playwright test : parcours complets dans
 npm run build         # build de chaque workspace
 ```
 
-Node 22 ou plus. La CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) exécute ces six commandes sur chaque pull request (609 tests au 13/09/2026, dont 135 pour les référentiels, 119 pour la capture, l'extension et le bouton-favori, et 30 pour l'impression, le partage, Comparer et Méthode). Une PR est fusionnée automatiquement dès que le check `verify` est vert (`gh pr merge <n> --auto --merge`) ; `master` refuse tout merge sans ce check. Un second job `e2e` joue les huit parcours Playwright dans Chromium ; il n'est pas encore requis pour fusionner.
+Node 22 ou plus. La CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) exécute ces six commandes sur chaque pull request (727 tests au 13/09/2026, dont 135 pour les référentiels, 119 pour la capture, l'extension et le bouton-favori, 30 pour l'impression, le partage, Comparer et Méthode, et 91 pour les comptes). Une PR est fusionnée automatiquement dès que le check `verify` est vert (`gh pr merge <n> --auto --merge`) ; `master` refuse tout merge sans ce check. Un second job `e2e` joue les huit parcours Playwright dans Chromium ; il n'est pas encore requis pour fusionner.
 
 ## Le moteur (`@loupe/moteur`)
 
@@ -152,7 +152,7 @@ npm run dev -w apps/web                     # le site relaie /api vers le port 8
 npm run migration:generer -w apps/comptes   # après une montée de version de Better Auth
 ```
 
-- L'API répond **sur l'origine du site** : avec `DEKLIC_COMPTES=1`, le build de `apps/web` dépose le worker des comptes dans `dist/_worker.js` et `public/_routes.json` ne lui envoie que `/api/*` (cookie de session de première partie).
+- L'API répond **sur l'origine du site** : avec `DEKLIC_COMPTES=1`, le build de `apps/web` dépose le worker des comptes dans `dist/_worker.js` et `dist/_routes.json`, qui ne lui envoie que `/api/*` (cookie de session de première partie).
 - Routes : `GET /api/comptes/sante`, `GET /api/comptes/fournisseurs` (boutons à afficher), `/api/auth/*` (Better Auth, derrière une garde : hôte connu, routes utilisées seulement, code de connexion seulement).
 - Code valable 10 minutes, invalidé après 3 erreurs ; 3 envois et 10 saisies par minute par adresse IP ; session de 7 jours en cookie `HttpOnly`, `SameSite=Lax`, `Secure` ; suppression du compte réservée aux sessions de moins d'un jour ; aucune adresse e-mail dans les journaux.
 - Base D1 `deklic-comptes` (tables de Better Auth), migration `apps/comptes/migrations/0001_comptes.sql`, testée à travers une D1 simulée sur `node:sqlite`.

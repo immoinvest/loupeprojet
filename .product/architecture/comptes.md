@@ -94,7 +94,7 @@ src/ecrans/Compte.tsx        profil (nom), méthodes liées, déconnexion, suppr
 src/coque/Profil.tsx         bas de la barre latérale : « Sans compte · Se connecter » ou initiales, nom, « Mon compte »
 src/composants/IconesFournisseurs.tsx   « G » de Google, pomme d'Apple
 vite.config.ts               proxy /api → 8787 ; plugin workerDesComptes (opt-in DEKLIC_COMPTES=1)
-public/_routes.json          include ["/api/*"]
+dist/_routes.json            include ["/api/*"], écrit par le plugin avec _worker.js (rien sans DEKLIC_COMPTES=1)
 ```
 
 `App` fournit `CompteProvider` avec `clientReseau()` ; `AppEnMemoire` avec un client mémoire anonyme (ou celui du test). Couverture 100 % exigée sur `src/compte/**` et `src/textes/**`.

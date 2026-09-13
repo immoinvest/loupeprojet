@@ -1,7 +1,7 @@
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import { spawnSync } from 'node:child_process';
-import { copyFileSync, mkdirSync, mkdtempSync, readdirSync, rmSync } from 'node:fs';
+import { copyFileSync, mkdirSync, mkdtempSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
@@ -26,16 +26,19 @@ function bundlerComptes(): string {
   return temporaire;
 }
 
+/** Seul /api/* entre dans le worker ; le reste est servi en statique (et _redirects s'applique). */
+const ROUTES_PAGES = { version: 1, include: ['/api/*'], exclude: [] };
+
 /**
  * L'API des comptes (apps/comptes) est servie sur l'origine du site par Cloudflare Pages : le build
- * dépose son worker en dist/_worker.js, et public/_routes.json ne lui envoie que /api/*.
+ * dépose son worker en dist/_worker.js et dist/_routes.json, qui ne lui envoie que /api/*.
  */
 function workerDesComptes(): Plugin {
   let sortie = '';
   return {
     name: 'deklic-worker-comptes',
-    // Opt-in : sans DEKLIC_COMPTES=1 (variable de build du projet Pages), aucun worker n'est déposé, donc
-    // ni flag nodejs_compat ni base D1 requis ; le site se déploie comme avant, la connexion est indisponible.
+    // Opt-in : sans DEKLIC_COMPTES=1 (variable de build du projet Pages), ni _worker.js ni _routes.json,
+    // donc ni flag nodejs_compat ni base D1 requis ; le site se déploie comme avant, connexion indisponible.
     apply: (_config, { command }) => command === 'build' && process.env.DEKLIC_COMPTES === '1',
     configResolved(config) {
       sortie = join(config.root, config.build.outDir);
@@ -52,6 +55,7 @@ function workerDesComptes(): Plugin {
         for (const module of modules) copyFileSync(join(temporaire, module), join(dossier, module));
       }
       rmSync(temporaire, { recursive: true, force: true });
+      writeFileSync(join(sortie, '_routes.json'), `${JSON.stringify(ROUTES_PAGES, null, 2)}\n`);
     },
   };
 }
