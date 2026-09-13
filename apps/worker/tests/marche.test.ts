@@ -229,6 +229,7 @@ describe('GET /marche', () => {
         cle.startsWith('loyers/')
           ? Promise.reject(new Error('R2 indisponible'))
           : Promise.resolve(PUBLIES[cle] ?? null),
+      lireTexte: () => Promise.resolve(null),
     };
     const { requete, journal } = banc({ donnees });
     const corps = await (await requete('/marche?codeInsee=13205')).json<Reponse>();
@@ -316,7 +317,12 @@ describe('lecteurs de données', () => {
     const lecteur = lecteurR2({
       get: (cle) =>
         Promise.resolve(
-          cle === 'present.json' ? { json: <T>() => Promise.resolve({ ok: true } as T) } : null,
+          cle === 'present.json'
+            ? {
+                json: <T>() => Promise.resolve({ ok: true } as T),
+                text: () => Promise.resolve('texte brut'),
+              }
+            : null,
         ),
     });
     expect(await lecteur.lireJson('absent.json')).toBeNull();
@@ -328,8 +334,18 @@ describe('lecteurs de données', () => {
       KV_CACHE: { get: () => Promise.resolve(null), put: () => Promise.resolve() },
       LIMITEUR: { limit: () => Promise.resolve({ success: true }) },
       LIMITEUR_EXTRACTION: { limit: () => Promise.resolve({ success: true }) },
-      DONNEES: { get: () => Promise.resolve({ json: <T>() => Promise.resolve(COMMUNES_13 as T) }) },
+      DONNEES: {
+        get: () =>
+          Promise.resolve({
+            json: <T>() => Promise.resolve(COMMUNES_13 as T),
+            text: () => Promise.resolve('date,prix\n'),
+          }),
+      },
     });
     expect(await deps.donnees.lireJson('communes/13.json')).toEqual(COMMUNES_13);
+    expect(await deps.donnees.lireTexte('dvf/2025/13205.csv')).toBe('date,prix\n');
+    expect(
+      await lecteurMemoire({ 'a.csv': 'texte', 'b.json': { x: 1 } }).lireTexte('b.json'),
+    ).toBeNull();
   });
 });
