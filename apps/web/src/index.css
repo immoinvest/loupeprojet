@@ -80,6 +80,18 @@ main:focus-visible {
   outline: none;
 }
 
+/* Bande qui défile au doigt (volets d'un projet) : sans barre de défilement, et le cadre de focus
+   se dessine à l'intérieur de l'élément, sinon le défilement le coupe. */
+.defilement-discret {
+  scrollbar-width: none;
+}
+.defilement-discret::-webkit-scrollbar {
+  display: none;
+}
+.defilement-discret :focus-visible {
+  outline-offset: -2px;
+}
+
 /* Impression : la coque disparaît, le document garde ses couleurs (les feux ont aussi un libellé). */
 @media print {
   @page {
