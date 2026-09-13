@@ -1,0 +1,686 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Spec produit Loupe</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#F3F6F7; --surface:#FFFFFF; --surface-2:#EAF0F2; --ink:#16232C; --muted:#5C6C77; --line:#D6DFE3;
+  --accent:#1E6E5A; --accent-ink:#FFFFFF; --accent-soft:#E1EFE9;
+  --ochre:#A8701B; --ochre-soft:#F6ECD6;
+  --good:#2E7D4F; --warn:#A8701B; --bad:#B23A3A; --bad-soft:#F7E3E3;
+  --code-bg:#EEF2F4;
+  --shadow:0 1px 2px rgba(22,35,44,.06);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F171C; --surface:#172229; --surface-2:#1E2B33; --ink:#E6ECEF; --muted:#9AAAB4; --line:#2A3841;
+    --accent:#5BC1A2; --accent-ink:#0F171C; --accent-soft:#1B3A33;
+    --ochre:#E0A94A; --ochre-soft:#3A2E17;
+    --good:#6CCB8F; --warn:#E0A94A; --bad:#E07070; --bad-soft:#3D2020;
+    --code-bg:#121C22;
+    --shadow:none;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F171C; --surface:#172229; --surface-2:#1E2B33; --ink:#E6ECEF; --muted:#9AAAB4; --line:#2A3841;
+  --accent:#5BC1A2; --accent-ink:#0F171C; --accent-soft:#1B3A33;
+  --ochre:#E0A94A; --ochre-soft:#3A2E17;
+  --good:#6CCB8F; --warn:#E0A94A; --bad:#E07070; --bad-soft:#3D2020;
+  --code-bg:#121C22;
+  --shadow:none;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:16px;line-height:1.6;padding-inline:20px;padding-block:0 80px}
+a{color:var(--accent);text-decoration-thickness:1px;text-underline-offset:3px}
+.wrap{max-width:1160px;margin:0 auto}
+header.top{padding-block:40px 28px;border-bottom:1px solid var(--line);margin-bottom:36px}
+.eyebrow{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+h1{font-family:"Bricolage Grotesque","IBM Plex Sans",sans-serif;font-weight:700;font-size:clamp(34px,5vw,52px);line-height:1.05;margin:10px 0 14px;letter-spacing:-.01em;text-wrap:balance}
+h1 .name{color:var(--accent)}
+.lede{font-size:19px;max-width:62ch;margin:0 0 22px;color:var(--ink)}
+.meta{display:flex;flex-wrap:wrap;gap:8px 22px;font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--muted)}
+.meta b{color:var(--ink);font-weight:500}
+.layout{display:grid;grid-template-columns:230px minmax(0,1fr);gap:48px;align-items:start}
+nav.toc{position:sticky;top:20px;font-size:13.5px;line-height:1.45}
+nav.toc .eyebrow{margin-bottom:10px}
+nav.toc ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+nav.toc a{color:var(--muted);text-decoration:none;display:block;padding:3px 0 3px 12px;border-left:2px solid var(--line)}
+nav.toc a:hover,nav.toc a:focus-visible{color:var(--ink);border-color:var(--accent)}
+main{min-width:0;max-width:78ch}
+section{margin-bottom:56px;scroll-margin-top:20px}
+h2{font-family:"Bricolage Grotesque",sans-serif;font-weight:700;font-size:28px;line-height:1.15;margin:0 0 6px;letter-spacing:-.01em;text-wrap:balance}
+h2 + .sub{color:var(--muted);margin:0 0 20px;font-size:15.5px}
+h3{font-family:"Bricolage Grotesque",sans-serif;font-weight:600;font-size:19px;margin:28px 0 8px;text-wrap:balance}
+p{margin:0 0 14px}
+ul,ol{margin:0 0 16px;padding-left:22px}
+li{margin-bottom:5px}
+li::marker{color:var(--muted)}
+strong{font-weight:600}
+code,kbd{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.88em;background:var(--code-bg);padding:1px 5px;border-radius:4px}
+pre{background:var(--code-bg);border:1px solid var(--line);border-radius:8px;padding:14px 16px;overflow-x:auto;font-family:"IBM Plex Mono",monospace;font-size:13px;line-height:1.5;margin:0 0 18px}
+pre code{background:none;padding:0;font-size:inherit}
+.callout{border:1px solid var(--line);border-left:4px solid var(--accent);background:var(--surface);border-radius:8px;padding:14px 18px;margin:18px 0 22px;box-shadow:var(--shadow)}
+.callout.warn{border-left-color:var(--ochre);background:var(--ochre-soft)}
+.callout.bad{border-left-color:var(--bad);background:var(--bad-soft)}
+.callout .eyebrow{margin-bottom:4px}
+.callout p:last-child{margin-bottom:0}
+.tablewrap{overflow-x:auto;margin:14px 0 22px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:14px;line-height:1.4}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:"IBM Plex Mono",monospace;font-weight:500;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:var(--surface-2);white-space:nowrap}
+tr:last-child td{border-bottom:none}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tag{display:inline-block;font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.04em;padding:2px 7px;border-radius:4px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+.tag.ok{color:var(--good);border-color:color-mix(in srgb,var(--good) 40%,transparent);background:color-mix(in srgb,var(--good) 10%,transparent)}
+.tag.warn{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 45%,transparent);background:color-mix(in srgb,var(--warn) 12%,transparent)}
+.tag.bad{color:var(--bad);border-color:color-mix(in srgb,var(--bad) 45%,transparent);background:color-mix(in srgb,var(--bad) 10%,transparent)}
+.tag.llm{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 45%,transparent);background:var(--accent-soft)}
+.steps{list-style:none;padding:0;margin:0 0 20px;display:flex;flex-direction:column;gap:10px;counter-reset:step}
+.steps li{counter-increment:step;display:grid;grid-template-columns:44px minmax(0,1fr);gap:14px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:14px 16px;box-shadow:var(--shadow)}
+.steps li::before{content:counter(step);font-family:"Bricolage Grotesque",sans-serif;font-weight:700;font-size:24px;line-height:1;color:var(--accent);padding-top:2px}
+.steps li b{display:block;font-weight:600;margin-bottom:3px}
+.steps li p{margin:0;font-size:15px}
+.steps .who{font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--muted);margin-top:6px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin:14px 0 22px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:14px 16px;box-shadow:var(--shadow)}
+.card h4{font-family:"Bricolage Grotesque",sans-serif;font-size:16px;margin:0 0 6px;font-weight:600}
+.card p{font-size:14.5px;margin:0;color:var(--ink)}
+.card .eyebrow{margin-bottom:6px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:14px 0 22px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 14px}
+.kpi .v{font-family:"Bricolage Grotesque",sans-serif;font-weight:700;font-size:26px;line-height:1.1;font-variant-numeric:tabular-nums}
+.kpi .l{font-size:12.5px;color:var(--muted);margin-top:4px}
+.mermaid{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px;margin:14px 0 22px;overflow-x:auto}
+.formula{font-family:"IBM Plex Mono",monospace;font-size:13.5px;background:var(--code-bg);border-radius:6px;padding:8px 12px;margin:6px 0 12px;overflow-x:auto;white-space:nowrap}
+.roadmap{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin:14px 0 22px}
+.roadmap .card{border-top:3px solid var(--line)}
+.roadmap .card.now{border-top-color:var(--accent)}
+.roadmap ul{padding-left:18px;margin:6px 0 0;font-size:14px}
+.sources{font-size:13.5px;columns:2;column-gap:32px}
+.sources li{break-inside:avoid;margin-bottom:4px}
+footer{margin-top:60px;padding-top:18px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
+@media (max-width:900px){.layout{grid-template-columns:1fr}nav.toc{display:none}.sources{columns:1}}
+</style>
+
+<div class="wrap">
+<header class="top">
+  <div class="eyebrow">Spec produit &amp; architecture · v1 · 13 septembre 2026</div>
+  <h1><span class="name">Loupe</span> — colle le lien d'une annonce, obtiens l'analyse complète en deux minutes.</h1>
+  <p class="lede">Un outil gratuit, sans compte, pour les personnes qui font leur premier investissement locatif. Tout part du lien de l'annonce : l'app en tire le bien, agrège les données publiques autour, et déroule l'analyse du modèle Excel « Projet 92K » (crédit, cash-flow, fiscalité, revente, rendement). Sans lien, on saisit trois chiffres à la main. L'IA n'intervient qu'à un seul endroit : lire ce que l'annonce dit.</p>
+  <div class="meta">
+    <span>Nom de travail : <b>Loupe</b> (à remplacer)</span>
+    <span>Auteur : <b>Pierre</b></span>
+    <span>Cible v1 : <b>moteur d'analyse</b></span>
+    <span>Modèle éco : <b>gratuit d'abord</b></span>
+    <span>Coût d'exploitation visé : <b>&lt; 10 €/mois</b></span>
+  </div>
+</header>
+
+<div class="layout">
+<nav class="toc" aria-label="Sommaire">
+  <div class="eyebrow">Sommaire</div>
+  <ol>
+    <li><a href="#pari">Le pari</a></li>
+    <li><a href="#lybox">Ce qu'on retient de Lybox</a></li>
+    <li><a href="#cible">Pour qui</a></li>
+    <li><a href="#principes">Principes produit</a></li>
+    <li><a href="#parcours">Parcours v1</a></li>
+    <li><a href="#lien">Du lien au rapport</a></li>
+    <li><a href="#moteur">Moteur de calcul</a></li>
+    <li><a href="#excel">Ton Excel → Loupe</a></li>
+    <li><a href="#autofill">Remplissage automatique</a></li>
+    <li><a href="#estimations">Estimations</a></li>
+    <li><a href="#archi">Architecture</a></li>
+    <li><a href="#llm">Où est l'IA, et son coût</a></li>
+    <li><a href="#donnees">Modèle de données</a></li>
+    <li><a href="#roadmap">Roadmap</a></li>
+    <li><a href="#risques">Risques &amp; questions</a></li>
+    <li><a href="#suite">Prochaines étapes</a></li>
+    <li><a href="#sources">Sources</a></li>
+  </ol>
+</nav>
+
+<main>
+
+<section id="pari">
+  <h2>Le pari</h2>
+  <p class="sub">Ce qui existe, et le trou dans lequel on se glisse.</p>
+  <p>Le marché français a trois familles d'outils. Les simulateurs complets mais à saisie manuelle et payants (Horiz.io à 8,25–19,99 €/mois, Lybox à 9–49 €/mois). Les gratuits à formulaire, sans lecture d'annonce (Rendify, simulateurs ANIL). Et les nouveaux entrants « IA » de 2025-2026 qui plafonnent le gratuit très bas (IMMONAI : 5 analyses/mois ; ImmoIA : 10 conversations/mois) ou qui sont des chats plutôt qu'un rapport.</p>
+  <p>Aucun ne combine <strong>zéro friction</strong> (un seul champ, pas de compte), <strong>lecture automatique de l'annonce</strong>, <strong>analyse complète</strong> (jusqu'à la revente et l'impôt sur la plus-value) et <strong>gratuit sans quota visible</strong>. Les reproches récurrents faits aux leaders — support lent, facturation surprise, résiliation compliquée, complexité — plaident pour un outil simple et honnête.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Outil</th><th>Ce qu'il fait</th><th>Prix</th><th>Ce qui manque pour un débutant</th></tr></thead>
+    <tbody>
+      <tr><td>Horiz.io</td><td>Simulateur le plus complet, plugin navigateur, gestion</td><td>8,25–19,99 €/mois</td><td>Payant pour l'essentiel, dense, support critiqué</td></tr>
+      <tr><td>Lybox</td><td>Agrégateur d'annonces + rentabilité + « crédits IA »</td><td>9–49 €/mois</td><td>Orienté chasse intensive, pas pédagogique</td></tr>
+      <tr><td>IMMONAI / ImmoIA</td><td>Analyse d'annonce par IA, scoring</td><td>Gratuit limité, 19,90–49,90 €/mois</td><td>Quota gratuit très bas, dépendance forte au LLM</td></tr>
+      <tr><td>Rendify</td><td>Simulateur gratuit, 6 régimes</td><td>Gratuit</td><td>Saisie 100 % manuelle</td></tr>
+      <tr><td>Rentila</td><td>Gestion locative (quittances, locataires)</td><td>Gratuit 1 lot, puis 5,90–11,90 € HT/mois</td><td>N'aide pas à décider d'acheter : c'est l'étape d'après</td></tr>
+    </tbody>
+  </table></div>
+  <div class="callout">
+    <div class="eyebrow">Positionnement en une phrase</div>
+    <p>« Tu as trouvé une annonce ? Colle-la ici. Loupe te dit si c'est cher, si ça s'autofinance, ce que tu paieras d'impôts et ce qu'il te restera à la revente — en deux minutes, gratuitement, et en t'expliquant chaque chiffre. »</p>
+  </div>
+</section>
+
+<section id="lybox">
+  <h2>Ce qu'on retient de Lybox</h2>
+  <p class="sub">Testé en conditions réelles le 13 septembre 2026 sur ton compte d'essai : une simulation créée de zéro (T3 65 m², Marseille 5e, 155 000 €) et ton favori d'Aix-en-Provence.</p>
+  <h3>À garder</h3>
+  <ul>
+    <li><strong>Trois champs pour démarrer</strong> (prix, surface, ville) quand on n'a pas d'annonce. C'est notre mode « saisir à la main ».</li>
+    <li><strong>Une rangée de cinq indicateurs</strong> en tête de chaque page : loyers, charges, cash-flow, brut, net. On la reprend, avec la couleur qui dit si c'est bon ou pas.</li>
+    <li><strong>Le taux de couverture</strong> (mensualité ÷ loyer) : un ratio qu'un débutant comprend instantanément.</li>
+    <li><strong>Le simulateur de négociation</strong> : « à quel prix ce projet atteint tel cash-flow ou tel rendement ». Chez nous il devient « À quel prix ça marche ? », avec trois cibles pré-calculées et une phrase à ressortir au vendeur.</li>
+    <li><strong>Fourchettes bas / moyen / haut avec indice de confiance</strong> pour le prix au m² et le loyer. On fait pareil, en montrant les ventes DVF qui servent de base.</li>
+    <li><strong>Le récapitulatif tout-en-un modifiable</strong> : notre écran « Vérifier » est construit sur ce principe, mais avant le rapport plutôt qu'après.</li>
+    <li><strong>« Préparer la visite »</strong> et la détection d'incohérences (leur IA a relevé « 65 m² pour 1 pièce »). On les fait avec des règles, pas un crédit IA.</li>
+    <li><strong>Statut du projet</strong> (analyse en cours, visite, offre), duplication, comparaison, historique du prix de l'annonce (« baisse totale −10 000 € »). Statut et duplication en v1.5 ; historique de prix en v2, tenu par l'extension chez l'utilisateur.</li>
+    <li><strong>Analyser un DPE</strong> à partir du PDF : bonne idée pour la v2, le DPE dit l'année, le chauffage et la surface.</li>
+  </ul>
+  <h3>À corriger chez nous</h3>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Observé chez Lybox</th><th>Ce que ça produit</th><th>Choix Loupe</th></tr></thead>
+    <tbody>
+      <tr><td>Charges par défaut à zéro (PNO, comptable, vacance, gestion, entretien) ; seule la taxe foncière est estimée (= 1 mois de loyer)</td><td>« Rendement net 5,1 % » ou « 6,0 % » affiché alors que le cash-flow est négatif ; un débutant retient le 6 %</td><td>Défauts réalistes et sourcés pour chaque ligne, vacance comprise. Le net est calculé charges pleines, quitte à décevoir</td></tr>
+      <tr><td>Nombre de pièces par défaut « 1 » pour 65 m² ; loyer estimé sur cette base, puis un avertissement</td><td>Loyer sous-estimé (776 €), incohérence signalée après coup</td><td>Pièces lues dans l'annonce, sinon déduites de la surface ; contrôle de cohérence avant le rapport, pas après</td></tr>
+      <tr><td>Quartier attribué automatiquement faux sur ton favori (« Plateau de Puyricard » pour un bien à Corsy) ; « différence de prix −43 % » calculée dessus</td><td>Le chiffre le plus visible de la page est faux sans que rien ne le signale</td><td>Ventes DVF dans un rayon autour de l'adresse géocodée, affichées sur une carte ; repli explicite « commune entière, confiance faible » quand l'adresse manque</td></tr>
+      <tr><td>Fiscalité : régime « foncier réel » par défaut même pour un meublé, net imposable à 0, un seul régime à la fois, page indisponible sur mobile</td><td>Impôt affiché à 0 € tant qu'on n'a pas saisi ses revenus ; pas de comparaison</td><td>TMI demandée parmi les cinq champs ; quatre régimes côte à côte ; tout fonctionne sur téléphone</td></tr>
+      <tr><td>Taux 3,5 % / 20 ans, notaire 8,5 % forfaitaire</td><td>Correct, mais figé</td><td>Taux du mois (3,35 % sur 25 ans en août 2026) et formule de frais réelle</td></tr>
+      <tr><td>Quatre fenêtres à la première visite (inscription, favoris, tutoriel, cookies), bandeau promo, compte à rebours, « essai expire dans 7 jours », crédits IA</td><td>On cherche le chiffre au milieu des sollicitations</td><td>Zéro fenêtre, zéro bandeau, pas de compte pour le premier rapport</td></tr>
+      <tr><td>Analyse IA : 1 crédit, 30 secondes, une page de prose, verdict « À voir », cible de prix à 102 631 € calculée sur un rendement générique de 7 % net</td><td>Utile mais lent, payant, et la cible ignore la situation de l'utilisateur</td><td>Verdict par règles, instantané, cinq feux ; prix cible dérivé du cash-flow de <em>ce</em> projet avec <em>ses</em> hypothèses</td></tr>
+      <tr><td>Cinq onglets par projet + « dashboard personnalisé » + barre latérale de huit entrées</td><td>Complet, mais on ne sait pas où regarder</td><td>Un rapport, une colonne, des ancres ; les détails se déplient</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="cible">
+  <h2>Pour qui</h2>
+  <p class="sub">Une personne, trois questions.</p>
+  <p><strong>Camille, 31 ans, salariée, 2 600 € net par mois</strong>, jamais investi. Elle passe ses soirées sur LeBonCoin et SeLoger, a un tableur bricolé, et se pose toujours les trois mêmes questions devant une annonce :</p>
+  <div class="grid2">
+    <div class="card"><div class="eyebrow">Question 1</div><h4>Est-ce que c'est cher ?</h4><p>Le prix au m² comparé aux ventes réelles du quartier (DVF), pas aux annonces.</p></div>
+    <div class="card"><div class="eyebrow">Question 2</div><h4>Est-ce que ça s'autofinance ?</h4><p>Le cash-flow mensuel après crédit, charges, vacance et impôt. Et l'effort d'épargne si c'est négatif.</p></div>
+    <div class="card"><div class="eyebrow">Question 3</div><h4>Qu'est-ce qu'il me restera ?</h4><p>Sur 5, 10, 15 ans : ce que la banque accepte, ce qu'elle paie d'impôts, ce qu'elle récupère à la revente.</p></div>
+  </div>
+  <p>Ce n'est pas un outil pour le multi-propriétaire à 12 lots. Lui a déjà Horiz ou un comptable. Loupe est le premier outil qu'on ouvre, celui qui remplace le tableur bricolé.</p>
+</section>
+
+<section id="principes">
+  <h2>Principes produit</h2>
+  <p class="sub">Cinq règles qui tranchent les débats de conception.</p>
+  <ol>
+    <li><strong>Une seule entrée : le lien.</strong> Un champ où l'on colle l'URL de l'annonce. Tout le reste se déduit ou se propose. La saisie manuelle (prix, surface, ville) n'apparaît que si l'on n'a pas de lien. Pas de formulaire à 40 cases à l'ouverture.</li>
+    <li><strong>Jamais de case vide.</strong> Chaque champ a une valeur par défaut sourcée (annonce, donnée publique, barème) et un badge qui dit d'où elle vient. L'utilisateur corrige, il ne remplit pas.</li>
+    <li><strong>Chaque chiffre s'explique en une phrase.</strong> Un tap sur « −134 €/mois » montre la soustraction. Les explications sont des textes écrits une fois, pas générés par un LLM.</li>
+    <li><strong>Gratuit et sans compte.</strong> La première analyse ne demande rien. Le compte (optionnel) sert à retrouver et comparer ses projets sur un autre appareil.</li>
+    <li><strong>L'IA lit, elle ne calcule pas.</strong> Au plus un appel LLM par annonce, seulement pour les champs que la page ne donne pas déjà en structuré. Tous les calculs sont déterministes, vérifiables, exécutés dans le navigateur.</li>
+  </ol>
+</section>
+
+<section id="parcours">
+  <h2>Parcours v1</h2>
+  <p class="sub">Six étapes, dont trois invisibles pour l'utilisateur. Le détail de la mécanique est dans <a href="#lien">Du lien au rapport</a>.</p>
+  <ol class="steps">
+    <li><div><b>Coller le lien</b><p>L'utilisateur colle l'URL de l'annonce (LeBonCoin, SeLoger, Bien'ici, PAP, Logic-Immo…). L'app reconnaît le portail et l'identifiant de l'annonce. Si l'extension Loupe est installée, la page est lue dans son navigateur à l'instant ; sinon l'app lui propose l'extension (30 secondes), le bouton-favori sans installation, ou de coller le texte. Sans lien du tout : trois champs, prix, surface, ville.</p><div class="who">Utilisateur · 10 secondes</div></div></li>
+    <li><div><b>Lire</b><p>La capture renvoie d'abord les données structurées que la page contient déjà (prix, surface, pièces, DPE, coordonnées approximatives, honoraires). Ce qui manque est extrait du texte de l'annonce par un appel LLM à schéma JSON strict : charges, taxe foncière, étage, ascenseur, année, chauffage, « travaux à prévoir ». Repli regex si le LLM ne répond pas.</p><div class="who">Extension + serveur · 0 ou 1 appel LLM · ~0,0004 $ · 2 secondes</div></div></li>
+    <li><div><b>Enrichir</b><p>Géocodage de l'adresse, du quartier ou des coordonnées de l'annonce, puis en parallèle : ventes DVF dans un rayon de 500 m, DPE officiel par clé BAN, loyer de référence de la commune (ANIL), taux de taxe foncière communal, risques (Géorisques), zonage ABC, population. Zéro LLM.</p><div class="who">Navigateur + proxy edge · 6 appels en parallèle · 1 seconde</div></div></li>
+    <li><div><b>Vérifier</b><p>Un écran unique, pré-rempli, groupé en quatre blocs (le bien, le financement, la location, la fiscalité). Chaque valeur porte un badge : <span class="tag">annonce</span> <span class="tag ok">donnée publique</span> <span class="tag warn">estimé</span>. On demande de confirmer cinq choses au maximum : loyer visé, apport, durée du prêt, TMI, mode d'exploitation.</p><div class="who">Utilisateur · 30 secondes</div></div></li>
+    <li><div><b>Le rapport</b><p>Un verdict en tête (prix vs marché, cash-flow, effort, risques), puis cinq volets : Financement, Cash-flow, Fiscalité (4 régimes côte à côte), Revente, Rendement &amp; TRI. Chaque hypothèse est modifiable en place et tout se recalcule instantanément.</p><div class="who">Navigateur · 0 serveur</div></div></li>
+    <li><div><b>Garder</b><p>Sauvegarde locale automatique. Export PDF « dossier banque » via impression navigateur. Lien de partage (le projet encodé dans l'URL, ou stocké si compte). Compte par lien magique pour synchroniser et comparer.</p><div class="who">Utilisateur · optionnel</div></div></li>
+  </ol>
+</section>
+
+<section id="lien">
+  <h2>Du lien au rapport : l'architecture d'agrégation</h2>
+  <p class="sub">Comment on part d'une URL et on arrive à un rapport, sans jamais faire ce qui a coûté 260 000 € à Jinka.</p>
+
+  <h3>La contrainte qui dessine tout</h3>
+  <p>LeBonCoin, SeLoger et Bien'ici n'ont pas d'API, interdisent l'extraction dans leurs CGU et bloquent les robots. Surtout, la cour d'appel de Versailles a condamné Jinka deux fois (décembre 2025 et avril 2026) pour avoir reconstitué leurs annonces côté serveur. La règle Loupe est donc simple : <strong>la page de l'annonce est lue dans le navigateur de l'utilisateur, jamais par nos serveurs, et nous ne constituons aucune base d'annonces</strong>. C'est exactement ce que font Horiz et Lybox avec leur extension. Le lien reste l'entrée et l'identifiant du projet ; c'est la <em>capture</em> qui se fait côté client.</p>
+
+  <h3>Le pipeline, en neuf étapes</h3>
+  <pre class="mermaid">
+flowchart LR
+  A[1 · Résoudre<br/>portail + id d'annonce] --> B[2 · Capturer<br/>dans le navigateur]
+  B --> C[3 · Extraire<br/>données structurées,<br/>puis LLM si trous]
+  C --> D[4 · Normaliser<br/>schéma Annonce]
+  D --> E[5 · Géocoder]
+  E --> F[6 · Enrichir<br/>DVF · DPE · loyers · TF · risques]
+  F --> G[7 · Estimer<br/>prix · loyer · travaux · TF]
+  G --> H[8 · Vérifier<br/>5 champs + cohérence]
+  H --> I[9 · Calculer<br/>et rendre le rapport]
+  classDef client fill:#E1EFE9,stroke:#1E6E5A,color:#16232C
+  classDef edge fill:#F6ECD6,stroke:#A8701B,color:#16232C
+  class A,B,D,G,H,I client
+  class C,E,F edge
+  </pre>
+  <p class="note" style="font-size:13px;color:var(--muted)">Vert : dans le navigateur. Ocre : passe par un Worker edge (proxy, cache, un appel LLM). Rien n'est stocké côté serveur en dehors du cache de données publiques.</p>
+
+  <div class="tablewrap"><table>
+    <thead><tr><th>Étape</th><th>Où</th><th>Ce qui se passe</th><th>Sortie</th></tr></thead>
+    <tbody>
+      <tr><td>1 · Résoudre</td><td>Navigateur</td><td>L'URL est canonisée (suppression du tracking), le portail reconnu par son domaine, l'identifiant d'annonce extrait par expression régulière. Un projet existant avec le même identifiant est rouvert plutôt que dupliqué.</td><td><code>{portail, id, url_canonique}</code></td></tr>
+      <tr><td>2 · Capturer</td><td>Navigateur de l'utilisateur</td><td>L'extension (ou le bouton-favori) lit la page ouverte : d'abord les données structurées que le portail embarque (JSON-LD schema.org, état applicatif de la page, coordonnées de la carte), puis des sélecteurs par portail, puis à défaut le texte visible. Les règles par portail sont un fichier versionné que l'extension télécharge, pour suivre les changements de maquette sans republier l'extension.</td><td>Capture brute : champs trouvés + texte + photos (URLs)</td></tr>
+      <tr><td>3 · Extraire</td><td>Worker <code>/extract</code></td><td>Si la capture structurée couvre déjà prix, surface, pièces, localisation et DPE, aucun LLM. Sinon, seul le texte est envoyé à Mistral avec un schéma JSON strict, pour les champs manquants uniquement (charges, TF, étage, ascenseur, année, chauffage, travaux mentionnés). Cache par empreinte du texte. Repli regex.</td><td>Champs manquants, avec un indice de confiance par champ</td></tr>
+      <tr><td>4 · Normaliser</td><td>Navigateur</td><td>Un seul schéma <code>Annonce</code> quel que soit le portail : prix FAI vs hors honoraires, surface Carrez vs habitable, charges mensuelles vs annuelles, « 3P » → 3 pièces, DPE lettre + kWh, « meublé / loué / colocation » détectés.</td><td><code>Annonce</code> canonique + provenance par champ</td></tr>
+      <tr><td>5 · Géocoder</td><td>Worker proxy → Géoplateforme</td><td>Dans l'ordre : adresse si l'annonce la donne, sinon coordonnées approximatives de la carte du portail, sinon « quartier + ville », sinon la commune. Le niveau obtenu est conservé, il conditionne la confiance de tout ce qui suit.</td><td>lat/lon, code INSEE, clé BAN éventuelle, niveau de précision</td></tr>
+      <tr><td>6 · Enrichir</td><td>Navigateur, en parallèle, via le proxy avec cache KV</td><td>DVF (CSV de la commune, filtré par rayon selon la précision : 300 m à l'adresse, 800 m au quartier, commune sinon), DPE ADEME (par clé BAN, sinon par surface + année dans la rue), loyers ANIL, taux REI, Géorisques, zonage ABC, population, BDNB, registre des copropriétés (v2).</td><td>Bloc <code>marche</code> du projet</td></tr>
+      <tr><td>7 · Estimer</td><td>Navigateur</td><td>Prix (médiane et quartiles DVF), loyer (ANIL ajusté meublé / colocation / encadrement), travaux (barème déclenché par les mots de l'annonce : « à rafraîchir », « à rénover », « travaux à prévoir », DPE F/G), taxe foncière (annonce si présente, sinon taux REI × valeur locative estimée, bornée par 0,8 à 1,2 mois de loyer), charges de copro (annonce, sinon barème par âge et taille de l'immeuble).</td><td>Hypothèses pré-remplies, chacune avec sa source</td></tr>
+      <tr><td>8 · Vérifier</td><td>Navigateur</td><td>Contrôles de cohérence (surface vs pièces, prix au m² vs DVF, charges vs âge de l'immeuble, DPE annonce vs DPE ADEME), puis l'écran où l'utilisateur confirme cinq valeurs : loyer visé, apport, durée, TMI, mode de location.</td><td>Projet prêt à calculer</td></tr>
+      <tr><td>9 · Calculer</td><td>Navigateur</td><td>Le moteur TypeScript déroule financement, cash-flow, quatre régimes fiscaux, revente, TRI, verdict à cinq feux, scénarios. Tout se recalcule à chaque modification.</td><td>Le rapport</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Les modes de capture, du plus fluide au plus manuel</h3>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Mode</th><th>Comment</th><th>Où ça marche</th><th>Effort utilisateur</th><th>Version</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Extension navigateur</strong></td><td>Sur la page de l'annonce, un bouton « Analyser avec Loupe » ; ou bien l'utilisateur colle l'URL dans Loupe et l'extension ouvre la page en arrière-plan, la lit, la referme. Lecture des données structurées, puis du texte.</td><td>Chrome, Edge, Brave, Firefox sur ordinateur ; Firefox sur Android ; Safari iOS en v1.5</td><td>Une installation, puis zéro</td><td>v1</td></tr>
+      <tr><td><strong>Bouton-favori (bookmarklet)</strong></td><td>Un bouton à glisser dans la barre de favoris. Cliqué sur une annonce, il lit la page et l'envoie à Loupe. Pas d'installation depuis un store, pas de permissions.</td><td>Tous les navigateurs d'ordinateur</td><td>Un glisser-déposer, puis un clic par annonce</td><td>v1</td></tr>
+      <tr><td><strong>Partage du lien depuis le téléphone</strong></td><td>« Partager → Loupe » depuis l'app du portail envoie l'URL à Loupe (Web Share Target). Loupe reconnaît le portail et demande de coller le texte de l'annonce (tout sélectionner, copier) le temps que l'extension mobile existe.</td><td>Android, iOS (PWA installée)</td><td>Un partage + un copier-coller</td><td>v1</td></tr>
+      <tr><td><strong>Texte collé</strong></td><td>L'utilisateur colle le texte de l'annonce, avec ou sans l'URL. Tout passe par l'extraction LLM.</td><td>Partout</td><td>Un copier-coller</td><td>v1</td></tr>
+      <tr><td><strong>Saisie manuelle</strong></td><td>Pas de lien (bien hors marché, bouche-à-oreille, notaire) : prix, surface, ville ou code postal. Le reste est estimé, puis complété champ par champ si l'utilisateur le souhaite.</td><td>Partout</td><td>Trois champs</td><td>v1</td></tr>
+      <tr><td><em>Lecture par nos serveurs</em></td><td>Désactivée. Réactivable portail par portail uniquement si ses CGU et son robots.txt l'autorisent explicitement, après revue. Aucun des grands portails ne l'autorise aujourd'hui.</td><td>—</td><td>—</td><td>jamais par défaut</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Le schéma « Annonce », commun à tous les portails</h3>
+<pre><code>{
+  "source":   { "portail": "leboncoin", "id": "2214xxxxx", "url": "https://www.leboncoin.fr/ad/ventes_immobilieres/2214xxxxx",
+                "capture": { "mode": "extension", "regles": "lbc-2026-09-02", "date": "2026-09-13T10:41:00Z" } },
+  "bien":     { "type": "appartement", "prix": 155000, "honoraires": 7000, "honoraires_charge": "acquereur",
+                "surface": 65, "surface_type": "carrez", "pieces": 3, "chambres": 2, "etage": 3, "etages_total": 4,
+                "ascenseur": false, "annee": 1962, "dpe": "D", "dpe_kwh": 215, "ges": "B",
+                "charges_copro_mois": 90, "taxe_fonciere": 1050, "lots": 24, "chauffage": "individuel electrique",
+                "meuble": false, "loue": false, "parking": false, "exterieur": null,
+                "travaux_mentionnes": ["rafraichissement"], "localisation": { "adresse": null, "quartier": "Baille",
+                "cp": "13005", "ville": "Marseille", "lat": 43.288, "lon": 5.394, "precision": "quartier" } },
+  "provenance": { "prix": "structure", "surface": "structure", "pieces": "structure", "dpe": "structure",
+                  "charges_copro_mois": "llm:0.92", "taxe_fonciere": "llm:0.88", "annee": "llm:0.71", "lots": "llm:0.64" },
+  "texte_hash": "sha256:…", "photos": ["https://…/1.jpg", "…"]
+}</code></pre>
+  <p>Chaque champ porte sa provenance et, pour ceux issus du LLM, un indice de confiance. En dessous de 0,7, le champ est marqué « à vérifier » sur l'écran suivant. Les photos ne sont ni stockées ni envoyées au LLM en v1 ; leurs URLs servent à afficher la vignette du projet.</p>
+
+  <h3>Ce qui rend l'analyse automatique fiable</h3>
+  <ul>
+    <li><strong>Des règles de capture par portail, versionnées et mises à jour sans republier l'extension.</strong> Un portail change sa maquette tous les quelques mois ; le fichier de règles se corrige en une heure, et l'extension le récupère au prochain lancement. Un test automatique quotidien sur une annonce témoin par portail signale les casses.</li>
+    <li><strong>La précision de géocodage pilote tout le reste.</strong> Une annonce sans adresse donne une comparaison DVF au quartier, affichée comme telle, avec une fourchette plus large. C'est l'erreur que fait Lybox sur ton favori d'Aix (mauvais quartier, « −43 % » sans avertissement).</li>
+    <li><strong>Le LLM ne voit que le texte, et seulement s'il manque quelque chose.</strong> Sur LeBonCoin ou SeLoger, la moitié des annonces se lisent entièrement sans lui.</li>
+    <li><strong>Rien n'est mutualisé entre utilisateurs à partir des annonces.</strong> Le cache d'extraction est indexé par empreinte du texte, il ne contient que les champs extraits et il expire à 30 jours. Aucune liste, aucune recherche, aucun historique de prix côté serveur : l'historique de prix (v2) est tenu par l'extension, chez l'utilisateur.</li>
+    <li><strong>Le projet est indépendant de l'annonce.</strong> Une fois capturé, il vit dans le stockage de l'utilisateur ; si l'annonce disparaît, l'analyse reste.</li>
+  </ul>
+</section>
+
+<section id="moteur">
+  <h2>Moteur de calcul</h2>
+  <p class="sub">Un module par onglet de ton Excel, avec les règles de septembre 2026.</p>
+
+  <h3>Financement</h3>
+  <ul>
+    <li><strong>Frais d'acquisition</strong> calculés, pas forfaitaires : droits (DMTO 4,50 % ou 5 % selon le département, jusqu'au 31/03/2028, + 1,20 % communal + 2,37 % de frais d'assiette), émoluments du notaire par tranches (3,870 % / 1,596 % / 1,064 % / 0,799 % HT + TVA), contribution de sécurité immobilière 0,10 %, débours ~0,4 %. Dans l'ancien on tombe entre 7 et 8,5 % ; ton forfait de 9,5 % surestime de ~2 900 € sur 155 000 €.</li>
+    <li><strong>Mensualité</strong> par PMT, tableau d'amortissement complet, assurance en % du capital initial (0,10–0,35 % selon délégation ou contrat groupe).</li>
+    <li><strong>TAEG réel</strong> par résolution du taux interne (frais de dossier + garantie inclus), plutôt que l'approximation <code>taux + frais/25/capital</code>.</li>
+    <li><strong>Taux d'effort HCSF</strong> : mensualité assurance comprise ÷ (revenus + 70 % des loyers). Seuil 35 %, durée 25 ans (27 si travaux ≥ 10 %). Deux valeurs affichées : « ta banque calculera probablement… » et « au pire… ».</li>
+    <li><strong>IRA</strong> = min(6 mois d'intérêts, 3 % du capital restant dû). Ton Excel calcule les deux mais garde 3 % dans la revente.</li>
+    <li><strong>Taux par défaut</strong> : moyennes du mois (août 2026 : 3,14 % sur 15 ans, 3,27 % sur 20, 3,35 % sur 25), bornées par le taux d'usure du trimestre (5,29 % à 20 ans et plus).</li>
+  </ul>
+
+  <h3>Cash-flow</h3>
+  <ul>
+    <li>Trois modes d'exploitation : <strong>meublé longue durée</strong>, <strong>nu</strong>, <strong>courte durée</strong> (nuitée × taux d'occupation − frais de ménage/conciergerie). Ta grille « 10/15/20 nuits » devient un curseur d'occupation.</li>
+    <li>Sorties détaillées comme dans ton onglet : crédit, assurance, taxe foncière, copro, PNO, énergie/internet si inclus, CFE, comptable, gestion déléguée (%), <strong>plus deux lignes que ton Excel n'a pas</strong> : vacance locative (par défaut 3 semaines/an en LLD, 1 mois en colocation) et provision entretien (0,5 %/an du prix).</li>
+    <li>Résultat : cash-flow mensuel, effort d'épargne mensuel si négatif, et « point mort » : le loyer minimum pour l'équilibre.</li>
+  </ul>
+
+  <h3>Fiscalité — quatre régimes côte à côte</h3>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Régime</th><th>Base imposable</th><th>Prélèvements sociaux</th><th>Points de règle intégrés</th></tr></thead>
+    <tbody>
+      <tr><td>Meublé micro-BIC</td><td>50 % des recettes (30 % en tourisme non classé)</td><td>18,6 % <span class="tag warn">LFSS 2026, à confirmer</span></td><td>Plafond 77 700 € (2025) puis 83 600 € (2026-2028) ; 15 000 € en tourisme non classé ; bascule au réel après 2 ans de dépassement</td></tr>
+      <tr><td>Meublé réel (LMNP)</td><td>Recettes − charges − intérêts − amortissements</td><td>18,6 % <span class="tag warn">idem</span></td><td>Terrain non amorti (15 % par défaut) ; amortissement par composants simplifié (gros œuvre 50 ans, second œuvre 20, mobilier 7, travaux 10) ; <strong>art. 39 C</strong> : l'amortissement ne crée pas de déficit, l'excédent est reporté sans limite ; déficit hors amortissement reportable 10 ans sur les BIC non pro</td></tr>
+      <tr><td>Nu micro-foncier</td><td>70 % des loyers</td><td>17,2 %</td><td>Plafond 15 000 € ; pas de déficit possible</td></tr>
+      <tr><td>Nu réel</td><td>Loyers − charges − intérêts</td><td>17,2 %</td><td>Déficit foncier imputable sur le revenu global jusqu'à 10 700 €/an (21 400 € pour rénovation énergétique jusqu'au 31/12/2027) ; intérêts reportables 10 ans</td></tr>
+    </tbody>
+  </table></div>
+  <p>Chaque régime est projeté sur la durée de détention (année par année, avec le stock de déficits et d'amortissements reportés) et l'app indique <strong>l'année où l'on commence à payer de l'impôt</strong>, comme ta cellule C117, mais calculée exactement plutôt qu'en division.</p>
+
+  <h3>Revente</h3>
+  <ul>
+    <li>Prix de revente = valeur actuelle × (1 + évolution)<sup>années</sup>, moins frais d'agence, diagnostics, IRA, capital restant dû → <strong>cash net vendeur</strong>.</li>
+    <li>Plus-value imposable : prix de vente − (prix d'achat + frais d'acquisition réels ou forfait 7,5 % + travaux justifiés ou forfait 15 % après 5 ans). <strong>Depuis le 15/02/2025, en LMNP réel, les amortissements de l'immeuble déduits sont réintégrés</strong> (LF 2025, art. 84 ; mobilier hors champ, résidences services exemptées). Ton Excel réintègre aussi les meubles : à corriger.</li>
+    <li>Abattements pour durée de détention : IR 6 %/an de la 6ᵉ à la 21ᵉ année puis 4 % la 22ᵉ (exonération à 22 ans) ; PS 1,65 %/an puis 1,60 % puis 9 %/an de la 23ᵉ à la 30ᵉ. Taux 19 % + 17,2 %. Surtaxe de 2 à 6 % au-delà de 50 000 € de plus-value.</li>
+  </ul>
+
+  <h3>Rendement, TRI, verdict</h3>
+  <ul>
+    <li>Rendement brut, net de charges, net-net (après intérêts et impôt), calculés sur prix + travaux + frais d'acquisition.</li>
+    <li><strong>TRI réel</strong> sur les flux annuels (apport et mobilier en année 0, cash-flows après impôt, cash net de revente en année N), résolu numériquement. Ton « multiple ÷ années » donne 50,9 % là où le TRI vrai du même projet est autour de 19 % : l'ordre de grandeur change complètement.</li>
+    <li>Enrichissement total = capital remboursé + plus-value nette + cash-flows cumulés − apport.</li>
+    <li><strong>Verdict</strong> sur cinq axes, chacun avec un feu (bon / à surveiller / problème) : prix vs DVF, rendement net, cash-flow, effort HCSF, risques (DPE F/G, copro en procédure, zone à risque). Pas de note globale magique : cinq feux lisibles valent mieux qu'un « 74/100 » qu'on ne sait pas contester.</li>
+  </ul>
+</section>
+
+<section id="excel">
+  <h2>Ton Excel → Loupe</h2>
+  <p class="sub">Ce que donne ton projet « 92K » recalculé avec les règles 2026. Mêmes entrées, moteur corrigé.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Indicateur</th><th class="num">Ton Excel</th><th class="num">Loupe</th><th>Pourquoi ça change</th></tr></thead>
+    <tbody>
+      <tr><td>Frais d'acquisition</td><td class="num">14 725 €</td><td class="num">11 832 €</td><td>Formule réelle (DMTO 5 %, base hors frais d'agence) au lieu de 9,5 % forfaitaire</td></tr>
+      <tr><td>Mensualité assurance comprise</td><td class="num">813 €</td><td class="num">807 €</td><td>Même capital ; PMT sur le taux nominal, frais traités dans le TAEG</td></tr>
+      <tr><td>TAEG assurance incluse</td><td class="num">3,74 %</td><td class="num">4,13 %</td><td>Résolution exacte : les frais fixes pèsent plus que <code>frais/25/capital</code></td></tr>
+      <tr><td>Taux d'effort</td><td class="num">38,7 %</td><td class="num">23,8 %</td><td>Méthode HCSF : loyers comptés à 70 % dans les revenus</td></tr>
+      <tr><td>Cash-flow mensuel</td><td class="num">+497 €</td><td class="num">+349 €</td><td>Vacance d'un mois par an provisionnée</td></tr>
+      <tr><td>Impôt micro-BIC année 1</td><td class="num">5 211 €</td><td class="num">5 365 €</td><td>Prélèvements sociaux BIC à 18,6 % (LFSS 2026), à confirmer</td></tr>
+      <tr><td>Impôt réel année 1</td><td class="num">0 €</td><td class="num">0 €</td><td>Identique, mais le déficit est scindé : 13 589 € reportables 10 ans + 6 250 € d'amortissement reporté sans limite (art. 39 C)</td></tr>
+      <tr><td>Première année imposable au réel</td><td class="num">année 4,2</td><td class="num">année 6</td><td>Projection année par année au lieu d'une division</td></tr>
+      <tr><td>Plus-value taxable (5 ans)</td><td class="num">27 579 €</td><td class="num">23 971 €</td><td>Réintégration des amortissements de l'immeuble seulement, pas du mobilier</td></tr>
+      <tr><td>IRA à la revente</td><td class="num">4 083 €</td><td class="num">2 183 €</td><td>Minimum légal des deux plafonds</td></tr>
+      <tr><td>« TRI »</td><td class="num">50,9 %</td><td class="num">18,9 %</td><td>Vrai TRI sur flux annuels (apport 22 682 €, 4 cash-flows de 4 193 €, sortie 27 588 €)</td></tr>
+    </tbody>
+  </table></div>
+  <div class="callout warn">
+    <div class="eyebrow">Deux points à corriger dans le modèle, indépendamment de l'app</div>
+    <p>1) En LMNP réel, les travaux sont soit passés en charge, soit immobilisés et amortis — jamais les deux (ton onglet Imposition déduit C12 en charge et l'onglet Revente prévoit une ligne « travaux amortis »). 2) Les prélèvements sociaux des BIC non professionnels sont passés à 18,6 % avec la LFSS 2026 (CSG 10,6 %) ; les revenus fonciers et les plus-values restent à 17,2 %. La source officielle consolidée manque encore : on l'affiche avec un drapeau « à confirmer » et un paramètre modifiable.</p>
+  </div>
+</section>
+
+<section id="autofill">
+  <h2>Remplissage automatique</h2>
+  <p class="sub">D'où vient chaque case, et à quel prix.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Champ</th><th>Source</th><th>Accès</th><th>Fraîcheur</th><th>Fiabilité</th></tr></thead>
+    <tbody>
+      <tr><td>Prix, surface, pièces, DPE annoncé, honoraires, coordonnées approximatives</td><td>Données structurées de la page de l'annonce</td><td>Extension / bouton-favori, dans le navigateur</td><td>Instantané</td><td>Bonne</td></tr>
+      <tr><td>Étage, ascenseur, année, charges, TF si citée, chauffage, travaux mentionnés</td><td>Texte de l'annonce</td><td><span class="tag llm">LLM JSON strict</span> + regex de secours</td><td>—</td><td>Bonne (sauf omissions du vendeur) ; indice de confiance par champ</td></tr>
+      <tr><td>Coordonnées, code INSEE, clé BAN, parcelle</td><td>Géoplateforme (IGN), successeur d'api-adresse</td><td>REST, sans clé, 50 req/s</td><td>Continue</td><td>Bonne à l'adresse, moyenne au quartier</td></tr>
+      <tr><td>Prix au m² des ventes réelles dans 500 m</td><td>DVF géolocalisées (Etalab), CSV par commune</td><td>Fichier statique, filtré dans le navigateur</td><td>Avril / octobre</td><td>Bonne (≥ 15 ventes), sinon repli commune</td></tr>
+      <tr><td>Classe DPE/GES officielle, conso, surface, année, chauffage</td><td>ADEME <code>dpe03existant</code></td><td>REST data-fair, sans clé</td><td>Hebdomadaire</td><td>Moyenne : plusieurs DPE par immeuble, l'utilisateur choisit</td></tr>
+      <tr><td>Loyer de référence €/m² (4 types de logement)</td><td>Carte des loyers ANIL/DHUP 2025</td><td>CSV embarqué (35 000 communes)</td><td>Annuelle</td><td>Moyenne : c'est un loyer prédit d'annonce, charges comprises</td></tr>
+      <tr><td>Taux de taxe foncière (commune + EPCI + TEOM)</td><td>REI DGFiP / OFGL</td><td>JSON pré-agrégé par INSEE</td><td>Annuelle</td><td>Faible seul : la base cadastrale n'est pas ouverte. On combine avec 0,8–1,2 mois de loyer et on demande l'avis réel</td></tr>
+      <tr><td>Risques : inondation, séisme, argiles, radon</td><td>Géorisques</td><td>REST, sans clé, 1 000 req/min</td><td>Continue</td><td>Bonne</td></tr>
+      <tr><td>Zone A bis/A/B1/B2/C, tension</td><td>Zonage ABC (juillet 2026)</td><td>CSV embarqué</td><td>Annuelle</td><td>Bonne</td></tr>
+      <tr><td>Population, EPCI</td><td>geo.api.gouv.fr</td><td>REST, sans clé</td><td>Continue</td><td>Bonne</td></tr>
+      <tr><td>Année de construction, nombre de logements</td><td>BDNB Open (CSTB)</td><td>REST, 10 000 appels/mois</td><td>Annuelle</td><td>À tester ; repli sur l'année du DPE</td></tr>
+      <tr><td>Taux de crédit par défaut, taux d'usure</td><td>Seuils de l'usure (data.economie)</td><td>API ODS, sans clé</td><td>Trimestrielle</td><td>Bonne pour borner</td></tr>
+      <tr><td>Frais de notaire, assurance, CFE, comptable, PNO</td><td>Barèmes intégrés</td><td>Code</td><td>Revue à chaque loi de finances</td><td>Bonne</td></tr>
+    </tbody>
+  </table></div>
+  <div class="callout bad">
+    <div class="eyebrow">Pourquoi le lien est lu dans le navigateur, pas par nos serveurs</div>
+    <p>LeBonCoin et SeLoger n'ont pas d'API. Le scraping serveur a été condamné deux fois en appel en 2025-2026 (Jinka : 60 000 € face à SeLoger en décembre 2025, 200 000 € face à LeBonCoin en avril 2026) sur le droit sui generis du producteur de base de données. Horiz, Lybox et Castorus s'en sortent avec une <strong>extension navigateur</strong> qui lit la page que l'utilisateur affiche lui-même. Loupe fait pareil dès la v1 (extension + bouton-favori), avec le texte collé et la saisie manuelle en repli. Jamais de crawl côté serveur, jamais de base d'annonces. Détail dans <a href="#lien">Du lien au rapport</a>.</p>
+  </div>
+</section>
+
+<section id="estimations">
+  <h2>Estimations</h2>
+  <p class="sub">Prix, loyer, travaux, taxe foncière : des méthodes simples, affichées comme des fourchettes.</p>
+  <div class="grid2">
+    <div class="card"><h4>Prix</h4><p>Médiane du €/m² des ventes DVF d'appartements (ou maisons) dans 500 m sur 24 mois, ajustée ±10 % selon l'écart de surface ; fourchette = 1ᵉʳ et 3ᵉ quartiles. Position de l'annonce dans la fourchette. Pas de modèle statistique en v1 : des ventes réelles, montrées sur une petite carte.</p></div>
+    <div class="card"><h4>Loyer</h4><p>Loyer ANIL de la commune pour le type (T1-T2 / T3+ / maison), converti hors charges (−8 %), +15 à +25 % si meublé, +30 à +45 % si colocation par chambre. Plafonné par le loyer de référence majoré dans les villes encadrées (Paris, Lyon, Lille, Montpellier, Bordeaux…).</p></div>
+    <div class="card"><h4>Travaux</h4><p>Barème par poste, choisi en trois clics : rafraîchissement 150–300 €/m², rénovation moyenne 500–800 €/m², lourde 1 000–1 500 €/m² ; cuisine et salle de bain au forfait ; DPE F/G → ligne « rénovation énergétique » avec rappel des interdictions de louer (G depuis 2025, F en 2028, E en 2034).</p></div>
+    <div class="card"><h4>Taxe foncière</h4><p>Le taux communal est public, la base cadastrale ne l'est pas. On croise « taux cumulé × valeur locative estimée » avec la règle « 0,8 à 1,2 mois de loyer », on affiche « ~1 050 €/an, estimation » et on incite à demander l'avis au vendeur.</p></div>
+  </div>
+</section>
+
+<section id="archi">
+  <h2>Architecture</h2>
+  <p class="sub">Tout dans le navigateur, sauf ce qui doit vraiment sortir.</p>
+  <pre class="mermaid">
+flowchart LR
+  X[Extension / bouton-favori<br/>lit la page de l'annonce] -->|capture structurée + texte| U[Navigateur<br/>SPA statique<br/>moteur de calcul + stockage local]
+  U -->|texte, champs manquants| W[Cloudflare Worker<br/>/extract]
+  W -->|JSON strict, cache par hash| L[(LLM<br/>Mistral Small / Ministral)]
+  U -->|adresse| P[Worker proxy + cache KV]
+  P --> G[Géoplateforme]
+  P --> A[ADEME DPE]
+  P --> R[Géorisques]
+  P --> B[BDNB]
+  U -->|CSV commune| D[DVF géolocalisées<br/>files.data.gouv]
+  U -->|fichiers embarqués| S[Loyers ANIL · REI · ABC · usure<br/>pré-agrégés au build]
+  U -.->|optionnel, compte| DB[(D1 + lien magique)]
+  </pre>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Brique</th><th>Choix</th><th>Pourquoi</th><th class="num">Coût/mois</th></tr></thead>
+    <tbody>
+      <tr><td>Front</td><td>SPA statique (Svelte ou Preact, TypeScript), Cloudflare Pages</td><td>Requêtes statiques illimitées ; tout le calcul tourne chez l'utilisateur</td><td class="num">0 €</td></tr>
+      <tr><td>Capture</td><td>Extension WebExtension (un seul code Chrome / Firefox / Edge, Safari en v1.5) + bookmarklet ; règles par portail dans un JSON versionné sur R2</td><td>Lecture côté client, conforme à la jurisprudence ; règles corrigeables sans republier</td><td class="num">0 €</td></tr>
+      <tr><td>Fonctions</td><td>Cloudflare Workers (100 000 req/jour gratuits)</td><td>Un endpoint <code>/extract</code>, un proxy CORS + cache, un rate-limit par IP</td><td class="num">0 €</td></tr>
+      <tr><td>Cache et données</td><td>KV (cache API), R2 (fichiers pré-agrégés, CSV DVF mis en cache), D1 (projets des comptes)</td><td>Quotas gratuits très au-dessus du besoin de 1 000 utilisateurs</td><td class="num">0 €</td></tr>
+      <tr><td>Auth (v1.5)</td><td>Lien magique par e-mail, sessions dans D1 ; ou Supabase Auth (50 000 MAU)</td><td>Pas de mot de passe à protéger ; Supabase met le projet en pause après 7 jours d'inactivité, acceptable seulement avec du trafic régulier</td><td class="num">0 €</td></tr>
+      <tr><td>LLM</td><td>Mistral Small 4 ou Ministral 8B, sortie JSON par schéma ; repli Gemini Flash-Lite</td><td>Moins cher, francophone, JSON strict natif ; 0,0003–0,0004 $ l'annonce</td><td class="num">3–4 $</td></tr>
+      <tr><td>Données pré-agrégées</td><td>GitHub Action mensuelle qui reconstruit loyers ANIL, taux REI, zonage ABC, taux d'usure en JSON</td><td>Aucune API à interroger en direct pour ces référentiels</td><td class="num">0 €</td></tr>
+      <tr><td>PDF</td><td>CSS <code>@media print</code> + impression navigateur</td><td>Pas de service de rendu</td><td class="num">0 €</td></tr>
+      <tr><td>Domaine</td><td>.fr</td><td></td><td class="num">~1 €</td></tr>
+    </tbody>
+  </table></div>
+  <p><strong>À éviter</strong> : Vercel Hobby (usage commercial interdit), Render gratuit (base qui expire à 30 jours), Fly.io et Railway (plus de gratuit permanent), Firebase Spark (pas de fonctions serveur, donc pas d'appel LLM). Alternative « une seule machine » : PocketBase sur un VPS Hetzner à ~4,5 € HT/mois, mais les mises à jour et les sauvegardes sont à ta charge.</p>
+  <p><strong>Vie privée</strong> : le texte de l'annonce n'est jamais stocké, seulement son empreinte SHA-256 (clé de cache). Les projets sauvegardés contiennent l'adresse et les hypothèses, pas l'annonce. Pas de tracking tiers. Mention des sources (ANIL, DVF, ADEME) obligatoire et affichée.</p>
+</section>
+
+<section id="llm">
+  <h2>Où est l'IA, et ce qu'elle coûte</h2>
+  <p class="sub">Un seul point d'usage. Tout le reste est du code.</p>
+  <div class="kpis">
+    <div class="kpi"><div class="v">0 ou 1</div><div class="l">appel LLM par annonce, pour les champs que la page ne donne pas</div></div>
+    <div class="kpi"><div class="v">0,0004 $</div><div class="l">par appel, Mistral Small 4 (1 500 tokens entrée, 300 sortie)</div></div>
+    <div class="kpi"><div class="v">~4 $</div><div class="l">par mois pour 10 000 analyses (1 000 utilisateurs × 10)</div></div>
+    <div class="kpi"><div class="v">0 €</div><div class="l">d'infrastructure sous les quotas gratuits Cloudflare</div></div>
+  </div>
+  <ul>
+    <li><strong>Cache</strong> par empreinte du texte normalisé : la même annonce collée par dix personnes ne coûte qu'un appel.</li>
+    <li><strong>Repli sans IA</strong> : un extracteur regex (prix, m², pièces, DPE, étage, code postal) prend le relais si le LLM est indisponible ou si le quota du jour est atteint. L'utilisateur ne voit qu'un badge « lecture partielle, vérifie ».</li>
+    <li><strong>Quota</strong> : 20 extractions par jour et par IP sans compte, 100 avec compte. Suffisant pour un particulier, dissuasif pour un scraper.</li>
+    <li><strong>Pas de LLM</strong> pour les explications (textes rédigés une fois), le verdict (règles), les estimations (données) ni le chat (pas de chat en v1).</li>
+    <li><strong>Plus tard, si utile</strong> : lecture des photos pour détecter l'état (cuisine, salle de bain) et pré-remplir les travaux — un modèle vision coûte 5 à 10× plus, donc en option et derrière un compte.</li>
+  </ul>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Modèle</th><th class="num">Entrée $/M</th><th class="num">Sortie $/M</th><th class="num">Coût / annonce</th><th>JSON strict</th></tr></thead>
+    <tbody>
+      <tr><td>Ministral 8B</td><td class="num">0,15</td><td class="num">0,15</td><td class="num">0,00027 $</td><td>Oui</td></tr>
+      <tr><td>Mistral Small 4</td><td class="num">0,15</td><td class="num">0,60</td><td class="num">0,00041 $</td><td>Oui</td></tr>
+      <tr><td>Gemini 3.1 Flash-Lite</td><td class="num">0,25</td><td class="num">1,50</td><td class="num">0,00083 $</td><td>Oui</td></tr>
+      <tr><td>Claude Haiku 4.5</td><td class="num">1,00</td><td class="num">5,00</td><td class="num">0,0030 $</td><td>Oui</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="donnees">
+  <h2>Modèle de données</h2>
+  <p class="sub">Un projet = un objet JSON, versionné avec les règles fiscales qui l'ont calculé.</p>
+<pre><code>{
+  "id": "prj_8f2a",  "version_regles": "2026-09",
+  "source":  { "portail": "leboncoin", "id": "2214xxxxx", "url": "https://www.leboncoin.fr/ad/ventes_immobilieres/2214xxxxx",
+               "capture": { "mode": "extension", "regles": "lbc-2026-09-02", "date": "2026-09-13" }, "texte_hash": "sha256…" },
+  "bien":    { "adresse": "Rue de Lodi, 13006 Marseille", "ban_id": "13206_5450", "insee": "13206",
+               "lat": 43.29, "lon": 5.38, "type": "appartement", "surface": 65, "pieces": 3,
+               "etage": 3, "ascenseur": false, "annee": 1962, "dpe": "D", "ges": "B",
+               "copro": { "lots": 24, "charges_mois": 90, "procedure": false } },
+  "marche":  { "dvf": { "median_m2": 3050, "q1": 2700, "q3": 3400, "n": 31, "rayon": 500 },
+               "loyer_anil_m2": 15.1, "tf_taux_cumule": 0.42, "zone_abc": "A", "risques": ["argiles:moyen"] },
+  "hyp":     { "prix": 155000, "agence": 7000, "travaux": 6000, "mobilier": 5000,
+               "apport": 14337, "taux": 0.0335, "duree": 25, "assurance": 0.0025,
+               "frais_dossier": 850, "garantie": 1500,
+               "mode": "meuble_lld", "loyer_hc": 980, "charges_locataire": 60, "vacance_sem": 3,
+               "tf": 1050, "copro": 1080, "pno": 180, "comptable": 420, "cfe": 180, "entretien": 0.005,
+               "tmi": 0.30, "ps_bic": 0.186, "regime": "reel",
+               "revente": { "annees": 10, "evolution": 0.015, "agence": 0.04 } },
+  "provenance": { "prix": "annonce", "surface": "annonce", "dpe": "ademe", "loyer_hc": "anil",
+                  "tf": "estime", "taux": "usure", "apport": "utilisateur" },
+  "resultats": "calculés à la volée, jamais stockés"
+}</code></pre>
+  <p>Les <code>resultats</code> ne sont pas persistés : ils se recalculent à l'ouverture avec la version des règles du projet, ce qui permet de montrer « avec les règles 2027, ton projet donnerait… » quand la loi change.</p>
+</section>
+
+<section id="roadmap">
+  <h2>Roadmap</h2>
+  <p class="sub">Ce qu'on fait, dans quel ordre, et ce qu'on ne fait pas.</p>
+  <div class="roadmap">
+    <div class="card now"><div class="eyebrow">v1 · 8–10 semaines</div><h4>Du lien au rapport</h4><ul><li>Extension Chrome/Firefox + bouton-favori : LeBonCoin, SeLoger, Bien'ici, PAP, Logic-Immo</li><li>Résoudre → capturer → extraire → enrichir → vérifier → rapport</li><li>Texte collé et saisie manuelle en repli</li><li>Les 5 volets, le verdict, les scénarios</li><li>Sauvegarde locale, PDF, lien de partage</li><li>Marseille, Lyon, Aix en test réel</li></ul></div>
+    <div class="card"><div class="eyebrow">v1.5 · +4 semaines</div><h4>Retrouver et comparer</h4><ul><li>Compte par lien magique, synchronisation</li><li>Comparaison de 2 à 5 projets côte à côte, statuts</li><li>Extension Safari iOS ; partage du lien depuis le téléphone</li><li>Portails supplémentaires : Figaro Immo, Green-Acres, Ouestfrance-immo</li></ul></div>
+    <div class="card"><div class="eyebrow">v2 · +6 semaines</div><h4>Voir plus loin</h4><ul><li>Historique de prix de l'annonce tenu par l'extension, alerte baisse</li><li>Loyers infra-communaux (observatoires locaux)</li><li>Registre des copropriétés (lots, procédures)</li><li>Lecture du DPE PDF ; travaux depuis les photos (option)</li></ul></div>
+    <div class="card"><div class="eyebrow">v3 · à décider</div><h4>Après l'achat</h4><ul><li>Suivi loyers, quittances, charges (le terrain de Rentila)</li><li>Préparation de la liasse LMNP ou partenariat comptable</li><li>Monétisation : affiliation courtier / PNO / comptable, export « dossier banque » premium</li></ul></div>
+  </div>
+  <p><strong>Pas en v1</strong> : moteur de recherche ou alertes d'annonces (c'est le terrain de Jinka et Lybox, et le risque juridique), chat IA, SCI à l'IS, carte interactive au-delà des ventes DVF autour du bien, application mobile native (le site est responsive et installable, l'extension mobile vient en v1.5).</p>
+</section>
+
+<section id="risques">
+  <h2>Risques et questions ouvertes</h2>
+  <p class="sub">Ce qu'on sait, ce qu'on ne sait pas encore.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Sujet</th><th>Risque</th><th>Réponse</th></tr></thead>
+    <tbody>
+      <tr><td>Annonces</td><td>Toute récupération serveur est attaquable (jurisprudence Jinka 2025-2026) ; les portails changent de maquette et cassent la capture</td><td>Lecture dans le navigateur de l'utilisateur (extension, bouton-favori), aucune base d'annonces ; règles par portail versionnées, test quotidien sur annonce témoin, repli texte collé toujours disponible</td></tr>
+      <tr><td>Fiscalité</td><td>Les règles bougent chaque loi de finances ; PS 18,6 % encore peu documenté ; BOFiP sur la réintégration des travaux amortis toujours attendu</td><td>Règles dans un fichier versionné, drapeau « à confirmer » visible, revue à chaque LF</td></tr>
+      <tr><td>Encadrement des loyers</td><td>L'expérimentation expire fin novembre 2026 ; pérennisation votée à l'AN, pas définitivement adoptée</td><td>Plafonds affichés comme information, pas comme contrainte dure</td></tr>
+      <tr><td>Qualité des données</td><td>Plusieurs DPE par immeuble ; ANIL = loyers d'annonce charges comprises ; TF non calculable exactement</td><td>Badges de provenance, fourchettes, incitation à demander les documents au vendeur</td></tr>
+      <tr><td>Fragilité des API publiques</td><td>api-adresse a fermé en 2026 ; l'API DVF du Cerema est en « preprod »</td><td>Fichiers statiques en priorité, API derrière un proxy remplaçable</td></tr>
+      <tr><td>Responsabilité</td><td>Un débutant peut prendre le verdict pour un conseil</td><td>Mention « outil d'aide à la décision, pas un conseil », hypothèses toujours visibles, pas de score unique</td></tr>
+      <tr><td>Monétisation</td><td>Gratuit sans plan = pas de plan</td><td>Coût marginal quasi nul : on peut attendre l'usage. Pistes v3 listées, aucune ne dégrade le gratuit</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="suite">
+  <h2>Prochaines étapes</h2>
+  <p class="sub">Deux semaines pour dérisquer avant d'écrire l'app.</p>
+  <ol>
+    <li><strong>Porter le moteur</strong> en TypeScript pur avec des tests qui reproduisent ton Excel (mêmes entrées, écarts documentés ci-dessus). C'est le cœur ; il ne dépend de rien.</li>
+    <li><strong>Sonder les API</strong> en conditions réelles : Géoplateforme, ADEME, Géorisques, BDNB, et le CSV DVF d'une commune, depuis un Worker. Mesurer la latence et la couverture sur 20 adresses d'Aix, Marseille et Lyon.</li>
+    <li><strong>Prototyper la capture</strong> : un bookmarklet qui lit LeBonCoin, SeLoger et Bien'ici (données structurées + texte) sur 30 annonces réelles ; mesurer quels champs sortent sans LLM.</li>
+    <li><strong>Tester l'extraction</strong> sur 50 annonces réelles : Ministral 8B vs Mistral Small 4 vs regex seule, champ par champ, sur les seuls champs que la capture structurée ne donne pas.</li>
+    <li><strong>Choisir le nom</strong> et vérifier le domaine et la marque (INPI).</li>
+    <li><strong>Montrer la maquette</strong> à cinq personnes qui cherchent leur premier bien. Regarder où elles hésitent sur l'écran « Vérifier ».</li>
+  </ol>
+</section>
+
+<section id="sources">
+  <h2>Sources</h2>
+  <p class="sub">Vérifiées le 13 septembre 2026.</p>
+  <ul class="sources">
+    <li><a href="https://www.impots.gouv.fr/particulier/questions/je-suis-proprietaire-dune-location-meublee-de-tourisme-quel-est-le-nouveau">impots.gouv — micro-BIC meublé de tourisme</a></li>
+    <li><a href="https://bofip.impots.gouv.fr/bofip/14765-PGP.html/ACTU-2025-00127">BOFiP — seuils micro 2026-2028</a></li>
+    <li><a href="https://bofip.impots.gouv.fr/bofip/4527-PGP.html/identifiant=BOI-BIC-AMT-20-40-10-20-20170301">BOFiP — art. 39 C, amortissements différés</a></li>
+    <li><a href="https://bofip.impots.gouv.fr/bofip/3610-PGP.html/identifiant=BOI-BIC-CHAMP-40-20-20260819">BOFiP — location meublée, déficits</a></li>
+    <li><a href="https://www.cnaf.notaires.fr/actualites/cession-dun-bien-loue-en-lmnp-et-pvi">Notaires — plus-value LMNP et amortissements</a></li>
+    <li><a href="https://questions.assemblee-nationale.fr/q17/17-10097QE.htm">RM Mette n° 10097 — amortissements antérieurs à 2025</a></li>
+    <li><a href="https://www.service-public.gouv.fr/particuliers/vosdroits/F10864">service-public — plus-value immobilière</a></li>
+    <li><a href="https://www.economie.gouv.fr/particuliers/gerer-mon-argent/investir-dans-limmobilier/tout-savoir-sur-le-deficit-foncier">economie.gouv — déficit foncier</a></li>
+    <li><a href="https://www.service-public.gouv.fr/particuliers/vosdroits/F2329">service-public — prélèvements sociaux</a></li>
+    <li><a href="https://www.dlapiper.com/fr-fr/insights/publications/2026/01/loi-de-finance-de-la-securite-sociale-2026">DLA Piper — LFSS 2026, CSG</a></li>
+    <li><a href="https://www.service-public.gouv.fr/particuliers/vosdroits/F1419">service-public — barème IR 2026</a></li>
+    <li><a href="https://www.legifiscal.fr/actualites-fiscales/4541-hausse-frais-notaire-commentee-bofip.html">Legifiscal — DMTO 5 % jusqu'en 2028</a></li>
+    <li><a href="https://www.economie.gouv.fr/particuliers/gerer-mon-argent/investir-dans-limmobilier/achat-dun-bien-immobilier-quels-frais-de-notaire-devez-vous-payer">economie.gouv — frais de notaire</a></li>
+    <li><a href="https://www.impots.gouv.fr/particulier/questions/je-fais-de-la-location-meublee-dois-je-payer-de-la-cfe-cotisation-fonciere-des">impots.gouv — CFE loueur en meublé</a></li>
+    <li><a href="https://lobservatoire.creditlogement.fr/publications/analyse-marche-immobilier-aout-2026/">Crédit Logement — taux août 2026</a></li>
+    <li><a href="https://www.banque-france.fr/fr/statistiques/taux-et-cours/taux-dusure-2026-q3">Banque de France — taux d'usure T3 2026</a></li>
+    <li><a href="https://www.economie.gouv.fr/hcsf/mesures/mesure-relative-loctroi-de-credits-immobiliers">HCSF — octroi de crédit</a></li>
+    <li><a href="https://www.economie.gouv.fr/particuliers/emprunter-et-sassurer/rembourser-son-credit-immobilier-avant-le-terme-comment-ca">economie.gouv — IRA</a></li>
+    <li><a href="https://www.data.gouv.fr/dataservices/api-geoplateforme-geocodage">Géoplateforme — géocodage</a></li>
+    <li><a href="https://www.data.gouv.fr/posts/lapi-adresse-de-la-base-adresse-nationale-est-transferee-a-lign-10">data.gouv — transfert de l'API Adresse</a></li>
+    <li><a href="https://www.data.gouv.fr/datasets/demandes-de-valeurs-foncieres-geolocalisees">DVF géolocalisées</a></li>
+    <li><a href="https://www.data.gouv.fr/dataservices/api-donnees-foncieres">API données foncières (Cerema)</a></li>
+    <li><a href="https://data.ademe.fr/datasets/dpe03existant">ADEME — DPE logements existants</a></li>
+    <li><a href="https://www.data.gouv.fr/datasets/carte-des-loyers-indicateurs-de-loyers-dannonce-par-commune-en-2025">Carte des loyers 2025</a></li>
+    <li><a href="https://data.ofgl.fr/explore/dataset/rei/">OFGL — REI, taux de fiscalité locale</a></li>
+    <li><a href="https://www.data.gouv.fr/dataservices/api-georisques">Géorisques — API</a></li>
+    <li><a href="https://www.data.gouv.fr/datasets/liste-des-communes-selon-le-zonage-abc">Zonage ABC</a></li>
+    <li><a href="https://www.data.gouv.fr/dataservices/api-bdnb-open">BDNB Open</a></li>
+    <li><a href="https://data.economie.gouv.fr/explore/dataset/seuil-de-lusure/">Seuils de l'usure (data.economie)</a></li>
+    <li><a href="https://www.immomatin.com/portails/sites-professionnels/apres-seloger-jinka-condamne-en-appel-face-a-leboncoin.html">Immo Matin — Jinka condamné (LeBonCoin, 2026)</a></li>
+    <li><a href="https://cms.law/fr/fra/news-information/arret-leboncoin-web-scraping-droit-sui-generis-sur-les-bases-de-donnees">CMS — scraping et droit sui generis</a></li>
+    <li><a href="https://horiz.io/rendement-locatif/offres">Horiz.io — offres</a></li>
+    <li><a href="https://www.lybox.fr/">Lybox</a></li>
+    <li><a href="https://immonai.com/">IMMONAI</a></li>
+    <li><a href="https://www.rentila.com/pricing">Rentila — tarifs</a></li>
+    <li><a href="https://developers.cloudflare.com/workers/platform/pricing/">Cloudflare Workers — tarifs</a></li>
+    <li><a href="https://mistral.ai/pricing/api">Mistral — tarifs API</a></li>
+    <li><a href="https://platform.claude.com/docs/en/about-claude/pricing">Claude — tarifs</a></li>
+    <li><a href="https://ai.google.dev/gemini-api/docs/pricing">Gemini — tarifs</a></li>
+  </ul>
+</section>
+
+<footer>Loupe est un nom de travail. Les chiffres fiscaux sont ceux connus au 13 septembre 2026 ; les lignes marquées « à confirmer » attendent une source officielle consolidée. Ce document est une aide à la conception, pas un conseil fiscal.</footer>
+</main>
+</div>
+</div>
+
+<!--claude-mermaid-runtime-begin:3477-->
+<style>.mermaid-diagram{margin-block:4px}.mermaid-diagram svg{display:block;margin:0 auto;max-width:100%;height:auto}</style>
+<script src="/_runtime/mermaid-11.16.1.min.js"></script>
+<script>(function(){
+var CFG={"palettes":{"light":{"surface":"#f4efe4","text":"#42392e","line":"#8a7f6d","border":"#7a6c52","bg":"#fffdf8"},"dark":{"surface":"#262b34","text":"#f2f3f5","line":"#a8adb8","border":"#9aa4b8","bg":"#1f232b"}}};
+if(typeof mermaid==='undefined')return;
+var pres=Array.prototype.slice.call(document.querySelectorAll('pre.mermaid')).filter(function(p){if(p.hasAttribute('data-claude-mermaid-claimed'))return false;p.setAttribute('data-claude-mermaid-claimed','1');return true;});
+if(!pres.length)return;
+var mq=window.matchMedia?window.matchMedia('(prefers-color-scheme: dark)'):null;
+var root=document.documentElement;
+var items=pres.map(function(pre){
+var mount=document.createElement('div');mount.className='mermaid-diagram';
+return {pre:pre,mount:mount,src:pre.textContent||''};
+});
+var seq=0;
+var renderGen=0;
+var lastKey='';
+function pageBg(fallback){
+var els=[document.body,document.documentElement];
+for(var i=0;i<els.length;i++){
+var c=els[i]&&getComputedStyle(els[i]).backgroundColor;
+if(c&&c!=='transparent'&&c!=='rgba(0, 0, 0, 0)')return c;
+}
+return fallback;
+}
+function render(){
+var theme=root.getAttribute('data-theme');
+var dark=theme==='dark'||(!!(mq&&mq.matches)&&theme!=='light');
+var pal=dark?CFG.palettes.dark:CFG.palettes.light;
+var bg=pageBg(pal.bg);
+var key=(dark?'d':'l')+'|'+bg;
+if(key===lastKey)return;
+lastKey=key;
+var gen=++renderGen;
+var font=getComputedStyle(document.body).fontFamily||'sans-serif';
+var nat={useMaxWidth:false};
+mermaid.initialize({
+startOnLoad:false,securityLevel:'strict',theme:'base',
+flowchart:nat,sequence:nat,er:nat,state:nat,class:nat,pie:nat,
+gantt:nat,journey:nat,timeline:nat,gitGraph:nat,mindmap:nat,xyChart:nat,
+quadrantChart:nat,sankey:nat,c4:nat,requirement:nat,block:nat,
+packet:nat,kanban:nat,architecture:nat,radar:nat,
+themeVariables:{background:bg,mainBkg:pal.surface,primaryColor:pal.surface,
+primaryTextColor:pal.text,lineColor:pal.line,primaryBorderColor:pal.border,
+nodeBorder:pal.border,clusterBorder:pal.border,edgeLabelBackground:bg,
+clusterBkg:'rgba(127,127,127,0.07)',titleColor:pal.text,
+darkMode:dark,rowOdd:bg,rowEven:'rgba(127,127,127,0.07)',
+attributeBackgroundColorOdd:bg,attributeBackgroundColorEven:'rgba(127,127,127,0.07)',
+fontSize:'16px',fontFamily:font},
+themeCSS:'.node rect, .node circle, .node polygon, .node path, .cluster rect { stroke-width: 2px; }'
+});
+items.forEach(function(it){
+var id='claude-mermaid-'+seq++;
+mermaid.render(id,it.src).then(function(r){
+if(gen!==renderGen)return;
+var prev=it.pre.previousElementSibling;
+if(prev&&prev.className==='mermaid-diagram'&&prev!==it.mount)return;
+it.mount.innerHTML=r.svg;
+if(!it.mount.parentNode)it.pre.parentNode.insertBefore(it.mount,it.pre);
+it.pre.style.display='none';
+},function(){
+var scratch=document.getElementById(id);
+if(scratch)scratch.parentNode.removeChild(scratch);
+scratch=document.getElementById('d'+id);
+if(scratch)scratch.parentNode.removeChild(scratch);
+if(gen!==renderGen)return;
+if(it.mount.parentNode)it.mount.parentNode.removeChild(it.mount);
+it.pre.style.display='';
+});
+});
+}
+render();
+if(mq&&mq.addEventListener)mq.addEventListener('change',render);
+if(typeof MutationObserver!=='undefined')new MutationObserver(render).observe(root,{attributes:true,attributeFilter:['data-theme']});
+})();</script>
+<!--claude-mermaid-runtime-end-->
+
+</body></html>

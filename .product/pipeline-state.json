@@ -1,0 +1,106 @@
+{
+  "feature_slug": "moteur-calcul",
+  "title": "Moteur de calcul Loupe (packages/moteur) + mise en place du monorepo",
+  "started_at": "2026-09-13T00:00:00Z",
+  "current_step": "completed",
+  "scope": "packages/moteur + racine du monorepo",
+  "branch": "feat/moteur-calcul",
+  "baseline": {
+    "tests_passed": 0,
+    "tests_failed": 0,
+    "typecheck_errors": 0,
+    "lint_errors": 0,
+    "git_status": "clean après US-0",
+    "last_commit": "60c4f78",
+    "note": "Aucun outillage de test dans le repo d'origine. Baseline établie à US-0 : 1 test."
+  },
+  "final": {
+    "tests_passed": 204,
+    "tests_failed": 0,
+    "coverage": "100 % lignes, branches, fonctions, instructions",
+    "typecheck_errors": 0,
+    "lint_errors": 0,
+    "perf_ms_projet_complet": 35
+  },
+  "steps": {
+    "context": { "status": "completed" },
+    "discovery": {
+      "status": "completed",
+      "output": ".product/features/moteur-calcul-discovery.md",
+      "validation": "auto-validée (autorisation Pierre 13/09), questions tranchées : différé conservé, Excel remplacé par un projet d'exemple, ancien simulateur supprimé"
+    },
+    "specs": {
+      "status": "completed",
+      "output": ".product/specs/moteur-calcul-specs.md",
+      "stories_count": 11
+    },
+    "architecture": {
+      "status": "completed",
+      "output": ".product/architecture/moteur-calcul.md"
+    },
+    "implement": {
+      "status": "completed",
+      "stories_completed": 11,
+      "stories_total": 11,
+      "commits": [
+        "ad0b3ea US-0 monorepo",
+        "6ea95b2 US-1 schémas + règles",
+        "e11216f US-2 financement",
+        "3a984c6 US-3 cash-flow",
+        "8d43f20 US-4a fiscalité meublée",
+        "ece2ce9 US-4b fiscalité nue + 4 régimes",
+        "2b23dc7 US-5 revente",
+        "a58089a US-6 rendement/TRI",
+        "c64b64f US-7 verdict",
+        "US-9 calculerProjet + schéma de sortie",
+        "US-8 scénarios + prix cibles",
+        "US-10 documentation"
+      ]
+    },
+    "refactor": {
+      "status": "completed",
+      "note": "max-lines 300 imposé par ESLint ; TAEG réécrit en multiplication itérative ; option avecTaeg pour les prix cibles (178 → 35 ms)"
+    },
+    "qa_tests": {
+      "status": "completed",
+      "note": "204 tests, 100 % couverture, tests d'intégration (schéma de sortie strict, pureté, NaN, perf)"
+    },
+    "security": {
+      "status": "completed",
+      "note": "aucun secret, aucune I/O, aucun eval, .env ignorés, node_modules et dist retirés du suivi"
+    },
+    "push": {
+      "status": "completed",
+      "pr": "https://github.com/immoinvest/loupeprojet/pull/1",
+      "note": "PR ouverte le 13/09/2026 ; merge par Pierre uniquement"
+    }
+  },
+  "decisions": {
+    "stack": "ADR-001 : spec Loupe (Cloudflare, SPA, Mistral) avec React au lieu de Svelte",
+    "design": "Direction visuelle à proposer (2-3 pistes) avant toute feature UI",
+    "merge": "Jamais de merge automatique sans validation",
+    "meilleur_regime": "Le « meilleur » régime est celui au meilleur cash-flow cumulé après impôt (pas l'impôt le plus faible, qui favorise le nu à loyer plus bas) ; les deux sont exposés"
+  },
+  "post_mortem": {
+    "blockers_encountered": [
+      "gh absent puis UAC ; connexion GitHub faite par Pierre via code device",
+      "Identité Git absente sur la machine : configurée localement au dépôt",
+      "Skills non enregistrés dans l'outil Skill : suivis depuis les fichiers .claude/commands"
+    ],
+    "retries": {
+      "US-2": "tolérances de test trop serrées sur mes arrondis à la main",
+      "US-4a": "oubli des 2 350 € de frais bancaires dans les charges de l'année 1 (test, pas moteur)",
+      "US-5": "1,015^10 × 155 000 = 179 884 et non 179 887 (maquette arrondie)",
+      "US-9": "perf 178 ms : TAEG recalculé dans les bissections de prix cible ; seuil de test dépendant de l'instrumentation"
+    },
+    "patterns_discovered": [
+      "Union discriminée { eligible: true } | { eligible: false; motif } plutôt qu'un ?? null inatteignable (couverture de branches)",
+      "Éviter les accès indexés sur des tableaux toujours pleins : ?? 0 crée une branche non couvrable",
+      "Règles injectées en paramètre : tests avec règles modifiées (partTerrain 1) pour couvrir les garde-fous"
+    ],
+    "improvements_for_next_time": [
+      "Écrire les valeurs attendues des tests à partir d'une formule dans le test, pas d'un chiffre recopié de la maquette",
+      "Mesurer la perf hors couverture, ou avec un seuil qui tient compte de l'instrumentation"
+    ]
+  }
+}

@@ -1,0 +1,26 @@
+# Dépendances et builds
+node_modules/
+dist/
+build/
+.wrangler/
+coverage/
+playwright-report/
+test-results/
+
+# Secrets et config locale
+.env
+.env.*
+!.env.example
+.dev.vars
+
+# Outils
+.turbo/
+*.tsbuildinfo
+.eslintcache
+
+# OS / éditeurs
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+.idea/
