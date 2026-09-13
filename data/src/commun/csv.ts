@@ -140,6 +140,11 @@ export function versEnregistrement(
   return enregistrement;
 }
 
+/** Valeur d'une colonne, chaîne vide si la colonne manque : évite de propager `undefined` dans les transformations. */
+export function champ(enregistrement: EnregistrementCsv, nom: string): string {
+  return enregistrement[nom] ?? '';
+}
+
 export interface OptionsCsv {
   readonly separateur: Separateur;
 }
