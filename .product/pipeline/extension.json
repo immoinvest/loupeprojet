@@ -1,0 +1,28 @@
+{
+  "feature_slug": "extension",
+  "title": "Extension navigateur : lire l'annonce dans le navigateur (packages/capture, apps/extension, lecture du fragment dans apps/web, bouton-favori)",
+  "started_at": "2026-09-13T00:00:00Z",
+  "current_step": "implement",
+  "scope": "packages/capture, apps/extension, apps/web/src/annonces/capture.ts + NouveauProjet.tsx, apps/web/public/capture.js + page /extension",
+  "branch": "feat/extension",
+  "base": "master (768c556)",
+  "steps": {
+    "discovery": {
+      "status": "completed",
+      "output": ".product/features/extension-discovery.md"
+    },
+    "implement": { "status": "in_progress", "stories_completed": 4, "stories_total": 6 },
+    "refactor": { "status": "pending" },
+    "qa_tests": { "status": "pending" },
+    "security": { "status": "pending" },
+    "push": { "status": "pending" }
+  },
+  "decisions": {
+    "contrat": "packages/capture porte le schéma, l'encodage base64url, la résolution d'URL et le moteur de règles ; l'extension et le bouton-favori ne sont que des enveloppes",
+    "transport": "fragment d'URL #capture=… : jamais envoyé au serveur, effacé de l'adresse après lecture",
+    "regles": "JSON par portail dans apps/extension/regles, versionnés <portail>-AAAA-MM-JJ, JSON-LD et état applicatif avant les sélecteurs CSS ; chargement distant (R2) prévu par la structure, non implémenté",
+    "fixtures": "pap.html relevée sur une vraie annonce le 13/09/2026 (navigateur intégré) ; leboncoin, seloger, bienici, logicimmo construites d'après la structure connue des portails, à vérifier sur de vraies annonces",
+    "zod": "import d'espace de noms (import * as z) dans @loupe/capture : bundle de l'extension 116 Ko au lieu de 463 Ko (les 40 locales de Zod ne sont plus embarquées)",
+    "resultat_injection": "le script de contenu dépose le résultat dans globalThis.__loupeCapture et le build ajoute cette expression en dernière ligne (valeur de complétion rendue par executeScript) ; le popup relit le monde isolé si le navigateur ne rend rien"
+  }
+}
