@@ -4,7 +4,7 @@ Format : `- [ ] slug — titre — date — scope`
 
 ## En cours
 
-- [ ] extraction-llm — `POST /extract` : lecture du texte d'une annonce par un modèle de langage (OpenRouter, modèle gratuit), 20 champs validés un par un, cache 30 jours, 10 lectures/min/IP — 2026-09-13 — `apps/worker/src/extraction`, ADR-003 amendé — PR à ouvrir
+- [ ] extraction-llm — `POST /extract` : lecture du texte d'une annonce par un modèle de langage (OpenRouter, modèle gratuit), 20 champs validés un par un, cache 30 jours, 10 lectures/min/IP — 2026-09-13 — `apps/worker/src/extraction`, ADR-003 amendé — PR #15 (déployé et vérifié en production)
 
 ## À venir
 
