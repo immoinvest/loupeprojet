@@ -1,0 +1,39 @@
+{
+  "feature_slug": "e2e-playwright",
+  "title": "Tests de bout en bout Playwright : parcours complets en vrai navigateur (Chromium), en local et en CI",
+  "started_at": "2026-09-13T00:00:00Z",
+  "current_step": "implement",
+  "scope": "apps/web/e2e/**, apps/web/playwright.config.ts, apps/web/package.json, apps/web/tsconfig.json, package.json (scripts), eslint.config.js (ignores), .github/workflows/ci.yml (job e2e)",
+  "branch": "feat/e2e-playwright",
+  "base": "master (768c556)",
+  "baseline": { "tests_passed": 277, "tests_failed": 0 },
+  "steps": {
+    "discovery": {
+      "status": "completed",
+      "output": ".product/features/e2e-playwright-discovery.md"
+    },
+    "specs": {
+      "status": "completed",
+      "stories_count": 5,
+      "note": "stories dans le document de discovery"
+    },
+    "architecture": {
+      "status": "completed",
+      "note": "config Playwright unique, un fichier de parcours par écran, aides partagées dans e2e/aides.ts ; détail dans .product/architecture/e2e-playwright.md à la fin"
+    },
+    "implement": {
+      "status": "in_progress",
+      "stories_completed": 1,
+      "stories_total": 5,
+      "commits": []
+    },
+    "qa_tests": { "status": "pending" },
+    "security": { "status": "pending" },
+    "push": { "status": "pending" }
+  },
+  "decisions": {
+    "serveur": "build de production puis vite preview sur 127.0.0.1:5199 (port dédié) : on teste l'artefact déployé, pas le serveur de développement",
+    "isolation": "contexte de navigateur neuf par test (stockage vide), aucune attente fixe",
+    "ci": "job e2e séparé de verify, non obligatoire dans la protection de branche tant que Pierre n'a pas décidé"
+  }
+}

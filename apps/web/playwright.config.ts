@@ -1,0 +1,42 @@
+import { defineConfig, devices } from '@playwright/test';
+import { existsSync } from 'node:fs';
+
+/**
+ * Port dédié aux tests de bout en bout : 5173 (vite dev, aperçu Claude Code) et 4173
+ * (vite preview lancé à la main) peuvent être occupés.
+ */
+const PORT = 5199;
+const URL_BASE = `http://127.0.0.1:${String(PORT)}`;
+const enCi = process.env.CI !== undefined;
+
+// On teste l'artefact déployé : `npm run test:e2e` construit `dist/` puis le sert avec vite preview.
+if (!existsSync(new URL('./dist/index.html', import.meta.url))) {
+  throw new Error(
+    "dist/index.html introuvable : lancez `npm run test:e2e` (qui construit l'application) ou `npm run build -w apps/web` avant `playwright test`.",
+  );
+}
+
+export default defineConfig({
+  testDir: './e2e',
+  fullyParallel: true,
+  forbidOnly: enCi,
+  retries: enCi ? 2 : 0,
+  // Le rapport HTML n'est jamais ouvert automatiquement : `npx playwright show-report` pour le lire.
+  reporter: enCi
+    ? [['github'], ['html', { open: 'never' }]]
+    : [['list'], ['html', { open: 'never' }]],
+  use: {
+    baseURL: URL_BASE,
+    locale: 'fr-FR',
+    timezoneId: 'Europe/Paris',
+    trace: 'retain-on-failure',
+    screenshot: 'only-on-failure',
+  },
+  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+  webServer: {
+    command: `npm run preview -- --host 127.0.0.1 --port ${String(PORT)} --strictPort`,
+    url: URL_BASE,
+    reuseExistingServer: !enCi,
+    timeout: 60_000,
+  },
+});
