@@ -1,0 +1,48 @@
+{
+  "feature_slug": "comptes",
+  "title": "Comptes utilisateurs : connexion Google, Apple ou code e-mail (Better Auth sur Cloudflare Pages + D1), page de connexion classique dans le visuel Deklic",
+  "started_at": "2026-09-13T19:00:00Z",
+  "current_step": "implement",
+  "scope": "full-stack : apps/comptes (nouveau), apps/web (connexion, compte, barre latérale), docs",
+  "branch": "feat/comptes",
+  "base": "origin/master (e1477d1, après la PR #9 worker-socle)",
+  "worktree": "C:/Users/errei/Claude/loupeprojet/.claude/worktrees/auth-comptes (le dossier principal sert une autre session)",
+  "baseline": {
+    "tests_passed": 306,
+    "tests_failed": 0,
+    "test_files": 33,
+    "typecheck_errors": 0,
+    "git_status": "clean",
+    "last_commit": "e1477d1",
+    "duree_tests_s": 207
+  },
+  "steps": {
+    "discovery": {
+      "status": "completed",
+      "output": ".product/features/comptes-discovery.md",
+      "self_review": "Better Auth retenu plutôt qu'Auth0 (visuel dans l'app, UE, 0 €, aucune dépendance) ; code e-mail plutôt que lien magique ; API dans le worker Pages (même origine) plutôt que dans apps/worker ; synchro des projets hors périmètre."
+    },
+    "specs": {
+      "status": "completed",
+      "output": ".product/specs/comptes-specs.md",
+      "stories_count": 8,
+      "self_review": "fournisseurs.email dépend d'un envoyeur réel ; carte Mes projets connectée sans bouton mort ; suppression = session fraîche (défaut Better Auth) ; routes et codes Better Auth 1.7 vérifiés dans les sources."
+    },
+    "architecture": {
+      "status": "completed",
+      "output": ".product/architecture/comptes.md",
+      "adr": ".product/adr/006-comptes-better-auth.md",
+      "self_review": "Better Auth 1.7 détecte le binding D1 nativement (pas de kysely-d1) ; instance par origine dans l'isolat ; _worker.js produit par un plugin Vite de apps/web ; _routes.json limite le worker à /api/*. Risque : Miniflare dans Vitest (repli node:sqlite)."
+    },
+    "implement": {
+      "status": "in_progress",
+      "stories_completed": 0,
+      "stories_total": 8,
+      "commits": []
+    },
+    "refactor": { "status": "pending" },
+    "qa_tests": { "status": "pending" },
+    "security": { "status": "pending" },
+    "push": { "status": "pending" }
+  }
+}
