@@ -154,6 +154,10 @@ describe('meilleureValeur', () => {
     expect(meilleureValeur(colonnes, indicateurParCode('prix'))).toBeNull();
     const sans = colonnes.map((c) => ({ ...c, valeurs: { ...c.valeurs, tri: null } }));
     expect(meilleureValeur(sans, indicateurParCode('tri'))).toBeNull();
+    // Deux projets identiques : aucune valeur n'est meilleure que l'autre, rien en vert.
+    const jumeaux = comparerProjets([exemple, projet('copie')]);
+    expect(meilleureValeur(jumeaux, indicateurParCode('cashflow'))).toBeNull();
+    expect(meilleureValeur(jumeaux, indicateurParCode('tri'))).toBeNull();
   });
 });
 

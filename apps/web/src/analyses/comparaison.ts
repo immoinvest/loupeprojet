@@ -240,8 +240,11 @@ export function meilleureValeur(
   const valeurs = colonnes
     .map((c) => c.valeurs[indicateur.code])
     .filter((v): v is number => v !== null);
-  if (valeurs.length === 0) return null;
-  return indicateur.sens === 'haut' ? Math.max(...valeurs) : Math.min(...valeurs);
+  const plusHaute = Math.max(...valeurs);
+  const plusBasse = Math.min(...valeurs);
+  // Aucune valeur, ou toutes égales : aucune n'est meilleure que les autres.
+  if (valeurs.length === 0 || plusHaute === plusBasse) return null;
+  return indicateur.sens === 'haut' ? plusHaute : plusBasse;
 }
 
 export const MIN_COMPARES = 2;
