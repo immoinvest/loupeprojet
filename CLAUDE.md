@@ -1,4 +1,4 @@
-# Instructions projet — Loupe
+# Instructions projet — Deklic (ex-Loupe)
 
 ## Git & Commits
 
@@ -12,11 +12,11 @@
 
 ---
 
-# Loupe — analyse d'investissement locatif à partir du lien d'une annonce
+# Deklic — analyse d'investissement locatif à partir du lien d'une annonce
 
 ## What This Is
 
-**Loupe** (nom de travail) : l'utilisateur colle le **lien d'une annonce** (LeBonCoin, SeLoger, Bien'ici, PAP, Logic-Immo), l'app lit la page **dans son navigateur**, complète avec les **données publiques** (DVF, ADEME, ANIL, REI, Géorisques), lui fait vérifier cinq chiffres, et produit un **rapport complet** : financement, cash-flow, fiscalité (4 régimes côte à côte), revente, rendement et TRI, verdict à cinq feux, scénarios « et si ».
+**Deklic** (ex-Loupe, renommé le 13/09/2026, ADR-005) : l'utilisateur colle le **lien d'une annonce** (LeBonCoin, SeLoger, Bien'ici, PAP, Logic-Immo), l'app lit la page **dans son navigateur**, complète avec les **données publiques** (DVF, ADEME, ANIL, REI, Géorisques), lui fait vérifier cinq chiffres, et produit un **rapport complet** : financement, cash-flow, fiscalité (4 régimes côte à côte), revente, rendement et TRI, verdict à cinq feux, scénarios « et si ».
 
 - **Cible** : Camille, 31 ans, premier investissement locatif, remplace son tableur bricolé.
 - **Modèle** : gratuit et sans compte en v1. Compte optionnel (lien magique) en v1.5. Monétisation en v3 (affiliation, export premium), sans jamais dégrader le gratuit.
@@ -34,6 +34,7 @@ L'utilisateur principal du repo pratique le **vibe coding** et ne relit pas le c
 | `.product/architecture-overview.md`       | Vue d'ensemble des modules                                                                 |
 | `.product/adr/`                           | Décisions d'architecture (stack, capture navigateur, LLM)                                  |
 | `.product/design/maquette-v1.md`          | Les 5 écrans de la maquette et leurs composants. Direction visuelle à redéfinir avant l'UI |
+| `marque/README.md`                        | Identité de marque Deklic : fichiers, couleurs, typographies, règles d'usage (ADR-005)     |
 | `.product/features-registry.md`           | Fonctionnalités livrées / en cours                                                         |
 | `.product/pipeline-state.json`            | État du pipeline de la feature en cours                                                    |
 
@@ -42,12 +43,17 @@ L'utilisateur principal du repo pratique le **vibe coding** et ne relit pas le c
 - L'ancien simulateur de comparaison de prêts (webpack, `src/`) a été **supprimé** le 13/09/2026 ; sa logique d'amortissement avec différés vit dans `packages/moteur/src/financement/amortissement.ts`, testée.
 - **Livré** : `packages/moteur` complet (feature `moteur-calcul`, 204 tests, couverture 100 %). API : `calculerProjet(projet) → Resultats`, `ProjetSchema`, `ResultatsSchema`, `projetExemple`, `obtenirRegles`.
 - **Direction visuelle** : C « Le guide » retenue (ADR-004) ; tokens dans `apps/web/src/index.css`.
+- **Identité de marque** : **Deklic** (ADR-005, 13/09/2026). Source de vérité dans `marque/` (logos SVG, favicon, icônes, image de partage, palette, guide) ; l'app reprend favicon, manifeste, tokens `--color-accent*` / `--color-flash*`, composant `LogotypeDeklic` (`apps/web/src/marque/Logo.tsx`). Noms internes inchangés (`@loupe/moteur`, dépôt, clé de stockage).
 - **Livré** : `apps/web` socle (React 19 + Vite + Tailwind v4, React Router déclaratif, coque SaaS, écrans Mes projets et Rapport, stockage local Zod, config Cloudflare Pages). Textes des codes du moteur dans `apps/web/src/textes/`.
 - **Livré** : écran Nouveau projet (`apps/web/src/annonces/` : `resoudreAnnonce`, `extraireChamps` par règles, `construireProjet` avec défauts sourcés ; formulaire Vérifier). Le schéma `Projet` du moteur porte une `source` optionnelle (portail, id, URL).
 - **Livré** : onglet Hypothèses (`apps/web/src/hypotheses/` : chemins pointés, conversion texte ↔ valeur, descripteurs des champs par groupe, `appliquerSaisie` ; `ProjetsContext.mettreAJour` valide par Zod avant d'enregistrer).
 - **Livré** : onglets Fiscalité (4 régimes côte à côte, « Retenir ce régime », frise, année par année), Revente (horizons 5/10/15/20 ans cliquables via `apps/web/src/analyses/`, plus-value détaillée) et Visite (points de vigilance cochables par catégorie, `categorieVigilance`). Toute interaction passe par `appliquerSaisie`.
-- **Production** : https://loupeprojet.pages.dev (Cloudflare Pages, branche `master`, build `npm ci && npm run build -w apps/web`).
-- **Prochaine étape** : `worker-socle` (Hono sur Workers : proxy, cache KV, rate-limit), puis `extension`.
+- **Livré** : `apps/worker` socle (Hono sur Workers : `GET /health`, `GET /proxy/:service` avec liste blanche, cache KV 24 h par empreinte des paramètres, 60 req/min/IP, erreurs en codes, journal structuré ; premier service : géocodage Géoplateforme). Dépendances injectées (`creerApp(deps)`), tests Node via `app.request()`. Déploiement : voir README (compte Cloudflare de Pierre).
+- **Livré** : tests de bout en bout Playwright (`apps/web/e2e/`, 8 parcours Chromium sur le build de production servi par `vite preview` sur 127.0.0.1:5199 ; `npm run test:e2e` construit puis teste ; sélecteurs par rôle et libellé, contexte neuf par test ; job CI `e2e` séparé de `verify`, pas encore requis pour le merge). Détails : `.product/architecture/e2e-playwright.md`.
+- **Livré** : `data/` (`@loupe/data`, feature `referentiels`) : `npm run referentiels -w data -- --source <dvf|loyers|taxe-fonciere|zonage|usure|communes|tout> [--departement 13]` génère dans `data/dist/` les référentiels par département ou commune (DVF 24 mois + index prix/m², loyers ANIL, taux TFPB REI, zonage ABC, seuils de l'usure saisis dans `data/sources/usure/`, communes API Géo), formats Zod dans `data/src/schemas/`, `<prefixe>/courant.json` = millésime à lire, sources et licences dans `data/SOURCES.md`. GitHub Action `referentiels.yml` (cron mensuel + manuel) publie sur R2 `loupe-data` par `aws s3 sync` ; secrets `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `CLOUDFLARE_ACCOUNT_ID` à créer par Pierre (README). Le chargement par l'application = feature `enrichissement-marche`.
+- **Production** : https://loupeprojet.pages.dev (Cloudflare Pages, branche `master`, build `npm ci && npm run build -w apps/web`). Worker : https://loupe-worker.erreip-gorguel.workers.dev (déployé à la main par `npm run deploy -w apps/worker`, machine connectée par `wrangler login` ; KV `KV_CACHE` = `a64f32a40a0846e1be258a7ea34a8090`).
+- **Sessions parallèles** : fiches dans `.product/sessions/` (extension, referentiels, garder, e2e-playwright) ; chaque session parallèle tient son état dans `.product/pipeline/<slug>.json` et ne touche aux docs communes qu'en fin de feature. `.product/pipeline-state.json` reste à la session principale.
+- **Prochaine étape (session principale)** : `extraction-llm` (`/extract` Mistral, clé à fournir par Pierre), puis `enrichissement-marche`.
 - `node_modules/` et `dist/` ne sont plus versionnés.
 
 ## Stack (décision ADR-001)
@@ -93,6 +99,7 @@ loupeprojet/
 ├── CLAUDE.md
 ├── .claude/commands/          ← skills du pipeline de dev
 ├── .product/                  ← specs, ADR, design, pipeline-state.json
+├── marque/                    ← identité Deklic : logos SVG, favicon, icônes, image de partage, guide (source de vérité)
 ├── package.json               ← workspaces: packages/*, apps/*
 ├── tsconfig.base.json
 ├── packages/
@@ -135,7 +142,7 @@ loupeprojet/
 
 ## Variables d'environnement
 
-Validées par Zod (`apps/worker/src/env.ts`), documentées dans `.env.example` / `.dev.vars.example`. Aucune n'est nécessaire pour `packages/moteur`.
+Validées par Zod (`apps/worker/src/dependances.ts`), documentées dans `apps/worker/.dev.vars.example`. Aucune n'est nécessaire pour `packages/moteur` ni `apps/web`. Déjà en place : `ENVIRONNEMENT` (`dev` / `preview` / `production`) et `ORIGINES_AUTORISEES` (origines CORS supplémentaires, séparées par des virgules).
 
 | Variable                                        | Usage                                         |
 | ----------------------------------------------- | --------------------------------------------- |
@@ -145,6 +152,8 @@ Validées par Zod (`apps/worker/src/env.ts`), documentées dans `.env.example` /
 | `RESEND_API_KEY`                                | Liens magiques (v1.5)                         |
 | Bindings Wrangler : `KV_CACHE`, `R2_DATA`, `DB` | Déclarés dans `wrangler.toml`, pas dans l'env |
 
+Secrets GitHub Actions du workflow `referentiels.yml` (publication des référentiels sur R2, jamais dans le code) : `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY` (jeton R2 « Object Read & Write » sur le bucket `loupe-data`), `CLOUDFLARE_ACCOUNT_ID`.
+
 ## Commandes
 
 ```bash
@@ -152,10 +161,11 @@ npm install                  # racine, installe tous les workspaces
 npm run lint                 # eslint . --max-warnings=0
 npm run typecheck            # tsc -b (tous les workspaces)
 npm run test                 # vitest run (tous les workspaces)
-npm run test:e2e             # playwright test (apps/web)
+npm run test:e2e             # vite build puis playwright test : 8 parcours Chromium (apps/web/e2e)
 npm run build                # build de tous les workspaces
 npm run dev -w apps/web      # front en local
 npm run dev -w apps/worker   # wrangler dev
+npm run referentiels -w data -- --source tout --departement 13   # référentiels d'un département dans data/dist/
 ```
 
 Ces scripts sont créés lors de la mise en place du monorepo (feature `moteur-calcul`).

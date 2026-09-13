@@ -2,7 +2,7 @@
   "name": "loupe",
   "version": "0.1.0",
   "private": true,
-  "description": "Loupe : colle le lien d'une annonce, obtiens l'analyse complète de rentabilité locative.",
+  "description": "Deklic : colle le lien d'une annonce, obtiens l'analyse complète de rentabilité locative.",
   "author": "Pierre Georgel",
   "license": "UNLICENSED",
   "type": "module",
@@ -11,7 +11,8 @@
   },
   "workspaces": [
     "packages/*",
-    "apps/*"
+    "apps/*",
+    "data"
   ],
   "scripts": {
     "lint": "eslint . --max-warnings=0",
@@ -20,6 +21,7 @@
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
+    "test:e2e": "npm run test:e2e -w apps/web",
     "build": "npm run build --workspaces --if-present"
   },
   "devDependencies": {

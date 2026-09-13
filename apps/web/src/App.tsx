@@ -51,7 +51,7 @@ export const routes: RouteObject[] = [
         element: (
           <Bientot
             titre="Page introuvable"
-            phrase="Cette adresse ne correspond à rien dans Loupe."
+            phrase="Cette adresse ne correspond à rien dans Deklic."
           />
         ),
       },

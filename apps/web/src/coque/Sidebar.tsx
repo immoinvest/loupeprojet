@@ -1,9 +1,10 @@
 import { calculerProjet } from '@loupe/moteur';
-import { Columns2, Info, Plus, Puzzle, Search, Settings } from 'lucide-react';
+import { Columns2, Info, Plus, Puzzle, Settings } from 'lucide-react';
 import type { JSX } from 'react';
 import { NavLink, useNavigate } from 'react-router';
 
 import { Point } from '@/composants/ui';
+import { LogotypeDeklic } from '@/marque/Logo';
 import { useProjets } from '@/stockage/ProjetsContext';
 import type { ProjetEnregistre } from '@/stockage/projets';
 
@@ -30,12 +31,8 @@ export function Sidebar(): JSX.Element {
 
   return (
     <aside className="flex h-full flex-col gap-5 border-r border-bordure bg-surface px-4 py-5">
-      <NavLink
-        to="/projets"
-        className="flex items-center gap-2.5 px-2.5 font-display text-[22px] font-bold text-accent"
-      >
-        <Search size={26} strokeWidth={2.4} aria-hidden="true" />
-        Loupe
+      <NavLink to="/projets" className="flex items-center px-2.5 py-1">
+        <LogotypeDeklic hauteur={26} />
       </NavLink>
 
       <button

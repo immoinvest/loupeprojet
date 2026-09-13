@@ -1,0 +1,14 @@
+{
+  "name": "Deklic",
+  "short_name": "Deklic",
+  "description": "Colle le lien d'une annonce, obtiens l'analyse complète de rentabilité locative.",
+  "lang": "fr",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fffdf9",
+  "theme_color": "#2b4bf2",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
