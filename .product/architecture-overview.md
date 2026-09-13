@@ -30,6 +30,8 @@
 | `apps/extension`  | Capture LBC, SeLoger, Bien'ici, PAP, Logic-Immo                                          | à venir                                                     |
 | `data/`           | Pré-agrégation des référentiels                                                          | à venir                                                     |
 
+Tests de bout en bout : `apps/web/e2e/` (Playwright, Chromium) rejoue huit parcours utilisateur sur le build de production servi par `vite preview`, en local et dans le job CI `e2e` ; voir `architecture/e2e-playwright.md`.
+
 ## Flux de données d'une analyse
 
 Résoudre → Capturer → Extraire → Normaliser → Géocoder → Enrichir → Estimer → Vérifier → Calculer. Le moteur intervient uniquement à l'étape 9 et reçoit un `Projet` complet (schéma Zod) ; il rend des `Resultats` jamais persistés.

@@ -1,0 +1,46 @@
+{
+  "feature_slug": "e2e-playwright",
+  "title": "Tests de bout en bout Playwright : parcours complets en vrai navigateur (Chromium), en local et en CI",
+  "started_at": "2026-09-13T00:00:00Z",
+  "current_step": "push",
+  "scope": "apps/web/e2e/**, apps/web/playwright.config.ts, apps/web/package.json, apps/web/tsconfig.json, package.json (scripts), eslint.config.js (ignores), .github/workflows/ci.yml (job e2e)",
+  "branch": "feat/e2e-playwright",
+  "base": "master (768c556), puis merge de origin/master (e1477d1 : worker-socle, identité Deklic)",
+  "baseline": { "tests_passed": 277, "tests_failed": 0 },
+  "steps": {
+    "discovery": {
+      "status": "completed",
+      "output": ".product/features/e2e-playwright-discovery.md"
+    },
+    "specs": {
+      "status": "completed",
+      "stories_count": 5,
+      "note": "stories dans le document de discovery"
+    },
+    "architecture": {
+      "status": "completed",
+      "output": ".product/architecture/e2e-playwright.md"
+    },
+    "implement": {
+      "status": "completed",
+      "stories_completed": 5,
+      "stories_total": 5,
+      "commits": ["af2ccd1", "c45b733", "ea2283e", "903971b", "72e7113"]
+    },
+    "qa_tests": {
+      "status": "completed",
+      "note": "8 parcours Playwright verts en local (Windows, Chromium 1243), ~55 s de tests ; les tests sont eux-mêmes typés (tsc) et lintés (règles typées, no-floating-promises)"
+    },
+    "security": {
+      "status": "completed",
+      "note": "aucun code applicatif touché ; aucun secret ; les tests ne lisent que la page servie en local ; rapport HTML et traces ignorés par git"
+    },
+    "push": { "status": "in_progress" }
+  },
+  "decisions": {
+    "serveur": "vite build (dans le script test:e2e) puis vite preview sur 127.0.0.1:5199 (port dédié) : on teste l'artefact déployé, pas le serveur de développement ; le build hors de Playwright évite le dépassement du délai webServer sur une machine lente",
+    "isolation": "contexte de navigateur neuf par test (stockage vide), aucune attente fixe, 60 s par test pour les machines lentes",
+    "ci": "job e2e séparé de verify, non obligatoire dans la protection de branche tant que Pierre n'a pas décidé",
+    "bugs": "aucun bug applicatif révélé : pas de test.fixme"
+  }
+}

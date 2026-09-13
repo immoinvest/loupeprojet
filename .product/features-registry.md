@@ -18,7 +18,6 @@ Parallélisables dès maintenant (fiches de session dans `.product/sessions/`, u
 - [ ] extension — WebExtension MV3 + `packages/capture` + bookmarklet ; règles par portail (fiche `sessions/extension.md`)
 - [ ] referentiels — `data/` + GitHub Action mensuelle : DVF, ANIL, REI, zonage ABC, usure, communes → R2 (fiche `sessions/referentiels.md`)
 - [ ] garder — impression soignée, partage sans compte, pages Comparer et Méthode (fiche `sessions/garder-comparer-methode.md`)
-- [ ] e2e-playwright — parcours complets en navigateur réel, en CI (fiche `sessions/e2e-playwright.md`)
 
 ## Livrées (mergées sur `master`)
 
@@ -29,3 +28,4 @@ Parallélisables dès maintenant (fiches de session dans `.product/sessions/`, u
 - [x] hypotheses-editables — onglet Hypothèses : toutes les hypothèses modifiables avec recalcul instantané, validation Zod, provenance, bloc Marché saisissable — 2026-09-13 — PR #5
 - [x] onglets-detail — Fiscalité (4 régimes côte à côte, frise, année par année), Revente (5/10/15/20 ans, plus-value détaillée), Visite (points de vigilance cochables) — 2026-09-13 — PR #6 ; merge automatique des PR (protection de `master`) — PR #7
 - [x] identite-visuelle — Identité de marque Deklic : dossier `marque/` (logos SVG, favicon, icônes 192/512/180, image de partage, palette, guide), ADR-005, app renommée (titre, favicon, manifeste, couleurs, logotype dans la barre latérale, textes) — 2026-09-13 — `marque/`, `apps/web`, docs — PR #8
+- [x] e2e-playwright — tests de bout en bout Playwright : 8 parcours Chromium sur le build de production (Mes projets, Rapport, Hypothèses, Fiscalité, Revente, Visite, nouveau projet et suppression, persistance), `npm run test:e2e`, job CI `e2e` non bloquant — 2026-09-13 — `apps/web/e2e`, `apps/web/playwright.config.ts`, `.github/workflows/ci.yml`, ignores ESLint — PR `feat/e2e-playwright`

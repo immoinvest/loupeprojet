@@ -13,9 +13,9 @@ loupeprojet/
 ├── marque/                 identité de marque Deklic (ADR-005) : logos SVG, favicon, icônes, image de partage, palette, guide
 ├── .prettierrc             printWidth 100, singleQuote, trailingComma all, LF
 ├── vitest.config.ts        projets = packages/*, apps/*
-├── .github/workflows/ci.yml  Node 22 : npm ci → lint → format:check → typecheck → test:coverage → build
+├── .github/workflows/ci.yml  Node 22 : npm ci → lint → format:check → typecheck → test:coverage → build ; job e2e : Playwright Chromium (npm run test:e2e)
 ├── packages/moteur/        ← livré (feature moteur-calcul)
-├── apps/web/               ← livré (socle, nouveau projet, hypothèses, onglets)
+├── apps/web/               ← livré (socle, nouveau projet, hypothèses, onglets) ; tests de bout en bout Playwright dans e2e/
 ├── apps/worker/            ← socle livré (feature worker-socle)
 ├── apps/extension/         ← à venir (fiche .product/sessions/extension.md)
 └── data/                   ← scripts de pré-agrégation (feature référentiels)
@@ -50,7 +50,7 @@ tests/                       un dossier par module + integration/ ; 204 tests ; 
 
 ## `apps/web` (socle livré)
 
-Voir `architecture/web-socle.md`. React 19 + Vite 7 + Tailwind v4 (`@theme` = tokens ADR-004), React Router 7 déclaratif (`useRoutes`), stockage local Zod (`loupe.projets.v1`), textes des codes du moteur dans `src/textes/`, Vitest + Testing Library (jsdom). Cloudflare Pages : `wrangler.toml`, `public/_redirects`. Couverture 100 % exigée sur `stockage/`, `formatage/`, `textes/` ; les écrans sont couverts par des tests de rendu et de navigation (`AppEnMemoire`).
+Voir `architecture/web-socle.md`. React 19 + Vite 7 + Tailwind v4 (`@theme` = tokens ADR-004), React Router 7 déclaratif (`useRoutes`), stockage local Zod (`loupe.projets.v1`), textes des codes du moteur dans `src/textes/`, Vitest + Testing Library (jsdom). Cloudflare Pages : `wrangler.toml`, `public/_redirects`. Couverture 100 % exigée sur `stockage/`, `formatage/`, `textes/` ; les écrans sont couverts par des tests de rendu et de navigation (`AppEnMemoire`). Tests de bout en bout : `apps/web/e2e/` avec Playwright (Chromium, build de production servi par `vite preview` sur 127.0.0.1:5199, sélecteurs par rôle et libellé, contexte neuf par test), `npm run test:e2e` ; voir `architecture/e2e-playwright.md`.
 
 ## `apps/worker` (socle livré)
 
@@ -75,13 +75,14 @@ Voir `architecture/worker-socle.md`. Hono 4 sur Cloudflare Workers (`wrangler.to
 6. Aucun `TODO` / `FIXME` (règle ESLint `no-warning-comments`)
 7. Aucun secret, aucun `.env` suivi, `.gitignore` à jour
 8. Aucun `eval`, `dangerouslySetInnerHTML`, clé API côté client
+9. `npm run test:e2e` → 8 parcours Playwright verts (en local avant la PR ; job CI `e2e`, pas encore bloquant pour le merge)
 
 ## Tests
 
-| Type              | Outil                                      | Où                                     |
-| ----------------- | ------------------------------------------ | -------------------------------------- |
-| Unitaires moteur  | Vitest                                     | `packages/moteur/tests/<module>`       |
-| Intégration       | Vitest                                     | `packages/moteur/tests/integration`    |
-| Worker            | Vitest (Node) + `app.request()` et doubles | `apps/worker/tests/`                   |
-| E2E web (à venir) | Playwright                                 | `apps/web/e2e/`                        |
-| Annonce témoin    | GitHub Action quotidienne (à venir)        | `.github/workflows/annonce-temoin.yml` |
+| Type             | Outil                                                               | Où                                     |
+| ---------------- | ------------------------------------------------------------------- | -------------------------------------- |
+| Unitaires moteur | Vitest                                                              | `packages/moteur/tests/<module>`       |
+| Intégration      | Vitest                                                              | `packages/moteur/tests/integration`    |
+| Worker           | Vitest (Node) + `app.request()` et doubles                          | `apps/worker/tests/`                   |
+| E2E web          | Playwright (Chromium, build de production servi par `vite preview`) | `apps/web/e2e/`                        |
+| Annonce témoin   | GitHub Action quotidienne (à venir)                                 | `.github/workflows/annonce-temoin.yml` |

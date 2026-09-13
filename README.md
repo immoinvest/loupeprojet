@@ -29,10 +29,11 @@ npm run format:check  # prettier --check .
 npm run typecheck     # tsc --noEmit dans chaque workspace
 npm run test          # vitest run
 npm run test:coverage # vitest run --coverage (seuil 100 % sur packages/moteur et les modules de logique d'apps/web)
+npm run test:e2e      # vite build puis playwright test : parcours complets dans Chromium (apps/web/e2e)
 npm run build         # build de chaque workspace
 ```
 
-Node 22 ou plus. La CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) exécute ces six commandes sur chaque pull request (277 tests au 13/09/2026). Une PR est fusionnée automatiquement dès que le check `verify` est vert (`gh pr merge <n> --auto --merge`) ; `master` refuse tout merge sans ce check.
+Node 22 ou plus. La CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) exécute ces six commandes sur chaque pull request (277 tests au 13/09/2026). Une PR est fusionnée automatiquement dès que le check `verify` est vert (`gh pr merge <n> --auto --merge`) ; `master` refuse tout merge sans ce check. Un second job `e2e` joue les huit parcours Playwright dans Chromium ; il n'est pas encore requis pour fusionner.
 
 ## Le moteur (`@loupe/moteur`)
 
@@ -74,6 +75,18 @@ npm run build -w apps/web    # apps/web/dist
 - Projets stockés dans le navigateur (`localStorage`, clé `loupe.projets.v1`), validés par Zod ; le premier lancement crée le projet d'exemple.
 - Textes centralisés dans `src/textes/` : les codes du moteur deviennent des phrases là et nulle part ailleurs.
 - Tests : Vitest + Testing Library (jsdom), couverture 100 % sur `stockage/`, `formatage/`, `textes/`, `annonces/`, `hypotheses/`, `analyses/`.
+
+## Tests de bout en bout (`apps/web/e2e`)
+
+```bash
+npx playwright install chromium   # une fois : télécharge le navigateur (~150 Mo)
+npm run test:e2e                  # construit apps/web, sert dist/ sur 127.0.0.1:5199, joue les parcours dans Chromium
+npx playwright show-report apps/web/playwright-report   # rapport HTML du dernier lancement (traces et captures des échecs)
+```
+
+- Huit parcours Playwright rejouent ce que l'utilisateur fait vraiment, sur le **build de production** servi par `vite preview` : premier lancement (projet d'exemple dans « Mes projets »), rapport (verdict, cinq feux, chiffres clés), hypothèses (le loyer change le cash-flow, une valeur invalide est refusée), fiscalité (« Retenir ce régime »), revente (« Dans 20 ans »), visite (cases et compteur), nouveau projet à la main puis suppression, persistance après rechargement.
+- Sélecteurs par rôle, libellé ou texte (jamais de classe CSS) ; un contexte de navigateur neuf par test, donc un stockage vide ; aucune attente fixe. Configuration dans [`apps/web/playwright.config.ts`](apps/web/playwright.config.ts), détails dans [`.product/architecture/e2e-playwright.md`](.product/architecture/e2e-playwright.md).
+- En CI, le job `e2e` (séparé de `verify`) installe Chromium, lance `npm run test:e2e` et conserve le rapport sept jours en cas d'échec. Il n'est pas requis pour fusionner une PR pour l'instant.
 
 ## Le serveur (`@loupe/worker`)
 
