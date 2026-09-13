@@ -20,7 +20,7 @@ describe('etatPourUrl', () => {
     ).toEqual({
       statut: 'annonce',
       portail: 'pap',
-      message: 'Annonce pap.fr reconnue. Un clic, et Loupe la lit.',
+      message: 'Annonce pap.fr reconnue. Un clic, et Deklic la lit.',
     });
     expect(etatPourUrl('https://www.pap.fr/annonce/vente-appartement-marseille-13')).toMatchObject({
       statut: 'hors-annonce',

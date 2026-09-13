@@ -129,7 +129,7 @@ describe('popup · analyser', () => {
       files: ['contenu.js'],
     });
     expect(statut.textContent).toBe(
-      `Lu : 155${String.fromCharCode(0x20_2f)}000 € · 65 m² · Marseille (13005). Ouverture de Loupe…`,
+      `Lu : 155${String.fromCharCode(0x20_2f)}000 € · 65 m² · Marseille (13005). Ouverture de Deklic…`,
     );
     await vi.waitFor(() => {
       expect(fermer).toHaveBeenCalled();

@@ -140,7 +140,7 @@ export function NouveauProjet(): JSX.Element {
                 <>
                   Avec l'
                   <Link to="/extension" className="font-bold text-accent">
-                    extension Loupe
+                    extension Deklic
                   </Link>{' '}
                   ou le bouton-favori, la page est lue en un clic. Sinon : sur l'annonce, tout
                   sélectionner (Ctrl+A), copier (Ctrl+C), et coller ici.

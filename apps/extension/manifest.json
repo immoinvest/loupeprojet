@@ -1,11 +1,11 @@
 {
   "manifest_version": 3,
-  "name": "Loupe",
+  "name": "Deklic",
   "version": "0.1.0",
-  "description": "Lit l'annonce ouverte (LeBonCoin, SeLoger, Bien'ici, PAP, Logic-Immo) et ouvre son analyse dans Loupe. Rien ne quitte votre navigateur.",
+  "description": "Lit l'annonce ouverte (LeBonCoin, SeLoger, Bien'ici, PAP, Logic-Immo) et ouvre son analyse dans Deklic. Rien ne quitte votre navigateur.",
   "permissions": ["activeTab", "scripting"],
   "action": {
-    "default_title": "Analyser dans Loupe",
+    "default_title": "Analyser dans Deklic",
     "default_popup": "popup.html",
     "default_icon": {
       "16": "icones/16.png",

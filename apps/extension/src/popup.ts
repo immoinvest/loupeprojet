@@ -1,6 +1,6 @@
 /**
  * Popup de l'extension : reconnaît l'onglet actif, injecte le script de contenu au clic, puis
- * ouvre Loupe avec la capture dans le fragment d'URL. Aucune requête réseau ici non plus.
+ * ouvre Deklic avec la capture dans le fragment d'URL. Aucune requête réseau ici non plus.
  */
 import { urlDeCapture } from '@loupe/capture';
 
@@ -60,7 +60,7 @@ async function analyser(tabId: number): Promise<void> {
       bouton.disabled = false;
       return;
     }
-    afficher(`Lu : ${resumeCapture(lecture.data.capture)}. Ouverture de Loupe…`);
+    afficher(`Lu : ${resumeCapture(lecture.data.capture)}. Ouverture de Deklic…`);
     await chrome.tabs.create({ url: urlDeCapture(baseUrl(), lecture.data.capture) });
     window.close();
   } catch {

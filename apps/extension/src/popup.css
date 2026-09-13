@@ -1,14 +1,14 @@
-/* Tokens de la direction « Le guide » (ADR-004) : blanc chaud, indigo, encre. */
+/* Tokens Deklic (ADR-005) sur la base « Le guide » (ADR-004) : blanc chaud, encre, bleu électrique. */
 :root {
-  --fond: #fbfaf7;
+  --fond: #fffdf9;
   --surface: #ffffff;
-  --encre: #1e1d2b;
-  --encre-2: #4b4a5c;
-  --encre-3: #7a7989;
+  --encre: #23272f;
+  --encre-2: #4b5563;
+  --encre-3: #6b7280;
   --bordure: #e6e3dc;
-  --accent: #4f55d8;
-  --accent-fonce: #3d43c2;
-  --accent-fond: #eef0fc;
+  --accent: #2b4bf2;
+  --accent-fonce: #1f38c4;
+  --accent-fond: #f5f7ff;
 }
 
 * {
@@ -38,29 +38,19 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--accent);
 }
 
 .logo {
-  width: 22px;
-  height: 22px;
-  border: 3px solid var(--accent);
-  border-radius: 50%;
-  position: relative;
+  flex: none;
 }
 
-.logo::after {
-  content: '';
-  position: absolute;
-  right: -9px;
-  bottom: -8px;
-  width: 10px;
-  height: 3px;
-  background: var(--accent);
-  border-radius: 2px;
-  transform: rotate(45deg);
+/* Le mot de la marque se compose en Sora dans le logotype ; ici, une approximation sans police à charger. */
+.nom {
+  font-family: 'Sora', 'Outfit', 'Segoe UI', system-ui, sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.05em;
+  color: var(--accent);
 }
 
 .statut {

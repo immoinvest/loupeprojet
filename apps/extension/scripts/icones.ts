@@ -1,15 +1,43 @@
 /**
- * Icônes de l'extension générées au build : la loupe du favicon du web (cercle + manche, indigo
- * ADR-004) dessinée pixel par pixel et encodée en PNG sans dépendance. Aucun binaire versionné.
+ * Icônes de l'extension générées au build : l'icône d'app Deklic (ADR-005, `marque/logo/deklic-icone-app.svg`),
+ * maison blanche et trois éclats orange sur un carré bleu arrondi, dessinée pixel par pixel sur la grille
+ * de 64 de la marque et encodée en PNG sans dépendance. Aucun binaire versionné.
  */
 import { deflateSync } from 'node:zlib';
 
-const INDIGO: readonly [number, number, number] = [79, 85, 216];
-const VUE = 24; // même repère que apps/web/public/favicon.svg
-const CENTRE = 10.5;
-const RAYON = 6.5;
-const MANCHE_DEBUT = 15.5;
-const MANCHE_FIN = 21;
+type Couleur = readonly [number, number, number];
+
+const BLEU: Couleur = [43, 75, 242];
+const ORANGE: Couleur = [255, 122, 26];
+const BLANC: Couleur = [255, 255, 255];
+
+const GRILLE = 64;
+const RAYON_CARRE = 14;
+/** Maison : contour 4, jointures arrondies. */
+const MAISON: readonly (readonly [number, number])[] = [
+  [32, 22],
+  [50, 36],
+  [50, 56],
+  [14, 56],
+  [14, 36],
+];
+const EPAISSEUR_MAISON = 4;
+/** Éclats : trait 5, bouts arrondis. */
+const ECLATS: readonly (readonly [readonly [number, number], readonly [number, number]])[] = [
+  [
+    [32, 16],
+    [32, 6],
+  ],
+  [
+    [21, 19],
+    [14, 12],
+  ],
+  [
+    [43, 19],
+    [50, 12],
+  ],
+];
+const EPAISSEUR_ECLATS = 5;
 
 const TABLE_CRC = Uint32Array.from({ length: 256 }, (_, n) => {
   let c = n;
@@ -32,29 +60,81 @@ function bloc(type: string, donnees: Uint8Array): Buffer {
   return Buffer.concat([longueur, typeEtDonnees, crc]);
 }
 
-/** Distance d'un point au segment du manche (extrémités arrondies). */
-function distanceAuManche(u: number, v: number): number {
-  const dx = MANCHE_FIN - MANCHE_DEBUT;
-  const t = Math.max(
-    0,
-    Math.min(1, ((u - MANCHE_DEBUT) * dx + (v - MANCHE_DEBUT) * dx) / (2 * dx * dx)),
-  );
-  const px = MANCHE_DEBUT + t * dx;
-  const py = MANCHE_DEBUT + t * dx;
-  return Math.hypot(u - px, v - py);
+function distanceSegment(
+  px: number,
+  py: number,
+  [ax, ay]: readonly [number, number],
+  [bx, by]: readonly [number, number],
+): number {
+  const dx = bx - ax;
+  const dy = by - ay;
+  const t = Math.max(0, Math.min(1, ((px - ax) * dx + (py - ay) * dy) / (dx * dx + dy * dy)));
+  return Math.hypot(px - (ax + t * dx), py - (ay + t * dy));
 }
 
-/** Opacité (0 à 1) du pixel (x, y) d'une icône de `taille` pixels, avec anticrénelage. */
-function opacite(x: number, y: number, taille: number): number {
-  const pixel = VUE / taille;
-  const u = (x + 0.5) * pixel;
-  const v = (y + 0.5) * pixel;
-  const epaisseur = taille <= 32 ? 3.2 : 2.4;
-  const distance = Math.min(
-    Math.abs(Math.hypot(u - CENTRE, v - CENTRE) - RAYON),
-    distanceAuManche(u, v),
-  );
+function distanceMaison(px: number, py: number): number {
+  let d = Number.POSITIVE_INFINITY;
+  for (let i = 0; i < MAISON.length; i += 1) {
+    const a = MAISON[i];
+    const b = MAISON[(i + 1) % MAISON.length];
+    if (a !== undefined && b !== undefined) d = Math.min(d, distanceSegment(px, py, a, b));
+  }
+  return d;
+}
+
+function distanceEclats(px: number, py: number): number {
+  return Math.min(...ECLATS.map(([a, b]) => distanceSegment(px, py, a, b)));
+}
+
+/** Distance signée au carré arrondi qui remplit la grille (négative à l'intérieur). */
+function distanceCarreArrondi(px: number, py: number): number {
+  const demi = GRILLE / 2 - RAYON_CARRE;
+  const qx = Math.abs(px - GRILLE / 2) - demi;
+  const qy = Math.abs(py - GRILLE / 2) - demi;
+  return Math.hypot(Math.max(qx, 0), Math.max(qy, 0)) + Math.min(Math.max(qx, qy), 0) - RAYON_CARRE;
+}
+
+/** Couverture (0 à 1) d'un trait d'épaisseur donnée à cette distance, anticrénelée sur un pixel. */
+function couverture(distance: number, epaisseur: number, pixel: number): number {
   return Math.max(0, Math.min(1, (epaisseur / 2 - distance) / pixel + 0.5));
+}
+
+interface Rgba {
+  readonly r: number;
+  readonly g: number;
+  readonly b: number;
+  readonly a: number;
+}
+
+/** Compose `dessus` (opacité `alpha`) sur `dessous`, en alpha non prémultiplié. */
+function superposer(dessous: Rgba, dessus: Couleur, alpha: number): Rgba {
+  const a = alpha + dessous.a * (1 - alpha);
+  if (a === 0) return { r: 0, g: 0, b: 0, a: 0 };
+  const melange = (haut: number, bas: number): number =>
+    (haut * alpha + bas * dessous.a * (1 - alpha)) / a;
+  return {
+    r: melange(dessus[0], dessous.r),
+    g: melange(dessus[1], dessous.g),
+    b: melange(dessus[2], dessous.b),
+    a,
+  };
+}
+
+function pixel(x: number, y: number, taille: number): Rgba {
+  const unite = GRILLE / taille;
+  const u = (x + 0.5) * unite;
+  const v = (y + 0.5) * unite;
+  const fond = superposer(
+    { r: 0, g: 0, b: 0, a: 0 },
+    BLEU,
+    Math.max(0, Math.min(1, -distanceCarreArrondi(u, v) / unite + 0.5)),
+  );
+  const avecMaison = superposer(
+    fond,
+    BLANC,
+    couverture(distanceMaison(u, v), EPAISSEUR_MAISON, unite),
+  );
+  return superposer(avecMaison, ORANGE, couverture(distanceEclats(u, v), EPAISSEUR_ECLATS, unite));
 }
 
 /** PNG RGBA d'une icône carrée de `taille` pixels. */
@@ -64,11 +144,12 @@ export function icone(taille: number): Buffer {
   for (let y = 0; y < taille; y += 1) {
     lignes[y * largeurLigne] = 0; // filtre « None »
     for (let x = 0; x < taille; x += 1) {
+      const p = pixel(x, y, taille);
       const position = y * largeurLigne + 1 + x * 4;
-      lignes[position] = INDIGO[0];
-      lignes[position + 1] = INDIGO[1];
-      lignes[position + 2] = INDIGO[2];
-      lignes[position + 3] = Math.round(opacite(x, y, taille) * 255);
+      lignes[position] = Math.round(p.r);
+      lignes[position + 1] = Math.round(p.g);
+      lignes[position + 2] = Math.round(p.b);
+      lignes[position + 3] = Math.round(p.a * 255);
     }
   }
   const entete = Buffer.alloc(13);

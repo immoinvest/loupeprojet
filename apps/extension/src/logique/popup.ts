@@ -27,7 +27,7 @@ export function etatPourUrl(url: string | undefined): EtatOnglet {
   return {
     statut: 'annonce',
     portail: annonce.portail,
-    message: `Annonce ${PORTAILS[annonce.portail]} reconnue. Un clic, et Loupe la lit.`,
+    message: `Annonce ${PORTAILS[annonce.portail]} reconnue. Un clic, et Deklic la lit.`,
   };
 }
 
@@ -53,9 +53,9 @@ export function messagePourRaison(raison: RaisonLecture): string {
     case 'hors-annonce':
       return `Cette page n'est pas une annonce. Ouvrez une annonce ${PORTAILS_LISTE}.`;
     case 'portail-sans-regles':
-      return "Ce portail n'a pas encore de règles de lecture. Collez le texte de l'annonce dans Loupe, ça marche aussi.";
+      return "Ce portail n'a pas encore de règles de lecture. Collez le texte de l'annonce dans Deklic, ça marche aussi.";
   }
 }
 
 export const MESSAGE_LECTURE_IMPOSSIBLE =
-  "Impossible de lire cette page. Collez le texte de l'annonce dans Loupe, ça marche aussi.";
+  "Impossible de lire cette page. Collez le texte de l'annonce dans Deklic, ça marche aussi.";
