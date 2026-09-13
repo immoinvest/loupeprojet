@@ -1,37 +1,34 @@
 {
-  "feature_slug": "identite-visuelle",
-  "title": "Identité de marque Deklic : dossier marque/ (logos SVG, favicon, icônes, image de partage, palette, guide), ADR-005, application renommée (titre, favicon, manifeste, couleurs, logotype, textes)",
+  "feature_slug": "worker-socle",
+  "title": "Socle du Worker : Hono sur Cloudflare Workers, proxy des données publiques avec cache KV, limite de débit, géocodage Géoplateforme",
   "started_at": "2026-09-13T00:00:00Z",
   "current_step": "push",
-  "scope": "marque/, apps/web/public, apps/web/index.html, apps/web/src/index.css, apps/web/src/marque/Logo.tsx, apps/web/src/coque/Sidebar.tsx, textes, docs",
-  "branch": "feat/identite-visuelle",
+  "scope": "apps/worker (app, dependances, proxy/cache, proxy/debit, services/geocodage), wrangler.toml, seuils de couverture",
+  "branch": "feat/worker-socle",
   "base": "master (768c556)",
-  "worktree": "C:/Users/errei/Claude/loupeprojet-identite (le dossier principal servait une autre feature)",
   "steps": {
     "discovery": {
       "status": "completed",
-      "output": "deux tournées de noms et un benchmark de 11 marques (canevas liés dans l'ADR-005) ; Pierre a écarté Proprio puis choisi Deklic"
+      "output": ".product/features/worker-socle-discovery.md"
     },
-    "implement": { "status": "completed", "stories_completed": 3, "stories_total": 3 },
+    "implement": { "status": "completed", "stories_completed": 5, "stories_total": 5 },
     "refactor": {
       "status": "completed",
-      "note": "le mot du logo est en tracés (fontkit + Sora Bold) : aucune police à charger ; un seul composant Logo.tsx, généré depuis les mêmes tracés que marque/logo/"
+      "note": "dépendances injectées (cache, limiteur, fetcher, horloge, journal) ; reponseErreur sans contexte Hono ; definirService ferme les types"
     },
     "qa_tests": {
       "status": "completed",
-      "note": "aucune logique nouvelle : les 277 tests existants couvrent la barre latérale et les textes ; lint, typecheck, format, build verts"
+      "note": "29 tests Node via app.request() : routes, CORS, débit, validation, cache HIT/MISS/expiration/panne, statuts amont, normalisation Géoplateforme, dépendances, journal"
     },
     "security": {
       "status": "completed",
-      "note": "fichiers statiques uniquement ; aucune donnée, aucune clé, aucun script externe ajouté"
+      "note": "liste blanche de services et de paramètres, délai amont, CORS restreint, aucune IP ni adresse journalisée, aucune clé côté client (le LLM viendra côté Worker)"
     },
     "push": { "status": "in_progress" }
   },
   "decisions": {
-    "nom": "Deklic (le déclic), écrit avec un K ; noms internes inchangés (@loupe/moteur, dépôt loupeprojet, clé loupe.projets.v1)",
-    "couleurs": "accent #2B4BF2 (remplace l'indigo #4F55D8), flash #FF7A1A réservé au logo et aux célébrations, jamais sémantique",
-    "typographie": "logotype Sora Bold en tracés ; interface Outfit + Nunito Sans inchangée",
-    "domaine": "à acheter par Pierre après recherche INPI : deklic.io / deklic.ai / mondeklic.fr / deklic-app.fr libres le 13/09/2026 ; og:image pointe sur loupeprojet.pages.dev en attendant"
-  },
-  "self_review": "Risques : homonymes Deklic (média, conseil) non vérifiés à l'INPI ; le changement d'accent touche toute l'app sans maquette dédiée (vérifié visuellement dans le build) ; les PNG sont des captures d'Edge sans fenêtre (nets aux tailles produites, à régénérer si le SVG change)."
+    "tests": "Vitest Node + doubles plutôt que @cloudflare/vitest-pool-workers ; les bindings réels sont exercés au déploiement",
+    "debit": "binding Rate Limiting Cloudflare (60/min/IP) derrière une interface LimiteurDebit",
+    "sessions_paralleles": "fiches dans .product/sessions/ (extension, referentiels, garder, e2e-playwright) ; chaque session tient son état dans .product/pipeline/<slug>.json"
+  }
 }

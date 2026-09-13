@@ -15,7 +15,9 @@ loupeprojet/
 ├── vitest.config.ts        projets = packages/*, apps/*
 ├── .github/workflows/ci.yml  Node 22 : npm ci → lint → format:check → typecheck → test:coverage → build
 ├── packages/moteur/        ← livré (feature moteur-calcul)
-├── apps/                   ← web, worker, extension (features suivantes)
+├── apps/web/               ← livré (socle, nouveau projet, hypothèses, onglets)
+├── apps/worker/            ← socle livré (feature worker-socle)
+├── apps/extension/         ← à venir (fiche .product/sessions/extension.md)
 └── data/                   ← scripts de pré-agrégation (feature référentiels)
 ```
 
@@ -50,6 +52,10 @@ tests/                       un dossier par module + integration/ ; 204 tests ; 
 
 Voir `architecture/web-socle.md`. React 19 + Vite 7 + Tailwind v4 (`@theme` = tokens ADR-004), React Router 7 déclaratif (`useRoutes`), stockage local Zod (`loupe.projets.v1`), textes des codes du moteur dans `src/textes/`, Vitest + Testing Library (jsdom). Cloudflare Pages : `wrangler.toml`, `public/_redirects`. Couverture 100 % exigée sur `stockage/`, `formatage/`, `textes/` ; les écrans sont couverts par des tests de rendu et de navigation (`AppEnMemoire`).
 
+## `apps/worker` (socle livré)
+
+Voir `architecture/worker-socle.md`. Hono 4 sur Cloudflare Workers (`wrangler.toml` : KV `KV_CACHE`, binding Rate Limiting `LIMITEUR` 60/min/IP, `[observability]`), dépendances injectées (`creerApp(deps)`), `GET /health`, `GET /proxy/:service` avec liste blanche de services (`services/`), cache KV par empreinte des paramètres validés, réponses amont validées et normalisées au contrat Loupe, erreurs en codes. Premier service : géocodage Géoplateforme. Tests Vitest en Node via `app.request()` et doubles ; couverture 100 % sur `src/**`. Build = `wrangler deploy --dry-run`.
+
 ## Conventions transverses
 
 - Zod à chaque frontière (entrée utilisateur, sortie LLM, réponse d'API, env). Types inférés (`z.infer`, `z.input`).
@@ -76,6 +82,6 @@ Voir `architecture/web-socle.md`. React 19 + Vite 7 + Tailwind v4 (`@theme` = to
 | ----------------- | ------------------------------------------ | -------------------------------------- |
 | Unitaires moteur  | Vitest                                     | `packages/moteur/tests/<module>`       |
 | Intégration       | Vitest                                     | `packages/moteur/tests/integration`    |
-| Worker (à venir)  | Vitest + `@cloudflare/vitest-pool-workers` | `apps/worker/tests/`                   |
+| Worker            | Vitest (Node) + `app.request()` et doubles | `apps/worker/tests/`                   |
 | E2E web (à venir) | Playwright                                 | `apps/web/e2e/`                        |
 | Annonce témoin    | GitHub Action quotidienne (à venir)        | `.github/workflows/annonce-temoin.yml` |
