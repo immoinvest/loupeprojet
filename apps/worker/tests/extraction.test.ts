@@ -51,7 +51,7 @@ describe('prompt', () => {
     expect(m[0]?.content).toContain('chargesCoproMois');
     expect(m[0]?.content).toContain('null');
     expect(m[1]).toEqual({ role: 'user', content: 'texte annonce' });
-    expect(VERSION_PROMPT).toBe(1);
+    expect(VERSION_PROMPT).toBe(2);
   });
 });
 

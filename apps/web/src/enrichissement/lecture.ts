@@ -28,6 +28,8 @@ const CLES = [
   'taxeFonciere',
   'honorairesAgence',
   'meuble',
+  'etat',
+  'exterieur',
 ] as const satisfies readonly (keyof ChampsExtraits & keyof ChampsIa)[];
 
 /** Le modèle lit mieux le texte libre ; les règles comblent ce qu'il n'a pas trouvé. */
@@ -35,7 +37,7 @@ export function fusionnerChamps(regles: ChampsExtraits, ia: ChampsIa): ChampsExt
   const champs: Record<string, unknown> = { ...regles };
   for (const cle of CLES) {
     const valeur = ia[cle];
-    if (valeur !== null) champs[cle] = valeur;
+    if (valeur !== null && valeur !== undefined) champs[cle] = valeur;
   }
   return champs;
 }
