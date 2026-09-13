@@ -24,7 +24,11 @@
       "status": "completed",
       "note": "messages validés par Zod, source et origine vérifiées côté page et pont, demandes à l'arrière-plan acceptées de cette extension seulement ; chargeur limité à l'origine du portail ; aucune requête vers nos serveurs depuis l'extension ; permissions d'hôte limitées aux cinq portails"
     },
-    "push": { "status": "in_progress" }
+    "push": {
+      "status": "completed",
+      "pr": "https://github.com/immoinvest/loupeprojet/pull/23",
+      "note": "auto-merge armé ; master (comptes) fusionné avant la PR"
+    }
   },
   "decisions": {
     "releve": "structures relevées sur de vraies annonces le 13/09/2026 dans le Chrome de l'utilisateur ; SeLoger et Logic-Immo ont changé d'adresses (identifiants alphanumériques) et partagent __UFRN_LIFECYCLE_SERVERREQUEST__ ; Bien'ici ne sert rien dans le HTML (données /realEstateAd.json)",
