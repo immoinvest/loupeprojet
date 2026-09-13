@@ -9,6 +9,8 @@ export {
 export {
   annonceDepuisCapture,
   champsDepuisCapture,
+  champsStructures,
+  importerCapture,
   lireFragmentCapture,
   type CaptureImportee,
   type LectureFragment,

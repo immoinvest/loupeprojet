@@ -1,4 +1,4 @@
-import { extraireChamps, type ChampsExtraits } from '@/annonces';
+import { extraireChamps, type CaptureImportee, type ChampsExtraits } from '@/annonces';
 
 import type { ClientWorker } from './client';
 import type { ChampsIa } from './contrat';
@@ -51,4 +51,39 @@ export async function lireAnnonce(texte: string, client: ClientWorker): Promise<
   return ia.ok
     ? { champs: fusionnerChamps(regles, ia.valeur), mode: 'ia' }
     : { champs: regles, mode: 'regles' };
+}
+
+/** Les champs que le texte donne souvent et que les données des portails oublient. */
+const CHAMPS_DU_TEXTE = [
+  'etage',
+  'ascenseur',
+  'dpe',
+  'annee',
+  'chargesCoproMois',
+  'taxeFonciere',
+  'honorairesAgence',
+] as const satisfies readonly (keyof ChampsExtraits)[];
+
+export interface CaptureCompletee {
+  readonly capture: CaptureImportee;
+  /** `ia` quand le modèle a complété la lecture, `null` sinon (rien à compléter, ou Worker indisponible). */
+  readonly mode: ModeLecture | null;
+}
+
+/**
+ * Après une lecture de la page par l'extension : s'il manque des champs que le texte donne souvent,
+ * l'IA lit la description. Les données de la page restent prioritaires, l'IA comble les trous.
+ */
+export async function completerAvecIa(
+  importee: CaptureImportee,
+  client: ClientWorker,
+): Promise<CaptureCompletee> {
+  const manque = CHAMPS_DU_TEXTE.some((cle) => importee.champs[cle] === undefined);
+  if (importee.description === undefined || !manque) return { capture: importee, mode: null };
+  const lecture = await lireAnnonce(importee.description, client);
+  if (lecture.mode !== 'ia') return { capture: importee, mode: null };
+  return {
+    capture: { ...importee, champs: { ...lecture.champs, ...importee.champsPage } },
+    mode: 'ia',
+  };
 }

@@ -57,7 +57,7 @@ export async function enrichirSaisie(
   const marche = await client.marche({
     codeInsee,
     codePostal: saisie.codePostal,
-    type: 'appartement',
+    type: saisie.typeBien ?? 'appartement',
     pieces: saisie.pieces,
   });
   return marche.ok ? marcheDepuisReponse(marche.valeur) : null;
