@@ -11,16 +11,25 @@ import {
 import {
   IndexDvfDepartementSchema,
   IndexDvfNationalSchema,
+  TendanceDvfDepartementSchema,
   type IndexDvfDepartement,
   type StatistiquesCommune,
   type Vente,
 } from '../../schemas/dvf.ts';
 import { ecrireMillesimeCourant } from '../courant.ts';
-import { ANNEES_LUES, FENETRE_MOIS, FILTRES_DVF, SOURCE_DVF, urlDvf } from './constantes.ts';
+import {
+  ANNEES_LUES,
+  FENETRE_MOIS,
+  FILTRES_DVF,
+  SEUIL_VENTES_SEMESTRE,
+  SOURCE_DVF,
+  urlDvf,
+} from './constantes.ts';
 import { csvDesVentes } from './csv-sortie.ts';
 import { dansFenetre, fenetreDesVentes } from './fenetre.ts';
 import { regrouperParMutation } from './mutations.ts';
 import { indexDesCommunes } from './statistiques.ts';
+import { tendanceDesVentes } from './tendance.ts';
 import { MOTIFS_EXCLUSION, venteDepuisMutation, type MotifExclusion } from './vente.ts';
 
 export interface OptionsDvf {
@@ -135,6 +144,16 @@ async function traiterDepartement(
     communes: indexDesCommunes(retenues),
   });
   await ecrireJson(join(dossier, 'index', `${departement}.json`), index);
+  // La tendance lit toutes les ventes collectées (cinq ans), pas seulement la fenêtre publiée.
+  const tendance = TendanceDvfDepartementSchema.parse({
+    genereLe: contexte.horloge().toISOString(),
+    millesime: String(millesime),
+    source: SOURCE_DVF,
+    departement,
+    seuilVentes: SEUIL_VENTES_SEMESTRE,
+    ...tendanceDesVentes(collecte.ventesParCommune, SEUIL_VENTES_SEMESTRE),
+  });
+  await ecrireJson(join(dossier, 'tendance', `${departement}.json`), tendance);
   contexte.journal.info('DVF : département publié', {
     departement,
     fenetre,
