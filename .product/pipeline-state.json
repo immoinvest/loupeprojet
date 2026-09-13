@@ -1,33 +1,33 @@
 {
-  "feature_slug": "hypotheses-editables",
-  "title": "Onglet Hypothèses : édition de toutes les hypothèses avec recalcul instantané, validation Zod, provenance, marché saisissable",
+  "feature_slug": "onglets-detail",
+  "title": "Onglets Fiscalité (4 régimes, frise, année par année), Revente (horizons 5/10/15/20 ans, plus-value détaillée), Visite (points de vigilance cochables)",
   "started_at": "2026-09-13T00:00:00Z",
   "current_step": "push",
-  "scope": "apps/web/src/hypotheses, écran Hypotheses, ProjetsContext.mettreAJour",
-  "branch": "feat/hypotheses-editables",
-  "base": "master (14e1c08)",
+  "scope": "apps/web/src/ecrans/{Fiscalite,Revente,Visite}.tsx, analyses/revente, textes (explicationRegime, categorieVigilance)",
+  "branch": "feat/onglets-detail",
+  "base": "master (2916703)",
   "steps": {
     "discovery": {
       "status": "completed",
-      "output": ".product/features/hypotheses-editables-discovery.md"
+      "output": ".product/features/onglets-detail-discovery.md"
     },
     "implement": { "status": "completed", "stories_completed": 5, "stories_total": 5 },
     "refactor": {
       "status": "completed",
-      "note": "champ générique piloté par descripteurs ; aucune logique métier dans l'écran"
+      "note": "les deux interactions (régime, horizon) passent par appliquerSaisie ; aucune formule dans les écrans"
     },
     "qa_tests": {
       "status": "completed",
-      "note": "chemins, conversion, descripteurs, appliquerSaisie (courte durée, DVF), écran (recalcul, erreurs, différé refusé, bascule courte durée)"
+      "note": "variantesRevente, explicationRegime (4 cas), catégories des 14 codes, écrans (retenir un régime, changer d'horizon, plus-value imposable, cases cochées)"
     },
     "security": {
       "status": "completed",
-      "note": "toute saisie passe par ProjetSchema avant enregistrement"
+      "note": "aucune saisie libre nouvelle : régime et horizon sont des valeurs fermées validées par ProjetSchema"
     },
     "push": { "status": "in_progress" }
   },
   "decisions": {
-    "recalcul": "À chaque frappe, calcul complet (~35 ms) ; une valeur invalide n'est jamais enregistrée, la dernière valeur valide reste en vigueur",
-    "pourcentages": "Saisis en « 3,35 », stockés en 0,0335"
+    "horizons": "5/10/15/20 ans recalculés sans scénarios (~5 ms chacun), mémoïsés sur le projet ; cliquer un horizon modifie l'hypothèse revente.annees",
+    "cases_visite": "état local à l'écran, non persisté (dit à l'utilisateur) ; à persister quand le projet aura des notes"
   }
 }
