@@ -1,0 +1,84 @@
+{
+  "version": "pap-2026-09-13",
+  "portail": "pap",
+  "champs": {
+    "prix": [
+      { "source": "jsonld", "chemin": "offers.price", "typeLd": "Product", "type": "montant" },
+      { "source": "css", "selecteur": "h1.item-title .item-price", "type": "montant" }
+    ],
+    "surface": [
+      {
+        "source": "jsonld",
+        "chemin": "additionalProperty[name=Surface].value",
+        "typeLd": "Product",
+        "type": "nombre"
+      },
+      {
+        "source": "css",
+        "selecteur": "ul.item-tags li",
+        "regex": "(\\d+(?:[,.]\\d+)?)\\s*m²",
+        "type": "nombre"
+      }
+    ],
+    "pieces": [
+      {
+        "source": "jsonld",
+        "chemin": "additionalProperty[name=Nombre de pièces].value",
+        "typeLd": "Product",
+        "type": "entier"
+      },
+      {
+        "source": "css",
+        "selecteur": "ul.item-tags li",
+        "regex": "(\\d+)\\s*pièces?",
+        "type": "entier"
+      }
+    ],
+    "chambres": [
+      {
+        "source": "css",
+        "selecteur": "ul.item-tags li",
+        "regex": "(\\d+)\\s*chambres?",
+        "type": "entier"
+      }
+    ],
+    "ville": [
+      {
+        "source": "jsonld",
+        "chemin": "address.addressLocality",
+        "typeLd": "Product",
+        "type": "texte"
+      },
+      {
+        "source": "css",
+        "selecteur": ".item-description h2",
+        "regex": "^(.+?)\\s*\\(\\d{5}\\)",
+        "type": "texte"
+      }
+    ],
+    "codePostal": [
+      {
+        "source": "jsonld",
+        "chemin": "address.postalCode",
+        "typeLd": "Product",
+        "type": "codePostal"
+      },
+      { "source": "css", "selecteur": ".item-description h2", "type": "codePostal" }
+    ],
+    "adresse": [
+      {
+        "source": "jsonld",
+        "chemin": "address.streetAddress",
+        "typeLd": "Product",
+        "type": "texte"
+      }
+    ],
+    "dpe": [{ "source": "css", "selecteur": ".energy-indice li.active", "type": "classe" }],
+    "ges": [{ "source": "css", "selecteur": ".ges-indice li.active", "type": "classe" }],
+    "description": [
+      { "source": "jsonld", "chemin": "description", "typeLd": "Product", "type": "texte" },
+      { "source": "css", "selecteur": ".item-description p", "type": "texte" },
+      { "source": "meta", "nom": "og:description", "type": "texte" }
+    ]
+  }
+}
