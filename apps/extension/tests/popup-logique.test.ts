@@ -55,5 +55,9 @@ describe('messagePourRaison', () => {
   it('a une phrase pour chaque raison', () => {
     expect(messagePourRaison('hors-annonce')).toMatch(/pas une annonce/);
     expect(messagePourRaison('portail-sans-regles')).toMatch(/Collez le texte/);
+    expect(messagePourRaison('permission')).toMatch(/Autoriser la lecture automatique/);
+    expect(messagePourRaison('chargement')).toMatch(/pas pu être chargée/);
+    expect(messagePourRaison('vide')).toMatch(/Rien n'a pu être lu/);
+    expect(messagePourRaison('occupe')).toMatch(/déjà en cours/);
   });
 });

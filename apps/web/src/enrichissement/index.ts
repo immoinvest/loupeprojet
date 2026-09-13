@@ -12,6 +12,7 @@ export {
 } from './client';
 export { type ChampsIa, type ReponseMarche, type ResultatGeocodage } from './contrat';
 export {
+  completerAvecIa,
   fusionnerChamps,
   lireAnnonce,
   LONGUEUR_MIN_IA,

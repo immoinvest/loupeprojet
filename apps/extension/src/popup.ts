@@ -7,7 +7,9 @@ import { urlDeCapture } from '@loupe/capture';
 import { baseUrl } from './config';
 import { ResultatLectureSchema } from './logique/lire-page';
 import {
+  MESSAGE_AUTORISEE,
   MESSAGE_LECTURE_IMPOSSIBLE,
+  ORIGINES_PORTAILS,
   etatPourUrl,
   messagePourRaison,
   resumeCapture,
@@ -26,9 +28,25 @@ function element(id: string): HTMLElement {
 const statut = element('statut');
 const bouton = element('analyser') as HTMLButtonElement;
 const lienLoupe = element('ouvrir') as HTMLAnchorElement;
+const autoriser = element('autoriser') as HTMLButtonElement;
 
 function afficher(message: string): void {
   statut.textContent = message;
+}
+
+/**
+ * La lecture automatique (lien collé dans Deklic) a besoin d'ouvrir et lire les cinq portails.
+ * Chrome l'accorde à l'installation ; Firefox demande l'accord de l'utilisateur, d'où ce bouton.
+ */
+async function proposerAutorisation(): Promise<void> {
+  const origines = [...ORIGINES_PORTAILS];
+  autoriser.hidden = await chrome.permissions.contains({ origins: origines });
+  autoriser.addEventListener('click', () => {
+    void chrome.permissions.request({ origins: origines }).then((accordee) => {
+      autoriser.hidden = accordee;
+      if (accordee) afficher(MESSAGE_AUTORISEE);
+    });
+  });
 }
 
 /** Injecte le script de contenu et récupère ce qu'il a déposé (valeur de complétion, sinon relecture). */
@@ -71,6 +89,7 @@ async function analyser(tabId: number): Promise<void> {
 
 async function demarrer(): Promise<void> {
   lienLoupe.href = baseUrl();
+  await proposerAutorisation();
   const [onglet] = await chrome.tabs.query({ active: true, currentWindow: true });
   const etat = etatPourUrl(onglet?.url);
   afficher(etat.message);

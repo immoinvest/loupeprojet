@@ -58,6 +58,12 @@ export const ExtracteurSchema = z.discriminatedUnion('source', [
     ...OPTIONS_COMMUNES,
   }),
   z.object({
+    /** Les données de l'annonce chargées par la page elle-même (voir `donnees` des règles). */
+    source: z.literal('donnees'),
+    chemin: CheminSchema,
+    ...OPTIONS_COMMUNES,
+  }),
+  z.object({
     source: z.literal('meta'),
     /** `property` ou `name` de la balise `<meta>`, ex. `og:description`. */
     nom: z.string().regex(/^[\w:.-]+$/, 'nom de meta'),
@@ -79,6 +85,19 @@ export type Extracteur = z.infer<typeof ExtracteurSchema>;
 export const NomChampCaptureSchema = ChampsCaptureSchema.keyof();
 
 /**
+ * Données qu'une page d'annonce charge elle-même après coup (Bien'ici n'écrit rien dans le HTML) :
+ * une adresse **relative** au portail, jamais un autre site, où `{id}` est remplacé par
+ * l'identifiant de l'annonce. La lecture reste dans le navigateur de l'utilisateur.
+ */
+export const DonneesPortailSchema = z.object({
+  url: z
+    .string()
+    .regex(/^\/[^/\\]/, 'adresse relative au portail')
+    .refine((u) => u.includes('{id}'), 'doit contenir {id}'),
+});
+export type DonneesPortail = z.infer<typeof DonneesPortailSchema>;
+
+/**
  * Les règles d'un portail : pour chaque champ, des extracteurs essayés dans l'ordre ; le premier
  * qui donne une valeur valide gagne. Fichier versionné `<portail>-AAAA-MM-JJ`, pensé pour être
  * servi un jour depuis R2 sans republier l'extension.
@@ -87,6 +106,7 @@ export const ReglesPortailSchema = z
   .object({
     version: z.string().regex(/^[a-z]+-\d{4}-\d{2}-\d{2}$/, 'version <portail>-AAAA-MM-JJ'),
     portail: PortailSchema,
+    donnees: DonneesPortailSchema.optional(),
     champs: z.partialRecord(NomChampCaptureSchema, z.array(ExtracteurSchema).min(1)),
   })
   .refine((r) => r.version.startsWith(`${r.portail}-`), {

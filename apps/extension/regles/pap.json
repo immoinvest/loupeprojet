@@ -6,6 +6,24 @@
       { "source": "jsonld", "chemin": "offers.price", "typeLd": "Product", "type": "montant" },
       { "source": "css", "selecteur": "h1.item-title .item-price", "type": "montant" }
     ],
+    "typeBien": [
+      {
+        "source": "jsonld",
+        "chemin": "additionalProperty[name=Type de bien].value",
+        "typeLd": "Product",
+        "regex": "^appartement",
+        "type": "texte",
+        "valeur": "appartement"
+      },
+      {
+        "source": "jsonld",
+        "chemin": "additionalProperty[name=Type de bien].value",
+        "typeLd": "Product",
+        "regex": "^maison",
+        "type": "texte",
+        "valeur": "maison"
+      }
+    ],
     "surface": [
       {
         "source": "jsonld",

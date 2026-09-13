@@ -1,8 +1,12 @@
-import type { ClasseEnergie, ModeLocation } from '@loupe/moteur';
+import type { ClasseEnergie, ModeLocation, TypeBien } from '@loupe/moteur';
 
 import type { AnnonceResolue, ChampsExtraits, Provenance, SaisieProjet } from '@/annonces';
 
 export type Cle =
+  | 'typeBien'
+  | 'ges'
+  | 'lotsCopro'
+  | 'coproEnProcedure'
   | 'prix'
   | 'honorairesAgence'
   | 'surface'
@@ -34,6 +38,10 @@ export interface ValeursInitiales {
 }
 
 const VIDE: Valeurs = {
+  typeBien: 'appartement',
+  ges: '',
+  lotsCopro: '',
+  coproEnProcedure: '',
   prix: '',
   honorairesAgence: '',
   surface: '',
@@ -65,6 +73,10 @@ export function valeursDepuisChamps(champs: ChampsExtraits): ValeursInitiales {
     valeurs[cle] = typeof v === 'boolean' ? (v ? 'oui' : 'non') : String(v);
     provenance[cle] = 'annonce';
   };
+  poser('typeBien', champs.typeBien);
+  poser('ges', champs.ges);
+  poser('lotsCopro', champs.lotsCopro);
+  poser('coproEnProcedure', champs.coproEnProcedure);
   poser('prix', champs.prix);
   poser('honorairesAgence', champs.honorairesAgence);
   poser('surface', champs.surface);
@@ -118,6 +130,10 @@ export function versSaisie(
 ): SaisieProjet {
   const opt = (cle: Cle): number | undefined => nombre(v[cle]);
   return {
+    typeBien: v.typeBien as TypeBien,
+    ges: v.ges === '' ? undefined : (v.ges as ClasseEnergie),
+    lotsCopro: opt('lotsCopro'),
+    coproEnProcedure: v.coproEnProcedure === '' ? undefined : v.coproEnProcedure === 'oui',
     prix: nombre(v.prix) ?? 0,
     honorairesAgence: opt('honorairesAgence'),
     surface: nombre(v.surface) ?? 0,

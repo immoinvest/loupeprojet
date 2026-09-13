@@ -6,6 +6,8 @@ Format : `- [ ] slug — titre — date — scope`
 
 - [ ] enrichissement-marche — le web appelle le Worker : lecture de l'annonce par l'IA (règles en repli), puis à la création géocodage et `GET /marche` (médiane et quartiles DVF de l'arrondissement ou de la commune, loyer ANIL, zone ABC lus sur R2) → bloc `marche` du projet, provenance « donnée publique » — 2026-09-13 — `apps/worker/src/marche`, `apps/web/src/enrichissement`, `NouveauProjet.tsx` — PR #21 (Worker déployé et vérifié en production)
 
+- [ ] lecture-auto — coller le lien suffit : Nouveau projet demande à l'extension de lire l'annonce dans un onglet du navigateur (caché, puis affiché si besoin), l'IA complète les trous du texte ; règles des cinq portails réécrites d'après les pages réelles du 13/09/2026 (nouvelles adresses SeLoger et Logic-Immo, état `__UFRN_LIFECYCLE_SERVERREQUEST__`, données Bien'ici `/realEstateAd.json`) ; type de bien, GES, lots et procédure de copropriété dans le formulaire — 2026-09-13 — `packages/capture`, `apps/extension`, `apps/web/src/{annonces,enrichissement/lecture.ts,ecrans/NouveauProjet.tsx,ecrans/nouveau-projet,ecrans/FormulaireProjet.tsx}` — PR #23
+
 ## À venir
 
 Chaîne serveur (session principale, en série) :

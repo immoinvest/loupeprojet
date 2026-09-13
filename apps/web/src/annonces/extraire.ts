@@ -1,7 +1,14 @@
-import type { ClasseEnergie } from '@loupe/moteur';
+import type { ClasseEnergie, TypeBien } from '@loupe/moteur';
 
-/** Champs qu'on sait lire dans le texte d'une annonce, par règles. Absent = non trouvé. */
+/**
+ * Champs lus dans une annonce (texte par règles, IA, ou données de la page lues par l'extension).
+ * Absent = non trouvé. Type, GES, lots et procédure ne viennent que des données de la page.
+ */
 export interface ChampsExtraits {
+  readonly typeBien?: TypeBien;
+  readonly ges?: ClasseEnergie;
+  readonly lotsCopro?: number;
+  readonly coproEnProcedure?: boolean;
   readonly prix?: number;
   readonly surface?: number;
   readonly pieces?: number;

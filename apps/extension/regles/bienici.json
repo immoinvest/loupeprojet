@@ -1,24 +1,30 @@
 {
   "version": "bienici-2026-09-13",
   "portail": "bienici",
+  "donnees": { "url": "/realEstateAd.json?id={id}" },
   "champs": {
     "prix": [
-      { "source": "jsonld", "chemin": "offers.price", "type": "montant" },
+      { "source": "donnees", "chemin": "price", "type": "montant" },
+      { "source": "meta", "nom": "og:title", "regex": "(\\d[\\d\\s.]*)\\s*€", "type": "montant" }
+    ],
+    "typeBien": [
       {
-        "source": "css",
-        "selecteur": ".ad-price__the-price, [class*=\"ad-price\"], [class*=\"price\"]",
-        "regex": "(\\d[\\d\\s.]*)\\s*€",
-        "type": "montant"
+        "source": "donnees",
+        "chemin": "propertyType",
+        "regex": "^flat$",
+        "type": "texte",
+        "valeur": "appartement"
+      },
+      {
+        "source": "donnees",
+        "chemin": "propertyType",
+        "regex": "^house$",
+        "type": "texte",
+        "valeur": "maison"
       }
     ],
     "surface": [
-      { "source": "jsonld", "chemin": "floorSize.value", "type": "nombre" },
-      {
-        "source": "css",
-        "selecteur": ".allDetails .labelInfo, [class*=\"details\"] li, h1",
-        "regex": "(\\d+(?:[,.]\\d+)?)\\s*m²",
-        "type": "nombre"
-      },
+      { "source": "donnees", "chemin": "surfaceArea", "type": "nombre" },
       {
         "source": "meta",
         "nom": "og:title",
@@ -27,99 +33,32 @@
       }
     ],
     "pieces": [
-      { "source": "jsonld", "chemin": "numberOfRooms", "type": "entier" },
-      {
-        "source": "css",
-        "selecteur": ".allDetails .labelInfo, [class*=\"details\"] li, h1",
-        "regex": "(\\d+)\\s*pièces?",
-        "type": "entier"
-      },
+      { "source": "donnees", "chemin": "roomsQuantity", "type": "entier" },
       { "source": "meta", "nom": "og:title", "regex": "(\\d+)\\s*pièces?", "type": "entier" }
     ],
-    "chambres": [
-      { "source": "jsonld", "chemin": "numberOfBedrooms", "type": "entier" },
-      {
-        "source": "css",
-        "selecteur": ".allDetails .labelInfo, [class*=\"details\"] li",
-        "regex": "(\\d+)\\s*chambres?",
-        "type": "entier"
-      }
-    ],
-    "etage": [
-      {
-        "source": "css",
-        "selecteur": ".allDetails .labelInfo, [class*=\"details\"] li",
-        "regex": "(\\d+)\\s*(?:er|e|ème|eme)?\\s*étage|(?:rez[-\\s]de[-\\s]chauss[ée]e|RDC)",
-        "type": "etage"
-      }
-    ],
-    "ascenseur": [
-      {
-        "source": "css",
-        "selecteur": ".allDetails .labelInfo, [class*=\"details\"] li",
-        "regex": "^sans\\s+ascenseur$",
-        "type": "booleen",
-        "valeur": false
-      },
-      {
-        "source": "css",
-        "selecteur": ".allDetails .labelInfo, [class*=\"details\"] li",
-        "regex": "^ascenseur$",
-        "type": "booleen",
-        "valeur": true
-      }
-    ],
-    "dpe": [
-      {
-        "source": "css",
-        "selecteur": ".dpe-line__classification span[class*=\"active\"], [class*=\"dpe\"] [class*=\"active\"]",
-        "regex": "\\b([A-G])\\b",
-        "type": "classe"
-      }
-    ],
-    "ges": [
-      {
-        "source": "css",
-        "selecteur": ".ges-line__classification span[class*=\"active\"], [class*=\"ges\"] [class*=\"active\"]",
-        "regex": "\\b([A-G])\\b",
-        "type": "classe"
-      }
+    "chambres": [{ "source": "donnees", "chemin": "bedroomsQuantity", "type": "entier" }],
+    "etage": [{ "source": "donnees", "chemin": "floor", "type": "etage" }],
+    "ascenseur": [{ "source": "donnees", "chemin": "hasElevator", "type": "booleen" }],
+    "dpe": [{ "source": "donnees", "chemin": "energyClassification", "type": "classe" }],
+    "ges": [{ "source": "donnees", "chemin": "greenhouseGazClassification", "type": "classe" }],
+    "chargesCopro": [
+      { "source": "donnees", "chemin": "annualCondominiumFees", "type": "montant", "diviser": 12 }
     ],
     "anneeConstruction": [
-      {
-        "source": "css",
-        "selecteur": ".allDetails .labelInfo, [class*=\"details\"] li",
-        "regex": "(?:construit|construction|année)\\D{0,20}((?:18|19|20)\\d\\d)",
-        "type": "entier"
-      }
+      { "source": "donnees", "chemin": "yearOfConstruction", "type": "entier" }
     ],
-    "ville": [
-      { "source": "jsonld", "chemin": "address.addressLocality", "type": "texte" },
-      {
-        "source": "css",
-        "selecteur": ".ad-overview__address, [class*=\"address\"], h1",
-        "regex": "^(.+?)\\s*\\(?\\d{5}\\)?",
-        "type": "texte"
-      },
-      {
-        "source": "meta",
-        "nom": "og:title",
-        "regex": "\\b(?:à|-)\\s+([\\p{L}'’ -]+?)\\s*\\(?\\d{5}",
-        "type": "texte"
-      }
+    "lotsCopro": [{ "source": "donnees", "chemin": "condominiumPartsQuantity", "type": "entier" }],
+    "coproEnProcedure": [
+      { "source": "donnees", "chemin": "isCondominiumInProcedure", "type": "booleen" }
     ],
+    "meuble": [{ "source": "donnees", "chemin": "isFurnished", "type": "booleen" }],
+    "ville": [{ "source": "donnees", "chemin": "city", "type": "texte" }],
     "codePostal": [
-      { "source": "jsonld", "chemin": "address.postalCode", "type": "codePostal" },
-      {
-        "source": "css",
-        "selecteur": ".ad-overview__address, [class*=\"address\"], h1",
-        "type": "codePostal"
-      },
+      { "source": "donnees", "chemin": "postalCode", "type": "codePostal" },
       { "source": "meta", "nom": "og:title", "type": "codePostal" }
     ],
     "description": [
-      { "source": "jsonld", "chemin": "description", "type": "texte" },
-      { "source": "css", "selecteur": ".description, [class*=\"description\"]", "type": "texte" },
+      { "source": "donnees", "chemin": "description", "type": "texte" },
       { "source": "meta", "nom": "og:description", "type": "texte" }
     ]
   }

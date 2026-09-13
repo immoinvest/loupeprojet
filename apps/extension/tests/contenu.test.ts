@@ -9,14 +9,14 @@ interface MondeIsole {
 }
 
 describe('script de contenu', () => {
-  it('lit la page ouverte et dépose le résultat dans le monde isolé, sans toucher à la page', async () => {
+  it('lit la page ouverte et dépose une promesse du résultat dans le monde isolé, sans toucher à la page', async () => {
     const page = new DOMParser().parseFromString(leboncoin, 'text/html');
     document.documentElement.innerHTML = page.documentElement.innerHTML;
     const avant = document.documentElement.innerHTML;
 
     await import('../src/contenu');
 
-    expect((globalThis as MondeIsole).__loupeCapture).toMatchObject({
+    expect(await (globalThis as MondeIsole).__loupeCapture).toMatchObject({
       ok: true,
       capture: {
         portail: 'leboncoin',

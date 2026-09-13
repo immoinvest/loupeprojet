@@ -4,6 +4,7 @@ import {
   type ClasseEnergie,
   type ModeLocation,
   type ProjetEntree,
+  type TypeBien,
 } from '@loupe/moteur';
 
 import type { MarcheEnrichi } from '@/enrichissement';
@@ -14,6 +15,10 @@ export type Provenance = 'annonce' | 'estime' | 'utilisateur';
 
 /** Ce que l'écran Vérifier envoie : les valeurs et, pour chacune, d'où elle vient. */
 export interface SaisieProjet {
+  readonly typeBien?: TypeBien | undefined;
+  readonly ges?: ClasseEnergie | undefined;
+  readonly lotsCopro?: number | undefined;
+  readonly coproEnProcedure?: boolean | undefined;
   readonly prix: number;
   readonly honorairesAgence?: number | undefined;
   readonly surface: number;
@@ -102,12 +107,31 @@ export function construireProjet(
     'achat.mobilier': 'estime',
   };
   if (s.dpe !== undefined) provenance['bien.dpe'] = s.provenance.dpe ?? 'utilisateur';
+  if (s.typeBien !== undefined) provenance['bien.type'] = s.provenance.typeBien ?? 'utilisateur';
+  if (s.ges !== undefined) provenance['bien.ges'] = s.provenance.ges ?? 'utilisateur';
+  if (s.lotsCopro !== undefined) {
+    provenance['bien.copro.lots'] = s.provenance.lotsCopro ?? 'utilisateur';
+  }
+  if (s.coproEnProcedure !== undefined) {
+    provenance['bien.copro.procedure'] = s.provenance.coproEnProcedure ?? 'utilisateur';
+  }
+  const copro =
+    s.lotsCopro === undefined && s.coproEnProcedure === undefined
+      ? {}
+      : {
+          copro: {
+            ...(s.lotsCopro === undefined ? {} : { lots: s.lotsCopro }),
+            ...(s.coproEnProcedure === undefined ? {} : { procedure: s.coproEnProcedure }),
+          },
+        };
 
   return {
     id,
     versionRegles: VERSION_REGLES_COURANTE,
     bien: {
-      type: 'appartement',
+      type: s.typeBien ?? 'appartement',
+      ...(s.ges === undefined ? {} : { ges: s.ges }),
+      ...copro,
       surface: s.surface,
       pieces: s.pieces ?? Math.max(1, Math.round(s.surface / 22)),
       ...(s.chambres === undefined ? {} : { chambres: s.chambres }),
