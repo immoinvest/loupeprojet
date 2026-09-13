@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-import { NOM_EXEMPLE, ouvrirMesProjets } from './aides';
+import { NOM_EXEMPLE, NOM_LYON, creerProjetManuel, ouvrirMesProjets } from './aides';
 
 test('au premier lancement, la racine mène à « Mes projets » avec le projet d’exemple', async ({
   page,
@@ -24,4 +24,62 @@ test('au premier lancement, la racine mène à « Mes projets » avec le projet 
   // Revenir sur la liste ne recrée pas l'exemple : toujours un seul projet.
   await ouvrirMesProjets(page);
   await expect(liste.getByRole('link', { name: NOM_EXEMPLE })).toHaveCount(1);
+});
+
+test('un projet saisi à la main a son rapport, apparaît dans la liste et se supprime', async ({
+  page,
+}) => {
+  await creerProjetManuel(page);
+  await expect(page).toHaveURL(/\/projets\/[0-9a-f-]{36}$/);
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(
+    'Prix sans repère de marché. Le loyer ne couvre pas tout.',
+  );
+  await expect(page.getByText('120 000 € · meublé longue durée')).toBeVisible();
+  await expect(page.getByLabel('Cinq feux').getByText('Cash-flow −222 €/mois')).toBeVisible();
+  await expect(
+    page.getByLabel('Cinq feux').getByText('Prix vs ventes réelles : pas de données'),
+  ).toBeVisible();
+
+  await page.getByRole('link', { name: 'Mes projets', exact: true }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Mes projets' })).toBeVisible();
+  const liste = page.getByRole('main');
+  await expect(liste.getByText('2 projets · sauvegardés sur cet appareil')).toBeVisible();
+  await expect(liste.getByRole('link', { name: NOM_LYON })).toBeVisible();
+  await expect(liste.getByRole('link', { name: NOM_EXEMPLE })).toBeVisible();
+
+  // Le filtre « Écartés » ne montre rien, « Tous » ramène les deux projets.
+  await page.getByRole('button', { name: 'Écartés' }).click();
+  await expect(liste.getByText('Aucun projet dans cette liste.')).toBeVisible();
+  await page.getByRole('button', { name: 'Tous' }).click();
+  await expect(liste.getByRole('link', { name: NOM_LYON })).toBeVisible();
+
+  await page.getByRole('button', { name: `Supprimer ${NOM_LYON}` }).click();
+  await expect(liste.getByRole('link', { name: NOM_LYON })).toHaveCount(0);
+  await expect(liste.getByRole('link', { name: NOM_EXEMPLE })).toBeVisible();
+  await expect(liste.getByText('1 projet · sauvegardés sur cet appareil')).toBeVisible();
+});
+
+test('recharger la page conserve les projets, le statut et la route ouverte', async ({ page }) => {
+  await creerProjetManuel(page);
+  await page.getByLabel('Statut du projet').selectOption('offre');
+
+  // Route profonde rechargée : le repli SPA sert la page, le stockage rend le projet.
+  await page.reload();
+  await expect(
+    page.getByRole('heading', { level: 1, name: /Prix sans repère de marché\./ }),
+  ).toBeVisible();
+  await expect(page.getByLabel('Statut du projet')).toHaveValue('offre');
+
+  await ouvrirMesProjets(page);
+  const liste = page.getByRole('main');
+  await expect(liste.getByText('2 projets · sauvegardés sur cet appareil')).toBeVisible();
+  await expect(liste.getByRole('link', { name: NOM_LYON })).toBeVisible();
+  await expect(liste.getByRole('link', { name: NOM_EXEMPLE })).toBeVisible();
+  await expect(liste.getByText('Offre faite')).toBeVisible();
+
+  // Un onglet neuf du même navigateur voit les mêmes projets.
+  const autre = await page.context().newPage();
+  await ouvrirMesProjets(autre);
+  await expect(autre.getByRole('main').getByRole('link', { name: NOM_LYON })).toBeVisible();
+  await autre.close();
 });

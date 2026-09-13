@@ -18,6 +18,8 @@ if (!existsSync(new URL('./dist/index.html', import.meta.url))) {
 
 export default defineConfig({
   testDir: './e2e',
+  // Machines lentes (antivirus, portable) : 30 s par défaut est trop juste pour les parcours longs.
+  timeout: 60_000,
   fullyParallel: true,
   forbidOnly: enCi,
   retries: enCi ? 2 : 0,
@@ -34,7 +36,7 @@ export default defineConfig({
   },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   webServer: {
-    command: `npm run preview -- --host 127.0.0.1 --port ${String(PORT)} --strictPort`,
+    command: `npx vite preview --host 127.0.0.1 --port ${String(PORT)} --strictPort`,
     url: URL_BASE,
     reuseExistingServer: !enCi,
     timeout: 60_000,
