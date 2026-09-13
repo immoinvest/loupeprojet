@@ -2,3 +2,8 @@
 ENVIRONNEMENT=dev
 # Origines supplémentaires autorisées (séparées par des virgules) en plus de la production et de localhost:5173.
 ORIGINES_AUTORISEES=
+# Clé du fournisseur de lecture d'annonces (OpenRouter). Vide = /extract désactivé en local.
+OPENROUTER_API_KEY=
+# Facultatif : autre fournisseur compatible « chat completions » et autre modèle.
+# LLM_URL=https://api.mistral.ai/v1/chat/completions
+# LLM_MODELE=mistral-small-latest

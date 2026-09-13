@@ -8,7 +8,12 @@ describe('santé et routes', () => {
     const { requete } = banc();
     const r = await requete('/health');
     expect(r.status).toBe(200);
-    expect(await r.json()).toEqual({ ok: true, version: VERSION_WORKER, environnement: 'dev' });
+    expect(await r.json()).toEqual({
+      ok: true,
+      version: VERSION_WORKER,
+      environnement: 'dev',
+      extraction: 'modele-test',
+    });
   });
 
   it('une route inconnue rend 404 INTROUVABLE en JSON', async () => {

@@ -90,7 +90,9 @@ jobs:
             echo "::warning::Secrets R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY ou CLOUDFLARE_ACCOUNT_ID absents : rien n'est publié."
             exit 0
           fi
-          POINT_ACCES="https://${CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com"
+          # Bucket créé dans la juridiction UE : il ne répond que sur l'adresse S3 européenne
+          # (l'adresse standard renvoie AccessDenied).
+          POINT_ACCES="https://${CLOUDFLARE_ACCOUNT_ID}.eu.r2.cloudflarestorage.com"
           # --delete seulement sur une passe France entière : une passe partielle ne doit rien effacer.
           SUPPRESSION=""
           if [ -z "$DEPARTEMENT" ]; then
