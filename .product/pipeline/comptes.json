@@ -36,9 +36,24 @@
     },
     "implement": {
       "status": "in_progress",
-      "stories_completed": 0,
+      "stories_completed": 5,
       "stories_total": 8,
-      "commits": []
+      "commits": [
+        "7471d00 docs(product): discovery, specs, architecture, ADR-006",
+        "6ff3a1b US-1 socle apps/comptes",
+        "ffae9f9 US-2 code e-mail, garde, Resend",
+        "859bcd3 US-3 Google et Apple",
+        "58facfa US-4 migration D1 testée",
+        "2c0818a US-5 worker déployé avec le site"
+      ],
+      "ecarts": [
+        "Better Auth avale les erreurs de sendVerificationOTP : garde HTTP avant Better Auth (routes utilisées, hôte connu, type de code) ; échec d'envoi journalisé, réponse « envoyé ».",
+        "Better Auth désactive le contrôle d'origine sous Vitest : disableOriginCheck: false explicite (même comportement en test et en production).",
+        "ENVIRONNEMENT vaut « production » par défaut (échec fermé) : sans secret ni base, /api/* répond 503 CONFIGURATION_INCOMPLETE, le site reste servi.",
+        "Miniflare 5 (alpha) et getPlatformProxy ne démarrent pas sur la machine de Pierre : la migration est testée à travers une D1 simulée sur node:sqlite (mêmes contrôles de types que D1) ; Miniflare retiré.",
+        "Client web en fetch + Zod plutôt que le client Better Auth : aucune dépendance ajoutée au site, réponses validées, erreurs traduites en codes.",
+        "Suppression refusée avec SESSION_EXPIRED (400) et non SESSION_NOT_FRESH : comportement réel de Better Auth 1.7."
+      ]
     },
     "refactor": { "status": "pending" },
     "qa_tests": { "status": "pending" },

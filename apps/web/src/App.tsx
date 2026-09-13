@@ -1,9 +1,14 @@
-import type { JSX } from 'react';
+import { useMemo, type JSX } from 'react';
 import { BrowserRouter, MemoryRouter, Navigate, useRoutes, type RouteObject } from 'react-router';
 
+import { CompteProvider } from './compte/CompteContext';
+import { clientMemoire } from './compte/memoire';
+import { clientReseau } from './compte/reseau';
+import type { ClientCompte } from './compte/types';
 import { AppLayout } from './coque/AppLayout';
 import { ProjetLayout } from './coque/ProjetLayout';
 import { Bientot } from './ecrans/Bientot';
+import { Connexion } from './ecrans/Connexion';
 import { Fiscalite } from './ecrans/Fiscalite';
 import { Hypotheses } from './ecrans/Hypotheses';
 import { MesProjets } from './ecrans/MesProjets';
@@ -14,6 +19,8 @@ import { Visite } from './ecrans/Visite';
 import { ProjetsProvider } from './stockage/ProjetsContext';
 
 export const routes: RouteObject[] = [
+  // Hors de la coque : une page de connexion classique, centrée.
+  { path: 'connexion', element: <Connexion /> },
   {
     element: <AppLayout />,
     children: [
@@ -70,29 +77,39 @@ function Racine(): JSX.Element | null {
   return useRoutes(routes);
 }
 
+/** Le client des comptes de production : l'API /api/* servie par le worker Pages, même origine. */
+const CLIENT_COMPTE = clientReseau();
+
 export function App(): JSX.Element {
   return (
     <ProjetsProvider>
-      <BrowserRouter>
-        <Racine />
-      </BrowserRouter>
+      <CompteProvider client={CLIENT_COMPTE}>
+        <BrowserRouter>
+          <Racine />
+        </BrowserRouter>
+      </CompteProvider>
     </ProjetsProvider>
   );
 }
 
-/** Pour les tests : même arbre de routes, en mémoire. */
+/** Pour les tests : même arbre de routes, en mémoire ; sans compte fourni, un client mémoire anonyme. */
 export function AppEnMemoire({
   chemin = '/',
   stockage,
+  compte,
 }: {
   chemin?: string;
   stockage?: Storage;
+  compte?: ClientCompte;
 }): JSX.Element {
+  const client = useMemo(() => compte ?? clientMemoire(), [compte]);
   return (
     <ProjetsProvider stockage={stockage}>
-      <MemoryRouter initialEntries={[chemin]}>
-        <Racine />
-      </MemoryRouter>
+      <CompteProvider client={client}>
+        <MemoryRouter initialEntries={[chemin]}>
+          <Racine />
+        </MemoryRouter>
+      </CompteProvider>
     </ProjetsProvider>
   );
 }
