@@ -1,0 +1,26 @@
+{
+  "feature_slug": "lecture-auto",
+  "title": "Coller un lien suffit : l'extension lit l'annonce dans un onglet sur demande de Deklic ; règles réelles des cinq portails",
+  "started_at": "2026-09-13T21:10:00Z",
+  "current_step": "implement",
+  "scope": "packages/capture, apps/extension (pont, arrière-plan, règles), apps/web/src/annonces + NouveauProjet + formulaire",
+  "branch": "feat/lecture-auto",
+  "base": "master (6d0dded)",
+  "steps": {
+    "discovery": {
+      "status": "completed",
+      "output": ".product/features/lecture-auto-discovery.md"
+    },
+    "implement": { "status": "in_progress", "stories_completed": 1, "stories_total": 4 },
+    "refactor": { "status": "pending" },
+    "qa_tests": { "status": "pending" },
+    "security": { "status": "pending" },
+    "push": { "status": "pending" }
+  },
+  "decisions": {
+    "releve": "structures relevées sur de vraies annonces le 13/09/2026 dans le Chrome de l'utilisateur ; SeLoger et Logic-Immo ont changé d'adresses (identifiants alphanumériques) et partagent __UFRN_LIFECYCLE_SERVERREQUEST__ ; Bien'ici ne sert rien dans le HTML (données /realEstateAd.json)",
+    "lecture": "onglet inactif à côté de Deklic, puis second essai onglet affiché si prix ou surface manquent ; une lecture à la fois",
+    "pont": "script de contenu sur les pages Deklic + window.postMessage, protocole validé par Zod dans @loupe/capture",
+    "hors_perimetre": "appel du LLM /extract (chaîne principale), lecture serveur (écartée par Pierre)"
+  }
+}
