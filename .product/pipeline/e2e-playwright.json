@@ -35,7 +35,10 @@
       "status": "completed",
       "note": "aucun code applicatif touché ; aucun secret ; les tests ne lisent que la page servie en local ; rapport HTML et traces ignorés par git"
     },
-    "push": { "status": "in_progress" }
+    "push": {
+      "status": "completed",
+      "note": "PR #11 https://github.com/immoinvest/loupeprojet/pull/11, merge automatique armé, origin/master fusionné deux fois (Deklic + worker, puis PR #10)"
+    }
   },
   "decisions": {
     "serveur": "vite build (dans le script test:e2e) puis vite preview sur 127.0.0.1:5199 (port dédié) : on teste l'artefact déployé, pas le serveur de développement ; le build hors de Playwright évite le dépassement du délai webServer sur une machine lente",
