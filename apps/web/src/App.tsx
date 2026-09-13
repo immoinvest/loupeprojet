@@ -6,6 +6,7 @@ import { ProjetLayout } from './coque/ProjetLayout';
 import { Bientot } from './ecrans/Bientot';
 import { Fiscalite } from './ecrans/Fiscalite';
 import { Hypotheses } from './ecrans/Hypotheses';
+import { Imprimer } from './ecrans/Imprimer';
 import { MesProjets } from './ecrans/MesProjets';
 import { NouveauProjet } from './ecrans/NouveauProjet';
 import { Rapport } from './ecrans/Rapport';
@@ -14,6 +15,8 @@ import { Visite } from './ecrans/Visite';
 import { ProjetsProvider } from './stockage/ProjetsContext';
 
 export const routes: RouteObject[] = [
+  // Hors coque : le document imprimable, sans barre latérale ni onglets.
+  { path: 'projets/:id/imprimer', element: <Imprimer /> },
   {
     element: <AppLayout />,
     children: [

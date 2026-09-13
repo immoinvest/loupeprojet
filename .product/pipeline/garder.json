@@ -1,0 +1,26 @@
+{
+  "feature_slug": "garder",
+  "title": "Garder : impression PDF, lien de partage sans compte, page Comparer, page Méthode",
+  "started_at": "2026-09-13T18:00:00Z",
+  "current_step": "implement",
+  "scope": "apps/web/src/ecrans/{Imprimer,Partage,Comparer,Methode}.tsx, coque/ProjetLayout (PDF, Partager), stockage/partage.ts, analyses/{comparaison,defauts}.ts, textes/methode*.ts, index.css (print), App.tsx (routes)",
+  "branch": "feat/garder",
+  "base": "master (768c556)",
+  "steps": {
+    "discovery": {
+      "status": "completed",
+      "output": ".product/features/garder-discovery.md"
+    },
+    "implement": { "status": "in_progress", "stories_completed": 0, "stories_total": 4 },
+    "refactor": { "status": "pending" },
+    "qa_tests": { "status": "pending" },
+    "security": { "status": "pending" },
+    "push": { "status": "pending" }
+  },
+  "decisions": {
+    "comparer": "projets en colonnes, indicateurs en lignes ; le tri réordonne les colonnes selon la ligne cliquée",
+    "impression": "les écrans existants sont réutilisés dans un mode document (contexte) : boutons masqués, explications dépliées, grilles à deux colonnes ; pas de pied de page répété",
+    "partage": "ProjetEnregistre complet en base64url dans le fragment ; validation Zod ; rien n'est enregistré avant le clic « Ajouter »",
+    "methode": "constantes formatées depuis obtenirRegles(), défauts lus dans les schémas et construireProjet ; sources CGI citées seulement quand elles sont sûres"
+  }
+}
