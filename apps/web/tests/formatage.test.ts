@@ -26,6 +26,12 @@ describe('euros', () => {
     expect(n(eurosSignes(0))).toBe('0 €');
     expect(n(eurosParMois(-210))).toBe('−210 €/mois');
   });
+
+  it('ne produit jamais « −0 » pour une valeur qui s’arrondit à zéro', () => {
+    expect(n(eurosSignes(-0.002))).toBe('0 €');
+    expect(n(euros(-0.4))).toBe('0 €');
+    expect(n(eurosParMois(-0.3))).toBe('0 €/mois');
+  });
 });
 
 describe('pourcentages et nombres', () => {

@@ -11,14 +11,22 @@ function signe(valeur: number, texteAbsolu: string, avecPlus: boolean): string {
   return avecPlus && valeur > 0 ? `+${texteAbsolu}` : texteAbsolu;
 }
 
+/** Arrondi à l'euro, sans jamais produire « −0 ». */
+function arrondiEuro(valeur: number): number {
+  const arrondi = Math.round(valeur);
+  return arrondi === 0 ? 0 : arrondi;
+}
+
 /** 155000 → « 155 000 € » ; −210 → « −210 € » (vrai signe moins). */
 export function euros(valeur: number): string {
-  return signe(valeur, formatEuros.format(Math.abs(Math.round(valeur))), false);
+  const arrondi = arrondiEuro(valeur);
+  return signe(arrondi, formatEuros.format(Math.abs(arrondi)), false);
 }
 
 /** +980 → « +980 € », −210 → « −210 € », 0 → « 0 € ». */
 export function eurosSignes(valeur: number): string {
-  return signe(valeur, formatEuros.format(Math.abs(Math.round(valeur))), true);
+  const arrondi = arrondiEuro(valeur);
+  return signe(arrondi, formatEuros.format(Math.abs(arrondi)), true);
 }
 
 export function nombre(valeur: number, decimales = 0): string {

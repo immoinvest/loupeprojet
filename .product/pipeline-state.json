@@ -39,7 +39,11 @@
       "status": "completed",
       "note": "aucun secret ; stockage local validé par Zod ; aucun dangerouslySetInnerHTML ; liens externes : polices Google uniquement"
     },
-    "push": { "status": "in_progress" }
+    "push": {
+      "status": "completed",
+      "pr": "https://github.com/immoinvest/loupeprojet/pull/3",
+      "note": "PR empilée sur #2 ; merge par Pierre dans l'ordre #1, #2, #3"
+    }
   },
   "decisions": {
     "shadcn": "Composants maison en Tailwind (pas d'invite CLI) ; migration possible",
