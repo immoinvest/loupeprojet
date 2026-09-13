@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Deklic">
+  <path d="M32 22 L50 36 V56 H14 V36 Z" fill="#12173A" stroke="#12173A" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M32 16 V6 M21 19 L14 12 M43 19 L50 12" fill="none" stroke="#12173A" stroke-width="5" stroke-linecap="round"/>
+</svg>

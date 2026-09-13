@@ -1,4 +1,4 @@
-# Loupe — Vue d'ensemble de l'architecture
+# Deklic — Vue d'ensemble de l'architecture
 
 ```
 ┌──────────────────────────────┐   capture structurée + texte   ┌──────────────────────────────────────┐

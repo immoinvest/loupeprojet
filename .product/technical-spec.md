@@ -1,4 +1,4 @@
-# Loupe — Spécification technique
+# Deklic — Spécification technique
 
 Stack : voir `adr/001-stack.md`. Ce document décrit la structure et les conventions ; il est mis à jour à chaque feature (Rule 8).
 
@@ -10,6 +10,7 @@ loupeprojet/
 ├── tsconfig.base.json      strict, noUncheckedIndexedAccess, exactOptionalPropertyTypes, ES2022, bundler resolution
 ├── tsconfig.json           couvre les fichiers de config racine (ESLint type-checked)
 ├── eslint.config.js        typescript-eslint strict-type-checked + stylistic, no-console, max-lines 300, prettier
+├── marque/                 identité de marque Deklic (ADR-005) : logos SVG, favicon, icônes, image de partage, palette, guide
 ├── .prettierrc             printWidth 100, singleQuote, trailingComma all, LF
 ├── vitest.config.ts        projets = packages/*, apps/*
 ├── .github/workflows/ci.yml  Node 22 : npm ci → lint → format:check → typecheck → test:coverage → build
