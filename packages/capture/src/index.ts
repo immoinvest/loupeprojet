@@ -20,6 +20,7 @@ export {
   type AnnonceResolue,
   type Portail,
 } from './portails';
+export * from './regles';
 export {
   CaptureSchema,
   ChampsCaptureSchema,
