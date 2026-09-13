@@ -27,6 +27,18 @@ export async function ouvrirVolet(page: Page, volet: Volet, titre: string | RegE
   await expect(page.getByRole('heading', { level: 1, name: titre })).toBeVisible();
 }
 
+/**
+ * La navigation « Mes projets » : barre latérale à partir de 1 024 px, tiroir en dessous.
+ * Ouvre le tiroir quand le bouton de menu est affiché.
+ */
+export async function ouvrirNavigation(page: Page): Promise<Locator> {
+  const menu = page.getByRole('button', { name: 'Ouvrir le menu' });
+  if (await menu.isVisible()) await menu.click();
+  const navigation = page.getByRole('navigation', { name: 'Mes projets' });
+  await expect(navigation).toBeVisible();
+  return navigation;
+}
+
 /** La carte (section) dont le titre de niveau 2 est exactement `titre`. */
 export function carte(page: Page, titre: string): Locator {
   return page.locator('section', {
