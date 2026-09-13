@@ -1,6 +1,7 @@
 import type { Resultats } from '@loupe/moteur';
 import type { JSX } from 'react';
 
+import { useModeDocument } from '@/composants/document';
 import { Carte, GrosChiffre, Ligne, Pastille, Pourquoi, TitreCarte } from '@/composants/ui';
 import { euros, eurosParMois, eurosSignes, nombre, pourcentage } from '@/formatage/nombres';
 import { useProjetCourant } from '@/coque/ProjetLayout';
@@ -132,13 +133,20 @@ function CarteCashflow({ r }: { r: Resultats }): JSX.Element {
 }
 
 function Leviers({ r }: { r: Resultats }): JSX.Element | null {
+  // Sur papier (ou en noir et blanc), la carte pleine d'encre devient une carte claire.
+  const document = useModeDocument();
   const s = r.scenarios;
   if (s === null) return null;
   const negocier = s.scenarios.find((x) => x.code === 'negocier');
   const coloc = s.scenarios.find((x) => x.code === 'colocation');
   const autres = s.scenarios.filter((x) => x.code !== 'negocier' && x.code !== 'colocation');
+  const separateur = document ? 'w-px bg-bordure' : 'w-px bg-white/25';
   return (
-    <Carte className="flex-row items-stretch gap-5 border-accent bg-accent text-white">
+    <Carte
+      className={`flex-row items-stretch gap-5 ${
+        document ? 'border-accent-bordure bg-accent-fond' : 'border-accent bg-accent text-white'
+      }`}
+    >
       {negocier !== undefined && (
         <div className="flex flex-1 flex-col gap-1.5">
           <span className="text-xs font-bold tracking-wide uppercase opacity-80">
@@ -156,7 +164,7 @@ function Leviers({ r }: { r: Resultats }): JSX.Element | null {
           </span>
         </div>
       )}
-      <div className="w-px bg-white/25" />
+      <div className={separateur} />
       {coloc !== undefined && (
         <div className="flex flex-1 flex-col gap-1.5">
           <span className="text-xs font-bold tracking-wide uppercase opacity-80">
@@ -175,7 +183,7 @@ function Leviers({ r }: { r: Resultats }): JSX.Element | null {
           </span>
         </div>
       )}
-      <div className="w-px bg-white/25" />
+      <div className={separateur} />
       <div className="flex flex-1 flex-col gap-1.5">
         <span className="text-xs font-bold tracking-wide uppercase opacity-80">Et si…</span>
         <div className="flex flex-col gap-1 text-sm">

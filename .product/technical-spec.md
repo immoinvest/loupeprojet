@@ -17,7 +17,7 @@ loupeprojet/
 ├── .github/workflows/referentiels.yml  cron mensuel + manuel : génère data/dist puis aws s3 sync vers R2 deklic-data
 ├── packages/moteur/        ← livré (feature moteur-calcul)
 ├── packages/capture/       ← livré (feature extension) : contrat de capture et moteur de règles, partagés par l'extension, le favori et le web
-├── apps/web/               ← livré (socle, nouveau projet, hypothèses, onglets, lecture de la capture, bouton-favori, page /extension) ; e2e Playwright
+├── apps/web/               ← livré (socle, nouveau projet, hypothèses, onglets, lecture de la capture, bouton-favori, page /extension, garder) ; e2e Playwright
 ├── apps/worker/            ← socle livré (feature worker-socle)
 ├── apps/extension/         ← livré (feature extension) : WebExtension MV3, règles par portail, build esbuild vers dist/chrome et dist/firefox
 └── data/                   ← livré (feature referentiels) : pré-agrégation des référentiels publics
@@ -53,6 +53,8 @@ tests/                       un dossier par module + integration/ ; 204 tests ; 
 ## `apps/web` (socle livré)
 
 Voir `architecture/web-socle.md`. React 19 + Vite 7 + Tailwind v4 (`@theme` = tokens ADR-004), React Router 7 déclaratif (`useRoutes`), stockage local Zod (`loupe.projets.v1`), textes des codes du moteur dans `src/textes/`, Vitest + Testing Library (jsdom). Cloudflare Pages : `wrangler.toml`, `public/_redirects`. Couverture 100 % exigée sur `stockage/`, `formatage/`, `textes/` ; les écrans sont couverts par des tests de rendu et de navigation (`AppEnMemoire`). Tests de bout en bout : `apps/web/e2e/` avec Playwright (Chromium, build de production servi par `vite preview` sur 127.0.0.1:5199, sélecteurs par rôle et libellé, contexte neuf par test), `npm run test:e2e` ; voir `architecture/e2e-playwright.md`. Appels au Worker : `src/enrichissement/` (client revalidé par Zod, lecture IA puis règles, enrichissement marché), fourni par le contexte `coque/ClientWorker.tsx` (hors ligne par défaut, donc jamais de réseau en test) ; voir `architecture/enrichissement-marche.md`.
+
+Feature `garder` : voir `architecture/garder.md`. Route `/projets/:id/imprimer` hors coque, rendue sous `ModeDocument` (contexte `composants/document.tsx` : boutons masqués, explications dépliées, grilles à deux colonnes) avec `@media print` dans `index.css` ; partage par fragment d'URL (`stockage/partage.ts`, base64url + Zod, jamais d'exception) ; Comparer (`analyses/comparaison.ts`) ; Méthode générée depuis `obtenirRegles()` (`textes/methode*.ts`, défauts lus par `analyses/defauts.ts`). Couverture 100 % sur ces modules (globs `stockage`, `analyses`, `textes`).
 
 ## `apps/worker` (socle livré)
 
