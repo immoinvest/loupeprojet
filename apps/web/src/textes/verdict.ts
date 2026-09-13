@@ -7,8 +7,13 @@ export interface TexteVerdict {
   readonly sousTitre: string;
 }
 
+/** Le verdict porte toujours les cinq axes : on lit l'état sans cas d'absence. */
 function feu(r: Resultats, axe: 'prix' | 'cashflow' | 'effort'): string {
-  return r.verdict.feux.find((f) => f.axe === axe)?.feu ?? 'inconnu';
+  let etat = 'inconnu';
+  for (const f of r.verdict.feux) {
+    if (f.axe === axe) etat = f.feu;
+  }
+  return etat;
 }
 
 function phrasePrix(r: Resultats): string {
@@ -37,10 +42,11 @@ function phraseCashflow(r: Resultats): string {
 
 /** Titre en deux phrases courtes et sous-titre chiffré, composés par règles. */
 export function texteVerdict(r: Resultats): TexteVerdict {
-  const prix = r.verdict.feux.find((f) => f.axe === 'prix');
   const morceaux: string[] = [];
-  if (prix?.valeur !== null && prix?.valeur !== undefined) {
-    morceaux.push(`${pourcentageSigne(prix.valeur)} par rapport aux ventes du quartier`);
+  for (const f of r.verdict.feux) {
+    if (f.axe === 'prix' && f.valeur !== null) {
+      morceaux.push(`${pourcentageSigne(f.valeur)} par rapport aux ventes du quartier`);
+    }
   }
   const effort = r.financement.effort.hcsf;
   if (effort !== null) {
