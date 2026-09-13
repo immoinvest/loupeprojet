@@ -1,0 +1,18 @@
+[
+  {
+    "nom": "Aix-en-Provence",
+    "code": "13001",
+    "codesPostaux": ["13080", "13090", "13100", "13290", "13540"],
+    "population": 147478,
+    "codeDepartement": "13",
+    "codeEpci": "200054807"
+  },
+  {
+    "nom": "Marseille",
+    "code": "13055",
+    "codesPostaux": ["13001", "13002", "13003"],
+    "population": 877215,
+    "codeDepartement": "13",
+    "codeEpci": "200054807"
+  }
+]

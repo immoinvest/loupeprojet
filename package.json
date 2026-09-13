@@ -11,7 +11,8 @@
   },
   "workspaces": [
     "packages/*",
-    "apps/*"
+    "apps/*",
+    "data"
   ],
   "scripts": {
     "lint": "eslint . --max-warnings=0",
