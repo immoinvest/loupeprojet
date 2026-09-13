@@ -2,7 +2,7 @@
   "name": "@loupe/moteur",
   "version": "0.1.0",
   "private": true,
-  "description": "Moteur de calcul Loupe : financement, cash-flow, fiscalité, revente, rendement, verdict. TypeScript pur, sans I/O.",
+  "description": "Moteur de calcul Deklic : financement, cash-flow, fiscalité, revente, rendement, verdict. TypeScript pur, sans I/O.",
   "type": "module",
   "main": "./src/index.ts",
   "types": "./src/index.ts",

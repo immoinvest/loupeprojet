@@ -1,0 +1,23 @@
+# Worker Loupe : proxy des données publiques (cache KV, limite de débit) ; /extract viendra ensuite.
+# Déploiement : `npx wrangler login` puis `npm run deploy -w apps/worker`.
+# Avant le premier déploiement : `npx wrangler kv namespace create KV_CACHE` et reporter l'id ci-dessous.
+name = "loupe-worker"
+main = "src/index.ts"
+compatibility_date = "2026-09-01"
+workers_dev = true
+
+[observability]
+enabled = true
+
+[vars]
+ENVIRONNEMENT = "production"
+
+[[kv_namespaces]]
+binding = "KV_CACHE"
+id = "a-remplacer-par-l-id-cree-avec-wrangler"
+
+# 60 requêtes par minute et par adresse IP sur /proxy/* (le namespace_id est un entier libre, unique par worker).
+[[ratelimits]]
+name = "LIMITEUR"
+namespace_id = "1001"
+simple = { limit = 60, period = 60 }
