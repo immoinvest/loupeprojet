@@ -49,10 +49,11 @@ L'utilisateur principal du repo pratique le **vibe coding** et ne relit pas le c
 - **Livré** : onglet Hypothèses (`apps/web/src/hypotheses/` : chemins pointés, conversion texte ↔ valeur, descripteurs des champs par groupe, `appliquerSaisie` ; `ProjetsContext.mettreAJour` valide par Zod avant d'enregistrer).
 - **Livré** : onglets Fiscalité (4 régimes côte à côte, « Retenir ce régime », frise, année par année), Revente (horizons 5/10/15/20 ans cliquables via `apps/web/src/analyses/`, plus-value détaillée) et Visite (points de vigilance cochables par catégorie, `categorieVigilance`). Toute interaction passe par `appliquerSaisie`.
 - **Livré** : `apps/worker` socle (Hono sur Workers : `GET /health`, `GET /proxy/:service` avec liste blanche, cache KV 24 h par empreinte des paramètres, 60 req/min/IP, erreurs en codes, journal structuré ; premier service : géocodage Géoplateforme). Dépendances injectées (`creerApp(deps)`), tests Node via `app.request()`. Déploiement : voir README (compte Cloudflare de Pierre).
+- **Livré** : `POST /extract` (`apps/worker/src/extraction/` : contrat de 20 champs validés un par un, prompt versionné, connecteur « chat completions » OpenRouter ou Mistral réglé par `LLM_URL`/`LLM_MODELE`, secret `OPENROUTER_API_KEY`, cache 30 jours par empreinte du texte, 10 lectures/min/IP ; sans clé → `503 EXTRACTION_INDISPONIBLE`). Modèle par défaut `nvidia/nemotron-3-super-120b-a12b:free` (ADR-003 amendé). Le web ne l'appelle pas encore (`enrichissement-marche`).
 - **Livré** : tests de bout en bout Playwright (`apps/web/e2e/`, 8 parcours Chromium sur le build de production servi par `vite preview` sur 127.0.0.1:5199 ; `npm run test:e2e` construit puis teste ; sélecteurs par rôle et libellé, contexte neuf par test ; job CI `e2e` séparé de `verify`, pas encore requis pour le merge). Détails : `.product/architecture/e2e-playwright.md`.
 - **Production** : https://loupeprojet.pages.dev (Cloudflare Pages, branche `master`, build `npm ci && npm run build -w apps/web`). Worker : https://loupe-worker.erreip-gorguel.workers.dev (déployé à la main par `npm run deploy -w apps/worker`, machine connectée par `wrangler login` ; KV `KV_CACHE` = `a64f32a40a0846e1be258a7ea34a8090`).
 - **Sessions parallèles** : fiches dans `.product/sessions/` (extension, referentiels, garder, e2e-playwright) ; chaque session parallèle tient son état dans `.product/pipeline/<slug>.json` et ne touche aux docs communes qu'en fin de feature. `.product/pipeline-state.json` reste à la session principale.
-- **Prochaine étape (session principale)** : `extraction-llm` (`/extract` Mistral, clé à fournir par Pierre), puis `enrichissement-marche`.
+- **Prochaine étape (session principale)** : `enrichissement-marche` (le web appelle `/proxy/geocodage` et `/extract`, puis DVF, ADEME, ANIL, Géorisques quand les référentiels seront publiés).
 - `node_modules/` et `dist/` ne sont plus versionnés.
 
 ## Stack (décision ADR-001)
@@ -141,15 +142,15 @@ loupeprojet/
 
 ## Variables d'environnement
 
-Validées par Zod (`apps/worker/src/dependances.ts`), documentées dans `apps/worker/.dev.vars.example`. Aucune n'est nécessaire pour `packages/moteur` ni `apps/web`. Déjà en place : `ENVIRONNEMENT` (`dev` / `preview` / `production`) et `ORIGINES_AUTORISEES` (origines CORS supplémentaires, séparées par des virgules).
+Validées par Zod (`apps/worker/src/dependances.ts`), documentées dans `apps/worker/.dev.vars.example`. Aucune n'est nécessaire pour `packages/moteur` ni `apps/web`. Déjà en place : `ENVIRONNEMENT` (`dev` / `preview` / `production`), `ORIGINES_AUTORISEES` (origines CORS supplémentaires, séparées par des virgules), `LLM_URL` et `LLM_MODELE` (fournisseur « chat completions » et modèle de lecture des annonces, dans `wrangler.toml`) et le secret `OPENROUTER_API_KEY` (posé par Pierre dans le dashboard Cloudflare ; jamais dans le dépôt ni dans une conversation).
 
-| Variable                                        | Usage                                         |
-| ----------------------------------------------- | --------------------------------------------- |
-| `MISTRAL_API_KEY`                               | Extraction LLM (Worker uniquement)            |
-| `ANTHROPIC_API_KEY`                             | Fournisseur LLM alternatif (optionnel)        |
-| `SENTRY_DSN`                                    | Erreurs front + worker                        |
-| `RESEND_API_KEY`                                | Liens magiques (v1.5)                         |
-| Bindings Wrangler : `KV_CACHE`, `R2_DATA`, `DB` | Déclarés dans `wrangler.toml`, pas dans l'env |
+| Variable                                        | Usage                                                                                   |
+| ----------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `OPENROUTER_API_KEY` (secret)                   | Clé du fournisseur de lecture des annonces (Worker uniquement)                          |
+| `LLM_URL`, `LLM_MODELE`                         | Fournisseur « chat completions » et modèle ; Mistral direct = autre URL et autre modèle |
+| `SENTRY_DSN`                                    | Erreurs front + worker                                                                  |
+| `RESEND_API_KEY`                                | Liens magiques (v1.5)                                                                   |
+| Bindings Wrangler : `KV_CACHE`, `R2_DATA`, `DB` | Déclarés dans `wrangler.toml`, pas dans l'env                                           |
 
 ## Commandes
 

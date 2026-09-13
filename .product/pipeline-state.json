@@ -1,34 +1,34 @@
 {
-  "feature_slug": "worker-socle",
-  "title": "Socle du Worker : Hono sur Cloudflare Workers, proxy des données publiques avec cache KV, limite de débit, géocodage Géoplateforme",
+  "feature_slug": "extraction-llm",
+  "title": "POST /extract : lecture du texte d'une annonce par un modèle de langage (OpenRouter, modèle gratuit), champs validés, cache 30 jours, limite dédiée",
   "started_at": "2026-09-13T00:00:00Z",
   "current_step": "push",
-  "scope": "apps/worker (app, dependances, proxy/cache, proxy/debit, services/geocodage), wrangler.toml, seuils de couverture",
-  "branch": "feat/worker-socle",
-  "base": "master (768c556)",
+  "scope": "apps/worker/src/extraction, http.ts, dependances, wrangler.toml, ADR-003",
+  "branch": "feat/extraction-llm",
+  "base": "master (e4efd39)",
   "steps": {
     "discovery": {
       "status": "completed",
-      "output": ".product/features/worker-socle-discovery.md"
+      "output": ".product/features/extraction-llm-discovery.md"
     },
     "implement": { "status": "completed", "stories_completed": 5, "stories_total": 5 },
     "refactor": {
       "status": "completed",
-      "note": "dépendances injectées (cache, limiteur, fetcher, horloge, journal) ; reponseErreur sans contexte Hono ; definirService ferme les types"
+      "note": "http.ts partagé (réponses, cache sûr, limite de débit) ; le proxy et l'extraction ne dupliquent rien"
     },
     "qa_tests": {
       "status": "completed",
-      "note": "29 tests Node via app.request() : routes, CORS, débit, validation, cache HIT/MISS/expiration/panne, statuts amont, normalisation Géoplateforme, dépendances, journal"
+      "note": "contrat, prompt, extraireJson, route (cache, erreurs, limite, CORS), fournisseur (requête, statuts, journal sans secret ni texte), dépendances ; test réel après déploiement"
     },
     "security": {
       "status": "completed",
-      "note": "liste blanche de services et de paramètres, délai amont, CORS restreint, aucune IP ni adresse journalisée, aucune clé côté client (le LLM viendra côté Worker)"
+      "note": "clé en secret Cloudflare uniquement ; texte jamais stocké ni journalisé ; sortie du modèle validée champ par champ ; limite 10/min/IP"
     },
     "push": { "status": "in_progress" }
   },
   "decisions": {
-    "tests": "Vitest Node + doubles plutôt que @cloudflare/vitest-pool-workers ; les bindings réels sont exercés au déploiement",
-    "debit": "binding Rate Limiting Cloudflare (60/min/IP) derrière une interface LimiteurDebit",
-    "sessions_paralleles": "fiches dans .product/sessions/ (extension, referentiels, garder, e2e-playwright) ; chaque session tient son état dans .product/pipeline/<slug>.json"
+    "fournisseur": "OpenRouter via connecteur chat completions ; Mistral direct = changer LLM_URL et LLM_MODELE",
+    "modele": "nvidia/nemotron-3-super-120b-a12b:free (catalogue public OpenRouter du 13/09/2026, prix 0, response_format accepté)",
+    "confiance": "pas d'indice par champ : validation par champ + liste rejetes ; badge « à vérifier » côté web"
   }
 }

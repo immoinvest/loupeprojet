@@ -22,13 +22,13 @@
 
 ## Modules et statut
 
-| Module            | Rôle                                                                                     | Statut                                                      |
-| ----------------- | ---------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
-| `packages/moteur` | Financement, cash-flow, 4 régimes fiscaux, revente, rendement/TRI, verdict, scénarios    | **livré** (PR `feat/moteur-calcul`, 204 tests, 100 %)       |
-| `apps/web`        | Coque SaaS, Mes projets, Nouveau projet, Rapport, Hypothèses, Fiscalité, Revente, Visite | **livré** (PR #3 à #6) ; Comparer, Méthode, partage à venir |
-| `apps/worker`     | `/proxy/*` (liste blanche, cache KV, limite de débit, géocodage) ; `/extract` à venir    | **socle livré** (PR `feat/worker-socle`)                    |
-| `apps/extension`  | Capture LBC, SeLoger, Bien'ici, PAP, Logic-Immo                                          | à venir                                                     |
-| `data/`           | Pré-agrégation des référentiels                                                          | à venir                                                     |
+| Module            | Rôle                                                                                                                    | Statut                                                      |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| `packages/moteur` | Financement, cash-flow, 4 régimes fiscaux, revente, rendement/TRI, verdict, scénarios                                   | **livré** (PR `feat/moteur-calcul`, 204 tests, 100 %)       |
+| `apps/web`        | Coque SaaS, Mes projets, Nouveau projet, Rapport, Hypothèses, Fiscalité, Revente, Visite                                | **livré** (PR #3 à #6) ; Comparer, Méthode, partage à venir |
+| `apps/worker`     | `/proxy/*` (liste blanche, cache KV, limite de débit, géocodage) ; `/extract` (lecture LLM des annonces via OpenRouter) | **livré et déployé** (PR #9, #10, extraction-llm)           |
+| `apps/extension`  | Capture LBC, SeLoger, Bien'ici, PAP, Logic-Immo                                                                         | à venir                                                     |
+| `data/`           | Pré-agrégation des référentiels                                                                                         | à venir                                                     |
 
 Tests de bout en bout : `apps/web/e2e/` (Playwright, Chromium) rejoue huit parcours utilisateur sur le build de production servi par `vite preview`, en local et dans le job CI `e2e` ; voir `architecture/e2e-playwright.md`.
 
