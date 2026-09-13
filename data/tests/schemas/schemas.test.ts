@@ -7,6 +7,7 @@ import {
   IndexDvfNationalSchema,
   LoyersDepartementSchema,
   MetaSchema,
+  MillesimeCourantSchema,
   SaisieUsureSchema,
   TaxeFonciereDepartementSchema,
   UsurePublieeSchema,
@@ -38,6 +39,17 @@ describe('codes', () => {
     for (const code of ['1', '977', '2C', '100']) {
       expect(CodeDepartementSchema.safeParse(code).success).toBe(false);
     }
+  });
+});
+
+describe('MillesimeCourantSchema', () => {
+  it('décrit le pointeur courant.json de chaque source datée', () => {
+    expect(
+      MillesimeCourantSchema.safeParse({ genereLe: META.genereLe, millesime: '2025' }).success,
+    ).toBe(true);
+    expect(
+      MillesimeCourantSchema.safeParse({ genereLe: META.genereLe, millesime: '' }).success,
+    ).toBe(false);
   });
 });
 

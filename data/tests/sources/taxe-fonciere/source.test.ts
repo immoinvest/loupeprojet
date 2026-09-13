@@ -87,6 +87,9 @@ describe('executerTaxeFonciere', () => {
       message: 'taxe foncière : exercice REI retenu',
       annee: '2025',
     });
+    expect(
+      JSON.parse(await readFile(join(dossier, 'taxe-fonciere', 'courant.json'), 'utf8')),
+    ).toEqual({ genereLe: '2026-09-13T10:00:00.000Z', millesime: '2025' });
   });
 
   it('accepte un exercice imposé sans interroger la facette', async () => {

@@ -17,6 +17,13 @@ export const MetaSchema = z.object({
 });
 export type Meta = z.infer<typeof MetaSchema>;
 
+/** `<source>/courant.json` : le millésime à lire aujourd'hui, pour que l'application ne devine pas l'année. */
+export const MillesimeCourantSchema = z.object({
+  genereLe: z.iso.datetime(),
+  millesime: z.string().min(1),
+});
+export type MillesimeCourant = z.infer<typeof MillesimeCourantSchema>;
+
 /** Code INSEE : cinq chiffres, ou 2A/2B suivis de trois chiffres en Corse. */
 export const CodeInseeSchema = z.string().regex(/^(\d{5}|2[AB]\d{3})$/);
 

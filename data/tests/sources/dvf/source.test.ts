@@ -84,6 +84,7 @@ describe('executerDvf', () => {
     );
     await expect(lireSortie('dvf/2025/2A041.csv')).rejects.toThrow(); // VEFA écartée
     await expect(lireSortie('dvf/2025/index.json')).rejects.toThrow(); // passe partielle
+    await expect(lireSortie('dvf/courant.json')).rejects.toThrow(); // passe partielle
 
     const index = IndexDvfDepartementSchema.parse(
       JSON.parse(await lireSortie('dvf/2025/index/2A.json')),
@@ -134,6 +135,10 @@ describe('executerDvf', () => {
     );
     expect(national.departements).toEqual(['2A']);
     expect(Object.keys(national.communes)).toEqual(['2A004', '2A062', '2A065', '2A247']);
+    expect(JSON.parse(await lireSortie('dvf/courant.json'))).toEqual({
+      genereLe: '2026-09-13T10:00:00.000Z',
+      millesime: '2025',
+    });
   });
 
   it('tolère un dossier annuel absent (404) avec un avertissement', async () => {

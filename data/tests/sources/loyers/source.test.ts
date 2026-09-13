@@ -96,9 +96,21 @@ describe('executerLoyers', () => {
     expect(faux.journal.filter((entree) => entree.message === 'loyers : fichier lu')).toHaveLength(
       4,
     );
+    expect(faux.journal).toContainEqual(
+      expect.objectContaining({
+        message: 'loyers : fichier lu',
+        type: 'appartement',
+        communes: 6,
+        ignorees: 1,
+      }),
+    );
     expect(faux.journal.at(-1)).toMatchObject({
       message: 'loyers : départements publiés',
       departements: 2,
+    });
+    expect(JSON.parse(await readFile(join(dossier, 'loyers', 'courant.json'), 'utf8'))).toEqual({
+      genereLe: '2026-09-13T10:00:00.000Z',
+      millesime: '2025',
     });
   });
 });

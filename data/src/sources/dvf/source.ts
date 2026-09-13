@@ -15,6 +15,7 @@ import {
   type StatistiquesCommune,
   type Vente,
 } from '../../schemas/dvf.ts';
+import { ecrireMillesimeCourant } from '../courant.ts';
 import { ANNEES_LUES, FENETRE_MOIS, FILTRES_DVF, SOURCE_DVF, urlDvf } from './constantes.ts';
 import { csvDesVentes } from './csv-sortie.ts';
 import { dansFenetre, fenetreDesVentes } from './fenetre.ts';
@@ -171,6 +172,7 @@ export async function executerDvf(contexte: Contexte, options: OptionsDvf): Prom
       join(contexte.dossierSortie, 'dvf', String(millesime), 'index.json'),
       national,
     );
+    await ecrireMillesimeCourant(contexte, 'dvf', String(millesime));
     contexte.journal.info('DVF : index national publié', { departements: departements.length });
   }
 }

@@ -9,6 +9,7 @@ import {
   TYPES_INDICATEUR_LOYER,
   type TypeIndicateurLoyer,
 } from '../../schemas/loyers.ts';
+import { ecrireMillesimeCourant } from '../courant.ts';
 import { FICHIERS_LOYERS, MILLESIME_LOYERS, SOURCE_LOYERS } from './constantes.ts';
 import { assemblerLoyers, indicateurDepuisLigne, type LigneIndicateur } from './transformer.ts';
 
@@ -65,6 +66,7 @@ export async function executerLoyers(contexte: Contexte, options: OptionsLoyers)
     );
     publies += 1;
   }
+  await ecrireMillesimeCourant(contexte, 'loyers', MILLESIME_LOYERS);
   contexte.journal.info('loyers : départements publiés', {
     departements: publies,
     millesime: MILLESIME_LOYERS,

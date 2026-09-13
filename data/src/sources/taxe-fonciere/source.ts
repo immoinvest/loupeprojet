@@ -5,6 +5,7 @@ import { ecrireJson } from '../../commun/fichiers.ts';
 import { objetTrie } from '../../commun/listes.ts';
 import { telechargerTexteEnFlux } from '../../commun/telechargement.ts';
 import { TaxeFonciereDepartementSchema } from '../../schemas/taxe-fonciere.ts';
+import { ecrireMillesimeCourant } from '../courant.ts';
 import { detecterAnneeRei } from './annee.ts';
 import { SOURCE_TAXE_FONCIERE, urlExportRei } from './constantes.ts';
 import { tauxDepuisLignes } from './transformer.ts';
@@ -49,4 +50,5 @@ export async function executerTaxeFonciere(
     );
     contexte.journal.info('taxe foncière : département publié', { departement, communes: nombre });
   }
+  await ecrireMillesimeCourant(contexte, 'taxe-fonciere', annee);
 }
