@@ -47,14 +47,16 @@ function Synthese(): JSX.Element {
     },
   ];
   return (
-    <div className="sticky top-[var(--hauteur-barre-app)] z-10 -mx-4 flex items-center gap-8 border-b border-bordure bg-fond/95 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6 lg:-mx-10 lg:px-10">
+    <div className="sticky top-[var(--hauteur-barre-app)] z-10 -mx-4 grid grid-cols-2 gap-x-6 gap-y-2 border-b border-bordure bg-fond/95 px-4 py-3 backdrop-blur sm:-mx-6 sm:flex sm:items-center sm:gap-8 sm:px-6 lg:-mx-10 lg:px-10">
       {kpis.map((k) => (
         <div key={k.l} className="flex flex-col">
           <span className="text-xs text-encre-3">{k.l}</span>
-          <span className={`font-display text-xl font-bold ${k.ton}`}>{k.v}</span>
+          <span className={`font-display text-lg font-bold sm:text-xl ${k.ton}`}>{k.v}</span>
         </div>
       ))}
-      <span className="ml-auto text-sm text-encre-3">Recalculé à chaque modification.</span>
+      <span className="ml-auto hidden text-sm text-encre-3 sm:inline">
+        Recalculé à chaque modification.
+      </span>
     </div>
   );
 }
@@ -86,9 +88,9 @@ export function Hypotheses(): JSX.Element {
   return (
     <Page haut="serre">
       <Synthese />
-      <div className="flex items-baseline gap-3">
+      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-2">
         <TitrePage taille="section">Vos hypothèses</TitrePage>
-        <span className="flex items-center gap-2 text-sm text-encre-3">
+        <span className="flex flex-wrap items-center gap-2 text-sm text-encre-3">
           <Pastille ton="neutre" compacte>
             annonce
           </Pastille>
@@ -107,7 +109,7 @@ export function Hypotheses(): JSX.Element {
           <Carte key={g.titre}>
             <h2 className="m-0 font-display text-[22px] font-semibold">{g.titre}</h2>
             {g.sousTitre !== undefined && <p className="m-0 text-sm text-encre-2">{g.sousTitre}</p>}
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
               {visibles.map((d) => (
                 <ChampHypothese
                   key={d.chemin}

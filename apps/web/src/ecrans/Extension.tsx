@@ -49,7 +49,7 @@ export function Extension(): JSX.Element {
       </div>
 
       <Carte>
-        <div className="flex items-baseline justify-between gap-4">
+        <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
           <h2 className="m-0 font-display text-[22px] font-semibold">
             Le bouton-favori, sans rien installer
           </h2>
@@ -110,7 +110,7 @@ export function Extension(): JSX.Element {
       </Carte>
 
       <Carte>
-        <div className="flex items-baseline justify-between gap-4">
+        <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
           <h2 className="m-0 font-display text-[22px] font-semibold">L'extension navigateur</h2>
           <Pastille ton="neutre" compacte>
             Chrome · Edge · Firefox

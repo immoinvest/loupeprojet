@@ -37,13 +37,13 @@ export function DocumentProjet({
     <ModeDocument>
       <div className="document">
         <header
-          className={`flex items-end justify-between gap-6 border-b border-bordure pt-8 pb-5 ${MARGES_LATERALES}`}
+          className={`flex flex-col gap-3 border-b border-bordure pt-6 pb-5 sm:flex-row sm:items-end sm:justify-between sm:gap-6 sm:pt-8 print:flex-row print:items-end print:justify-between print:gap-6 print:pt-8 ${MARGES_LATERALES}`}
         >
           <div className="flex flex-col gap-1">
-            <span className="flex items-center gap-2 font-display text-sm font-bold text-encre-3">
+            <span className="flex flex-wrap items-center gap-2 font-display text-sm font-bold text-encre-3">
               <LogotypeDeklic hauteur={20} />· dossier d'analyse locative
             </span>
-            <h1 className="m-0 font-display text-[28px] leading-tight font-bold">
+            <h1 className="m-0 font-display text-2xl leading-tight font-bold sm:text-[28px] print:text-[28px]">
               {enregistre.nom}
             </h1>
             <span className="text-[15px] text-encre-2">
@@ -51,7 +51,7 @@ export function DocumentProjet({
               {nombre(bien.surface)} m² · département {bien.departement}
             </span>
           </div>
-          <dl className="m-0 flex flex-col gap-0.5 text-right text-[13px] text-encre-3">
+          <dl className="m-0 flex flex-col gap-0.5 text-[13px] text-encre-3 sm:text-right print:text-right">
             <div>
               <dt className="inline">{libelleDate} </dt>
               <dd className="inline font-semibold text-encre-2">{jour}</dd>

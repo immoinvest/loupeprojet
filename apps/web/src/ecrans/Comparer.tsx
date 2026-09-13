@@ -111,7 +111,10 @@ function Tableau({
       <table className="w-full border-collapse text-[15px]">
         <thead>
           <tr className="border-b border-bordure">
-            <th scope="col" className="px-3 py-3 text-left text-xs font-semibold text-encre-3">
+            <th
+              scope="col"
+              className="sticky left-0 z-[1] min-w-[8rem] bg-surface px-3 py-3 text-left text-xs font-semibold text-encre-3"
+            >
               Cliquez une ligne pour trier
             </th>
             {colonnes.map((c) => (
@@ -144,7 +147,7 @@ function Tableau({
                 <th
                   scope="row"
                   aria-sort={sens}
-                  className="px-3 py-2.5 text-left align-top font-semibold"
+                  className="sticky left-0 z-[1] min-w-[8rem] bg-surface px-3 py-2.5 text-left align-top font-semibold"
                 >
                   <button
                     type="button"
@@ -207,7 +210,7 @@ export function Comparer(): JSX.Element {
       </div>
 
       {projets.length < MIN_COMPARES ? (
-        <Carte className="flex-row items-center gap-5">
+        <Carte className="sm:flex-row sm:items-center sm:gap-5">
           <span className="flex-1 text-[15px] text-encre-2">
             Il vous faut au moins deux projets pour comparer.
           </span>

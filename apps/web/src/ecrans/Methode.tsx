@@ -8,6 +8,15 @@ import { Carte, Pastille } from '@/composants/ui';
 import { dateCourte } from '@/formatage/nombres';
 import { sectionsMethode, type SectionMethode } from '@/textes/methode';
 
+/** Sous 768 px, chaque constante devient un bloc (libellé, valeur, source) : même tableau, autre affichage. */
+const EN_BLOCS = {
+  table: 'max-md:block',
+  entete: 'max-md:hidden',
+  corps: 'max-md:flex max-md:flex-col',
+  ligne: 'max-md:flex max-md:flex-col max-md:gap-0.5 max-md:py-2',
+  cellule: 'max-md:p-0',
+} as const;
+
 function Section({ s }: { s: SectionMethode }): JSX.Element {
   return (
     <Carte id={s.code}>
@@ -21,19 +30,22 @@ function Section({ s }: { s: SectionMethode }): JSX.Element {
         </ol>
       )}
       {s.constantes.length > 0 && (
-        <table className="w-full border-collapse text-sm">
-          <thead>
+        <table className={`w-full border-collapse text-sm ${EN_BLOCS.table}`}>
+          <thead className={EN_BLOCS.entete}>
             <tr className="text-left text-xs text-encre-3">
               <th className="py-1.5 pr-3 font-semibold">Constante</th>
               <th className="py-1.5 pr-3 font-semibold">Valeur</th>
               <th className="py-1.5 font-semibold">Source</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className={EN_BLOCS.corps}>
             {s.constantes.map((c) => (
-              <tr key={c.libelle} className="border-t border-bordure-douce align-top">
-                <td className="py-2 pr-3">{c.libelle}</td>
-                <td className="py-2 pr-3 font-semibold">
+              <tr
+                key={c.libelle}
+                className={`border-t border-bordure-douce align-top ${EN_BLOCS.ligne}`}
+              >
+                <td className={`py-2 pr-3 ${EN_BLOCS.cellule}`}>{c.libelle}</td>
+                <td className={`py-2 pr-3 font-semibold ${EN_BLOCS.cellule}`}>
                   {c.valeur}
                   {c.aConfirmer === true && (
                     <>
@@ -44,7 +56,9 @@ function Section({ s }: { s: SectionMethode }): JSX.Element {
                     </>
                   )}
                 </td>
-                <td className="py-2 text-encre-3">{c.source}</td>
+                <td className={`py-2 text-encre-3 max-md:text-xs ${EN_BLOCS.cellule}`}>
+                  {c.source}
+                </td>
               </tr>
             ))}
           </tbody>

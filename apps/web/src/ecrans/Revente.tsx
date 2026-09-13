@@ -42,7 +42,7 @@ export function Revente(): JSX.Element {
       </div>
 
       <div
-        className={`grid gap-4 ${document ? 'grid-cols-2' : 'grid-cols-4'}`}
+        className={`grid grid-cols-1 gap-4 sm:grid-cols-2 ${document ? 'print:grid-cols-2' : 'xl:grid-cols-4'}`}
         role="group"
         aria-label="Horizon de revente"
       >
@@ -66,7 +66,7 @@ export function Revente(): JSX.Element {
               <span className="text-xs font-bold tracking-wide text-encre-3 uppercase">
                 Dans {v.annees} ans
               </span>
-              <span className="font-display text-[26px] leading-none font-bold">
+              <span className="font-display text-[24px] leading-none font-bold sm:text-[26px] print:text-[26px]">
                 {euros(v.cashNetVendeur)}
               </span>
               <span className="text-sm text-encre-2">
@@ -78,7 +78,7 @@ export function Revente(): JSX.Element {
         })}
       </div>
 
-      <div className="grid grid-cols-2 gap-5">
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-2 print:grid-cols-2">
         <Carte>
           <TitreCarte>Revente dans {annees} ans</TitreCarte>
           <div>
@@ -128,7 +128,7 @@ export function Revente(): JSX.Element {
       </div>
 
       <Carte>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
           <TitreCarte>La plus-value, en détail</TitreCarte>
           {pv.plusValueBrute > 0 && pv.reintegration > 0 && (
             <Pastille ton="surveiller" compacte>
@@ -142,7 +142,7 @@ export function Revente(): JSX.Element {
             pas le prix d'acquisition majoré ({euros(pv.prixAcquisitionMajore)}).
           </p>
         ) : (
-          <div className="grid grid-cols-2 gap-x-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 md:gap-x-10 print:grid-cols-2 print:gap-x-10">
             <div>
               <Ligne libelle="Prix de cession, frais déduits" valeur={euros(pv.prixCession)} />
               <Ligne libelle="Prix d'achat" valeur={euros(r.projet.hypotheses.achat.prix)} />

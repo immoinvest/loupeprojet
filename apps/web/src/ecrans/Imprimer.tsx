@@ -40,11 +40,12 @@ export function Imprimer(): JSX.Element {
 
   return (
     <div className="min-h-screen bg-fond">
-      <div className="no-print sticky top-0 z-10 flex items-center gap-4 border-b border-bordure bg-surface px-6 py-3">
+      {/* Sur téléphone, la barre s'empile et défile avec la page ; à partir de 640 px, elle reste en haut. */}
+      <div className="no-print z-10 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-bordure bg-surface px-4 py-3 sm:sticky sm:top-0 sm:flex-nowrap sm:px-6">
         <Link to={`/projets/${enregistre.id}`} className="text-sm font-semibold no-underline">
           ← Retour au projet
         </Link>
-        <span className="flex-1 text-sm text-encre-3">
+        <span className="order-last basis-full text-sm text-encre-3 sm:order-none sm:flex-1 sm:basis-auto">
           Aperçu du document. Dans la fenêtre d'impression, choisissez « Enregistrer au format PDF
           ».
         </span>
@@ -58,7 +59,7 @@ export function Imprimer(): JSX.Element {
         </Bouton>
       </div>
       <FournisseurProjet enregistre={enregistre}>
-        <div className="document-page mx-auto my-6 max-w-[210mm] rounded-carte border border-bordure bg-surface shadow-carte">
+        <div className="document-page mx-2 my-4 max-w-[210mm] rounded-carte border border-bordure bg-surface shadow-carte sm:mx-auto sm:my-6">
           <DocumentProjet />
         </div>
       </FournisseurProjet>

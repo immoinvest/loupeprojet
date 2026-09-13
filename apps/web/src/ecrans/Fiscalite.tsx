@@ -46,7 +46,7 @@ function CarteRegime({
       <p className="m-0 text-sm text-encre-3">
         Loyer {euros(r.cashflow.recettes.loyersBruts / 12)} par mois, {MODES[r.mode]}.
       </p>
-      <div className="font-display text-[32px] leading-none font-bold">
+      <div className="font-display text-[28px] leading-none font-bold sm:text-[32px] print:text-[32px]">
         {euros(r.impotTotal)}
         <span className="ml-2 text-base font-semibold text-encre-3">d'impôt sur {annees} ans</span>
       </div>
@@ -135,7 +135,10 @@ export function Fiscalite(): JSX.Element {
         </Chapo>
       </div>
 
-      <div className={`grid gap-4 ${document ? 'grid-cols-2' : 'grid-cols-4'}`}>
+      {/* Une colonne sur téléphone, deux à partir de 640 px et sur papier, quatre à l'écran à partir de 1 280 px. */}
+      <div
+        className={`grid grid-cols-1 gap-4 sm:grid-cols-2 ${document ? 'print:grid-cols-2' : 'xl:grid-cols-4'}`}
+      >
         {ORDRE_REGIMES.map((regime) => (
           <CarteRegime
             key={regime}
@@ -171,7 +174,7 @@ export function Fiscalite(): JSX.Element {
           <table className="w-full border-collapse text-sm">
             <thead>
               <tr className="text-left text-xs text-encre-3">
-                <th className="py-2 pr-3 font-semibold">Année</th>
+                <th className="sticky left-0 bg-surface py-2 pr-3 font-semibold">Année</th>
                 {COLONNES.map((c) => (
                   <th key={c.titre} className="py-2 pr-3 text-right font-semibold">
                     {c.titre}
@@ -182,7 +185,7 @@ export function Fiscalite(): JSX.Element {
             <tbody>
               {retenu.annees.map((a) => (
                 <tr key={a.annee} className="border-t border-bordure-douce">
-                  <td className="py-2 pr-3 font-semibold">{a.annee}</td>
+                  <td className="sticky left-0 bg-surface py-2 pr-3 font-semibold">{a.annee}</td>
                   {COLONNES.map((c) => (
                     <td key={c.titre} className="py-2 pr-3 text-right">
                       {c.valeur(a)}

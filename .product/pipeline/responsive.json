@@ -31,14 +31,15 @@
     },
     "implement": {
       "status": "in_progress",
-      "stories_completed": 2,
+      "stories_completed": 3,
       "stories_total": 11,
       "commits": [
         { "etape": "docs", "hash": "9c06b16" },
         { "etape": "docs (Prettier)", "hash": "3ed6e26" },
         { "etape": "US-1", "hash": "9ad8a69", "tests": 645, "fichiers_de_test": 91 },
         { "etape": "US-2", "hash": "7fad103", "tests": 645, "fichiers_de_test": 91 },
-        { "etape": "refactor Rapport (300 lignes)", "hash": "e2fb7bf" }
+        { "etape": "refactor Rapport (300 lignes)", "hash": "e2fb7bf" },
+        { "etape": "US-3a", "hash": "61b4539", "tests": 645, "fichiers_de_test": 91 }
       ],
       "notes": [
         "Audit temporaire déplacé dans le scratchpad ; il devient e2e/formats.ts et responsive.spec.ts en US-10",
