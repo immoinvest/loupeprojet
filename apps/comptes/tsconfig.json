@@ -8,5 +8,5 @@
     "noEmit": true,
     "declaration": false
   },
-  "include": ["src", "tests", "types", "vitest.config.ts"]
+  "include": ["src", "tests", "scripts", "types", "vitest.config.ts"]
 }
