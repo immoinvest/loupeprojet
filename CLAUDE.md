@@ -6,7 +6,8 @@
 - Ne jamais signer les commits (pas de `--gpg-sign`, pas de `-S`).
 - La branche principale est **`master`**. **Feature branches obligatoires** : ne jamais commiter directement sur `master`. Toujours créer une branche `feat/[slug]`, `fix/[slug]`, `refactor/[slug]`, `chore/[slug]`.
 - Format des messages : Conventional Commits, `feat(scope): US-N — description courte`. Scopes : `moteur`, `web`, `worker`, `extension`, `data`, `infra`, `docs`.
-- **Pull Requests** : quand le travail est prêt, créer une PR via `gh pr create`. Cloudflare Pages déploie une preview à chaque push de branche ; le merge sur `master` déploie en production.
+- **Pull Requests** : quand le travail est prêt, créer une PR via `gh pr create`, puis activer le merge automatique : `gh pr merge <n> --auto --merge`. GitHub fusionne dès que le check CI `verify` est vert (décision de Pierre, 13/09/2026 : « merge automatique une fois tous les checks passés »). `master` est protégée : check `verify` obligatoire, branche à jour exigée, règle appliquée aussi aux administrateurs ; la branche de la PR est supprimée après le merge. Cloudflare Pages déploie une preview à chaque push de branche ; le merge sur `master` déploie en production. Après le merge : `git checkout master && git pull` avant la branche suivante.
+- `gh` n'est pas dans le PATH de l'outil PowerShell de Claude Code : l'appeler par `& "C:\Program Files\GitHub CLI\gh.exe"`.
 - Ne jamais commiter `.env*` (sauf `.env.example`), `.dev.vars`, `node_modules/`, `dist/`, `.wrangler/`.
 
 ---
@@ -165,23 +166,23 @@ Ces scripts sont créés lors de la mise en place du monorepo (feature `moteur-c
 
 Les skills ont été écrits pour un autre projet (FastAPI/Python + React, deux repos). **Ici, les équivalences suivantes priment sur leur texte :**
 
-| Dans les skills                                               | Ici                                                                                                                     |
-| ------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `evaluation-api/`, `evaluation-frontend/`, `app/`             | Un seul monorepo : `packages/*`, `apps/*`                                                                               |
-| `uv run pytest tests/unit/`                                   | `npm run test`                                                                                                          |
-| `uv run mypy app/` / `npx tsc --noEmit`                       | `npm run typecheck` (**0 erreur**, pas de baseline tolérée)                                                             |
-| `uv run ruff check` / `ruff format`                           | `npm run lint` + `npx prettier --write .`                                                                               |
-| `docker compose build`                                        | `npm run build`                                                                                                         |
-| Alembic migrations                                            | Migrations D1 dans `apps/worker/migrations/` (v1.5)                                                                     |
-| Auth0 JWT, `verify_token`                                     | Aucune auth en v1 ; rate-limit par IP dans le Worker                                                                    |
-| `print()` interdit                                            | `console.log` interdit en code applicatif → logger structuré (Worker) ; le moteur ne logue jamais                       |
-| Gates Python (pickle, yaml, shell=True…)                      | Gates TS : pas de `eval`, pas de `dangerouslySetInnerHTML`, pas de clé API côté client, pas de texte d'annonce persisté |
-| `branch main`                                                 | `master`                                                                                                                |
-| `references/domain-examples.md` (ALPHA10X)                    | Non applicable : suivre les principes métier et le glossaire ci-dessus                                                  |
-| Couverture « Composite score / scoring 100 % »                | **`packages/moteur` : 100 % lignes et branches**                                                                        |
-| Couverture « Auth 100 % »                                     | Worker `/extract` (quota, cache, validation Zod) : 100 %                                                                |
-| Commit `feat(eval-api): US-N — …`                             | `feat(moteur): US-N — …`                                                                                                |
-| `gh pr merge --squash` automatique (Step 8 de `/new-feature`) | **Jamais sans validation explicite de l'utilisateur**                                                                   |
+| Dans les skills                                               | Ici                                                                                                                        |
+| ------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `evaluation-api/`, `evaluation-frontend/`, `app/`             | Un seul monorepo : `packages/*`, `apps/*`                                                                                  |
+| `uv run pytest tests/unit/`                                   | `npm run test`                                                                                                             |
+| `uv run mypy app/` / `npx tsc --noEmit`                       | `npm run typecheck` (**0 erreur**, pas de baseline tolérée)                                                                |
+| `uv run ruff check` / `ruff format`                           | `npm run lint` + `npx prettier --write .`                                                                                  |
+| `docker compose build`                                        | `npm run build`                                                                                                            |
+| Alembic migrations                                            | Migrations D1 dans `apps/worker/migrations/` (v1.5)                                                                        |
+| Auth0 JWT, `verify_token`                                     | Aucune auth en v1 ; rate-limit par IP dans le Worker                                                                       |
+| `print()` interdit                                            | `console.log` interdit en code applicatif → logger structuré (Worker) ; le moteur ne logue jamais                          |
+| Gates Python (pickle, yaml, shell=True…)                      | Gates TS : pas de `eval`, pas de `dangerouslySetInnerHTML`, pas de clé API côté client, pas de texte d'annonce persisté    |
+| `branch main`                                                 | `master`                                                                                                                   |
+| `references/domain-examples.md` (ALPHA10X)                    | Non applicable : suivre les principes métier et le glossaire ci-dessus                                                     |
+| Couverture « Composite score / scoring 100 % »                | **`packages/moteur` : 100 % lignes et branches**                                                                           |
+| Couverture « Auth 100 % »                                     | Worker `/extract` (quota, cache, validation Zod) : 100 %                                                                   |
+| Commit `feat(eval-api): US-N — …`                             | `feat(moteur): US-N — …`                                                                                                   |
+| `gh pr merge --squash` automatique (Step 8 de `/new-feature`) | `gh pr merge <n> --auto --merge` dès la PR ouverte : GitHub fusionne quand le check `verify` est vert (voir Git & Commits) |
 
 Les skills sont des commandes projet (`/new-feature`, `/specs`, `/implement`…). Si l'outil Skill ne les connaît pas dans une session, lire le fichier `.claude/commands/<nom>.md` et suivre son contenu.
 
