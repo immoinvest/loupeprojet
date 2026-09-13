@@ -13,7 +13,8 @@ Monorepo npm workspaces, TypeScript strict, Vitest, ESLint, Prettier. Cible : Re
 ```
 packages/moteur/     Moteur de calcul pur (TypeScript + Zod), 100 % couvert par les tests
 apps/web/            Application React + Vite + Tailwind v4 (coque SaaS, Mes projets, Nouveau projet, Rapport, Hypothèses, Fiscalité, Revente, Visite), Cloudflare Pages
-apps/                À venir : worker, extension
+apps/worker/         Serveur Hono sur Cloudflare Workers : proxy des données publiques (cache KV, limite de débit)
+apps/                À venir : extension
 .product/            Spécifications, ADR, design, état du pipeline de développement
 .claude/commands/    Skills du pipeline de développement (Claude Code)
 ```
@@ -72,6 +73,25 @@ npm run build -w apps/web    # apps/web/dist
 - Projets stockés dans le navigateur (`localStorage`, clé `loupe.projets.v1`), validés par Zod ; le premier lancement crée le projet d'exemple.
 - Textes centralisés dans `src/textes/` : les codes du moteur deviennent des phrases là et nulle part ailleurs.
 - Tests : Vitest + Testing Library (jsdom), couverture 100 % sur `stockage/`, `formatage/`, `textes/`, `annonces/`, `hypotheses/`, `analyses/`.
+
+## Le serveur (`@loupe/worker`)
+
+```bash
+npm run dev -w apps/worker      # http://localhost:8787 (wrangler dev : KV et limite de débit simulés)
+npm run build -w apps/worker    # wrangler deploy --dry-run
+npm run deploy -w apps/worker   # déploiement (compte Cloudflare connecté par `npx wrangler login`)
+```
+
+- Hono sur Cloudflare Workers. Routes : `GET /health` ; `GET /proxy/geocodage?q=…&limit=…&codePostal=…` (Géoplateforme IGN), réponse au contrat Loupe : libellé, score, latitude/longitude, précision (adresse, rue, lieu-dit, commune), clé BAN, code INSEE.
+- Chaque réponse amont est validée (Zod) puis gardée en cache KV 24 h, partagé entre tous les utilisateurs ; en-tête `X-Loupe-Cache: HIT|MISS`. Limite : 60 requêtes par minute et par adresse IP. CORS : production, previews Pages, localhost.
+- Erreurs en codes (`SERVICE_INCONNU`, `PARAMETRES_INVALIDES`, `TROP_DE_REQUETES`, `AMONT_INDISPONIBLE`, `AMONT_SATURE`, `AMONT_INVALIDE`) : l'interface les traduit. Journal structuré (une ligne JSON par événement), sans adresse IP ni adresse saisie.
+- Tests : Vitest (Node), l'application est exercée par `app.request()` avec des doubles (cache, limiteur, amont, horloge) ; couverture 100 %.
+
+### Déployer le Worker
+
+1. `npx wrangler login` (une fois, dans le navigateur).
+2. `npx wrangler kv namespace create KV_CACHE` depuis `apps/worker`, puis reporter l'`id` obtenu dans `apps/worker/wrangler.toml`.
+3. `npm run deploy -w apps/worker` → `https://loupe-worker.<compte>.workers.dev`.
 
 ### Déployer sur Cloudflare Pages
 

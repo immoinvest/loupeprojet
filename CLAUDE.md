@@ -46,8 +46,10 @@ L'utilisateur principal du repo pratique le **vibe coding** et ne relit pas le c
 - **Livré** : écran Nouveau projet (`apps/web/src/annonces/` : `resoudreAnnonce`, `extraireChamps` par règles, `construireProjet` avec défauts sourcés ; formulaire Vérifier). Le schéma `Projet` du moteur porte une `source` optionnelle (portail, id, URL).
 - **Livré** : onglet Hypothèses (`apps/web/src/hypotheses/` : chemins pointés, conversion texte ↔ valeur, descripteurs des champs par groupe, `appliquerSaisie` ; `ProjetsContext.mettreAJour` valide par Zod avant d'enregistrer).
 - **Livré** : onglets Fiscalité (4 régimes côte à côte, « Retenir ce régime », frise, année par année), Revente (horizons 5/10/15/20 ans cliquables via `apps/web/src/analyses/`, plus-value détaillée) et Visite (points de vigilance cochables par catégorie, `categorieVigilance`). Toute interaction passe par `appliquerSaisie`.
-- **Production** : https://loupeprojet.pages.dev (Cloudflare Pages, branche `master`, build `npm ci && npm run build -w apps/web`).
-- **Prochaine étape** : `worker-socle` (Hono sur Workers : proxy, cache KV, rate-limit), puis `extension`.
+- **Livré** : `apps/worker` socle (Hono sur Workers : `GET /health`, `GET /proxy/:service` avec liste blanche, cache KV 24 h par empreinte des paramètres, 60 req/min/IP, erreurs en codes, journal structuré ; premier service : géocodage Géoplateforme). Dépendances injectées (`creerApp(deps)`), tests Node via `app.request()`. Déploiement : voir README (compte Cloudflare de Pierre).
+- **Production** : https://loupeprojet.pages.dev (Cloudflare Pages, branche `master`, build `npm ci && npm run build -w apps/web`). Le Worker n'est pas encore déployé.
+- **Sessions parallèles** : fiches dans `.product/sessions/` (extension, referentiels, garder, e2e-playwright) ; chaque session parallèle tient son état dans `.product/pipeline/<slug>.json` et ne touche aux docs communes qu'en fin de feature. `.product/pipeline-state.json` reste à la session principale.
+- **Prochaine étape (session principale)** : `extraction-llm` (`/extract` Mistral, clé à fournir par Pierre), puis `enrichissement-marche`.
 - `node_modules/` et `dist/` ne sont plus versionnés.
 
 ## Stack (décision ADR-001)
@@ -135,7 +137,7 @@ loupeprojet/
 
 ## Variables d'environnement
 
-Validées par Zod (`apps/worker/src/env.ts`), documentées dans `.env.example` / `.dev.vars.example`. Aucune n'est nécessaire pour `packages/moteur`.
+Validées par Zod (`apps/worker/src/dependances.ts`), documentées dans `apps/worker/.dev.vars.example`. Aucune n'est nécessaire pour `packages/moteur` ni `apps/web`. Déjà en place : `ENVIRONNEMENT` (`dev` / `preview` / `production`) et `ORIGINES_AUTORISEES` (origines CORS supplémentaires, séparées par des virgules).
 
 | Variable                                        | Usage                                         |
 | ----------------------------------------------- | --------------------------------------------- |
