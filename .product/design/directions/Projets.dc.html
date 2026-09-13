@@ -1,114 +1,458 @@
 <!doctype html>
 <html>
-<head>
-  <meta charset="utf-8">
-  <script src="./support.js"></script>
-</head>
-<body>
-<x-dc>
-<helmet>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&display=swap">
-  <style>
-    body { margin: 0; font-family: "Nunito Sans", "Segoe UI", system-ui, sans-serif; color: #23272F; background: #FFFDF9; }
-    a { color: #4F55D8; } a:hover { color: #3A3FB0; }
-    .display { font-family: Outfit, "Segoe UI", sans-serif; }
-    .num { font-variant-numeric: tabular-nums; }
-    .card { background: #FFFFFF; border: 1px solid #ECE8E0; border-radius: 20px; padding: 22px 26px; box-shadow: 0 6px 24px rgba(35, 39, 47, 0.05); }
-    .pill { display: inline-flex; align-items: center; gap: 8px; padding: 9px 14px; border-radius: 999px; font-size: 14px; font-weight: 600; min-height: 44px; box-sizing: border-box; }
-    .nav { display: flex; align-items: center; gap: 12px; padding: 11px 14px; border-radius: 12px; font-size: 15px; font-weight: 600; color: #4B5563; min-height: 44px; box-sizing: border-box; }
-    .metric { display: flex; flex-direction: column; gap: 2px; }
-    .metric span:first-child { font-size: 12px; color: #6B7280; }
-    .metric span:last-child { font-size: 18px; font-weight: 700; }
-    .dots { display: flex; gap: 5px; }
-  </style>
-</helmet>
-<div style="width: 1440px; min-height: 900px; background: #FFFDF9; display: grid; grid-template-columns: 248px minmax(0, 1fr); box-sizing: border-box;">
-
-  <div style="background: #FFFFFF; border-right: 1px solid #ECE8E0; padding: 22px 16px; display: flex; flex-direction: column; gap: 22px; box-sizing: border-box;">
-    <div class="display" style="display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 22px; color: #4F55D8; padding: 0 10px;">
-      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#4F55D8" stroke-width="2.4" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="M15.5 15.5 21 21"></path></svg>Loupe
-    </div>
-    <div class="nav" style="background: #4F55D8; color: #FFFFFF; justify-content: center;">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>Nouveau projet
-    </div>
-    <div style="display: flex; flex-direction: column; gap: 4px;">
-      <div class="nav" style="background: #EEEEFF; color: #23272F;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#23272F" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="8" height="8" rx="2"></rect><rect x="13" y="3" width="8" height="8" rx="2"></rect><rect x="3" y="13" width="8" height="8" rx="2"></rect><rect x="13" y="13" width="8" height="8" rx="2"></rect></svg>Mes projets</div>
-      <div class="nav"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4B5563" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="7" height="16" rx="1.5"></rect><rect x="14" y="4" width="7" height="16" rx="1.5"></rect></svg>Comparer</div>
-      <div class="nav"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4B5563" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v5l3 2"></path></svg>Comment c'est calculé</div>
-      <div class="nav"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4B5563" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h10"></path></svg>Extension navigateur</div>
-    </div>
-    <div style="flex-grow: 1;"></div>
-    <div style="display: flex; align-items: center; gap: 12px; padding: 12px 10px; border-top: 1px solid #ECE8E0;">
-      <div class="display" style="width: 40px; height: 40px; border-radius: 50%; background: #EEEEFF; color: #4F55D8; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px;">PG</div>
-      <div style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1;"><span style="font-size: 15px; font-weight: 700;">Pierre</span><span style="font-size: 12px; color: #6B7280;">Gratuit · 3 projets</span></div>
-    </div>
-  </div>
-
-  <div style="display: flex; flex-direction: column; min-width: 0; padding: 32px 40px 40px; gap: 22px;">
-    <div style="display: flex; align-items: flex-end; gap: 16px;">
-      <div style="display: flex; flex-direction: column; gap: 6px;">
-        <h1 class="display" style="font-weight: 700; font-size: 34px; line-height: 1.1; margin: 0; letter-spacing: -0.02em;">Mes projets</h1>
-        <span style="font-size: 15px; color: #6B7280;">3 projets · sauvegardés sur cet appareil</span>
-      </div>
-      <div style="flex-grow: 1;"></div>
-      <div style="display: flex; gap: 8px;">
-        <span class="pill" style="background: #EEEEFF; color: #4F55D8;">Tous</span>
-        <span class="pill" style="border: 1px solid #ECE8E0; color: #4B5563;">En cours</span>
-        <span class="pill" style="border: 1px solid #ECE8E0; color: #4B5563;">Écartés</span>
-      </div>
-      <span class="pill" style="border: 1px solid #ECE8E0; color: #4B5563;">Comparer 2 projets</span>
-    </div>
-
-    <div style="display: flex; flex-direction: column; gap: 12px;">
-      <div class="card" style="display: grid; grid-template-columns: minmax(0, 2fr) repeat(4, minmax(0, 1fr)) 120px; gap: 20px; align-items: center;">
-        <div style="display: flex; flex-direction: column; gap: 4px;">
-          <span class="display" style="font-size: 18px; font-weight: 700;">T3 · 65 m² · Marseille 5e</span>
-          <span style="font-size: 13px; color: #6B7280;">155 000 € · meublé LLD · aujourd'hui</span>
-          <span class="pill" style="background: #FBEEDA; color: #9A5B0F; min-height: 30px; padding: 4px 10px; font-size: 12px; align-self: flex-start;">Visite prévue</span>
+  <head>
+    <meta charset="utf-8" />
+    <script src="./support.js"></script>
+  </head>
+  <body>
+    <x-dc>
+      <helmet>
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&display=swap"
+        />
+        <style>
+          body {
+            margin: 0;
+            font-family: 'Nunito Sans', 'Segoe UI', system-ui, sans-serif;
+            color: #23272f;
+            background: #fffdf9;
+          }
+          a {
+            color: #4f55d8;
+          }
+          a:hover {
+            color: #3a3fb0;
+          }
+          .display {
+            font-family: Outfit, 'Segoe UI', sans-serif;
+          }
+          .num {
+            font-variant-numeric: tabular-nums;
+          }
+          .card {
+            background: #ffffff;
+            border: 1px solid #ece8e0;
+            border-radius: 20px;
+            padding: 22px 26px;
+            box-shadow: 0 6px 24px rgba(35, 39, 47, 0.05);
+          }
+          .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 14px;
+            border-radius: 999px;
+            font-size: 14px;
+            font-weight: 600;
+            min-height: 44px;
+            box-sizing: border-box;
+          }
+          .nav {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 11px 14px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            color: #4b5563;
+            min-height: 44px;
+            box-sizing: border-box;
+          }
+          .metric {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+          }
+          .metric span:first-child {
+            font-size: 12px;
+            color: #6b7280;
+          }
+          .metric span:last-child {
+            font-size: 18px;
+            font-weight: 700;
+          }
+          .dots {
+            display: flex;
+            gap: 5px;
+          }
+        </style>
+      </helmet>
+      <div
+        style="
+          width: 1440px;
+          min-height: 900px;
+          background: #fffdf9;
+          display: grid;
+          grid-template-columns: 248px minmax(0, 1fr);
+          box-sizing: border-box;
+        "
+      >
+        <div
+          style="
+            background: #ffffff;
+            border-right: 1px solid #ece8e0;
+            padding: 22px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+            box-sizing: border-box;
+          "
+        >
+          <div
+            class="display"
+            style="
+              display: flex;
+              align-items: center;
+              gap: 10px;
+              font-weight: 700;
+              font-size: 22px;
+              color: #4f55d8;
+              padding: 0 10px;
+            "
+          >
+            <svg
+              width="26"
+              height="26"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#4F55D8"
+              stroke-width="2.4"
+              stroke-linecap="round"
+            >
+              <circle cx="10.5" cy="10.5" r="6.5"></circle>
+              <path d="M15.5 15.5 21 21"></path></svg
+            >Loupe
+          </div>
+          <div class="nav" style="background: #4f55d8; color: #ffffff; justify-content: center">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#FFFFFF"
+              stroke-width="2.4"
+              stroke-linecap="round"
+            >
+              <path d="M12 5v14M5 12h14"></path></svg
+            >Nouveau projet
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 4px">
+            <div class="nav" style="background: #eeeeff; color: #23272f">
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#23272F"
+                stroke-width="2"
+                stroke-linecap="round"
+              >
+                <rect x="3" y="3" width="8" height="8" rx="2"></rect>
+                <rect x="13" y="3" width="8" height="8" rx="2"></rect>
+                <rect x="3" y="13" width="8" height="8" rx="2"></rect>
+                <rect x="13" y="13" width="8" height="8" rx="2"></rect></svg
+              >Mes projets
+            </div>
+            <div class="nav">
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#4B5563"
+                stroke-width="2"
+                stroke-linecap="round"
+              >
+                <rect x="3" y="4" width="7" height="16" rx="1.5"></rect>
+                <rect x="14" y="4" width="7" height="16" rx="1.5"></rect></svg
+              >Comparer
+            </div>
+            <div class="nav">
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#4B5563"
+                stroke-width="2"
+                stroke-linecap="round"
+              >
+                <circle cx="12" cy="12" r="9"></circle>
+                <path d="M12 8v5l3 2"></path></svg
+              >Comment c'est calculé
+            </div>
+            <div class="nav">
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#4B5563"
+                stroke-width="2"
+                stroke-linecap="round"
+              >
+                <path d="M4 6h16M4 12h16M4 18h10"></path></svg
+              >Extension navigateur
+            </div>
+          </div>
+          <div style="flex-grow: 1"></div>
+          <div
+            style="
+              display: flex;
+              align-items: center;
+              gap: 12px;
+              padding: 12px 10px;
+              border-top: 1px solid #ece8e0;
+            "
+          >
+            <div
+              class="display"
+              style="
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                background: #eeeeff;
+                color: #4f55d8;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: 700;
+                font-size: 15px;
+              "
+            >
+              PG
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1">
+              <span style="font-size: 15px; font-weight: 700">Pierre</span
+              ><span style="font-size: 12px; color: #6b7280">Gratuit · 3 projets</span>
+            </div>
+          </div>
         </div>
-        <div class="metric"><span>Prix vs marché</span><span class="num" style="color: #2E9E6B;">−22 %</span></div>
-        <div class="metric"><span>Cash-flow</span><span class="num" style="color: #D9453D;">−210 €</span></div>
-        <div class="metric"><span>Rendement net</span><span class="num">4,3 %</span></div>
-        <div class="metric"><span>TRI 10 ans</span><span class="num">3,8 %</span></div>
-        <div class="dots"><svg width="12" height="12" viewBox="0 0 12 12"><circle cx="6" cy="6" r="6" fill="#2E9E6B"></circle></svg><svg width="12" height="12" viewBox="0 0 12 12"><circle cx="6" cy="6" r="6" fill="#D98A1E"></circle></svg><svg width="12" height="12" viewBox="0 0 12 12"><circle cx="6" cy="6" r="6" fill="#D9453D"></circle></svg><svg width="12" height="12" viewBox="0 0 12 12"><circle cx="6" cy="6" r="6" fill="#2E9E6B"></circle></svg><svg width="12" height="12" viewBox="0 0 12 12"><circle cx="6" cy="6" r="6" fill="#2E9E6B"></circle></svg></div>
-      </div>
-      <div class="card" style="display: grid; grid-template-columns: minmax(0, 2fr) repeat(4, minmax(0, 1fr)) 120px; gap: 20px; align-items: center;">
-        <div style="display: flex; flex-direction: column; gap: 4px;">
-          <span class="display" style="font-size: 18px; font-weight: 700;">T3 · Marseille 5e, colocation</span>
-          <span style="font-size: 13px; color: #6B7280;">119 663 € négociés · 2 chambres à 662 € · hier</span>
-          <span class="pill" style="background: #EEEEFF; color: #4F55D8; min-height: 30px; padding: 4px 10px; font-size: 12px; align-self: flex-start;">Scénario</span>
-        </div>
-        <div class="metric"><span>Prix vs marché</span><span class="num" style="color: #2E9E6B;">−40 %</span></div>
-        <div class="metric"><span>Cash-flow</span><span class="num" style="color: #2E9E6B;">+404 €</span></div>
-        <div class="metric"><span>Rendement net</span><span class="num">7,9 %</span></div>
-        <div class="metric"><span>TRI 10 ans</span><span class="num">21 %</span></div>
-        <div class="dots"><svg width="12" height="12" viewBox="0 0 12 12"><circle cx="6" cy="6" r="6" fill="#2E9E6B"></circle></svg><svg width="12" height="12" viewBox="0 0 12 12"><circle cx="6" cy="6" r="6" fill="#2E9E6B"></circle></svg><svg width="12" height="12" viewBox="0 0 12 12"><circle cx="6" cy="6" r="6" fill="#2E9E6B"></circle></svg><svg width="12" height="12" viewBox="0 0 12 12"><circle cx="6" cy="6" r="6" fill="#2E9E6B"></circle></svg><svg width="12" height="12" viewBox="0 0 12 12"><circle cx="6" cy="6" r="6" fill="#D98A1E"></circle></svg></div>
-      </div>
-      <div class="card" style="display: grid; grid-template-columns: minmax(0, 2fr) repeat(4, minmax(0, 1fr)) 120px; gap: 20px; align-items: center; opacity: 0.7;">
-        <div style="display: flex; flex-direction: column; gap: 4px;">
-          <span class="display" style="font-size: 18px; font-weight: 700;">T2 · 41 m² · Aix, Jas de Bouffan</span>
-          <span style="font-size: 13px; color: #6B7280;">189 000 € · meublé LLD · il y a 3 jours</span>
-          <span class="pill" style="border: 1px solid #ECE8E0; color: #6B7280; min-height: 30px; padding: 4px 10px; font-size: 12px; align-self: flex-start;">Écarté</span>
-        </div>
-        <div class="metric"><span>Prix vs marché</span><span class="num">+3 %</span></div>
-        <div class="metric"><span>Cash-flow</span><span class="num" style="color: #D9453D;">−310 €</span></div>
-        <div class="metric"><span>Rendement net</span><span class="num">3,4 %</span></div>
-        <div class="metric"><span>TRI 10 ans</span><span class="num" style="color: #D9453D;">−2 %</span></div>
-        <div class="dots"><svg width="12" height="12" viewBox="0 0 12 12"><circle cx="6" cy="6" r="6" fill="#D98A1E"></circle></svg><svg width="12" height="12" viewBox="0 0 12 12"><circle cx="6" cy="6" r="6" fill="#D9453D"></circle></svg><svg width="12" height="12" viewBox="0 0 12 12"><circle cx="6" cy="6" r="6" fill="#D9453D"></circle></svg><svg width="12" height="12" viewBox="0 0 12 12"><circle cx="6" cy="6" r="6" fill="#2E9E6B"></circle></svg><svg width="12" height="12" viewBox="0 0 12 12"><circle cx="6" cy="6" r="6" fill="#2E9E6B"></circle></svg></div>
-      </div>
-    </div>
 
-    <div class="card" style="display: flex; align-items: center; gap: 20px; background: #F7F5FF; border-color: #E4E3FF;">
-      <div style="display: flex; flex-direction: column; gap: 4px; flex-grow: 1;">
-        <span class="display" style="font-size: 17px; font-weight: 700;">Retrouvez vos projets sur tous vos appareils</span>
-        <span style="font-size: 14px; color: #4B5563;">Un compte par e-mail, sans mot de passe. Gratuit.</span>
-      </div>
-      <span class="pill" style="background: #4F55D8; color: #FFFFFF;">Créer mon compte</span>
-    </div>
+        <div
+          style="
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            padding: 32px 40px 40px;
+            gap: 22px;
+          "
+        >
+          <div style="display: flex; align-items: flex-end; gap: 16px">
+            <div style="display: flex; flex-direction: column; gap: 6px">
+              <h1
+                class="display"
+                style="
+                  font-weight: 700;
+                  font-size: 34px;
+                  line-height: 1.1;
+                  margin: 0;
+                  letter-spacing: -0.02em;
+                "
+              >
+                Mes projets
+              </h1>
+              <span style="font-size: 15px; color: #6b7280"
+                >3 projets · sauvegardés sur cet appareil</span
+              >
+            </div>
+            <div style="flex-grow: 1"></div>
+            <div style="display: flex; gap: 8px">
+              <span class="pill" style="background: #eeeeff; color: #4f55d8">Tous</span>
+              <span class="pill" style="border: 1px solid #ece8e0; color: #4b5563">En cours</span>
+              <span class="pill" style="border: 1px solid #ece8e0; color: #4b5563">Écartés</span>
+            </div>
+            <span class="pill" style="border: 1px solid #ece8e0; color: #4b5563"
+              >Comparer 2 projets</span
+            >
+          </div>
 
-    <div style="font-size: 12px; color: #6B7280;">Les cinq points reprennent les feux du rapport : prix · rendement · cash-flow · effort · risques.</div>
-  </div>
-</div>
-</x-dc>
-</body>
+          <div style="display: flex; flex-direction: column; gap: 12px">
+            <div
+              class="card"
+              style="
+                display: grid;
+                grid-template-columns: minmax(0, 2fr) repeat(4, minmax(0, 1fr)) 120px;
+                gap: 20px;
+                align-items: center;
+              "
+            >
+              <div style="display: flex; flex-direction: column; gap: 4px">
+                <span class="display" style="font-size: 18px; font-weight: 700"
+                  >T3 · 65 m² · Marseille 5e</span
+                >
+                <span style="font-size: 13px; color: #6b7280"
+                  >155 000 € · meublé LLD · aujourd'hui</span
+                >
+                <span
+                  class="pill"
+                  style="
+                    background: #fbeeda;
+                    color: #9a5b0f;
+                    min-height: 30px;
+                    padding: 4px 10px;
+                    font-size: 12px;
+                    align-self: flex-start;
+                  "
+                  >Visite prévue</span
+                >
+              </div>
+              <div class="metric">
+                <span>Prix vs marché</span><span class="num" style="color: #2e9e6b">−22 %</span>
+              </div>
+              <div class="metric">
+                <span>Cash-flow</span><span class="num" style="color: #d9453d">−210 €</span>
+              </div>
+              <div class="metric"><span>Rendement net</span><span class="num">4,3 %</span></div>
+              <div class="metric"><span>TRI 10 ans</span><span class="num">3,8 %</span></div>
+              <div class="dots">
+                <svg width="12" height="12" viewBox="0 0 12 12">
+                  <circle cx="6" cy="6" r="6" fill="#2E9E6B"></circle></svg
+                ><svg width="12" height="12" viewBox="0 0 12 12">
+                  <circle cx="6" cy="6" r="6" fill="#D98A1E"></circle></svg
+                ><svg width="12" height="12" viewBox="0 0 12 12">
+                  <circle cx="6" cy="6" r="6" fill="#D9453D"></circle></svg
+                ><svg width="12" height="12" viewBox="0 0 12 12">
+                  <circle cx="6" cy="6" r="6" fill="#2E9E6B"></circle></svg
+                ><svg width="12" height="12" viewBox="0 0 12 12">
+                  <circle cx="6" cy="6" r="6" fill="#2E9E6B"></circle>
+                </svg>
+              </div>
+            </div>
+            <div
+              class="card"
+              style="
+                display: grid;
+                grid-template-columns: minmax(0, 2fr) repeat(4, minmax(0, 1fr)) 120px;
+                gap: 20px;
+                align-items: center;
+              "
+            >
+              <div style="display: flex; flex-direction: column; gap: 4px">
+                <span class="display" style="font-size: 18px; font-weight: 700"
+                  >T3 · Marseille 5e, colocation</span
+                >
+                <span style="font-size: 13px; color: #6b7280"
+                  >119 663 € négociés · 2 chambres à 662 € · hier</span
+                >
+                <span
+                  class="pill"
+                  style="
+                    background: #eeeeff;
+                    color: #4f55d8;
+                    min-height: 30px;
+                    padding: 4px 10px;
+                    font-size: 12px;
+                    align-self: flex-start;
+                  "
+                  >Scénario</span
+                >
+              </div>
+              <div class="metric">
+                <span>Prix vs marché</span><span class="num" style="color: #2e9e6b">−40 %</span>
+              </div>
+              <div class="metric">
+                <span>Cash-flow</span><span class="num" style="color: #2e9e6b">+404 €</span>
+              </div>
+              <div class="metric"><span>Rendement net</span><span class="num">7,9 %</span></div>
+              <div class="metric"><span>TRI 10 ans</span><span class="num">21 %</span></div>
+              <div class="dots">
+                <svg width="12" height="12" viewBox="0 0 12 12">
+                  <circle cx="6" cy="6" r="6" fill="#2E9E6B"></circle></svg
+                ><svg width="12" height="12" viewBox="0 0 12 12">
+                  <circle cx="6" cy="6" r="6" fill="#2E9E6B"></circle></svg
+                ><svg width="12" height="12" viewBox="0 0 12 12">
+                  <circle cx="6" cy="6" r="6" fill="#2E9E6B"></circle></svg
+                ><svg width="12" height="12" viewBox="0 0 12 12">
+                  <circle cx="6" cy="6" r="6" fill="#2E9E6B"></circle></svg
+                ><svg width="12" height="12" viewBox="0 0 12 12">
+                  <circle cx="6" cy="6" r="6" fill="#D98A1E"></circle>
+                </svg>
+              </div>
+            </div>
+            <div
+              class="card"
+              style="
+                display: grid;
+                grid-template-columns: minmax(0, 2fr) repeat(4, minmax(0, 1fr)) 120px;
+                gap: 20px;
+                align-items: center;
+                opacity: 0.7;
+              "
+            >
+              <div style="display: flex; flex-direction: column; gap: 4px">
+                <span class="display" style="font-size: 18px; font-weight: 700"
+                  >T2 · 41 m² · Aix, Jas de Bouffan</span
+                >
+                <span style="font-size: 13px; color: #6b7280"
+                  >189 000 € · meublé LLD · il y a 3 jours</span
+                >
+                <span
+                  class="pill"
+                  style="
+                    border: 1px solid #ece8e0;
+                    color: #6b7280;
+                    min-height: 30px;
+                    padding: 4px 10px;
+                    font-size: 12px;
+                    align-self: flex-start;
+                  "
+                  >Écarté</span
+                >
+              </div>
+              <div class="metric"><span>Prix vs marché</span><span class="num">+3 %</span></div>
+              <div class="metric">
+                <span>Cash-flow</span><span class="num" style="color: #d9453d">−310 €</span>
+              </div>
+              <div class="metric"><span>Rendement net</span><span class="num">3,4 %</span></div>
+              <div class="metric">
+                <span>TRI 10 ans</span><span class="num" style="color: #d9453d">−2 %</span>
+              </div>
+              <div class="dots">
+                <svg width="12" height="12" viewBox="0 0 12 12">
+                  <circle cx="6" cy="6" r="6" fill="#D98A1E"></circle></svg
+                ><svg width="12" height="12" viewBox="0 0 12 12">
+                  <circle cx="6" cy="6" r="6" fill="#D9453D"></circle></svg
+                ><svg width="12" height="12" viewBox="0 0 12 12">
+                  <circle cx="6" cy="6" r="6" fill="#D9453D"></circle></svg
+                ><svg width="12" height="12" viewBox="0 0 12 12">
+                  <circle cx="6" cy="6" r="6" fill="#2E9E6B"></circle></svg
+                ><svg width="12" height="12" viewBox="0 0 12 12">
+                  <circle cx="6" cy="6" r="6" fill="#2E9E6B"></circle>
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <div
+            class="card"
+            style="
+              display: flex;
+              align-items: center;
+              gap: 20px;
+              background: #f7f5ff;
+              border-color: #e4e3ff;
+            "
+          >
+            <div style="display: flex; flex-direction: column; gap: 4px; flex-grow: 1">
+              <span class="display" style="font-size: 17px; font-weight: 700"
+                >Retrouvez vos projets sur tous vos appareils</span
+              >
+              <span style="font-size: 14px; color: #4b5563"
+                >Un compte par e-mail, sans mot de passe. Gratuit.</span
+              >
+            </div>
+            <span class="pill" style="background: #4f55d8; color: #ffffff">Créer mon compte</span>
+          </div>
+
+          <div style="font-size: 12px; color: #6b7280">
+            Les cinq points reprennent les feux du rapport : prix · rendement · cash-flow · effort ·
+            risques.
+          </div>
+        </div>
+      </div>
+    </x-dc>
+  </body>
 </html>

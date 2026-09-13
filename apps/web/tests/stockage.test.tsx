@@ -1,0 +1,133 @@
+import { projetExemple } from '@loupe/moteur';
+import { act, renderHook } from '@testing-library/react';
+import type { ReactNode } from 'react';
+import { describe, expect, it } from 'vitest';
+
+import { ProjetsProvider, useProjets } from '@/stockage/ProjetsContext';
+import {
+  CLE_STOCKAGE,
+  creerProjet,
+  ecrireProjets,
+  lireProjets,
+  nomParDefaut,
+} from '@/stockage/projets';
+
+/** Stockage en mémoire, pour tester le fournisseur sans toucher localStorage. */
+function stockageMemoire(): Storage {
+  const donnees = new Map<string, string>();
+  return {
+    get length(): number {
+      return donnees.size;
+    },
+    clear: () => {
+      donnees.clear();
+    },
+    getItem: (cle: string) => donnees.get(cle) ?? null,
+    key: (index: number) => [...donnees.keys()][index] ?? null,
+    removeItem: (cle: string) => {
+      donnees.delete(cle);
+    },
+    setItem: (cle: string, valeur: string) => {
+      donnees.set(cle, valeur);
+    },
+  };
+}
+
+const stockage = (): Storage => window.localStorage;
+
+describe('lireProjets', () => {
+  it('rend une liste vide sans contenu, avec un JSON cassé ou un schéma invalide', () => {
+    expect(lireProjets(stockage())).toEqual([]);
+    stockage().setItem(CLE_STOCKAGE, '{pas du json');
+    expect(lireProjets(stockage())).toEqual([]);
+    stockage().setItem(CLE_STOCKAGE, JSON.stringify([{ id: 'x' }]));
+    expect(lireProjets(stockage())).toEqual([]);
+  });
+
+  it('relit ce qui a été écrit', () => {
+    const p = creerProjet({
+      nom: 'Test',
+      genererId: () => 'id-1',
+      maintenant: () => '2026-09-13T00:00:00.000Z',
+    });
+    ecrireProjets(stockage(), [p]);
+    const lus = lireProjets(stockage());
+    expect(lus).toHaveLength(1);
+    expect(lus[0]?.id).toBe('id-1');
+    expect(lus[0]?.nom).toBe('Test');
+    expect(lus[0]?.projet.hypotheses.achat.prix).toBe(155_000);
+    expect(lus[0]?.projet.hypotheses.location.vacanceSemaines).toBe(3);
+  });
+});
+
+describe('creerProjet', () => {
+  it('génère un identifiant et des dates par défaut, statut « analyse »', () => {
+    const p = creerProjet();
+    expect(p.id.length).toBeGreaterThan(8);
+    expect(p.projet.id).toBe(p.id);
+    expect(p.statut).toBe('analyse');
+    expect(p.creeLe).toBe(p.modifieLe);
+    expect(new Date(p.creeLe).getFullYear()).toBeGreaterThanOrEqual(2026);
+  });
+
+  it('accepte une source, un nom et un statut', () => {
+    const source = {
+      ...projetExemple,
+      bien: { ...projetExemple.bien, type: 'maison' as const, surface: 120 },
+    };
+    const p = creerProjet({ source, statut: 'ecarte' });
+    expect(p.nom).toBe('Maison · 120 m² · dépt 13');
+    expect(p.statut).toBe('ecarte');
+    expect(p.projet.bien.type).toBe('maison');
+  });
+
+  it('nomParDefaut pour un appartement', () => {
+    expect(nomParDefaut(projetExemple)).toBe('T3 · 65 m² · dépt 13');
+  });
+});
+
+describe('ProjetsProvider / useProjets', () => {
+  it('refuse d’être utilisé hors du fournisseur', () => {
+    expect(() => renderHook(() => useProjets())).toThrow(/ProjetsProvider/);
+  });
+
+  it('amorce, crée, change le statut, supprime, dans un stockage fourni', () => {
+    const stockage = stockageMemoire();
+    const enveloppe = ({ children }: { children: ReactNode }): ReactNode => (
+      <ProjetsProvider stockage={stockage}>{children}</ProjetsProvider>
+    );
+    const { result } = renderHook(() => useProjets(), { wrapper: enveloppe });
+    expect(result.current.projets).toHaveLength(1);
+    expect(lireProjets(stockage)).toHaveLength(1);
+    expect(lireProjets(window.localStorage)).toHaveLength(0);
+
+    let cree = '';
+    act(() => {
+      cree = result.current.creer({ nom: 'Second' }).id;
+    });
+    expect(result.current.projets[0]?.nom).toBe('Second');
+    expect(result.current.trouver(cree)?.nom).toBe('Second');
+    expect(result.current.trouver(undefined)).toBeUndefined();
+
+    act(() => {
+      result.current.changerStatut(cree, 'ecarte');
+    });
+    expect(result.current.trouver(cree)?.statut).toBe('ecarte');
+
+    act(() => {
+      result.current.supprimer(cree);
+    });
+    expect(result.current.projets).toHaveLength(1);
+    expect(lireProjets(stockage)).toHaveLength(1);
+  });
+
+  it('réutilise une liste déjà présente sans la réamorcer', () => {
+    const stockage = stockageMemoire();
+    ecrireProjets(stockage, [creerProjet({ nom: 'Existant' }), creerProjet({ nom: 'Autre' })]);
+    const enveloppe = ({ children }: { children: ReactNode }): ReactNode => (
+      <ProjetsProvider stockage={stockage}>{children}</ProjetsProvider>
+    );
+    const { result } = renderHook(() => useProjets(), { wrapper: enveloppe });
+    expect(result.current.projets.map((p) => p.nom)).toEqual(['Existant', 'Autre']);
+  });
+});

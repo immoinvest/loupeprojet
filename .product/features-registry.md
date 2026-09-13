@@ -2,23 +2,25 @@
 
 Format : `- [ ] slug — titre — date — scope`
 
-## En cours
+## En cours (PR ouvertes, à merger dans l'ordre)
 
-- [ ] moteur-calcul — Moteur de calcul Loupe (financement, cash-flow, fiscalité, revente, rendement/TRI, verdict, scénarios) en TypeScript pur, 204 tests, couverture 100 %, avec mise en place du monorepo — 2026-09-13 — `packages/moteur` + racine — **PR ouverte, en attente de merge**
+- [ ] moteur-calcul — Moteur de calcul Loupe en TypeScript pur, 204 tests, couverture 100 %, monorepo — 2026-09-13 — `packages/moteur` + racine — PR #1
+- [ ] direction-visuelle — Direction C « Le guide » retenue, ADR-004, maquettes coque SaaS — 2026-09-13 — `.product/` — PR #2
+- [ ] web-socle — `apps/web` : React + Vite + Tailwind v4, coque SaaS, Mes projets, Rapport, stockage local, Cloudflare Pages — 2026-09-13 — `apps/web` — PR #3
 
 ## À venir (ordre proposé, une par session)
 
-- [ ] direction-visuelle — 2-3 pistes visuelles à proposer et valider avant toute UI (Rule 10)
-- [ ] web-socle — apps/web : Vite, React, Tailwind, shadcn/ui, routing, stockage local, déploiement Cloudflare Pages
-- [ ] ecran-verifier-rapport — écrans Vérifier + Rapport branchés sur le moteur, saisie manuelle (prix, surface, ville)
+- [ ] ecran-verifier-rapport — onglet Hypothèses éditable (recalcul instantané), saisie manuelle (prix, surface, ville), création d'un projet vide
+- [ ] onglets-detail — Fiscalité (4 régimes année par année), Revente, Visite (points de vigilance)
 - [ ] worker-socle — apps/worker : Hono, proxy + cache KV, rate-limit
 - [ ] enrichissement-marche — géocodage, DVF, ADEME, ANIL, REI, Géorisques, ABC
 - [ ] extraction-llm — /extract Mistral JSON strict, repli regex, cache
 - [ ] capture-bookmarklet — lecture LBC, SeLoger, Bien'ici depuis le navigateur
 - [ ] extension — WebExtension MV3, règles par portail sur R2, test d'annonce témoin
-- [ ] garder — sauvegarde, PDF, lien de partage
+- [ ] garder — PDF soigné, lien de partage, export
+- [ ] e2e-playwright — parcours complets en navigateur réel, en CI
 - [ ] referentiels — GitHub Action mensuelle ANIL/REI/ABC/usure
 
 ## Livrées
 
-_(aucune : la première PR attend le merge)_
+_(aucune : les PR attendent le merge)_

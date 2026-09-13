@@ -1,177 +1,596 @@
 <!doctype html>
 <html>
-<head>
-  <meta charset="utf-8">
-  <script src="./support.js"></script>
-</head>
-<body>
-<x-dc>
-<helmet>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Source+Sans+3:wght@400;600&family=Spline+Sans+Mono:wght@400;500&display=swap">
-  <style>
-    body { margin: 0; font-family: "Source Sans 3", "Segoe UI", system-ui, sans-serif; color: #1E1A16; background: #F6F1E8; }
-    a { color: #1E1A16; } a:hover { color: #B4702A; }
-    .num { font-family: "Spline Sans Mono", "Courier New", monospace; font-variant-numeric: tabular-nums; }
-    .serif { font-family: Newsreader, Georgia, serif; }
-    .eyebrow { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: #7A716A; }
-    .rule { border-top: 1px solid #D9CFC0; }
-    .row { display: flex; justify-content: space-between; gap: 16px; padding: 7px 0; border-bottom: 1px solid #E8DFD2; font-size: 15px; }
-  </style>
-</helmet>
-<div style="width: 1280px; min-height: 1560px; background: #F6F1E8; box-sizing: border-box; padding: 0 0 48px;">
+  <head>
+    <meta charset="utf-8" />
+    <script src="./support.js"></script>
+  </head>
+  <body>
+    <x-dc>
+      <helmet>
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Source+Sans+3:wght@400;600&family=Spline+Sans+Mono:wght@400;500&display=swap"
+        />
+        <style>
+          body {
+            margin: 0;
+            font-family: 'Source Sans 3', 'Segoe UI', system-ui, sans-serif;
+            color: #1e1a16;
+            background: #f6f1e8;
+          }
+          a {
+            color: #1e1a16;
+          }
+          a:hover {
+            color: #b4702a;
+          }
+          .num {
+            font-family: 'Spline Sans Mono', 'Courier New', monospace;
+            font-variant-numeric: tabular-nums;
+          }
+          .serif {
+            font-family: Newsreader, Georgia, serif;
+          }
+          .eyebrow {
+            font-size: 11px;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: #7a716a;
+          }
+          .rule {
+            border-top: 1px solid #d9cfc0;
+          }
+          .row {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 7px 0;
+            border-bottom: 1px solid #e8dfd2;
+            font-size: 15px;
+          }
+        </style>
+      </helmet>
+      <div
+        style="
+          width: 1280px;
+          min-height: 1560px;
+          background: #f6f1e8;
+          box-sizing: border-box;
+          padding: 0 0 48px;
+        "
+      >
+        <div
+          style="
+            display: flex;
+            align-items: baseline;
+            gap: 28px;
+            padding: 22px 64px;
+            border-bottom: 1px solid #1e1a16;
+          "
+        >
+          <div class="serif" style="font-size: 26px; font-weight: 600; letter-spacing: -0.01em">
+            Loupe
+          </div>
+          <div style="display: flex; gap: 22px; font-size: 14px">
+            <span style="border-bottom: 1px solid #1e1a16; padding-bottom: 2px">Rapport</span>
+            <span style="color: #7a716a">Hypothèses</span>
+            <span style="color: #7a716a">Mes projets</span>
+            <span style="color: #7a716a">Comment c'est calculé</span>
+          </div>
+          <div style="flex-grow: 1"></div>
+          <div class="eyebrow">Dossier n° 1 · sauvegardé sur cet appareil</div>
+        </div>
 
-  <div style="display: flex; align-items: baseline; gap: 28px; padding: 22px 64px; border-bottom: 1px solid #1E1A16;">
-    <div class="serif" style="font-size: 26px; font-weight: 600; letter-spacing: -0.01em;">Loupe</div>
-    <div style="display: flex; gap: 22px; font-size: 14px;">
-      <span style="border-bottom: 1px solid #1E1A16; padding-bottom: 2px;">Rapport</span>
-      <span style="color: #7A716A;">Hypothèses</span>
-      <span style="color: #7A716A;">Mes projets</span>
-      <span style="color: #7A716A;">Comment c'est calculé</span>
-    </div>
-    <div style="flex-grow: 1;"></div>
-    <div class="eyebrow">Dossier n° 1 · sauvegardé sur cet appareil</div>
-  </div>
+        <div
+          style="
+            display: grid;
+            grid-template-columns: 220px minmax(0, 1fr);
+            gap: 48px;
+            padding: 44px 64px 0;
+          "
+        >
+          <div style="display: flex; flex-direction: column; gap: 6px">
+            <div class="eyebrow">Le bien</div>
+            <div class="serif" style="font-size: 22px; line-height: 1.2">T3 · 65 m²</div>
+            <div style="font-size: 15px; color: #4a433d">Marseille 5e, Baille</div>
+            <div style="font-size: 15px; color: #4a433d">
+              3e étage sans ascenseur · 1962 · DPE D
+            </div>
+            <div class="num" style="font-size: 15px; margin-top: 8px">155 000 € FAI</div>
+            <div class="num" style="font-size: 13px; color: #7a716a">2 385 €/m²</div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 14px">
+            <div class="eyebrow">Verdict</div>
+            <h1
+              class="serif"
+              style="
+                font-weight: 500;
+                font-size: 44px;
+                line-height: 1.1;
+                margin: 0;
+                letter-spacing: -0.015em;
+                text-wrap: balance;
+              "
+            >
+              Prix attractif, mais l'opération ne s'autofinance pas en meublé classique.
+            </h1>
+            <p
+              style="font-size: 17px; line-height: 1.55; margin: 0; max-width: 62ch; color: #2e2823"
+            >
+              Le bien est 22 % sous les ventes réelles du quartier et la banque devrait suivre. Il
+              manque toutefois 210 € par mois, vacance comprise, pour couvrir le crédit et les
+              charges. Deux leviers : négocier autour de 120 000 €, ou louer en colocation.
+            </p>
+          </div>
+        </div>
 
-  <div style="display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 48px; padding: 44px 64px 0;">
-    <div style="display: flex; flex-direction: column; gap: 6px;">
-      <div class="eyebrow">Le bien</div>
-      <div class="serif" style="font-size: 22px; line-height: 1.2;">T3 · 65 m²</div>
-      <div style="font-size: 15px; color: #4A433D;">Marseille 5e, Baille</div>
-      <div style="font-size: 15px; color: #4A433D;">3e étage sans ascenseur · 1962 · DPE D</div>
-      <div class="num" style="font-size: 15px; margin-top: 8px;">155 000 € FAI</div>
-      <div class="num" style="font-size: 13px; color: #7A716A;">2 385 €/m²</div>
-    </div>
-    <div style="display: flex; flex-direction: column; gap: 14px;">
-      <div class="eyebrow">Verdict</div>
-      <h1 class="serif" style="font-weight: 500; font-size: 44px; line-height: 1.1; margin: 0; letter-spacing: -0.015em; text-wrap: balance;">Prix attractif, mais l'opération ne s'autofinance pas en meublé classique.</h1>
-      <p style="font-size: 17px; line-height: 1.55; margin: 0; max-width: 62ch; color: #2E2823;">Le bien est 22 % sous les ventes réelles du quartier et la banque devrait suivre. Il manque toutefois 210 € par mois, vacance comprise, pour couvrir le crédit et les charges. Deux leviers : négocier autour de 120 000 €, ou louer en colocation.</p>
-    </div>
-  </div>
+        <div
+          style="
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 0;
+            margin: 36px 64px 0;
+            border-top: 1px solid #1e1a16;
+            border-bottom: 1px solid #1e1a16;
+          "
+        >
+          <div
+            style="
+              display: flex;
+              flex-direction: column;
+              gap: 6px;
+              padding: 16px 18px 16px 0;
+              border-right: 1px solid #d9cfc0;
+            "
+          >
+            <div style="display: flex; align-items: center; gap: 8px">
+              <svg width="10" height="10" viewBox="0 0 10 10">
+                <circle cx="5" cy="5" r="5" fill="#3B7A4A"></circle></svg
+              ><span class="eyebrow">Prix vs ventes réelles</span>
+            </div>
+            <div class="num" style="font-size: 26px">−22 %</div>
+            <div style="font-size: 13px; color: #7a716a">bon</div>
+          </div>
+          <div
+            style="
+              display: flex;
+              flex-direction: column;
+              gap: 6px;
+              padding: 16px 18px;
+              border-right: 1px solid #d9cfc0;
+            "
+          >
+            <div style="display: flex; align-items: center; gap: 8px">
+              <svg width="10" height="10" viewBox="0 0 10 10">
+                <circle cx="5" cy="5" r="5" fill="#B4702A"></circle></svg
+              ><span class="eyebrow">Rendement net</span>
+            </div>
+            <div class="num" style="font-size: 26px">4,3 %</div>
+            <div style="font-size: 13px; color: #7a716a">à surveiller</div>
+          </div>
+          <div
+            style="
+              display: flex;
+              flex-direction: column;
+              gap: 6px;
+              padding: 16px 18px;
+              border-right: 1px solid #d9cfc0;
+            "
+          >
+            <div style="display: flex; align-items: center; gap: 8px">
+              <svg width="10" height="10" viewBox="0 0 10 10">
+                <circle cx="5" cy="5" r="5" fill="#A63D2F"></circle></svg
+              ><span class="eyebrow">Cash-flow mensuel</span>
+            </div>
+            <div class="num" style="font-size: 26px; color: #a63d2f">−210 €</div>
+            <div style="font-size: 13px; color: #7a716a">problème</div>
+          </div>
+          <div
+            style="
+              display: flex;
+              flex-direction: column;
+              gap: 6px;
+              padding: 16px 18px;
+              border-right: 1px solid #d9cfc0;
+            "
+          >
+            <div style="display: flex; align-items: center; gap: 8px">
+              <svg width="10" height="10" viewBox="0 0 10 10">
+                <circle cx="5" cy="5" r="5" fill="#3B7A4A"></circle></svg
+              ><span class="eyebrow">Effort HCSF</span>
+            </div>
+            <div class="num" style="font-size: 26px">25 %</div>
+            <div style="font-size: 13px; color: #7a716a">bon, seuil 35 %</div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 6px; padding: 16px 0 16px 18px">
+            <div style="display: flex; align-items: center; gap: 8px">
+              <svg width="10" height="10" viewBox="0 0 10 10">
+                <circle cx="5" cy="5" r="5" fill="#3B7A4A"></circle></svg
+              ><span class="eyebrow">Risques</span>
+            </div>
+            <div class="num" style="font-size: 26px">0</div>
+            <div style="font-size: 13px; color: #7a716a">rien de bloquant</div>
+          </div>
+        </div>
 
-  <div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0; margin: 36px 64px 0; border-top: 1px solid #1E1A16; border-bottom: 1px solid #1E1A16;">
-    <div style="display: flex; flex-direction: column; gap: 6px; padding: 16px 18px 16px 0; border-right: 1px solid #D9CFC0;">
-      <div style="display: flex; align-items: center; gap: 8px;"><svg width="10" height="10" viewBox="0 0 10 10"><circle cx="5" cy="5" r="5" fill="#3B7A4A"></circle></svg><span class="eyebrow">Prix vs ventes réelles</span></div>
-      <div class="num" style="font-size: 26px;">−22 %</div>
-      <div style="font-size: 13px; color: #7A716A;">bon</div>
-    </div>
-    <div style="display: flex; flex-direction: column; gap: 6px; padding: 16px 18px; border-right: 1px solid #D9CFC0;">
-      <div style="display: flex; align-items: center; gap: 8px;"><svg width="10" height="10" viewBox="0 0 10 10"><circle cx="5" cy="5" r="5" fill="#B4702A"></circle></svg><span class="eyebrow">Rendement net</span></div>
-      <div class="num" style="font-size: 26px;">4,3 %</div>
-      <div style="font-size: 13px; color: #7A716A;">à surveiller</div>
-    </div>
-    <div style="display: flex; flex-direction: column; gap: 6px; padding: 16px 18px; border-right: 1px solid #D9CFC0;">
-      <div style="display: flex; align-items: center; gap: 8px;"><svg width="10" height="10" viewBox="0 0 10 10"><circle cx="5" cy="5" r="5" fill="#A63D2F"></circle></svg><span class="eyebrow">Cash-flow mensuel</span></div>
-      <div class="num" style="font-size: 26px; color: #A63D2F;">−210 €</div>
-      <div style="font-size: 13px; color: #7A716A;">problème</div>
-    </div>
-    <div style="display: flex; flex-direction: column; gap: 6px; padding: 16px 18px; border-right: 1px solid #D9CFC0;">
-      <div style="display: flex; align-items: center; gap: 8px;"><svg width="10" height="10" viewBox="0 0 10 10"><circle cx="5" cy="5" r="5" fill="#3B7A4A"></circle></svg><span class="eyebrow">Effort HCSF</span></div>
-      <div class="num" style="font-size: 26px;">25 %</div>
-      <div style="font-size: 13px; color: #7A716A;">bon, seuil 35 %</div>
-    </div>
-    <div style="display: flex; flex-direction: column; gap: 6px; padding: 16px 0 16px 18px;">
-      <div style="display: flex; align-items: center; gap: 8px;"><svg width="10" height="10" viewBox="0 0 10 10"><circle cx="5" cy="5" r="5" fill="#3B7A4A"></circle></svg><span class="eyebrow">Risques</span></div>
-      <div class="num" style="font-size: 26px;">0</div>
-      <div style="font-size: 13px; color: #7A716A;">rien de bloquant</div>
-    </div>
-  </div>
+        <div
+          style="
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 64px;
+            padding: 40px 64px 0;
+          "
+        >
+          <div style="display: flex; flex-direction: column; gap: 14px">
+            <h2
+              class="serif"
+              style="font-weight: 500; font-size: 28px; margin: 0; letter-spacing: -0.01em"
+            >
+              Est-ce que c'est cher ?
+            </h2>
+            <div style="position: relative; height: 54px; margin: 10px 6px 0">
+              <div
+                style="
+                  position: absolute;
+                  left: 0;
+                  right: 0;
+                  top: 24px;
+                  height: 1px;
+                  background: #1e1a16;
+                "
+              ></div>
+              <div
+                style="
+                  position: absolute;
+                  left: 22%;
+                  top: 18px;
+                  width: 1px;
+                  height: 13px;
+                  background: #1e1a16;
+                "
+              ></div>
+              <div
+                class="num"
+                style="
+                  position: absolute;
+                  left: 22%;
+                  top: 36px;
+                  transform: translateX(-50%);
+                  font-size: 12px;
+                  color: #7a716a;
+                "
+              >
+                Q1 2 700
+              </div>
+              <div
+                style="
+                  position: absolute;
+                  left: 50%;
+                  top: 18px;
+                  width: 1px;
+                  height: 13px;
+                  background: #1e1a16;
+                "
+              ></div>
+              <div
+                class="num"
+                style="
+                  position: absolute;
+                  left: 50%;
+                  top: 36px;
+                  transform: translateX(-50%);
+                  font-size: 12px;
+                  color: #7a716a;
+                "
+              >
+                médiane 3 050
+              </div>
+              <div
+                style="
+                  position: absolute;
+                  left: 78%;
+                  top: 18px;
+                  width: 1px;
+                  height: 13px;
+                  background: #1e1a16;
+                "
+              ></div>
+              <div
+                class="num"
+                style="
+                  position: absolute;
+                  left: 78%;
+                  top: 36px;
+                  transform: translateX(-50%);
+                  font-size: 12px;
+                  color: #7a716a;
+                "
+              >
+                Q3 3 400
+              </div>
+              <div
+                style="
+                  position: absolute;
+                  left: 5%;
+                  top: 17px;
+                  width: 15px;
+                  height: 15px;
+                  border-radius: 50%;
+                  background: #b4702a;
+                  transform: translateX(-50%);
+                "
+              ></div>
+              <div
+                class="num"
+                style="
+                  position: absolute;
+                  left: 5%;
+                  top: -6px;
+                  transform: translateX(-50%);
+                  font-size: 13px;
+                  font-weight: 500;
+                  color: #b4702a;
+                  white-space: nowrap;
+                "
+              >
+                ce bien 2 385 €/m²
+              </div>
+            </div>
+            <p style="font-size: 15px; line-height: 1.55; margin: 6px 0 0; color: #2e2823">
+              31 appartements vendus à moins de 500 m depuis avril 2024. Le prix demandé est sous le
+              premier quart : une bonne affaire, ou quelque chose à vérifier en visite (troisième
+              étage sans ascenseur, travaux, copropriété).
+            </p>
+            <div
+              class="rule"
+              style="
+                padding-top: 12px;
+                font-size: 14px;
+                line-height: 1.5;
+                color: #7a716a;
+                font-style: italic;
+              "
+            >
+              On compare aux ventes signées chez le notaire, pas aux prix affichés dans les
+              annonces, qui sont 5 à 10 % au-dessus.
+            </div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 14px">
+            <h2
+              class="serif"
+              style="font-weight: 500; font-size: 28px; margin: 0; letter-spacing: -0.01em"
+            >
+              Est-ce que ça s'autofinance ?
+            </h2>
+            <div style="display: flex; flex-direction: column">
+              <div class="row"><span>Loyer hors charges</span><span class="num">+980</span></div>
+              <div class="row"><span>Crédit et assurance</span><span class="num">−827</span></div>
+              <div class="row"><span>Taxe foncière</span><span class="num">−88</span></div>
+              <div class="row"><span>Copropriété</span><span class="num">−90</span></div>
+              <div class="row"><span>PNO, comptable, CFE</span><span class="num">−65</span></div>
+              <div class="row"><span>Entretien</span><span class="num">−65</span></div>
+              <div class="row">
+                <span>Vacance, 3 semaines par an</span><span class="num">−56</span>
+              </div>
+              <div
+                class="row"
+                style="
+                  border-bottom: none;
+                  border-top: 1px solid #1e1a16;
+                  font-weight: 600;
+                  padding-top: 10px;
+                "
+              >
+                <span>Cash-flow mensuel</span><span class="num" style="color: #a63d2f">−210 €</span>
+              </div>
+            </div>
+            <p style="font-size: 15px; line-height: 1.55; margin: 0; color: #2e2823">
+              Point mort : il faudrait <span class="num">1 203 €</span> de loyer pour équilibrer. Le
+              crédit absorbe 84 % du loyer.
+            </p>
+          </div>
+        </div>
 
-  <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 64px; padding: 40px 64px 0;">
-    <div style="display: flex; flex-direction: column; gap: 14px;">
-      <h2 class="serif" style="font-weight: 500; font-size: 28px; margin: 0; letter-spacing: -0.01em;">Est-ce que c'est cher ?</h2>
-      <div style="position: relative; height: 54px; margin: 10px 6px 0;">
-        <div style="position: absolute; left: 0; right: 0; top: 24px; height: 1px; background: #1E1A16;"></div>
-        <div style="position: absolute; left: 22%; top: 18px; width: 1px; height: 13px; background: #1E1A16;"></div>
-        <div class="num" style="position: absolute; left: 22%; top: 36px; transform: translateX(-50%); font-size: 12px; color: #7A716A;">Q1 2 700</div>
-        <div style="position: absolute; left: 50%; top: 18px; width: 1px; height: 13px; background: #1E1A16;"></div>
-        <div class="num" style="position: absolute; left: 50%; top: 36px; transform: translateX(-50%); font-size: 12px; color: #7A716A;">médiane 3 050</div>
-        <div style="position: absolute; left: 78%; top: 18px; width: 1px; height: 13px; background: #1E1A16;"></div>
-        <div class="num" style="position: absolute; left: 78%; top: 36px; transform: translateX(-50%); font-size: 12px; color: #7A716A;">Q3 3 400</div>
-        <div style="position: absolute; left: 5%; top: 17px; width: 15px; height: 15px; border-radius: 50%; background: #B4702A; transform: translateX(-50%);"></div>
-        <div class="num" style="position: absolute; left: 5%; top: -6px; transform: translateX(-50%); font-size: 13px; font-weight: 500; color: #B4702A; white-space: nowrap;">ce bien 2 385 €/m²</div>
-      </div>
-      <p style="font-size: 15px; line-height: 1.55; margin: 6px 0 0; color: #2E2823;">31 appartements vendus à moins de 500 m depuis avril 2024. Le prix demandé est sous le premier quart : une bonne affaire, ou quelque chose à vérifier en visite (troisième étage sans ascenseur, travaux, copropriété).</p>
-      <div class="rule" style="padding-top: 12px; font-size: 14px; line-height: 1.5; color: #7A716A; font-style: italic;">On compare aux ventes signées chez le notaire, pas aux prix affichés dans les annonces, qui sont 5 à 10 % au-dessus.</div>
-    </div>
-    <div style="display: flex; flex-direction: column; gap: 14px;">
-      <h2 class="serif" style="font-weight: 500; font-size: 28px; margin: 0; letter-spacing: -0.01em;">Est-ce que ça s'autofinance ?</h2>
-      <div style="display: flex; flex-direction: column;">
-        <div class="row"><span>Loyer hors charges</span><span class="num">+980</span></div>
-        <div class="row"><span>Crédit et assurance</span><span class="num">−827</span></div>
-        <div class="row"><span>Taxe foncière</span><span class="num">−88</span></div>
-        <div class="row"><span>Copropriété</span><span class="num">−90</span></div>
-        <div class="row"><span>PNO, comptable, CFE</span><span class="num">−65</span></div>
-        <div class="row"><span>Entretien</span><span class="num">−65</span></div>
-        <div class="row"><span>Vacance, 3 semaines par an</span><span class="num">−56</span></div>
-        <div class="row" style="border-bottom: none; border-top: 1px solid #1E1A16; font-weight: 600; padding-top: 10px;"><span>Cash-flow mensuel</span><span class="num" style="color: #A63D2F;">−210 €</span></div>
-      </div>
-      <p style="font-size: 15px; line-height: 1.55; margin: 0; color: #2E2823;">Point mort : il faudrait <span class="num">1 203 €</span> de loyer pour équilibrer. Le crédit absorbe 84 % du loyer.</p>
-    </div>
-  </div>
+        <div style="margin: 44px 64px 0; display: flex; flex-direction: column; gap: 14px">
+          <div style="display: flex; align-items: baseline; gap: 18px">
+            <h2
+              class="serif"
+              style="font-weight: 500; font-size: 28px; margin: 0; letter-spacing: -0.01em"
+            >
+              Combien d'impôts, selon le régime ?
+            </h2>
+            <span style="font-size: 14px; color: #7a716a">cumul sur 10 ans, tranche à 30 %</span>
+          </div>
+          <div
+            style="
+              display: grid;
+              grid-template-columns: repeat(4, minmax(0, 1fr));
+              gap: 0;
+              border-top: 1px solid #1e1a16;
+            "
+          >
+            <div
+              style="
+                padding: 16px 18px 16px 0;
+                border-right: 1px solid #d9cfc0;
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+              "
+            >
+              <div style="font-size: 15px; font-weight: 600">
+                Meublé au réel <span style="font-weight: 400; color: #b4702a">· retenu</span>
+              </div>
+              <div class="num" style="font-size: 30px">0 €</div>
+              <div style="font-size: 13px; color: #7a716a; line-height: 1.45">
+                Les amortissements effacent le résultat ; 50 807 € restent en réserve après dix ans.
+              </div>
+            </div>
+            <div
+              style="
+                padding: 16px 18px;
+                border-right: 1px solid #d9cfc0;
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+              "
+            >
+              <div style="font-size: 15px; font-weight: 600">Nu au réel</div>
+              <div class="num" style="font-size: 30px">4 235 €</div>
+              <div style="font-size: 13px; color: #7a716a; line-height: 1.45">
+                Déficit foncier les premières années, imposé à partir de la sixième.
+              </div>
+            </div>
+            <div
+              style="
+                padding: 16px 18px;
+                border-right: 1px solid #d9cfc0;
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+              "
+            >
+              <div style="font-size: 15px; font-weight: 600">Meublé micro-BIC</div>
+              <div class="num" style="font-size: 30px">26 928 €</div>
+              <div style="font-size: 13px; color: #7a716a; line-height: 1.45">
+                Simple, sans comptable, mais imposé dès la première année.
+              </div>
+            </div>
+            <div style="padding: 16px 0 16px 18px; display: flex; flex-direction: column; gap: 4px">
+              <div style="font-size: 15px; font-weight: 600">Nu micro-foncier</div>
+              <div class="num" style="font-size: 30px">31 757 €</div>
+              <div style="font-size: 13px; color: #7a716a; line-height: 1.45">
+                Le plus simple et le plus cher. À éviter avec un crédit.
+              </div>
+            </div>
+          </div>
+        </div>
 
-  <div style="margin: 44px 64px 0; display: flex; flex-direction: column; gap: 14px;">
-    <div style="display: flex; align-items: baseline; gap: 18px;">
-      <h2 class="serif" style="font-weight: 500; font-size: 28px; margin: 0; letter-spacing: -0.01em;">Combien d'impôts, selon le régime ?</h2>
-      <span style="font-size: 14px; color: #7A716A;">cumul sur 10 ans, tranche à 30 %</span>
-    </div>
-    <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; border-top: 1px solid #1E1A16;">
-      <div style="padding: 16px 18px 16px 0; border-right: 1px solid #D9CFC0; display: flex; flex-direction: column; gap: 4px;">
-        <div style="font-size: 15px; font-weight: 600;">Meublé au réel <span style="font-weight: 400; color: #B4702A;">· retenu</span></div>
-        <div class="num" style="font-size: 30px;">0 €</div>
-        <div style="font-size: 13px; color: #7A716A; line-height: 1.45;">Les amortissements effacent le résultat ; 50 807 € restent en réserve après dix ans.</div>
-      </div>
-      <div style="padding: 16px 18px; border-right: 1px solid #D9CFC0; display: flex; flex-direction: column; gap: 4px;">
-        <div style="font-size: 15px; font-weight: 600;">Nu au réel</div>
-        <div class="num" style="font-size: 30px;">4 235 €</div>
-        <div style="font-size: 13px; color: #7A716A; line-height: 1.45;">Déficit foncier les premières années, imposé à partir de la sixième.</div>
-      </div>
-      <div style="padding: 16px 18px; border-right: 1px solid #D9CFC0; display: flex; flex-direction: column; gap: 4px;">
-        <div style="font-size: 15px; font-weight: 600;">Meublé micro-BIC</div>
-        <div class="num" style="font-size: 30px;">26 928 €</div>
-        <div style="font-size: 13px; color: #7A716A; line-height: 1.45;">Simple, sans comptable, mais imposé dès la première année.</div>
-      </div>
-      <div style="padding: 16px 0 16px 18px; display: flex; flex-direction: column; gap: 4px;">
-        <div style="font-size: 15px; font-weight: 600;">Nu micro-foncier</div>
-        <div class="num" style="font-size: 30px;">31 757 €</div>
-        <div style="font-size: 13px; color: #7A716A; line-height: 1.45;">Le plus simple et le plus cher. À éviter avec un crédit.</div>
-      </div>
-    </div>
-  </div>
+        <div
+          style="
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 64px;
+            padding: 44px 64px 0;
+          "
+        >
+          <div style="display: flex; flex-direction: column; gap: 14px">
+            <h2
+              class="serif"
+              style="font-weight: 500; font-size: 28px; margin: 0; letter-spacing: -0.01em"
+            >
+              Et si…
+            </h2>
+            <div style="display: flex; flex-direction: column">
+              <div class="row">
+                <span>Négocier à <span class="num">119 663 €</span></span
+                ><span class="num">cash-flow 0 €</span>
+              </div>
+              <div class="row">
+                <span>Colocation, 2 chambres à <span class="num">662 €</span></span
+                ><span class="num" style="color: #3b7a4a">+88 €/mois</span>
+              </div>
+              <div class="row">
+                <span>Prêt sur 20 ans</span><span class="num">−339 €/mois</span>
+              </div>
+              <div class="row">
+                <span>Taux +0,5 point</span><span class="num">−254 €/mois</span>
+              </div>
+              <div class="row">
+                <span>Location nue à <span class="num">850 €</span></span
+                ><span class="num">−283 €/mois</span>
+              </div>
+              <div class="row" style="border-bottom: none">
+                <span>Vacance de 2 mois par an</span><span class="num">−305 €/mois</span>
+              </div>
+            </div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 14px">
+            <h2
+              class="serif"
+              style="font-weight: 500; font-size: 28px; margin: 0; letter-spacing: -0.01em"
+            >
+              À quel prix ça marche ?
+            </h2>
+            <div style="display: flex; flex-direction: column">
+              <div class="row">
+                <span>Cash-flow à l'équilibre</span
+                ><span class="num">119 663 € <span style="color: #7a716a">(−23 %)</span></span>
+              </div>
+              <div class="row">
+                <span>Rendement net 6 %</span
+                ><span class="num">112 186 € <span style="color: #7a716a">(−28 %)</span></span>
+              </div>
+              <div class="row" style="border-bottom: none">
+                <span>Rendement brut 8 %</span
+                ><span class="num">130 888 € <span style="color: #7a716a">(−16 %)</span></span>
+              </div>
+            </div>
+            <div
+              class="rule"
+              style="
+                padding-top: 12px;
+                font-size: 14px;
+                line-height: 1.5;
+                color: #7a716a;
+                font-style: italic;
+              "
+            >
+              Une offre argumentée avec les ventes du quartier vaut mieux qu'un pourcentage au doigt
+              mouillé. Cette page figure dans le PDF « dossier banque ».
+            </div>
+          </div>
+        </div>
 
-  <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 64px; padding: 44px 64px 0;">
-    <div style="display: flex; flex-direction: column; gap: 14px;">
-      <h2 class="serif" style="font-weight: 500; font-size: 28px; margin: 0; letter-spacing: -0.01em;">Et si…</h2>
-      <div style="display: flex; flex-direction: column;">
-        <div class="row"><span>Négocier à <span class="num">119 663 €</span></span><span class="num">cash-flow 0 €</span></div>
-        <div class="row"><span>Colocation, 2 chambres à <span class="num">662 €</span></span><span class="num" style="color: #3B7A4A;">+88 €/mois</span></div>
-        <div class="row"><span>Prêt sur 20 ans</span><span class="num">−339 €/mois</span></div>
-        <div class="row"><span>Taux +0,5 point</span><span class="num">−254 €/mois</span></div>
-        <div class="row"><span>Location nue à <span class="num">850 €</span></span><span class="num">−283 €/mois</span></div>
-        <div class="row" style="border-bottom: none;"><span>Vacance de 2 mois par an</span><span class="num">−305 €/mois</span></div>
-      </div>
-    </div>
-    <div style="display: flex; flex-direction: column; gap: 14px;">
-      <h2 class="serif" style="font-weight: 500; font-size: 28px; margin: 0; letter-spacing: -0.01em;">À quel prix ça marche ?</h2>
-      <div style="display: flex; flex-direction: column;">
-        <div class="row"><span>Cash-flow à l'équilibre</span><span class="num">119 663 € <span style="color: #7A716A;">(−23 %)</span></span></div>
-        <div class="row"><span>Rendement net 6 %</span><span class="num">112 186 € <span style="color: #7A716A;">(−28 %)</span></span></div>
-        <div class="row" style="border-bottom: none;"><span>Rendement brut 8 %</span><span class="num">130 888 € <span style="color: #7A716A;">(−16 %)</span></span></div>
-      </div>
-      <div class="rule" style="padding-top: 12px; font-size: 14px; line-height: 1.5; color: #7A716A; font-style: italic;">Une offre argumentée avec les ventes du quartier vaut mieux qu'un pourcentage au doigt mouillé. Cette page figure dans le PDF « dossier banque ».</div>
-    </div>
-  </div>
+        <div
+          style="
+            margin: 44px 64px 0;
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 24px;
+            border-top: 1px solid #1e1a16;
+            padding-top: 18px;
+          "
+        >
+          <div style="display: flex; flex-direction: column; gap: 4px">
+            <div class="eyebrow">Revente dans 10 ans</div>
+            <div class="num" style="font-size: 22px">58 217 €</div>
+            <div style="font-size: 13px; color: #7a716a">en poche, après crédit et impôt</div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 4px">
+            <div class="eyebrow">TRI</div>
+            <div class="num" style="font-size: 22px">3,8 %</div>
+            <div style="font-size: 13px; color: #7a716a">8,9 % en négociant à 119 663 €</div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 4px">
+            <div class="eyebrow">Enrichissement</div>
+            <div class="num" style="font-size: 22px">+13 647 €</div>
+            <div style="font-size: 13px; color: #7a716a">capital remboursé 48 906 €</div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 4px">
+            <div class="eyebrow">Mise de départ</div>
+            <div class="num" style="font-size: 22px">19 337 €</div>
+            <div style="font-size: 13px; color: #7a716a">apport 14 337 + mobilier 5 000</div>
+          </div>
+        </div>
 
-  <div style="margin: 44px 64px 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px; border-top: 1px solid #1E1A16; padding-top: 18px;">
-    <div style="display: flex; flex-direction: column; gap: 4px;"><div class="eyebrow">Revente dans 10 ans</div><div class="num" style="font-size: 22px;">58 217 €</div><div style="font-size: 13px; color: #7A716A;">en poche, après crédit et impôt</div></div>
-    <div style="display: flex; flex-direction: column; gap: 4px;"><div class="eyebrow">TRI</div><div class="num" style="font-size: 22px;">3,8 %</div><div style="font-size: 13px; color: #7A716A;">8,9 % en négociant à 119 663 €</div></div>
-    <div style="display: flex; flex-direction: column; gap: 4px;"><div class="eyebrow">Enrichissement</div><div class="num" style="font-size: 22px;">+13 647 €</div><div style="font-size: 13px; color: #7A716A;">capital remboursé 48 906 €</div></div>
-    <div style="display: flex; flex-direction: column; gap: 4px;"><div class="eyebrow">Mise de départ</div><div class="num" style="font-size: 22px;">19 337 €</div><div style="font-size: 13px; color: #7A716A;">apport 14 337 + mobilier 5 000</div></div>
-  </div>
-
-  <div style="margin: 40px 64px 0; display: flex; gap: 24px; flex-wrap: wrap; font-size: 12px; color: #7A716A; border-top: 1px solid #D9CFC0; padding-top: 14px;">
-    <span>Sources : DVF avril 2026, ADEME, ANIL 2025, REI 2025</span><span>Règles fiscales : septembre 2026</span><span>Outil d'aide à la décision, pas un conseil</span>
-  </div>
-</div>
-</x-dc>
-</body>
+        <div
+          style="
+            margin: 40px 64px 0;
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+            font-size: 12px;
+            color: #7a716a;
+            border-top: 1px solid #d9cfc0;
+            padding-top: 14px;
+          "
+        >
+          <span>Sources : DVF avril 2026, ADEME, ANIL 2025, REI 2025</span
+          ><span>Règles fiscales : septembre 2026</span
+          ><span>Outil d'aide à la décision, pas un conseil</span>
+        </div>
+      </div>
+    </x-dc>
+  </body>
 </html>

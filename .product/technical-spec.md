@@ -45,6 +45,10 @@ tests/                       un dossier par module + integration/ ; 204 tests ; 
 - Montants en euros flottants, arrondi explicite à l'affichage (`arrondirEuro`, `arrondirTaux`) ; taux en décimal ; durées nommées (`dureeMois`, `annees`).
 - Performance : ~35 ms pour un projet complet (6 scénarios + 3 prix cibles) ; ~5 ms sans scénarios.
 
+## `apps/web` (socle livré)
+
+Voir `architecture/web-socle.md`. React 19 + Vite 7 + Tailwind v4 (`@theme` = tokens ADR-004), React Router 7 déclaratif (`useRoutes`), stockage local Zod (`loupe.projets.v1`), textes des codes du moteur dans `src/textes/`, Vitest + Testing Library (jsdom). Cloudflare Pages : `wrangler.toml`, `public/_redirects`. Couverture 100 % exigée sur `stockage/`, `formatage/`, `textes/` ; les écrans sont couverts par des tests de rendu et de navigation (`AppEnMemoire`).
+
 ## Conventions transverses
 
 - Zod à chaque frontière (entrée utilisateur, sortie LLM, réponse d'API, env). Types inférés (`z.infer`, `z.input`).

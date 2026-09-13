@@ -12,8 +12,9 @@ Monorepo npm workspaces, TypeScript strict, Vitest, ESLint, Prettier. Cible : Re
 
 ```
 packages/moteur/     Moteur de calcul pur (TypeScript + Zod), 100 % couvert par les tests
-apps/                À venir : web, worker, extension
-.product/            Spécifications, ADR, état du pipeline de développement
+apps/web/            Application React + Vite + Tailwind v4 (coque SaaS, Mes projets, Rapport), Cloudflare Pages
+apps/                À venir : worker, extension
+.product/            Spécifications, ADR, design, état du pipeline de développement
 .claude/commands/    Skills du pipeline de développement (Claude Code)
 ```
 
@@ -52,6 +53,28 @@ resultats.scenarios?.prixCibles; // prix pour cash-flow nul, net 6 %, brut 8 %
 - **Tests** : 204 tests, couverture 100 % (lignes, branches, fonctions), cas de référence vérifiés à la main sur le projet d'exemple (T3 65 m², Marseille 5e, 155 000 € FAI).
 
 Modules : `financement` (frais d'acquisition par formule, PMT, amortissement avec différés, TAEG, HCSF, IRA), `cashflow`, `fiscalite` (micro-BIC, LMNP réel, micro-foncier, nu réel), `revente` (plus-value, abattements, surtaxe, réintégration LMNP), `rendement` (brut/net/net-net, TRI, enrichissement), `verdict`, `scenarios`.
+
+## L'application web (`@loupe/web`)
+
+```bash
+npm run dev -w apps/web      # http://localhost:5173
+npm run build -w apps/web    # apps/web/dist
+```
+
+- Direction visuelle « Le guide » ([ADR-004](.product/adr/004-direction-visuelle.md)) : tokens dans `src/index.css`, polices Outfit et Nunito Sans.
+- Coque d'application : barre latérale (projets, nouveau projet, comparer, méthode, extension, profil), en-tête projet à onglets (Rapport, Hypothèses, Fiscalité, Revente, Visite).
+- Écrans livrés : **Mes projets** (liste, filtres, statut, suppression) et **Rapport** (verdict, cinq feux, prix vs ventes réelles, cash-flow, leviers, fiscalité, revente), calculés par le moteur. Les autres onglets affichent un état « bientôt ».
+- Projets stockés dans le navigateur (`localStorage`, clé `loupe.projets.v1`), validés par Zod ; le premier lancement crée le projet d'exemple.
+- Textes centralisés dans `src/textes/` : les codes du moteur deviennent des phrases là et nulle part ailleurs.
+- Tests : Vitest + Testing Library (jsdom), couverture 100 % sur `stockage/`, `formatage/`, `textes/`.
+
+### Déployer sur Cloudflare Pages
+
+1. Dans le tableau de bord Cloudflare, créer un projet Pages connecté au dépôt GitHub.
+2. Commande de build : `npm ci && npm run build -w apps/web` · dossier de sortie : `apps/web/dist` · Node 22.
+3. `apps/web/public/_redirects` gère le rechargement des routes de l'application.
+
+En local : `npx wrangler pages deploy dist` depuis `apps/web` (compte Cloudflare requis).
 
 ## Avertissement
 

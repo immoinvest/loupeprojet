@@ -7,6 +7,17 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'html'],
       include: ['packages/*/src/**', 'apps/*/src/**'],
+      exclude: ['**/index.ts', '**/exemples/**', 'apps/web/src/main.tsx'],
+      // En mode projets, seuls les seuils déclarés ici sont appliqués (ceux des sous-projets sont ignorés).
+      thresholds: {
+        'packages/moteur/src/**': { lines: 100, functions: 100, branches: 100, statements: 100 },
+        'apps/web/src/{stockage,formatage,textes}/**': {
+          lines: 100,
+          functions: 100,
+          branches: 100,
+          statements: 100,
+        },
+      },
     },
   },
 });

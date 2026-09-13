@@ -1,0 +1,182 @@
+import type { Feu } from '@loupe/moteur';
+import type { JSX, ReactNode } from 'react';
+
+export type TonPastille = Feu | 'neutre' | 'accent';
+
+const TONS: Readonly<Record<TonPastille, string>> = {
+  bon: 'bg-bon-fond text-bon-texte',
+  surveiller: 'bg-surveiller-fond text-surveiller-texte',
+  probleme: 'bg-probleme-fond text-probleme-texte',
+  inconnu: 'bg-bordure-douce text-encre-3',
+  neutre: 'border border-bordure text-encre-2 bg-surface',
+  accent: 'bg-accent-doux text-accent',
+};
+
+const POINTS: Readonly<Record<Feu, string>> = {
+  bon: 'bg-bon',
+  surveiller: 'bg-surveiller',
+  probleme: 'bg-probleme',
+  inconnu: 'bg-encre-4',
+};
+
+export function Point({ feu, taille = 10 }: { feu: Feu; taille?: number }): JSX.Element {
+  return (
+    <span
+      aria-hidden="true"
+      className={`inline-block rounded-full ${POINTS[feu]}`}
+      style={{ width: taille, height: taille }}
+    />
+  );
+}
+
+export function Pastille({
+  ton,
+  feu,
+  children,
+  compacte = false,
+}: {
+  ton: TonPastille;
+  feu?: Feu;
+  children: ReactNode;
+  compacte?: boolean;
+}): JSX.Element {
+  return (
+    <span
+      className={`inline-flex items-center gap-2 rounded-full font-semibold ${TONS[ton]} ${
+        compacte ? 'min-h-[30px] px-2.5 py-1 text-xs' : 'min-h-[44px] px-3.5 py-2 text-sm'
+      }`}
+    >
+      {feu !== undefined && <Point feu={feu} />}
+      {children}
+    </span>
+  );
+}
+
+export function Carte({
+  children,
+  className = '',
+}: {
+  children: ReactNode;
+  className?: string;
+}): JSX.Element {
+  return (
+    <section
+      className={`flex flex-col gap-3 rounded-carte border border-bordure bg-surface p-6 shadow-carte ${className}`}
+    >
+      {children}
+    </section>
+  );
+}
+
+export function TitreCarte({
+  children,
+  action,
+}: {
+  children: ReactNode;
+  action?: ReactNode;
+}): JSX.Element {
+  return (
+    <div className="flex items-baseline justify-between gap-4">
+      <h2 className="m-0 font-display text-[22px] font-semibold">{children}</h2>
+      {action}
+    </div>
+  );
+}
+
+export function GrosChiffre({
+  children,
+  ton = 'encre',
+  complement,
+}: {
+  children: ReactNode;
+  ton?: 'encre' | 'bon' | 'probleme' | 'surveiller';
+  complement?: ReactNode;
+}): JSX.Element {
+  const couleur = {
+    encre: 'text-encre',
+    bon: 'text-bon',
+    probleme: 'text-probleme',
+    surveiller: 'text-surveiller',
+  }[ton];
+  return (
+    <div className={`font-display text-[40px] leading-none font-bold ${couleur}`}>
+      {children}
+      {complement !== undefined && (
+        <span className="ml-2 text-lg font-semibold text-encre-3">{complement}</span>
+      )}
+    </div>
+  );
+}
+
+export function Ligne({
+  libelle,
+  valeur,
+  fort = false,
+  tonValeur = '',
+}: {
+  libelle: ReactNode;
+  valeur: ReactNode;
+  fort?: boolean;
+  tonValeur?: string;
+}): JSX.Element {
+  return (
+    <div
+      className={`flex justify-between gap-4 border-b border-bordure-douce py-2 text-[15px] last:border-b-0 ${
+        fort ? 'pt-3 text-[17px] font-bold' : ''
+      }`}
+    >
+      <span>{libelle}</span>
+      <span className={tonValeur}>{valeur}</span>
+    </div>
+  );
+}
+
+/** Explication longue, repliée par défaut. */
+export function Pourquoi({
+  texte,
+  libelle = 'Pourquoi ?',
+}: {
+  texte: string;
+  libelle?: string;
+}): JSX.Element {
+  return (
+    <details className="text-sm">
+      <summary className="cursor-pointer list-none font-bold text-accent">{libelle}</summary>
+      <p className="mt-2 mb-0 rounded-encart bg-accent-fond p-3 leading-relaxed text-encre-2">
+        {texte}
+      </p>
+    </details>
+  );
+}
+
+export function Bouton({
+  children,
+  onClick,
+  variante = 'secondaire',
+  type = 'button',
+  disabled = false,
+  title,
+}: {
+  children: ReactNode;
+  onClick?: () => void;
+  variante?: 'primaire' | 'secondaire';
+  type?: 'button' | 'submit';
+  disabled?: boolean;
+  title?: string;
+}): JSX.Element {
+  const style =
+    variante === 'primaire'
+      ? 'bg-accent text-white hover:bg-accent-fonce'
+      : 'border border-bordure bg-surface text-encre-2 hover:bg-accent-fond';
+  return (
+    <button
+      type={type}
+      onClick={onClick}
+      disabled={disabled}
+      title={title}
+      className={`inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full px-4 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-50 ${style}`}
+    >
+      {children}
+    </button>
+  );
+}
