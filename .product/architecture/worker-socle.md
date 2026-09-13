@@ -44,4 +44,4 @@ Vitest en environnement Node (`apps/worker/vitest.config.ts`) : `app.request()` 
 
 ## Déploiement
 
-1. `npx wrangler login` (une fois, navigateur) ; 2. `npx wrangler kv namespace create KV_CACHE` et reporter l'`id` dans `wrangler.toml` ; 3. `npm run deploy -w apps/worker`. Variables : `ENVIRONNEMENT` (vars), `ORIGINES_AUTORISEES` (optionnelle). En local : `npm run dev -w apps/worker` (KV et limite simulés, `.dev.vars` d'après `.dev.vars.example`).
+Déployé le 13/09/2026 sur https://loupe-worker.erreip-gorguel.workers.dev (compte Cloudflare de Pierre, KV `KV_CACHE` créé par `wrangler kv namespace create`). Redéploiement : `npx wrangler login` (une fois) puis `npm run deploy -w apps/worker`. Variables : `ENVIRONNEMENT` (vars), `ORIGINES_AUTORISEES` (optionnelle). En local : `npm run dev -w apps/worker` (KV et limite simulés, `.dev.vars` d'après `.dev.vars.example`). Vérifié en ligne : `/health`, `/proxy/geocodage` (données réelles, `MISS` puis `HIT`), 400 et 404 en codes.

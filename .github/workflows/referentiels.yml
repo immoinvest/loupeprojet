@@ -1,0 +1,110 @@
+name: Référentiels
+
+# Pré-agrège les données publiques (DVF, loyers ANIL, taxe foncière REI, zonage ABC, usure, communes)
+# puis les publie sur le bucket R2 « deklic-data » par l'API S3 de Cloudflare.
+# Sans les secrets R2, la génération tourne quand même et le résultat reste consultable en artefact.
+
+on:
+  workflow_dispatch:
+    inputs:
+      source:
+        description: 'Source à régénérer : dvf, loyers, taxe-fonciere, zonage, usure, communes ou tout'
+        required: true
+        default: tout
+        type: string
+      departement:
+        description: 'Département (01 à 95, 2A, 2B, 971 à 976). Vide = France entière, avec index national DVF.'
+        required: false
+        default: ''
+        type: string
+  schedule:
+    # Le 2 de chaque mois à 03:30 UTC : après la mise en ligne des DVF (avril, octobre) et des REI.
+    - cron: '30 3 2 * *'
+
+concurrency:
+  group: referentiels
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  BUCKET: deklic-data
+  SOURCE: ${{ github.event.inputs.source || 'tout' }}
+  DEPARTEMENT: ${{ github.event.inputs.departement || '' }}
+
+jobs:
+  generer-et-publier:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Générer les référentiels
+        run: |
+          if [ -n "$DEPARTEMENT" ]; then
+            npm run referentiels -w data -- --source "$SOURCE" --departement "$DEPARTEMENT"
+          else
+            npm run referentiels -w data -- --source "$SOURCE"
+          fi
+
+      - name: Résumé
+        run: |
+          {
+            echo "## Référentiels générés"
+            echo ""
+            echo "| Préfixe | Fichiers | Taille |"
+            echo "| --- | --- | --- |"
+            for dossier in data/dist/*/; do
+              [ -d "$dossier" ] || continue
+              nom=$(basename "$dossier")
+              echo "| $nom | $(find "$dossier" -type f | wc -l) | $(du -sh "$dossier" | cut -f1) |"
+            done
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Conserver le résultat en artefact (passe sur un seul département)
+        if: env.DEPARTEMENT != ''
+        uses: actions/upload-artifact@v7
+        with:
+          name: referentiels-${{ env.DEPARTEMENT }}
+          path: data/dist
+          retention-days: 7
+
+      - name: Publier sur R2 (API S3, synchronisation par préfixe)
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+          AWS_REQUEST_CHECKSUM_CALCULATION: when_required
+          AWS_RESPONSE_CHECKSUM_VALIDATION: when_required
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if [ -z "$AWS_ACCESS_KEY_ID" ] || [ -z "$AWS_SECRET_ACCESS_KEY" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "::warning::Secrets R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY ou CLOUDFLARE_ACCOUNT_ID absents : rien n'est publié."
+            exit 0
+          fi
+          # Bucket créé dans la juridiction UE : il ne répond que sur l'adresse S3 européenne
+          # (l'adresse standard renvoie AccessDenied).
+          POINT_ACCES="https://${CLOUDFLARE_ACCOUNT_ID}.eu.r2.cloudflarestorage.com"
+          # --delete seulement sur une passe France entière : une passe partielle ne doit rien effacer.
+          SUPPRESSION=""
+          if [ -z "$DEPARTEMENT" ]; then
+            SUPPRESSION="--delete"
+          fi
+          for dossier in data/dist/*/; do
+            [ -d "$dossier" ] || continue
+            prefixe=$(basename "$dossier")
+            if [ -z "$(ls -A "$dossier")" ]; then
+              echo "::warning::Préfixe $prefixe vide, non synchronisé."
+              continue
+            fi
+            echo "Synchronisation de $prefixe vers s3://$BUCKET/$prefixe/"
+            aws s3 sync "$dossier" "s3://$BUCKET/$prefixe/" $SUPPRESSION --only-show-errors --endpoint-url "$POINT_ACCES"
+          done

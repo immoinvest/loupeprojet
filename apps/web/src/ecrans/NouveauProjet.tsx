@@ -1,13 +1,15 @@
-import { useState, type JSX } from 'react';
-import { useNavigate } from 'react-router';
+import { useEffect, useState, type JSX } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router';
 
 import {
   PORTAILS,
   construireProjet,
   extraireChamps,
+  lireFragmentCapture,
   nomDuProjet,
   resoudreAnnonce,
   type AnnonceResolue,
+  type CaptureImportee,
   type SaisieProjet,
 } from '@/annonces';
 import { Bouton, Carte, Pastille } from '@/composants/ui';
@@ -17,15 +19,31 @@ import { FormulaireProjet, valeursDepuisChamps } from './FormulaireProjet';
 
 type Etape = 'lien' | 'texte' | 'verifier';
 
+const CHEMIN = '/projets/nouveau';
+
+function pluriel(n: number, mot: string): string {
+  return `${String(n)} ${mot}${n > 1 ? 's' : ''}`;
+}
+
 export function NouveauProjet(): JSX.Element {
   const { creer } = useProjets();
   const naviguer = useNavigate();
-  const [url, setUrl] = useState('');
+  const { hash } = useLocation();
+  // Le fragment est lu une seule fois, au premier rendu, puis effacé de l'adresse (effet ci-dessous).
+  const [fragment] = useState(() => lireFragmentCapture(hash));
+  const capture: CaptureImportee | null = fragment.statut === 'lue' ? fragment.capture : null;
+  const [url, setUrl] = useState(capture?.annonce.urlCanonique ?? '');
   const [texte, setTexte] = useState('');
-  const [etape, setEtape] = useState<Etape>('lien');
+  const [etape, setEtape] = useState<Etape>(capture === null ? 'lien' : 'verifier');
   const [manuel, setManuel] = useState(false);
-  const [initial, setInitial] = useState(() => valeursDepuisChamps({}));
-  const [nbChamps, setNbChamps] = useState(0);
+  const [initial, setInitial] = useState(() => valeursDepuisChamps(capture?.champs ?? {}));
+  const [nbChamps, setNbChamps] = useState(
+    capture === null ? 0 : Object.keys(capture.champs).length,
+  );
+
+  useEffect(() => {
+    if (fragment.statut !== 'absente') void naviguer(CHEMIN, { replace: true });
+  }, [fragment.statut, naviguer]);
 
   const annonce: AnnonceResolue | null = resoudreAnnonce(url);
 
@@ -86,10 +104,21 @@ export function NouveauProjet(): JSX.Element {
                 <Pastille ton="neutre" compacte>
                   annonce {annonce.id}
                 </Pastille>
+                {capture !== null && (
+                  <Pastille ton="accent" compacte>
+                    {capture.mode === 'bookmarklet'
+                      ? 'lue par le bouton-favori'
+                      : "lue par l'extension"}
+                  </Pastille>
+                )}
               </>
             ) : url.trim() !== '' ? (
               <Pastille ton="surveiller" compacte>
                 Site non reconnu : collez le texte ci-dessous, ça marche aussi
+              </Pastille>
+            ) : fragment.statut === 'illisible' ? (
+              <Pastille ton="surveiller" compacte>
+                La capture reçue est illisible : collez le lien, puis le texte de l'annonce
               </Pastille>
             ) : (
               <span className="text-sm text-encre-3">
@@ -103,11 +132,23 @@ export function NouveauProjet(): JSX.Element {
       {!manuel && (etape === 'texte' || etape === 'verifier' || url.trim() !== '') && (
         <Carte>
           <div className="flex flex-col gap-1">
-            <h2 className="m-0 font-display text-[22px] font-semibold">Le texte de l'annonce</h2>
+            <h2 className="m-0 font-display text-[22px] font-semibold">
+              {capture === null ? "Le texte de l'annonce" : 'Il manque quelque chose ?'}
+            </h2>
             <p className="m-0 text-sm text-encre-2">
-              L'extension Deklic lira la page à votre place, bientôt. En attendant : sur l'annonce,
-              tout sélectionner (Ctrl+A), copier (Ctrl+C), et coller ici. Le texte n'est pas
-              conservé, seulement ce qu'on y lit.
+              {capture === null ? (
+                <>
+                  Avec l'
+                  <Link to="/extension" className="font-bold text-accent">
+                    extension Deklic
+                  </Link>{' '}
+                  ou le bouton-favori, la page est lue en un clic. Sinon : sur l'annonce, tout
+                  sélectionner (Ctrl+A), copier (Ctrl+C), et coller ici.
+                </>
+              ) : (
+                'Collez le texte de l’annonce pour compléter ce qui a été lu.'
+              )}{' '}
+              Le texte n'est pas conservé, seulement ce qu'on y lit.
             </p>
           </div>
           <textarea
@@ -128,7 +169,7 @@ export function NouveauProjet(): JSX.Element {
               <span className="text-sm text-encre-2">
                 {nbChamps === 0
                   ? 'Rien de reconnu : remplissez le formulaire ci-dessous.'
-                  : `${String(nbChamps)} champ${nbChamps > 1 ? 's' : ''} lu${nbChamps > 1 ? 's' : ''} dans l'annonce, à vérifier ci-dessous.`}
+                  : `${pluriel(nbChamps, 'champ')} ${nbChamps > 1 ? 'lus' : 'lu'} dans l'annonce, à vérifier ci-dessous.`}
               </span>
             )}
           </div>

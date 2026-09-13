@@ -7,6 +7,8 @@ export default defineConfig({
   resolve: {
     alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
   },
+  // Adresse figée dans le bouton-favori par vite.bookmarklet.config.ts ; une valeur locale pour les tests.
+  define: { __LOUPE_BASE_URL__: JSON.stringify('http://localhost:5173') },
   test: {
     name: 'web',
     environment: 'jsdom',
@@ -23,6 +25,7 @@ export default defineConfig({
         'src/annonces/**',
         'src/hypotheses/**',
         'src/analyses/**',
+        'src/bookmarklet/**',
         'src/compte/**',
       ],
       thresholds: { lines: 100, functions: 100, branches: 100, statements: 100 },

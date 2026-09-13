@@ -4,14 +4,17 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
+    "dev": "npm run build:favori && vite",
+    "build": "npm run build:favori && vite build",
+    "build:favori": "vite build -c vite.bookmarklet.config.ts",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "vite build && playwright test"
   },
   "dependencies": {
+    "@loupe/capture": "*",
     "@loupe/moteur": "*",
     "lucide-react": "^0.560.0",
     "react": "^19.2.0",
@@ -20,6 +23,8 @@
     "zod": "^4.1.0"
   },
   "devDependencies": {
+    "@loupe/extension": "*",
+    "@playwright/test": "^1.63.0",
     "@tailwindcss/vite": "^4.1.0",
     "@testing-library/jest-dom": "^6.9.0",
     "@testing-library/react": "^16.3.0",

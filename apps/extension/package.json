@@ -1,0 +1,27 @@
+{
+  "name": "@loupe/extension",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Extension navigateur Loupe (Manifest V3) : lit l'annonce ouverte dans le navigateur et l'envoie à Loupe. Règles de capture par portail.",
+  "type": "module",
+  "exports": {
+    "./regles/*.json": "./regles/*.json"
+  },
+  "scripts": {
+    "build": "node --experimental-strip-types scripts/build.ts",
+    "build:dev": "node --experimental-strip-types scripts/build.ts --dev",
+    "dev": "node --experimental-strip-types scripts/build.ts --dev --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage"
+  },
+  "dependencies": {
+    "@loupe/capture": "*",
+    "zod": "^4.1.0"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.2.0",
+    "esbuild": "^0.28.0",
+    "jsdom": "^27.0.0"
+  }
+}

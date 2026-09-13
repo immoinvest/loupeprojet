@@ -9,6 +9,7 @@ import { AppLayout } from './coque/AppLayout';
 import { ProjetLayout } from './coque/ProjetLayout';
 import { Bientot } from './ecrans/Bientot';
 import { Connexion } from './ecrans/Connexion';
+import { Extension } from './ecrans/Extension';
 import { Fiscalite } from './ecrans/Fiscalite';
 import { Hypotheses } from './ecrans/Hypotheses';
 import { MesProjets } from './ecrans/MesProjets';
@@ -51,15 +52,7 @@ export const routes: RouteObject[] = [
           />
         ),
       },
-      {
-        path: 'extension',
-        element: (
-          <Bientot
-            titre="Extension navigateur"
-            phrase="Bientôt : lisez une annonce LeBonCoin, SeLoger ou Bien'ici en un clic."
-          />
-        ),
-      },
+      { path: 'extension', element: <Extension /> },
       {
         path: '*',
         element: (

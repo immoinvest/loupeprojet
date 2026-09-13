@@ -1,0 +1,67 @@
+{
+  "feature_slug": "referentiels",
+  "title": "Référentiels : données publiques pré-agrégées (DVF, loyers ANIL, taxe foncière REI, zonage ABC, usure, communes) publiées sur R2 par GitHub Action",
+  "started_at": "2026-09-13T17:30:00Z",
+  "current_step": "done",
+  "scope": "data/ (workspace @loupe/data), .github/workflows/referentiels.yml, vitest.config.ts et package.json racine (ajout du workspace)",
+  "branch": "feat/referentiels",
+  "base": "master (768c556), fusion d'origin/master (e4efd39) avant la PR",
+  "baseline": {
+    "typecheck": "ok",
+    "tests": "277 passés (un délai dépassé sous charge, repassé vert isolément)"
+  },
+  "steps": {
+    "discovery": {
+      "status": "completed",
+      "output": ".product/features/referentiels-discovery.md"
+    },
+    "specs": {
+      "status": "completed",
+      "stories_count": 9,
+      "note": "stories dans le document de discovery"
+    },
+    "architecture": {
+      "status": "completed",
+      "output": ".product/architecture/referentiels.md"
+    },
+    "implement": {
+      "status": "completed",
+      "stories_completed": 9,
+      "stories_total": 9,
+      "commits": [
+        "US-1 socle data/ (CSV en flux, téléchargement, journal, statistiques)",
+        "US-2 schémas Zod des fichiers publiés",
+        "US-3 DVF : ventes par commune et index des prix au m²",
+        "US-4 loyers ANIL",
+        "US-5 taxe foncière REI (OFGL)",
+        "US-6 zonage ABC",
+        "US-7 seuils de l'usure (saisies trimestrielles)",
+        "US-8 communes (API Géo)",
+        "US-9 ligne de commande, courant.json, SOURCES.md, GitHub Action"
+      ]
+    },
+    "refactor": {
+      "status": "completed",
+      "note": "transformations pures séparées de l'orchestration ; elementA/objetTrie pour éviter les branches de repli ; aucun fichier au-dessus de 300 lignes"
+    },
+    "qa_tests": {
+      "status": "completed",
+      "note": "134 tests, couverture 100 % lignes/branches/fonctions sur data/src (hors cli.ts) ; fixtures réelles (DVF 2A, ANIL Windows-1252, REI BOM, zonage, API Géo) ; aucune requête réseau ; passe réelle sur la Corse-du-Sud vérifiée à la main (112 communes DVF, 3 261 ventes)"
+    },
+    "security": {
+      "status": "completed",
+      "note": "aucun secret dans le code ; jetons R2 uniquement dans les secrets GitHub ; entrées de la ligne de commande validées ; réponses des API validées par Zod ; aucune exécution de code téléchargé"
+    },
+    "push": {
+      "status": "completed",
+      "pr": "https://github.com/immoinvest/loupeprojet/pull/13",
+      "note": "PR #13 ouverte le 13/09/2026, auto-merge armé ; bucket R2 loupe-data et secrets GitHub à créer par Pierre"
+    }
+  },
+  "decisions": {
+    "publication": "aws s3 sync vers l'API S3 de R2 (34 000 fichiers DVF) au lieu de wrangler r2 object put fichier par fichier ; --delete seulement sur une passe France entière",
+    "usure": "fichiers trimestriels saisis à la main dans data/sources/usure/, aucune source ouverte automatisable sans clé ; contrôle seuil = taux moyen + un tiers",
+    "execution": "node --experimental-strip-types sur les sources TypeScript, sans étape de build",
+    "courant": "chaque source datée publie <prefixe>/courant.json avec le millésime à lire"
+  }
+}

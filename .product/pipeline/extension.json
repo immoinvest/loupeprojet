@@ -1,0 +1,42 @@
+{
+  "feature_slug": "extension",
+  "title": "Extension navigateur : lire l'annonce dans le navigateur (packages/capture, apps/extension, lecture du fragment dans apps/web, bouton-favori)",
+  "started_at": "2026-09-13T00:00:00Z",
+  "current_step": "push",
+  "scope": "packages/capture, apps/extension, apps/web/src/annonces/capture.ts + NouveauProjet.tsx, apps/web/src/bookmarklet + public/capture.js + page /extension",
+  "branch": "feat/extension",
+  "base": "master (768c556), fusionné avec master (cd38c4a) avant la PR",
+  "steps": {
+    "discovery": {
+      "status": "completed",
+      "output": ".product/features/extension-discovery.md"
+    },
+    "implement": { "status": "completed", "stories_completed": 6, "stories_total": 6 },
+    "refactor": {
+      "status": "completed",
+      "note": "logique sans chrome.* dans src/logique ; règles déclaratives en JSON ; import d'espace de noms de Zod (bundle 116 Ko au lieu de 463) ; identité Deklic appliquée après la fusion de master"
+    },
+    "qa_tests": {
+      "status": "completed",
+      "note": "capture 68 tests, extension 33 tests, web +18 (module capture, écran Nouveau projet depuis un fragment, favori, page Extension) ; couverture 100 % sur packages/capture/src, apps/extension/src, apps/web/src/bookmarklet et annonces ; parcours vérifié dans le navigateur (fragment lu, 11 champs, adresse nettoyée)"
+    },
+    "security": {
+      "status": "completed",
+      "note": "fragment validé par Zod (longueurs, enums, nombres finis), jamais interprété comme HTML, effacé de l'adresse ; aucun réseau depuis le script de contenu ni le favori ; permissions activeTab + scripting seulement ; pas d'eval ; URL javascript: du favori posée par setAttribute (React la bloque en prop) ; capture.js généré, ignoré par git/ESLint/Prettier"
+    },
+    "push": {
+      "status": "completed",
+      "note": "PR #16 ouverte, merge automatique armé (check verify)"
+    }
+  },
+  "decisions": {
+    "contrat": "packages/capture porte le schéma, l'encodage base64url, la résolution d'URL et le moteur de règles ; l'extension et le bouton-favori ne sont que des enveloppes",
+    "transport": "fragment d'URL #capture=… : jamais envoyé au serveur, effacé de l'adresse après lecture",
+    "regles": "JSON par portail dans apps/extension/regles, versionnés <portail>-AAAA-MM-JJ, JSON-LD et état applicatif avant les sélecteurs CSS ; exportés du package pour le favori ; chargement distant (R2) prévu par la structure, non implémenté",
+    "fixtures": "pap.html relevée sur une vraie annonce le 13/09/2026 (navigateur intégré) ; leboncoin, seloger, bienici, logicimmo construites d'après la structure connue des portails, à vérifier sur de vraies annonces",
+    "zod": "import d'espace de noms (import * as z) dans @loupe/capture : bundle de l'extension 116 Ko au lieu de 463 Ko ; favori 115 Ko (166 Ko en URL javascript:), zod/mini possible plus tard",
+    "resultat_injection": "le script de contenu dépose le résultat dans globalThis.__loupeCapture et le build ajoute cette expression en dernière ligne (valeur de complétion rendue par executeScript) ; le popup relit le monde isolé si le navigateur ne rend rien",
+    "marque": "Deklic (ADR-005, fusionné pendant la session) dans les textes, le popup et l'icône ; noms techniques inchangés",
+    "hors_perimetre": "apps/web/src/annonces/resoudre.ts devient un ré-export de @loupe/capture ; ESLint ignore apps/web/public/capture.js ; apps/web/package.json : scripts dev/build construisent le favori, dépendances @loupe/capture et @loupe/extension"
+  }
+}
