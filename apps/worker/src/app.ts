@@ -4,9 +4,11 @@ import { cors } from 'hono/cors';
 import { origineAutorisee } from './cors';
 import type { Dependances } from './dependances';
 import { reponseErreur } from './erreurs';
+import { creerExtraction } from './extraction';
+import { limiterDebit } from './http';
 import { creerProxy } from './proxy/proxy';
 
-export const VERSION_WORKER = '0.1.0';
+export const VERSION_WORKER = '0.2.0';
 
 /** L'application Hono, construite à partir de dépendances injectées (réelles en production, doubles en test). */
 export function creerApp(deps: Dependances): Hono {
@@ -16,25 +18,26 @@ export function creerApp(deps: Dependances): Hono {
     '*',
     cors({
       origin: (origine) => (origineAutorisee(origine, deps.origines) ? origine : ''),
-      allowMethods: ['GET', 'OPTIONS'],
+      allowMethods: ['GET', 'POST', 'OPTIONS'],
+      allowHeaders: ['Content-Type'],
       maxAge: 86_400,
     }),
   );
 
   app.get('/health', (c) =>
-    c.json({ ok: true, version: VERSION_WORKER, environnement: deps.environnement }),
+    c.json({
+      ok: true,
+      version: VERSION_WORKER,
+      environnement: deps.environnement,
+      extraction: deps.extracteur === null ? null : deps.extracteur.modele,
+    }),
   );
 
-  app.use('/proxy/*', async (c, next) => {
-    const ip = c.req.header('CF-Connecting-IP') ?? 'inconnue';
-    const { success } = await deps.limiteur.limit({ key: ip });
-    if (!success) {
-      deps.journal.info('debit.refuse', { chemin: c.req.path });
-      return reponseErreur(429, 'TROP_DE_REQUETES');
-    }
-    await next();
-  });
+  app.use('/proxy/*', limiterDebit(deps.limiteur, deps.journal));
   app.get('/proxy/:service', creerProxy(deps));
+
+  app.use('/extract', limiterDebit(deps.limiteurExtraction, deps.journal));
+  app.post('/extract', creerExtraction(deps));
 
   app.notFound(() => reponseErreur(404, 'INTROUVABLE'));
   app.onError((erreur, c) => {

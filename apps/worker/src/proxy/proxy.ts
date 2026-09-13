@@ -1,16 +1,14 @@
-import type { Context, Handler } from 'hono';
+import type { Handler } from 'hono';
 import type { BlankEnv } from 'hono/types';
 import type { ContentfulStatusCode } from 'hono/utils/http-status';
 
 import type { Dependances } from '../dependances';
 import { messageDe, reponseErreur, type CodeErreur } from '../erreurs';
+import { ecrireCache, lireCache, repondre } from '../http';
 import type { Service } from '../services';
 import { cleCache } from './cache';
 
 const AGENT = 'Loupe/0.1 (+https://loupeprojet.pages.dev)';
-/** Le navigateur garde une réponse une heure ; le Worker, la durée de vie du service. */
-const CACHE_NAVIGATEUR = 'public, max-age=3600';
-const TYPE_JSON = 'application/json; charset=UTF-8';
 
 type ResultatAmont =
   | { readonly ok: true; readonly donnees: unknown }
@@ -20,28 +18,6 @@ type ResultatAmont =
       readonly code: CodeErreur;
       readonly details?: Readonly<Record<string, unknown>>;
     };
-
-async function lireCache(deps: Dependances, cle: string): Promise<string | null> {
-  try {
-    return await deps.cache.lire(cle);
-  } catch (erreur) {
-    deps.journal.erreur('cache.lecture_impossible', { cle, raison: messageDe(erreur) });
-    return null;
-  }
-}
-
-async function ecrireCache(
-  deps: Dependances,
-  cle: string,
-  valeur: string,
-  ttlSecondes: number,
-): Promise<void> {
-  try {
-    await deps.cache.ecrire(cle, valeur, ttlSecondes);
-  } catch (erreur) {
-    deps.journal.erreur('cache.ecriture_impossible', { cle, raison: messageDe(erreur) });
-  }
-}
 
 async function appelerAmont(deps: Dependances, service: Service, url: URL): Promise<ResultatAmont> {
   let reponse: Response;
@@ -80,14 +56,6 @@ async function appelerAmont(deps: Dependances, service: Service, url: URL): Prom
     deps.journal.erreur('amont.invalide', { service: service.nom, raison: messageDe(erreur) });
     return { ok: false, statut: 502, code: 'AMONT_INVALIDE' };
   }
-}
-
-function repondre(c: Context, texte: string, cache: 'HIT' | 'MISS'): Response {
-  return c.body(texte, 200, {
-    'Content-Type': TYPE_JSON,
-    'Cache-Control': CACHE_NAVIGATEUR,
-    'X-Loupe-Cache': cache,
-  });
 }
 
 /**

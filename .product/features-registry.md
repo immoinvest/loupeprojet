@@ -4,13 +4,12 @@ Format : `- [ ] slug — titre — date — scope`
 
 ## En cours
 
-- [ ] worker-socle — `apps/worker` : Hono sur Workers, proxy des données publiques (cache KV 24 h, 60 req/min/IP), premier service géocodage Géoplateforme — 2026-09-13 — PR #9
+- [ ] extraction-llm — `POST /extract` : lecture du texte d'une annonce par un modèle de langage (OpenRouter, modèle gratuit), 20 champs validés un par un, cache 30 jours, 10 lectures/min/IP — 2026-09-13 — `apps/worker/src/extraction`, ADR-003 amendé — PR #15 (déployé et vérifié en production)
 
 ## À venir
 
 Chaîne serveur (session principale, en série) :
 
-- [ ] extraction-llm — /extract Mistral JSON strict, repli regex, cache (après worker-socle ; clé Mistral = décision de Pierre)
 - [ ] enrichissement-marche — le web appelle le proxy : géocodage, DVF, ADEME, ANIL, REI, Géorisques, ABC (après worker-socle et referentiels)
 
 Parallélisables dès maintenant (fiches de session dans `.product/sessions/`, une session par feature, chacune dans son worktree) :
@@ -29,3 +28,4 @@ Parallélisables dès maintenant (fiches de session dans `.product/sessions/`, u
 - [x] referentiels — `data/` (`@loupe/data`) : DVF 24 mois par commune + index des prix au m², loyers ANIL, taux de taxe foncière REI, zonage ABC, seuils de l'usure (saisies trimestrielles), communes API Géo ; formats Zod, `SOURCES.md`, GitHub Action mensuelle → R2 `deklic-data` par `aws s3 sync` (bucket et secrets à créer par Pierre) — 2026-09-13 — `data/`, `.github/workflows/referentiels.yml` — PR `feat/referentiels`
 - [x] identite-visuelle — Identité de marque Deklic : dossier `marque/` (logos SVG, favicon, icônes 192/512/180, image de partage, palette, guide), ADR-005, app renommée (titre, favicon, manifeste, couleurs, logotype dans la barre latérale, textes) — 2026-09-13 — `marque/`, `apps/web`, docs — PR #8
 - [x] e2e-playwright — tests de bout en bout Playwright : 8 parcours Chromium sur le build de production (Mes projets, Rapport, Hypothèses, Fiscalité, Revente, Visite, nouveau projet et suppression, persistance), `npm run test:e2e`, job CI `e2e` non bloquant — 2026-09-13 — `apps/web/e2e`, `apps/web/playwright.config.ts`, `.github/workflows/ci.yml`, ignores ESLint — PR #11
+- [x] worker-socle — `apps/worker` : Hono sur Workers, proxy des données publiques (cache KV 24 h, 60 req/min/IP), premier service géocodage Géoplateforme — 2026-09-13 — PR #9 ; espace KV créé et Worker déployé sur https://loupe-worker.erreip-gorguel.workers.dev — PR #10
