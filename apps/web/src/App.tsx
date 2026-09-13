@@ -5,6 +5,7 @@ import { AppLayout } from './coque/AppLayout';
 import { ProjetLayout } from './coque/ProjetLayout';
 import { Bientot } from './ecrans/Bientot';
 import { Comparer } from './ecrans/Comparer';
+import { Extension } from './ecrans/Extension';
 import { Fiscalite } from './ecrans/Fiscalite';
 import { Hypotheses } from './ecrans/Hypotheses';
 import { Imprimer } from './ecrans/Imprimer';
@@ -40,15 +41,7 @@ export const routes: RouteObject[] = [
       { path: 'partage', element: <Partage /> },
       { path: 'comparer', element: <Comparer /> },
       { path: 'methode', element: <Methode /> },
-      {
-        path: 'extension',
-        element: (
-          <Bientot
-            titre="Extension navigateur"
-            phrase="Bientôt : lisez une annonce LeBonCoin, SeLoger ou Bien'ici en un clic."
-          />
-        ),
-      },
+      { path: 'extension', element: <Extension /> },
       {
         path: '*',
         element: (

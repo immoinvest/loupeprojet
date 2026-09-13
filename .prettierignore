@@ -5,3 +5,7 @@ coverage
 .product/reference
 package-lock.json
 .claude/worktrees
+# Pages d'annonces enregistrées : on les garde telles quelles
+apps/extension/tests/fixtures
+# Bouton-favori généré par le build du web
+apps/web/public/capture.js

@@ -1,0 +1,28 @@
+{
+  "name": "@loupe/capture",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Contrat de capture d'une annonce : schéma, encodage pour fragment d'URL, résolution du portail, règles de capture. Partagé par l'extension, le bouton-favori et le web.",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "files": [
+    "src",
+    "dist"
+  ],
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "build": "tsc -p tsconfig.build.json",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage"
+  },
+  "dependencies": {
+    "zod": "^4.1.0"
+  },
+  "devDependencies": {
+    "jsdom": "^27.0.0"
+  }
+}

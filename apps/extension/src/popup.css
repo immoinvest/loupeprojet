@@ -1,0 +1,97 @@
+/* Tokens Deklic (ADR-005) sur la base « Le guide » (ADR-004) : blanc chaud, encre, bleu électrique. */
+:root {
+  --fond: #fffdf9;
+  --surface: #ffffff;
+  --encre: #23272f;
+  --encre-2: #4b5563;
+  --encre-3: #6b7280;
+  --bordure: #e6e3dc;
+  --accent: #2b4bf2;
+  --accent-fonce: #1f38c4;
+  --accent-fond: #f5f7ff;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  width: 320px;
+  background: var(--fond);
+  color: var(--encre);
+  font:
+    15px/1.45 'Nunito Sans',
+    'Segoe UI',
+    system-ui,
+    sans-serif;
+}
+
+.popup {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+}
+
+.entete {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.logo {
+  flex: none;
+}
+
+/* Le mot de la marque se compose en Sora dans le logotype ; ici, une approximation sans police à charger. */
+.nom {
+  font-family: 'Sora', 'Outfit', 'Segoe UI', system-ui, sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.05em;
+  color: var(--accent);
+}
+
+.statut {
+  margin: 0;
+  min-height: 44px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--accent-fond);
+  color: var(--encre-2);
+}
+
+.bouton {
+  min-height: 44px;
+  border: 0;
+  border-radius: 999px;
+  padding: 0 16px;
+  background: var(--accent);
+  color: #fff;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.bouton:hover:not(:disabled) {
+  background: var(--accent-fonce);
+}
+
+.bouton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.note {
+  margin: 0;
+  font-size: 13px;
+  color: var(--encre-3);
+}
+
+.lien {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent);
+  text-decoration: none;
+}

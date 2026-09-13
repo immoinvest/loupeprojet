@@ -1,0 +1,123 @@
+{
+  "version": "logicimmo-2026-09-13",
+  "portail": "logicimmo",
+  "champs": {
+    "prix": [
+      { "source": "jsonld", "chemin": "offers.price", "type": "montant" },
+      { "source": "meta", "nom": "product:price:amount", "type": "montant" },
+      {
+        "source": "css",
+        "selecteur": "[data-testid=\"cdp-price\"], .price, [class*=\"Price\"], [class*=\"price\"]",
+        "regex": "(\\d[\\d\\s.]*)\\s*€",
+        "type": "montant"
+      }
+    ],
+    "surface": [
+      { "source": "jsonld", "chemin": "floorSize.value", "type": "nombre" },
+      {
+        "source": "css",
+        "selecteur": "[data-testid=\"cdp-summary\"] li, .mainInfos li, [class*=\"features\"] li, h1",
+        "regex": "(\\d+(?:[,.]\\d+)?)\\s*m²",
+        "type": "nombre"
+      },
+      {
+        "source": "meta",
+        "nom": "og:title",
+        "regex": "(\\d+(?:[,.]\\d+)?)\\s*m²",
+        "type": "nombre"
+      }
+    ],
+    "pieces": [
+      { "source": "jsonld", "chemin": "numberOfRooms", "type": "entier" },
+      {
+        "source": "css",
+        "selecteur": "[data-testid=\"cdp-summary\"] li, .mainInfos li, [class*=\"features\"] li, h1",
+        "regex": "(\\d+)\\s*pièces?",
+        "type": "entier"
+      },
+      { "source": "meta", "nom": "og:title", "regex": "(\\d+)\\s*pièces?", "type": "entier" }
+    ],
+    "chambres": [
+      { "source": "jsonld", "chemin": "numberOfBedrooms", "type": "entier" },
+      {
+        "source": "css",
+        "selecteur": "[data-testid=\"cdp-summary\"] li, .mainInfos li, [class*=\"features\"] li",
+        "regex": "(\\d+)\\s*chambres?",
+        "type": "entier"
+      }
+    ],
+    "etage": [
+      {
+        "source": "css",
+        "selecteur": "[data-testid=\"cdp-summary\"] li, .mainInfos li, [class*=\"features\"] li",
+        "regex": "(\\d+)\\s*(?:er|e|ème|eme)?\\s*étage|(?:rez[-\\s]de[-\\s]chauss[ée]e|RDC)",
+        "type": "etage"
+      }
+    ],
+    "ascenseur": [
+      {
+        "source": "css",
+        "selecteur": "[data-testid=\"cdp-summary\"] li, .mainInfos li, [class*=\"features\"] li",
+        "regex": "^sans\\s+ascenseur$",
+        "type": "booleen",
+        "valeur": false
+      },
+      {
+        "source": "css",
+        "selecteur": "[data-testid=\"cdp-summary\"] li, .mainInfos li, [class*=\"features\"] li",
+        "regex": "^ascenseur$",
+        "type": "booleen",
+        "valeur": true
+      }
+    ],
+    "dpe": [
+      {
+        "source": "css",
+        "selecteur": "[data-testid=\"cdp-dpe\"] [class*=\"active\"], .dpe [class*=\"active\"], [class*=\"dpe\"] [class*=\"active\"]",
+        "regex": "\\b([A-G])\\b",
+        "type": "classe"
+      }
+    ],
+    "ges": [
+      {
+        "source": "css",
+        "selecteur": "[data-testid=\"cdp-ges\"] [class*=\"active\"], .ges [class*=\"active\"], [class*=\"ges\"] [class*=\"active\"]",
+        "regex": "\\b([A-G])\\b",
+        "type": "classe"
+      }
+    ],
+    "ville": [
+      { "source": "jsonld", "chemin": "address.addressLocality", "type": "texte" },
+      {
+        "source": "css",
+        "selecteur": "[data-testid=\"cdp-location\"], .address, [class*=\"ddress\"]",
+        "regex": "^(.+?)\\s*\\(?\\d{5}\\)?",
+        "type": "texte"
+      },
+      {
+        "source": "meta",
+        "nom": "og:title",
+        "regex": "\\b(?:à|-)\\s+([\\p{L}'’ -]+?)\\s*\\(?\\d{5}",
+        "type": "texte"
+      }
+    ],
+    "codePostal": [
+      { "source": "jsonld", "chemin": "address.postalCode", "type": "codePostal" },
+      {
+        "source": "css",
+        "selecteur": "[data-testid=\"cdp-location\"], .address, [class*=\"ddress\"]",
+        "type": "codePostal"
+      },
+      { "source": "meta", "nom": "og:title", "type": "codePostal" }
+    ],
+    "description": [
+      { "source": "jsonld", "chemin": "description", "type": "texte" },
+      {
+        "source": "css",
+        "selecteur": "[data-testid=\"cdp-description\"], .description, [class*=\"escription\"]",
+        "type": "texte"
+      },
+      { "source": "meta", "nom": "og:description", "type": "texte" }
+    ]
+  }
+}
