@@ -9,6 +9,7 @@ export const VERSION_MOTEUR = '0.1.0';
 export * from './cashflow';
 export * from './commun';
 export * from './financement';
+export * from './fiscalite';
 export * from './regles';
 export * from './schema';
 export { projetExemple } from './exemples/t3-marseille';
