@@ -136,7 +136,7 @@ npm run referentiels -w data -- --aide
 
 L'Action tourne le 2 de chaque mois à 03:30 UTC, ou à la main (onglet Actions → « Référentiels » → source et département). Elle génère les fichiers puis les synchronise vers le bucket R2 `deklic-data` par l'API S3 (`aws s3 sync`, préinstallé sur les runners) ; sans les secrets ci-dessous elle génère seulement et prévient. À faire une fois dans le compte Cloudflare :
 
-1. R2 → Créer un bucket nommé `deklic-data` (région automatique).
+1. R2 → Créer un bucket nommé `deklic-data` dans la juridiction européenne (« Specify jurisdiction », EU) : les données restent dans l'Union européenne et l'Action publie vers l'adresse S3 européenne `https://<compte>.eu.r2.cloudflarestorage.com`.
 2. R2 → Gérer les jetons d'API R2 → Créer un jeton « Object Read & Write » limité au bucket `deklic-data` ; noter l'Access Key ID et la Secret Access Key.
 3. Dans GitHub, Settings → Secrets and variables → Actions : `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `CLOUDFLARE_ACCOUNT_ID` (l'identifiant de compte affiché dans le tableau de bord R2).
 4. Lancer l'Action à la main une première fois sur un département (par exemple `13`) puis sur la France entière.
