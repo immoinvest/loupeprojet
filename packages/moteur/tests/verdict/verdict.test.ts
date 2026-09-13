@@ -47,6 +47,12 @@ describe('feux unitaires', () => {
     });
   });
 
+  it('prix : compare au prix au m² estimé quand il est fourni, plutôt qu’à la médiane', () => {
+    expect(feuPrix(3_000, marche, regles, 3_500).valeur).toBeCloseTo(3_000 / 3_500 - 1, 10);
+    expect(feuPrix(3_000, marche, regles, 3_500).feu).toBe('bon');
+    expect(feuPrix(3_000, MarcheSchema.parse({}), regles, 3_500).feu).toBe('inconnu');
+  });
+
   it('rendement net : bon dès 5,5 %, à surveiller dès 4 %, problème en dessous', () => {
     expect(feuRendement(0.06, regles).feu).toBe('bon');
     expect(feuRendement(0.045, regles).feu).toBe('surveiller');

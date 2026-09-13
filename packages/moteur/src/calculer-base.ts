@@ -1,4 +1,5 @@
 import type { ResultatCashflow } from './cashflow';
+import { estimerPrix, type EstimationPrix } from './estimation';
 import { calculerFinancement, type ResultatFinancement } from './financement';
 import { calculerFiscalite, type ResultatFiscalite } from './fiscalite';
 import type { Regles } from './regles/types';
@@ -16,6 +17,8 @@ export interface ResultatsBase {
   readonly fiscalite: ResultatFiscalite;
   readonly revente: ResultatRevente;
   readonly rendement: ResultatRendement;
+  /** Estimation du prix du bien ; `null` sans ventes réelles connues. */
+  readonly estimation: EstimationPrix | null;
   readonly verdict: ResultatVerdict;
 }
 
@@ -25,7 +28,8 @@ export function calculerBase(projet: Projet, regles: Regles): ResultatsBase {
   const fiscalite = calculerFiscalite(projet, financement, regles);
   const revente = calculerRevente(projet, financement, fiscalite, regles);
   const rendement = calculerRendement(projet, financement, fiscalite, revente);
-  const verdict = calculerVerdict(projet, financement, fiscalite, rendement, regles);
+  const estimation = estimerPrix(projet, regles);
+  const verdict = calculerVerdict(projet, financement, fiscalite, rendement, regles, estimation);
   return {
     projet,
     financement,
@@ -33,6 +37,7 @@ export function calculerBase(projet: Projet, regles: Regles): ResultatsBase {
     fiscalite,
     revente,
     rendement,
+    estimation,
     verdict,
   };
 }

@@ -27,10 +27,18 @@ function feuDecroissant(valeur: number, bonDes: number, surveillerDes: number): 
   return 'probleme';
 }
 
-/** Prix au m² comparé à la médiane des ventes réelles (DVF). */
-export function feuPrix(prixM2: number, marche: Marche, regles: Regles): FeuVerdict {
+/**
+ * Prix au m² comparé au prix au m² estimé du bien quand l'estimation existe, sinon à la médiane des ventes
+ * réelles (DVF).
+ */
+export function feuPrix(
+  prixM2: number,
+  marche: Marche,
+  regles: Regles,
+  prixM2Estime: number | null = null,
+): FeuVerdict {
   if (marche.dvf === undefined) return { axe: 'prix', feu: 'inconnu', valeur: null };
-  const ecart = prixM2 / marche.dvf.medianM2 - 1;
+  const ecart = prixM2 / (prixM2Estime ?? marche.dvf.medianM2) - 1;
   const { bonJusqua, surveillerJusqua } = regles.verdict.prix;
   return { axe: 'prix', feu: feuCroissant(ecart, bonJusqua, surveillerJusqua), valeur: ecart };
 }

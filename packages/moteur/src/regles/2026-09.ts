@@ -117,8 +117,49 @@ export const regles202609: Regles = {
     effort: { bonJusqua: 0.33, surveillerJusqua: 0.35 },
   },
 
-  aConfirmer: ['fiscalite.prelevementsSociaux.bic', 'acquisition.dmtoParDepartement'],
+  estimation: {
+    // DVF ne dit rien de l'état : un bien à rénover se vend dans le bas des ventes comparables,
+    // un bien rénové dans le haut (choix Deklic).
+    positionsEtat: { a_renover: 0.25, a_rafraichir: 0.375, bon_etat: 0.5, renove: 0.75 },
+    // Notaires de France, « La valeur verte des logements en France sur les transactions 2024 »
+    // (janvier 2026), écarts à la classe D. F n'est pas publiée à part : l'écart de G est repris.
+    // Maisons : seule G est publiée ; les autres classes restent sans correction.
+    dpe: {
+      appartement: { A: 0.16, B: 0.12, C: 0.06, D: 0, E: -0.04, F: -0.12, G: -0.12 },
+      maison: { A: null, B: null, C: null, D: 0, E: null, F: -0.25, G: -0.25 },
+    },
+    // MeilleursAgents (juin 2017), grandes villes de province, par rapport au 2e étage.
+    etage: {
+      avecAscenseur: { rezDeChaussee: -0.099, hautsAPartirDe: 4, hauts: 0.04 },
+      sansAscenseur: { rezDeChaussee: -0.096, hautsAPartirDe: 3, hauts: -0.009 },
+    },
+    // MeilleursAgents (mai 2020), onze plus grandes villes : balcon ou terrasse +8,8 %.
+    exterieur: 0.088,
+    // Observatoire des charges de copropriété ARC/UNARC, 2024 : 26 €/m²/an en moyenne en France.
+    // L'écart est capitalisé au rendement locatif brut local, borné à ±15 % (choix Deklic).
+    charges: { repereM2An: 26, borne: 0.15 },
+    // Choix Deklic : confiance élevée avec 10 ventes à 300 m, moyenne avec 5 ventes à 1 km.
+    confiance: {
+      eleveeVentes: 10,
+      eleveeRayonMetres: 300,
+      moyenneVentes: 5,
+      moyenneRayonMetres: 1_000,
+    },
+    marges: { elevee: 0.05, moyenne: 0.08, faible: 0.12 },
+  },
+
+  aConfirmer: [
+    'fiscalite.prelevementsSociaux.bic',
+    'acquisition.dmtoParDepartement',
+    'estimation.dpe',
+    'estimation.etage',
+    'estimation.exterieur',
+    'estimation.charges',
+  ],
   simplifications: [
+    'Estimation : l’état du bien le place entre le premier et le troisième quartile des ventes comparables',
+    'Estimation : corrections additionnées ; coefficients d’étage des grandes villes de province appliqués partout',
+    'Estimation : un balcon ou une terrasse ajoute une prime, son absence ne retire rien',
     'Amortissement du bâti en deux composants (55 % / 50 ans, 45 % / 20 ans)',
     'Frais d’acquisition passés en charge la première année au réel meublé',
     'Surtaxe sur les plus-values élevées appliquée par tranche, sans lissage',

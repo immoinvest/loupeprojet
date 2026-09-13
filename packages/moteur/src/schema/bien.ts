@@ -6,6 +6,10 @@ export type ClasseEnergie = z.infer<typeof ClasseEnergieSchema>;
 export const TypeBienSchema = z.enum(['appartement', 'maison']);
 export type TypeBien = z.infer<typeof TypeBienSchema>;
 
+/** État du bien, de l'annonce ou de la visite : place son prix dans la fourchette des ventes comparables. */
+export const EtatBienSchema = z.enum(['a_renover', 'a_rafraichir', 'bon_etat', 'renove']);
+export type EtatBien = z.infer<typeof EtatBienSchema>;
+
 export const CoproSchema = z.object({
   lots: z.number().int().positive().optional(),
   procedure: z.boolean().default(false),
@@ -22,6 +26,9 @@ export const BienSchema = z.object({
   annee: z.number().int().min(1000).max(2100).optional(),
   dpe: ClasseEnergieSchema.optional(),
   ges: ClasseEnergieSchema.optional(),
+  etat: EtatBienSchema.optional(),
+  /** Balcon, terrasse ou loggia. */
+  exterieur: z.boolean().optional(),
   /** Numéro de département (« 13 », « 2A », « 976 ») : détermine les droits de mutation. */
   departement: z.string().regex(/^(\d{2,3}|2A|2B)$/),
   copro: CoproSchema.optional(),

@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import { BienSchema } from './bien';
+import { ReglagesEstimationSchema } from './estimation';
 import { HypothesesSchema } from './hypotheses';
 import { MarcheSchema } from './marche';
 
@@ -26,6 +27,7 @@ export const ProjetSchema = z.object({
   bien: BienSchema,
   marche: MarcheSchema.prefault({}),
   hypotheses: HypothesesSchema,
+  estimation: ReglagesEstimationSchema.prefault({}),
   provenance: ProvenanceSchema.default({}),
 });
 export type Projet = z.infer<typeof ProjetSchema>;
