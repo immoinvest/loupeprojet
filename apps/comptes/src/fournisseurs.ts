@@ -1,3 +1,5 @@
+import { importPKCS8, SignJWT } from 'jose';
+
 import { ErreurConfiguration } from './erreurs';
 
 export interface ConfigGoogle {
@@ -79,4 +81,29 @@ export function lireConfigFournisseurs(v: VariablesFournisseurs): ConfigFourniss
 /** Les méthodes de connexion à proposer : l'e-mail dépend d'un envoyeur disponible. */
 export function disponibles(config: ConfigFournisseurs, email: boolean): Fournisseurs {
   return { email, google: config.google !== undefined, apple: config.apple !== undefined };
+}
+
+export const ORIGINE_APPLE = 'https://appleid.apple.com';
+/** Apple refuse un secret client valable plus de six mois. */
+export const DUREE_SECRET_APPLE_JOURS = 180;
+const SECONDES_PAR_JOUR = 86_400;
+
+/**
+ * Le secret client d'Apple : un JWT ES256 signé avec la clé privée (.p8) du compte développeur.
+ * La clé peut arriver sur une ligne, avec des `\n` littéraux (variable d'environnement).
+ */
+export async function secretClientApple(
+  config: ConfigApple,
+  maintenant: () => number,
+): Promise<string> {
+  const cle = await importPKCS8(config.privateKey.replace(/\\n/g, '\n'), 'ES256');
+  const emisLe = Math.floor(maintenant() / 1000);
+  return new SignJWT({})
+    .setProtectedHeader({ alg: 'ES256', kid: config.keyId })
+    .setIssuer(config.teamId)
+    .setSubject(config.clientId)
+    .setAudience(ORIGINE_APPLE)
+    .setIssuedAt(emisLe)
+    .setExpirationTime(emisLe + DUREE_SECRET_APPLE_JOURS * SECONDES_PAR_JOUR)
+    .sign(cle);
 }

@@ -4,6 +4,7 @@ import { emailOTP } from 'better-auth/plugins/email-otp';
 import { DUREE_CODE_MINUTES, messageCode } from './courriel';
 import type { Dependances } from './dependances';
 import { messageDe } from './erreurs';
+import { fournisseursSociaux, originesDeConfiance } from './sociaux';
 
 export const CHEMIN_AUTH = '/api/auth';
 export const PREFIXE_COOKIE = 'deklic';
@@ -56,7 +57,8 @@ export function optionsAuth(deps: Dependances, origine: string): BetterAuthOptio
     basePath: CHEMIN_AUTH,
     secret: deps.secret,
     database: deps.base,
-    trustedOrigins: [...deps.origines],
+    trustedOrigins: originesDeConfiance(deps),
+    socialProviders: fournisseursSociaux(deps),
     plugins: [
       emailOTP({
         otpLength: LONGUEUR_CODE,
