@@ -13,6 +13,9 @@ test-results/
 !.env.example
 .dev.vars
 
+# Bouton-favori généré par le build du web (apps/web/vite.bookmarklet.config.ts)
+apps/web/public/capture.js
+
 # Outils
 .turbo/
 *.tsbuildinfo

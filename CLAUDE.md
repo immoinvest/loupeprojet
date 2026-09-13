@@ -52,6 +52,7 @@ L'utilisateur principal du repo pratique le **vibe coding** et ne relit pas le c
 - **Livré** : `POST /extract` (`apps/worker/src/extraction/` : contrat de 20 champs validés un par un, prompt versionné, connecteur « chat completions » OpenRouter ou Mistral réglé par `LLM_URL`/`LLM_MODELE`, secret `OPENROUTER_API_KEY`, cache 30 jours par empreinte du texte, 10 lectures/min/IP ; sans clé → `503 EXTRACTION_INDISPONIBLE`). Modèle par défaut `nvidia/nemotron-3-super-120b-a12b:free` (ADR-003 amendé). Le web ne l'appelle pas encore (`enrichissement-marche`).
 - **Livré** : tests de bout en bout Playwright (`apps/web/e2e/`, 8 parcours Chromium sur le build de production servi par `vite preview` sur 127.0.0.1:5199 ; `npm run test:e2e` construit puis teste ; sélecteurs par rôle et libellé, contexte neuf par test ; job CI `e2e` séparé de `verify`, pas encore requis pour le merge). Détails : `.product/architecture/e2e-playwright.md`.
 - **Livré** : `data/` (`@loupe/data`, feature `referentiels`) : `npm run referentiels -w data -- --source <dvf|loyers|taxe-fonciere|zonage|usure|communes|tout> [--departement 13]` génère dans `data/dist/` les référentiels par département ou commune (DVF 24 mois + index prix/m², loyers ANIL, taux TFPB REI, zonage ABC, seuils de l'usure saisis dans `data/sources/usure/`, communes API Géo), formats Zod dans `data/src/schemas/`, `<prefixe>/courant.json` = millésime à lire, sources et licences dans `data/SOURCES.md`. GitHub Action `referentiels.yml` (cron mensuel + manuel) publie sur R2 `deklic-data` par `aws s3 sync` ; secrets `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `CLOUDFLARE_ACCOUNT_ID` à créer par Pierre (README). Le chargement par l'application = feature `enrichissement-marche`.
+- **Livré** : feature `extension` : `packages/capture` (`@loupe/capture` : `CaptureSchema` version 1, `encoderCapture` / `decoderCapture` base64url pour `#capture=…`, `resoudreAnnonce` partagé, moteur de règles JSON-LD / état applicatif / meta / CSS : `capturer`, `creerRegistre`), `apps/extension` (WebExtension MV3 Chrome/Edge/Firefox, `activeTab` + `scripting` seulement, règles versionnées `regles/<portail>.json`, popup « Analyser dans Deklic », script de contenu, build `npm run build -w apps/extension` → `dist/chrome`, `dist/firefox`, à charger non empaquetée : `apps/extension/README.md`), web : `src/annonces/capture.ts` lit le fragment dans `NouveauProjet.tsx`, bouton-favori `public/capture.js` (construit par `vite.bookmarklet.config.ts`, ignoré par git) et page `/extension`. Le fragment n'est jamais envoyé au serveur ; la description sert à `extraireChamps` puis disparaît. Fixtures : PAP relevée sur une vraie annonce, les quatre autres à vérifier. Détails : `.product/architecture/extension.md`.
 - **Production** : https://loupeprojet.pages.dev (Cloudflare Pages, branche `master`, build `npm ci && npm run build -w apps/web`). Worker : https://loupe-worker.erreip-gorguel.workers.dev (déployé à la main par `npm run deploy -w apps/worker`, machine connectée par `wrangler login` ; KV `KV_CACHE` = `a64f32a40a0846e1be258a7ea34a8090`).
 - **Sessions parallèles** : fiches dans `.product/sessions/` (extension, referentiels, garder, e2e-playwright) ; chaque session parallèle tient son état dans `.product/pipeline/<slug>.json` et ne touche aux docs communes qu'en fin de feature. `.product/pipeline-state.json` reste à la session principale.
 - **Prochaine étape (session principale)** : `enrichissement-marche` (le web appelle `/proxy/geocodage` et `/extract`, puis DVF, ADEME, ANIL, Géorisques quand les référentiels seront publiés).
@@ -104,11 +105,12 @@ loupeprojet/
 ├── package.json               ← workspaces: packages/*, apps/*
 ├── tsconfig.base.json
 ├── packages/
-│   └── moteur/                ← moteur de calcul pur (financement, cashflow, fiscalite, revente, rendement, verdict, regles/)
+│   ├── moteur/                ← moteur de calcul pur (financement, cashflow, fiscalite, revente, rendement, verdict, regles/)
+│   └── capture/               ← contrat de capture (schéma, encodage, résolution d'URL, moteur de règles), partagé extension / favori / web
 ├── apps/
-│   ├── web/                   ← React + Vite (Cloudflare Pages)
+│   ├── web/                   ← React + Vite (Cloudflare Pages) ; bouton-favori construit dans public/capture.js
 │   ├── worker/                ← Hono sur Cloudflare Workers (/extract, /proxy)
-│   └── extension/             ← WebExtension + bookmarklet + règles par portail
+│   └── extension/             ← WebExtension MV3 (popup, script de contenu, build esbuild) + règles par portail (regles/*.json)
 ├── data/                      ← scripts de pré-agrégation des référentiels (GitHub Action)
 └── .github/workflows/         ← CI, test d'annonce témoin, rebuild mensuel des référentiels
 ```
@@ -164,8 +166,9 @@ npm run typecheck            # tsc -b (tous les workspaces)
 npm run test                 # vitest run (tous les workspaces)
 npm run test:e2e             # vite build puis playwright test : 8 parcours Chromium (apps/web/e2e)
 npm run build                # build de tous les workspaces
-npm run dev -w apps/web      # front en local
+npm run dev -w apps/web      # front en local (construit d'abord le bouton-favori public/capture.js)
 npm run dev -w apps/worker   # wrangler dev
+npm run build -w apps/extension       # extension : dist/chrome et dist/firefox (build:dev vise localhost:5173)
 npm run referentiels -w data -- --source tout --departement 13   # référentiels d'un département dans data/dist/
 ```
 

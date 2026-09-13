@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="color-scheme" content="light" />
+    <title>Deklic</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <main class="popup">
+      <header class="entete">
+        <svg class="logo" viewBox="0 0 64 64" width="26" height="26" aria-hidden="true">
+          <path
+            d="M32 22 L50 36 V56 H14 V36 Z"
+            fill="none"
+            stroke="#2b4bf2"
+            stroke-width="4"
+            stroke-linejoin="round"
+          />
+          <path
+            d="M32 16V6M21 19l-7-7M43 19l7-7"
+            fill="none"
+            stroke="#ff7a1a"
+            stroke-width="5"
+            stroke-linecap="round"
+          />
+        </svg>
+        <span class="nom">deklic</span>
+      </header>
+      <p id="statut" class="statut" aria-live="polite">Lecture de l'onglet…</p>
+      <button id="analyser" type="button" class="bouton" disabled>Analyser dans Deklic</button>
+      <p class="note">
+        La page est lue dans votre navigateur, jamais par nos serveurs. Seuls les chiffres de
+        l'annonce sont transmis à Deklic.
+      </p>
+      <a id="ouvrir" class="lien" target="_blank" rel="noopener">Ouvrir Deklic</a>
+    </main>
+    <script src="popup.js"></script>
+  </body>
+</html>

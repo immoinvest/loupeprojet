@@ -16,9 +16,10 @@ loupeprojet/
 ├── .github/workflows/ci.yml  Node 22 : npm ci → lint → format:check → typecheck → test:coverage → build ; job e2e : Playwright Chromium (npm run test:e2e)
 ├── .github/workflows/referentiels.yml  cron mensuel + manuel : génère data/dist puis aws s3 sync vers R2 deklic-data
 ├── packages/moteur/        ← livré (feature moteur-calcul)
-├── apps/web/               ← livré (socle, nouveau projet, hypothèses, onglets) ; tests de bout en bout Playwright dans e2e/
+├── packages/capture/       ← livré (feature extension) : contrat de capture et moteur de règles, partagés par l'extension, le favori et le web
+├── apps/web/               ← livré (socle, nouveau projet, hypothèses, onglets, lecture de la capture, bouton-favori, page /extension) ; e2e Playwright
 ├── apps/worker/            ← socle livré (feature worker-socle)
-├── apps/extension/         ← à venir (fiche .product/sessions/extension.md)
+├── apps/extension/         ← livré (feature extension) : WebExtension MV3, règles par portail, build esbuild vers dist/chrome et dist/firefox
 └── data/                   ← livré (feature referentiels) : pré-agrégation des référentiels publics
 ```
 
@@ -57,6 +58,10 @@ Voir `architecture/web-socle.md`. React 19 + Vite 7 + Tailwind v4 (`@theme` = to
 
 Voir `architecture/worker-socle.md`. Hono 4 sur Cloudflare Workers (`wrangler.toml` : KV `KV_CACHE`, binding Rate Limiting `LIMITEUR` 60/min/IP, `[observability]`), dépendances injectées (`creerApp(deps)`), `GET /health`, `GET /proxy/:service` avec liste blanche de services (`services/`), cache KV par empreinte des paramètres validés, réponses amont validées et normalisées au contrat Loupe, erreurs en codes. Premier service : géocodage Géoplateforme. `POST /extract` : lecture du texte d'une annonce par un modèle de langage (connecteur « chat completions », OpenRouter par défaut), 20 champs validés un par un, cache 30 jours (voir `architecture/extraction-llm.md`). Tests Vitest en Node via `app.request()` et doubles ; couverture 100 % sur `src/**`. Build = `wrangler deploy --dry-run`.
 
+## `packages/capture` et `apps/extension` (livrés, feature extension)
+
+Voir `architecture/extension.md`. `@loupe/capture` : `CaptureSchema` (version 1, portail, url, champs optionnels bornés, description ≤ 4 000 caractères, captureLe, mode, regles), `encoderCapture` / `decoderCapture` (base64url d'un JSON UTF-8, jamais d'exception), `urlDeCapture` / `captureDepuisHash` (`#capture=…`), `resoudreAnnonce` (une seule source de vérité pour les cinq portails, ré-exportée par le web), moteur de règles (`ReglesPortailSchema`, extracteurs `jsonld` / `json` / `meta` / `css` avec regex, `valeur`, `diviser`, conversions, `appliquerRegles`, `capturer`, `creerRegistre`). Import d'espace de noms de Zod pour des bundles légers. `@loupe/extension` : Manifest V3 (`activeTab` + `scripting`, rien d'autre), `regles/<portail>.json` versionnés `<portail>-AAAA-MM-JJ` et exportés, popup et script de contenu bâtis par esbuild (`node --experimental-strip-types scripts/build.ts [--dev] [--watch]`) vers `dist/chrome` et `dist/firefox`, icônes PNG dessinées au build. Web : `src/annonces/capture.ts`, `src/bookmarklet/` (bouton-favori construit par `vite.bookmarklet.config.ts` dans `public/capture.js`, ignoré par git), page `/extension`. Couverture 100 % exigée sur `packages/capture/src/**`, `apps/extension/src/**` et `apps/web/src/bookmarklet/**`. Fixtures HTML dans `apps/extension/tests/fixtures/` (hors Prettier).
+
 ## `data/` (livré, feature referentiels)
 
 Voir `architecture/referentiels.md` et `data/SOURCES.md`. Workspace `@loupe/data` exécuté directement par Node (`node --experimental-strip-types src/cli.ts`, imports en `.ts`, aucun build) : `commun/` (CSV en flux RFC 4180, décodage UTF-8 / Windows-1252, téléchargement avec trois tentatives et gzip, journal JSON + annotations GitHub, quartiles, dates, 101 départements), `schemas/` (Zod : un schéma par fichier publié, en-tête `genereLe` / `millesime` / `source`), `sources/<source>/` (constantes, transformation pure, orchestration), `cli/arguments.ts`, `sources/executer.ts`. Tout accès externe passe par un `Contexte` injecté (`fetch`, pause, horloge, journal, dossier de sortie) : les tests utilisent un faux `fetch` nourri par des extraits réels (`tests/fixtures/`), sans réseau. Couverture 100 % exigée sur `data/src/**` (hors `cli.ts`). Sortie `data/dist/` (ignorée par git), publiée sur R2 `deklic-data` par `.github/workflows/referentiels.yml` (`aws s3 sync`, secrets `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `CLOUDFLARE_ACCOUNT_ID`). Seuils de l'usure saisis à la main dans `data/sources/usure/`.
@@ -90,5 +95,7 @@ Voir `architecture/referentiels.md` et `data/SOURCES.md`. Workspace `@loupe/data
 | Intégration      | Vitest                                                              | `packages/moteur/tests/integration`    |
 | Worker           | Vitest (Node) + `app.request()` et doubles                          | `apps/worker/tests/`                   |
 | Référentiels     | Vitest (Node) + faux `fetch` et fixtures réelles                    | `data/tests/`                          |
+| Capture          | Vitest (jsdom) : pages synthétiques via `DOMParser`                 | `packages/capture/tests/`              |
+| Extension        | Vitest (jsdom) : pages enregistrées, faux `chrome`                  | `apps/extension/tests/`                |
 | E2E web          | Playwright (Chromium, build de production servi par `vite preview`) | `apps/web/e2e/`                        |
 | Annonce témoin   | GitHub Action quotidienne (à venir)                                 | `.github/workflows/annonce-temoin.yml` |
