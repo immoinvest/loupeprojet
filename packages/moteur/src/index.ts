@@ -11,5 +11,8 @@ export * from './commun';
 export * from './financement';
 export * from './fiscalite';
 export * from './regles';
+export * from './rendement';
+export * from './revente';
 export * from './schema';
+export * from './verdict';
 export { projetExemple } from './exemples/t3-marseille';
