@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="color-scheme" content="light" />
+    <title>Loupe</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <main class="popup">
+      <header class="entete">
+        <span class="logo" aria-hidden="true"></span>
+        <span class="nom">Loupe</span>
+      </header>
+      <p id="statut" class="statut" aria-live="polite">Lecture de l'onglet…</p>
+      <button id="analyser" type="button" class="bouton" disabled>Analyser dans Loupe</button>
+      <p class="note">
+        La page est lue dans votre navigateur, jamais par nos serveurs. Seuls les chiffres de
+        l'annonce sont transmis à Loupe.
+      </p>
+      <a id="ouvrir" class="lien" target="_blank" rel="noopener">Ouvrir Loupe</a>
+    </main>
+    <script src="popup.js"></script>
+  </body>
+</html>

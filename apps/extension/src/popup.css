@@ -1,0 +1,107 @@
+/* Tokens de la direction « Le guide » (ADR-004) : blanc chaud, indigo, encre. */
+:root {
+  --fond: #fbfaf7;
+  --surface: #ffffff;
+  --encre: #1e1d2b;
+  --encre-2: #4b4a5c;
+  --encre-3: #7a7989;
+  --bordure: #e6e3dc;
+  --accent: #4f55d8;
+  --accent-fonce: #3d43c2;
+  --accent-fond: #eef0fc;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  width: 320px;
+  background: var(--fond);
+  color: var(--encre);
+  font:
+    15px/1.45 'Nunito Sans',
+    'Segoe UI',
+    system-ui,
+    sans-serif;
+}
+
+.popup {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+}
+
+.entete {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.logo {
+  width: 22px;
+  height: 22px;
+  border: 3px solid var(--accent);
+  border-radius: 50%;
+  position: relative;
+}
+
+.logo::after {
+  content: '';
+  position: absolute;
+  right: -9px;
+  bottom: -8px;
+  width: 10px;
+  height: 3px;
+  background: var(--accent);
+  border-radius: 2px;
+  transform: rotate(45deg);
+}
+
+.statut {
+  margin: 0;
+  min-height: 44px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--accent-fond);
+  color: var(--encre-2);
+}
+
+.bouton {
+  min-height: 44px;
+  border: 0;
+  border-radius: 999px;
+  padding: 0 16px;
+  background: var(--accent);
+  color: #fff;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.bouton:hover:not(:disabled) {
+  background: var(--accent-fonce);
+}
+
+.bouton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.note {
+  margin: 0;
+  font-size: 13px;
+  color: var(--encre-3);
+}
+
+.lien {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent);
+  text-decoration: none;
+}

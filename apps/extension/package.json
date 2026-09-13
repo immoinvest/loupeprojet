@@ -8,6 +8,9 @@
     "./regles/*.json": "./regles/*.json"
   },
   "scripts": {
+    "build": "node --experimental-strip-types scripts/build.ts",
+    "build:dev": "node --experimental-strip-types scripts/build.ts --dev",
+    "dev": "node --experimental-strip-types scripts/build.ts --dev --watch",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage"
