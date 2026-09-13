@@ -103,9 +103,10 @@ npm run deploy -w apps/worker   # déploiement (compte Cloudflare connecté par 
 
 ### Déployer le Worker
 
-1. `npx wrangler login` (une fois, dans le navigateur).
-2. `npx wrangler kv namespace create KV_CACHE` depuis `apps/worker`, puis reporter l'`id` obtenu dans `apps/worker/wrangler.toml`.
-3. `npm run deploy -w apps/worker` → `https://loupe-worker.<compte>.workers.dev`.
+Le Worker est déployé sur `https://loupe-worker.erreip-gorguel.workers.dev` (espace KV `KV_CACHE` créé le 13/09/2026, identifiant dans `apps/worker/wrangler.toml`). Pour redéployer après un changement :
+
+1. `npx wrangler login` si la machine n'est pas encore connectée au compte Cloudflare (une fois, dans le navigateur ; sous PowerShell, `npx.cmd wrangler login` si l'exécution des scripts est bloquée).
+2. `npm run deploy -w apps/worker`.
 
 ### Déployer sur Cloudflare Pages
 
