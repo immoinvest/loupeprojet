@@ -30,7 +30,7 @@ describe('Nouveau projet — depuis un lien', () => {
       await utilisateur.click(zone);
       await utilisateur.paste(ANNONCE);
       await utilisateur.click(screen.getByRole('button', { name: 'Lire le texte' }));
-      expect(screen.getByText(/champs lus dans l'annonce/)).toBeInTheDocument();
+      expect(await screen.findByText(/champs lus dans l'annonce, à vérifier/)).toBeInTheDocument();
       expect(screen.getByLabelText(/Prix affiché/)).toHaveValue('155000');
       expect(screen.getByLabelText(/Surface/)).toHaveValue('65');
       expect(screen.getByLabelText(/Code postal/)).toHaveValue('13005');
@@ -44,7 +44,11 @@ describe('Nouveau projet — depuis un lien', () => {
       await utilisateur.click(screen.getByRole('button', { name: /Créer le projet/ }));
 
       expect(
-        await screen.findByRole('heading', { name: /Prix sans repère de marché/ }),
+        await screen.findByRole(
+          'heading',
+          { name: /Prix sans repère de marché/ },
+          { timeout: 10_000 },
+        ),
       ).toBeInTheDocument();
       const cree = lireProjets(window.localStorage)[0];
       expect(cree?.nom).toBe('T3 · 65 m² · Marseille 5e');
@@ -71,7 +75,7 @@ describe('Nouveau projet — depuis un lien', () => {
     await utilisateur.click(zone);
     await utilisateur.paste('bonjour');
     await utilisateur.click(screen.getByRole('button', { name: 'Lire le texte' }));
-    expect(screen.getByText(/Rien de reconnu/)).toBeInTheDocument();
+    expect(await screen.findByText(/Rien de reconnu/)).toBeInTheDocument();
   });
 });
 
@@ -111,7 +115,11 @@ describe('Nouveau projet — à la main', () => {
       await utilisateur.type(screen.getByLabelText(/Durée du prêt/), '20');
       await utilisateur.type(screen.getByLabelText(/Vos revenus/), '1900');
       await utilisateur.click(screen.getByRole('button', { name: /Créer le projet/ }));
-      await screen.findByRole('heading', { name: /Prix sans repère de marché/ });
+      await screen.findByRole(
+        'heading',
+        { name: /Prix sans repère de marché/ },
+        { timeout: 10_000 },
+      );
       const p = lireProjets(window.localStorage)[0]?.projet;
       expect(p?.bien.departement).toBe('2A');
       expect(p?.bien.surface).toBe(32.5);

@@ -16,6 +16,12 @@ ENVIRONNEMENT = "production"
 LLM_URL = "https://openrouter.ai/api/v1/chat/completions"
 LLM_MODELE = "nvidia/nemotron-3-super-120b-a12b:free"
 
+# Référentiels publics publiés par `data/` (GitHub Action « Référentiels »), bucket créé en juridiction UE.
+[[r2_buckets]]
+binding = "DONNEES"
+bucket_name = "deklic-data"
+jurisdiction = "eu"
+
 [[kv_namespaces]]
 binding = "KV_CACHE"
 id = "a64f32a40a0846e1be258a7ea34a8090"

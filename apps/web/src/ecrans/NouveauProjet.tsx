@@ -4,7 +4,6 @@ import { Link, useLocation, useNavigate } from 'react-router';
 import {
   PORTAILS,
   construireProjet,
-  extraireChamps,
   lireFragmentCapture,
   nomDuProjet,
   resoudreAnnonce,
@@ -13,6 +12,8 @@ import {
   type SaisieProjet,
 } from '@/annonces';
 import { Bouton, Carte, Pastille } from '@/composants/ui';
+import { useClientWorker } from '@/coque/ClientWorker';
+import { enrichirSaisie, lireAnnonce, type ModeLecture } from '@/enrichissement';
 import { useProjets } from '@/stockage/ProjetsContext';
 
 import { FormulaireProjet, valeursDepuisChamps } from './FormulaireProjet';
@@ -40,6 +41,9 @@ export function NouveauProjet(): JSX.Element {
   const [nbChamps, setNbChamps] = useState(
     capture === null ? 0 : Object.keys(capture.champs).length,
   );
+  const client = useClientWorker();
+  const [lecture, setLecture] = useState<ModeLecture | null>(null);
+  const [enCours, setEnCours] = useState<'lecture' | 'creation' | null>(null);
 
   useEffect(() => {
     if (fragment.statut !== 'absente') void naviguer(CHEMIN, { replace: true });
@@ -47,10 +51,13 @@ export function NouveauProjet(): JSX.Element {
 
   const annonce: AnnonceResolue | null = resoudreAnnonce(url);
 
-  const lireTexte = (): void => {
-    const champs = extraireChamps(texte);
+  const lireTexte = async (): Promise<void> => {
+    setEnCours('lecture');
+    const { champs, mode } = await lireAnnonce(texte, client);
     setInitial(valeursDepuisChamps(champs));
     setNbChamps(Object.keys(champs).length);
+    setLecture(mode);
+    setEnCours(null);
     setEtape('verifier');
   };
 
@@ -60,9 +67,12 @@ export function NouveauProjet(): JSX.Element {
     setEtape('verifier');
   };
 
-  const creerProjet = (saisie: SaisieProjet): void => {
+  const creerProjet = async (saisie: SaisieProjet): Promise<void> => {
+    setEnCours('creation');
+    // Ventes réelles et loyers de la commune ; sans réponse, le projet est créé sans repère de marché.
+    const enrichi = await enrichirSaisie(saisie, client);
     const nom = nomDuProjet(saisie);
-    const source = construireProjet(saisie, 'a-remplacer');
+    const source = construireProjet(saisie, 'a-remplacer', enrichi);
     const enregistre = creer({ nom, source });
     void naviguer(`/projets/${enregistre.id}`);
   };
@@ -162,14 +172,20 @@ export function NouveauProjet(): JSX.Element {
             className="rounded-encart border border-bordure bg-surface p-3 text-[15px]"
           />
           <div className="flex items-center gap-3">
-            <Bouton variante="primaire" onClick={lireTexte} disabled={texte.trim() === ''}>
-              Lire le texte
+            <Bouton
+              variante="primaire"
+              onClick={() => {
+                void lireTexte();
+              }}
+              disabled={texte.trim() === '' || enCours !== null}
+            >
+              {enCours === 'lecture' ? 'Lecture en cours…' : 'Lire le texte'}
             </Bouton>
-            {etape === 'verifier' && (
+            {etape === 'verifier' && enCours !== 'lecture' && (
               <span className="text-sm text-encre-2">
                 {nbChamps === 0
                   ? 'Rien de reconnu : remplissez le formulaire ci-dessous.'
-                  : `${pluriel(nbChamps, 'champ')} ${nbChamps > 1 ? 'lus' : 'lu'} dans l'annonce, à vérifier ci-dessous.`}
+                  : `${pluriel(nbChamps, 'champ')} ${nbChamps > 1 ? 'lus' : 'lu'} dans l'annonce${lecture === 'ia' ? " par l'IA" : ''}, à vérifier ci-dessous.`}
               </span>
             )}
           </div>
@@ -206,8 +222,15 @@ export function NouveauProjet(): JSX.Element {
             key={`${String(manuel)}-${String(nbChamps)}-${texte.length.toString()}`}
             initial={initial}
             annonce={manuel ? null : annonce}
-            onCreer={creerProjet}
+            onCreer={(saisie) => {
+              if (enCours === null) void creerProjet(saisie);
+            }}
           />
+          {enCours === 'creation' && (
+            <p role="status" className="m-0 text-sm text-encre-2">
+              On cherche les ventes réelles et les loyers de la commune…
+            </p>
+          )}
         </div>
       )}
     </div>

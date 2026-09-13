@@ -103,12 +103,14 @@ describe('origines', () => {
 describe('dépendances depuis l’environnement', () => {
   const kv = { get: () => Promise.resolve(null), put: () => Promise.resolve() };
   const limiteur = { limit: () => Promise.resolve({ success: true }) };
+  const r2 = { get: () => Promise.resolve(null) };
 
   it('applique les valeurs par défaut et les origines supplémentaires', () => {
     const deps = dependancesDepuisEnv({
       KV_CACHE: kv,
       LIMITEUR: limiteur,
       LIMITEUR_EXTRACTION: limiteur,
+      DONNEES: r2,
     });
     expect(deps.environnement).toBe('dev');
     expect(deps.origines).toEqual(ORIGINES_DEFAUT);
@@ -121,6 +123,7 @@ describe('dépendances depuis l’environnement', () => {
       KV_CACHE: kv,
       LIMITEUR: limiteur,
       LIMITEUR_EXTRACTION: limiteur,
+      DONNEES: r2,
       ENVIRONNEMENT: 'production',
       ORIGINES_AUTORISEES: 'https://loupe.example',
     });
@@ -134,6 +137,7 @@ describe('dépendances depuis l’environnement', () => {
         KV_CACHE: kv,
         LIMITEUR: limiteur,
         LIMITEUR_EXTRACTION: limiteur,
+        DONNEES: r2,
         ENVIRONNEMENT: 'staging',
       }),
     ).toThrow(ErreurConfiguration);
@@ -147,6 +151,7 @@ describe('dépendances depuis l’environnement', () => {
       KV_CACHE: kv,
       LIMITEUR: limiteur,
       LIMITEUR_EXTRACTION: limiteur,
+      DONNEES: r2,
     });
     const url = new URL('https://exemple.test/x');
     const init = { signal: AbortSignal.timeout(1000), headers: { accept: 'application/json' } };
