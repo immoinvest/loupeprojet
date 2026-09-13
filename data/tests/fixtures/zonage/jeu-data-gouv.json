@@ -1,0 +1,35 @@
+{
+  "slug": "liste-des-communes-selon-le-zonage-abc",
+  "title": "Liste des communes selon le zonage ABC",
+  "license": "lov2",
+  "resources": [
+    {
+      "id": "add248a9-4db8-4315-b1ad-38c45ae86b9f",
+      "title": "Liste des 468 communes reclassées - Zonage ABC 5 septembre 2025.csv",
+      "format": "csv",
+      "url": "https://static.data.gouv.fr/resources/liste-des-communes-selon-le-zonage-abc/20250910-150536/liste-des-468-communes-reclassees.csv",
+      "last_modified": "2025-09-10T15:05:36.425000+00:00"
+    },
+    {
+      "id": "2de67240-da8c-4856-ba7c-f95ddd2ea450",
+      "title": "Liste ensemble des communes - Zonage ABC en vigueur 26 juin 2026.xlsx",
+      "format": "xlsx",
+      "url": "https://static.data.gouv.fr/resources/liste-des-communes-selon-le-zonage-abc/20260703-091327/liste-ensemble-des-communes.xlsx",
+      "last_modified": "2026-07-03T09:13:28.285000+00:00"
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000001",
+      "title": "Liste ensemble des communes - Zonage ABC en vigueur 5 septembre 2025.csv",
+      "format": "csv",
+      "url": "https://static.data.gouv.fr/resources/liste-des-communes-selon-le-zonage-abc/20250910-000000/liste-ensemble-des-communes-2025.csv",
+      "last_modified": "2025-09-10T15:00:00.000000+00:00"
+    },
+    {
+      "id": "13f7282b-8a25-43ab-9713-8bb4e476df55",
+      "title": "Liste ensemble des communes - Zonage ABC en vigueur 26 juin 2026.csv",
+      "format": "csv",
+      "url": "https://static.data.gouv.fr/resources/liste-des-communes-selon-le-zonage-abc/20260703-091314/liste-ensemble-des-communes-zonage-abc-en-vigueur-26-juin-2026.csv",
+      "last_modified": "2026-07-03T09:13:15.092000+00:00"
+    }
+  ]
+}
