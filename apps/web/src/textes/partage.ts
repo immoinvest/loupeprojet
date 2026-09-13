@@ -4,7 +4,7 @@ export const RAISONS_PARTAGE = {
   illisible:
     'Ce lien est incomplet ou abîmé, sans doute coupé en le collant. Demandez-en un nouveau.',
   invalide:
-    'Ce projet vient d’une version de Loupe que celle-ci ne sait pas lire. Demandez un nouveau lien.',
+    'Ce projet vient d’une version de Deklic que celle-ci ne sait pas lire. Demandez un nouveau lien.',
 } as const;
 
 export type RaisonPartage = keyof typeof RAISONS_PARTAGE;

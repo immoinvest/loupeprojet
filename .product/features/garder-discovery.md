@@ -36,15 +36,15 @@ Fiche `garder` (Pierre, 13/09/2026) : terminer le tour de l'application côté w
 
 ## Risques
 
-| Risque                                                             | Mitigation                                                                                                                     |
-| ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------ |
-| Impression : fonds non imprimés, texte blanc de la carte Leviers   | `print-color-adjust: exact` ; carte Leviers en fond clair et encre sombre en mode document ; feux avec libellé                 |
-| Impression : grilles à quatre colonnes trop étroites en A4         | Mode document : grilles à deux colonnes, largeur du document limitée à l'écran comme au papier                                 |
-| Lien de partage long (≈ 2 à 3 Ko)                                  | Testé avec un projet complet (courte durée, marché, copro) ; limite navigateur très supérieure ; pas de compression en v1      |
-| Lien de partage forgé ou corrompu                                  | Décodage tolérant (jamais d'exception), validation Zod stricte, message neutre, rien n'est enregistré                          |
-| Un projet partagé avec une version de règles inconnue plus tard    | `VersionReglesSchema` refuse ; le message invite à demander un nouveau lien                                                    |
-| Comparaison d'horizons différents (impôt, revente, enrichissement) | Ligne « Horizon de revente » et mention « sur N ans » dans les cellules concernées                                             |
-| Sources juridiques de la page Méthode                              | Références au CGI / textes connus seulement ; ce qui vient de la spec est cité « spec Loupe » ; drapeau « à confirmer » repris |
+| Risque                                                             | Mitigation                                                                                                                      |
+| ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
+| Impression : fonds non imprimés, texte blanc de la carte Leviers   | `print-color-adjust: exact` ; carte Leviers en fond clair et encre sombre en mode document ; feux avec libellé                  |
+| Impression : grilles à quatre colonnes trop étroites en A4         | Mode document : grilles à deux colonnes, largeur du document limitée à l'écran comme au papier                                  |
+| Lien de partage long (≈ 2 à 3 Ko)                                  | Testé avec un projet complet (courte durée, marché, copro) ; limite navigateur très supérieure ; pas de compression en v1       |
+| Lien de partage forgé ou corrompu                                  | Décodage tolérant (jamais d'exception), validation Zod stricte, message neutre, rien n'est enregistré                           |
+| Un projet partagé avec une version de règles inconnue plus tard    | `VersionReglesSchema` refuse ; le message invite à demander un nouveau lien                                                     |
+| Comparaison d'horizons différents (impôt, revente, enrichissement) | Ligne « Horizon de revente » et mention « sur N ans » dans les cellules concernées                                              |
+| Sources juridiques de la page Méthode                              | Références au CGI / textes connus seulement ; ce qui vient de la spec est cité « spec Deklic » ; drapeau « à confirmer » repris |
 
 ## Auto-validation critique
 

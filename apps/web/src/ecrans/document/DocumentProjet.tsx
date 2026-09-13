@@ -7,6 +7,7 @@ import { Fiscalite } from '@/ecrans/Fiscalite';
 import { Rapport } from '@/ecrans/Rapport';
 import { Revente } from '@/ecrans/Revente';
 import { Visite } from '@/ecrans/Visite';
+import { LogotypeDeklic } from '@/marque/Logo';
 import { MODES } from '@/textes/regimes';
 
 const VOLETS: readonly { readonly titre: string; readonly Volet: () => JSX.Element }[] = [
@@ -36,8 +37,8 @@ export function DocumentProjet({
       <div className="document">
         <header className="flex items-end justify-between gap-6 border-b border-bordure px-10 pt-8 pb-5">
           <div className="flex flex-col gap-1">
-            <span className="font-display text-sm font-bold text-accent">
-              Loupe · dossier d'analyse locative
+            <span className="flex items-center gap-2 font-display text-sm font-bold text-encre-3">
+              <LogotypeDeklic hauteur={20} />· dossier d'analyse locative
             </span>
             <h1 className="m-0 font-display text-[28px] leading-tight font-bold">
               {enregistre.nom}
@@ -72,7 +73,7 @@ export function DocumentProjet({
 
         <footer className="flex flex-col gap-1 border-t border-bordure px-10 py-5 text-xs text-encre-3">
           <span>
-            Loupe est un outil d'aide à la décision, pas un conseil en investissement ni un conseil
+            Deklic est un outil d'aide à la décision, pas un conseil en investissement ni un conseil
             fiscal. Règles connues au {dateCourte(r.meta.dateReference)} (version{' '}
             {r.meta.versionRegles}). Tout est calculé dans le navigateur ; rien n'est envoyé à un
             serveur.
