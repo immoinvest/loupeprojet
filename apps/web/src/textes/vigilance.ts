@@ -1,6 +1,41 @@
-import type { PointVigilance } from '@loupe/moteur';
+import type { CodeVigilance, PointVigilance } from '@loupe/moteur';
 
 import { euros, pourcentage, pourcentageSigne } from '@/formatage/nombres';
+
+export type CategorieVigilance = 'documents' | 'sur_place' | 'finances';
+
+export const CATEGORIES: Readonly<Record<CategorieVigilance, string>> = {
+  documents: 'Documents à demander',
+  sur_place: 'À vérifier sur place',
+  finances: "À régler avant l'offre",
+};
+
+export const ORDRE_CATEGORIES: readonly CategorieVigilance[] = [
+  'documents',
+  'sur_place',
+  'finances',
+];
+
+const CATEGORIE_PAR_CODE: Readonly<Record<CodeVigilance, CategorieVigilance>> = {
+  PV_AG_ET_CARNET: 'documents',
+  CONFIRMER_CHARGES_COPRO: 'documents',
+  CONFIRMER_TAXE_FONCIERE: 'documents',
+  COPRO_EN_PROCEDURE: 'documents',
+  VERIFIER_DPE: 'sur_place',
+  RENOVATION_ENERGETIQUE_OBLIGATOIRE: 'sur_place',
+  SANS_ASCENSEUR_ETAGE_ELEVE: 'sur_place',
+  RISQUE_NATUREL: 'sur_place',
+  EXPLIQUER_PRIX_SOUS_MARCHE: 'sur_place',
+  EFFORT_HCSF_DEPASSE: 'finances',
+  DUREE_PRET_HORS_HCSF: 'finances',
+  PLAFOND_MICRO_DEPASSE: 'finances',
+  LOYER_AU_DESSUS_PLAFOND: 'finances',
+  PS_BIC_A_CONFIRMER: 'finances',
+};
+
+export function categorieVigilance(code: CodeVigilance): CategorieVigilance {
+  return CATEGORIE_PAR_CODE[code];
+}
 
 function param(point: PointVigilance, cle: string): number | string {
   return point.parametres[cle] ?? '';

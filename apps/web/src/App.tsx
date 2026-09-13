@@ -4,10 +4,13 @@ import { BrowserRouter, MemoryRouter, Navigate, useRoutes, type RouteObject } fr
 import { AppLayout } from './coque/AppLayout';
 import { ProjetLayout } from './coque/ProjetLayout';
 import { Bientot } from './ecrans/Bientot';
+import { Fiscalite } from './ecrans/Fiscalite';
 import { Hypotheses } from './ecrans/Hypotheses';
 import { MesProjets } from './ecrans/MesProjets';
 import { NouveauProjet } from './ecrans/NouveauProjet';
 import { Rapport } from './ecrans/Rapport';
+import { Revente } from './ecrans/Revente';
+import { Visite } from './ecrans/Visite';
 import { ProjetsProvider } from './stockage/ProjetsContext';
 
 export const routes: RouteObject[] = [
@@ -23,33 +26,9 @@ export const routes: RouteObject[] = [
         children: [
           { index: true, element: <Rapport /> },
           { path: 'hypotheses', element: <Hypotheses /> },
-          {
-            path: 'fiscalite',
-            element: (
-              <Bientot
-                titre="Fiscalité"
-                phrase="Bientôt : les quatre régimes année par année, et l'année où vous commencez à payer."
-              />
-            ),
-          },
-          {
-            path: 'revente',
-            element: (
-              <Bientot
-                titre="Revente"
-                phrase="Bientôt : la revente à 5, 10 et 15 ans, plus-value et impôt détaillés."
-              />
-            ),
-          },
-          {
-            path: 'visite',
-            element: (
-              <Bientot
-                titre="Préparer la visite"
-                phrase="Bientôt : la liste des points à vérifier sur place, générée à partir de ce projet."
-              />
-            ),
-          },
+          { path: 'fiscalite', element: <Fiscalite /> },
+          { path: 'revente', element: <Revente /> },
+          { path: 'visite', element: <Visite /> },
         ],
       },
       {

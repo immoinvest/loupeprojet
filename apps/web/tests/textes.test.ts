@@ -7,9 +7,21 @@ import {
 import { describe, expect, it } from 'vitest';
 
 import { AXES, ETATS, libelleFeu } from '@/textes/feux';
-import { CRITERES_PRIX, MODES, REGIMES, SCENARIOS } from '@/textes/regimes';
+import {
+  CRITERES_PRIX,
+  MODES,
+  ORDRE_REGIMES,
+  REGIMES,
+  SCENARIOS,
+  explicationRegime,
+} from '@/textes/regimes';
 import { reponseCourte, texteVerdict } from '@/textes/verdict';
-import { phraseVigilance } from '@/textes/vigilance';
+import {
+  CATEGORIES,
+  ORDRE_CATEGORIES,
+  categorieVigilance,
+  phraseVigilance,
+} from '@/textes/vigilance';
 
 const n = (s: string): string => s.replace(/\s/g, ' ');
 
@@ -105,6 +117,79 @@ describe('vigilance', () => {
     expect(n(phraseVigilance(p('LOYER_AU_DESSUS_PLAFOND', { plafond: 900 })))).toContain('900 €');
     expect(phraseVigilance(p('VERIFIER_DPE'))).toContain('DPE ');
     expect(phraseVigilance(p('EFFORT_HCSF_DEPASSE', { seuil: 'x' }))).toContain('0 %');
+  });
+});
+
+describe('régimes : explications et ordre', () => {
+  const r = calculerProjet(projetExemple);
+  const dix = r.projet.hypotheses.revente.annees;
+
+  it('couvre les quatre régimes dans un ordre meublé puis nu', () => {
+    expect(ORDRE_REGIMES).toEqual(['lmnp_reel', 'micro_bic', 'nu_reel', 'micro_foncier']);
+  });
+
+  it('LMNP réel sans impôt : réserve d’amortissements ; nu réel : première année imposable', () => {
+    expect(n(explicationRegime(r.fiscalite.regimes.lmnp_reel, dix))).toContain(
+      'aucun impôt sur 10 ans, et 50 807 € restent en réserve',
+    );
+    expect(explicationRegime(r.fiscalite.regimes.nu_reel, dix)).toContain("à partir de l'année 6");
+    expect(explicationRegime(r.fiscalite.regimes.micro_bic, dix)).toContain('50 %');
+    expect(explicationRegime(r.fiscalite.regimes.micro_foncier, dix)).toContain('30 %');
+  });
+
+  it('LMNP réel imposé et nu réel jamais imposé : les autres phrases', () => {
+    const riche = calculerProjet(
+      variante({ location: { mode: 'meuble_lld', loyerHc: 2_300, vacanceSemaines: 0 } }),
+    );
+    expect(riche.fiscalite.regimes.lmnp_reel.premiereAnneeImposable).not.toBeNull();
+    expect(explicationRegime(riche.fiscalite.regimes.lmnp_reel, dix)).toMatch(
+      /jusqu'à l'année \d+/,
+    );
+    const nuSansImpot = calculerProjet(
+      variante({
+        location: { mode: 'nu', loyerHc: 400 },
+        fiscalite: { tmi: 0.3, regime: 'nu_reel' },
+      }),
+    );
+    expect(nuSansImpot.fiscalite.regimes.nu_reel.premiereAnneeImposable).toBeNull();
+    expect(explicationRegime(nuSansImpot.fiscalite.regimes.nu_reel, dix)).toContain(
+      'aucun impôt sur 10 ans',
+    );
+  });
+
+  it('plafond dépassé', () => {
+    const gros = calculerProjet(
+      variante({ location: { mode: 'meuble_lld', loyerHc: 8_000, vacanceSemaines: 0 } }),
+    );
+    expect(explicationRegime(gros.fiscalite.regimes.micro_bic, dix)).toContain('inaccessible');
+  });
+});
+
+describe('catégories de vigilance', () => {
+  it('chaque code a une catégorie, et chaque catégorie un libellé', () => {
+    const codes = [
+      'PV_AG_ET_CARNET',
+      'CONFIRMER_CHARGES_COPRO',
+      'COPRO_EN_PROCEDURE',
+      'VERIFIER_DPE',
+      'RENOVATION_ENERGETIQUE_OBLIGATOIRE',
+      'EXPLIQUER_PRIX_SOUS_MARCHE',
+      'CONFIRMER_TAXE_FONCIERE',
+      'RISQUE_NATUREL',
+      'SANS_ASCENSEUR_ETAGE_ELEVE',
+      'EFFORT_HCSF_DEPASSE',
+      'DUREE_PRET_HORS_HCSF',
+      'PLAFOND_MICRO_DEPASSE',
+      'LOYER_AU_DESSUS_PLAFOND',
+      'PS_BIC_A_CONFIRMER',
+    ] as const;
+    for (const code of codes) {
+      expect(ORDRE_CATEGORIES).toContain(categorieVigilance(code));
+    }
+    expect(categorieVigilance('PV_AG_ET_CARNET')).toBe('documents');
+    expect(categorieVigilance('VERIFIER_DPE')).toBe('sur_place');
+    expect(categorieVigilance('EFFORT_HCSF_DEPASSE')).toBe('finances');
+    expect(Object.keys(CATEGORIES)).toHaveLength(3);
   });
 });
 

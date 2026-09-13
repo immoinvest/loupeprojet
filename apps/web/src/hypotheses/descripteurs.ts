@@ -21,6 +21,16 @@ export const GROUPES: readonly Groupe[] = [
   GROUPE_FISCALITE,
 ];
 
+/** Retrouve un descripteur par son chemin ; lève une erreur si le chemin n'est pas éditable. */
+export function descripteurParChemin(chemin: string): Descripteur {
+  for (const groupe of GROUPES) {
+    for (const d of groupe.champs) {
+      if (d.chemin === chemin) return d;
+    }
+  }
+  throw new Error(`Aucun descripteur pour ${chemin}`);
+}
+
 /** Clé de provenance associée à un chemin : « hypotheses.achat.prix » → « achat.prix ». */
 export function cleProvenance(chemin: string): string {
   return chemin.replace(/^hypotheses\./, '');
