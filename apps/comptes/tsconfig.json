@@ -2,9 +2,11 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "lib": ["ES2022"],
-    "types": ["@cloudflare/workers-types"],
+    // Les tests tournent en Node et Better Auth est typé sur les API web de Node ; les types
+    // Cloudflare (D1Database, ExecutionContext) s'importent explicitement depuis @cloudflare/workers-types.
+    "types": ["node"],
     "noEmit": true,
     "declaration": false
   },
-  "include": ["src", "tests", "vitest.config.ts"]
+  "include": ["src", "tests", "types", "vitest.config.ts"]
 }

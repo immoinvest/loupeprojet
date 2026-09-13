@@ -1,5 +1,8 @@
+import type { D1Database } from '@cloudflare/workers-types';
+import type { BetterAuthOptions } from 'better-auth';
 import { z } from 'zod';
 
+import { envoyeurJournal, envoyeurResend, type Envoyeur } from './courriel';
 import { ErreurConfiguration } from './erreurs';
 import { lireConfigFournisseurs, type ConfigFournisseurs } from './fournisseurs';
 import { journalConsole, type Journal } from './journal';
@@ -11,9 +14,9 @@ export interface ServeurStatique {
   fetch(requete: Request): Promise<Response>;
 }
 
-/** Ce que Cloudflare injecte : bindings (wrangler.toml, projet Pages) et variables (vars, secrets, .dev.vars). */
+/** Ce que Cloudflare injecte : bindings (projet Pages, wrangler.toml) et variables (vars, secrets, .dev.vars). */
 export interface Bindings {
-  readonly DB: D1Database;
+  readonly DB?: D1Database | undefined;
   readonly ASSETS?: ServeurStatique | undefined;
   readonly ENVIRONNEMENT?: string | undefined;
   readonly BETTER_AUTH_SECRET?: string | undefined;
@@ -32,27 +35,34 @@ export interface Dependances {
   readonly environnement: Environnement;
   /** Secret de Better Auth (cookies, jetons) : BETTER_AUTH_SECRET, ou une valeur fixe en dev. */
   readonly secret: string;
+  /** La base des comptes : le binding D1 en production, un adaptateur mémoire en test. */
+  readonly base: BetterAuthOptions['database'];
+  /** Envoi des codes : Resend avec une clé, le journal en dev, sinon null (l'e-mail n'est pas proposé). */
+  readonly courriel: Envoyeur | null;
   readonly fournisseurs: ConfigFournisseurs;
-  /** Origines de confiance : production, previews Pages, localhost, plus ORIGINES_AUTORISEES. */
+  /** Origines connues : le site et ses previews, localhost en dev, plus ORIGINES_AUTORISEES. */
   readonly origines: readonly string[];
   readonly journal: Journal;
   readonly maintenant: () => number;
 }
 
-/** Secret de développement : jamais en production (le worker refuse de démarrer sans BETTER_AUTH_SECRET). */
+/** Secret de développement : jamais hors dev (le worker refuse de démarrer sans BETTER_AUTH_SECRET). */
 export const SECRET_DEV = 'deklic-dev-secret-ne-jamais-utiliser-en-production';
 
-export const ORIGINES_DEFAUT: readonly string[] = [
+/** Le site en production et ses previews (https://<branche ou empreinte>.loupeprojet.pages.dev). */
+export const ORIGINES_SITE: readonly string[] = [
   'https://loupeprojet.pages.dev',
   'https://*.loupeprojet.pages.dev',
-  'http://localhost:5173',
-  'http://localhost:8787',
 ];
+
+/** Le poste de développement : Vite (5173) et wrangler dev (8787). */
+export const ORIGINES_DEV: readonly string[] = ['http://localhost:5173', 'http://localhost:8787'];
 
 const Optionnelle = z.string().trim().min(1).optional();
 
 const VariablesSchema = z.object({
-  ENVIRONNEMENT: z.enum(['dev', 'preview', 'production']).default('dev'),
+  // Sans variable, on suppose la production : secret exigé, aucune origine locale (échec fermé).
+  ENVIRONNEMENT: z.enum(['dev', 'preview', 'production']).default('production'),
   BETTER_AUTH_SECRET: z.string().min(32).optional(),
   RESEND_API_KEY: Optionnelle,
   COURRIEL_EXPEDITEUR: z.string().trim().min(3).default('Deklic <onboarding@resend.dev>'),
@@ -102,14 +112,29 @@ function lireSecret(v: Variables): string {
   throw new ErreurConfiguration('BETTER_AUTH_SECRET manquant (obligatoire hors dev)');
 }
 
+function lireBase(env: Bindings): D1Database {
+  if (env.DB === undefined) throw new ErreurConfiguration('binding D1 « DB » absent');
+  return env.DB;
+}
+
+function lireCourriel(v: Variables, journal: Journal): Envoyeur | null {
+  if (v.RESEND_API_KEY !== undefined) {
+    return envoyeurResend(v.RESEND_API_KEY, v.COURRIEL_EXPEDITEUR);
+  }
+  return v.ENVIRONNEMENT === 'dev' ? envoyeurJournal(journal) : null;
+}
+
 /** Construit les dépendances de production à partir de l'environnement Cloudflare. */
 export function dependancesDepuisEnv(env: Bindings): Dependances {
   const v = lireVariables(env);
+  const locales = v.ENVIRONNEMENT === 'dev' ? ORIGINES_DEV : [];
   return {
     environnement: v.ENVIRONNEMENT,
     secret: lireSecret(v),
+    base: lireBase(env),
+    courriel: lireCourriel(v, journalConsole),
     fournisseurs: lireConfigFournisseurs(v),
-    origines: [...ORIGINES_DEFAUT, ...lireOriginesSupplementaires(v.ORIGINES_AUTORISEES)],
+    origines: [...ORIGINES_SITE, ...locales, ...lireOriginesSupplementaires(v.ORIGINES_AUTORISEES)],
     journal: journalConsole,
     maintenant: () => Date.now(),
   };

@@ -1,9 +1,12 @@
+import type { D1Database, ExecutionContext } from '@cloudflare/workers-types';
 import { Hono } from 'hono';
 import { describe, expect, it } from 'vitest';
 
 import { VERSION_COMPTES } from '../src/app';
 import type { Bindings, Dependances } from '../src/dependances';
+import { ErreurConfiguration } from '../src/erreurs';
 import { creerGestionnaire } from '../src/index';
+import { journalMemoire } from '../src/journal';
 import { banc } from './aide';
 
 describe('santé et routes', () => {
@@ -66,8 +69,8 @@ describe('fournisseurs', () => {
     });
   });
 
-  it('hors dev, l’e-mail n’est pas proposé sans envoyeur', async () => {
-    const { requete } = banc({ environnement: 'production' });
+  it('sans envoyeur, l’e-mail n’est pas proposé', async () => {
+    const { requete } = banc({ environnement: 'production', courriel: null });
     expect(await (await requete('/api/comptes/fournisseurs')).json()).toEqual({
       email: false,
       google: false,
@@ -82,40 +85,38 @@ describe('gestionnaire Pages (index)', () => {
     passThroughOnException: () => undefined,
     props: {},
   } as unknown as ExecutionContext;
-  const env = { DB: {} as D1Database } as Bindings;
+  const env: Bindings = { DB: {} as D1Database };
+  const statique = {
+    fetch: (): Promise<Response> => Promise.resolve(new Response('<html>site</html>')),
+  };
 
-  function appTemoin(): { app: Hono; constructions: number[] } {
-    const constructions: number[] = [];
+  function appTemoin(): Hono {
     const app = new Hono();
     app.get('/api/ping', (c) => c.text('pong'));
-    return {
-      app,
-      constructions,
-    };
+    return app;
   }
 
   it('envoie /api/* à l’application, construite une seule fois', async () => {
-    const { app, constructions } = appTemoin();
+    let constructions = 0;
     const gestionnaire = creerGestionnaire(() => {
-      constructions.push(1);
-      return app;
+      constructions += 1;
+      return appTemoin();
     });
     const r1 = await gestionnaire.fetch(new Request('https://deklic.test/api/ping'), env, contexte);
     const r2 = await gestionnaire.fetch(new Request('https://deklic.test/api'), env, contexte);
     expect(await r1.text()).toBe('pong');
     expect(r2.status).toBe(404);
-    expect(constructions).toHaveLength(1);
+    expect(constructions).toBe(1);
   });
 
   it('délègue le reste aux fichiers statiques, ou rend 404 sans binding ASSETS', async () => {
-    const { app } = appTemoin();
-    const gestionnaire = creerGestionnaire(() => app);
-    const statique = await gestionnaire.fetch(
+    const gestionnaire = creerGestionnaire(appTemoin);
+    const site = await gestionnaire.fetch(
       new Request('https://deklic.test/projets'),
-      { ...env, ASSETS: { fetch: () => Promise.resolve(new Response('<html>site</html>')) } },
+      { ...env, ASSETS: statique },
       contexte,
     );
-    expect(await statique.text()).toBe('<html>site</html>');
+    expect(await site.text()).toBe('<html>site</html>');
 
     const sans = await gestionnaire.fetch(
       new Request('https://deklic.test/projets'),
@@ -126,13 +127,43 @@ describe('gestionnaire Pages (index)', () => {
     expect(await sans.json()).toEqual({ code: 'INTROUVABLE' });
   });
 
+  it('une configuration incomplète rend 503 sur /api/* et laisse le site servi', async () => {
+    const journal = journalMemoire();
+    const gestionnaire = creerGestionnaire(undefined, journal);
+    const api = await gestionnaire.fetch(
+      new Request('https://loupeprojet.pages.dev/api/comptes/sante'),
+      { ...env, ASSETS: statique },
+      contexte,
+    );
+    expect(api.status).toBe(503);
+    expect(await api.json()).toEqual({ code: 'CONFIGURATION_INCOMPLETE' });
+    expect(journal.evenements).toEqual([
+      {
+        niveau: 'erreur',
+        evenement: 'configuration.incomplete',
+        donnees: { raison: 'BETTER_AUTH_SECRET manquant (obligatoire hors dev)' },
+      },
+    ]);
+
+    const construireEnEchec = creerGestionnaire(() => {
+      throw new ErreurConfiguration('binding D1 « DB » absent');
+    }, journal);
+    const site = await construireEnEchec.fetch(
+      new Request('https://loupeprojet.pages.dev/projets'),
+      { ...env, ASSETS: statique },
+      contexte,
+    );
+    expect(await site.text()).toBe('<html>site</html>');
+  });
+
   it('le gestionnaire par défaut construit l’application depuis l’environnement', async () => {
     const { default: parDefaut } = await import('../src/index');
     const r = await parDefaut.fetch(
-      new Request('https://deklic.test/api/comptes/sante'),
+      new Request('http://localhost:8787/api/comptes/sante'),
       { ...env, ENVIRONNEMENT: 'dev' },
       contexte,
     );
     expect(r.status).toBe(200);
+    expect(await r.json()).toEqual({ ok: true, version: VERSION_COMPTES, environnement: 'dev' });
   });
 });

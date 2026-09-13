@@ -1,7 +1,13 @@
 import type { ContentfulStatusCode } from 'hono/utils/http-status';
 
 /** Codes d'erreur propres au worker des comptes ; Better Auth rend ses propres `{ code, message }`. */
-export type CodeErreur = 'INTROUVABLE' | 'COURRIEL_INDISPONIBLE' | 'ERREUR_INTERNE';
+export type CodeErreur =
+  | 'INTROUVABLE'
+  | 'ORIGINE_INCONNUE'
+  | 'TYPE_NON_PRIS_EN_CHARGE'
+  | 'COURRIEL_INDISPONIBLE'
+  | 'CONFIGURATION_INCOMPLETE'
+  | 'ERREUR_INTERNE';
 
 /** Réponse JSON d'erreur, indépendante du contexte Hono (utilisable dans notFound, onError et index). */
 export function reponseErreur(statut: ContentfulStatusCode, code: CodeErreur): Response {
@@ -17,4 +23,8 @@ export class ErreurConfiguration extends Error {
     super(message);
     this.name = 'ErreurConfiguration';
   }
+}
+
+export function messageDe(erreur: unknown): string {
+  return erreur instanceof Error ? erreur.message : String(erreur);
 }
