@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "wrangler d1 migrations apply deklic-comptes --local && wrangler dev --port 8787",
+    "dev:node": "vite-node scripts/serveur-node.ts",
     "build": "wrangler deploy --dry-run --outdir dist",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
