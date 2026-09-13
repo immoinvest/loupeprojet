@@ -1,9 +1,26 @@
 {
   "manifest_version": 3,
   "name": "Deklic",
-  "version": "0.1.0",
-  "description": "Lit l'annonce ouverte (LeBonCoin, SeLoger, Bien'ici, PAP, Logic-Immo) et ouvre son analyse dans Deklic. Rien ne quitte votre navigateur.",
+  "version": "0.2.0",
+  "description": "Collez le lien d'une annonce (LeBonCoin, SeLoger, Bien'ici, PAP, Logic-Immo) dans Deklic : l'extension la lit dans votre navigateur et remplit l'analyse.",
   "permissions": ["activeTab", "scripting"],
+  "host_permissions": [
+    "*://*.leboncoin.fr/*",
+    "*://*.seloger.com/*",
+    "*://*.bienici.com/*",
+    "*://*.pap.fr/*",
+    "*://*.logic-immo.com/*"
+  ],
+  "background": {
+    "service_worker": "arriere-plan.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://*.loupeprojet.pages.dev/*", "http://localhost/*", "http://127.0.0.1/*"],
+      "js": ["pont.js"],
+      "run_at": "document_start"
+    }
+  ],
   "action": {
     "default_title": "Analyser dans Deklic",
     "default_popup": "popup.html",
