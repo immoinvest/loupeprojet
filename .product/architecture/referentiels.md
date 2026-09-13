@@ -1,6 +1,6 @@
 # Architecture : Référentiels (`data/`, `@loupe/data`)
 
-Scripts de pré-agrégation des données publiques, exécutés par la GitHub Action `referentiels.yml` (mensuelle ou manuelle) puis publiés sur le bucket R2 `loupe-data`. Le navigateur les lira via le Worker `/proxy` (feature `enrichissement-marche`). Sources, licences et formats : `data/SOURCES.md`.
+Scripts de pré-agrégation des données publiques, exécutés par la GitHub Action `referentiels.yml` (mensuelle ou manuelle) puis publiés sur le bucket R2 `deklic-data`. Le navigateur les lira via le Worker `/proxy` (feature `enrichissement-marche`). Sources, licences et formats : `data/SOURCES.md`.
 
 ```
 data/
@@ -43,7 +43,7 @@ tests/
 
 ## Flux d'une passe
 
-`cli.ts` → `analyserArguments` → `contexteReel(dossierSortie)` → `executerSources` → pour chaque source : téléchargement en flux (`telechargerTexteEnFlux` gzip / encodage) → `lireCsv` → transformation pure (module `transformer.ts` ou `vente.ts`) → validation Zod du fichier publié → `ecrireJson` / `ecrireTexte` dans `data/dist/<prefixe>/…` → journal. L'Action synchronise ensuite `data/dist/<prefixe>/` vers `s3://loupe-data/<prefixe>/`.
+`cli.ts` → `analyserArguments` → `contexteReel(dossierSortie)` → `executerSources` → pour chaque source : téléchargement en flux (`telechargerTexteEnFlux` gzip / encodage) → `lireCsv` → transformation pure (module `transformer.ts` ou `vente.ts`) → validation Zod du fichier publié → `ecrireJson` / `ecrireTexte` dans `data/dist/<prefixe>/…` → journal. L'Action synchronise ensuite `data/dist/<prefixe>/` vers `s3://deklic-data/<prefixe>/`.
 
 ## Patterns
 

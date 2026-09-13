@@ -148,10 +148,10 @@ npm run referentiels -w data -- --aide
 
 ### Publier sur R2 (GitHub Action `referentiels.yml`)
 
-L'Action tourne le 2 de chaque mois à 03:30 UTC, ou à la main (onglet Actions → « Référentiels » → source et département). Elle génère les fichiers puis les synchronise vers le bucket R2 `loupe-data` par l'API S3 (`aws s3 sync`, préinstallé sur les runners) ; sans les secrets ci-dessous elle génère seulement et prévient. À faire une fois dans le compte Cloudflare :
+L'Action tourne le 2 de chaque mois à 03:30 UTC, ou à la main (onglet Actions → « Référentiels » → source et département). Elle génère les fichiers puis les synchronise vers le bucket R2 `deklic-data` par l'API S3 (`aws s3 sync`, préinstallé sur les runners) ; sans les secrets ci-dessous elle génère seulement et prévient. À faire une fois dans le compte Cloudflare :
 
-1. R2 → Créer un bucket nommé `loupe-data` (région automatique).
-2. R2 → Gérer les jetons d'API R2 → Créer un jeton « Object Read & Write » limité au bucket `loupe-data` ; noter l'Access Key ID et la Secret Access Key.
+1. R2 → Créer un bucket nommé `deklic-data` (région automatique).
+2. R2 → Gérer les jetons d'API R2 → Créer un jeton « Object Read & Write » limité au bucket `deklic-data` ; noter l'Access Key ID et la Secret Access Key.
 3. Dans GitHub, Settings → Secrets and variables → Actions : `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `CLOUDFLARE_ACCOUNT_ID` (l'identifiant de compte affiché dans le tableau de bord R2).
 4. Lancer l'Action à la main une première fois sur un département (par exemple `13`) puis sur la France entière.
 
