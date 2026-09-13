@@ -49,6 +49,7 @@ L'utilisateur principal du repo pratique le **vibe coding** et ne relit pas le c
 - **Livré** : onglet Hypothèses (`apps/web/src/hypotheses/` : chemins pointés, conversion texte ↔ valeur, descripteurs des champs par groupe, `appliquerSaisie` ; `ProjetsContext.mettreAJour` valide par Zod avant d'enregistrer).
 - **Livré** : onglets Fiscalité (4 régimes côte à côte, « Retenir ce régime », frise, année par année), Revente (horizons 5/10/15/20 ans cliquables via `apps/web/src/analyses/`, plus-value détaillée) et Visite (points de vigilance cochables par catégorie, `categorieVigilance`). Toute interaction passe par `appliquerSaisie`.
 - **Livré** : `apps/worker` socle (Hono sur Workers : `GET /health`, `GET /proxy/:service` avec liste blanche, cache KV 24 h par empreinte des paramètres, 60 req/min/IP, erreurs en codes, journal structuré ; premier service : géocodage Géoplateforme). Dépendances injectées (`creerApp(deps)`), tests Node via `app.request()`. Déploiement : voir README (compte Cloudflare de Pierre).
+- **Livré** : `data/` (`@loupe/data`, feature `referentiels`) : `npm run referentiels -w data -- --source <dvf|loyers|taxe-fonciere|zonage|usure|communes|tout> [--departement 13]` génère dans `data/dist/` les référentiels par département ou commune (DVF 24 mois + index prix/m², loyers ANIL, taux TFPB REI, zonage ABC, seuils de l'usure saisis dans `data/sources/usure/`, communes API Géo), formats Zod dans `data/src/schemas/`, `<prefixe>/courant.json` = millésime à lire, sources et licences dans `data/SOURCES.md`. GitHub Action `referentiels.yml` (cron mensuel + manuel) publie sur R2 `loupe-data` par `aws s3 sync` ; secrets `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `CLOUDFLARE_ACCOUNT_ID` à créer par Pierre (README). Le chargement par l'application = feature `enrichissement-marche`.
 - **Production** : https://loupeprojet.pages.dev (Cloudflare Pages, branche `master`, build `npm ci && npm run build -w apps/web`). Worker : https://loupe-worker.erreip-gorguel.workers.dev (déployé à la main par `npm run deploy -w apps/worker`, machine connectée par `wrangler login` ; KV `KV_CACHE` = `a64f32a40a0846e1be258a7ea34a8090`).
 - **Sessions parallèles** : fiches dans `.product/sessions/` (extension, referentiels, garder, e2e-playwright) ; chaque session parallèle tient son état dans `.product/pipeline/<slug>.json` et ne touche aux docs communes qu'en fin de feature. `.product/pipeline-state.json` reste à la session principale.
 - **Prochaine étape (session principale)** : `extraction-llm` (`/extract` Mistral, clé à fournir par Pierre), puis `enrichissement-marche`.
@@ -150,6 +151,8 @@ Validées par Zod (`apps/worker/src/dependances.ts`), documentées dans `apps/wo
 | `RESEND_API_KEY`                                | Liens magiques (v1.5)                         |
 | Bindings Wrangler : `KV_CACHE`, `R2_DATA`, `DB` | Déclarés dans `wrangler.toml`, pas dans l'env |
 
+Secrets GitHub Actions du workflow `referentiels.yml` (publication des référentiels sur R2, jamais dans le code) : `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY` (jeton R2 « Object Read & Write » sur le bucket `loupe-data`), `CLOUDFLARE_ACCOUNT_ID`.
+
 ## Commandes
 
 ```bash
@@ -161,6 +164,7 @@ npm run test:e2e             # playwright test (apps/web)
 npm run build                # build de tous les workspaces
 npm run dev -w apps/web      # front en local
 npm run dev -w apps/worker   # wrangler dev
+npm run referentiels -w data -- --source tout --departement 13   # référentiels d'un département dans data/dist/
 ```
 
 Ces scripts sont créés lors de la mise en place du monorepo (feature `moteur-calcul`).

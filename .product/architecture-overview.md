@@ -22,13 +22,13 @@
 
 ## Modules et statut
 
-| Module            | Rôle                                                                                     | Statut                                                      |
-| ----------------- | ---------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
-| `packages/moteur` | Financement, cash-flow, 4 régimes fiscaux, revente, rendement/TRI, verdict, scénarios    | **livré** (PR `feat/moteur-calcul`, 204 tests, 100 %)       |
-| `apps/web`        | Coque SaaS, Mes projets, Nouveau projet, Rapport, Hypothèses, Fiscalité, Revente, Visite | **livré** (PR #3 à #6) ; Comparer, Méthode, partage à venir |
-| `apps/worker`     | `/proxy/*` (liste blanche, cache KV, limite de débit, géocodage) ; `/extract` à venir    | **socle livré** (PR `feat/worker-socle`)                    |
-| `apps/extension`  | Capture LBC, SeLoger, Bien'ici, PAP, Logic-Immo                                          | à venir                                                     |
-| `data/`           | Pré-agrégation des référentiels                                                          | à venir                                                     |
+| Module            | Rôle                                                                                                                      | Statut                                                                              |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `packages/moteur` | Financement, cash-flow, 4 régimes fiscaux, revente, rendement/TRI, verdict, scénarios                                     | **livré** (PR `feat/moteur-calcul`, 204 tests, 100 %)                               |
+| `apps/web`        | Coque SaaS, Mes projets, Nouveau projet, Rapport, Hypothèses, Fiscalité, Revente, Visite                                  | **livré** (PR #3 à #6) ; Comparer, Méthode, partage à venir                         |
+| `apps/worker`     | `/proxy/*` (liste blanche, cache KV, limite de débit, géocodage) ; `/extract` à venir                                     | **socle livré** (PR `feat/worker-socle`)                                            |
+| `apps/extension`  | Capture LBC, SeLoger, Bien'ici, PAP, Logic-Immo                                                                           | à venir                                                                             |
+| `data/`           | Pré-agrégation des référentiels (DVF, loyers ANIL, taxe foncière REI, zonage ABC, usure, communes) → R2 par GitHub Action | **livré** (PR `feat/referentiels`, 135 tests, 100 %) ; bucket et secrets R2 à créer |
 
 ## Flux de données d'une analyse
 

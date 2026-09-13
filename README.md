@@ -15,6 +15,7 @@ packages/moteur/     Moteur de calcul pur (TypeScript + Zod), 100 % couvert par 
 apps/web/            Application React + Vite + Tailwind v4 (coque SaaS, Mes projets, Nouveau projet, Rapport, Hypothèses, Fiscalité, Revente, Visite), Cloudflare Pages
 apps/worker/         Serveur Hono sur Cloudflare Workers : proxy des données publiques (cache KV, limite de débit)
 apps/                À venir : extension
+data/                Référentiels publics pré-agrégés (DVF, loyers ANIL, taxe foncière, zonage ABC, usure, communes) publiés sur R2 par GitHub Action
 marque/              Identité de marque Deklic : logos SVG, favicon, icônes, image de partage, guide (ADR-005)
 .product/            Spécifications, ADR, design, état du pipeline de développement
 .claude/commands/    Skills du pipeline de développement (Claude Code)
@@ -28,11 +29,11 @@ npm run lint          # eslint . --max-warnings=0
 npm run format:check  # prettier --check .
 npm run typecheck     # tsc --noEmit dans chaque workspace
 npm run test          # vitest run
-npm run test:coverage # vitest run --coverage (seuil 100 % sur packages/moteur et les modules de logique d'apps/web)
+npm run test:coverage # vitest run --coverage (seuil 100 % sur packages/moteur, apps/worker, data et les modules de logique d'apps/web)
 npm run build         # build de chaque workspace
 ```
 
-Node 22 ou plus. La CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) exécute ces six commandes sur chaque pull request (277 tests au 13/09/2026). Une PR est fusionnée automatiquement dès que le check `verify` est vert (`gh pr merge <n> --auto --merge`) ; `master` refuse tout merge sans ce check.
+Node 22 ou plus. La CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) exécute ces six commandes sur chaque pull request (441 tests au 13/09/2026, dont 135 pour les référentiels). Une PR est fusionnée automatiquement dès que le check `verify` est vert (`gh pr merge <n> --auto --merge`) ; `master` refuse tout merge sans ce check.
 
 ## Le moteur (`@loupe/moteur`)
 
@@ -102,6 +103,29 @@ Le Worker est déployé sur `https://loupe-worker.erreip-gorguel.workers.dev` (e
 3. `apps/web/public/_redirects` gère le rechargement des routes de l'application.
 
 En local : `npx wrangler pages deploy dist` depuis `apps/web` (compte Cloudflare requis).
+
+## Les référentiels (`@loupe/data`)
+
+```bash
+npm run referentiels -w data -- --source tout --departement 13   # un département, dans data/dist/
+npm run referentiels -w data -- --source dvf                     # France entière (index national DVF)
+npm run referentiels -w data -- --aide
+```
+
+- Six sources publiques pré-agrégées en petits fichiers par département ou par commune, lisibles par le navigateur : ventes de logements DVF des 24 derniers mois (`dvf/<millesime>/<codeInsee>.csv` + index des prix au m² par département), loyers ANIL (`loyers/<millesime>/<dep>.json`), taux de taxe foncière REI (`taxe-fonciere/<annee>/<dep>.json`), zonage ABC (`zonage/<dep>.json`), seuils de l'usure (`usure/courant.json`), communes et arrondissements (`communes/<dep>.json`). Chaque source datée publie aussi `<prefixe>/courant.json` avec le millésime à lire.
+- Tout fichier publié porte `genereLe`, `millesime` et `source` (nom, URL, licence, mention imposée) et est validé par un schéma Zod (`data/src/schemas/`). Sources, licences, formats d'origine et transformations : [`data/SOURCES.md`](data/SOURCES.md).
+- TypeScript exécuté directement par Node (`--experimental-strip-types`), lecture en flux (les CSV DVF ne sont jamais chargés en mémoire), téléchargement avec trois tentatives, journal JSON sur la sortie d'erreur.
+- Les seuils de l'usure n'ont pas de source ouverte automatisable : ils sont saisis chaque trimestre dans `data/sources/usure/<AAAA>-T<n>.json` depuis la publication de la Banque de France, et contrôlés (seuil = taux moyen + un tiers).
+- Tests : 135 tests, couverture 100 % sur `data/src/` (hors `cli.ts`), sur des extraits réels sans aucune requête réseau.
+
+### Publier sur R2 (GitHub Action `referentiels.yml`)
+
+L'Action tourne le 2 de chaque mois à 03:30 UTC, ou à la main (onglet Actions → « Référentiels » → source et département). Elle génère les fichiers puis les synchronise vers le bucket R2 `loupe-data` par l'API S3 (`aws s3 sync`, préinstallé sur les runners) ; sans les secrets ci-dessous elle génère seulement et prévient. À faire une fois dans le compte Cloudflare :
+
+1. R2 → Créer un bucket nommé `loupe-data` (région automatique).
+2. R2 → Gérer les jetons d'API R2 → Créer un jeton « Object Read & Write » limité au bucket `loupe-data` ; noter l'Access Key ID et la Secret Access Key.
+3. Dans GitHub, Settings → Secrets and variables → Actions : `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `CLOUDFLARE_ACCOUNT_ID` (l'identifiant de compte affiché dans le tableau de bord R2).
+4. Lancer l'Action à la main une première fois sur un département (par exemple `13`) puis sur la France entière.
 
 ## Avertissement
 
