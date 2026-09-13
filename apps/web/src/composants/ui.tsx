@@ -57,12 +57,16 @@ export function Pastille({
 export function Carte({
   children,
   className = '',
+  id,
 }: {
   children: ReactNode;
   className?: string;
+  /** Ancre (sommaire de la page Méthode). */
+  id?: string;
 }): JSX.Element {
   return (
     <section
+      id={id}
       className={`flex flex-col gap-3 rounded-carte border border-bordure bg-surface p-6 shadow-carte ${className}`}
     >
       {children}

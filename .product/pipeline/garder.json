@@ -11,7 +11,7 @@
       "status": "completed",
       "output": ".product/features/garder-discovery.md"
     },
-    "implement": { "status": "in_progress", "stories_completed": 3, "stories_total": 4 },
+    "implement": { "status": "completed", "stories_completed": 4, "stories_total": 4 },
     "refactor": { "status": "pending" },
     "qa_tests": { "status": "pending" },
     "security": { "status": "pending" },

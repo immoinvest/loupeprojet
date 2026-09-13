@@ -9,6 +9,7 @@ import { Fiscalite } from './ecrans/Fiscalite';
 import { Hypotheses } from './ecrans/Hypotheses';
 import { Imprimer } from './ecrans/Imprimer';
 import { MesProjets } from './ecrans/MesProjets';
+import { Methode } from './ecrans/Methode';
 import { NouveauProjet } from './ecrans/NouveauProjet';
 import { Partage } from './ecrans/Partage';
 import { Rapport } from './ecrans/Rapport';
@@ -38,15 +39,7 @@ export const routes: RouteObject[] = [
       },
       { path: 'partage', element: <Partage /> },
       { path: 'comparer', element: <Comparer /> },
-      {
-        path: 'methode',
-        element: (
-          <Bientot
-            titre="Comment c'est calculé"
-            phrase="Bientôt : chaque formule, chaque source, chaque hypothèse par défaut."
-          />
-        ),
-      },
+      { path: 'methode', element: <Methode /> },
       {
         path: 'extension',
         element: (
