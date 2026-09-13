@@ -172,7 +172,7 @@ export function NouveauProjet(): JSX.Element {
             placeholder="Appartement T3 de 65 m² au 3e étage… Prix 155 000 €… DPE D…"
             className="rounded-encart border border-bordure bg-surface p-3 text-[15px]"
           />
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <Bouton
               variante="primaire"
               onClick={() => {
@@ -194,7 +194,7 @@ export function NouveauProjet(): JSX.Element {
       )}
 
       {etape !== 'verifier' && !manuel && (
-        <div className="flex items-center gap-3 text-sm text-encre-3">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-encre-3">
           <span>Pas de lien ?</span>
           <button type="button" onClick={passerEnManuel} className="font-bold text-accent">
             Je n'ai pas de lien, je saisis à la main
@@ -204,8 +204,8 @@ export function NouveauProjet(): JSX.Element {
 
       {etape === 'verifier' && (
         <div className="flex flex-col gap-3">
-          <div className="flex items-baseline gap-3">
-            <h2 className="m-0 font-display text-[28px] font-bold tracking-tight">
+          <div className="flex flex-wrap items-baseline gap-x-3 gap-y-2">
+            <h2 className="m-0 font-display text-2xl font-bold tracking-tight sm:text-[28px]">
               Vérifiez, corrigez, et c'est parti.
             </h2>
             <span className="text-sm text-encre-3">

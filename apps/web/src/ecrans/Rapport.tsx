@@ -173,12 +173,12 @@ export function Rapport(): JSX.Element {
           ))}
         </div>
       </div>
-      <div className="grid grid-cols-2 gap-5">
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-2 print:grid-cols-2">
         <CartePrix r={r} />
         <CarteCashflow r={r} />
       </div>
       <Leviers r={r} />
-      <div className="grid grid-cols-2 gap-5">
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-2 print:grid-cols-2">
         <CarteFiscalite r={r} />
         <CarteRevente r={r} />
       </div>

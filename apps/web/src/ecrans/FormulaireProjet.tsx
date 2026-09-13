@@ -66,7 +66,7 @@ export function FormulaireProjet({
     >
       <Carte>
         <h2 className="m-0 font-display text-[22px] font-semibold">Le bien</h2>
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
           <Champ cle="prix" libelle="Prix affiché" unite="€" erreur={erreurs.prix} {...c} />
           <Champ cle="honorairesAgence" libelle="dont honoraires d'agence" unite="€" {...c} />
           <Champ cle="surface" libelle="Surface" unite="m²" erreur={erreurs.surface} {...c} />
@@ -84,7 +84,7 @@ export function FormulaireProjet({
 
       <Carte>
         <h2 className="m-0 font-display text-[22px] font-semibold">Vous</h2>
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
           <Champ cle="mode" libelle="Mode de location" options={MODES} aToi {...c} />
           <Champ
             cle="loyerHc"
@@ -120,13 +120,13 @@ export function FormulaireProjet({
         <p className="m-0 text-sm text-encre-2">
           Laissez vide si vous ne savez pas : on estime, et ce sera marqué comme tel.
         </p>
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
           <Champ cle="chargesCoproMois" libelle="Charges de copropriété" unite="€/mois" {...c} />
           <Champ cle="taxeFonciere" libelle="Taxe foncière" unite="€/an" {...c} />
         </div>
       </Carte>
 
-      <div className="flex items-center gap-4">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
         <Bouton variante="primaire" type="submit">
           Créer le projet et voir le rapport
         </Bouton>

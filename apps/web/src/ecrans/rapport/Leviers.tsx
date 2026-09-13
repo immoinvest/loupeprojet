@@ -15,10 +15,13 @@ export function Leviers({ r }: { r: Resultats }): JSX.Element | null {
   const negocier = s.scenarios.find((x) => x.code === 'negocier');
   const coloc = s.scenarios.find((x) => x.code === 'colocation');
   const autres = s.scenarios.filter((x) => x.code !== 'negocier' && x.code !== 'colocation');
-  const separateur = document ? 'w-px bg-bordure' : 'w-px bg-white/25';
+  // Filets horizontaux quand les leviers s'empilent (téléphone), verticaux côte à côte.
+  const separateur = `h-px md:h-auto md:w-px print:h-auto print:w-px ${
+    document ? 'bg-bordure' : 'bg-white/25'
+  }`;
   return (
     <Carte
-      className={`flex-row items-stretch gap-5 ${
+      className={`md:flex-row md:items-stretch md:gap-5 print:flex-row print:items-stretch print:gap-5 ${
         document ? 'border-accent-bordure bg-accent-fond' : 'border-accent bg-accent text-white'
       }`}
     >
@@ -27,7 +30,7 @@ export function Leviers({ r }: { r: Resultats }): JSX.Element | null {
           <span className="text-xs font-bold tracking-wide uppercase opacity-80">
             Levier 1 · Négocier
           </span>
-          <span className="font-display text-[32px] font-bold">
+          <span className="font-display text-[28px] font-bold sm:text-[32px] print:text-[32px]">
             {euros(Number(negocier.parametres.prix ?? 0))}
           </span>
           <span className="text-sm leading-snug opacity-90">
@@ -45,7 +48,7 @@ export function Leviers({ r }: { r: Resultats }): JSX.Element | null {
           <span className="text-xs font-bold tracking-wide uppercase opacity-80">
             Levier 2 · Colocation
           </span>
-          <span className="font-display text-[32px] font-bold">
+          <span className="font-display text-[28px] font-bold sm:text-[32px] print:text-[32px]">
             {eurosParMois(coloc.indicateurs.cashflowMensuel)}
           </span>
           <span className="text-sm leading-snug opacity-90">

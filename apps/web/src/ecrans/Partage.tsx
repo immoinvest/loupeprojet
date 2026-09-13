@@ -43,7 +43,7 @@ export function Partage(): JSX.Element {
 
   return (
     <Page>
-      <Carte className="flex-row items-center gap-5 border-accent-bordure bg-accent-fond">
+      <Carte className="border-accent-bordure bg-accent-fond sm:flex-row sm:items-center sm:gap-5">
         <div className="flex flex-1 flex-col gap-1">
           <span className="text-xs font-bold tracking-wider text-accent uppercase">
             Projet partagé
