@@ -1,0 +1,42 @@
+{
+  "feature_slug": "responsive",
+  "title": "Responsive et application mobile : Deklic utilisable de 320 à 1 920 px, installable, hors ligne, cible de partage",
+  "started_at": "2026-09-13T22:00:00Z",
+  "current_step": "implement",
+  "scope": "apps/web (coque, écrans, composants, index.css, index.html, manifeste, icônes, service worker), marque/ (icône adaptative), e2e Playwright, job CI e2e, docs",
+  "branch": "feat/responsive",
+  "base": "master (73c46dd)",
+  "baseline": {
+    "e2e_passed": 8,
+    "e2e_failed": 0,
+    "unit_tests_passed": 636,
+    "unit_test_files": 89,
+    "unit_tests_failed": 0,
+    "audit": "375 px : débordement 832 px sur les volets d'un projet, 482 px sur Mes projets, bouton « saisir à la main » non cliquable ; 768 px : 439 px ; 1 024 px : 183 px ; 0 px à 1 280 px et plus"
+  },
+  "steps": {
+    "discovery": {
+      "status": "completed",
+      "output": ".product/features/responsive-discovery.md"
+    },
+    "specs": {
+      "status": "completed",
+      "output": ".product/specs/responsive-specs.md",
+      "stories_count": 11
+    },
+    "architecture": {
+      "status": "completed",
+      "output": ".product/architecture/responsive.md",
+      "adr": ".product/adr/006-application-mobile.md"
+    },
+    "implement": { "status": "in_progress", "stories_completed": 0, "stories_total": 11 },
+    "refactor": { "status": "pending" },
+    "qa_tests": { "status": "pending" },
+    "security": { "status": "pending" },
+    "push": { "status": "pending" }
+  },
+  "decisions": {
+    "application_mobile": "PWA installable (spec : pas d'app native en v1) ; applications de boutique hors périmètre, décision de Pierre",
+    "etat_pipeline": "session parallèle : état dans .product/pipeline/responsive.json, pipeline-state.json réservé à la session principale"
+  }
+}
