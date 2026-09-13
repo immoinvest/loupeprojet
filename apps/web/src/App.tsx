@@ -4,6 +4,7 @@ import { BrowserRouter, MemoryRouter, Navigate, useRoutes, type RouteObject } fr
 import { AppLayout } from './coque/AppLayout';
 import { ProjetLayout } from './coque/ProjetLayout';
 import { Bientot } from './ecrans/Bientot';
+import { Comparer } from './ecrans/Comparer';
 import { Fiscalite } from './ecrans/Fiscalite';
 import { Hypotheses } from './ecrans/Hypotheses';
 import { Imprimer } from './ecrans/Imprimer';
@@ -36,10 +37,7 @@ export const routes: RouteObject[] = [
         ],
       },
       { path: 'partage', element: <Partage /> },
-      {
-        path: 'comparer',
-        element: <Bientot titre="Comparer" phrase="Bientôt : deux à cinq projets côte à côte." />,
-      },
+      { path: 'comparer', element: <Comparer /> },
       {
         path: 'methode',
         element: (
