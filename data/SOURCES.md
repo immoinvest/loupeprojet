@@ -23,7 +23,7 @@ URL et formats vérifiés le 13 septembre 2026 par l'API data.gouv.fr (`https://
 - **Fichiers lus** : `https://files.data.gouv.fr/geo-dvf/latest/csv/<annee>/departements/<dep>.csv.gz` (redirection vers un stockage S3 à suivre). Trois dossiers annuels sont lus par département, du plus récent (détecté par une requête HEAD, ou imposé par `--millesime-dvf`) vers le passé, pour couvrir 24 mois : le dossier de l'année en cours n'apparaît qu'en octobre, avec le premier semestre.
 - **Licence** : Licence Ouverte 2.0.
 - **Millésime** : année du dossier le plus récent (par exemple `2025` après la livraison d'avril 2026 qui couvre l'année 2025). Publication semestrielle des DVF : avril et octobre.
-- **Format d'origine** : CSV UTF-8, virgule, 40 colonnes, une ligne par local et par lot d'une mutation ; les lignes d'une mutation sont contiguës.
+- **Format d'origine** : CSV UTF-8, virgule, 40 colonnes, une ligne par local et par lot d'une mutation ; les lignes d'une mutation sont contiguës. Aucun fichier pour le Bas-Rhin, le Haut-Rhin et la Moselle, soumis au livre foncier, ni pour Mayotte : les avertissements « dossier DVF absent » de ces quatre départements sont attendus.
 - **Transformations** :
   1. Regroupement des lignes par `id_mutation` (un identifiant qui réapparaît plus bas est écarté et compté comme `rupture`).
   2. Une mutation devient une vente de logement si : `nature_mutation` = « Vente » (les ventes en l'état futur d'achèvement, échanges, adjudications, expropriations et terrains à bâtir sont écartés : le comparable est le marché de l'ancien) ; une seule `valeur_fonciere` non nulle (plusieurs dispositions = prix ambigu) ; aucun local industriel ou commercial ; exactement un logement (maison ou appartement) après suppression des lignes répétées à l'identique, les dépendances étant ignorées ; surface réelle bâtie entre 9 et 1 000 m² ; prix au m² entre 300 et 40 000 €.
@@ -48,8 +48,8 @@ URL et formats vérifiés le 13 septembre 2026 par l'API data.gouv.fr (`https://
 - **Requête** : export CSV filtré par département, exercice, catégorie « Taux » et variables `E12` (commune), `E22` (syndicats et organismes assimilés), `E32` (intercommunalité), `E52gGEMAPI` (GEMAPI), `E52`, `E52A`, `E52TASA` (taxes spéciales d'équipement), `F22` (TEOM, taux plein). L'exercice le plus récent est lu sur la facette `annee`, ou imposé par `--annee-rei`.
 - **Licence** : Licence Ouverte 2.0 (données DGFiP).
 - **Millésime** : exercice REI (`2025` au 13/09/2026).
-- **Format d'origine** : CSV UTF-8 avec BOM, point-virgule, format long (une ligne par variable et par commune), taux en pourcentage.
-- **Transformations** : somme des variables par commune, conversion en décimal arrondi à 5 décimales (`44,54 %` → `0.4454`). Sortie `taxe-fonciere/<annee>/<dep>.json` : par commune `commune`, `syndicats`, `intercommunalite`, `gemapi`, `tse`, `total` (somme des cinq postes supportés par le propriétaire) et `teom` à part quand elle existe (récupérable sur le locataire, hors total). Paris, Lyon et Marseille sont publiés au niveau de la commune (`75056`, `69123`, `13055`).
+- **Format d'origine** : CSV UTF-8 avec BOM, point-virgule, format long (une ligne par variable et par commune), taux en pourcentage ; le code commune `idcom` perd son zéro initial pour les départements 01 à 09 (`1109` pour 01109).
+- **Transformations** : code commune complété à cinq caractères (`1109` devient `01109`), somme des variables par commune, conversion en décimal arrondi à 5 décimales (`44,54 %` → `0.4454`). Sortie `taxe-fonciere/<annee>/<dep>.json` : par commune `commune`, `syndicats`, `intercommunalite`, `gemapi`, `tse`, `total` (somme des cinq postes supportés par le propriétaire) et `teom` à part quand elle existe (récupérable sur le locataire, hors total). Paris, Lyon et Marseille sont publiés au niveau de la commune (`75056`, `69123`, `13055`).
 
 ## Zonage ABC
 
