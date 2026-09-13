@@ -8,6 +8,7 @@ import type { ClientCompte } from './compte/types';
 import { AppLayout } from './coque/AppLayout';
 import { ProjetLayout } from './coque/ProjetLayout';
 import { Bientot } from './ecrans/Bientot';
+import { Compte } from './ecrans/Compte';
 import { Connexion } from './ecrans/Connexion';
 import { Extension } from './ecrans/Extension';
 import { Fiscalite } from './ecrans/Fiscalite';
@@ -39,6 +40,7 @@ export const routes: RouteObject[] = [
           { path: 'visite', element: <Visite /> },
         ],
       },
+      { path: 'compte', element: <Compte /> },
       {
         path: 'comparer',
         element: <Bientot titre="Comparer" phrase="Bientôt : deux à cinq projets côte à côte." />,
