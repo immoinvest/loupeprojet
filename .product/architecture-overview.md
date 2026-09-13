@@ -22,13 +22,13 @@
 
 ## Modules et statut
 
-| Module            | Rôle                                                                                  | Statut                                                |
-| ----------------- | ------------------------------------------------------------------------------------- | ----------------------------------------------------- |
-| `packages/moteur` | Financement, cash-flow, 4 régimes fiscaux, revente, rendement/TRI, verdict, scénarios | **livré** (PR `feat/moteur-calcul`, 204 tests, 100 %) |
-| `apps/web`        | Écrans Coller, Vérifier, Rapport, Fiscalité & revente, Mes projets                    | à venir (direction visuelle à valider d'abord)        |
-| `apps/worker`     | `/extract`, `/proxy/*`, quotas, cache                                                 | à venir                                               |
-| `apps/extension`  | Capture LBC, SeLoger, Bien'ici, PAP, Logic-Immo                                       | à venir                                               |
-| `data/`           | Pré-agrégation des référentiels                                                       | à venir                                               |
+| Module            | Rôle                                                                                                  | Statut                                                |
+| ----------------- | ----------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| `packages/moteur` | Financement, cash-flow, 4 régimes fiscaux, revente, rendement/TRI, verdict, scénarios                 | **livré** (PR `feat/moteur-calcul`, 204 tests, 100 %) |
+| `apps/web`        | Coque SaaS, Mes projets, Rapport (livrés) ; Vérifier/Hypothèses, Fiscalité, Revente, Visite (à venir) | **socle livré** (PR `feat/web-socle`)                 |
+| `apps/worker`     | `/extract`, `/proxy/*`, quotas, cache                                                                 | à venir                                               |
+| `apps/extension`  | Capture LBC, SeLoger, Bien'ici, PAP, Logic-Immo                                                       | à venir                                               |
+| `data/`           | Pré-agrégation des référentiels                                                                       | à venir                                               |
 
 ## Flux de données d'une analyse
 

@@ -40,7 +40,9 @@ L'utilisateur principal du repo pratique le **vibe coding** et ne relit pas le c
 
 - L'ancien simulateur de comparaison de prêts (webpack, `src/`) a été **supprimé** le 13/09/2026 ; sa logique d'amortissement avec différés vit dans `packages/moteur/src/financement/amortissement.ts`, testée.
 - **Livré** : `packages/moteur` complet (feature `moteur-calcul`, 204 tests, couverture 100 %). API : `calculerProjet(projet) → Resultats`, `ProjetSchema`, `ResultatsSchema`, `projetExemple`, `obtenirRegles`.
-- **Prochaine étape** : proposer 2-3 directions visuelles (Rule 10), puis `apps/web`.
+- **Direction visuelle** : C « Le guide » retenue (ADR-004) ; tokens dans `apps/web/src/index.css`.
+- **Livré** : `apps/web` socle (React 19 + Vite + Tailwind v4, React Router déclaratif, coque SaaS, écrans Mes projets et Rapport, stockage local Zod, config Cloudflare Pages). Textes des codes du moteur dans `apps/web/src/textes/`.
+- **Prochaine étape** : `ecran-verifier-rapport` (édition des hypothèses, saisie manuelle), puis `worker-socle`.
 - `node_modules/` et `dist/` ne sont plus versionnés.
 
 ## Stack (décision ADR-001)
