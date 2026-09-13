@@ -1,0 +1,54 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Source+Sans+3:wght@400;600&display=swap">
+  <style>
+    body { margin: 0; font-family: "Source Sans 3", "Segoe UI", system-ui, sans-serif; color: #1E1A16; background: #FFFFFF; }
+    a { color: #1E1A16; } a:hover { color: #B4702A; }
+  </style>
+</helmet>
+<div style="width: 640px; min-height: 900px; background: #FFFFFF; padding: 48px 48px 56px; box-sizing: border-box; display: flex; flex-direction: column; gap: 28px;">
+  <div style="display: flex; flex-direction: column; gap: 10px;">
+    <div style="font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: #7A716A;">Loupe · direction visuelle · 13 septembre 2026</div>
+    <h1 style="font-family: Newsreader, Georgia, serif; font-weight: 600; font-size: 40px; line-height: 1.08; margin: 0; letter-spacing: -0.01em;">Trois façons de montrer le même rapport.</h1>
+    <p style="font-size: 17px; line-height: 1.5; margin: 0; color: #4A433D;">Même bien (T3 65 m², Marseille 5e, 155 000 € FAI), mêmes chiffres, calculés par le moteur. Seul le langage visuel change. Choisissez la piste dont vous voulez que l'application ait l'air ; le reste des écrans suivra.</p>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 18px;">
+    <div style="display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: 16px; padding: 18px 0; border-top: 1px solid #D9CFC0;">
+      <div style="font-family: Newsreader, Georgia, serif; font-size: 34px; font-weight: 600; color: #B4702A; line-height: 1;">A</div>
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+        <div style="font-size: 20px; font-weight: 600;">Le dossier</div>
+        <div style="font-size: 15px; line-height: 1.5; color: #4A433D;">Papier crème, serif, filets fins, chiffres en colonne. L'app ressemble au dossier qu'on pose devant un banquier. <strong>Pourquoi :</strong> la confiance. Un débutant se sent pris au sérieux, et le PDF « dossier banque » est déjà là. <strong>Compromis :</strong> peut paraître austère, moins « app », peu de couleur.</div>
+      </div>
+    </div>
+    <div style="display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: 16px; padding: 18px 0; border-top: 1px solid #D9CFC0;">
+      <div style="font-family: Newsreader, Georgia, serif; font-size: 34px; font-weight: 600; color: #4F8FE8; line-height: 1;">B</div>
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+        <div style="font-size: 20px; font-weight: 600;">Le cockpit</div>
+        <div style="font-size: 15px; line-height: 1.5; color: #4A433D;">Fond nuit, tuiles denses, gros chiffres en monospace, feux vifs. L'app ressemble à un terminal d'investisseur. <strong>Pourquoi :</strong> le sérieux technique et l'envie de « piloter » ; tout tient sur un écran. <strong>Compromis :</strong> peut intimider Camille, sombre uniquement, moins bien à l'impression.</div>
+      </div>
+    </div>
+    <div style="display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: 16px; padding: 18px 0; border-top: 1px solid #D9CFC0; border-bottom: 1px solid #D9CFC0;">
+      <div style="font-family: Newsreader, Georgia, serif; font-size: 34px; font-weight: 600; color: #4F55D8; line-height: 1;">C</div>
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+        <div style="font-size: 20px; font-weight: 600;">Le guide</div>
+        <div style="font-size: 15px; line-height: 1.5; color: #4A433D;">Blanc chaud, une couleur vive, cartes arrondies très aérées, une question par carte, une phrase d'explication sous chaque chiffre. L'app ressemble à un bon conseiller qui parle simplement. <strong>Pourquoi :</strong> c'est la promesse de la spec (« chaque chiffre s'explique en une phrase »). <strong>Compromis :</strong> plus long à faire défiler, moins dense pour un habitué.</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 8px; font-size: 14px; line-height: 1.5; color: #7A716A;">
+    <div>Les trois planches sont volontairement au même niveau de finition. Les polices, couleurs et espacements sont des propositions, pas des décisions gravées : on les ajustera sur la piste retenue.</div>
+    <div>Chiffres : moteur Loupe, règles 2026-09. Cash-flow vacance déduite. Outil d'aide à la décision, pas un conseil.</div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

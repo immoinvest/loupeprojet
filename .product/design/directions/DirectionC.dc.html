@@ -1,0 +1,131 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&display=swap">
+  <style>
+    body { margin: 0; font-family: "Nunito Sans", "Segoe UI", system-ui, sans-serif; color: #23272F; background: #FFFDF9; }
+    a { color: #4F55D8; } a:hover { color: #3A3FB0; }
+    .display { font-family: Outfit, "Segoe UI", sans-serif; }
+    .num { font-variant-numeric: tabular-nums; }
+    .card { background: #FFFFFF; border: 1px solid #ECE8E0; border-radius: 20px; padding: 28px 32px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 6px 24px rgba(35, 39, 47, 0.05); }
+    .pill { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 999px; font-size: 14px; font-weight: 600; }
+    .row { display: flex; justify-content: space-between; gap: 16px; padding: 10px 0; border-bottom: 1px solid #F1EDE5; font-size: 16px; }
+  </style>
+</helmet>
+<div style="width: 1280px; min-height: 1560px; background: #FFFDF9; box-sizing: border-box; padding: 0 0 56px;">
+
+  <div style="display: flex; align-items: center; gap: 28px; padding: 22px 80px;">
+    <div class="display" style="display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 22px; color: #4F55D8;">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#4F55D8" stroke-width="2.4" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="M15.5 15.5 21 21"></path></svg>Loupe
+    </div>
+    <div style="display: flex; gap: 8px; font-size: 15px; font-weight: 600;">
+      <span style="padding: 8px 14px; border-radius: 999px; background: #EEEEFF; color: #4F55D8;">Mon rapport</span>
+      <span style="padding: 8px 14px; color: #6B7280;">Mes hypothèses</span>
+      <span style="padding: 8px 14px; color: #6B7280;">Mes projets</span>
+    </div>
+    <div style="flex-grow: 1;"></div>
+    <span style="font-size: 14px; color: #6B7280;">Sauvegardé sur cet appareil · sans compte</span>
+  </div>
+
+  <div style="padding: 24px 80px 0; display: flex; flex-direction: column; gap: 10px;">
+    <div style="font-size: 15px; font-weight: 600; color: #4F55D8;">T3 · 65 m² · Marseille 5e · 155 000 €</div>
+    <h1 class="display" style="font-weight: 700; font-size: 46px; line-height: 1.1; margin: 0; letter-spacing: -0.02em; max-width: 20ch; text-wrap: balance;">Le prix est bon. Le loyer ne couvre pas tout.</h1>
+    <p style="font-size: 19px; line-height: 1.55; margin: 0; max-width: 62ch; color: #4B5563;">Ce bien coûte 22 % de moins que ce qui s'est vendu autour, et la banque devrait dire oui. Mais chaque mois, il vous manquera <strong>210 €</strong> pour payer le crédit et les charges. Bonne nouvelle : il y a deux façons d'y remédier, plus bas.</p>
+    <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px;">
+      <span class="pill" style="background: #E3F4EA; color: #1F7A4D;"><svg width="10" height="10" viewBox="0 0 10 10"><circle cx="5" cy="5" r="5" fill="#2E9E6B"></circle></svg>Prix : 22 % sous le marché</span>
+      <span class="pill" style="background: #FBEEDA; color: #9A5B0F;"><svg width="10" height="10" viewBox="0 0 10 10"><circle cx="5" cy="5" r="5" fill="#D98A1E"></circle></svg>Rendement net : 4,3 %, correct</span>
+      <span class="pill" style="background: #FBE5E3; color: #A3302A;"><svg width="10" height="10" viewBox="0 0 10 10"><circle cx="5" cy="5" r="5" fill="#D9453D"></circle></svg>Cash-flow : −210 € par mois</span>
+      <span class="pill" style="background: #E3F4EA; color: #1F7A4D;"><svg width="10" height="10" viewBox="0 0 10 10"><circle cx="5" cy="5" r="5" fill="#2E9E6B"></circle></svg>Banque : effort 25 %, ça passe</span>
+      <span class="pill" style="background: #E3F4EA; color: #1F7A4D;"><svg width="10" height="10" viewBox="0 0 10 10"><circle cx="5" cy="5" r="5" fill="#2E9E6B"></circle></svg>Risques : rien de bloquant</span>
+    </div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; padding: 36px 80px 0;">
+    <div class="card">
+      <h2 class="display" style="font-weight: 600; font-size: 26px; margin: 0; letter-spacing: -0.01em;">Est-ce que c'est cher ?</h2>
+      <div class="display num" style="font-size: 44px; font-weight: 700; color: #2E9E6B; line-height: 1;">Non.</div>
+      <div style="position: relative; height: 62px; margin: 6px 10px 0;">
+        <div style="position: absolute; left: 0; right: 0; top: 24px; height: 10px; border-radius: 999px; background: linear-gradient(90deg, #2E9E6B 0%, #D98A1E 60%, #D9453D 100%); opacity: 0.35;"></div>
+        <div style="position: absolute; left: 22%; top: 20px; width: 2px; height: 18px; background: #23272F; opacity: 0.4;"></div>
+        <div class="num" style="position: absolute; left: 22%; top: 44px; transform: translateX(-50%); font-size: 12px; color: #6B7280;">2 700</div>
+        <div style="position: absolute; left: 50%; top: 20px; width: 2px; height: 18px; background: #23272F; opacity: 0.4;"></div>
+        <div class="num" style="position: absolute; left: 50%; top: 44px; transform: translateX(-50%); font-size: 12px; color: #6B7280;">3 050, le prix habituel</div>
+        <div style="position: absolute; left: 78%; top: 20px; width: 2px; height: 18px; background: #23272F; opacity: 0.4;"></div>
+        <div class="num" style="position: absolute; left: 78%; top: 44px; transform: translateX(-50%); font-size: 12px; color: #6B7280;">3 400</div>
+        <div style="position: absolute; left: 5%; top: 18px; width: 22px; height: 22px; border-radius: 50%; background: #4F55D8; border: 4px solid #FFFFFF; box-shadow: 0 0 0 2px #4F55D8; transform: translateX(-50%);"></div>
+        <div class="num" style="position: absolute; left: 5%; top: -8px; transform: translateX(-50%); font-size: 13px; font-weight: 700; color: #4F55D8; white-space: nowrap;">vous : 2 385 €/m²</div>
+      </div>
+      <p style="font-size: 16px; line-height: 1.55; margin: 0; color: #4B5563;">Sur les 31 appartements vendus à moins de 500 mètres ces deux dernières années, trois sur quatre sont partis plus cher. Un prix aussi bas, ça se vérifie en visite : pourquoi le vendeur baisse-t-il ?</p>
+      <div style="font-size: 14px; line-height: 1.5; color: #6B7280; background: #F7F5FF; border-radius: 12px; padding: 12px 14px;">On compare aux ventes signées chez le notaire, pas aux annonces, qui affichent 5 à 10 % de plus que le prix final.</div>
+    </div>
+    <div class="card">
+      <h2 class="display" style="font-weight: 600; font-size: 26px; margin: 0; letter-spacing: -0.01em;">Est-ce que ça s'autofinance ?</h2>
+      <div class="display num" style="font-size: 44px; font-weight: 700; color: #D9453D; line-height: 1;">Pas tout à fait.</div>
+      <div style="display: flex; flex-direction: column;">
+        <div class="row"><span>Le locataire paie</span><span class="num" style="font-weight: 700; color: #2E9E6B;">+980 €</span></div>
+        <div class="row"><span>La banque prend</span><span class="num">−827 €</span></div>
+        <div class="row"><span>Taxe foncière et copropriété</span><span class="num">−178 €</span></div>
+        <div class="row"><span>Assurance, comptable, CFE, entretien</span><span class="num">−130 €</span></div>
+        <div class="row"><span>Trois semaines sans locataire par an</span><span class="num">−56 €</span></div>
+        <div class="row" style="border-bottom: none; font-weight: 700; font-size: 18px; padding-top: 14px;"><span>Il vous reste</span><span class="num" style="color: #D9453D;">−210 € par mois</span></div>
+      </div>
+      <div style="font-size: 14px; line-height: 1.5; color: #6B7280; background: #F7F5FF; border-radius: 12px; padding: 12px 14px;">Avec un loyer de <strong class="num">1 203 €</strong>, ce serait à l'équilibre. Nous avons compté ce que les annonces oublient : la vacance, l'entretien, le comptable.</div>
+    </div>
+  </div>
+
+  <div style="padding: 24px 80px 0;">
+    <div class="card" style="background: #4F55D8; border-color: #4F55D8; color: #FFFFFF;">
+      <h2 class="display" style="font-weight: 600; font-size: 26px; margin: 0; letter-spacing: -0.01em;">Deux façons de faire marcher ce projet</h2>
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px;">
+        <div style="background: rgba(255, 255, 255, 0.12); border-radius: 14px; padding: 18px 20px; display: flex; flex-direction: column; gap: 6px;">
+          <div style="font-size: 14px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; opacity: 0.8;">Négocier</div>
+          <div class="display num" style="font-size: 34px; font-weight: 700;">119 663 €</div>
+          <div style="font-size: 15px; line-height: 1.5; opacity: 0.92;">À ce prix (−23 %), le loyer couvre tout : cash-flow à 0 €, et le rendement de votre argent passe de 3,8 % à 8,9 % par an. Un argument solide : c'est encore au-dessus du premier quart des ventes du quartier.</div>
+        </div>
+        <div style="background: rgba(255, 255, 255, 0.12); border-radius: 14px; padding: 18px 20px; display: flex; flex-direction: column; gap: 6px;">
+          <div style="font-size: 14px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; opacity: 0.8;">Louer en colocation</div>
+          <div class="display num" style="font-size: 34px; font-weight: 700;">+88 € par mois</div>
+          <div style="font-size: 15px; line-height: 1.5; opacity: 0.92;">Deux chambres à 662 €, un mois de vacance par an : le projet devient positif et le rendement de votre argent monte à 14,4 %. Plus de gestion, mais plus de marge.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; padding: 24px 80px 0;">
+    <div class="card">
+      <h2 class="display" style="font-weight: 600; font-size: 26px; margin: 0; letter-spacing: -0.01em;">Combien d'impôts ?</h2>
+      <div class="display num" style="font-size: 44px; font-weight: 700; color: #2E9E6B; line-height: 1;">0 € pendant 10 ans</div>
+      <p style="font-size: 16px; line-height: 1.55; margin: 0; color: #4B5563;">En meublé au réel, les amortissements effacent votre résultat imposable chaque année, et il en reste 50 807 € en réserve au bout de dix ans. Il faut un comptable (420 €/an, déjà comptés).</p>
+      <div style="display: flex; flex-direction: column;">
+        <div class="row"><span>Meublé au réel <span style="color: #4F55D8; font-weight: 700;">· votre choix</span></span><span class="num" style="font-weight: 700;">0 €</span></div>
+        <div class="row"><span>Nu au réel</span><span class="num">4 235 €</span></div>
+        <div class="row"><span>Meublé micro-BIC</span><span class="num">26 928 €</span></div>
+        <div class="row" style="border-bottom: none;"><span>Nu micro-foncier</span><span class="num">31 757 €</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2 class="display" style="font-weight: 600; font-size: 26px; margin: 0; letter-spacing: -0.01em;">Qu'est-ce qu'il vous restera ?</h2>
+      <div class="display num" style="font-size: 44px; font-weight: 700; color: #23272F; line-height: 1;">58 217 € <span style="font-size: 20px; font-weight: 600; color: #6B7280;">dans 10 ans</span></div>
+      <p style="font-size: 16px; line-height: 1.55; margin: 0; color: #4B5563;">Si vous revendez à 179 884 € (+1,5 % par an), une fois le crédit remboursé, l'agence et l'indemnité payées. Aucun impôt sur la plus-value dans ce cas.</p>
+      <div style="display: flex; flex-direction: column;">
+        <div class="row"><span>Vous aurez mis de votre poche</span><span class="num">19 337 € + 25 233 €</span></div>
+        <div class="row"><span>Le locataire aura remboursé</span><span class="num" style="color: #2E9E6B; font-weight: 700;">48 906 €</span></div>
+        <div class="row" style="border-bottom: none; font-weight: 700; font-size: 18px; padding-top: 14px;"><span>Vous serez plus riche de</span><span class="num">+13 647 €</span></div>
+      </div>
+      <div style="font-size: 14px; line-height: 1.5; color: #6B7280; background: #F7F5FF; border-radius: 12px; padding: 12px 14px;">Soit 3,8 % par an sur l'argent engagé (TRI). Un livret A fait 1,7 %, mais sans travaux ni locataire. En négociant à 119 663 €, on passe à 8,9 %.</div>
+    </div>
+  </div>
+
+  <div style="padding: 32px 80px 0; display: flex; gap: 20px; flex-wrap: wrap; font-size: 13px; color: #6B7280;">
+    <span>Sources : ventes DVF (avril 2026), ADEME, loyers ANIL 2025, taxe foncière REI 2025</span><span>Règles fiscales : septembre 2026</span><span>Loupe aide à décider, ce n'est pas un conseil</span>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>
