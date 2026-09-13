@@ -6,6 +6,8 @@ import {
   type ProjetEntree,
 } from '@loupe/moteur';
 
+import type { MarcheEnrichi } from '@/enrichissement';
+
 import type { AnnonceResolue } from './resoudre';
 
 export type Provenance = 'annonce' | 'estime' | 'utilisateur';
@@ -66,8 +68,15 @@ export function nomDuProjet(s: SaisieProjet): string {
   return `${type} · ${s.ville}`;
 }
 
-/** Assemble un projet complet à partir de la saisie vérifiée, avec des défauts sourcés. */
-export function construireProjet(s: SaisieProjet, id: string): ProjetEntree {
+/**
+ * Assemble un projet complet à partir de la saisie vérifiée, avec des défauts sourcés et, quand
+ * le Worker a répondu, les données de marché de la commune.
+ */
+export function construireProjet(
+  s: SaisieProjet,
+  id: string,
+  enrichi: MarcheEnrichi | null = null,
+): ProjetEntree {
   const meuble = s.mode !== 'nu';
   const regime = meuble ? 'lmnp_reel' : 'nu_reel';
   const taxeFonciere = s.taxeFonciere ?? s.loyerHc;
@@ -108,6 +117,7 @@ export function construireProjet(s: SaisieProjet, id: string): ProjetEntree {
       ...(s.dpe === undefined ? {} : { dpe: s.dpe }),
       departement: departementDuCodePostal(s.codePostal),
     },
+    ...(enrichi === null ? {} : { marche: enrichi.marche }),
     ...(s.annonce === undefined
       ? {}
       : { source: { portail: s.annonce.portail, id: s.annonce.id, url: s.annonce.urlCanonique } }),
@@ -142,6 +152,6 @@ export function construireProjet(s: SaisieProjet, id: string): ProjetEntree {
       fiscalite: { tmi: s.tmi, regime },
       revenusMensuels: s.revenusMensuels,
     },
-    provenance,
+    provenance: { ...provenance, ...(enrichi === null ? {} : enrichi.provenance) },
   };
 }
