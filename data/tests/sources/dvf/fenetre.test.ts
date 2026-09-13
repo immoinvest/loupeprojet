@@ -3,7 +3,21 @@ import type { Vente } from '../../../src/schemas/dvf.ts';
 import { dansFenetre, fenetreDesVentes } from '../../../src/sources/dvf/fenetre.ts';
 
 function vente(date: string): Vente {
-  return { date, prix: 100000, surface: 40, type: 'appartement', pieces: 2, lat: null, lon: null };
+  return {
+    date,
+    prix: 100000,
+    surface: 40,
+    type: 'appartement',
+    pieces: 2,
+    lat: null,
+    lon: null,
+    idParcelle: null,
+    numero: null,
+    suffixe: null,
+    codeVoie: null,
+    voie: null,
+    carrez: null,
+  };
 }
 
 describe('fenetreDesVentes', () => {

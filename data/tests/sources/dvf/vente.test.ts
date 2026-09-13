@@ -34,7 +34,7 @@ function motif(id: string): string {
 }
 
 describe('venteDepuisMutation', () => {
-  it('retient une maison seule avec ses coordonnées', () => {
+  it('retient une maison seule avec ses coordonnées, sa parcelle et son adresse', () => {
     expect(analyser('2025-327551')).toEqual({
       ok: true,
       vente: {
@@ -47,6 +47,12 @@ describe('venteDepuisMutation', () => {
           pieces: 4,
           lat: 42.038082,
           lon: 8.949341,
+          idParcelle: '2A0620000B1203',
+          numero: 5011,
+          suffixe: null,
+          codeVoie: 'B180',
+          voie: 'SAINT SYLVESTRE',
+          carrez: null,
         },
       },
     });
@@ -59,6 +65,9 @@ describe('venteDepuisMutation', () => {
       surface: 66,
       prix: 136000,
       pieces: 4,
+      idParcelle: '2A004000BO0412',
+      codeVoie: 'A090',
+      carrez: 67.09,
     });
   });
 
@@ -110,6 +119,10 @@ describe('venteDepuisMutation', () => {
     expect(avec({ nombre_pieces_principales: '' })).toMatchObject({
       ok: true,
       vente: { vente: { pieces: 0 } },
+    });
+    expect(avec({ adresse_numero: '', adresse_nom_voie: '  ' })).toMatchObject({
+      ok: true,
+      vente: { vente: { numero: null, voie: null } },
     });
   });
 });

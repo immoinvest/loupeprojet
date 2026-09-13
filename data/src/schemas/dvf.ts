@@ -13,10 +13,37 @@ export const VenteSchema = z.object({
   pieces: z.number().int().nonnegative(),
   lat: z.number().min(-90).max(90).nullable(),
   lon: z.number().min(-180).max(180).nullable(),
+  /** Parcelle cadastrale, même format que le cadastre IGN (14 caractères) : même parcelle = même immeuble. */
+  idParcelle: z
+    .string()
+    .regex(/^[0-9A-Z]{14}$/)
+    .nullable(),
+  numero: z.number().int().nonnegative().nullable(),
+  suffixe: z.string().min(1).nullable(),
+  /** Code de la voie (FANTOIR), identique à celui de la clé BAN d'une adresse : même code = même rue. */
+  codeVoie: z.string().min(1).nullable(),
+  voie: z.string().min(1).nullable(),
+  /** Surface Carrez du logement (somme de ses lots) quand l'acte la mentionne. */
+  carrez: z.number().positive().nullable(),
 });
 export type Vente = z.infer<typeof VenteSchema>;
 
-export const EN_TETE_VENTES = ['date', 'prix', 'surface', 'type', 'pieces', 'lat', 'lon'] as const;
+/** Colonnes du CSV des ventes ; les colonnes d'adresse ont été ajoutées à la fin (compatibles avec les anciens lecteurs). */
+export const EN_TETE_VENTES = [
+  'date',
+  'prix',
+  'surface',
+  'type',
+  'pieces',
+  'lat',
+  'lon',
+  'idParcelle',
+  'numero',
+  'suffixe',
+  'codeVoie',
+  'voie',
+  'carrez',
+] as const;
 
 /** Prix au m² d'un type de logement dans une commune : nombre de ventes, médiane, quartiles (en €/m² entiers). */
 export const StatistiquesTypeSchema = z.object({

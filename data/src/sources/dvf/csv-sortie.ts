@@ -4,6 +4,11 @@ function texteOuVide(valeur: number | null): string {
   return valeur === null ? '' : String(valeur);
 }
 
+/** Texte libre (nom de voie) : sans virgule, guillemet ni saut de ligne, pour un CSV lisible sans échappement. */
+function texteCsv(valeur: string | null): string {
+  return valeur === null ? '' : valeur.replace(/[",\s]+/g, ' ').trim();
+}
+
 export function ligneCsvVente(vente: Vente): string {
   return [
     vente.date,
@@ -13,6 +18,12 @@ export function ligneCsvVente(vente: Vente): string {
     String(vente.pieces),
     texteOuVide(vente.lat),
     texteOuVide(vente.lon),
+    texteCsv(vente.idParcelle),
+    texteOuVide(vente.numero),
+    texteCsv(vente.suffixe),
+    texteCsv(vente.codeVoie),
+    texteCsv(vente.voie),
+    texteOuVide(vente.carrez),
   ].join(',');
 }
 

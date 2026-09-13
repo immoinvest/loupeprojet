@@ -10,6 +10,12 @@ const AVEC_COORDONNEES: Vente = {
   pieces: 4,
   lat: 41.934774,
   lon: 8.740565,
+  idParcelle: '2A004000BO0412',
+  numero: 9001,
+  suffixe: 'B',
+  codeVoie: 'A090',
+  voie: 'RES DES CANNES, BAT "A"',
+  carrez: 67.09,
 };
 
 const SANS_COORDONNEES: Vente = {
@@ -20,23 +26,29 @@ const SANS_COORDONNEES: Vente = {
   pieces: 0,
   lat: null,
   lon: null,
+  idParcelle: null,
+  numero: null,
+  suffixe: null,
+  codeVoie: null,
+  voie: null,
+  carrez: null,
 };
 
 describe('ligneCsvVente', () => {
-  it('écrit les coordonnées quand elles existent, des colonnes vides sinon', () => {
+  it('écrit coordonnées, parcelle et adresse quand elles existent, des colonnes vides sinon', () => {
     expect(ligneCsvVente(AVEC_COORDONNEES)).toBe(
-      '2025-01-09,136000,66,appartement,4,41.934774,8.740565',
+      '2025-01-09,136000,66,appartement,4,41.934774,8.740565,2A004000BO0412,9001,B,A090,RES DES CANNES BAT A,67.09',
     );
-    expect(ligneCsvVente(SANS_COORDONNEES)).toBe('2024-06-15,120000,31.5,maison,0,,');
+    expect(ligneCsvVente(SANS_COORDONNEES)).toBe('2024-06-15,120000,31.5,maison,0,,,,,,,,');
   });
 });
 
 describe('csvDesVentes', () => {
   it("ajoute l'en-tête et trie par date croissante", () => {
     expect(csvDesVentes([AVEC_COORDONNEES, SANS_COORDONNEES])).toBe(
-      'date,prix,surface,type,pieces,lat,lon\n' +
-        '2024-06-15,120000,31.5,maison,0,,\n' +
-        '2025-01-09,136000,66,appartement,4,41.934774,8.740565\n',
+      'date,prix,surface,type,pieces,lat,lon,idParcelle,numero,suffixe,codeVoie,voie,carrez\n' +
+        '2024-06-15,120000,31.5,maison,0,,,,,,,,\n' +
+        '2025-01-09,136000,66,appartement,4,41.934774,8.740565,2A004000BO0412,9001,B,A090,RES DES CANNES BAT A,67.09\n',
     );
   });
 });

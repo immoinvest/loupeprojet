@@ -25,6 +25,7 @@ import { Partage } from './ecrans/Partage';
 import { Rapport } from './ecrans/Rapport';
 import { Revente } from './ecrans/Revente';
 import { Visite } from './ecrans/Visite';
+import { Adresse } from './ecrans/Adresse';
 import { ProjetsProvider } from './stockage/ProjetsContext';
 
 export const routes: RouteObject[] = [
@@ -46,6 +47,7 @@ export const routes: RouteObject[] = [
           { path: 'fiscalite', element: <Fiscalite /> },
           { path: 'revente', element: <Revente /> },
           { path: 'visite', element: <Visite /> },
+          { path: 'adresse', element: <Adresse /> },
         ],
       },
       { path: 'compte', element: <Compte /> },
