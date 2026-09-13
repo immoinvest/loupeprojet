@@ -35,7 +35,7 @@ npm run test:e2e      # vite build puis playwright test : parcours complets dans
 npm run build         # build de chaque workspace
 ```
 
-Node 22 ou plus. La CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) exécute ces six commandes sur chaque pull request (590 tests au 13/09/2026, dont 135 pour les référentiels et 119 pour la capture, l'extension et le bouton-favori). Une PR est fusionnée automatiquement dès que le check `verify` est vert (`gh pr merge <n> --auto --merge`) ; `master` refuse tout merge sans ce check. Un second job `e2e` joue les huit parcours Playwright dans Chromium ; il n'est pas encore requis pour fusionner.
+Node 22 ou plus. La CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) exécute ces six commandes sur chaque pull request (609 tests au 13/09/2026, dont 135 pour les référentiels, 119 pour la capture, l'extension et le bouton-favori, et 30 pour l'impression, le partage, Comparer et Méthode). Une PR est fusionnée automatiquement dès que le check `verify` est vert (`gh pr merge <n> --auto --merge`) ; `master` refuse tout merge sans ce check. Un second job `e2e` joue les huit parcours Playwright dans Chromium ; il n'est pas encore requis pour fusionner.
 
 ## Le moteur (`@loupe/moteur`)
 

@@ -28,7 +28,11 @@
       "status": "completed",
       "note": "aucun innerHTML ni eval ; lien de partage décodé sans exception et validé par Zod ; textes du lien affichés comme texte, jamais comme lien ; rien d'enregistré avant « Ajouter » ; infobulle : le lien contient revenus et apport"
     },
-    "push": { "status": "in_progress" }
+    "push": {
+      "status": "completed",
+      "pr": "https://github.com/immoinvest/loupeprojet/pull/19",
+      "note": "auto-merge armé ; master fusionné trois fois dans la branche (Deklic et worker, e2e et référentiels et extraction, extension) ; 609 tests verts en local"
+    }
   },
   "decisions": {
     "comparer": "projets en colonnes, indicateurs en lignes ; le tri réordonne les colonnes selon la ligne cliquée",
