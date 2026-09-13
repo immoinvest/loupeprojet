@@ -24,7 +24,7 @@
       "status": "completed",
       "note": "aucun modèle de langage ; paramètres validés par Zod ; réponses du cadastre validées ; adresse du bien stockée dans le navigateur seulement ; clés de cache par empreinte"
     },
-    "push": { "status": "in_progress" }
+    "push": { "status": "done", "pr": 24 }
   },
   "decisions": {
     "sans_llm": "égalité de parcelle et de code de voie, parité des numéros, distances : reproductible et gratuit",

@@ -4,7 +4,7 @@ Format : `- [ ] slug — titre — date — scope`
 
 ## En cours
 
-- [ ] dvf-adresse — analyse DVF à l'adresse exacte, sans modèle de langage : ventes du même immeuble (parcelle cadastrale), des parcelles voisines (API Carto IGN, contours à moins de 3 m), du même côté de la rue et d'en face (code de voie BAN = DVF, parité des numéros), cercles de 100 à 300 m ; repère de prix appliqué au verdict sur clic ; onglet « Adresse » du projet ; CSV DVF publiés avec parcelle, numéro, voie et Carrez — 2026-09-13 — `data/src/sources/dvf`, `apps/worker/src/adresse`, `apps/web/src/{enrichissement/adresse.ts,ecrans/Adresse.tsx,textes/adresse.ts}` — PR à ouvrir
+- [ ] dvf-adresse — analyse DVF à l'adresse exacte, sans modèle de langage : ventes du même immeuble (parcelle cadastrale), des parcelles voisines (API Carto IGN, contours à moins de 3 m), du même côté de la rue et d'en face (code de voie BAN = DVF, parité des numéros), cercles de 100 à 300 m ; repère de prix appliqué au verdict sur clic ; onglet « Adresse » du projet ; CSV DVF publiés avec parcelle, numéro, voie et Carrez — 2026-09-13 — `data/src/sources/dvf`, `apps/worker/src/adresse`, `apps/web/src/{enrichissement/adresse.ts,ecrans/Adresse.tsx,textes/adresse.ts}` — PR #24
 
 ## À venir
 
