@@ -1,7 +1,7 @@
 name: Référentiels
 
 # Pré-agrège les données publiques (DVF, loyers ANIL, taxe foncière REI, zonage ABC, usure, communes)
-# puis les publie sur le bucket R2 « loupe-data » par l'API S3 de Cloudflare.
+# puis les publie sur le bucket R2 « deklic-data » par l'API S3 de Cloudflare.
 # Sans les secrets R2, la génération tourne quand même et le résultat reste consultable en artefact.
 
 on:
@@ -29,7 +29,7 @@ permissions:
   contents: read
 
 env:
-  BUCKET: loupe-data
+  BUCKET: deklic-data
   SOURCE: ${{ github.event.inputs.source || 'tout' }}
   DEPARTEMENT: ${{ github.event.inputs.departement || '' }}
 

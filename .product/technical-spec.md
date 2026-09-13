@@ -14,7 +14,7 @@ loupeprojet/
 ├── .prettierrc             printWidth 100, singleQuote, trailingComma all, LF
 ├── vitest.config.ts        projets = packages/*, apps/*, data ; seuils 100 % moteur, worker, data, modules de logique du web
 ├── .github/workflows/ci.yml  Node 22 : npm ci → lint → format:check → typecheck → test:coverage → build ; job e2e : Playwright Chromium (npm run test:e2e)
-├── .github/workflows/referentiels.yml  cron mensuel + manuel : génère data/dist puis aws s3 sync vers R2 loupe-data
+├── .github/workflows/referentiels.yml  cron mensuel + manuel : génère data/dist puis aws s3 sync vers R2 deklic-data
 ├── packages/moteur/        ← livré (feature moteur-calcul)
 ├── apps/web/               ← livré (socle, nouveau projet, hypothèses, onglets) ; tests de bout en bout Playwright dans e2e/
 ├── apps/worker/            ← socle livré (feature worker-socle)
@@ -59,7 +59,7 @@ Voir `architecture/worker-socle.md`. Hono 4 sur Cloudflare Workers (`wrangler.to
 
 ## `data/` (livré, feature referentiels)
 
-Voir `architecture/referentiels.md` et `data/SOURCES.md`. Workspace `@loupe/data` exécuté directement par Node (`node --experimental-strip-types src/cli.ts`, imports en `.ts`, aucun build) : `commun/` (CSV en flux RFC 4180, décodage UTF-8 / Windows-1252, téléchargement avec trois tentatives et gzip, journal JSON + annotations GitHub, quartiles, dates, 101 départements), `schemas/` (Zod : un schéma par fichier publié, en-tête `genereLe` / `millesime` / `source`), `sources/<source>/` (constantes, transformation pure, orchestration), `cli/arguments.ts`, `sources/executer.ts`. Tout accès externe passe par un `Contexte` injecté (`fetch`, pause, horloge, journal, dossier de sortie) : les tests utilisent un faux `fetch` nourri par des extraits réels (`tests/fixtures/`), sans réseau. Couverture 100 % exigée sur `data/src/**` (hors `cli.ts`). Sortie `data/dist/` (ignorée par git), publiée sur R2 `loupe-data` par `.github/workflows/referentiels.yml` (`aws s3 sync`, secrets `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `CLOUDFLARE_ACCOUNT_ID`). Seuils de l'usure saisis à la main dans `data/sources/usure/`.
+Voir `architecture/referentiels.md` et `data/SOURCES.md`. Workspace `@loupe/data` exécuté directement par Node (`node --experimental-strip-types src/cli.ts`, imports en `.ts`, aucun build) : `commun/` (CSV en flux RFC 4180, décodage UTF-8 / Windows-1252, téléchargement avec trois tentatives et gzip, journal JSON + annotations GitHub, quartiles, dates, 101 départements), `schemas/` (Zod : un schéma par fichier publié, en-tête `genereLe` / `millesime` / `source`), `sources/<source>/` (constantes, transformation pure, orchestration), `cli/arguments.ts`, `sources/executer.ts`. Tout accès externe passe par un `Contexte` injecté (`fetch`, pause, horloge, journal, dossier de sortie) : les tests utilisent un faux `fetch` nourri par des extraits réels (`tests/fixtures/`), sans réseau. Couverture 100 % exigée sur `data/src/**` (hors `cli.ts`). Sortie `data/dist/` (ignorée par git), publiée sur R2 `deklic-data` par `.github/workflows/referentiels.yml` (`aws s3 sync`, secrets `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `CLOUDFLARE_ACCOUNT_ID`). Seuils de l'usure saisis à la main dans `data/sources/usure/`.
 
 ## Conventions transverses
 
