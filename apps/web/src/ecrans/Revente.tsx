@@ -1,6 +1,7 @@
 import { useMemo, type JSX } from 'react';
 
 import { HORIZONS, variantesRevente } from '@/analyses';
+import { useModeDocument } from '@/composants/document';
 import { Carte, Ligne, Pastille, TitreCarte } from '@/composants/ui';
 import { useProjetCourant } from '@/coque/ProjetLayout';
 import { euros, eurosSignes, pourcentage } from '@/formatage/nombres';
@@ -10,6 +11,7 @@ import { useProjets } from '@/stockage/ProjetsContext';
 export function Revente(): JSX.Element {
   const { enregistre, resultats: r } = useProjetCourant();
   const { mettreAJour } = useProjets();
+  const document = useModeDocument();
   const annees = r.projet.hypotheses.revente.annees;
   const rv = r.revente;
   const pv = rv.plusValue;
@@ -40,7 +42,11 @@ export function Revente(): JSX.Element {
         </p>
       </div>
 
-      <div className="grid grid-cols-4 gap-4" role="group" aria-label="Horizon de revente">
+      <div
+        className={`grid gap-4 ${document ? 'grid-cols-2' : 'grid-cols-4'}`}
+        role="group"
+        aria-label="Horizon de revente"
+      >
         {variantes.map((v) => {
           const actif = v.annees === annees;
           return (
@@ -48,6 +54,7 @@ export function Revente(): JSX.Element {
               key={v.annees}
               type="button"
               aria-pressed={actif}
+              disabled={document}
               onClick={() => {
                 choisirHorizon(v.annees);
               }}

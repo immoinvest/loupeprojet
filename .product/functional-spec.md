@@ -27,7 +27,7 @@ Concurrents : Horiz.io (8–20 €/mois, complet, saisie manuelle), Lybox (9–4
 3. **Enrichir** — géocodage puis en parallèle : DVF 500 m, DPE ADEME, loyers ANIL, taux TF (REI), Géorisques, zonage ABC, population. Zéro LLM.
 4. **Vérifier** — un écran, quatre blocs (bien, financement, location, fiscalité), badges `annonce` / `donnée publique` / `estimé` / `à toi`. Cinq confirmations max : loyer visé, apport, durée, TMI, mode de location.
 5. **Le rapport** — verdict + cinq feux, puis Financement, Cash-flow, Fiscalité (4 régimes), Revente, Rendement & TRI. Tout modifiable en place, recalcul instantané.
-6. **Garder** — sauvegarde locale, PDF via impression, lien de partage (projet encodé dans l'URL), compte optionnel par Google, Apple ou code à 6 chiffres reçu par e-mail (livré le 13/09/2026, ADR-006 ; synchronisation des projets à venir).
+6. **Garder** — sauvegarde locale, PDF via impression, lien de partage (projet encodé dans l'URL), compte optionnel par Google, Apple ou code à 6 chiffres reçu par e-mail (livré le 13/09/2026, ADR-006 ; synchronisation des projets à venir). Livré le 13/09/2026 (feature `garder`) : dossier imprimable `/projets/:id/imprimer`, lien `/partage#p=…` en lecture seule avec « Ajouter à mes projets », comparaison de 2 à 5 projets sans compte (`/comparer`, avancée de la v1.5) et page « Comment c'est calculé » (`/methode`).
 
 ## Pipeline technique (9 étapes)
 

@@ -63,3 +63,42 @@ a:hover {
   outline: 2px solid var(--color-accent);
   outline-offset: 2px;
 }
+
+/* Impression : la coque disparaît, le document garde ses couleurs (les feux ont aussi un libellé). */
+@media print {
+  @page {
+    size: A4;
+    margin: 12mm 12mm 14mm;
+  }
+
+  html {
+    background: #fff;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .document-page {
+    margin: 0 !important;
+    max-width: none !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+
+  /* Chaque volet commence une page ; une carte n'est pas coupée quand elle tient sur une page. */
+  .document-volet {
+    break-before: page;
+  }
+  .document section {
+    break-inside: avoid;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+}

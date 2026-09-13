@@ -1,5 +1,6 @@
 import { creerApp } from '../src/app';
 import type { Dependances } from '../src/dependances';
+import { lecteurMemoire } from '../src/donnees/lecteur';
 import type { Extracteur, ReponseExtracteur } from '../src/extraction';
 import { journalMemoire } from '../src/journal';
 import { cacheMemoire } from '../src/proxy/cache';
@@ -124,6 +125,7 @@ export function banc(surcharges: Partial<Dependances> = {}, limite = 60): Banc {
     limiteur: limiteurMemoire(limite, 60, maintenant),
     limiteurExtraction: limiteurMemoire(limite, 60, maintenant),
     extracteur: extracteurFixe(),
+    donnees: lecteurMemoire({}),
     fetcher: (url) => {
       appels.push(url);
       return Promise.resolve(reponseJson(REPONSE_GEOPLATEFORME));

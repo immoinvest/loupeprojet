@@ -358,7 +358,12 @@ describe('diagnostic d’une réponse inexploitable', () => {
 describe('dépendances : extracteur depuis l’environnement', () => {
   const kv = { get: () => Promise.resolve(null), put: () => Promise.resolve() };
   const limiteur = { limit: () => Promise.resolve({ success: true }) };
-  const base = { KV_CACHE: kv, LIMITEUR: limiteur, LIMITEUR_EXTRACTION: limiteur };
+  const base = {
+    KV_CACHE: kv,
+    LIMITEUR: limiteur,
+    LIMITEUR_EXTRACTION: limiteur,
+    DONNEES: { get: () => Promise.resolve(null) },
+  };
 
   it('sans clé (absente ou vide) : pas d’extracteur ; avec clé : modèle par défaut ou réglé', () => {
     expect(dependancesDepuisEnv(base).extracteur).toBeNull();

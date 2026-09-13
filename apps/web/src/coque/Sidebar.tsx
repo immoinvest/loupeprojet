@@ -32,7 +32,7 @@ export function Sidebar(): JSX.Element {
   };
 
   return (
-    <aside className="flex h-full flex-col gap-5 border-r border-bordure bg-surface px-4 py-5">
+    <aside className="flex h-full flex-col gap-5 border-r border-bordure bg-surface px-4 py-5 print:hidden">
       <NavLink to="/projets" className="flex items-center px-2.5 py-1">
         <LogotypeDeklic hauteur={26} />
       </NavLink>

@@ -1,6 +1,7 @@
 import type { AnneeFiscale, Regime, ResultatRegime } from '@loupe/moteur';
 import type { JSX } from 'react';
 
+import { useModeDocument } from '@/composants/document';
 import { Bouton, Carte, Pastille } from '@/composants/ui';
 import { useProjetCourant } from '@/coque/ProjetLayout';
 import { euros, eurosSignes, pourcentage } from '@/formatage/nombres';
@@ -106,6 +107,7 @@ const COLONNES: readonly {
 export function Fiscalite(): JSX.Element {
   const { enregistre, resultats: r } = useProjetCourant();
   const { mettreAJour } = useProjets();
+  const document = useModeDocument();
   const f = r.fiscalite;
   const annees = r.projet.hypotheses.revente.annees;
   const retenu = f.regimes[f.retenu];
@@ -134,7 +136,7 @@ export function Fiscalite(): JSX.Element {
         </p>
       </div>
 
-      <div className="grid grid-cols-4 gap-4">
+      <div className={`grid gap-4 ${document ? 'grid-cols-2' : 'grid-cols-4'}`}>
         {ORDRE_REGIMES.map((regime) => (
           <CarteRegime
             key={regime}

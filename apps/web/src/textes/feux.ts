@@ -17,6 +17,12 @@ export const ETATS: Readonly<Record<Feu, string>> = {
   inconnu: 'inconnu',
 };
 
+/** « aucun », « 1 signal », « 2 signaux ». */
+export function libelleRisques(nombre: number): string {
+  if (nombre === 0) return 'aucun';
+  return `${String(nombre)} ${nombre === 1 ? 'signal' : 'signaux'}`;
+}
+
 /** Texte court d'une pastille de feu : « Prix −22 % », « Cash-flow −210 €/mois »… */
 export function libelleFeu(feu: FeuVerdict): string {
   if (feu.valeur === null) return `${AXES[feu.axe]} : pas de données`;
@@ -30,8 +36,6 @@ export function libelleFeu(feu: FeuVerdict): string {
     case 'effort':
       return `Effort ${pourcentage(feu.valeur, 0)}`;
     case 'risques':
-      return feu.valeur === 0
-        ? 'Risques : aucun'
-        : `Risques : ${String(feu.valeur)} ${feu.valeur === 1 ? 'signal' : 'signaux'}`;
+      return `Risques : ${libelleRisques(feu.valeur)}`;
   }
 }
