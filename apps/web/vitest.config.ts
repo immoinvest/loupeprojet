@@ -10,11 +10,19 @@ export default defineConfig({
   test: {
     name: 'web',
     environment: 'jsdom',
+    // Les tests de rendu tapent au clavier dans jsdom : lents quand toute la suite tourne en parallèle.
+    testTimeout: 30_000,
     include: ['tests/**/*.test.{ts,tsx}'],
     setupFiles: ['tests/setup.ts'],
     coverage: {
       provider: 'v8',
-      include: ['src/stockage/**', 'src/formatage/**', 'src/textes/**', 'src/annonces/**'],
+      include: [
+        'src/stockage/**',
+        'src/formatage/**',
+        'src/textes/**',
+        'src/annonces/**',
+        'src/hypotheses/**',
+      ],
       thresholds: { lines: 100, functions: 100, branches: 100, statements: 100 },
     },
   },
