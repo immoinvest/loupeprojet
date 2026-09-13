@@ -2,7 +2,7 @@
   "feature_slug": "e2e-playwright",
   "title": "Tests de bout en bout Playwright : parcours complets en vrai navigateur (Chromium), en local et en CI",
   "started_at": "2026-09-13T00:00:00Z",
-  "current_step": "implement",
+  "current_step": "push",
   "scope": "apps/web/e2e/**, apps/web/playwright.config.ts, apps/web/package.json, apps/web/tsconfig.json, package.json (scripts), eslint.config.js (ignores), .github/workflows/ci.yml (job e2e)",
   "branch": "feat/e2e-playwright",
   "base": "master (768c556)",
@@ -23,7 +23,7 @@
     },
     "implement": {
       "status": "in_progress",
-      "stories_completed": 4,
+      "stories_completed": 5,
       "stories_total": 5,
       "commits": []
     },
