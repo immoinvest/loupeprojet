@@ -17,7 +17,6 @@ Parallélisables dès maintenant (fiches de session dans `.product/sessions/`, u
 
 - [ ] extension — WebExtension MV3 + `packages/capture` + bookmarklet ; règles par portail (fiche `sessions/extension.md`)
 - [ ] garder — impression soignée, partage sans compte, pages Comparer et Méthode (fiche `sessions/garder-comparer-methode.md`)
-- [ ] e2e-playwright — parcours complets en navigateur réel, en CI (fiche `sessions/e2e-playwright.md`)
 
 ## Livrées (mergées sur `master`)
 
@@ -29,3 +28,4 @@ Parallélisables dès maintenant (fiches de session dans `.product/sessions/`, u
 - [x] onglets-detail — Fiscalité (4 régimes côte à côte, frise, année par année), Revente (5/10/15/20 ans, plus-value détaillée), Visite (points de vigilance cochables) — 2026-09-13 — PR #6 ; merge automatique des PR (protection de `master`) — PR #7
 - [x] referentiels — `data/` (`@loupe/data`) : DVF 24 mois par commune + index des prix au m², loyers ANIL, taux de taxe foncière REI, zonage ABC, seuils de l'usure (saisies trimestrielles), communes API Géo ; formats Zod, `SOURCES.md`, GitHub Action mensuelle → R2 `loupe-data` par `aws s3 sync` (bucket et secrets à créer par Pierre) — 2026-09-13 — `data/`, `.github/workflows/referentiels.yml` — PR `feat/referentiels`
 - [x] identite-visuelle — Identité de marque Deklic : dossier `marque/` (logos SVG, favicon, icônes 192/512/180, image de partage, palette, guide), ADR-005, app renommée (titre, favicon, manifeste, couleurs, logotype dans la barre latérale, textes) — 2026-09-13 — `marque/`, `apps/web`, docs — PR #8
+- [x] e2e-playwright — tests de bout en bout Playwright : 8 parcours Chromium sur le build de production (Mes projets, Rapport, Hypothèses, Fiscalité, Revente, Visite, nouveau projet et suppression, persistance), `npm run test:e2e`, job CI `e2e` non bloquant — 2026-09-13 — `apps/web/e2e`, `apps/web/playwright.config.ts`, `.github/workflows/ci.yml`, ignores ESLint — PR #11
