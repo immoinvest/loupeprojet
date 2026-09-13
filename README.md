@@ -2,7 +2,7 @@
 
 Colle le lien d'une annonce immobilière, obtiens l'analyse complète de rentabilité locative : financement, cash-flow, fiscalité (quatre régimes côte à côte), revente, rendement et TRI, verdict à cinq feux, scénarios « et si ».
 
-Gratuit, sans compte, tout se calcule dans le navigateur. Spécification produit : [`.product/reference/spec-produit-v1.html`](.product/reference/spec-produit-v1.html). Décisions d'architecture : [`.product/adr/`](.product/adr/).
+Gratuit, sans compte obligatoire (compte optionnel par Google, Apple ou code e-mail), tout se calcule dans le navigateur. Spécification produit : [`.product/reference/spec-produit-v1.html`](.product/reference/spec-produit-v1.html). Décisions d'architecture : [`.product/adr/`](.product/adr/).
 
 ## Stack
 
@@ -15,6 +15,7 @@ packages/moteur/     Moteur de calcul pur (TypeScript + Zod), 100 % couvert par 
 packages/capture/    Contrat de capture d'une annonce (schéma, encodage pour fragment d'URL, règles de lecture par portail), partagé par l'extension, le bouton-favori et le web
 apps/web/            Application React + Vite + Tailwind v4 (coque SaaS, Mes projets, Nouveau projet, Rapport, Hypothèses, Fiscalité, Revente, Visite, Comparer, Méthode, impression, partage, Extension), Cloudflare Pages
 apps/worker/         Serveur Hono sur Cloudflare Workers : proxy des données publiques (cache KV, limite de débit)
+apps/comptes/        Comptes optionnels (Better Auth sur Hono) : Google, Apple ou code e-mail, servis par le worker Pages sur l'origine du site, base D1
 apps/extension/      Extension navigateur (Manifest V3, Chrome/Edge/Firefox) : lit l'annonce ouverte et l'envoie à Deklic ; règles par portail
 data/                Référentiels publics pré-agrégés (DVF, loyers ANIL, taxe foncière, zonage ABC, usure, communes) publiés sur R2 par GitHub Action
 marque/              Identité de marque Deklic : logos SVG, favicon, icônes, image de partage, guide (ADR-005)
@@ -30,12 +31,12 @@ npm run lint          # eslint . --max-warnings=0
 npm run format:check  # prettier --check .
 npm run typecheck     # tsc --noEmit dans chaque workspace
 npm run test          # vitest run
-npm run test:coverage # vitest run --coverage (seuil 100 % sur packages/moteur, apps/worker, data et les modules de logique d'apps/web)
+npm run test:coverage # vitest run --coverage (seuil 100 % sur packages/moteur, packages/capture, apps/worker, apps/comptes, apps/extension, data et les modules de logique d'apps/web)
 npm run test:e2e      # vite build puis playwright test : parcours complets dans Chromium (apps/web/e2e)
 npm run build         # build de chaque workspace
 ```
 
-Node 22 ou plus. La CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) exécute ces six commandes sur chaque pull request (609 tests au 13/09/2026, dont 135 pour les référentiels, 119 pour la capture, l'extension et le bouton-favori, et 30 pour l'impression, le partage, Comparer et Méthode). Une PR est fusionnée automatiquement dès que le check `verify` est vert (`gh pr merge <n> --auto --merge`) ; `master` refuse tout merge sans ce check. Un second job `e2e` joue les huit parcours Playwright dans Chromium ; il n'est pas encore requis pour fusionner.
+Node 22 ou plus. La CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) exécute ces six commandes sur chaque pull request (727 tests au 13/09/2026, dont 135 pour les référentiels, 119 pour la capture, l'extension et le bouton-favori, 30 pour l'impression, le partage, Comparer et Méthode, et 91 pour les comptes). Une PR est fusionnée automatiquement dès que le check `verify` est vert (`gh pr merge <n> --auto --merge`) ; `master` refuse tout merge sans ce check. Un second job `e2e` joue les huit parcours Playwright dans Chromium ; il n'est pas encore requis pour fusionner.
 
 ## Le moteur (`@loupe/moteur`)
 
@@ -83,7 +84,8 @@ npm run build -w apps/web    # apps/web/dist
 - **Comment c'est calculé** (`/methode`) : chaque module du moteur expliqué, chaque constante avec sa valeur lue dans les règles datées et sa source, les valeurs « à confirmer » signalées, les simplifications assumées.
 - Projets stockés dans le navigateur (`localStorage`, clé `loupe.projets.v1`), validés par Zod ; le premier lancement crée le projet d'exemple.
 - Textes centralisés dans `src/textes/` : les codes du moteur deviennent des phrases là et nulle part ailleurs.
-- Tests : Vitest + Testing Library (jsdom), couverture 100 % sur `stockage/`, `formatage/`, `textes/`, `annonces/`, `hypotheses/`, `analyses/`, `bookmarklet/`, `enrichissement/`. Les tests n'appellent jamais le réseau : `AppEnMemoire` utilise un client du Worker hors ligne, ou le faux client qu'on lui passe.
+- Compte optionnel : page **Connexion** (`/connexion`, hors de la coque : Google, Apple, code par e-mail), page **Mon compte** (`/compte` : nom, méthodes liées, déconnexion, suppression), profil dans la barre latérale ; client `src/compte/` (voir « Les comptes »).
+- Tests : Vitest + Testing Library (jsdom), couverture 100 % sur `stockage/`, `formatage/`, `textes/`, `annonces/`, `hypotheses/`, `analyses/`, `bookmarklet/`, `enrichissement/`, `compte/`. Les tests n'appellent jamais le réseau : `AppEnMemoire` utilise un client du Worker hors ligne et un client des comptes en mémoire, ou les faux clients qu'on lui passe.
 
 ## L'extension navigateur (`@loupe/extension`) et le contrat de capture (`@loupe/capture`)
 
@@ -136,8 +138,41 @@ Le Worker est déployé sur `https://loupe-worker.erreip-gorguel.workers.dev` (e
 1. Dans le tableau de bord Cloudflare, créer un projet Pages connecté au dépôt GitHub.
 2. Commande de build : `npm ci && npm run build -w apps/web` · dossier de sortie : `apps/web/dist` · Node 22.
 3. `apps/web/public/_redirects` gère le rechargement des routes de l'application.
+4. Comptes : voir « Mettre en service les comptes » (variable de build `DEKLIC_COMPTES=1`, binding D1 `DB`, flag `nodejs_compat`, secrets).
 
 En local : `npx wrangler pages deploy dist` depuis `apps/web` (compte Cloudflare requis).
+
+## Les comptes (`@loupe/comptes`)
+
+Compte optionnel : connexion par Google, Apple ou un code à 6 chiffres reçu par e-mail ([ADR-006](.product/adr/006-comptes-better-auth.md), Better Auth). Rien n'est verrouillé sans compte ; les projets restent sur l'appareil (la synchronisation viendra ensuite).
+
+```bash
+npm run dev -w apps/comptes                 # API sur http://localhost:8787 (D1 locale, migrations appliquées)
+npm run dev:node -w apps/comptes            # la même API sur Node (base SQLite locale), si wrangler dev ne démarre pas
+npm run dev -w apps/web                     # le site relaie /api vers le port 8787
+npm run migration:generer -w apps/comptes   # après une montée de version de Better Auth
+```
+
+- L'API répond **sur l'origine du site** : avec `DEKLIC_COMPTES=1`, le build de `apps/web` dépose le worker des comptes dans `dist/_worker.js` et `dist/_routes.json`, qui ne lui envoie que `/api/*` (cookie de session de première partie).
+- Routes : `GET /api/comptes/sante`, `GET /api/comptes/fournisseurs` (boutons à afficher), `/api/auth/*` (Better Auth, derrière une garde : hôte connu, routes utilisées seulement, code de connexion seulement).
+- Code valable 10 minutes, invalidé après 3 erreurs ; 3 envois et 10 saisies par minute par adresse IP ; session de 7 jours en cookie `HttpOnly`, `SameSite=Lax`, `Secure` ; suppression du compte réservée aux sessions de moins d'un jour ; aucune adresse e-mail dans les journaux.
+- Base D1 `deklic-comptes` (tables de Better Auth), migration `apps/comptes/migrations/0001_comptes.sql`, testée à travers une D1 simulée sur `node:sqlite`.
+- En développement, sans clé Resend, le code s'affiche dans le terminal du worker (événement `courriel.dev`).
+- Web : `src/compte/` (client réseau fetch + Zod, client mémoire, `CompteProvider`), écrans `/connexion` et `/compte`, profil dans la barre latérale.
+
+### Mettre en service les comptes (une fois, compte Cloudflare de Pierre)
+
+Tant que ces étapes ne sont pas faites, le site se déploie comme avant et la page de connexion indique que la connexion n'est pas disponible.
+
+1. **Base D1** : `cd apps/comptes`, `npx wrangler d1 create deklic-comptes --location weur`, reporter l'identifiant dans `apps/comptes/wrangler.toml`, puis `npx wrangler d1 migrations apply deklic-comptes --remote`.
+2. **Projet Pages `loupeprojet`** (tableau de bord Cloudflare, Workers & Pages, loupeprojet, Settings), pour Production et Preview :
+   - Bindings : D1 database, nom de variable `DB`, base `deklic-comptes` ;
+   - Runtime : Compatibility flags, `nodejs_compat` ;
+   - Variables and Secrets : `DEKLIC_COMPTES` = `1` (variable de build), `BETTER_AUTH_SECRET` (secret de 32 caractères ou plus, par exemple `openssl rand -base64 32`), et `ENVIRONNEMENT` = `preview` pour Preview uniquement ;
+   - puis relancer un déploiement.
+3. **E-mails (Resend)** : une clé API en secret `RESEND_API_KEY`, l'expéditeur en variable `COURRIEL_EXPEDITEUR` (par exemple `Deklic <bonjour@deklic.io>`). Tant que le domaine n'est pas vérifié chez Resend, seuls les e-mails vers l'adresse du compte Resend partent.
+4. **Google** : console.cloud.google.com, API et services, Identifiants, ID client OAuth « Application Web » ; URI de redirection autorisés `https://loupeprojet.pages.dev/api/auth/callback/google` et `http://localhost:5173/api/auth/callback/google` ; écran de consentement publié. Secrets `GOOGLE_CLIENT_ID` et `GOOGLE_CLIENT_SECRET`.
+5. **Apple** (programme développeur, 99 $/an, facultatif) : un Services ID (`APPLE_CLIENT_ID`) avec « Sign in with Apple », domaine `loupeprojet.pages.dev`, retour `https://loupeprojet.pages.dev/api/auth/callback/apple` ; une clé « Sign in with Apple » : `APPLE_KEY_ID`, `APPLE_PRIVATE_KEY` (contenu du fichier .p8) et `APPLE_TEAM_ID`. Apple ne fonctionne pas sur localhost.
 
 ## Les référentiels (`@loupe/data`)
 

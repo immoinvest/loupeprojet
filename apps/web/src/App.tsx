@@ -1,13 +1,19 @@
-import type { JSX } from 'react';
+import { useMemo, type JSX } from 'react';
 import { BrowserRouter, MemoryRouter, Navigate, useRoutes, type RouteObject } from 'react-router';
 
 import { clientHorsLigne, clientWorker, urlWorker, type ClientWorker } from '@/enrichissement';
 
+import { CompteProvider } from './compte/CompteContext';
+import { clientMemoire } from './compte/memoire';
+import { clientReseau } from './compte/reseau';
+import type { ClientCompte } from './compte/types';
 import { AppLayout } from './coque/AppLayout';
 import { ClientWorkerProvider } from './coque/ClientWorker';
 import { ProjetLayout } from './coque/ProjetLayout';
 import { Bientot } from './ecrans/Bientot';
 import { Comparer } from './ecrans/Comparer';
+import { Compte } from './ecrans/Compte';
+import { Connexion } from './ecrans/Connexion';
 import { Extension } from './ecrans/Extension';
 import { Fiscalite } from './ecrans/Fiscalite';
 import { Hypotheses } from './ecrans/Hypotheses';
@@ -23,7 +29,8 @@ import { Adresse } from './ecrans/Adresse';
 import { ProjetsProvider } from './stockage/ProjetsContext';
 
 export const routes: RouteObject[] = [
-  // Hors coque : le document imprimable, sans barre latérale ni onglets.
+  // Hors de la coque : la page de connexion classique, centrée, et le document imprimable.
+  { path: 'connexion', element: <Connexion /> },
   { path: 'projets/:id/imprimer', element: <Imprimer /> },
   {
     element: <AppLayout />,
@@ -43,6 +50,7 @@ export const routes: RouteObject[] = [
           { path: 'adresse', element: <Adresse /> },
         ],
       },
+      { path: 'compte', element: <Compte /> },
       { path: 'partage', element: <Partage /> },
       { path: 'comparer', element: <Comparer /> },
       { path: 'methode', element: <Methode /> },
@@ -69,34 +77,47 @@ const CLIENT_WORKER = clientWorker(urlWorker(import.meta.env.VITE_WORKER_URL), (
   fetch(url, init),
 );
 
+/** Le client des comptes de production : l'API /api/* servie par le worker Pages, même origine. */
+const CLIENT_COMPTE = clientReseau();
+
 export function App(): JSX.Element {
   return (
     <ProjetsProvider>
       <ClientWorkerProvider client={CLIENT_WORKER}>
-        <BrowserRouter>
-          <Racine />
-        </BrowserRouter>
+        <CompteProvider client={CLIENT_COMPTE}>
+          <BrowserRouter>
+            <Racine />
+          </BrowserRouter>
+        </CompteProvider>
       </ClientWorkerProvider>
     </ProjetsProvider>
   );
 }
 
-/** Pour les tests : même arbre de routes, en mémoire, hors ligne sauf client fourni. */
+/**
+ * Pour les tests : même arbre de routes, en mémoire ; Worker hors ligne et compte anonyme en mémoire,
+ * sauf clients fournis.
+ */
 export function AppEnMemoire({
   chemin = '/',
   stockage,
   client = clientHorsLigne,
+  compte,
 }: {
   chemin?: string;
   stockage?: Storage;
   client?: ClientWorker;
+  compte?: ClientCompte;
 }): JSX.Element {
+  const clientCompte = useMemo(() => compte ?? clientMemoire(), [compte]);
   return (
     <ProjetsProvider stockage={stockage}>
       <ClientWorkerProvider client={client}>
-        <MemoryRouter initialEntries={[chemin]}>
-          <Racine />
-        </MemoryRouter>
+        <CompteProvider client={clientCompte}>
+          <MemoryRouter initialEntries={[chemin]}>
+            <Racine />
+          </MemoryRouter>
+        </CompteProvider>
       </ClientWorkerProvider>
     </ProjetsProvider>
   );

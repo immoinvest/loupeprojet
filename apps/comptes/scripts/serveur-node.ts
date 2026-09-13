@@ -1,0 +1,93 @@
+import { mkdirSync } from 'node:fs';
+import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
+import { DatabaseSync } from 'node:sqlite';
+import { fileURLToPath } from 'node:url';
+
+import { creerApp } from '../src/app';
+import { envoyeurJournal } from '../src/courriel';
+import {
+  lireOriginesSupplementaires,
+  ORIGINES_DEV,
+  ORIGINES_SITE,
+  SECRET_DEV,
+} from '../src/dependances';
+import { journalConsole } from '../src/journal';
+import { lireMigration } from './migration';
+
+/**
+ * L'API des comptes sur Node, pour le développement sur une machine où `wrangler dev` ne démarre pas
+ * (le runtime workerd plante sous certains Windows). Même application, base SQLite locale au schéma
+ * de D1, codes de connexion écrits dans le terminal. `npm run dev:node -w apps/comptes`.
+ */
+const PORT = Number(process.env.PORT ?? '8787');
+const DOSSIER = new URL('../.wrangler/node/', import.meta.url);
+
+function ouvrirBase(): DatabaseSync {
+  mkdirSync(DOSSIER, { recursive: true });
+  const base = new DatabaseSync(fileURLToPath(new URL('comptes.sqlite', DOSSIER)));
+  const existe = base
+    .prepare("select count(*) as n from sqlite_master where type = 'table' and name = 'user'")
+    .get();
+  if (Number(existe?.n ?? 0) === 0) base.exec(lireMigration());
+  return base;
+}
+
+const app = creerApp({
+  environnement: 'dev',
+  secret: SECRET_DEV,
+  base: ouvrirBase(),
+  courriel: envoyeurJournal(journalConsole),
+  fournisseurs: {},
+  origines: [
+    ...ORIGINES_SITE,
+    ...ORIGINES_DEV,
+    ...lireOriginesSupplementaires(process.env.ORIGINES_AUTORISEES),
+  ],
+  journal: journalConsole,
+  maintenant: () => Date.now(),
+});
+
+async function versRequete(entree: IncomingMessage): Promise<Request> {
+  const url = new URL(
+    entree.url ?? '/',
+    `http://${entree.headers.host ?? `localhost:${String(PORT)}`}`,
+  );
+  const entetes = new Headers();
+  for (const [nom, valeur] of Object.entries(entree.headers)) {
+    for (const v of Array.isArray(valeur) ? valeur : [valeur]) {
+      if (v !== undefined) entetes.append(nom, v);
+    }
+  }
+  const morceaux: Uint8Array[] = [];
+  for await (const morceau of entree) morceaux.push(morceau as Uint8Array);
+  const methode = entree.method ?? 'GET';
+  const sansCorps = methode === 'GET' || methode === 'HEAD' || morceaux.length === 0;
+  return new Request(url, {
+    method: methode,
+    headers: entetes,
+    ...(sansCorps ? {} : { body: Buffer.concat(morceaux) }),
+  });
+}
+
+async function repondre(entree: IncomingMessage, sortie: ServerResponse): Promise<void> {
+  const reponse = await app.fetch(await versRequete(entree));
+  sortie.statusCode = reponse.status;
+  reponse.headers.forEach((valeur, nom) => {
+    if (nom !== 'set-cookie') sortie.setHeader(nom, valeur);
+  });
+  const cookies = reponse.headers.getSetCookie();
+  if (cookies.length > 0) sortie.setHeader('set-cookie', cookies);
+  sortie.end(Buffer.from(await reponse.arrayBuffer()));
+}
+
+createServer((entree, sortie) => {
+  repondre(entree, sortie).catch((erreur: unknown) => {
+    journalConsole.erreur('serveur-node.erreur', {
+      raison: erreur instanceof Error ? erreur.message : String(erreur),
+    });
+    sortie.statusCode = 500;
+    sortie.end();
+  });
+}).listen(PORT, () => {
+  process.stdout.write(`API des comptes (Node) sur http://localhost:${String(PORT)}\n`);
+});
