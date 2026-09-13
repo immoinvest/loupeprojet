@@ -103,4 +103,12 @@ describe('calculerFinancement — cas limites', () => {
   it('echeancier vide pour un tableau vide', () => {
     expect(echeancier([])).toEqual([]);
   });
+
+  it('peut sauter le calcul des TAEG (prix cibles)', () => {
+    const f = calculerFinancement(projet, regles, { avecTaeg: false });
+    expect(f.taegHorsAssurance).toBeNull();
+    expect(f.taegAvecAssurance).toBeNull();
+    expect(f.tauxUsureDepasse).toBe(false);
+    expect(f.mensualiteTotale).toBeCloseTo(826.65, 1);
+  });
 });

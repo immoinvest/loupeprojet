@@ -63,6 +63,8 @@ export interface Regles {
   readonly exploitation: {
     /** Écart de loyer meublé / nu utilisé pour déduire le loyer nu par défaut. */
     readonly primeMeuble: number;
+    /** Supplément de loyer total attendu en colocation par rapport à une location classique. */
+    readonly primeColocation: number;
     readonly vacanceSemainesColocation: number;
     readonly interdictionLocationDpe: Readonly<Record<'G' | 'F' | 'E', number>>;
   };

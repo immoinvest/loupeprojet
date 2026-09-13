@@ -69,8 +69,18 @@ export function echeancier(lignes: readonly LigneAmortissement[]): Echeance[] {
   return echeances;
 }
 
-export function calculerFinancement(projet: Projet, regles: Regles): ResultatFinancement {
+export interface OptionsFinancement {
+  /** Défaut `true`. Les TAEG coûtent deux résolutions numériques : inutiles pour un prix cible. */
+  readonly avecTaeg?: boolean;
+}
+
+export function calculerFinancement(
+  projet: Projet,
+  regles: Regles,
+  options: OptionsFinancement = {},
+): ResultatFinancement {
   const { achat, pret, location, revente, revenusMensuels } = projet.hypotheses;
+  const avecTaeg = options.avecTaeg ?? true;
   const frais = fraisAcquisition(achat, projet.bien.departement, regles);
   const fraisBancaires = pret.fraisDossier + pret.fraisGarantie;
   const besoinFinancement = achat.prix + achat.travaux + frais.total + fraisBancaires;
@@ -90,7 +100,7 @@ export function calculerFinancement(projet: Projet, regles: Regles): ResultatFin
   const totalInterets = sommer(tableau.map((l) => l.interets));
   const totalAssurance = sommer(tableau.map((l) => l.assurance));
   const capitalNet = montantEmprunte - fraisBancaires;
-  const taegAvecAssurance = taeg(capitalNet, tableau, true);
+  const taegAvecAssurance = avecTaeg ? taeg(capitalNet, tableau, true) : null;
   const crdRevente = crdFinAnnee(parAnnee, revente.annees);
 
   return {
@@ -107,7 +117,7 @@ export function calculerFinancement(projet: Projet, regles: Regles): ResultatFin
     totalInterets,
     totalAssurance,
     coutTotalCredit: totalInterets + totalAssurance + fraisBancaires,
-    taegHorsAssurance: taeg(capitalNet, tableau, false),
+    taegHorsAssurance: avecTaeg ? taeg(capitalNet, tableau, false) : null,
     taegAvecAssurance,
     tauxUsureDepasse: (taegAvecAssurance ?? 0) > regles.credit.tauxUsure,
     effort: tauxEffort(

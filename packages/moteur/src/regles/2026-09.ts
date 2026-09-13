@@ -44,6 +44,7 @@ export const regles202609: Regles = {
 
   exploitation: {
     primeMeuble: 0.15,
+    primeColocation: 0.35,
     vacanceSemainesColocation: 4,
     interdictionLocationDpe: { G: 2025, F: 2028, E: 2034 },
   },
@@ -124,5 +125,6 @@ export const regles202609: Regles = {
     'Recettes BIC = loyers hors charges (charges refacturées ignorées)',
     'Intérêts capitalisés pendant un différé total non déduits fiscalement',
     'Rendement net et net-net calculés sur la première année pleine',
+    'Scénario colocation : loyer total +35 % et 4 semaines de vacance, sans travaux d’aménagement',
   ],
 };
