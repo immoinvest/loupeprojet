@@ -1,27 +1,52 @@
 import { render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import userEvent from '@testing-library/user-event';
+import { afterEach, describe, expect, it, vi, type MockInstance } from 'vitest';
 
 import { AppEnMemoire } from '@/App';
+import { MESSAGE_SITE_BLOQUANT, codeFavori } from '@/bookmarklet/favori';
 
 afterEach(() => {
-  vi.unstubAllGlobals();
+  vi.restoreAllMocks();
+});
+
+/** `userEvent.setup()` installe un presse-papiers dans jsdom ; on l'espionne ensuite. */
+function preparer(): {
+  utilisateur: ReturnType<typeof userEvent.setup>;
+  writeText: MockInstance<(texte: string) => Promise<void>>;
+} {
+  const utilisateur = userEvent.setup();
+  const writeText = vi.spyOn(navigator.clipboard, 'writeText');
+  return { utilisateur, writeText };
+}
+
+describe('codeFavori', () => {
+  it('est une URL javascript: courte qui charge capture.js depuis l’origine donnée', () => {
+    const href = codeFavori('https://loupeprojet.pages.dev/');
+    expect(href.startsWith('javascript:')).toBe(true);
+    expect(href.length).toBeLessThan(600);
+    const script = decodeURIComponent(href.slice('javascript:'.length));
+    expect(script).toContain('"https://loupeprojet.pages.dev/capture.js"');
+    expect(script).toContain(MESSAGE_SITE_BLOQUANT);
+    expect(script).not.toContain('\n');
+    expect(script).toMatch(/^\(function\(\)\{.*\}\)\(\);$/);
+  });
 });
 
 describe('Page Extension navigateur', () => {
-  it('propose le bouton-favori à glisser, avec le code servi par le site en URL javascript:', async () => {
-    vi.stubGlobal(
-      'fetch',
-      vi.fn(() => Promise.resolve({ ok: true, text: () => Promise.resolve('alert("Loupe %");') })),
-    );
+  it('pose le favori sur le lien à glisser et le copie au clic sur le bouton', async () => {
+    const { utilisateur, writeText } = preparer();
+    writeText.mockResolvedValue(undefined);
     render(<AppEnMemoire chemin="/extension" />);
     expect(
       await screen.findByRole('heading', { name: /Lisez une annonce en un clic/ }),
     ).toBeInTheDocument();
-    const favori = await screen.findByTitle(/Glissez-moi/);
-    await screen.findByText(/Un clic ici ne fait rien/);
-    expect(favori.getAttribute('href')).toBe(
-      `javascript:${encodeURIComponent('alert("Loupe %");')}`,
-    );
+    const favori = screen.getByTitle(/Glissez-moi/);
+    expect(favori.getAttribute('href')).toBe(codeFavori(window.location.origin));
+
+    await utilisateur.click(screen.getByRole('button', { name: 'Copier le favori' }));
+    expect(await screen.findByText(/Favori copié/)).toBeInTheDocument();
+    expect(writeText).toHaveBeenCalledWith(codeFavori(window.location.origin));
+
     expect(screen.getByRole('link', { name: /guide du dépôt/ })).toHaveAttribute(
       'href',
       expect.stringContaining('github.com/immoinvest/loupeprojet') as string,
@@ -32,22 +57,23 @@ describe('Page Extension navigateur', () => {
     );
   });
 
-  it('dit quand le bouton-favori n’est pas disponible', async () => {
-    vi.stubGlobal(
-      'fetch',
-      vi.fn(() => Promise.resolve({ ok: false, status: 404, text: () => Promise.resolve('') })),
-    );
+  it('un clic sur le lien lui-même copie aussi, sans exécuter le favori', async () => {
+    const { utilisateur, writeText } = preparer();
+    writeText.mockResolvedValue(undefined);
     render(<AppEnMemoire chemin="/extension" />);
-    expect(await screen.findByText(/pas disponible sur cette version/)).toBeInTheDocument();
-    expect(screen.getByTitle(/Glissez-moi/).getAttribute('href')).toBeNull();
+    await utilisateur.click(await screen.findByTitle(/Glissez-moi/));
+    expect(await screen.findByText(/Favori copié/)).toBeInTheDocument();
+    expect(writeText).toHaveBeenCalledTimes(1);
   });
 
-  it('reste calme si le réseau échoue', async () => {
-    vi.stubGlobal(
-      'fetch',
-      vi.fn(() => Promise.reject(new Error('hors ligne'))),
-    );
+  it('montre l’adresse à copier à la main quand le presse-papiers refuse', async () => {
+    const { utilisateur, writeText } = preparer();
+    writeText.mockRejectedValue(new Error('refusé'));
     render(<AppEnMemoire chemin="/extension" />);
-    expect(await screen.findByText(/pas disponible sur cette version/)).toBeInTheDocument();
+    await utilisateur.click(await screen.findByRole('button', { name: 'Copier le favori' }));
+    expect(await screen.findByText(/Copie impossible ici/)).toBeInTheDocument();
+    expect(screen.getByLabelText('Adresse du favori')).toHaveValue(
+      codeFavori(window.location.origin),
+    );
   });
 });
