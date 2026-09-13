@@ -6,7 +6,14 @@ import tseslint from 'typescript-eslint';
 
 export default defineConfig(
   {
-    ignores: ['**/node_modules/**', '**/dist/**', '**/coverage/**', '**/.wrangler/**'],
+    ignores: [
+      '**/node_modules/**',
+      '**/dist/**',
+      '**/coverage/**',
+      '**/.wrangler/**',
+      // Bouton-favori généré par le build du web (vite.bookmarklet.config.ts).
+      'apps/web/public/capture.js',
+    ],
   },
   eslint.configs.recommended,
   tseslint.configs.strictTypeChecked,
