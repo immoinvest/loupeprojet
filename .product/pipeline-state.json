@@ -1,0 +1,49 @@
+{
+  "feature_slug": "moteur-calcul",
+  "title": "Moteur de calcul Loupe (packages/moteur) + mise en place du monorepo",
+  "started_at": "2026-09-13T00:00:00Z",
+  "current_step": "discovery",
+  "scope": "packages/moteur + racine du monorepo",
+  "branch": "feat/moteur-calcul",
+  "baseline": {
+    "tests_passed": 0,
+    "tests_failed": 0,
+    "typecheck_errors": null,
+    "lint_errors": null,
+    "git_status": "untracked: CLAUDE.md, .claude/, .product/, .gitignore",
+    "last_commit": "60c4f78",
+    "note": "Aucun outillage de test dans le repo d'origine (script test = echo). Baseline établie après mise en place du monorepo."
+  },
+  "steps": {
+    "context": {
+      "status": "completed",
+      "outputs": [
+        "CLAUDE.md",
+        ".product/adr/001-stack.md",
+        ".product/adr/002-capture-navigateur.md",
+        ".product/adr/003-llm-extraction.md",
+        ".product/functional-spec.md",
+        ".product/technical-spec.md",
+        ".product/architecture-overview.md",
+        ".product/features-registry.md",
+        ".product/design/maquette-v1.md"
+      ]
+    },
+    "discovery": {
+      "status": "awaiting_validation",
+      "output": ".product/features/moteur-calcul-discovery.md"
+    },
+    "specs": { "status": "pending" },
+    "architecture": { "status": "pending" },
+    "implement": { "status": "pending", "stories_completed": 0, "stories_total": 0, "commits": [] },
+    "refactor": { "status": "pending" },
+    "qa_tests": { "status": "pending" },
+    "security": { "status": "pending" },
+    "push": { "status": "pending" }
+  },
+  "decisions": {
+    "stack": "ADR-001 : spec Loupe (Cloudflare, SPA, Mistral) avec React au lieu de Svelte",
+    "design": "Direction visuelle à proposer (2-3 pistes) avant toute feature UI",
+    "merge": "Jamais de merge automatique sans validation"
+  }
+}

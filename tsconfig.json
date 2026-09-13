@@ -1,14 +1,10 @@
 {
+  "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./dist/",
-    "sourceMap": true,
-    "noImplicitAny": true,
-    "module": "es6",
-    "target": "es5",
-    "jsx": "react",
+    "noEmit": true,
     "allowJs": true,
-    "moduleResolution": "node",
-    "esModuleInterop": true,
-    "lib": ["dom", "es2015", "es2016", "es2017"]
-  }
+    "checkJs": true,
+    "types": ["node"]
+  },
+  "include": ["eslint.config.js", "vitest.config.ts"]
 }
