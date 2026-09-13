@@ -7,7 +7,21 @@ import {
 } from '../../../src/sources/dvf/statistiques.ts';
 
 function vente(prix: number, surface: number, type: Vente['type'] = 'appartement'): Vente {
-  return { date: '2025-01-01', prix, surface, type, pieces: 2, lat: null, lon: null };
+  return {
+    date: '2025-01-01',
+    prix,
+    surface,
+    type,
+    pieces: 2,
+    lat: null,
+    lon: null,
+    idParcelle: null,
+    numero: null,
+    suffixe: null,
+    codeVoie: null,
+    voie: null,
+    carrez: null,
+  };
 }
 
 describe('statistiquesDesVentes', () => {
