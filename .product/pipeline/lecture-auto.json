@@ -2,25 +2,35 @@
   "feature_slug": "lecture-auto",
   "title": "Coller un lien suffit : l'extension lit l'annonce dans un onglet sur demande de Deklic ; règles réelles des cinq portails",
   "started_at": "2026-09-13T21:10:00Z",
-  "current_step": "implement",
-  "scope": "packages/capture, apps/extension (pont, arrière-plan, règles), apps/web/src/annonces + NouveauProjet + formulaire",
+  "current_step": "push",
+  "scope": "packages/capture, apps/extension (pont, arrière-plan, règles), apps/web/src/annonces + enrichissement/lecture + NouveauProjet + formulaire",
   "branch": "feat/lecture-auto",
-  "base": "master (6d0dded)",
+  "base": "master (6d0dded), fusionné avec master (73c46dd : enrichissement-marche, garder)",
   "steps": {
     "discovery": {
       "status": "completed",
       "output": ".product/features/lecture-auto-discovery.md"
     },
-    "implement": { "status": "in_progress", "stories_completed": 1, "stories_total": 4 },
-    "refactor": { "status": "pending" },
-    "qa_tests": { "status": "pending" },
-    "security": { "status": "pending" },
-    "push": { "status": "pending" }
+    "implement": { "status": "completed", "stories_completed": 4, "stories_total": 4 },
+    "refactor": {
+      "status": "completed",
+      "note": "orchestration de la lecture sans chrome.* (lecteur.ts), protocole partagé dans @loupe/capture, chargeur de données injecté"
+    },
+    "qa_tests": {
+      "status": "completed",
+      "note": "capture 83 tests, extension 62 tests, web +14 (pont, complément IA, construire, écran avec extension mockée) ; couverture 100 % sur les modules de logique"
+    },
+    "security": {
+      "status": "completed",
+      "note": "messages validés par Zod, source et origine vérifiées côté page et pont, demandes à l'arrière-plan acceptées de cette extension seulement ; chargeur limité à l'origine du portail ; aucune requête vers nos serveurs depuis l'extension ; permissions d'hôte limitées aux cinq portails"
+    },
+    "push": { "status": "in_progress" }
   },
   "decisions": {
     "releve": "structures relevées sur de vraies annonces le 13/09/2026 dans le Chrome de l'utilisateur ; SeLoger et Logic-Immo ont changé d'adresses (identifiants alphanumériques) et partagent __UFRN_LIFECYCLE_SERVERREQUEST__ ; Bien'ici ne sert rien dans le HTML (données /realEstateAd.json)",
-    "lecture": "onglet inactif à côté de Deklic, puis second essai onglet affiché si prix ou surface manquent ; une lecture à la fois",
-    "pont": "script de contenu sur les pages Deklic + window.postMessage, protocole validé par Zod dans @loupe/capture",
-    "hors_perimetre": "appel du LLM /extract (chaîne principale), lecture serveur (écartée par Pierre)"
+    "lecture": "onglet inactif à côté de Deklic, puis second essai onglet affiché si prix ou surface manquent ; une lecture à la fois ; délai côté page 90 s",
+    "pont": "script de contenu sur les pages Deklic (document_start) + window.postMessage, protocole validé par Zod dans @loupe/capture",
+    "ia": "complément par /extract seulement s'il manque étage, ascenseur, DPE, année, charges, taxe foncière ou honoraires ; données de la page prioritaires",
+    "hors_perimetre": "lecture serveur (écartée par Pierre) ; le type de bien dans le formulaire recoupe la fiche marche-complet de la chaîne principale (fait ici)"
   }
 }
