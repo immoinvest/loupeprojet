@@ -1,33 +1,34 @@
 {
-  "feature_slug": "onglets-detail",
-  "title": "Onglets Fiscalité (4 régimes, frise, année par année), Revente (horizons 5/10/15/20 ans, plus-value détaillée), Visite (points de vigilance cochables)",
+  "feature_slug": "worker-socle",
+  "title": "Socle du Worker : Hono sur Cloudflare Workers, proxy des données publiques avec cache KV, limite de débit, géocodage Géoplateforme",
   "started_at": "2026-09-13T00:00:00Z",
   "current_step": "push",
-  "scope": "apps/web/src/ecrans/{Fiscalite,Revente,Visite}.tsx, analyses/revente, textes (explicationRegime, categorieVigilance)",
-  "branch": "feat/onglets-detail",
-  "base": "master (2916703)",
+  "scope": "apps/worker (app, dependances, proxy/cache, proxy/debit, services/geocodage), wrangler.toml, seuils de couverture",
+  "branch": "feat/worker-socle",
+  "base": "master (768c556)",
   "steps": {
     "discovery": {
       "status": "completed",
-      "output": ".product/features/onglets-detail-discovery.md"
+      "output": ".product/features/worker-socle-discovery.md"
     },
     "implement": { "status": "completed", "stories_completed": 5, "stories_total": 5 },
     "refactor": {
       "status": "completed",
-      "note": "les deux interactions (régime, horizon) passent par appliquerSaisie ; aucune formule dans les écrans"
+      "note": "dépendances injectées (cache, limiteur, fetcher, horloge, journal) ; reponseErreur sans contexte Hono ; definirService ferme les types"
     },
     "qa_tests": {
       "status": "completed",
-      "note": "variantesRevente, explicationRegime (4 cas), catégories des 14 codes, écrans (retenir un régime, changer d'horizon, plus-value imposable, cases cochées)"
+      "note": "29 tests Node via app.request() : routes, CORS, débit, validation, cache HIT/MISS/expiration/panne, statuts amont, normalisation Géoplateforme, dépendances, journal"
     },
     "security": {
       "status": "completed",
-      "note": "aucune saisie libre nouvelle : régime et horizon sont des valeurs fermées validées par ProjetSchema"
+      "note": "liste blanche de services et de paramètres, délai amont, CORS restreint, aucune IP ni adresse journalisée, aucune clé côté client (le LLM viendra côté Worker)"
     },
     "push": { "status": "in_progress" }
   },
   "decisions": {
-    "horizons": "5/10/15/20 ans recalculés sans scénarios (~5 ms chacun), mémoïsés sur le projet ; cliquer un horizon modifie l'hypothèse revente.annees",
-    "cases_visite": "état local à l'écran, non persisté (dit à l'utilisateur) ; à persister quand le projet aura des notes"
+    "tests": "Vitest Node + doubles plutôt que @cloudflare/vitest-pool-workers ; les bindings réels sont exercés au déploiement",
+    "debit": "binding Rate Limiting Cloudflare (60/min/IP) derrière une interface LimiteurDebit",
+    "sessions_paralleles": "fiches dans .product/sessions/ (extension, referentiels, garder, e2e-playwright) ; chaque session tient son état dans .product/pipeline/<slug>.json"
   }
 }
