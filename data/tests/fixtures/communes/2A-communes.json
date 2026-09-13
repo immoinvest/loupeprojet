@@ -1,0 +1,24 @@
+[
+  {
+    "nom": "Afa",
+    "code": "2A001",
+    "codesPostaux": ["20167"],
+    "population": 3350,
+    "codeDepartement": "2A",
+    "codeEpci": "242010056"
+  },
+  {
+    "nom": "Ajaccio",
+    "code": "2A004",
+    "codesPostaux": ["20000", "20090", "20167"],
+    "population": 76320,
+    "codeDepartement": "2A",
+    "codeEpci": "242010056"
+  },
+  {
+    "nom": "Alata",
+    "code": "2A006",
+    "codesPostaux": ["20167"],
+    "codeDepartement": "2A"
+  }
+]

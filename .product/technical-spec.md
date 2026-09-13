@@ -6,19 +6,20 @@ Stack : voir `adr/001-stack.md`. Ce document décrit la structure et les convent
 
 ```
 loupeprojet/
-├── package.json            workspaces: ["packages/*", "apps/*"] ; scripts lint / format / typecheck / test / test:coverage / build
+├── package.json            workspaces: ["packages/*", "apps/*", "data"] ; scripts lint / format / typecheck / test / test:coverage / build
 ├── tsconfig.base.json      strict, noUncheckedIndexedAccess, exactOptionalPropertyTypes, ES2022, bundler resolution
 ├── tsconfig.json           couvre les fichiers de config racine (ESLint type-checked)
 ├── eslint.config.js        typescript-eslint strict-type-checked + stylistic, no-console, max-lines 300, prettier
 ├── marque/                 identité de marque Deklic (ADR-005) : logos SVG, favicon, icônes, image de partage, palette, guide
 ├── .prettierrc             printWidth 100, singleQuote, trailingComma all, LF
-├── vitest.config.ts        projets = packages/*, apps/*
-├── .github/workflows/ci.yml  Node 22 : npm ci → lint → format:check → typecheck → test:coverage → build
+├── vitest.config.ts        projets = packages/*, apps/*, data ; seuils 100 % moteur, worker, data, modules de logique du web
+├── .github/workflows/ci.yml  Node 22 : npm ci → lint → format:check → typecheck → test:coverage → build ; job e2e : Playwright Chromium (npm run test:e2e)
+├── .github/workflows/referentiels.yml  cron mensuel + manuel : génère data/dist puis aws s3 sync vers R2 loupe-data
 ├── packages/moteur/        ← livré (feature moteur-calcul)
-├── apps/web/               ← livré (socle, nouveau projet, hypothèses, onglets)
+├── apps/web/               ← livré (socle, nouveau projet, hypothèses, onglets) ; tests de bout en bout Playwright dans e2e/
 ├── apps/worker/            ← socle livré (feature worker-socle)
 ├── apps/extension/         ← à venir (fiche .product/sessions/extension.md)
-└── data/                   ← scripts de pré-agrégation (feature référentiels)
+└── data/                   ← livré (feature referentiels) : pré-agrégation des référentiels publics
 ```
 
 ## `packages/moteur` (livré)
@@ -50,11 +51,15 @@ tests/                       un dossier par module + integration/ ; 204 tests ; 
 
 ## `apps/web` (socle livré)
 
-Voir `architecture/web-socle.md`. React 19 + Vite 7 + Tailwind v4 (`@theme` = tokens ADR-004), React Router 7 déclaratif (`useRoutes`), stockage local Zod (`loupe.projets.v1`), textes des codes du moteur dans `src/textes/`, Vitest + Testing Library (jsdom). Cloudflare Pages : `wrangler.toml`, `public/_redirects`. Couverture 100 % exigée sur `stockage/`, `formatage/`, `textes/` ; les écrans sont couverts par des tests de rendu et de navigation (`AppEnMemoire`).
+Voir `architecture/web-socle.md`. React 19 + Vite 7 + Tailwind v4 (`@theme` = tokens ADR-004), React Router 7 déclaratif (`useRoutes`), stockage local Zod (`loupe.projets.v1`), textes des codes du moteur dans `src/textes/`, Vitest + Testing Library (jsdom). Cloudflare Pages : `wrangler.toml`, `public/_redirects`. Couverture 100 % exigée sur `stockage/`, `formatage/`, `textes/` ; les écrans sont couverts par des tests de rendu et de navigation (`AppEnMemoire`). Tests de bout en bout : `apps/web/e2e/` avec Playwright (Chromium, build de production servi par `vite preview` sur 127.0.0.1:5199, sélecteurs par rôle et libellé, contexte neuf par test), `npm run test:e2e` ; voir `architecture/e2e-playwright.md`.
 
 ## `apps/worker` (socle livré)
 
 Voir `architecture/worker-socle.md`. Hono 4 sur Cloudflare Workers (`wrangler.toml` : KV `KV_CACHE`, binding Rate Limiting `LIMITEUR` 60/min/IP, `[observability]`), dépendances injectées (`creerApp(deps)`), `GET /health`, `GET /proxy/:service` avec liste blanche de services (`services/`), cache KV par empreinte des paramètres validés, réponses amont validées et normalisées au contrat Loupe, erreurs en codes. Premier service : géocodage Géoplateforme. Tests Vitest en Node via `app.request()` et doubles ; couverture 100 % sur `src/**`. Build = `wrangler deploy --dry-run`.
+
+## `data/` (livré, feature referentiels)
+
+Voir `architecture/referentiels.md` et `data/SOURCES.md`. Workspace `@loupe/data` exécuté directement par Node (`node --experimental-strip-types src/cli.ts`, imports en `.ts`, aucun build) : `commun/` (CSV en flux RFC 4180, décodage UTF-8 / Windows-1252, téléchargement avec trois tentatives et gzip, journal JSON + annotations GitHub, quartiles, dates, 101 départements), `schemas/` (Zod : un schéma par fichier publié, en-tête `genereLe` / `millesime` / `source`), `sources/<source>/` (constantes, transformation pure, orchestration), `cli/arguments.ts`, `sources/executer.ts`. Tout accès externe passe par un `Contexte` injecté (`fetch`, pause, horloge, journal, dossier de sortie) : les tests utilisent un faux `fetch` nourri par des extraits réels (`tests/fixtures/`), sans réseau. Couverture 100 % exigée sur `data/src/**` (hors `cli.ts`). Sortie `data/dist/` (ignorée par git), publiée sur R2 `loupe-data` par `.github/workflows/referentiels.yml` (`aws s3 sync`, secrets `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `CLOUDFLARE_ACCOUNT_ID`). Seuils de l'usure saisis à la main dans `data/sources/usure/`.
 
 ## Conventions transverses
 
@@ -75,13 +80,15 @@ Voir `architecture/worker-socle.md`. Hono 4 sur Cloudflare Workers (`wrangler.to
 6. Aucun `TODO` / `FIXME` (règle ESLint `no-warning-comments`)
 7. Aucun secret, aucun `.env` suivi, `.gitignore` à jour
 8. Aucun `eval`, `dangerouslySetInnerHTML`, clé API côté client
+9. `npm run test:e2e` → 8 parcours Playwright verts (en local avant la PR ; job CI `e2e`, pas encore bloquant pour le merge)
 
 ## Tests
 
-| Type              | Outil                                      | Où                                     |
-| ----------------- | ------------------------------------------ | -------------------------------------- |
-| Unitaires moteur  | Vitest                                     | `packages/moteur/tests/<module>`       |
-| Intégration       | Vitest                                     | `packages/moteur/tests/integration`    |
-| Worker            | Vitest (Node) + `app.request()` et doubles | `apps/worker/tests/`                   |
-| E2E web (à venir) | Playwright                                 | `apps/web/e2e/`                        |
-| Annonce témoin    | GitHub Action quotidienne (à venir)        | `.github/workflows/annonce-temoin.yml` |
+| Type             | Outil                                                               | Où                                     |
+| ---------------- | ------------------------------------------------------------------- | -------------------------------------- |
+| Unitaires moteur | Vitest                                                              | `packages/moteur/tests/<module>`       |
+| Intégration      | Vitest                                                              | `packages/moteur/tests/integration`    |
+| Worker           | Vitest (Node) + `app.request()` et doubles                          | `apps/worker/tests/`                   |
+| Référentiels     | Vitest (Node) + faux `fetch` et fixtures réelles                    | `data/tests/`                          |
+| E2E web          | Playwright (Chromium, build de production servi par `vite preview`) | `apps/web/e2e/`                        |
+| Annonce témoin   | GitHub Action quotidienne (à venir)                                 | `.github/workflows/annonce-temoin.yml` |

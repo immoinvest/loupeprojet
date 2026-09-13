@@ -11,6 +11,8 @@ export default defineConfig(
       '**/dist/**',
       '**/coverage/**',
       '**/.wrangler/**',
+      '**/playwright-report/**',
+      '**/test-results/**',
       // Worktrees des sessions parallèles (Claude Code) : du code en cours d'écriture, hors dépôt.
       '.claude/worktrees/**',
     ],

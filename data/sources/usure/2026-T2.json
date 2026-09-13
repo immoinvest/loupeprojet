@@ -1,0 +1,24 @@
+{
+  "trimestre": "2026-T2",
+  "applicableDu": "2026-04-01",
+  "publieLe": "2026-03-27",
+  "source": {
+    "nom": "Banque de France, taux d'usure 2026-T2 (taux effectifs moyens du 1er trimestre 2026, seuils applicables au 1er avril 2026)",
+    "url": "https://www.banque-france.fr/fr/statistiques/taux-et-cours/taux-dusure-2026-q2",
+    "licence": "Banque de France, réutilisation libre avec mention de la source"
+  },
+  "tauxEffectifsMoyens": {
+    "fixeMoins10Ans": 0.03,
+    "fixe10a20Ans": 0.0336,
+    "fixe20AnsEtPlus": 0.0389,
+    "variable": 0.0375,
+    "relais": 0.0465
+  },
+  "seuils": {
+    "fixeMoins10Ans": 0.04,
+    "fixe10a20Ans": 0.0448,
+    "fixe20AnsEtPlus": 0.0519,
+    "variable": 0.05,
+    "relais": 0.062
+  }
+}
