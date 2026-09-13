@@ -11,6 +11,7 @@ import {
   type CaptureImportee,
   type SaisieProjet,
 } from '@/annonces';
+import { Chapo, Page, TitrePage } from '@/composants/mise-en-page';
 import { Bouton, Carte, Pastille } from '@/composants/ui';
 import { useClientWorker } from '@/coque/ClientWorker';
 import { enrichirSaisie, lireAnnonce, type ModeLecture } from '@/enrichissement';
@@ -78,15 +79,15 @@ export function NouveauProjet(): JSX.Element {
   };
 
   return (
-    <div className="flex flex-col gap-6 px-10 pt-8 pb-10">
+    <Page espacement="large">
       <div className="flex flex-col gap-2">
-        <h1 className="m-0 max-w-[22ch] font-display text-[40px] leading-[1.1] font-bold tracking-tight text-balance">
+        <TitrePage taille="accroche" className="max-w-[22ch]">
           Colle le lien de l'annonce, on s'occupe du reste.
-        </h1>
-        <p className="m-0 max-w-[64ch] text-[17px] text-encre-2">
+        </TitrePage>
+        <Chapo>
           Prix, surface, étage, DPE, charges : tout ce que l'annonce dit est lu pour vous. Vous
           vérifiez cinq chiffres, et le rapport est prêt.
-        </p>
+        </Chapo>
       </div>
 
       {!manuel && (
@@ -233,6 +234,6 @@ export function NouveauProjet(): JSX.Element {
           )}
         </div>
       )}
-    </div>
+    </Page>
   );
 }

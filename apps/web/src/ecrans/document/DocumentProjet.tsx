@@ -1,6 +1,7 @@
 import type { JSX } from 'react';
 
 import { ModeDocument } from '@/composants/document';
+import { MARGES_LATERALES } from '@/composants/mise-en-page';
 import { useProjetCourant } from '@/coque/ProjetLayout';
 import { dateCourte, euros, nombre } from '@/formatage/nombres';
 import { Fiscalite } from '@/ecrans/Fiscalite';
@@ -35,7 +36,9 @@ export function DocumentProjet({
   return (
     <ModeDocument>
       <div className="document">
-        <header className="flex items-end justify-between gap-6 border-b border-bordure px-10 pt-8 pb-5">
+        <header
+          className={`flex items-end justify-between gap-6 border-b border-bordure pt-8 pb-5 ${MARGES_LATERALES}`}
+        >
           <div className="flex flex-col gap-1">
             <span className="flex items-center gap-2 font-display text-sm font-bold text-encre-3">
               <LogotypeDeklic hauteur={20} />· dossier d'analyse locative
@@ -64,14 +67,18 @@ export function DocumentProjet({
 
         {VOLETS.map(({ titre, Volet }, index) => (
           <article key={titre} className={index === 0 ? '' : 'document-volet'}>
-            <div className="px-10 pt-6 text-xs font-bold tracking-wider text-encre-4 uppercase">
+            <div
+              className={`pt-6 text-xs font-bold tracking-wider text-encre-4 uppercase ${MARGES_LATERALES}`}
+            >
               {index + 1} · {titre} · {enregistre.nom}
             </div>
             <Volet />
           </article>
         ))}
 
-        <footer className="flex flex-col gap-1 border-t border-bordure px-10 py-5 text-xs text-encre-3">
+        <footer
+          className={`flex flex-col gap-1 border-t border-bordure py-5 text-xs text-encre-3 ${MARGES_LATERALES}`}
+        >
           <span>
             Deklic est un outil d'aide à la décision, pas un conseil en investissement ni un conseil
             fiscal. Règles connues au {dateCourte(r.meta.dateReference)} (version{' '}

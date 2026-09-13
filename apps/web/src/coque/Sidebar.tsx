@@ -1,6 +1,6 @@
 import { calculerProjet } from '@loupe/moteur';
-import { Columns2, Info, Plus, Puzzle, Settings } from 'lucide-react';
-import type { JSX } from 'react';
+import { Columns2, Info, Plus, Puzzle, Settings, X } from 'lucide-react';
+import { useEffect, useRef, type JSX } from 'react';
 import { NavLink, useNavigate } from 'react-router';
 
 import { Point } from '@/composants/ui';
@@ -8,10 +8,22 @@ import { LogotypeDeklic } from '@/marque/Logo';
 import { useProjets } from '@/stockage/ProjetsContext';
 import type { ProjetEnregistre } from '@/stockage/projets';
 
+/** Identifiant de la navigation principale, visé par le bouton de menu (`aria-controls`). */
+export const ID_NAVIGATION = 'navigation-principale';
+
 const lien = ({ isActive }: { isActive: boolean }): string =>
   `flex min-h-[44px] items-center gap-3 rounded-encart px-3.5 py-2.5 text-[15px] font-semibold ${
     isActive ? 'bg-accent-doux text-encre' : 'text-encre-2 hover:bg-accent-fond'
   }`;
+
+/**
+ * Sous 1 024 px, la barre latérale est un tiroir. À l'ouverture, il devient visible tout de suite
+ * (sinon le focus ne peut pas y entrer) ; à la fermeture, il ne disparaît qu'une fois sorti de l'écran.
+ */
+const ETAT_TIROIR = {
+  ouvert: 'visible translate-x-0 shadow-carte transition-[translate]',
+  ferme: 'invisible -translate-x-full transition-[translate,visibility]',
+} as const;
 
 function feuCashflow(p: ProjetEnregistre): 'bon' | 'surveiller' | 'probleme' | 'inconnu' {
   return (
@@ -21,19 +33,48 @@ function feuCashflow(p: ProjetEnregistre): 'bon' | 'surveiller' | 'probleme' | '
   );
 }
 
-export function Sidebar(): JSX.Element {
+export function Sidebar({
+  ouvert,
+  onFermer,
+}: {
+  ouvert: boolean;
+  onFermer: () => void;
+}): JSX.Element {
   const { projets } = useProjets();
   const naviguer = useNavigate();
+  const fermerRef = useRef<HTMLButtonElement>(null);
+
+  // À l'ouverture du tiroir, le focus entre dedans.
+  useEffect(() => {
+    if (ouvert) fermerRef.current?.focus();
+  }, [ouvert]);
 
   const nouveau = (): void => {
     void naviguer('/projets/nouveau');
   };
 
   return (
-    <aside className="flex h-full flex-col gap-5 border-r border-bordure bg-surface px-4 py-5 print:hidden">
-      <NavLink to="/projets" className="flex items-center px-2.5 py-1">
-        <LogotypeDeklic hauteur={26} />
-      </NavLink>
+    <aside
+      id={ID_NAVIGATION}
+      data-ouvert={ouvert}
+      className={`fixed inset-y-0 left-0 z-40 flex w-[min(20rem,85vw)] flex-col gap-5 overflow-y-auto overscroll-contain border-r border-bordure bg-surface pt-[max(1.25rem,env(safe-area-inset-top))] pr-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] pl-[max(1rem,env(safe-area-inset-left))] transition-[translate,visibility] duration-200 motion-reduce:transition-none ${
+        ouvert ? ETAT_TIROIR.ouvert : ETAT_TIROIR.ferme
+      } lg:visible lg:static lg:z-auto lg:h-full lg:w-auto lg:translate-x-0 lg:overflow-visible lg:shadow-none lg:transition-none print:hidden`}
+    >
+      <div className="flex items-center justify-between gap-2">
+        <NavLink to="/projets" className="flex items-center px-2.5 py-1">
+          <LogotypeDeklic hauteur={26} />
+        </NavLink>
+        <button
+          ref={fermerRef}
+          type="button"
+          onClick={onFermer}
+          aria-label="Fermer le menu"
+          className="flex h-11 w-11 items-center justify-center rounded-full text-encre-2 hover:bg-accent-fond lg:hidden"
+        >
+          <X size={22} aria-hidden="true" />
+        </button>
+      </div>
 
       <button
         type="button"

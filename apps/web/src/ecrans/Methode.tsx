@@ -3,6 +3,7 @@ import { useMemo, type JSX } from 'react';
 import { Link } from 'react-router';
 
 import { defautsDuMoteur } from '@/analyses';
+import { Chapo, Page, TitrePage } from '@/composants/mise-en-page';
 import { Carte, Pastille } from '@/composants/ui';
 import { dateCourte } from '@/formatage/nombres';
 import { sectionsMethode, type SectionMethode } from '@/textes/methode';
@@ -61,16 +62,14 @@ export function Methode(): JSX.Element {
   );
 
   return (
-    <div className="flex flex-col gap-5 px-10 pt-8 pb-10">
+    <Page>
       <div className="flex flex-col gap-2">
-        <h1 className="m-0 font-display text-[34px] leading-tight font-bold tracking-tight">
-          Comment c'est calculé
-        </h1>
-        <p className="m-0 max-w-[64ch] text-[17px] text-encre-2">
+        <TitrePage>Comment c'est calculé</TitrePage>
+        <Chapo>
           Règles du {dateCourte(regles.dateReference)} (version {regles.version}). Tout se calcule
           dans votre navigateur, à partir des textes officiels et de barèmes écrits une fois ; l'IA
           ne calcule jamais. Chaque valeur se change dans l'onglet Hypothèses d'un projet.
-        </p>
+        </Chapo>
       </div>
 
       <nav aria-label="Sommaire" className="flex flex-wrap gap-2">
@@ -111,6 +110,6 @@ export function Methode(): JSX.Element {
         Outil d'aide à la décision, pas un conseil en investissement ni un conseil fiscal.{' '}
         <Link to="/projets">Retour à mes projets</Link>.
       </p>
-    </div>
+    </Page>
   );
 }

@@ -1,6 +1,7 @@
 import type { ProjetEntree } from '@loupe/moteur';
 import { useState, type JSX } from 'react';
 
+import { Page, TitrePage } from '@/composants/mise-en-page';
 import { Carte, Pastille } from '@/composants/ui';
 import { useProjetCourant } from '@/coque/ProjetLayout';
 import { eurosParMois, pourcentage } from '@/formatage/nombres';
@@ -46,7 +47,7 @@ function Synthese(): JSX.Element {
     },
   ];
   return (
-    <div className="sticky top-0 z-10 -mx-10 flex items-center gap-8 border-b border-bordure bg-fond/95 px-10 py-3 backdrop-blur">
+    <div className="sticky top-[var(--hauteur-barre-app)] z-10 -mx-4 flex items-center gap-8 border-b border-bordure bg-fond/95 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6 lg:-mx-10 lg:px-10">
       {kpis.map((k) => (
         <div key={k.l} className="flex flex-col">
           <span className="text-xs text-encre-3">{k.l}</span>
@@ -83,10 +84,10 @@ export function Hypotheses(): JSX.Element {
   };
 
   return (
-    <div className="flex flex-col gap-5 px-10 pt-4 pb-10">
+    <Page haut="serre">
       <Synthese />
       <div className="flex items-baseline gap-3">
-        <h1 className="m-0 font-display text-[28px] font-bold tracking-tight">Vos hypothèses</h1>
+        <TitrePage taille="section">Vos hypothèses</TitrePage>
         <span className="flex items-center gap-2 text-sm text-encre-3">
           <Pastille ton="neutre" compacte>
             annonce
@@ -123,6 +124,6 @@ export function Hypotheses(): JSX.Element {
           </Carte>
         );
       })}
-    </div>
+    </Page>
   );
 }

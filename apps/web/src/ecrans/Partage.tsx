@@ -1,6 +1,7 @@
 import { useMemo, type JSX } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router';
 
+import { Chapo, Page, TitrePage } from '@/composants/mise-en-page';
 import { Bouton, Carte } from '@/composants/ui';
 import { FournisseurProjet } from '@/coque/ProjetLayout';
 import { dateCourte } from '@/formatage/nombres';
@@ -12,13 +13,13 @@ import { DocumentProjet } from './document/DocumentProjet';
 
 function LienIllisible({ raison }: { raison: RaisonPartage }): JSX.Element {
   return (
-    <div className="flex flex-col gap-4 p-10">
-      <h1 className="m-0 font-display text-3xl font-bold">Lien de partage illisible</h1>
-      <p className="m-0 max-w-[60ch] text-[17px] text-encre-2">{RAISONS_PARTAGE[raison]}</p>
+    <Page espacement="moyen">
+      <TitrePage>Lien de partage illisible</TitrePage>
+      <Chapo>{RAISONS_PARTAGE[raison]}</Chapo>
       <p className="m-0 text-[15px]">
         <Link to="/projets">Retour à mes projets</Link>
       </p>
-    </div>
+    </Page>
   );
 }
 
@@ -41,7 +42,7 @@ export function Partage(): JSX.Element {
   };
 
   return (
-    <div className="flex flex-col gap-5 px-10 pt-8 pb-10">
+    <Page>
       <Carte className="flex-row items-center gap-5 border-accent-bordure bg-accent-fond">
         <div className="flex flex-1 flex-col gap-1">
           <span className="text-xs font-bold tracking-wider text-accent uppercase">
@@ -62,6 +63,6 @@ export function Partage(): JSX.Element {
           <DocumentProjet libelleDate="Version du" date={enregistre.modifieLe} />
         </div>
       </FournisseurProjet>
-    </div>
+    </Page>
   );
 }

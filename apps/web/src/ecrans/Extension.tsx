@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type JSX } from 'react';
 import { Link } from 'react-router';
 
 import { NOM_FAVORI, codeFavori } from '@/bookmarklet/favori';
+import { Chapo, Page, TitrePage } from '@/composants/mise-en-page';
 import { Bouton, Carte, Pastille } from '@/composants/ui';
 
 const README_EXTENSION =
@@ -35,16 +36,16 @@ export function Extension(): JSX.Element {
   };
 
   return (
-    <div className="flex flex-col gap-6 px-10 pt-8 pb-10">
+    <Page espacement="large">
       <div className="flex flex-col gap-2">
-        <h1 className="m-0 max-w-[22ch] font-display text-[40px] leading-[1.1] font-bold tracking-tight text-balance">
+        <TitrePage taille="accroche" className="max-w-[22ch]">
           Lisez une annonce en un clic.
-        </h1>
-        <p className="m-0 max-w-[64ch] text-[17px] text-encre-2">
+        </TitrePage>
+        <Chapo>
           Sur une annonce LeBonCoin, SeLoger, Bien'ici, PAP ou Logic-Immo, un clic lit la page dans
           votre navigateur et ouvre Deklic avec le formulaire pré-rempli. La page n'est jamais lue
           par nos serveurs.
-        </p>
+        </Chapo>
       </div>
 
       <Carte>
@@ -145,6 +146,6 @@ export function Extension(): JSX.Element {
           dans Nouveau projet.
         </p>
       </Carte>
-    </div>
+    </Page>
   );
 }

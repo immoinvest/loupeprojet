@@ -10,6 +10,7 @@ import {
 } from 'react';
 import { Link, NavLink, Outlet, useNavigate, useParams } from 'react-router';
 
+import { Page, TitrePage } from '@/composants/mise-en-page';
 import { Bouton } from '@/composants/ui';
 import { euros } from '@/formatage/nombres';
 import { useProjets } from '@/stockage/ProjetsContext';
@@ -45,12 +46,12 @@ export function FournisseurProjet({
 
 export function ProjetIntrouvable(): JSX.Element {
   return (
-    <div className="p-10">
-      <h1 className="font-display text-3xl font-bold">Projet introuvable</h1>
-      <p className="text-encre-2">
+    <Page espacement="serre">
+      <TitrePage>Projet introuvable</TitrePage>
+      <p className="m-0 text-[17px] text-encre-2">
         Il a peut-être été supprimé. <Link to="/projets">Retour à mes projets</Link>.
       </p>
-    </div>
+    </Page>
   );
 }
 

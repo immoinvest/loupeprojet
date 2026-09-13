@@ -2,6 +2,7 @@ import type { AnneeFiscale, Regime, ResultatRegime } from '@loupe/moteur';
 import type { JSX } from 'react';
 
 import { useModeDocument } from '@/composants/document';
+import { Chapo, Page, TitrePage } from '@/composants/mise-en-page';
 import { Bouton, Carte, Pastille } from '@/composants/ui';
 import { useProjetCourant } from '@/coque/ProjetLayout';
 import { euros, eurosSignes, pourcentage } from '@/formatage/nombres';
@@ -124,16 +125,14 @@ export function Fiscalite(): JSX.Element {
   };
 
   return (
-    <div className="flex flex-col gap-5 px-10 pt-8 pb-10">
+    <Page>
       <div className="flex flex-col gap-2">
-        <h1 className="m-0 font-display text-[32px] leading-tight font-bold tracking-tight">
-          Combien d'impôts, selon le régime ?
-        </h1>
-        <p className="m-0 max-w-[64ch] text-[17px] text-encre-2">
+        <TitrePage taille="volet">Combien d'impôts, selon le régime ?</TitrePage>
+        <Chapo>
           Les quatre régimes avec votre tranche à{' '}
           {pourcentage(r.projet.hypotheses.fiscalite.tmi, 0)}, projetés sur {annees} ans. Le régime
           retenu alimente le rapport ; changez-le ici.
-        </p>
+        </Chapo>
       </div>
 
       <div className={`grid gap-4 ${document ? 'grid-cols-2' : 'grid-cols-4'}`}>
@@ -195,6 +194,6 @@ export function Fiscalite(): JSX.Element {
           </table>
         </div>
       </Carte>
-    </div>
+    </Page>
   );
 }

@@ -3,6 +3,7 @@ import { Trash2 } from 'lucide-react';
 import { useMemo, useState, type JSX } from 'react';
 import { Link, useNavigate } from 'react-router';
 
+import { Page, TitrePage } from '@/composants/mise-en-page';
 import { Bouton, Carte, Pastille, Point } from '@/composants/ui';
 import {
   dateCourte,
@@ -120,12 +121,10 @@ export function MesProjets(): JSX.Element {
   const visibles = projets.filter((p) => garder(p, filtre));
 
   return (
-    <div className="flex flex-col gap-6 p-10">
+    <Page espacement="large">
       <div className="flex items-end gap-4">
         <div className="flex flex-col gap-1.5">
-          <h1 className="m-0 font-display text-[34px] leading-tight font-bold tracking-tight">
-            Mes projets
-          </h1>
+          <TitrePage>Mes projets</TitrePage>
           <span className="text-[15px] text-encre-3">
             {projets.length} {projets.length > 1 ? 'projets' : 'projet'} · sauvegardés sur cet
             appareil
@@ -204,6 +203,6 @@ export function MesProjets(): JSX.Element {
         Les cinq points reprennent les feux du rapport : prix · rendement · cash-flow · effort ·
         risques.
       </p>
-    </div>
+    </Page>
   );
 }

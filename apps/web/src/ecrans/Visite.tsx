@@ -1,6 +1,7 @@
 import { useState, type JSX } from 'react';
 import { Link } from 'react-router';
 
+import { Chapo, Page, TitrePage } from '@/composants/mise-en-page';
 import { Carte, Pastille } from '@/composants/ui';
 import { useProjetCourant } from '@/coque/ProjetLayout';
 import { libelleFeu } from '@/textes/feux';
@@ -30,18 +31,16 @@ export function Visite(): JSX.Element {
   };
 
   return (
-    <div className="flex flex-col gap-5 px-10 pt-8 pb-10">
+    <Page>
       <div className="flex flex-col gap-2">
-        <h1 className="m-0 font-display text-[32px] leading-tight font-bold tracking-tight">
-          Préparer la visite
-        </h1>
-        <p className="m-0 max-w-[64ch] text-[17px] text-encre-2">
+        <TitrePage taille="volet">Préparer la visite</TitrePage>
+        <Chapo>
           {points.length} {points.length > 1 ? 'points déduits' : 'point déduit'} de ce projet.{' '}
           <span className="font-semibold">
             {coches.size} sur {points.length} vérifiés
           </span>{' '}
           (sur cet écran seulement).
-        </p>
+        </Chapo>
         <div className="flex flex-wrap gap-2.5 pt-1" aria-label="Cinq feux">
           {r.verdict.feux.map((f) => (
             <Pastille key={f.axe} ton={f.feu} feu={f.feu} compacte>
@@ -91,6 +90,6 @@ export function Visite(): JSX.Element {
           : le rapport se recalcule.
         </p>
       </Carte>
-    </div>
+    </Page>
   );
 }

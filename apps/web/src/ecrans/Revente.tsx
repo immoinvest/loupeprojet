@@ -2,6 +2,7 @@ import { useMemo, type JSX } from 'react';
 
 import { HORIZONS, variantesRevente } from '@/analyses';
 import { useModeDocument } from '@/composants/document';
+import { Chapo, Page, TitrePage } from '@/composants/mise-en-page';
 import { Carte, Ligne, Pastille, TitreCarte } from '@/composants/ui';
 import { useProjetCourant } from '@/coque/ProjetLayout';
 import { euros, eurosSignes, pourcentage } from '@/formatage/nombres';
@@ -31,15 +32,13 @@ export function Revente(): JSX.Element {
   };
 
   return (
-    <div className="flex flex-col gap-5 px-10 pt-8 pb-10">
+    <Page>
       <div className="flex flex-col gap-2">
-        <h1 className="m-0 font-display text-[32px] leading-tight font-bold tracking-tight">
-          Qu'est-ce qu'il vous restera ?
-        </h1>
-        <p className="m-0 max-w-[64ch] text-[17px] text-encre-2">
+        <TitrePage taille="volet">Qu'est-ce qu'il vous restera ?</TitrePage>
+        <Chapo>
           Revente estimée à {pourcentage(r.projet.hypotheses.revente.evolutionAnnuelle)} par an,
           crédit remboursé, agence et impôt payés. Choisissez l'horizon.
-        </p>
+        </Chapo>
       </div>
 
       <div
@@ -174,6 +173,6 @@ export function Revente(): JSX.Element {
           </div>
         )}
       </Carte>
-    </div>
+    </Page>
   );
 }
