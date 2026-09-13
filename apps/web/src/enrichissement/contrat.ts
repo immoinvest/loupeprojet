@@ -37,6 +37,8 @@ export const ResultatGeocodageSchema = z.object({
   lat: z.number(),
   lon: z.number(),
   precision: z.string(),
+  /** Clé BAN : `13205_6659_00144` = commune, code de la voie, numéro. */
+  cleBan: z.string().nullable().optional(),
   codeInsee: z.string().nullable(),
   codePostal: z.string().nullable(),
 });
@@ -44,6 +46,13 @@ export type ResultatGeocodage = z.infer<typeof ResultatGeocodageSchema>;
 
 export const ReponseGeocodageSchema = z.object({
   donnees: z.object({ resultats: z.array(ResultatGeocodageSchema) }),
+});
+
+const SourceSchema = z.object({
+  nom: z.string(),
+  url: z.string(),
+  licence: z.string(),
+  mention: z.string().optional(),
 });
 
 /** GET /marche : ventes réelles (DVF), loyer d'annonce (ANIL, charges comprises), zone ABC. */
@@ -67,16 +76,72 @@ export const ReponseMarcheSchema = z.object({
     })
     .nullable(),
   zone: z.string().nullable(),
-  sources: z.array(
-    z.object({
-      nom: z.string(),
-      url: z.string(),
-      licence: z.string(),
-      mention: z.string().optional(),
-    }),
-  ),
+  sources: z.array(SourceSchema),
 });
 export type ReponseMarche = z.infer<typeof ReponseMarcheSchema>;
+
+export const CodeGroupeSchema = z.enum([
+  'meme_parcelle',
+  'parcelles_voisines',
+  'meme_cote',
+  'en_face',
+  'rayon_100',
+  'rayon_200',
+  'rayon_300',
+]);
+export type CodeGroupe = z.infer<typeof CodeGroupeSchema>;
+
+const StatistiquesPrixSchema = z.object({
+  ventes: z.number().int().positive(),
+  medianeM2: z.number().positive(),
+  q1M2: z.number().positive(),
+  q3M2: z.number().positive(),
+  minM2: z.number().positive(),
+  maxM2: z.number().positive(),
+});
+export type StatistiquesPrix = z.infer<typeof StatistiquesPrixSchema>;
+
+/** GET /marche/adresse : ventes autour d'une adresse précise, par groupe, et repère de prix. */
+export const ReponseAdresseSchema = z.object({
+  codeInsee: z.string(),
+  millesime: z.string().nullable(),
+  parcelle: z.string().nullable(),
+  parcellesVoisines: z.array(z.string()),
+  cadastre: z.enum(['ok', 'indisponible']),
+  ventesCommune: z.number().int().nonnegative(),
+  groupes: z.array(
+    z.object({
+      code: CodeGroupeSchema,
+      ventes: z.number().int().nonnegative(),
+      comparables: z.number().int().nonnegative(),
+      statistiques: StatistiquesPrixSchema.nullable(),
+      distanceMaxMetres: z.number().nonnegative().nullable(),
+    }),
+  ),
+  reference: z
+    .object({
+      code: CodeGroupeSchema,
+      rayonMetres: z.number().positive(),
+      statistiques: StatistiquesPrixSchema,
+    })
+    .nullable(),
+  ventesProches: z.array(
+    z.object({
+      date: z.string(),
+      prix: z.number().positive(),
+      surface: z.number().positive(),
+      prixM2: z.number().positive(),
+      pieces: z.number().int().nonnegative(),
+      type: z.enum(['appartement', 'maison']),
+      adresse: z.string().nullable(),
+      distanceMetres: z.number().nonnegative().nullable(),
+      groupes: z.array(CodeGroupeSchema),
+    }),
+  ),
+  sources: z.array(SourceSchema),
+});
+export type ReponseAdresse = z.infer<typeof ReponseAdresseSchema>;
+export type ReferenceAdresse = NonNullable<ReponseAdresse['reference']>;
 
 /** Corps d'erreur du Worker : un code, jamais un texte. */
 export const ErreurWorkerSchema = z.object({ code: z.string() });

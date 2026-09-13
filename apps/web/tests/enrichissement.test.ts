@@ -129,7 +129,7 @@ describe('client du Worker', () => {
       valeur: resultat,
     });
     expect(f.appels[0]?.url).toBe(
-      'https://worker.test/proxy/geocodage?q=13005+Marseille&codePostal=13005&limit=1',
+      'https://worker.test/proxy/geocodage?q=13005+Marseille&limit=1&codePostal=13005',
     );
     const vide = fauxFetch(() => Promise.resolve(json({ donnees: { resultats: [] } })));
     expect(await clientWorker(base, vide).geocoder('x', '13005')).toEqual({

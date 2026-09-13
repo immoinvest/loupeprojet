@@ -2,10 +2,12 @@ import type { z } from 'zod';
 
 import {
   ErreurWorkerSchema,
+  ReponseAdresseSchema,
   ReponseExtractionSchema,
   ReponseGeocodageSchema,
   ReponseMarcheSchema,
   type ChampsIa,
+  type ReponseAdresse,
   type ReponseMarche,
   type ResultatGeocodage,
 } from './contrat';
@@ -20,11 +22,22 @@ export interface ParametresMarche {
   readonly pieces?: number | undefined;
 }
 
+export interface ParametresAdresse {
+  readonly codeInsee: string;
+  readonly lat: number;
+  readonly lon: number;
+  readonly numero: number | null;
+  readonly codeVoie: string | null;
+  readonly type: 'appartement' | 'maison';
+  readonly surface: number;
+}
+
 /** Ce que l'application demande au Worker. Chaque échec devient un code : l'écran décide quoi en faire. */
 export interface ClientWorker {
   extraire(texte: string): Promise<Resultat<ChampsIa>>;
-  geocoder(recherche: string, codePostal: string): Promise<Resultat<ResultatGeocodage | null>>;
+  geocoder(recherche: string, codePostal?: string): Promise<Resultat<ResultatGeocodage | null>>;
   marche(parametres: ParametresMarche): Promise<Resultat<ReponseMarche>>;
+  analyserAdresse(parametres: ParametresAdresse): Promise<Resultat<ReponseAdresse>>;
 }
 
 export type Fetch = (url: string, init: RequestInit) => Promise<Response>;
@@ -33,6 +46,8 @@ export const URL_WORKER_DEFAUT = 'https://loupe-worker.erreip-gorguel.workers.de
 /** Le modèle a 25 s côté Worker : on lui laisse un peu de marge. */
 export const DELAI_EXTRACTION_MS = 30_000;
 export const DELAI_DONNEES_MS = 10_000;
+/** Lecture du CSV de la commune et deux appels au cadastre : un peu plus long. */
+export const DELAI_ADRESSE_MS = 20_000;
 
 /** Adresse du Worker : `VITE_WORKER_URL` si elle est valable, la production sinon. */
 export function urlWorker(valeur: unknown): string {
@@ -90,7 +105,8 @@ export function clientWorker(base: string, fetcher: Fetch): ClientWorker {
       return r.ok ? { ok: true, valeur: r.valeur.champs } : r;
     },
     async geocoder(recherche, codePostal) {
-      const q = new URLSearchParams({ q: recherche, codePostal, limit: '1' });
+      const q = new URLSearchParams({ q: recherche, limit: '1' });
+      if (codePostal !== undefined) q.set('codePostal', codePostal);
       const r = await appeler(
         fetcher,
         `${base}/proxy/geocodage?${q.toString()}`,
@@ -115,6 +131,24 @@ export function clientWorker(base: string, fetcher: Fetch): ClientWorker {
         DELAI_DONNEES_MS,
       );
     },
+    analyserAdresse(p) {
+      const q = new URLSearchParams({
+        codeInsee: p.codeInsee,
+        lat: String(p.lat),
+        lon: String(p.lon),
+        type: p.type,
+        surface: String(p.surface),
+      });
+      if (p.numero !== null) q.set('numero', String(p.numero));
+      if (p.codeVoie !== null) q.set('codeVoie', p.codeVoie);
+      return appeler(
+        fetcher,
+        `${base}/marche/adresse?${q.toString()}`,
+        { method: 'GET' },
+        ReponseAdresseSchema,
+        DELAI_ADRESSE_MS,
+      );
+    },
   };
 }
 
@@ -125,4 +159,5 @@ export const clientHorsLigne: ClientWorker = {
   extraire: () => horsLigne(),
   geocoder: () => horsLigne(),
   marche: () => horsLigne(),
+  analyserAdresse: () => horsLigne(),
 };

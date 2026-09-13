@@ -12,12 +12,24 @@ export const STATUTS: Readonly<Record<StatutProjet, string>> = {
   scenario: 'Scénario',
 };
 
+/** Adresse exacte du bien, précisée par l'utilisateur (agence, diagnostics) : sert à l'analyse DVF à l'adresse. */
+export const AdresseBienSchema = z.object({
+  libelle: z.string().min(1),
+  lat: z.number().min(-90).max(90),
+  lon: z.number().min(-180).max(180),
+  codeInsee: z.string().regex(/^(\d{5}|2[AB]\d{3})$/),
+  codeVoie: z.string().nullable(),
+  numero: z.number().int().nonnegative().nullable(),
+});
+export type AdresseBien = z.infer<typeof AdresseBienSchema>;
+
 export const ProjetEnregistreSchema = z.object({
   id: z.string().min(1),
   nom: z.string().min(1),
   statut: StatutProjetSchema,
   creeLe: z.string(),
   modifieLe: z.string(),
+  adresse: AdresseBienSchema.optional(),
   projet: ProjetSchema,
 });
 export type ProjetEnregistre = z.infer<typeof ProjetEnregistreSchema>;
