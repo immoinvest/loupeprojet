@@ -105,7 +105,11 @@ describe('dépendances depuis l’environnement', () => {
   const limiteur = { limit: () => Promise.resolve({ success: true }) };
 
   it('applique les valeurs par défaut et les origines supplémentaires', () => {
-    const deps = dependancesDepuisEnv({ KV_CACHE: kv, LIMITEUR: limiteur });
+    const deps = dependancesDepuisEnv({
+      KV_CACHE: kv,
+      LIMITEUR: limiteur,
+      LIMITEUR_EXTRACTION: limiteur,
+    });
     expect(deps.environnement).toBe('dev');
     expect(deps.origines).toEqual(ORIGINES_DEFAUT);
     expect(deps.services).toBe(SERVICES);
@@ -116,6 +120,7 @@ describe('dépendances depuis l’environnement', () => {
     const prod = dependancesDepuisEnv({
       KV_CACHE: kv,
       LIMITEUR: limiteur,
+      LIMITEUR_EXTRACTION: limiteur,
       ENVIRONNEMENT: 'production',
       ORIGINES_AUTORISEES: 'https://loupe.example',
     });
@@ -125,7 +130,12 @@ describe('dépendances depuis l’environnement', () => {
 
   it('refuse un environnement inconnu', () => {
     expect(() =>
-      dependancesDepuisEnv({ KV_CACHE: kv, LIMITEUR: limiteur, ENVIRONNEMENT: 'staging' }),
+      dependancesDepuisEnv({
+        KV_CACHE: kv,
+        LIMITEUR: limiteur,
+        LIMITEUR_EXTRACTION: limiteur,
+        ENVIRONNEMENT: 'staging',
+      }),
     ).toThrow(ErreurConfiguration);
   });
 
@@ -133,7 +143,11 @@ describe('dépendances depuis l’environnement', () => {
     const espion = vi
       .spyOn(globalThis, 'fetch')
       .mockResolvedValue(new Response('{}', { status: 200 }));
-    const deps = dependancesDepuisEnv({ KV_CACHE: kv, LIMITEUR: limiteur });
+    const deps = dependancesDepuisEnv({
+      KV_CACHE: kv,
+      LIMITEUR: limiteur,
+      LIMITEUR_EXTRACTION: limiteur,
+    });
     const url = new URL('https://exemple.test/x');
     const init = { signal: AbortSignal.timeout(1000), headers: { accept: 'application/json' } };
     const r = await deps.fetcher(url, init);

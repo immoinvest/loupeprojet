@@ -26,7 +26,7 @@
 | ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
 | `packages/moteur` | Financement, cash-flow, 4 régimes fiscaux, revente, rendement/TRI, verdict, scénarios                                                     | **livré** (PR `feat/moteur-calcul`, 204 tests, 100 %)                               |
 | `apps/web`        | Coque SaaS, Mes projets, Nouveau projet, Rapport, Hypothèses, Fiscalité, Revente, Visite, impression, partage par lien, Comparer, Méthode | **livré** (PR #3 à #6, `feat/garder`)                                               |
-| `apps/worker`     | `/proxy/*` (liste blanche, cache KV, limite de débit, géocodage) ; `/extract` à venir                                                     | **socle livré** (PR `feat/worker-socle`)                                            |
+| `apps/worker`     | `/proxy/*` (liste blanche, cache KV, limite de débit, géocodage) ; `/extract` (lecture LLM des annonces via OpenRouter)                   | **livré et déployé** (PR #9, #10, #15)                                              |
 | `apps/extension`  | Capture LBC, SeLoger, Bien'ici, PAP, Logic-Immo                                                                                           | à venir                                                                             |
 | `data/`           | Pré-agrégation des référentiels (DVF, loyers ANIL, taxe foncière REI, zonage ABC, usure, communes) → R2 par GitHub Action                 | **livré** (PR `feat/referentiels`, 135 tests, 100 %) ; bucket et secrets R2 à créer |
 

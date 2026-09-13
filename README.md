@@ -101,7 +101,8 @@ npm run build -w apps/worker    # wrangler deploy --dry-run
 npm run deploy -w apps/worker   # déploiement (compte Cloudflare connecté par `npx wrangler login`)
 ```
 
-- Hono sur Cloudflare Workers. Routes : `GET /health` ; `GET /proxy/geocodage?q=…&limit=…&codePostal=…` (Géoplateforme IGN), réponse au contrat Loupe : libellé, score, latitude/longitude, précision (adresse, rue, lieu-dit, commune), clé BAN, code INSEE.
+- Hono sur Cloudflare Workers. Routes : `GET /health` ; `GET /proxy/geocodage?q=…&limit=…&codePostal=…` (Géoplateforme IGN), réponse au contrat Loupe : libellé, score, latitude/longitude, précision (adresse, rue, lieu-dit, commune), clé BAN, code INSEE ; `POST /extract { texte }` : un modèle de langage lit le texte d'une annonce et rend 20 champs (prix, surface, étage, ascenseur, DPE, charges, taxe foncière, année, lots, loyer actuel…), chacun validé ou `null`, jamais inventé.
+- Lecture des annonces : connecteur « chat completions » réglé par `LLM_URL` et `LLM_MODELE` (OpenRouter et le modèle gratuit `nvidia/nemotron-3-super-120b-a12b:free` par défaut ; Mistral direct en changeant l'URL), secret `OPENROUTER_API_KEY` posé dans Cloudflare. Le texte n'est ni stocké ni journalisé : son empreinte sert de clé de cache 30 jours. Sans clé, `/extract` répond `503 EXTRACTION_INDISPONIBLE` et l'application garde sa lecture par règles.
 - Chaque réponse amont est validée (Zod) puis gardée en cache KV 24 h, partagé entre tous les utilisateurs ; en-tête `X-Loupe-Cache: HIT|MISS`. Limite : 60 requêtes par minute et par adresse IP. CORS : production, previews Pages, localhost.
 - Erreurs en codes (`SERVICE_INCONNU`, `PARAMETRES_INVALIDES`, `TROP_DE_REQUETES`, `AMONT_INDISPONIBLE`, `AMONT_SATURE`, `AMONT_INVALIDE`) : l'interface les traduit. Journal structuré (une ligne JSON par événement), sans adresse IP ni adresse saisie.
 - Tests : Vitest (Node), l'application est exercée par `app.request()` avec des doubles (cache, limiteur, amont, horloge) ; couverture 100 %.
@@ -137,10 +138,10 @@ npm run referentiels -w data -- --aide
 
 ### Publier sur R2 (GitHub Action `referentiels.yml`)
 
-L'Action tourne le 2 de chaque mois à 03:30 UTC, ou à la main (onglet Actions → « Référentiels » → source et département). Elle génère les fichiers puis les synchronise vers le bucket R2 `loupe-data` par l'API S3 (`aws s3 sync`, préinstallé sur les runners) ; sans les secrets ci-dessous elle génère seulement et prévient. À faire une fois dans le compte Cloudflare :
+L'Action tourne le 2 de chaque mois à 03:30 UTC, ou à la main (onglet Actions → « Référentiels » → source et département). Elle génère les fichiers puis les synchronise vers le bucket R2 `deklic-data` par l'API S3 (`aws s3 sync`, préinstallé sur les runners) ; sans les secrets ci-dessous elle génère seulement et prévient. À faire une fois dans le compte Cloudflare :
 
-1. R2 → Créer un bucket nommé `loupe-data` (région automatique).
-2. R2 → Gérer les jetons d'API R2 → Créer un jeton « Object Read & Write » limité au bucket `loupe-data` ; noter l'Access Key ID et la Secret Access Key.
+1. R2 → Créer un bucket nommé `deklic-data` dans la juridiction européenne (« Specify jurisdiction », EU) : les données restent dans l'Union européenne et l'Action publie vers l'adresse S3 européenne `https://<compte>.eu.r2.cloudflarestorage.com`.
+2. R2 → Gérer les jetons d'API R2 → Créer un jeton « Object Read & Write » limité au bucket `deklic-data` ; noter l'Access Key ID et la Secret Access Key.
 3. Dans GitHub, Settings → Secrets and variables → Actions : `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `CLOUDFLARE_ACCOUNT_ID` (l'identifiant de compte affiché dans le tableau de bord R2).
 4. Lancer l'Action à la main une première fois sur un département (par exemple `13`) puis sur la France entière.
 
