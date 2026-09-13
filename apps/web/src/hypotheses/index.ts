@@ -4,6 +4,7 @@ export { depuisTexte, versTexte, type Conversion, type TypeChamp } from './conve
 export {
   GROUPES,
   cleProvenance,
+  descripteurParChemin,
   valeurActuelle,
   type Descripteur,
   type Groupe,
