@@ -17,7 +17,7 @@
                                                        │ quota par IP       │  └────────────────────────┘
                                                        └────────────────────┘
                               R2 : CSV DVF par commune · loyers ANIL · taux REI · zonage ABC · usure (rebuild mensuel)
-                              D1 (v1.5) : projets des comptes, sessions lien magique
+                              D1 « deklic-comptes » : utilisateurs, sessions, comptes liés (apps/comptes, worker Pages sur l'origine du site)
 ```
 
 ## Modules et statut
@@ -27,6 +27,7 @@
 | `packages/moteur`  | Financement, cash-flow, 4 régimes fiscaux, revente, rendement/TRI, verdict, scénarios                                                                                                                 | **livré** (PR `feat/moteur-calcul`, 204 tests, 100 %)                                                          |
 | `apps/web`         | Coque SaaS, Mes projets, Nouveau projet (capture, lecture IA, marché de la commune), Rapport, Hypothèses, Fiscalité, Revente, Visite, page Extension, impression, partage par lien, Comparer, Méthode | **livré** (PR #3 à #6, #16, #19, #21)                                                                          |
 | `apps/worker`      | `/proxy/*` (géocodage), `/extract` (lecture LLM des annonces), `/marche` (DVF, ANIL, zone ABC lus sur R2)                                                                                             | **livré et déployé** (PR #9, #10, #15, #21)                                                                    |
+| `apps/comptes`     | Comptes optionnels : Better Auth sur Hono servi par le worker Pages (`/api/auth`, `/api/comptes`), code e-mail (Resend), Google, Apple, D1 `deklic-comptes` ; écrans `/connexion` et `/compte`        | **livré** (ADR-006) ; mise en service par Pierre (README)                                                      |
 | `packages/capture` | Contrat de capture (schéma, encodage pour fragment d'URL, résolution d'URL) et moteur de règles (JSON-LD, état applicatif, meta, CSS)                                                                 | **livré** (PR #16, 68 tests, 100 %)                                                                            |
 | `apps/extension`   | WebExtension MV3 : règles des cinq portails d'après les pages réelles, lecture d'un lien collé dans Deklic (pont + onglet ouvert, lu, refermé), popup ; bouton-favori côté web                        | **livré** (PR #16, lecture automatique `feat/lecture-auto`, 62 tests, 100 %) ; stores et règles sur R2 à venir |
 | `data/`            | Pré-agrégation des référentiels (DVF, loyers ANIL, taxe foncière REI, zonage ABC, usure, communes) → R2 par GitHub Action                                                                             | **livré** (PR `feat/referentiels`, 135 tests, 100 %) ; bucket et secrets R2 à créer                            |
