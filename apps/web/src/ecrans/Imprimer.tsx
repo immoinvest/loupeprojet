@@ -39,10 +39,13 @@ export function Imprimer(): JSX.Element {
   if (enregistre === undefined) return <ProjetIntrouvable />;
 
   return (
-    <div className="min-h-screen bg-fond">
+    <div className="min-h-dvh bg-fond pr-[env(safe-area-inset-right)] pl-[env(safe-area-inset-left)]">
       {/* Sur téléphone, la barre s'empile et défile avec la page ; à partir de 640 px, elle reste en haut. */}
       <div className="no-print z-10 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-bordure bg-surface px-4 py-3 sm:sticky sm:top-0 sm:flex-nowrap sm:px-6">
-        <Link to={`/projets/${enregistre.id}`} className="text-sm font-semibold no-underline">
+        <Link
+          to={`/projets/${enregistre.id}`}
+          className="inline-flex min-h-11 items-center text-sm font-semibold no-underline"
+        >
           ← Retour au projet
         </Link>
         <span className="order-last basis-full text-sm text-encre-3 sm:order-none sm:flex-1 sm:basis-auto">

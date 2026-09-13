@@ -99,7 +99,7 @@ export function Extension(): JSX.Element {
             aria-label="Adresse du favori"
             value={href}
             rows={3}
-            className="w-full rounded-encart border border-bordure bg-surface p-3 font-mono text-xs"
+            className="w-full rounded-encart border border-bordure bg-surface p-3 font-mono text-xs pointer-coarse:text-base"
           />
         )}
         <p className="m-0 text-sm text-encre-3">

@@ -121,7 +121,7 @@ function Tableau({
               <th key={c.id} scope="col" className="px-3 py-3 text-left align-top">
                 <Link
                   to={`/projets/${c.id}`}
-                  className="font-display text-[17px] font-bold text-encre no-underline hover:text-accent"
+                  className="font-display text-[17px] font-bold text-encre no-underline hover:text-accent pointer-coarse:inline-flex pointer-coarse:min-h-11 pointer-coarse:items-center"
                 >
                   {c.nom}
                 </Link>
@@ -154,7 +154,7 @@ function Tableau({
                     onClick={() => {
                       onTrier(i.code);
                     }}
-                    className={`text-left hover:text-accent ${sens === 'none' ? '' : 'text-accent'}`}
+                    className={`text-left hover:text-accent pointer-coarse:min-h-11 ${sens === 'none' ? '' : 'text-accent'}`}
                   >
                     {i.libelle}
                     {sens === 'none' ? '' : sens === 'descending' ? ' ↓' : ' ↑'}

@@ -23,7 +23,13 @@ export function AppLayout(): JSX.Element {
         />
       )}
       <Sidebar ouvert={menu.ouvert} onFermer={menu.fermer} />
-      <main ref={menu.contenuRef} tabIndex={-1} inert={menu.ouvert} className="min-w-0">
+      {/* Téléphone à encoche (viewport-fit=cover) : le contenu reste hors des zones masquées. */}
+      <main
+        ref={menu.contenuRef}
+        tabIndex={-1}
+        inert={menu.ouvert}
+        className="min-w-0 pr-[env(safe-area-inset-right)] pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)]"
+      >
         <Outlet />
       </main>
     </div>

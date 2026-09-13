@@ -69,7 +69,7 @@ function CarteProjet({
       <div className="col-span-2 flex min-w-0 flex-col gap-1 sm:col-span-4 xl:col-span-1">
         <Link
           to={`/projets/${p.id}`}
-          className="font-display text-lg font-bold text-encre no-underline hover:text-accent"
+          className="font-display text-lg font-bold text-encre no-underline hover:text-accent pointer-coarse:flex pointer-coarse:min-h-11 pointer-coarse:items-center"
         >
           {p.nom}
         </Link>

@@ -91,7 +91,7 @@ export function Methode(): JSX.Element {
           <a
             key={s.code}
             href={`#${s.code}`}
-            className="min-h-[36px] rounded-full border border-bordure bg-surface px-3 py-1.5 text-sm font-semibold text-encre-2 no-underline hover:bg-accent-fond"
+            className="inline-flex min-h-[36px] items-center rounded-full border border-bordure bg-surface px-3 py-1.5 text-sm font-semibold text-encre-2 no-underline hover:bg-accent-fond pointer-coarse:min-h-11"
           >
             {s.titre}
           </a>

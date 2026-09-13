@@ -62,7 +62,7 @@ export function Sidebar({
       } lg:visible lg:static lg:z-auto lg:h-full lg:w-auto lg:translate-x-0 lg:overflow-visible lg:shadow-none lg:transition-none print:hidden`}
     >
       <div className="flex items-center justify-between gap-2">
-        <NavLink to="/projets" className="flex items-center px-2.5 py-1">
+        <NavLink to="/projets" className="flex items-center px-2.5 py-1 pointer-coarse:min-h-11">
           <LogotypeDeklic hauteur={26} />
         </NavLink>
         <button

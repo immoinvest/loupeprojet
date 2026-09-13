@@ -110,7 +110,10 @@ function EnTete(): JSX.Element {
     >
       <div className="flex min-w-0 flex-col gap-1 2xl:pb-3.5">
         <span className="text-[13px] break-words text-encre-3">
-          <Link to="/projets" className="text-encre-3 no-underline hover:text-accent">
+          <Link
+            to="/projets"
+            className="text-encre-3 no-underline hover:text-accent pointer-coarse:inline-flex pointer-coarse:min-h-11 pointer-coarse:items-center"
+          >
             Mes projets
           </Link>{' '}
           / {enregistre.nom}
@@ -136,7 +139,7 @@ function EnTete(): JSX.Element {
             onChange={(e) => {
               changerStatut(enregistre.id, StatutProjetSchema.parse(e.target.value));
             }}
-            className="bg-transparent font-semibold outline-none"
+            className="bg-transparent font-semibold outline-none pointer-coarse:text-base"
           >
             {StatutProjetSchema.options.map((s) => (
               <option key={s} value={s}>

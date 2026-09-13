@@ -170,7 +170,7 @@ export function NouveauProjet(): JSX.Element {
             }}
             rows={7}
             placeholder="Appartement T3 de 65 m² au 3e étage… Prix 155 000 €… DPE D…"
-            className="rounded-encart border border-bordure bg-surface p-3 text-[15px]"
+            className="rounded-encart border border-bordure bg-surface p-3 text-[15px] pointer-coarse:text-base"
           />
           <div className="flex flex-wrap items-center gap-3">
             <Bouton
@@ -196,7 +196,11 @@ export function NouveauProjet(): JSX.Element {
       {etape !== 'verifier' && !manuel && (
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-encre-3">
           <span>Pas de lien ?</span>
-          <button type="button" onClick={passerEnManuel} className="font-bold text-accent">
+          <button
+            type="button"
+            onClick={passerEnManuel}
+            className="font-bold text-accent pointer-coarse:min-h-11"
+          >
             Je n'ai pas de lien, je saisis à la main
           </button>
         </div>

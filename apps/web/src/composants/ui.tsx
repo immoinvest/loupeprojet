@@ -163,7 +163,9 @@ export function Pourquoi({
   }
   return (
     <details className="text-sm">
-      <summary className="cursor-pointer list-none font-bold text-accent">{libelle}</summary>
+      <summary className="cursor-pointer list-none font-bold text-accent pointer-coarse:py-3">
+        {libelle}
+      </summary>
       <p className={`mt-2 mb-0 ${CLASSE_EXPLICATION}`}>{texte}</p>
     </details>
   );

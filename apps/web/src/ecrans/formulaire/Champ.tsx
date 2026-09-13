@@ -17,7 +17,7 @@ export interface ChampProps {
 }
 
 const CLASSE_SAISIE =
-  'min-h-[44px] w-full min-w-0 rounded-encart border bg-surface px-3 text-[15px] font-semibold';
+  'min-h-[44px] w-full min-w-0 rounded-encart border bg-surface px-3 text-[15px] font-semibold pointer-coarse:text-base';
 
 /** Un champ du formulaire Vérifier : libellé, badge de provenance, saisie ou liste, erreur. */
 export function Champ({

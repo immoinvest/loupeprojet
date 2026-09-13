@@ -17,7 +17,9 @@ function LienIllisible({ raison }: { raison: RaisonPartage }): JSX.Element {
       <TitrePage>Lien de partage illisible</TitrePage>
       <Chapo>{RAISONS_PARTAGE[raison]}</Chapo>
       <p className="m-0 text-[15px]">
-        <Link to="/projets">Retour à mes projets</Link>
+        <Link to="/projets" className="inline-flex min-h-11 items-center">
+          Retour à mes projets
+        </Link>
       </p>
     </Page>
   );

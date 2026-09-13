@@ -46,7 +46,7 @@ export function BoutonPartager({ enregistre }: { enregistre: ProjetEnregistre })
           onFocus={(e) => {
             e.currentTarget.select();
           }}
-          className="order-last min-h-[44px] w-full min-w-0 rounded-full border border-bordure bg-surface px-3 text-xs sm:order-none sm:w-64"
+          className="order-last min-h-[44px] w-full min-w-0 rounded-full border border-bordure bg-surface px-3 text-xs sm:order-none sm:w-64 pointer-coarse:text-base"
         />
       )}
       <Bouton
