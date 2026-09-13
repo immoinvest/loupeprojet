@@ -6,9 +6,10 @@ import type { Dependances } from './dependances';
 import { reponseErreur } from './erreurs';
 import { creerExtraction } from './extraction';
 import { limiterDebit } from './http';
+import { creerMarche } from './marche';
 import { creerProxy } from './proxy/proxy';
 
-export const VERSION_WORKER = '0.2.0';
+export const VERSION_WORKER = '0.3.0';
 
 /** L'application Hono, construite à partir de dépendances injectées (réelles en production, doubles en test). */
 export function creerApp(deps: Dependances): Hono {
@@ -35,6 +36,9 @@ export function creerApp(deps: Dependances): Hono {
 
   app.use('/proxy/*', limiterDebit(deps.limiteur, deps.journal));
   app.get('/proxy/:service', creerProxy(deps));
+
+  app.use('/marche', limiterDebit(deps.limiteur, deps.journal));
+  app.get('/marche', creerMarche(deps));
 
   app.use('/extract', limiterDebit(deps.limiteurExtraction, deps.journal));
   app.post('/extract', creerExtraction(deps));

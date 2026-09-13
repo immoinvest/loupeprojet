@@ -62,7 +62,11 @@ describe('Nouveau projet — depuis l’extension', () => {
       await utilisateur.type(screen.getByLabelText(/Vos revenus/), '2600');
       await utilisateur.click(screen.getByRole('button', { name: /Créer le projet/ }));
 
-      await screen.findByRole('heading', { name: /Prix sans repère de marché/ });
+      await screen.findByRole(
+        'heading',
+        { name: /Prix sans repère de marché/ },
+        { timeout: 10_000 },
+      );
       const cree = lireProjets(window.localStorage)[0];
       expect(cree?.nom).toBe('T3 · 65 m² · Marseille 5e');
       expect(cree?.projet.source).toEqual({

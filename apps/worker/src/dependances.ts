@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import { lireOriginesSupplementaires, ORIGINES_DEFAUT } from './cors';
+import { lecteurR2, type LecteurDonnees, type R2Minimal } from './donnees/lecteur';
 import { ErreurConfiguration } from './erreurs';
 import {
   DELAI_LLM_MS,
@@ -21,6 +22,8 @@ export interface Bindings {
   readonly KV_CACHE: KvMinimal;
   readonly LIMITEUR: LimiteurDebit;
   readonly LIMITEUR_EXTRACTION: LimiteurDebit;
+  /** Bucket R2 `deklic-data` (juridiction UE) : référentiels publiés par `data/`. */
+  readonly DONNEES: R2Minimal;
   readonly ENVIRONNEMENT?: string | undefined;
   readonly ORIGINES_AUTORISEES?: string | undefined;
   readonly LLM_URL?: string | undefined;
@@ -47,6 +50,7 @@ export interface Dependances {
   readonly limiteur: LimiteurDebit;
   readonly limiteurExtraction: LimiteurDebit;
   readonly extracteur: Extracteur | null;
+  readonly donnees: LecteurDonnees;
   readonly fetcher: Fetcher;
   readonly maintenant: () => number;
   readonly journal: Journal;
@@ -102,6 +106,7 @@ export function dependancesDepuisEnv(env: Bindings): Dependances {
     limiteur: env.LIMITEUR,
     limiteurExtraction: env.LIMITEUR_EXTRACTION,
     extracteur,
+    donnees: lecteurR2(env.DONNEES),
     fetcher,
     maintenant: () => Date.now(),
     journal: journalConsole,

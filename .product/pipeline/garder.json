@@ -1,0 +1,43 @@
+{
+  "feature_slug": "garder",
+  "title": "Garder : impression PDF, lien de partage sans compte, page Comparer, page Méthode",
+  "started_at": "2026-09-13T18:00:00Z",
+  "current_step": "push",
+  "scope": "apps/web/src/ecrans/{Imprimer,Partage,Comparer,Methode}.tsx, ecrans/document/DocumentProjet.tsx, coque/ProjetLayout (PDF, Partager), composants/document.tsx, stockage/partage.ts, analyses/{comparaison,defauts}.ts, textes/{partage,methode*}.ts, index.css (print), App.tsx (routes)",
+  "branch": "feat/garder",
+  "base": "master (768c556), puis fusions de master (marque Deklic, worker-socle, e2e-playwright, referentiels)",
+  "steps": {
+    "discovery": {
+      "status": "completed",
+      "output": ".product/features/garder-discovery.md"
+    },
+    "architecture": {
+      "status": "completed",
+      "output": ".product/architecture/garder.md"
+    },
+    "implement": { "status": "completed", "stories_completed": 4, "stories_total": 4 },
+    "refactor": {
+      "status": "completed",
+      "note": "FournisseurProjet et ProjetIntrouvable extraits de ProjetLayout ; libelleRisques partagé ; sections de la Méthode réparties en quatre fichiers sous 300 lignes"
+    },
+    "qa_tests": {
+      "status": "completed",
+      "note": "30 tests : impression (3), partage (9), comparaison (8), comparer (3), méthode (6 + 1) ; couverture 100 % sur stockage, analyses, textes"
+    },
+    "security": {
+      "status": "completed",
+      "note": "aucun innerHTML ni eval ; lien de partage décodé sans exception et validé par Zod ; textes du lien affichés comme texte, jamais comme lien ; rien d'enregistré avant « Ajouter » ; infobulle : le lien contient revenus et apport"
+    },
+    "push": {
+      "status": "completed",
+      "pr": "https://github.com/immoinvest/loupeprojet/pull/19",
+      "note": "auto-merge armé ; master fusionné trois fois dans la branche (Deklic et worker, e2e et référentiels et extraction, extension) ; 609 tests verts en local"
+    }
+  },
+  "decisions": {
+    "comparer": "projets en colonnes, indicateurs en lignes ; le tri réordonne les colonnes selon la ligne cliquée",
+    "impression": "les écrans existants sont réutilisés en mode document (contexte) : boutons masqués, explications dépliées, grilles à deux colonnes ; pas de pied de page répété",
+    "partage": "ProjetEnregistre complet en base64url dans le fragment ; validation Zod ; rien n'est enregistré avant « Ajouter » ; pas de compression (moins de 4 Ko)",
+    "methode": "constantes formatées depuis obtenirRegles(), défauts lus dans les schémas et construireProjet ; sources CGI citées quand elles sont sûres, sinon « spec Deklic »"
+  }
+}

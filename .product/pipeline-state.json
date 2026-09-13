@@ -1,34 +1,35 @@
 {
-  "feature_slug": "extraction-llm",
-  "title": "POST /extract : lecture du texte d'une annonce par un modèle de langage (OpenRouter, modèle gratuit), champs validés, cache 30 jours, limite dédiée",
+  "feature_slug": "enrichissement-marche",
+  "title": "Enrichissement marché : le web lit l'annonce par l'IA et crée chaque projet avec les ventes réelles (DVF), le loyer ANIL et la zone ABC de sa commune, lus sur R2 par le Worker",
   "started_at": "2026-09-13T00:00:00Z",
   "current_step": "push",
-  "scope": "apps/worker/src/extraction, http.ts, dependances, wrangler.toml, ADR-003",
-  "branch": "feat/extraction-llm",
-  "base": "master (e4efd39)",
+  "scope": "apps/worker/src/marche, apps/worker/src/donnees, wrangler.toml (binding R2), apps/web/src/enrichissement, coque/ClientWorker, annonces/construire, ecrans/NouveauProjet, App",
+  "branch": "feat/enrichissement-marche",
+  "base": "master (56b6c39)",
   "steps": {
     "discovery": {
       "status": "completed",
-      "output": ".product/features/extraction-llm-discovery.md"
+      "output": ".product/features/enrichissement-marche-discovery.md"
     },
     "implement": { "status": "completed", "stories_completed": 5, "stories_total": 5 },
     "refactor": {
       "status": "completed",
-      "note": "http.ts partagé (réponses, cache sûr, limite de débit) ; le proxy et l'extraction ne dupliquent rien"
+      "note": "assemblage pur séparé des lectures R2 ; source citée seulement si une valeur en vient ; NouveauProjet touché aux deux seuls points d'appel (PR extension #16 ouverte sur le même écran)"
     },
     "qa_tests": {
       "status": "completed",
-      "note": "contrat, prompt, extraireJson, route (cache, erreurs, limite, CORS), fournisseur (requête, statuts, journal sans secret ni texte), dépendances ; test réel après déploiement"
+      "note": "Worker : route /marche (arrondissement, courant.json, maison, rien de publié, fichier invalide, panne R2, débit), assemblage, lecteurs ; web : client, lecture IA ou règles, conversion, enrichissement, parcours avec faux Worker ; délais d'attente de création portés à 10 s (appel réseau + machine chargée)"
     },
     "security": {
       "status": "completed",
-      "note": "clé en secret Cloudflare uniquement ; texte jamais stocké ni journalisé ; sortie du modèle validée champ par champ ; limite 10/min/IP"
+      "note": "bucket R2 privé lu par le Worker seulement ; réponses du Worker revalidées par Zod dans le navigateur ; tests sans réseau (client hors ligne par défaut) ; panne R2 jamais mise en cache"
     },
     "push": { "status": "in_progress" }
   },
   "decisions": {
-    "fournisseur": "OpenRouter via connecteur chat completions ; Mistral direct = changer LLM_URL et LLM_MODELE",
-    "modele": "nvidia/nemotron-3-super-120b-a12b:free (catalogue public OpenRouter du 13/09/2026, prix 0, response_format accepté)",
-    "confiance": "pas d'indice par champ : validation par champ + liste rejetes ; badge « à vérifier » côté web"
+    "maille": "arrondissement désigné par le code postal, commune sinon, commune parente en repli ; rayon autour de l'adresse reporté à marche-complet",
+    "millesime_dvf": "dvf/courant.json s'il existe, sinon l'année en cours et les deux précédentes",
+    "loyer_reference": "loyer d'annonce ANIL × 0,92 (−8 % de charges), provenance anil ; le loyer visé reste saisi par l'utilisateur",
+    "hors_ligne": "AppEnMemoire et le contexte par défaut n'appellent jamais le réseau ; une panne du Worker ramène le comportement d'avant"
   }
 }
