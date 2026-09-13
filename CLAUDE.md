@@ -42,7 +42,8 @@ L'utilisateur principal du repo pratique le **vibe coding** et ne relit pas le c
 - **Livré** : `packages/moteur` complet (feature `moteur-calcul`, 204 tests, couverture 100 %). API : `calculerProjet(projet) → Resultats`, `ProjetSchema`, `ResultatsSchema`, `projetExemple`, `obtenirRegles`.
 - **Direction visuelle** : C « Le guide » retenue (ADR-004) ; tokens dans `apps/web/src/index.css`.
 - **Livré** : `apps/web` socle (React 19 + Vite + Tailwind v4, React Router déclaratif, coque SaaS, écrans Mes projets et Rapport, stockage local Zod, config Cloudflare Pages). Textes des codes du moteur dans `apps/web/src/textes/`.
-- **Prochaine étape** : `ecran-verifier-rapport` (édition des hypothèses, saisie manuelle), puis `worker-socle`.
+- **Livré** : écran Nouveau projet (`apps/web/src/annonces/` : `resoudreAnnonce`, `extraireChamps` par règles, `construireProjet` avec défauts sourcés ; formulaire Vérifier). Le schéma `Projet` du moteur porte une `source` optionnelle (portail, id, URL).
+- **Prochaine étape** : `hypotheses-editables` (onglet Hypothèses), puis `worker-socle` et `extension` (qui branchera la lecture automatique sur l'écran Nouveau projet).
 - `node_modules/` et `dist/` ne sont plus versionnés.
 
 ## Stack (décision ADR-001)

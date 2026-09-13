@@ -2,15 +2,13 @@
 
 Format : `- [ ] slug — titre — date — scope`
 
-## En cours (PR ouvertes, à merger dans l'ordre)
+## En cours
 
-- [ ] moteur-calcul — Moteur de calcul Loupe en TypeScript pur, 204 tests, couverture 100 %, monorepo — 2026-09-13 — `packages/moteur` + racine — PR #1
-- [ ] direction-visuelle — Direction C « Le guide » retenue, ADR-004, maquettes coque SaaS — 2026-09-13 — `.product/` — PR #2
-- [ ] web-socle — `apps/web` : React + Vite + Tailwind v4, coque SaaS, Mes projets, Rapport, stockage local, Cloudflare Pages — 2026-09-13 — `apps/web` — PR #3
+- [ ] nouveau-projet — écran `/projets/nouveau` : lien d'annonce (portail reconnu, texte collé lu par règles) ou saisie manuelle, formulaire Vérifier avec provenance, création du projet — 2026-09-13 — `apps/web/src/annonces`, écrans — PR #4
 
 ## À venir (ordre proposé, une par session)
 
-- [ ] ecran-verifier-rapport — onglet Hypothèses éditable (recalcul instantané), saisie manuelle (prix, surface, ville), création d'un projet vide
+- [ ] hypotheses-editables — onglet Hypothèses éditable (recalcul instantané), modification d'un projet existant
 - [ ] onglets-detail — Fiscalité (4 régimes année par année), Revente, Visite (points de vigilance)
 - [ ] worker-socle — apps/worker : Hono, proxy + cache KV, rate-limit
 - [ ] enrichissement-marche — géocodage, DVF, ADEME, ANIL, REI, Géorisques, ABC
@@ -21,6 +19,8 @@ Format : `- [ ] slug — titre — date — scope`
 - [ ] e2e-playwright — parcours complets en navigateur réel, en CI
 - [ ] referentiels — GitHub Action mensuelle ANIL/REI/ABC/usure
 
-## Livrées
+## Livrées (mergées sur `master`)
 
-_(aucune : les PR attendent le merge)_
+- [x] moteur-calcul — Moteur de calcul Loupe en TypeScript pur, 204 tests, couverture 100 %, monorepo — 2026-09-13 — PR #1
+- [x] direction-visuelle — Direction C « Le guide » retenue, ADR-004, maquettes coque SaaS — 2026-09-13 — PR #2
+- [x] web-socle — `apps/web` : React + Vite + Tailwind v4, coque SaaS, Mes projets, Rapport, stockage local, Cloudflare Pages — 2026-09-13 — PR #3

@@ -33,15 +33,29 @@ describe('Mes projets', () => {
     expect(screen.getByText('Visite prévue')).toBeInTheDocument();
   });
 
-  it('crée un projet, le filtre et le supprime', async () => {
+  it('crée un projet, le filtre et le supprime', { timeout: 30_000 }, async () => {
     const utilisateur = userEvent.setup();
     render(<AppEnMemoire chemin="/projets" />);
     await screen.findByRole('heading', { name: 'Mes projets' });
 
     // Deux boutons « Nouveau projet » : barre latérale et en-tête de page. On prend celui de la page.
     await utilisateur.click(screen.getAllByRole('button', { name: 'Nouveau projet' }).at(-1)!);
-    expect(await screen.findByRole('heading', { name: /Le prix est bon/ })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: /Colle le lien/ })).toBeInTheDocument();
+
+    await utilisateur.click(screen.getByRole('button', { name: /je saisis à la main/ }));
+    await utilisateur.type(screen.getByLabelText(/Prix affiché/), '120000');
+    await utilisateur.type(screen.getByLabelText(/Surface/), '40');
+    await utilisateur.type(screen.getByLabelText(/Code postal/), '69003');
+    await utilisateur.type(screen.getByLabelText(/^Ville/), 'Lyon');
+    await utilisateur.type(screen.getByLabelText(/Loyer visé/), '700');
+    await utilisateur.type(screen.getByLabelText(/^Apport/), '10000');
+    await utilisateur.type(screen.getByLabelText(/Vos revenus/), '2400');
+    await utilisateur.click(screen.getByRole('button', { name: /Créer le projet/ }));
+    expect(
+      await screen.findByRole('heading', { name: /Prix sans repère de marché/ }),
+    ).toBeInTheDocument();
     expect(lireProjets(window.localStorage)).toHaveLength(2);
+    expect(lireProjets(window.localStorage)[0]?.nom).toBe('40 m² · Lyon');
 
     await utilisateur.click(screen.getByRole('link', { name: 'Mes projets' }));
     await screen.findByRole('heading', { name: 'Mes projets' });
@@ -52,7 +66,7 @@ describe('Mes projets', () => {
     expect(screen.getByText('Aucun projet dans cette liste.')).toBeInTheDocument();
     await utilisateur.click(screen.getByRole('button', { name: 'Tous' }));
 
-    await utilisateur.click(screen.getByRole('button', { name: /Supprimer T3 · 65 m² · dépt 13/ }));
+    await utilisateur.click(screen.getByRole('button', { name: /Supprimer 40 m² · Lyon/ }));
     expect(lireProjets(window.localStorage)).toHaveLength(1);
   });
 });
