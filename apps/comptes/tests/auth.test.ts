@@ -224,6 +224,32 @@ describe('garde', () => {
     );
   });
 
+  it('ne laisse modifier que le nom affiché, 80 caractères au plus', async () => {
+    const b = banc();
+    for (const corps of [
+      { name: 'x'.repeat(81) },
+      { name: 'Camille', image: 'https://pirate.example/traceur.gif' },
+      { image: 'https://pirate.example/traceur.gif' },
+      { name: 42 },
+    ]) {
+      const r = await b.requete('/api/auth/update-user', { corps });
+      expect(r.status).toBe(400);
+      expect(await r.json()).toEqual({ code: 'CHAMPS_INVALIDES' });
+    }
+    // Un nom valide passe la garde : sans session, Better Auth répond 401.
+    expect(
+      (await b.requete('/api/auth/update-user', { corps: { name: 'x'.repeat(80) } })).status,
+    ).toBe(401);
+    expect(
+      (
+        await b.requete('/api/auth/update-user', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+        })
+      ).status,
+    ).toBe(400);
+  });
+
   it('refuse un hôte inconnu et accepte les previews Pages', async () => {
     const pirate = banc({}, 'https://pirate.example');
     const refus = await pirate.requete('/api/auth/get-session');

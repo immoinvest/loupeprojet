@@ -44,12 +44,27 @@ export function origineConnue(origine: string, motifs: readonly string[]): boole
  * Avant Better Auth : l'hôte doit être le nôtre (l'origine de la requête sert d'URL de base aux
  * redirections), la route doit être utilisée, et seul le code de connexion peut être demandé.
  */
+const MISE_A_JOUR = 'POST /update-user';
+export const LONGUEUR_NOM_MAX = 80;
+/** Seul le nom affiché se modifie, et il reste court : pas d'image ni de champ arbitraire stockés. */
+const MiseAJourSchema = z.strictObject({ name: z.string().max(LONGUEUR_NOM_MAX) });
+
+function corpsJson(requete: Request): Promise<unknown> {
+  return requete
+    .clone()
+    .json()
+    .catch(() => null);
+}
+
 export function garde(deps: Dependances): MiddlewareHandler {
   return async (c, next) => {
     const url = new URL(c.req.url);
     if (!origineConnue(url.origin, deps.origines)) return reponseErreur(403, 'ORIGINE_INCONNUE');
     const route = `${c.req.method} ${url.pathname.slice(CHEMIN_AUTH.length)}`;
     if (!ROUTES_AUTH.has(route)) return reponseErreur(404, 'INTROUVABLE');
+    if (route === MISE_A_JOUR && !MiseAJourSchema.safeParse(await corpsJson(c.req.raw)).success) {
+      return reponseErreur(400, 'CHAMPS_INVALIDES');
+    }
     if (route === DEMANDE_CODE) {
       if (deps.courriel === null) return reponseErreur(503, 'COURRIEL_INDISPONIBLE');
       const corps = await c.req.raw

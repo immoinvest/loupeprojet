@@ -123,6 +123,7 @@ export function Compte(): JSX.Element {
             <input
               name="nom"
               autoComplete="name"
+              maxLength={80}
               value={valeurNom}
               onChange={(e) => {
                 setNom(e.target.value);
