@@ -8,3 +8,7 @@ export const RAISONS_PARTAGE = {
 } as const;
 
 export type RaisonPartage = keyof typeof RAISONS_PARTAGE;
+
+/** Infobulle du bouton Partager : le lien porte tout le projet, données personnelles comprises. */
+export const AVERTISSEMENT_PARTAGE =
+  "Copie un lien qui contient tout le projet, revenus et apport compris. Il n'est jamais envoyé à nos serveurs : ne le donnez qu'à des personnes de confiance.";

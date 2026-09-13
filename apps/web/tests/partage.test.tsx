@@ -6,7 +6,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { AppEnMemoire } from '@/App';
 import { decoderPartage, encoderPartage, lienPartage, lireFragment } from '@/stockage/partage';
 import { creerProjet, ecrireProjets, lireProjets, type ProjetEnregistre } from '@/stockage/projets';
-import { RAISONS_PARTAGE } from '@/textes/partage';
+import { AVERTISSEMENT_PARTAGE, RAISONS_PARTAGE } from '@/textes/partage';
 
 const DATE = '2026-09-13T10:00:00.000Z';
 
@@ -174,6 +174,12 @@ describe('Bouton Partager', () => {
     render(<AppEnMemoire chemin={`/projets/${id}`} />);
     await screen.findByRole('heading', { name: /Le prix est bon/ });
 
+    // L'infobulle prévient : le lien porte des données personnelles.
+    expect(screen.getByRole('button', { name: 'Partager' })).toHaveAttribute(
+      'title',
+      AVERTISSEMENT_PARTAGE,
+    );
+    expect(AVERTISSEMENT_PARTAGE).toContain('revenus et apport');
     await utilisateur.click(screen.getByRole('button', { name: 'Partager' }));
     expect(await screen.findByRole('button', { name: 'Lien copié' })).toBeInTheDocument();
     const lien = await navigator.clipboard.readText();

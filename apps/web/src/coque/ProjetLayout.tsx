@@ -15,6 +15,7 @@ import { euros } from '@/formatage/nombres';
 import { useProjets } from '@/stockage/ProjetsContext';
 import { lienPartage } from '@/stockage/partage';
 import { STATUTS, StatutProjetSchema, type ProjetEnregistre } from '@/stockage/projets';
+import { AVERTISSEMENT_PARTAGE } from '@/textes/partage';
 import { MODES } from '@/textes/regimes';
 
 export interface ContexteProjet {
@@ -108,6 +109,7 @@ function BoutonPartager({ enregistre }: { enregistre: ProjetEnregistre }): JSX.E
         />
       )}
       <Bouton
+        title={AVERTISSEMENT_PARTAGE}
         onClick={() => {
           void partager();
         }}
