@@ -31,6 +31,7 @@ URL et formats vérifiés le 13 septembre 2026 par l'API data.gouv.fr (`https://
   4. `dvf/<millesime>/<codeInsee>.csv` : `date,prix,surface,type,pieces,lat,lon` (type `appartement` ou `maison`, coordonnées WGS-84 du centre de la parcelle, vides quand la parcelle n'est pas géocodée : la vente compte alors pour la commune, pas pour un rayon), ventes triées par date.
   5. `dvf/<millesime>/index/<dep>.json` : par commune et par type, `ventes`, `medianeM2`, `q1M2`, `q3M2` (prix au m² arrondis à l'euro, quartiles par interpolation linéaire, méthode 7 de Hyndman et Fan) et la `fenetre` du département.
   6. `dvf/<millesime>/index.json` : fusion nationale des index, écrite seulement quand la passe couvre les 101 départements. `dvf/courant.json` : `{ genereLe, millesime }`, également écrit sur une passe complète.
+  7. `dvf/<millesime>/tendance/<dep>.json` : évolution des prix sur les cinq dossiers annuels lus (toutes les ventes collectées, pas seulement la fenêtre de 24 mois). Pour le département (`seriesDepartement`) et pour chaque commune qui a au moins deux semestres exploitables (`communes`), par type : la médiane du prix au m² de chaque semestre (`2024-S2`) qui compte au moins `seuilVentes` ventes (20). Le Worker s'en sert pour ramener chaque vente au dernier semestre publié.
 - **Journal** : motifs d'exclusion comptés par département (`nature`, `prix`, `local_commercial`, `logements`, `surface`, `prix_m2`, `date`, `rupture`).
 
 ## Carte des loyers ANIL
