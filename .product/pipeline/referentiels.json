@@ -2,7 +2,7 @@
   "feature_slug": "referentiels",
   "title": "Référentiels : données publiques pré-agrégées (DVF, loyers ANIL, taxe foncière REI, zonage ABC, usure, communes) publiées sur R2 par GitHub Action",
   "started_at": "2026-09-13T17:30:00Z",
-  "current_step": "push",
+  "current_step": "done",
   "scope": "data/ (workspace @loupe/data), .github/workflows/referentiels.yml, vitest.config.ts et package.json racine (ajout du workspace)",
   "branch": "feat/referentiels",
   "base": "master (768c556), fusion d'origin/master (e4efd39) avant la PR",
@@ -11,13 +11,19 @@
     "tests": "277 passés (un délai dépassé sous charge, repassé vert isolément)"
   },
   "steps": {
-    "discovery": { "status": "completed", "output": ".product/features/referentiels-discovery.md" },
+    "discovery": {
+      "status": "completed",
+      "output": ".product/features/referentiels-discovery.md"
+    },
     "specs": {
       "status": "completed",
       "stories_count": 9,
       "note": "stories dans le document de discovery"
     },
-    "architecture": { "status": "completed", "output": ".product/architecture/referentiels.md" },
+    "architecture": {
+      "status": "completed",
+      "output": ".product/architecture/referentiels.md"
+    },
     "implement": {
       "status": "completed",
       "stories_completed": 9,
@@ -46,7 +52,11 @@
       "status": "completed",
       "note": "aucun secret dans le code ; jetons R2 uniquement dans les secrets GitHub ; entrées de la ligne de commande validées ; réponses des API validées par Zod ; aucune exécution de code téléchargé"
     },
-    "push": { "status": "in_progress" }
+    "push": {
+      "status": "completed",
+      "pr": "https://github.com/immoinvest/loupeprojet/pull/13",
+      "note": "PR #13 ouverte le 13/09/2026, auto-merge armé ; bucket R2 loupe-data et secrets GitHub à créer par Pierre"
+    }
   },
   "decisions": {
     "publication": "aws s3 sync vers l'API S3 de R2 (34 000 fichiers DVF) au lieu de wrangler r2 object put fichier par fichier ; --delete seulement sur une passe France entière",
