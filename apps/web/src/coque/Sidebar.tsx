@@ -21,12 +21,11 @@ function feuCashflow(p: ProjetEnregistre): 'bon' | 'surveiller' | 'probleme' | '
 }
 
 export function Sidebar(): JSX.Element {
-  const { projets, creer } = useProjets();
+  const { projets } = useProjets();
   const naviguer = useNavigate();
 
   const nouveau = (): void => {
-    const p = creer();
-    void naviguer(`/projets/${p.id}`);
+    void naviguer('/projets/nouveau');
   };
 
   return (

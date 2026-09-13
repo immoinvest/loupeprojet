@@ -114,7 +114,7 @@ function CarteProjet({
 }
 
 export function MesProjets(): JSX.Element {
-  const { projets, creer, supprimer } = useProjets();
+  const { projets, supprimer } = useProjets();
   const naviguer = useNavigate();
   const [filtre, setFiltre] = useState<Filtre>('tous');
   const visibles = projets.filter((p) => garder(p, filtre));
@@ -157,7 +157,7 @@ export function MesProjets(): JSX.Element {
         <Bouton
           variante="primaire"
           onClick={() => {
-            void naviguer(`/projets/${creer().id}`);
+            void naviguer('/projets/nouveau');
           }}
         >
           Nouveau projet

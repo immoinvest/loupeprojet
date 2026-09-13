@@ -1,0 +1,137 @@
+import { useState, type JSX } from 'react';
+
+import type { AnnonceResolue, SaisieProjet } from '@/annonces';
+import { Bouton, Carte } from '@/composants/ui';
+
+import { Champ } from './formulaire/Champ';
+import {
+  valider,
+  versSaisie,
+  type Cle,
+  type Erreurs,
+  type ValeursInitiales,
+  type Valeurs,
+} from './formulaire/valeurs';
+
+export { valeursDepuisChamps } from './formulaire/valeurs';
+
+const OUI_NON = [
+  { v: '', l: '?' },
+  { v: 'oui', l: 'oui' },
+  { v: 'non', l: 'non' },
+];
+const DPE = [{ v: '', l: '?' }, ...['A', 'B', 'C', 'D', 'E', 'F', 'G'].map((l) => ({ v: l, l }))];
+const MODES = [
+  { v: 'meuble_lld', l: 'Meublé longue durée' },
+  { v: 'nu', l: 'Location nue' },
+  { v: 'courte_duree', l: 'Courte durée' },
+];
+const TMI = [
+  { v: '0', l: '0 %' },
+  { v: '0.11', l: '11 %' },
+  { v: '0.3', l: '30 %' },
+  { v: '0.41', l: '41 %' },
+  { v: '0.45', l: '45 %' },
+];
+
+export function FormulaireProjet({
+  initial,
+  annonce,
+  onCreer,
+}: {
+  initial: ValeursInitiales;
+  annonce: AnnonceResolue | null;
+  onCreer: (saisie: SaisieProjet) => void;
+}): JSX.Element {
+  const [valeurs, setValeurs] = useState<Valeurs>(initial.valeurs);
+  const [provenance, setProvenance] = useState(initial.provenance);
+  const [erreurs, setErreurs] = useState<Erreurs>({});
+
+  const changer = (cle: Cle, v: string): void => {
+    setValeurs((prev) => ({ ...prev, [cle]: v }));
+    setProvenance((prev) => ({ ...prev, [cle]: 'utilisateur' }));
+  };
+  const c = { valeurs, provenance, onChange: changer };
+
+  return (
+    <form
+      noValidate
+      onSubmit={(e) => {
+        e.preventDefault();
+        const trouvees = valider(valeurs);
+        setErreurs(trouvees);
+        if (Object.keys(trouvees).length === 0) onCreer(versSaisie(valeurs, provenance, annonce));
+      }}
+      className="flex flex-col gap-5"
+    >
+      <Carte>
+        <h2 className="m-0 font-display text-[22px] font-semibold">Le bien</h2>
+        <div className="grid grid-cols-3 gap-2">
+          <Champ cle="prix" libelle="Prix affiché" unite="€" erreur={erreurs.prix} {...c} />
+          <Champ cle="honorairesAgence" libelle="dont honoraires d'agence" unite="€" {...c} />
+          <Champ cle="surface" libelle="Surface" unite="m²" erreur={erreurs.surface} {...c} />
+          <Champ cle="pieces" libelle="Pièces" {...c} />
+          <Champ cle="chambres" libelle="Chambres" {...c} />
+          <Champ cle="etage" libelle="Étage" {...c} />
+          <Champ cle="ascenseur" libelle="Ascenseur" options={OUI_NON} {...c} />
+          <Champ cle="annee" libelle="Année de construction" {...c} />
+          <Champ cle="dpe" libelle="DPE" options={DPE} {...c} />
+          <Champ cle="codePostal" libelle="Code postal" erreur={erreurs.codePostal} {...c} />
+          <Champ cle="ville" libelle="Ville" erreur={erreurs.ville} {...c} />
+          <Champ cle="travaux" libelle="Travaux prévus" unite="€" {...c} />
+        </div>
+      </Carte>
+
+      <Carte>
+        <h2 className="m-0 font-display text-[22px] font-semibold">Vous</h2>
+        <div className="grid grid-cols-3 gap-2">
+          <Champ cle="mode" libelle="Mode de location" options={MODES} aToi {...c} />
+          <Champ
+            cle="loyerHc"
+            libelle="Loyer visé, hors charges"
+            unite="€/mois"
+            aToi
+            erreur={erreurs.loyerHc}
+            {...c}
+          />
+          <Champ cle="apport" libelle="Apport" unite="€" aToi erreur={erreurs.apport} {...c} />
+          <Champ
+            cle="dureeAnnees"
+            libelle="Durée du prêt"
+            unite="ans"
+            aToi
+            erreur={erreurs.dureeAnnees}
+            {...c}
+          />
+          <Champ cle="tmi" libelle="Tranche d'imposition" options={TMI} aToi {...c} />
+          <Champ
+            cle="revenusMensuels"
+            libelle="Vos revenus nets"
+            unite="€/mois"
+            aToi
+            erreur={erreurs.revenusMensuels}
+            {...c}
+          />
+        </div>
+      </Carte>
+
+      <Carte>
+        <h2 className="m-0 font-display text-[22px] font-semibold">Charges connues</h2>
+        <p className="m-0 text-sm text-encre-2">
+          Laissez vide si vous ne savez pas : on estime, et ce sera marqué comme tel.
+        </p>
+        <div className="grid grid-cols-3 gap-2">
+          <Champ cle="chargesCoproMois" libelle="Charges de copropriété" unite="€/mois" {...c} />
+          <Champ cle="taxeFonciere" libelle="Taxe foncière" unite="€/an" {...c} />
+        </div>
+      </Carte>
+
+      <div className="flex items-center gap-4">
+        <Bouton variante="primaire" type="submit">
+          Créer le projet et voir le rapport
+        </Bouton>
+        <span className="text-sm text-encre-3">Tout reste modifiable ensuite.</span>
+      </div>
+    </form>
+  );
+}

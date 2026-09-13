@@ -1,63 +1,39 @@
 {
-  "feature_slug": "web-socle",
-  "title": "Socle web : apps/web (React + Vite + Tailwind v4), coque SaaS, Mes projets, Rapport, stockage local, Cloudflare Pages",
+  "feature_slug": "nouveau-projet",
+  "title": "Écran Nouveau projet : lien d'annonce (portail, texte collé lu par règles) ou saisie manuelle, formulaire Vérifier, création",
   "started_at": "2026-09-13T00:00:00Z",
   "current_step": "push",
-  "scope": "apps/web + racine (eslint override tests tsx)",
-  "branch": "feat/web-socle",
-  "base": "feat/direction-visuelle (PR empilée : merger #1, #2 puis #3)",
-  "baseline": {
-    "tests_passed": 204,
-    "tests_failed": 0,
-    "note": "moteur 204 tests, 100 %"
-  },
-  "final": {
-    "tests_web": 27,
-    "coverage_web": "100 % sur stockage/, formatage/, textes/",
-    "typecheck_errors": 0,
-    "lint_errors": 0,
-    "build_js_gzip_kb": 130
-  },
+  "scope": "apps/web/src/annonces, écrans NouveauProjet + FormulaireProjet, route /projets/nouveau ; moteur : champ source optionnel",
+  "branch": "feat/nouveau-projet",
+  "base": "master (PR #1, #2, #3 fusionnées le 13/09 sur demande de Pierre)",
   "steps": {
-    "discovery": { "status": "completed", "output": ".product/features/web-socle-discovery.md" },
-    "specs": {
+    "discovery": {
       "status": "completed",
-      "output": ".product/specs/web-socle-specs.md",
-      "stories_count": 8
+      "output": ".product/features/nouveau-projet-discovery.md (discovery + specs)"
     },
-    "architecture": { "status": "completed", "output": ".product/architecture/web-socle.md" },
-    "implement": { "status": "completed", "stories_completed": 8, "stories_total": 8 },
+    "implement": { "status": "completed", "stories_completed": 4, "stories_total": 4 },
     "refactor": {
       "status": "completed",
-      "note": "routeur déclaratif (useRoutes) au lieu du data router : pas de loaders, et jsdom refuse l'AbortSignal du data router"
+      "note": "formulaire scindé en valeurs.ts / Champ.tsx / FormulaireProjet.tsx (max-lines 300)"
     },
     "qa_tests": {
       "status": "completed",
-      "note": "27 tests : formatage, textes (14 codes, matrice du verdict), stockage (tolérance aux données cassées), rendu et navigation réels via AppEnMemoire"
+      "note": "annonces (résolution 5 portails, extraction, construction, département), écran (lien, texte, manuel, validation, décimales FR)"
     },
     "security": {
       "status": "completed",
-      "note": "aucun secret ; stockage local validé par Zod ; aucun dangerouslySetInnerHTML ; liens externes : polices Google uniquement"
+      "note": "aucune requête réseau ; texte d'annonce jamais stocké ; URL canonisée sans paramètres de suivi"
     },
-    "push": {
-      "status": "completed",
-      "pr": "https://github.com/immoinvest/loupeprojet/pull/3",
-      "note": "PR empilée sur #2 ; merge par Pierre dans l'ordre #1, #2, #3"
-    }
+    "push": { "status": "in_progress" }
   },
   "decisions": {
-    "shadcn": "Composants maison en Tailwind (pas d'invite CLI) ; migration possible",
-    "playwright": "Feature dédiée e2e-playwright (installation des navigateurs en CI)",
-    "cashflow_reponse": "« Non. » quand le cash-flow est sous −100 €/mois, « Pas tout à fait. » entre −100 et 0 : plus honnête que la maquette"
+    "capture": "Sans extension, le texte de l'annonce est collé par l'utilisateur et lu localement par règles ; l'extension remplacera cette étape sans refonte",
+    "defauts": "TF = 1 mois de loyer, copro 25 €/m²/an, PNO 150, comptable 420 (meublé réel), CFE 180 (meublé), mobilier 75 €/m² (meublé), frais bancaires 850 + 1 500 ; tous marqués estimé"
   },
   "post_mortem": {
     "blockers_encountered": [
-      "React Router data router + jsdom : TypeError AbortSignal → routage déclaratif",
-      "PowerShell Get-Content/Set-Content a corrompu l'encodage UTF-8 de trois tests → réécrits avec l'outil Write ; ne plus réécrire de fichiers texte via PowerShell"
-    ],
-    "improvements_for_next_time": [
-      "Ne jamais transformer un fichier source via PowerShell ; utiliser Edit/Write",
-      "Mémoïser calculerProjet au niveau du contexte si la liste de projets grandit (aujourd'hui 1 calcul par carte et par entrée de barre latérale)"
+      "Mes regex écrites avec des échappements \\u00a0 ressortent avec les caractères réels (lint no-irregular-whitespace) : utiliser \\s",
+      "Regex « X € de charges » captait la fin du prix : ancrage (?<!\\d)"
     ]
   }
 }

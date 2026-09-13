@@ -10,10 +10,19 @@ export const VersionReglesSchema = z.enum(['2026-09']);
 export const ProvenanceSchema = z.record(z.string(), z.string());
 export type Provenance = z.infer<typeof ProvenanceSchema>;
 
+/** D'où vient le projet : l'annonce d'origine (jamais son texte, seulement son adresse). */
+export const SourceAnnonceSchema = z.object({
+  portail: z.string().min(1),
+  id: z.string().min(1),
+  url: z.url(),
+});
+export type SourceAnnonce = z.infer<typeof SourceAnnonceSchema>;
+
 /** L'objet unique que le moteur consomme. Les résultats ne sont jamais stockés dedans. */
 export const ProjetSchema = z.object({
   id: z.string().min(1),
   versionRegles: VersionReglesSchema,
+  source: SourceAnnonceSchema.optional(),
   bien: BienSchema,
   marche: MarcheSchema.prefault({}),
   hypotheses: HypothesesSchema,

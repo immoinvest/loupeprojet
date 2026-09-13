@@ -5,6 +5,7 @@ import { AppLayout } from './coque/AppLayout';
 import { ProjetLayout } from './coque/ProjetLayout';
 import { Bientot } from './ecrans/Bientot';
 import { MesProjets } from './ecrans/MesProjets';
+import { NouveauProjet } from './ecrans/NouveauProjet';
 import { Rapport } from './ecrans/Rapport';
 import { ProjetsProvider } from './stockage/ProjetsContext';
 
@@ -14,6 +15,7 @@ export const routes: RouteObject[] = [
     children: [
       { index: true, element: <Navigate to="/projets" replace /> },
       { path: 'projets', element: <MesProjets /> },
+      { path: 'projets/nouveau', element: <NouveauProjet /> },
       {
         path: 'projets/:id',
         element: <ProjetLayout />,
