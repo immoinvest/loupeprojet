@@ -38,9 +38,10 @@ L'utilisateur principal du repo pratique le **vibe coding** et ne relit pas le c
 
 ## Statut du repo
 
-- Le dépôt contient encore l'ancien **simulateur de comparaison de prêts** (TypeScript vanilla + Webpack : `src/`, `webpack.config.js`, `dist/`). Il est **remplacé** par le monorepo Loupe.
-- La logique de [src/calculPret.ts](src/calculPret.ts) (amortissement, échéancier, comparaison de prêts) est **reprise** dans `packages/moteur`, avec tests. Le reste (`src/index.ts`, `index.html`, `styles.css`, webpack) est supprimé une fois le moteur porté.
-- `node_modules/` et `dist/` étaient versionnés : retirés du suivi Git (`git rm -r --cached`) lors de la mise en place.
+- L'ancien simulateur de comparaison de prêts (webpack, `src/`) a été **supprimé** le 13/09/2026 ; sa logique d'amortissement avec différés vit dans `packages/moteur/src/financement/amortissement.ts`, testée.
+- **Livré** : `packages/moteur` complet (feature `moteur-calcul`, 204 tests, couverture 100 %). API : `calculerProjet(projet) → Resultats`, `ProjetSchema`, `ResultatsSchema`, `projetExemple`, `obtenirRegles`.
+- **Prochaine étape** : proposer 2-3 directions visuelles (Rule 10), puis `apps/web`.
+- `node_modules/` et `dist/` ne sont plus versionnés.
 
 ## Stack (décision ADR-001)
 

@@ -4,7 +4,7 @@ Format : `- [ ] slug — titre — date — scope`
 
 ## En cours
 
-- [ ] moteur-calcul — Moteur de calcul Loupe (financement, cash-flow, fiscalité, revente, rendement/TRI, verdict) en TypeScript pur, testé, avec mise en place du monorepo — démarré 2026-09-13 — `packages/moteur` + racine
+- [ ] moteur-calcul — Moteur de calcul Loupe (financement, cash-flow, fiscalité, revente, rendement/TRI, verdict, scénarios) en TypeScript pur, 204 tests, couverture 100 %, avec mise en place du monorepo — 2026-09-13 — `packages/moteur` + racine — **PR ouverte, en attente de merge**
 
 ## À venir (ordre proposé, une par session)
 
@@ -21,4 +21,4 @@ Format : `- [ ] slug — titre — date — scope`
 
 ## Livrées
 
-_(aucune)_
+_(aucune : la première PR attend le merge)_
