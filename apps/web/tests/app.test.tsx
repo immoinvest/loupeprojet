@@ -92,11 +92,12 @@ describe('Rapport', () => {
     expect(n(screen.getByText(/58 217 €/).textContent)).toContain('58 217 €');
   });
 
-  it('les onglets non livrés affichent un état « bientôt », un id inconnu une page introuvable', async () => {
+  it('les pages non livrées affichent un état « bientôt », un id inconnu une page introuvable', async () => {
     await ouvrirExemple();
     const utilisateur = userEvent.setup();
-    await utilisateur.click(screen.getByRole('link', { name: 'Fiscalité' }));
-    expect(await screen.findByRole('heading', { name: 'Fiscalité' })).toBeInTheDocument();
+    // Deux barres latérales sont montées (liste puis projet) : on prend le lien de la dernière.
+    await utilisateur.click(screen.getAllByRole('link', { name: 'Comparer' }).at(-1)!);
+    expect(await screen.findByRole('heading', { name: 'Comparer' })).toBeInTheDocument();
 
     render(<AppEnMemoire chemin="/projets/inconnu" />);
     expect(await screen.findByRole('heading', { name: 'Projet introuvable' })).toBeInTheDocument();
