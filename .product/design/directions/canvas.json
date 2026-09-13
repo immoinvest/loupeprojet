@@ -1,0 +1,32 @@
+{
+  "pages": [
+    { "id": "page-1", "name": "Retenu · Le guide" },
+    { "id": "page-2", "name": "Pistes écartées" }
+  ],
+  "artboards": [
+    { "file": "Main.dc.html", "x": 0, "y": 0, "w": 1440, "h": 1300, "title": "Rapport", "page": "page-1" },
+    { "file": "Projets.dc.html", "x": 1560, "y": 0, "w": 1440, "h": 900, "title": "Mes projets", "page": "page-1" },
+    { "file": "DirectionC.dc.html", "x": 0, "y": 0, "w": 1280, "h": 1900, "title": "C · Le guide, premier jet", "page": "page-2" },
+    { "file": "DirectionA.dc.html", "x": 1400, "y": 0, "w": 1280, "h": 1700, "title": "A · Le dossier", "page": "page-2" },
+    { "file": "DirectionB.dc.html", "x": 2800, "y": 0, "w": 1280, "h": 1700, "title": "B · Le cockpit", "page": "page-2" }
+  ],
+  "annotations": [
+    {
+      "id": "decision",
+      "x": 0,
+      "y": -150,
+      "w": 520,
+      "text": "Direction retenue par Pierre le 13/09/2026 : C « Le guide », avec moins de texte et une coque d'application (projets, profil, onglets). Chiffres réels du moteur, T3 Marseille.",
+      "page": "page-1"
+    },
+    {
+      "id": "ecartees",
+      "x": 0,
+      "y": -150,
+      "w": 520,
+      "text": "Pistes écartées, conservées pour mémoire. Le premier jet de C montre le niveau de texte jugé trop dense.",
+      "page": "page-2"
+    }
+  ],
+  "launch": { "view": "canvas", "page": "page-1" }
+}
