@@ -34,7 +34,7 @@ export default defineConfig(
     },
   },
   {
-    files: ['**/*.test.ts'],
+    files: ['**/*.test.ts', '**/*.test.tsx', '**/tests/setup.ts'],
     rules: {
       'max-lines': 'off',
       '@typescript-eslint/no-non-null-assertion': 'off',

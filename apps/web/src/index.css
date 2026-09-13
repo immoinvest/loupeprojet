@@ -1,0 +1,60 @@
+@import 'tailwindcss';
+
+/* Tokens de la direction visuelle « Le guide » (ADR-004). */
+@theme {
+  --font-display: 'Outfit', 'Segoe UI', system-ui, sans-serif;
+  --font-sans: 'Nunito Sans', 'Segoe UI', system-ui, sans-serif;
+
+  --color-fond: #fffdf9;
+  --color-surface: #ffffff;
+  --color-bordure: #ece8e0;
+  --color-bordure-douce: #f1ede5;
+  --color-encre: #23272f;
+  --color-encre-2: #4b5563;
+  --color-encre-3: #6b7280;
+  --color-encre-4: #9ca3af;
+
+  --color-accent: #4f55d8;
+  --color-accent-fonce: #3a3fb0;
+  --color-accent-doux: #eeeeff;
+  --color-accent-fond: #f7f5ff;
+  --color-accent-bordure: #e4e3ff;
+
+  --color-bon: #2e9e6b;
+  --color-bon-texte: #1f7a4d;
+  --color-bon-fond: #e3f4ea;
+  --color-surveiller: #d98a1e;
+  --color-surveiller-texte: #9a5b0f;
+  --color-surveiller-fond: #fbeeda;
+  --color-probleme: #d9453d;
+  --color-probleme-texte: #a3302a;
+  --color-probleme-fond: #fbe5e3;
+
+  --radius-carte: 20px;
+  --radius-encart: 12px;
+  --shadow-carte: 0 6px 24px rgba(35, 39, 47, 0.05);
+}
+
+html {
+  background: var(--color-fond);
+  color: var(--color-encre);
+  font-family: var(--font-sans);
+  font-variant-numeric: tabular-nums;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+}
+
+a {
+  color: var(--color-accent);
+}
+a:hover {
+  color: var(--color-accent-fonce);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}

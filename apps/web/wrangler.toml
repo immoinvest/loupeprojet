@@ -1,0 +1,5 @@
+# Cloudflare Pages : `npx wrangler pages deploy dist` depuis apps/web, ou connexion du dépôt GitHub
+# (commande de build : `npm ci && npm run build -w apps/web`, dossier de sortie : `apps/web/dist`).
+name = "loupe"
+compatibility_date = "2026-09-01"
+pages_build_output_dir = "dist"
