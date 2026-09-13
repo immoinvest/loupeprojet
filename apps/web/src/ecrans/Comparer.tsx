@@ -154,7 +154,7 @@ function Tableau({
                     onClick={() => {
                       onTrier(i.code);
                     }}
-                    className={`text-left hover:text-accent pointer-coarse:min-h-11 ${sens === 'none' ? '' : 'text-accent'}`}
+                    className={`text-left hover:text-accent pointer-coarse:min-h-11 pointer-coarse:w-full ${sens === 'none' ? '' : 'text-accent'}`}
                   >
                     {i.libelle}
                     {sens === 'none' ? '' : sens === 'descending' ? ' ↓' : ' ↑'}
