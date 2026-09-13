@@ -102,6 +102,48 @@ describe('Rapport', () => {
     expect(await screen.findByRole('heading', { name: 'Projet introuvable' })).toBeInTheDocument();
   });
 
+  it(
+    'modifie une hypothèse : recalcul, enregistrement, provenance, erreurs',
+    { timeout: 30_000 },
+    async () => {
+      await ouvrirExemple();
+      const utilisateur = userEvent.setup();
+      await utilisateur.click(screen.getByRole('link', { name: 'Hypothèses' }));
+      await screen.findByRole('heading', { name: 'Vos hypothèses' });
+
+      const loyer = screen.getByLabelText(/Loyer visé, hors charges/);
+      expect(loyer).toHaveValue('980');
+      await utilisateur.clear(loyer);
+      await utilisateur.type(loyer, '1300');
+      expect(lireProjets(window.localStorage)[0]?.projet.hypotheses.location.loyerHc).toBe(1300);
+      expect(lireProjets(window.localStorage)[0]?.projet.provenance['location.loyerHc']).toBe(
+        'utilisateur',
+      );
+      expect(screen.getByText(/\+\d+ €\/mois/)).toBeInTheDocument();
+
+      const prix = screen.getByLabelText(/Prix affiché/);
+      await utilisateur.clear(prix);
+      expect(screen.getByText('Cette valeur est nécessaire au calcul.')).toBeInTheDocument();
+      expect(lireProjets(window.localStorage)[0]?.projet.hypotheses.achat.prix).toBe(155_000);
+      await utilisateur.type(prix, '150000');
+      expect(screen.queryByText('Cette valeur est nécessaire au calcul.')).not.toBeInTheDocument();
+      expect(lireProjets(window.localStorage)[0]?.projet.hypotheses.achat.prix).toBe(150_000);
+
+      // « 4 » puis « 40 » sont valides et enregistrés ; « 400 » dépasse la durée du prêt et
+      // est refusé : la dernière valeur valide (40) reste en vigueur.
+      const differe = screen.getByLabelText(/Différé total/);
+      await utilisateur.clear(differe);
+      await utilisateur.type(differe, '400');
+      expect(screen.getByText(/différé doit être plus court/)).toBeInTheDocument();
+      expect(lireProjets(window.localStorage)[0]?.projet.hypotheses.pret.differeTotalMois).toBe(40);
+
+      await utilisateur.selectOptions(screen.getByLabelText(/Mode de location/), 'courte_duree');
+      // 1 300 € / 30 nuits × 2 = 86,7 → 87 €
+      expect(screen.getByLabelText(/Prix de la nuitée/)).toHaveValue('87');
+      expect(screen.getByLabelText(/Taux d'occupation/)).toHaveValue('60');
+    },
+  );
+
   it('change le statut depuis l’en-tête', async () => {
     await ouvrirExemple();
     const utilisateur = userEvent.setup();

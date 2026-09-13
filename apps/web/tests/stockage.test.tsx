@@ -121,6 +121,45 @@ describe('ProjetsProvider / useProjets', () => {
     expect(lireProjets(stockage)).toHaveLength(1);
   });
 
+  it('mettreAJour valide par Zod, ne touche que le projet visé, et refuse une entrée invalide', () => {
+    const stockage = stockageMemoire();
+    const a = creerProjet({ nom: 'A' });
+    const b = creerProjet({ nom: 'B' });
+    ecrireProjets(stockage, [a, b]);
+    const enveloppe = ({ children }: { children: ReactNode }): ReactNode => (
+      <ProjetsProvider stockage={stockage}>{children}</ProjetsProvider>
+    );
+    const { result } = renderHook(() => useProjets(), { wrapper: enveloppe });
+
+    let retour: ReturnType<typeof result.current.mettreAJour> | undefined;
+    act(() => {
+      retour = result.current.mettreAJour(b.id, {
+        ...b.projet,
+        hypotheses: {
+          ...b.projet.hypotheses,
+          location: { ...b.projet.hypotheses.location, loyerHc: 1_100 },
+        },
+      });
+    });
+    expect(retour).toEqual({ ok: true });
+    expect(result.current.trouver(b.id)?.projet.hypotheses.location.loyerHc).toBe(1_100);
+    expect(result.current.trouver(a.id)?.projet.hypotheses.location.loyerHc).toBe(980);
+    expect(lireProjets(stockage)[1]?.projet.hypotheses.location.loyerHc).toBe(1_100);
+
+    act(() => {
+      retour = result.current.mettreAJour(a.id, {
+        ...a.projet,
+        hypotheses: {
+          ...a.projet.hypotheses,
+          pret: { ...a.projet.hypotheses.pret, dureeAnnees: 0 },
+        },
+      });
+    });
+    expect(retour?.ok).toBe(false);
+    expect(retour?.ok === false && retour.erreurs['hypotheses.pret.dureeAnnees']).toBeTruthy();
+    expect(result.current.trouver(a.id)?.projet.hypotheses.pret.dureeAnnees).toBe(25);
+  });
+
   it('réutilise une liste déjà présente sans la réamorcer', () => {
     const stockage = stockageMemoire();
     ecrireProjets(stockage, [creerProjet({ nom: 'Existant' }), creerProjet({ nom: 'Autre' })]);

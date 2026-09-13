@@ -4,6 +4,7 @@ import { BrowserRouter, MemoryRouter, Navigate, useRoutes, type RouteObject } fr
 import { AppLayout } from './coque/AppLayout';
 import { ProjetLayout } from './coque/ProjetLayout';
 import { Bientot } from './ecrans/Bientot';
+import { Hypotheses } from './ecrans/Hypotheses';
 import { MesProjets } from './ecrans/MesProjets';
 import { NouveauProjet } from './ecrans/NouveauProjet';
 import { Rapport } from './ecrans/Rapport';
@@ -21,15 +22,7 @@ export const routes: RouteObject[] = [
         element: <ProjetLayout />,
         children: [
           { index: true, element: <Rapport /> },
-          {
-            path: 'hypotheses',
-            element: (
-              <Bientot
-                titre="Hypothèses"
-                phrase="Bientôt : modifiez chaque hypothèse ici, le rapport se recalcule instantanément."
-              />
-            ),
-          },
+          { path: 'hypotheses', element: <Hypotheses /> },
           {
             path: 'fiscalite',
             element: (

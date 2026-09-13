@@ -1,39 +1,33 @@
 {
-  "feature_slug": "nouveau-projet",
-  "title": "Écran Nouveau projet : lien d'annonce (portail, texte collé lu par règles) ou saisie manuelle, formulaire Vérifier, création",
+  "feature_slug": "hypotheses-editables",
+  "title": "Onglet Hypothèses : édition de toutes les hypothèses avec recalcul instantané, validation Zod, provenance, marché saisissable",
   "started_at": "2026-09-13T00:00:00Z",
   "current_step": "push",
-  "scope": "apps/web/src/annonces, écrans NouveauProjet + FormulaireProjet, route /projets/nouveau ; moteur : champ source optionnel",
-  "branch": "feat/nouveau-projet",
-  "base": "master (PR #1, #2, #3 fusionnées le 13/09 sur demande de Pierre)",
+  "scope": "apps/web/src/hypotheses, écran Hypotheses, ProjetsContext.mettreAJour",
+  "branch": "feat/hypotheses-editables",
+  "base": "master (14e1c08)",
   "steps": {
     "discovery": {
       "status": "completed",
-      "output": ".product/features/nouveau-projet-discovery.md (discovery + specs)"
+      "output": ".product/features/hypotheses-editables-discovery.md"
     },
-    "implement": { "status": "completed", "stories_completed": 4, "stories_total": 4 },
+    "implement": { "status": "completed", "stories_completed": 5, "stories_total": 5 },
     "refactor": {
       "status": "completed",
-      "note": "formulaire scindé en valeurs.ts / Champ.tsx / FormulaireProjet.tsx (max-lines 300)"
+      "note": "champ générique piloté par descripteurs ; aucune logique métier dans l'écran"
     },
     "qa_tests": {
       "status": "completed",
-      "note": "annonces (résolution 5 portails, extraction, construction, département), écran (lien, texte, manuel, validation, décimales FR)"
+      "note": "chemins, conversion, descripteurs, appliquerSaisie (courte durée, DVF), écran (recalcul, erreurs, différé refusé, bascule courte durée)"
     },
     "security": {
       "status": "completed",
-      "note": "aucune requête réseau ; texte d'annonce jamais stocké ; URL canonisée sans paramètres de suivi"
+      "note": "toute saisie passe par ProjetSchema avant enregistrement"
     },
     "push": { "status": "in_progress" }
   },
   "decisions": {
-    "capture": "Sans extension, le texte de l'annonce est collé par l'utilisateur et lu localement par règles ; l'extension remplacera cette étape sans refonte",
-    "defauts": "TF = 1 mois de loyer, copro 25 €/m²/an, PNO 150, comptable 420 (meublé réel), CFE 180 (meublé), mobilier 75 €/m² (meublé), frais bancaires 850 + 1 500 ; tous marqués estimé"
-  },
-  "post_mortem": {
-    "blockers_encountered": [
-      "Mes regex écrites avec des échappements \\u00a0 ressortent avec les caractères réels (lint no-irregular-whitespace) : utiliser \\s",
-      "Regex « X € de charges » captait la fin du prix : ancrage (?<!\\d)"
-    ]
+    "recalcul": "À chaque frappe, calcul complet (~35 ms) ; une valeur invalide n'est jamais enregistrée, la dernière valeur valide reste en vigueur",
+    "pourcentages": "Saisis en « 3,35 », stockés en 0,0335"
   }
 }

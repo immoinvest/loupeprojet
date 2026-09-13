@@ -1,3 +1,4 @@
+import { ProjetSchema, type ProjetEntree } from '@loupe/moteur';
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
 
 import {
@@ -15,7 +16,13 @@ export interface ContexteProjets {
   readonly supprimer: (id: string) => void;
   readonly changerStatut: (id: string, statut: StatutProjet) => void;
   readonly trouver: (id: string | undefined) => ProjetEnregistre | undefined;
+  /** Remplace le projet après validation Zod ; une entrée invalide n'est pas enregistrée. */
+  readonly mettreAJour: (id: string, projet: ProjetEntree) => MiseAJour;
 }
+
+export type MiseAJour =
+  | { readonly ok: true }
+  | { readonly ok: false; readonly erreurs: Readonly<Record<string, string>> };
 
 const Contexte = createContext<ContexteProjets | null>(null);
 
@@ -66,6 +73,22 @@ export function ProjetsProvider({ stockage, children }: ProjetsProviderProps): R
         );
       },
       trouver: (id) => projets.find((p) => p.id === id),
+      mettreAJour: (id, projet) => {
+        const resultat = ProjetSchema.safeParse(projet);
+        if (!resultat.success) {
+          const erreurs: Record<string, string> = {};
+          for (const issue of resultat.error.issues) {
+            erreurs[issue.path.map(String).join('.')] = issue.message;
+          }
+          return { ok: false, erreurs };
+        }
+        remplacer(
+          projets.map((p) =>
+            p.id === id ? { ...p, projet: resultat.data, modifieLe: new Date().toISOString() } : p,
+          ),
+        );
+        return { ok: true };
+      },
     }),
     [projets, remplacer],
   );

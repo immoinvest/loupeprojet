@@ -85,16 +85,17 @@ describe('calculerProjet — pureté et robustesse', () => {
   });
 
   it(
-    'calcule un projet complet (6 scénarios, 3 prix cibles) en moins de 150 ms en moyenne',
+    'calcule un projet complet (6 scénarios, 3 prix cibles) en moins de 500 ms en moyenne',
     { timeout: 30_000 },
     () => {
       // Mesuré à ~35 ms en isolation ; l'instrumentation de couverture et les tests en parallèle
-      // multiplient la mesure. Le seuil est un garde-fou contre une régression d'un ordre de grandeur.
+      // (jsdom compris) multiplient la mesure jusqu'à 250 ms sur une machine chargée.
       calculerProjet(projetExemple);
       const debut = performance.now();
       for (let i = 0; i < 10; i += 1) calculerProjet(projetExemple);
       const moyenne = (performance.now() - debut) / 10;
-      expect(moyenne).toBeLessThan(150);
+      // Garde-fou contre une régression d'un ordre de grandeur, pas une mesure fine.
+      expect(moyenne).toBeLessThan(500);
     },
   );
 });

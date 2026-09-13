@@ -43,7 +43,9 @@ L'utilisateur principal du repo pratique le **vibe coding** et ne relit pas le c
 - **Direction visuelle** : C « Le guide » retenue (ADR-004) ; tokens dans `apps/web/src/index.css`.
 - **Livré** : `apps/web` socle (React 19 + Vite + Tailwind v4, React Router déclaratif, coque SaaS, écrans Mes projets et Rapport, stockage local Zod, config Cloudflare Pages). Textes des codes du moteur dans `apps/web/src/textes/`.
 - **Livré** : écran Nouveau projet (`apps/web/src/annonces/` : `resoudreAnnonce`, `extraireChamps` par règles, `construireProjet` avec défauts sourcés ; formulaire Vérifier). Le schéma `Projet` du moteur porte une `source` optionnelle (portail, id, URL).
-- **Prochaine étape** : `hypotheses-editables` (onglet Hypothèses), puis `worker-socle` et `extension` (qui branchera la lecture automatique sur l'écran Nouveau projet).
+- **Livré** : onglet Hypothèses (`apps/web/src/hypotheses/` : chemins pointés, conversion texte ↔ valeur, descripteurs des champs par groupe, `appliquerSaisie` ; `ProjetsContext.mettreAJour` valide par Zod avant d'enregistrer).
+- **Production** : https://loupeprojet.pages.dev (Cloudflare Pages, branche `master`, build `npm ci && npm run build -w apps/web`).
+- **Prochaine étape** : `onglets-detail` (Fiscalité, Revente, Visite), puis `worker-socle` et `extension`.
 - `node_modules/` et `dist/` ne sont plus versionnés.
 
 ## Stack (décision ADR-001)
