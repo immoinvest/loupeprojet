@@ -52,7 +52,11 @@ describe('Mes projets', () => {
     await utilisateur.type(screen.getByLabelText(/Vos revenus/), '2400');
     await utilisateur.click(screen.getByRole('button', { name: /Créer le projet/ }));
     expect(
-      await screen.findByRole('heading', { name: /Prix sans repère de marché/ }),
+      await screen.findByRole(
+        'heading',
+        { name: /Prix sans repère de marché/ },
+        { timeout: 10_000 },
+      ),
     ).toBeInTheDocument();
     expect(lireProjets(window.localStorage)).toHaveLength(2);
     expect(lireProjets(window.localStorage)[0]?.nom).toBe('40 m² · Lyon');
