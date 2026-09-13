@@ -65,6 +65,7 @@ npm run build -w apps/web    # apps/web/dist
 - Coque d'application : barre latérale (projets, nouveau projet, comparer, méthode, extension, profil), en-tête projet à onglets (Rapport, Hypothèses, Fiscalité, Revente, Visite).
 - Écrans livrés : **Nouveau projet** (lien d'annonce reconnu sur LeBonCoin, SeLoger, Bien'ici, PAP, Logic-Immo ; texte de l'annonce collé et lu par règles ; ou saisie manuelle ; formulaire Vérifier avec provenance de chaque valeur), **Mes projets** (liste, filtres, statut, suppression) et **Rapport** (verdict, cinq feux, prix vs ventes réelles, cash-flow, leviers, fiscalité, revente), calculés par le moteur. Les autres onglets affichent un état « bientôt ».
 - La lecture automatique de la page d'annonce arrive avec l'extension navigateur (ADR-002) ; le texte collé n'est jamais conservé, seuls les champs lus le sont.
+- Onglet **Hypothèses** : toutes les valeurs d'un projet sont modifiables (bien, marché, achat, financement, location, charges, fiscalité, revente), avec la provenance de chacune ; chaque modification est validée, enregistrée et recalculée instantanément.
 - Projets stockés dans le navigateur (`localStorage`, clé `loupe.projets.v1`), validés par Zod ; le premier lancement crée le projet d'exemple.
 - Textes centralisés dans `src/textes/` : les codes du moteur deviennent des phrases là et nulle part ailleurs.
 - Tests : Vitest + Testing Library (jsdom), couverture 100 % sur `stockage/`, `formatage/`, `textes/`.

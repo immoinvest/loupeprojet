@@ -4,11 +4,10 @@ Format : `- [ ] slug — titre — date — scope`
 
 ## En cours
 
-- [ ] nouveau-projet — écran `/projets/nouveau` : lien d'annonce (portail reconnu, texte collé lu par règles) ou saisie manuelle, formulaire Vérifier avec provenance, création du projet — 2026-09-13 — `apps/web/src/annonces`, écrans — PR #4
+- [ ] hypotheses-editables — onglet Hypothèses : toutes les hypothèses modifiables avec recalcul instantané, validation Zod, provenance, bloc Marché saisissable — 2026-09-13 — `apps/web/src/hypotheses`, écran — PR #5
 
 ## À venir (ordre proposé, une par session)
 
-- [ ] hypotheses-editables — onglet Hypothèses éditable (recalcul instantané), modification d'un projet existant
 - [ ] onglets-detail — Fiscalité (4 régimes année par année), Revente, Visite (points de vigilance)
 - [ ] worker-socle — apps/worker : Hono, proxy + cache KV, rate-limit
 - [ ] enrichissement-marche — géocodage, DVF, ADEME, ANIL, REI, Géorisques, ABC
@@ -24,3 +23,4 @@ Format : `- [ ] slug — titre — date — scope`
 - [x] moteur-calcul — Moteur de calcul Loupe en TypeScript pur, 204 tests, couverture 100 %, monorepo — 2026-09-13 — PR #1
 - [x] direction-visuelle — Direction C « Le guide » retenue, ADR-004, maquettes coque SaaS — 2026-09-13 — PR #2
 - [x] web-socle — `apps/web` : React + Vite + Tailwind v4, coque SaaS, Mes projets, Rapport, stockage local, Cloudflare Pages — 2026-09-13 — PR #3
+- [x] nouveau-projet — écran `/projets/nouveau` : lien d'annonce reconnu, texte collé lu par règles, saisie manuelle, formulaire Vérifier — 2026-09-13 — PR #4 (production : https://loupeprojet.pages.dev)

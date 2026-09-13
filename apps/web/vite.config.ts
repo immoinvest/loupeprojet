@@ -8,4 +8,6 @@ export default defineConfig({
   resolve: {
     alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
   },
+  // Port fourni par l'environnement (aperçu Claude Code) ; 5173 par défaut en local.
+  server: { port: Number(process.env.PORT) || 5173 },
 });
