@@ -1,4 +1,4 @@
-﻿/**
+/**
  * @loupe/moteur — moteur de calcul d'investissement locatif.
  *
  * TypeScript pur : aucune I/O, aucune date système, aucun aléatoire.
@@ -7,6 +7,7 @@
 export const VERSION_MOTEUR = '0.1.0';
 
 export * from './commun';
+export * from './financement';
 export * from './regles';
 export * from './schema';
 export { projetExemple } from './exemples/t3-marseille';
