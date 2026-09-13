@@ -15,6 +15,8 @@ export default defineConfig(
       '**/test-results/**',
       // Worktrees des sessions parallèles (Claude Code) : du code en cours d'écriture, hors dépôt.
       '.claude/worktrees/**',
+      // Bouton-favori généré par le build du web (vite.bookmarklet.config.ts).
+      'apps/web/public/capture.js',
     ],
   },
   eslint.configs.recommended,

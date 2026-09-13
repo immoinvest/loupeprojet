@@ -12,9 +12,10 @@ Monorepo npm workspaces, TypeScript strict, Vitest, ESLint, Prettier. Cible : Re
 
 ```
 packages/moteur/     Moteur de calcul pur (TypeScript + Zod), 100 % couvert par les tests
-apps/web/            Application React + Vite + Tailwind v4 (coque SaaS, Mes projets, Nouveau projet, Rapport, Hypothèses, Fiscalité, Revente, Visite), Cloudflare Pages
+packages/capture/    Contrat de capture d'une annonce (schéma, encodage pour fragment d'URL, règles de lecture par portail), partagé par l'extension, le bouton-favori et le web
+apps/web/            Application React + Vite + Tailwind v4 (coque SaaS, Mes projets, Nouveau projet, Rapport, Hypothèses, Fiscalité, Revente, Visite, Extension), Cloudflare Pages
 apps/worker/         Serveur Hono sur Cloudflare Workers : proxy des données publiques (cache KV, limite de débit)
-apps/                À venir : extension
+apps/extension/      Extension navigateur (Manifest V3, Chrome/Edge/Firefox) : lit l'annonce ouverte et l'envoie à Deklic ; règles par portail
 data/                Référentiels publics pré-agrégés (DVF, loyers ANIL, taxe foncière, zonage ABC, usure, communes) publiés sur R2 par GitHub Action
 marque/              Identité de marque Deklic : logos SVG, favicon, icônes, image de partage, guide (ADR-005)
 .product/            Spécifications, ADR, design, état du pipeline de développement
@@ -34,7 +35,7 @@ npm run test:e2e      # vite build puis playwright test : parcours complets dans
 npm run build         # build de chaque workspace
 ```
 
-Node 22 ou plus. La CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) exécute ces six commandes sur chaque pull request (441 tests au 13/09/2026, dont 135 pour les référentiels). Une PR est fusionnée automatiquement dès que le check `verify` est vert (`gh pr merge <n> --auto --merge`) ; `master` refuse tout merge sans ce check. Un second job `e2e` joue les huit parcours Playwright dans Chromium ; il n'est pas encore requis pour fusionner.
+Node 22 ou plus. La CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) exécute ces six commandes sur chaque pull request (560 tests au 13/09/2026, dont 135 pour les référentiels et 119 pour la capture, l'extension et le bouton-favori). Une PR est fusionnée automatiquement dès que le check `verify` est vert (`gh pr merge <n> --auto --merge`) ; `master` refuse tout merge sans ce check. Un second job `e2e` joue les huit parcours Playwright dans Chromium ; il n'est pas encore requis pour fusionner.
 
 ## Le moteur (`@loupe/moteur`)
 
@@ -67,8 +68,9 @@ npm run build -w apps/web    # apps/web/dist
 
 - Direction visuelle « Le guide » ([ADR-004](.product/adr/004-direction-visuelle.md)) : tokens dans `src/index.css`, polices Outfit et Nunito Sans.
 - Coque d'application : barre latérale (projets, nouveau projet, comparer, méthode, extension, profil), en-tête projet à onglets (Rapport, Hypothèses, Fiscalité, Revente, Visite).
-- Écrans livrés : **Nouveau projet** (lien d'annonce reconnu sur LeBonCoin, SeLoger, Bien'ici, PAP, Logic-Immo ; texte de l'annonce collé et lu par règles ; ou saisie manuelle ; formulaire Vérifier avec provenance de chaque valeur), **Mes projets** (liste, filtres, statut, suppression) et **Rapport** (verdict, cinq feux, prix vs ventes réelles, cash-flow, leviers, fiscalité, revente), calculés par le moteur. Les pages Comparer, Méthode et Extension affichent un état « bientôt ».
-- La lecture automatique de la page d'annonce arrive avec l'extension navigateur (ADR-002) ; le texte collé n'est jamais conservé, seuls les champs lus le sont.
+- Écrans livrés : **Nouveau projet** (lien d'annonce reconnu sur LeBonCoin, SeLoger, Bien'ici, PAP, Logic-Immo ; page lue par l'extension ou le bouton-favori ; texte de l'annonce collé et lu par règles ; ou saisie manuelle ; formulaire Vérifier avec provenance de chaque valeur), **Mes projets** (liste, filtres, statut, suppression), **Rapport** (verdict, cinq feux, prix vs ventes réelles, cash-flow, leviers, fiscalité, revente), calculés par le moteur, et **Extension navigateur** (bouton-favori à glisser, guide de l'extension). Les pages Comparer et Méthode affichent un état « bientôt ».
+- Lecture automatique de la page d'annonce (ADR-002) : l'extension ou le bouton-favori ouvre `/projets/nouveau#capture=…` ; le fragment est décodé, validé (Zod), affiché dans Vérifier avec les badges `annonce`, puis effacé de l'adresse. Il n'est jamais envoyé au serveur ; le texte de l'annonce sert à l'extraction puis disparaît, seuls les champs lus sont conservés.
+- Bouton-favori : `npm run build -w apps/web` construit d'abord `public/capture.js` (règles incluses, adresse de production ou de l'aperçu Cloudflare Pages, ou `LOUPE_BASE_URL`). Le favori lui-même (`src/bookmarklet/favori.ts`) est minuscule : il charge `capture.js` depuis Deklic au clic, donc il reste à jour et se glisse ou se colle dans la barre de favoris depuis la page `/extension` (bouton « Copier le favori »). Si un site bloque les scripts externes, le favori le dit et l'extension prend le relais.
 - Onglet **Hypothèses** : toutes les valeurs d'un projet sont modifiables (bien, marché, achat, financement, location, charges, fiscalité, revente), avec la provenance de chacune ; chaque modification est validée, enregistrée et recalculée instantanément.
 - Onglet **Fiscalité** : les quatre régimes côte à côte (impôt cumulé, cash-flow après impôt, explication), bouton « Retenir ce régime », frise « quand commencez-vous à payer », tableau année par année du régime retenu.
 - Onglet **Revente** : horizons 5 / 10 / 15 / 20 ans cliquables (`src/analyses/`), revente et enrichissement détaillés, plus-value poste par poste (abattements, IR, prélèvements sociaux, surtaxe, réintégration des amortissements).
@@ -76,7 +78,20 @@ npm run build -w apps/web    # apps/web/dist
 - **Enrichissement** (`src/enrichissement/`) : « Lire le texte » fait lire l'annonce par l'IA du Worker (les règles comblent ses trous, ou prennent le relais s'il ne répond pas) ; à la création, le bien est situé (code postal + ville) et reçoit la médiane et les quartiles des ventes réelles (DVF) de son arrondissement ou de sa commune, et le loyer de référence ANIL, marqués « donnée publique ». Sans Worker, le projet est créé comme avant, sans repère de marché. Adresse du Worker : variable `VITE_WORKER_URL` au build (production par défaut).
 - Projets stockés dans le navigateur (`localStorage`, clé `loupe.projets.v1`), validés par Zod ; le premier lancement crée le projet d'exemple.
 - Textes centralisés dans `src/textes/` : les codes du moteur deviennent des phrases là et nulle part ailleurs.
-- Tests : Vitest + Testing Library (jsdom), couverture 100 % sur `stockage/`, `formatage/`, `textes/`, `annonces/`, `hypotheses/`, `analyses/`, `enrichissement/`. Les tests n'appellent jamais le réseau : `AppEnMemoire` utilise un client du Worker hors ligne, ou le faux client qu'on lui passe.
+- Tests : Vitest + Testing Library (jsdom), couverture 100 % sur `stockage/`, `formatage/`, `textes/`, `annonces/`, `hypotheses/`, `analyses/`, `bookmarklet/`, `enrichissement/`. Les tests n'appellent jamais le réseau : `AppEnMemoire` utilise un client du Worker hors ligne, ou le faux client qu'on lui passe.
+
+## L'extension navigateur (`@loupe/extension`) et le contrat de capture (`@loupe/capture`)
+
+```bash
+npm run build -w apps/extension       # dist/chrome (Chrome, Edge, Brave) et dist/firefox, adresse de production
+npm run build:dev -w apps/extension   # idem, en visant http://localhost:5173
+npm run dev -w apps/extension         # reconstruction à chaque modification
+```
+
+- Sur une annonce LeBonCoin, SeLoger, Bien'ici, PAP ou Logic-Immo, l'icône Deklic puis **Analyser dans Deklic** : la page est lue dans le navigateur (jamais par nos serveurs), un onglet Deklic s'ouvre avec le formulaire Vérifier pré-rempli. Permissions `activeTab` et `scripting` seulement, aucun réseau, aucun stockage.
+- Règles de lecture par portail dans `apps/extension/regles/<portail>.json` (versionnées `<portail>-AAAA-MM-JJ`) : pour chaque champ, JSON-LD schema.org, puis état applicatif de la page, puis balises `og:`, puis sélecteurs CSS. Un portail qui change de maquette se corrige en éditant un JSON et sa fixture. La structure de PAP est relevée sur une vraie annonce ; LeBonCoin, SeLoger, Bien'ici et Logic-Immo sont construits d'après la structure connue des portails et restent à vérifier sur une vraie annonce.
+- `@loupe/capture` : `CaptureSchema` (version 1), `encoderCapture` / `decoderCapture` (base64url, jamais d'exception), `resoudreAnnonce`, moteur de règles (`capturer`, `creerRegistre`). Tests : 68 pour le contrat et le moteur de règles, 33 pour l'extension (règles sur pages enregistrées, popup avec un faux `chrome`), couverture 100 %.
+- Installation : voir [`apps/extension/README.md`](apps/extension/README.md) (charger l'extension non empaquetée dans Chrome, Edge ou Firefox). La publication sur les stores est une décision à part (compte et frais).
 
 ## Tests de bout en bout (`apps/web/e2e`)
 
@@ -137,7 +152,7 @@ npm run referentiels -w data -- --aide
 
 L'Action tourne le 2 de chaque mois à 03:30 UTC, ou à la main (onglet Actions → « Référentiels » → source et département). Elle génère les fichiers puis les synchronise vers le bucket R2 `deklic-data` par l'API S3 (`aws s3 sync`, préinstallé sur les runners) ; sans les secrets ci-dessous elle génère seulement et prévient. À faire une fois dans le compte Cloudflare :
 
-1. R2 → Créer un bucket nommé `deklic-data` (région automatique).
+1. R2 → Créer un bucket nommé `deklic-data` dans la juridiction européenne (« Specify jurisdiction », EU) : les données restent dans l'Union européenne et l'Action publie vers l'adresse S3 européenne `https://<compte>.eu.r2.cloudflarestorage.com`.
 2. R2 → Gérer les jetons d'API R2 → Créer un jeton « Object Read & Write » limité au bucket `deklic-data` ; noter l'Access Key ID et la Secret Access Key.
 3. Dans GitHub, Settings → Secrets and variables → Actions : `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `CLOUDFLARE_ACCOUNT_ID` (l'identifiant de compte affiché dans le tableau de bord R2).
 4. Lancer l'Action à la main une première fois sur un département (par exemple `13`) puis sur la France entière.
