@@ -18,13 +18,13 @@ Trois voies existent pour « une application mobile » :
 
 **Voie 3 : Deklic est une PWA.**
 
-| Élément            | Décision                                                                                                                                                                                                  |
-| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Installation       | Manifeste complet (`id`, `scope`, icônes `any` et `maskable`, raccourcis, `display: standalone`) ; entrée « Installer l'application » quand le navigateur émet `beforeinstallprompt` ; marche à suivre sur iPhone |
-| Hors ligne         | Service worker écrit à la main, construit par Vite après l'application : pages en réseau d'abord, fichiers versionnés en cache d'abord, cache nommé par l'empreinte de `index.html`, purge des anciens caches |
-| Recevoir un partage | `share_target` en GET vers `/projets/nouveau?titre=…&texte=…&lien=…` : le lien d'annonce est cherché dans les trois paramètres (Android le met souvent dans le texte)                                   |
-| Partager un projet | `navigator.share` sur écran tactile, copie du lien sur ordinateur                                                                                                                                         |
-| Mise en page       | Tailwind mobile-first ; sous 1 024 px, la barre latérale devient un tiroir ouvert depuis une barre d'app                                                                                                 |
+| Élément             | Décision                                                                                                                                                                                                          |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Installation        | Manifeste complet (`id`, `scope`, icônes `any` et `maskable`, raccourcis, `display: standalone`) ; entrée « Installer l'application » quand le navigateur émet `beforeinstallprompt` ; marche à suivre sur iPhone |
+| Hors ligne          | Service worker écrit à la main, construit par Vite après l'application : pages en réseau d'abord, fichiers versionnés en cache d'abord, cache nommé par l'empreinte de `index.html`, purge des anciens caches     |
+| Recevoir un partage | `share_target` en GET vers `/projets/nouveau?titre=…&texte=…&lien=…` : le lien d'annonce est cherché dans les trois paramètres (Android le met souvent dans le texte)                                             |
+| Partager un projet  | `navigator.share` sur écran tactile, copie du lien sur ordinateur                                                                                                                                                 |
+| Mise en page        | Tailwind mobile-first ; sous 1 024 px, la barre latérale devient un tiroir ouvert depuis une barre d'app                                                                                                          |
 
 ## Conséquences
 

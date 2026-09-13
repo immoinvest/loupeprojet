@@ -258,12 +258,12 @@ Scénario: développement et échec
 
 Contrat de cache :
 
-| Requête                                                   | Stratégie                                       |
-| --------------------------------------------------------- | ----------------------------------------------- |
-| Navigation de même origine                                | Réseau d'abord, repli sur la coque en cache      |
-| GET de même origine sous `/assets/`                       | Cache d'abord, sinon réseau puis mise en cache  |
-| GET de même origine : manifeste, icônes, favicon          | Réseau d'abord, repli cache                     |
-| `/capture.js`, autre méthode que GET, autre origine        | Ignorée (le navigateur fait comme sans service worker) |
+| Requête                                             | Stratégie                                              |
+| --------------------------------------------------- | ------------------------------------------------------ |
+| Navigation de même origine                          | Réseau d'abord, repli sur la coque en cache            |
+| GET de même origine sous `/assets/`                 | Cache d'abord, sinon réseau puis mise en cache         |
+| GET de même origine : manifeste, icônes, favicon    | Réseau d'abord, repli cache                            |
+| `/capture.js`, autre méthode que GET, autre origine | Ignorée (le navigateur fait comme sans service worker) |
 
 Cache nommé par version de build ; à l'activation, les caches d'une autre version sont supprimés ; à l'installation, la coque (`/`, script et styles référencés par la page, manifeste, icônes) est mise en cache.
 
@@ -400,14 +400,14 @@ Scénario: durée
 
 ## Contrats d'interface (front)
 
-| Élément                          | Contrat                                                                                                                                                                                       |
-| -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Bouton de menu                   | `button` nommé « Ouvrir le menu », `aria-expanded`, `aria-controls` vers la navigation principale ; masqué à partir de 1 024 px                                                               |
-| Tiroir                           | La barre latérale existante (`aside`), en panneau fixe sous 1 024 px ; bouton « Fermer le menu » ; fermeture à Échap, au voile et à chaque changement de route ; contenu derrière rendu inerte |
-| Invite d'installation            | État en mémoire : `disponible` (événement gardé), `installee` (standalone ou appinstalled), `indisponible` ; jamais stocké                                                                    |
-| Partage reçu                     | `lirePartageRecu(search: string)` → `{ statut: 'absent' }` ou `{ statut: 'recu', url?: string, texte?: string }` ; paramètres `titre`, `texte`, `lien` ; texte tronqué à 10 000 caractères       |
-| Partage d'un projet              | Décision pure : `modePartage({ tactile, partageNatif })` → `'natif'` ou `'copie'` ; AbortError = annulation silencieuse                                                                      |
-| Service worker                   | `/sw.js`, portée `/`, enregistré en production seulement ; stratégie par requête décidée par une fonction pure testée                                                                         |
+| Élément               | Contrat                                                                                                                                                                                        |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Bouton de menu        | `button` nommé « Ouvrir le menu », `aria-expanded`, `aria-controls` vers la navigation principale ; masqué à partir de 1 024 px                                                                |
+| Tiroir                | La barre latérale existante (`aside`), en panneau fixe sous 1 024 px ; bouton « Fermer le menu » ; fermeture à Échap, au voile et à chaque changement de route ; contenu derrière rendu inerte |
+| Invite d'installation | État en mémoire : `disponible` (événement gardé), `installee` (standalone ou appinstalled), `indisponible` ; jamais stocké                                                                     |
+| Partage reçu          | `lirePartageRecu(search: string)` → `{ statut: 'absent' }` ou `{ statut: 'recu', url?: string, texte?: string }` ; paramètres `titre`, `texte`, `lien` ; texte tronqué à 10 000 caractères     |
+| Partage d'un projet   | Décision pure : `modePartage({ tactile, partageNatif })` → `'natif'` ou `'copie'` ; AbortError = annulation silencieuse                                                                        |
+| Service worker        | `/sw.js`, portée `/`, enregistré en production seulement ; stratégie par requête décidée par une fonction pure testée                                                                          |
 
 ## Modèles de données
 
@@ -415,19 +415,19 @@ Aucun changement : aucune donnée nouvelle n'est stockée (ni l'état d'installa
 
 ## Priorisation MoSCoW
 
-| Story | Titre                                   | Priorité     | Effort | Dépendances       |
-| ----- | --------------------------------------- | ------------ | ------ | ----------------- |
-| US-1  | Navigation par menu sous 1 024 px       | Must (P0)    | M      | -                 |
-| US-2  | En-tête de projet adaptatif             | Must (P0)    | S      | US-1              |
-| US-3a | Liste, création, rapport                | Must (P0)    | M      | US-1              |
-| US-3b | Volets, comparaison, pages d'aide       | Must (P0)    | L      | US-1              |
-| US-4  | Confort tactile                         | Must (P0)    | S      | US-3a, US-3b      |
-| US-10 | Parcours et formats contrôlés en CI     | Must (P0)    | M      | US-1 à US-4       |
-| US-5  | Application installable                 | Should (P1)  | M      | US-1              |
-| US-6  | Application hors ligne                  | Should (P1)  | M      | US-5              |
-| US-7  | Recevoir une annonce partagée           | Should (P1)  | S      | US-5              |
-| US-8  | Partager un projet depuis le téléphone  | Should (P1)  | S      | US-2              |
-| US-9  | Page Extension pour téléphone           | Could (P2)   | S      | US-5, US-7        |
+| Story | Titre                                  | Priorité    | Effort | Dépendances  |
+| ----- | -------------------------------------- | ----------- | ------ | ------------ |
+| US-1  | Navigation par menu sous 1 024 px      | Must (P0)   | M      | -            |
+| US-2  | En-tête de projet adaptatif            | Must (P0)   | S      | US-1         |
+| US-3a | Liste, création, rapport               | Must (P0)   | M      | US-1         |
+| US-3b | Volets, comparaison, pages d'aide      | Must (P0)   | L      | US-1         |
+| US-4  | Confort tactile                        | Must (P0)   | S      | US-3a, US-3b |
+| US-10 | Parcours et formats contrôlés en CI    | Must (P0)   | M      | US-1 à US-4  |
+| US-5  | Application installable                | Should (P1) | M      | US-1         |
+| US-6  | Application hors ligne                 | Should (P1) | M      | US-5         |
+| US-7  | Recevoir une annonce partagée          | Should (P1) | S      | US-5         |
+| US-8  | Partager un projet depuis le téléphone | Should (P1) | S      | US-2         |
+| US-9  | Page Extension pour téléphone          | Could (P2)  | S      | US-5, US-7   |
 
 Ordre d'implémentation : US-1 → US-2 → US-3a → US-3b → US-4 → US-10 → US-5 → US-6 → US-7 → US-8 → US-9. Effort total estimé : XL.
 

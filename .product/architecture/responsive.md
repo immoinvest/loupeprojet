@@ -4,15 +4,15 @@ Discovery : `../features/responsive-discovery.md`. Specs : `../specs/responsive-
 
 ## 1. Existant réutilisé
 
-| Existant                                                                 | Réutilisation                                                                                          |
-| ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------ |
-| Coque `AppLayout` + `Sidebar` + `ProjetLayout`                           | La barre latérale devient le tiroir (même DOM) ; l'en-tête de projet se réorganise par classes          |
-| Contexte + hook (`useProjets`, `ClientWorkerProvider` avec défaut hors ligne) | Même modèle pour l'installation : `InstallationProvider` avec un suivi « indisponible » par défaut en test |
-| Modules de logique purs couverts à 100 % (`annonces/`, `enrichissement/`…) | Nouveaux : `application/`, `hors-ligne/`, `annonces/partage-recu.ts`                                   |
-| Build d'un fichier à part par une config Vite dédiée (`vite.bookmarklet.config.ts` → `public/capture.js`) | `vite.hors-ligne.config.ts` → `dist/sw.js`, après le build de l'application                          |
-| Lecture unique d'un fragment puis nettoyage de l'adresse (`lireFragmentCapture` dans `NouveauProjet`) | Même geste pour les paramètres de partage (`lirePartageRecu`)                                        |
-| `ModeDocument` et `@media print`                                         | Conservés ; toute classe `md:`, `lg:`, `xl:` d'un volet imprimable reçoit son équivalent `print:`       |
-| Aides Playwright (`e2e/aides.ts`), tests de rendu via `AppEnMemoire`     | Aides rendues indépendantes du format (ouverture du menu), mêmes parcours sur trois appareils           |
+| Existant                                                                                                  | Réutilisation                                                                                              |
+| --------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| Coque `AppLayout` + `Sidebar` + `ProjetLayout`                                                            | La barre latérale devient le tiroir (même DOM) ; l'en-tête de projet se réorganise par classes             |
+| Contexte + hook (`useProjets`, `ClientWorkerProvider` avec défaut hors ligne)                             | Même modèle pour l'installation : `InstallationProvider` avec un suivi « indisponible » par défaut en test |
+| Modules de logique purs couverts à 100 % (`annonces/`, `enrichissement/`…)                                | Nouveaux : `application/`, `hors-ligne/`, `annonces/partage-recu.ts`                                       |
+| Build d'un fichier à part par une config Vite dédiée (`vite.bookmarklet.config.ts` → `public/capture.js`) | `vite.hors-ligne.config.ts` → `dist/sw.js`, après le build de l'application                                |
+| Lecture unique d'un fragment puis nettoyage de l'adresse (`lireFragmentCapture` dans `NouveauProjet`)     | Même geste pour les paramètres de partage (`lirePartageRecu`)                                              |
+| `ModeDocument` et `@media print`                                                                          | Conservés ; toute classe `md:`, `lg:`, `xl:` d'un volet imprimable reçoit son équivalent `print:`          |
+| Aides Playwright (`e2e/aides.ts`), tests de rendu via `AppEnMemoire`                                      | Aides rendues indépendantes du format (ouverture du menu), mêmes parcours sur trois appareils              |
 
 Aucun conflit : aucune PR ouverte ; `NouveauProjet` et `Extension` (livrés par d'autres sessions) sont touchés aux seuls points nécessaires.
 
@@ -159,17 +159,17 @@ BoutonPartager → capacitesDuNavigateur(window) → modePartage
 
 ## 6. Cas limites
 
-| Module                   | Cas                                                                                                                                                   |
-| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `useMenu`                | ouverture puis passage en grand écran ; lien vers la page déjà affichée (même chemin, nouvelle `key`) ; démontage tiroir ouvert (page débloquée) ; `matchMedia` absent (jsdom) |
-| `lirePartageRecu`        | aucun paramètre ; paramètres vides ; lien seul, texte seul, titre seul ; lien suivi de ponctuation ; plusieurs liens dont un seul d'annonce ; URL invalide ; 20 000 caractères ; `%` mal encodé |
-| `creerSuiviInstallation` | fenêtre absente ; `matchMedia` absent ; déjà standalone ; `navigator.standalone` (iPhone) ; invite refusée ; invite déjà consommée ; `appinstalled` sans invite |
-| `modePartage`, `estAnnulation` | tactile sans `navigator.share` ; souris avec `navigator.share` ; erreur non `DOMException` ; `AbortError` sous forme d'objet nommé                    |
-| `strategiePour`          | autre origine ; POST ; `/capture.js` ; `/sw.js` ; navigation vers une route profonde ; `/assets/…` ; icône ; chemin inconnu ; URL relative invalide        |
-| `fichiersDeLaCoque`      | HTML sans assets ; doublons ; attributs `src` et `href` ; chemins absolus hors `/assets/` ignorés                                                     |
-| `cachesPerimes`          | aucun cache ; caches d'autres applications (préfixe différent) conservés ; cache courant conservé                                                    |
-| `enregistrerServiceWorker` | développement ; conteneur absent ; enregistrement rejeté (l'application continue)                                                                  |
-| Mise en page             | nom de projet très long ; 5 projets dans Comparer à 320 px ; montants à 7 chiffres ; volet Visite ouvert directement (onglet hors de la bande) ; mode document sur téléphone |
+| Module                         | Cas                                                                                                                                                                                             |
+| ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `useMenu`                      | ouverture puis passage en grand écran ; lien vers la page déjà affichée (même chemin, nouvelle `key`) ; démontage tiroir ouvert (page débloquée) ; `matchMedia` absent (jsdom)                  |
+| `lirePartageRecu`              | aucun paramètre ; paramètres vides ; lien seul, texte seul, titre seul ; lien suivi de ponctuation ; plusieurs liens dont un seul d'annonce ; URL invalide ; 20 000 caractères ; `%` mal encodé |
+| `creerSuiviInstallation`       | fenêtre absente ; `matchMedia` absent ; déjà standalone ; `navigator.standalone` (iPhone) ; invite refusée ; invite déjà consommée ; `appinstalled` sans invite                                 |
+| `modePartage`, `estAnnulation` | tactile sans `navigator.share` ; souris avec `navigator.share` ; erreur non `DOMException` ; `AbortError` sous forme d'objet nommé                                                              |
+| `strategiePour`                | autre origine ; POST ; `/capture.js` ; `/sw.js` ; navigation vers une route profonde ; `/assets/…` ; icône ; chemin inconnu ; URL relative invalide                                             |
+| `fichiersDeLaCoque`            | HTML sans assets ; doublons ; attributs `src` et `href` ; chemins absolus hors `/assets/` ignorés                                                                                               |
+| `cachesPerimes`                | aucun cache ; caches d'autres applications (préfixe différent) conservés ; cache courant conservé                                                                                               |
+| `enregistrerServiceWorker`     | développement ; conteneur absent ; enregistrement rejeté (l'application continue)                                                                                                               |
+| Mise en page                   | nom de projet très long ; 5 projets dans Comparer à 320 px ; montants à 7 chiffres ; volet Visite ouvert directement (onglet hors de la bande) ; mode document sur téléphone                    |
 
 ## 7. Retirer le service worker en urgence
 
