@@ -12,6 +12,7 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
+    "@loupe/capture": "*",
     "@loupe/moteur": "*",
     "lucide-react": "^0.560.0",
     "react": "^19.2.0",
