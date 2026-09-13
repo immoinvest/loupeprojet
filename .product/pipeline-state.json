@@ -1,33 +1,37 @@
 {
-  "feature_slug": "onglets-detail",
-  "title": "Onglets Fiscalité (4 régimes, frise, année par année), Revente (horizons 5/10/15/20 ans, plus-value détaillée), Visite (points de vigilance cochables)",
+  "feature_slug": "identite-visuelle",
+  "title": "Identité de marque Deklic : dossier marque/ (logos SVG, favicon, icônes, image de partage, palette, guide), ADR-005, application renommée (titre, favicon, manifeste, couleurs, logotype, textes)",
   "started_at": "2026-09-13T00:00:00Z",
   "current_step": "push",
-  "scope": "apps/web/src/ecrans/{Fiscalite,Revente,Visite}.tsx, analyses/revente, textes (explicationRegime, categorieVigilance)",
-  "branch": "feat/onglets-detail",
-  "base": "master (2916703)",
+  "scope": "marque/, apps/web/public, apps/web/index.html, apps/web/src/index.css, apps/web/src/marque/Logo.tsx, apps/web/src/coque/Sidebar.tsx, textes, docs",
+  "branch": "feat/identite-visuelle",
+  "base": "master (768c556)",
+  "worktree": "C:/Users/errei/Claude/loupeprojet-identite (le dossier principal servait une autre feature)",
   "steps": {
     "discovery": {
       "status": "completed",
-      "output": ".product/features/onglets-detail-discovery.md"
+      "output": "deux tournées de noms et un benchmark de 11 marques (canevas liés dans l'ADR-005) ; Pierre a écarté Proprio puis choisi Deklic"
     },
-    "implement": { "status": "completed", "stories_completed": 5, "stories_total": 5 },
+    "implement": { "status": "completed", "stories_completed": 3, "stories_total": 3 },
     "refactor": {
       "status": "completed",
-      "note": "les deux interactions (régime, horizon) passent par appliquerSaisie ; aucune formule dans les écrans"
+      "note": "le mot du logo est en tracés (fontkit + Sora Bold) : aucune police à charger ; un seul composant Logo.tsx, généré depuis les mêmes tracés que marque/logo/"
     },
     "qa_tests": {
       "status": "completed",
-      "note": "variantesRevente, explicationRegime (4 cas), catégories des 14 codes, écrans (retenir un régime, changer d'horizon, plus-value imposable, cases cochées)"
+      "note": "aucune logique nouvelle : les 277 tests existants couvrent la barre latérale et les textes ; lint, typecheck, format, build verts"
     },
     "security": {
       "status": "completed",
-      "note": "aucune saisie libre nouvelle : régime et horizon sont des valeurs fermées validées par ProjetSchema"
+      "note": "fichiers statiques uniquement ; aucune donnée, aucune clé, aucun script externe ajouté"
     },
     "push": { "status": "in_progress" }
   },
   "decisions": {
-    "horizons": "5/10/15/20 ans recalculés sans scénarios (~5 ms chacun), mémoïsés sur le projet ; cliquer un horizon modifie l'hypothèse revente.annees",
-    "cases_visite": "état local à l'écran, non persisté (dit à l'utilisateur) ; à persister quand le projet aura des notes"
-  }
+    "nom": "Deklic (le déclic), écrit avec un K ; noms internes inchangés (@loupe/moteur, dépôt loupeprojet, clé loupe.projets.v1)",
+    "couleurs": "accent #2B4BF2 (remplace l'indigo #4F55D8), flash #FF7A1A réservé au logo et aux célébrations, jamais sémantique",
+    "typographie": "logotype Sora Bold en tracés ; interface Outfit + Nunito Sans inchangée",
+    "domaine": "à acheter par Pierre après recherche INPI : deklic.io / deklic.ai / mondeklic.fr / deklic-app.fr libres le 13/09/2026 ; og:image pointe sur loupeprojet.pages.dev en attendant"
+  },
+  "self_review": "Risques : homonymes Deklic (média, conseil) non vérifiés à l'INPI ; le changement d'accent touche toute l'app sans maquette dédiée (vérifié visuellement dans le build) ; les PNG sont des captures d'Edge sans fenêtre (nets aux tailles produites, à régénérer si le SVG change)."
 }

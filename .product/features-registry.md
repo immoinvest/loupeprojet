@@ -4,6 +4,7 @@ Format : `- [ ] slug — titre — date — scope`
 
 ## En cours
 
+- [ ] identite-visuelle — Identité de marque Deklic : dossier `marque/` (logos SVG, favicon, icônes 192/512/180, image de partage, palette, guide), ADR-005, app renommée (titre, favicon, manifeste, couleurs, logotype dans la barre latérale, textes) — 2026-09-13 — `marque/`, `apps/web`, docs — PR à venir
 - [ ] onglets-detail — Fiscalité (4 régimes côte à côte, frise, année par année), Revente (5/10/15/20 ans, plus-value détaillée), Visite (points de vigilance cochables) — 2026-09-13 — `apps/web/src/ecrans`, `analyses`, `textes` — PR #6
 
 ## À venir (ordre proposé, une par session)

@@ -1,4 +1,4 @@
-# Loupe
+# Deklic
 
 Colle le lien d'une annonce immobilière, obtiens l'analyse complète de rentabilité locative : financement, cash-flow, fiscalité (quatre régimes côte à côte), revente, rendement et TRI, verdict à cinq feux, scénarios « et si ».
 
@@ -14,6 +14,7 @@ Monorepo npm workspaces, TypeScript strict, Vitest, ESLint, Prettier. Cible : Re
 packages/moteur/     Moteur de calcul pur (TypeScript + Zod), 100 % couvert par les tests
 apps/web/            Application React + Vite + Tailwind v4 (coque SaaS, Mes projets, Nouveau projet, Rapport, Hypothèses, Fiscalité, Revente, Visite), Cloudflare Pages
 apps/                À venir : worker, extension
+marque/              Identité de marque Deklic : logos SVG, favicon, icônes, image de partage, guide (ADR-005)
 .product/            Spécifications, ADR, design, état du pipeline de développement
 .claude/commands/    Skills du pipeline de développement (Claude Code)
 ```
@@ -83,4 +84,4 @@ En local : `npx wrangler pages deploy dist` depuis `apps/web` (compte Cloudflare
 
 ## Avertissement
 
-Loupe est un outil d'aide à la décision, pas un conseil en investissement ni un conseil fiscal. Les règles fiscales sont celles connues au 13 septembre 2026.
+Deklic est un outil d'aide à la décision, pas un conseil en investissement ni un conseil fiscal. Les règles fiscales sont celles connues au 13 septembre 2026.
