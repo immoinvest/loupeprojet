@@ -20,7 +20,13 @@ const VOLETS: readonly { readonly titre: string; readonly Volet: () => JSX.Eleme
  * Le projet complet en un seul document : en-tête, les quatre volets (un par page à
  * l'impression), pied de page. Rendu en mode document : lecture seule, explications visibles.
  */
-export function DocumentProjet({ date }: { date?: string }): JSX.Element {
+export function DocumentProjet({
+  date,
+  libelleDate = 'Imprimé le',
+}: {
+  date?: string;
+  libelleDate?: string;
+}): JSX.Element {
   const { enregistre, resultats: r } = useProjetCourant();
   const { bien, hypotheses, source } = enregistre.projet;
   const jour = dateCourte(date ?? new Date().toISOString());
@@ -43,7 +49,7 @@ export function DocumentProjet({ date }: { date?: string }): JSX.Element {
           </div>
           <dl className="m-0 flex flex-col gap-0.5 text-right text-[13px] text-encre-3">
             <div>
-              <dt className="inline">Imprimé le </dt>
+              <dt className="inline">{libelleDate} </dt>
               <dd className="inline font-semibold text-encre-2">{jour}</dd>
             </div>
             <div>

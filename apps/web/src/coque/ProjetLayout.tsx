@@ -1,10 +1,19 @@
 import { calculerProjet, type Resultats } from '@loupe/moteur';
-import { createContext, useContext, useMemo, type JSX, type ReactNode } from 'react';
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type JSX,
+  type ReactNode,
+} from 'react';
 import { Link, NavLink, Outlet, useNavigate, useParams } from 'react-router';
 
 import { Bouton } from '@/composants/ui';
 import { euros } from '@/formatage/nombres';
 import { useProjets } from '@/stockage/ProjetsContext';
+import { lienPartage } from '@/stockage/partage';
 import { STATUTS, StatutProjetSchema, type ProjetEnregistre } from '@/stockage/projets';
 import { MODES } from '@/textes/regimes';
 
@@ -56,6 +65,58 @@ const onglet = ({ isActive }: { isActive: boolean }): string =>
   `border-b-2 px-4 py-3 text-[15px] font-semibold ${
     isActive ? 'border-accent text-accent' : 'border-transparent text-encre-3 hover:text-encre'
   }`;
+
+type EtatPartage = 'repos' | 'copie' | 'manuel';
+
+const DUREE_CONFIRMATION_MS = 2_500;
+
+/** Copie le lien de partage ; si le presse-papiers refuse, le lien s'affiche à copier à la main. */
+function BoutonPartager({ enregistre }: { enregistre: ProjetEnregistre }): JSX.Element {
+  const [etat, setEtat] = useState<EtatPartage>('repos');
+  const lien = lienPartage(window.location.origin, enregistre);
+
+  useEffect(() => {
+    if (etat !== 'copie') return undefined;
+    const minuteur = window.setTimeout(() => {
+      setEtat('repos');
+    }, DUREE_CONFIRMATION_MS);
+    return () => {
+      window.clearTimeout(minuteur);
+    };
+  }, [etat]);
+
+  const partager = async (): Promise<void> => {
+    try {
+      await navigator.clipboard.writeText(lien);
+      setEtat('copie');
+    } catch {
+      setEtat('manuel');
+    }
+  };
+
+  return (
+    <>
+      {etat === 'manuel' && (
+        <input
+          readOnly
+          aria-label="Lien de partage"
+          value={lien}
+          onFocus={(e) => {
+            e.currentTarget.select();
+          }}
+          className="min-h-[44px] w-64 rounded-full border border-bordure bg-surface px-3 text-xs"
+        />
+      )}
+      <Bouton
+        onClick={() => {
+          void partager();
+        }}
+      >
+        {etat === 'copie' ? 'Lien copié' : 'Partager'}
+      </Bouton>
+    </>
+  );
+}
 
 function EnTete(): JSX.Element {
   const { enregistre } = useProjetCourant();
@@ -109,9 +170,7 @@ function EnTete(): JSX.Element {
         >
           PDF
         </Bouton>
-        <Bouton disabled title="Bientôt : lien de partage">
-          Partager
-        </Bouton>
+        <BoutonPartager enregistre={enregistre} />
       </div>
     </header>
   );

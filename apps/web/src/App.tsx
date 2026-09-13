@@ -9,6 +9,7 @@ import { Hypotheses } from './ecrans/Hypotheses';
 import { Imprimer } from './ecrans/Imprimer';
 import { MesProjets } from './ecrans/MesProjets';
 import { NouveauProjet } from './ecrans/NouveauProjet';
+import { Partage } from './ecrans/Partage';
 import { Rapport } from './ecrans/Rapport';
 import { Revente } from './ecrans/Revente';
 import { Visite } from './ecrans/Visite';
@@ -34,6 +35,7 @@ export const routes: RouteObject[] = [
           { path: 'visite', element: <Visite /> },
         ],
       },
+      { path: 'partage', element: <Partage /> },
       {
         path: 'comparer',
         element: <Bientot titre="Comparer" phrase="Bientôt : deux à cinq projets côte à côte." />,
