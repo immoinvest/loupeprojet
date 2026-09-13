@@ -1,0 +1,60 @@
+{
+  "marque": "Deklic",
+  "date": "2026-09-13",
+  "adr": ".product/adr/005-identite-marque.md",
+  "couleurs": {
+    "accent": {
+      "nom": "Bleu électrique",
+      "hex": "#2B4BF2",
+      "usage": "maison du logo, actions, liens, focus"
+    },
+    "accentFonce": { "nom": "Bleu pressé", "hex": "#1F38C4", "usage": "survol" },
+    "accentDoux": { "nom": "Bleu doux", "hex": "#E8ECFF", "usage": "sélection active" },
+    "accentFond": {
+      "nom": "Bleu fond",
+      "hex": "#F5F7FF",
+      "usage": "encarts, fond de page bleutée"
+    },
+    "accentBordure": { "nom": "Bleu bordure", "hex": "#D9DFFF", "usage": "cartes mises en avant" },
+    "flash": {
+      "nom": "Orange flash",
+      "hex": "#FF7A1A",
+      "usage": "éclats du logo, i du mot, célébrations ; jamais un état sémantique"
+    },
+    "flashFond": {
+      "nom": "Orange pâle",
+      "hex": "#FFF1E6",
+      "usage": "fond des messages de célébration"
+    },
+    "fond": { "nom": "Blanc chaud", "hex": "#FFFDF9", "usage": "fond de l'application (ADR-004)" },
+    "encre": { "nom": "Encre", "hex": "#23272F", "usage": "texte (ADR-004)" },
+    "encreLogo": { "nom": "Encre profonde", "hex": "#12173A", "usage": "versions mono du logo" },
+    "bon": { "nom": "Vert bon", "hex": "#2E9E6B", "usage": "feu vert (sémantique, ADR-004)" },
+    "surveiller": {
+      "nom": "Orange à surveiller",
+      "hex": "#D98A1E",
+      "usage": "feu orange (sémantique, ADR-004), distinct du flash"
+    },
+    "probleme": {
+      "nom": "Rouge problème",
+      "hex": "#D9453D",
+      "usage": "feu rouge (sémantique, ADR-004)"
+    }
+  },
+  "typographies": {
+    "logotype": {
+      "police": "Sora",
+      "graisse": 700,
+      "interlettrage": "-0.05em",
+      "rendu": "tracés SVG, aucune police à charger"
+    },
+    "titres": { "police": "Outfit", "graisses": [600, 700] },
+    "texte": { "police": "Nunito Sans", "graisses": [400, 600, 700] }
+  },
+  "logo": {
+    "grille": 64,
+    "maison": "M32 22 L50 36 V56 H14 V36 Z (contour 4, jointures arrondies)",
+    "eclats": "M32 16 V6 M21 19 L14 12 M43 19 L50 12 (trait 5, bouts arrondis)",
+    "logotype": { "viewBox": "0 0 399 64", "motX": 78, "ligneDeBase": 56, "echelleMot": 0.6 }
+  }
+}
