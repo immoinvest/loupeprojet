@@ -12,17 +12,17 @@ Deklic doit proposer un compte optionnel : connexion par Google, Apple ou e-mail
 
 ## Décision
 
-| Sujet                 | Choix                                                                                                                                                                                                                                                      |
-| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Bibliothèque          | **Better Auth** (TypeScript, MIT) : sessions en cookie, code e-mail (plugin `emailOTP`), fournisseurs Google et Apple, mise à jour et suppression du compte, limite de débit. Nous n'écrivons aucune cryptographie.                                          |
-| Base                  | **Cloudflare D1** (SQLite, `location_hint` UE), tables Better Auth (`user`, `session`, `account`, `verification`), migration SQL versionnée dans `apps/comptes/migrations/`. Accès par **Kysely + `kysely-d1`** (l'adaptateur Kysely est natif chez Better Auth). |
-| Méthode e-mail        | **Code à 6 chiffres** envoyé par e-mail (10 minutes, 3 essais), pas de mot de passe. Le lien magique de la spec est remplacé : on reste sur l'appareil où l'on se connecte.                                                                                 |
-| E-mails               | **Resend** (API HTTP, gratuit jusqu'à 3 000/mois). Sans clé (développement) : le code est écrit dans le journal du worker.                                                                                                                                  |
-| Déploiement           | Nouveau workspace **`apps/comptes`** (Hono + Better Auth). Le build de `apps/web` produit `dist/_worker.js` (bundle de `apps/comptes` par `wrangler deploy --dry-run`) et `dist/_routes.json` (seul `/api/*` entre dans le worker). Même origine que le site. |
-| Développement local   | `wrangler dev` sur `apps/comptes` (D1 locale automatique, secrets dans `.dev.vars`) ; Vite relaie `/api` vers `http://localhost:8787`.                                                                                                                       |
-| Instance              | Better Auth est instancié **par requête** (les bindings D1 n'existent que dans la requête), avec `baseURL` = origine de la requête ; les origines de confiance couvrent la production, les previews Pages, localhost et `appleid.apple.com`.               |
-| Fournisseurs          | Google et Apple activés par variables d'environnement ; `GET /api/comptes/fournisseurs` dit à l'interface quels boutons afficher. Apple exige le programme développeur (99 $/an) : décision de Pierre, pas un blocage.                                       |
-| Sécurité              | Cookies `HttpOnly`, `SameSite=Lax`, `Secure` hors développement ; session 7 jours renouvelée ; suppression du compte réservée aux sessions de moins d'un jour ; aucune adresse e-mail ni code dans les journaux ; secrets uniquement côté worker.            |
+| Sujet               | Choix                                                                                                                                                                                                                                                             |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Bibliothèque        | **Better Auth** (TypeScript, MIT) : sessions en cookie, code e-mail (plugin `emailOTP`), fournisseurs Google et Apple, mise à jour et suppression du compte, limite de débit. Nous n'écrivons aucune cryptographie.                                               |
+| Base                | **Cloudflare D1** (SQLite, `location_hint` UE), tables Better Auth (`user`, `session`, `account`, `verification`), migration SQL versionnée dans `apps/comptes/migrations/`. Accès par **Kysely + `kysely-d1`** (l'adaptateur Kysely est natif chez Better Auth). |
+| Méthode e-mail      | **Code à 6 chiffres** envoyé par e-mail (10 minutes, 3 essais), pas de mot de passe. Le lien magique de la spec est remplacé : on reste sur l'appareil où l'on se connecte.                                                                                       |
+| E-mails             | **Resend** (API HTTP, gratuit jusqu'à 3 000/mois). Sans clé (développement) : le code est écrit dans le journal du worker.                                                                                                                                        |
+| Déploiement         | Nouveau workspace **`apps/comptes`** (Hono + Better Auth). Le build de `apps/web` produit `dist/_worker.js` (bundle de `apps/comptes` par `wrangler deploy --dry-run`) et `dist/_routes.json` (seul `/api/*` entre dans le worker). Même origine que le site.     |
+| Développement local | `wrangler dev` sur `apps/comptes` (D1 locale automatique, secrets dans `.dev.vars`) ; Vite relaie `/api` vers `http://localhost:8787`.                                                                                                                            |
+| Instance            | Better Auth est instancié **par requête** (les bindings D1 n'existent que dans la requête), avec `baseURL` = origine de la requête ; les origines de confiance couvrent la production, les previews Pages, localhost et `appleid.apple.com`.                      |
+| Fournisseurs        | Google et Apple activés par variables d'environnement ; `GET /api/comptes/fournisseurs` dit à l'interface quels boutons afficher. Apple exige le programme développeur (99 $/an) : décision de Pierre, pas un blocage.                                            |
+| Sécurité            | Cookies `HttpOnly`, `SameSite=Lax`, `Secure` hors développement ; session 7 jours renouvelée ; suppression du compte réservée aux sessions de moins d'un jour ; aucune adresse e-mail ni code dans les journaux ; secrets uniquement côté worker.                 |
 
 ## Alternatives écartées
 
@@ -41,3 +41,13 @@ Deklic doit proposer un compte optionnel : connexion par Google, Apple ou e-mail
 - Les previews Pages ont chacune leur origine : Google et Apple n'y fonctionnent pas (URL de retour non enregistrées) ; le code e-mail, si.
 - `apps/comptes` devient le foyer naturel de la synchronisation des projets (v1.5) : même base, même session.
 - Coût : 0 € dans les quotas gratuits (D1 : 5 millions de lectures/jour ; Resend : 3 000 e-mails/mois ; Pages Functions : 100 000 requêtes/jour).
+
+## Mise à jour après implémentation (13/09/2026)
+
+- **Accès à D1** : pas de `kysely-d1`. Better Auth 1.7 reconnaît le binding D1 tel quel et utilise son propre dialecte D1, sans transaction.
+- **Instances** : une instance Better Auth par origine, gardée dans l'isolat (les bindings sont stables d'une requête à l'autre), et non une par requête.
+- **Garde avant Better Auth** : Better Auth avale les erreurs de l'envoi du code et répond « envoyé » ; une garde HTTP vérifie donc l'hôte, n'ouvre que les routes utilisées (mot de passe et changement d'adresse fermés) et n'accepte que le code de connexion.
+- **Échec fermé** : sans `ENVIRONNEMENT`, le worker se considère en production (secret exigé, pas d'origine locale) ; sans secret ou sans base, `/api/*` répond 503 et le site reste servi.
+- **Déploiement opt-in** : le bundle importe `node:crypto` (utilitaires de Better Auth), que Pages refuse sans le flag `nodejs_compat`. Le build de `apps/web` ne dépose `_worker.js` qu'avec la variable de build `DEKLIC_COMPTES=1`, pour ne pas casser les déploiements de `master` avant la mise en service.
+- **Client web** : fetch et Zod sur les routes Better Auth, plutôt que le client Better Auth : aucune dépendance ajoutée au site, réponses validées, erreurs traduites en codes.
+- **Tests de la base** : Miniflare ne démarre pas sur la machine de développement ; la migration est vérifiée à travers une D1 simulée sur `node:sqlite`, qui refuse les mêmes types de valeurs que D1.

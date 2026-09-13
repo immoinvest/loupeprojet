@@ -4,11 +4,11 @@ Discovery validée : `.product/features/comptes-discovery.md`. Branche `feat/com
 
 ## Épics
 
-| Épic | Titre                                  | Stories       |
-| ---- | -------------------------------------- | ------------- |
-| E1   | API des comptes (`apps/comptes`)       | US-1 à US-5   |
-| E2   | Écrans et coque (`apps/web`)           | US-6 à US-8   |
-| E3   | Documentation et mise en place         | fin de pipeline (ADR-006, guide, docs communes) |
+| Épic | Titre                            | Stories                                         |
+| ---- | -------------------------------- | ----------------------------------------------- |
+| E1   | API des comptes (`apps/comptes`) | US-1 à US-5                                     |
+| E2   | Écrans et coque (`apps/web`)     | US-6 à US-8                                     |
+| E3   | Documentation et mise en place   | fin de pipeline (ADR-006, guide, docs communes) |
 
 ## Stories
 
@@ -234,20 +234,20 @@ Scénario : suppression
 
 Base : l'origine du site, préfixe `/api`. Cookies : `HttpOnly`, `SameSite=Lax`, `Secure` hors développement, durée 7 jours renouvelée chaque jour.
 
-| Route                                                | Corps / réponse                                                                                       |
-| ---------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| `GET /api/comptes/sante`                             | `200 { ok: true, version, environnement }`                                                            |
-| `GET /api/comptes/fournisseurs`                      | `200 { email: boolean, google: boolean, apple: boolean }`                                            |
-| `POST /api/auth/email-otp/send-verification-otp`     | `{ email, type: 'sign-in' }` → `200 { success: true }` ; `400` e-mail invalide ; `429`                |
-| `POST /api/auth/sign-in/email-otp`                   | `{ email, otp }` → `200 { token, user }` + cookie ; `400 INVALID_OTP / OTP_EXPIRED / TOO_MANY_ATTEMPTS` |
-| `POST /api/auth/sign-in/social`                      | `{ provider: 'google' \| 'apple', callbackURL, errorCallbackURL }` → `200 { url, redirect: true }`    |
-| `GET /api/auth/callback/:provider`                   | `302` vers `callbackURL` (cookie posé) ou `errorCallbackURL?error=…`                                  |
-| `GET /api/auth/get-session`                          | `200 { session, user }` ou `200 null`                                                                 |
-| `POST /api/auth/sign-out`                            | `200 { success: true }`                                                                               |
-| `POST /api/auth/update-user`                         | `{ name }` → `200 { status: true }`                                                                   |
-| `GET /api/auth/list-accounts`                        | `200 [{ id, providerId, accountId, createdAt, … }]`                                                   |
-| `POST /api/auth/delete-user`                         | `200 { success: true }` ; `400 SESSION_NOT_FRESH` si la session date de plus d'un jour                |
-| Erreurs `apps/comptes`                               | `{ code }` : `404 INTROUVABLE`, `500 ERREUR_INTERNE` ; Better Auth : `{ code, message }`              |
+| Route                                            | Corps / réponse                                                                                         |
+| ------------------------------------------------ | ------------------------------------------------------------------------------------------------------- |
+| `GET /api/comptes/sante`                         | `200 { ok: true, version, environnement }`                                                              |
+| `GET /api/comptes/fournisseurs`                  | `200 { email: boolean, google: boolean, apple: boolean }`                                               |
+| `POST /api/auth/email-otp/send-verification-otp` | `{ email, type: 'sign-in' }` → `200 { success: true }` ; `400` e-mail invalide ; `429`                  |
+| `POST /api/auth/sign-in/email-otp`               | `{ email, otp }` → `200 { token, user }` + cookie ; `400 INVALID_OTP / OTP_EXPIRED / TOO_MANY_ATTEMPTS` |
+| `POST /api/auth/sign-in/social`                  | `{ provider: 'google' \| 'apple', callbackURL, errorCallbackURL }` → `200 { url, redirect: true }`      |
+| `GET /api/auth/callback/:provider`               | `302` vers `callbackURL` (cookie posé) ou `errorCallbackURL?error=…`                                    |
+| `GET /api/auth/get-session`                      | `200 { session, user }` ou `200 null`                                                                   |
+| `POST /api/auth/sign-out`                        | `200 { success: true }`                                                                                 |
+| `POST /api/auth/update-user`                     | `{ name }` → `200 { status: true }`                                                                     |
+| `GET /api/auth/list-accounts`                    | `200 [{ id, providerId, accountId, createdAt, … }]`                                                     |
+| `POST /api/auth/delete-user`                     | `200 { success: true }` ; `400 SESSION_NOT_FRESH` si la session date de plus d'un jour                  |
+| Erreurs `apps/comptes`                           | `{ code }` : `404 INTROUVABLE`, `500 ERREUR_INTERNE` ; Better Auth : `{ code, message }`                |
 
 Les routes `/api/auth/*` sont celles de Better Auth (préfixe `basePath = /api/auth`), documentées ici pour les tests ; l'interface passe par le client Better Auth, jamais par `fetch` à la main.
 
@@ -264,27 +264,27 @@ Le SQL exact est généré par Better Auth (US-4) et versionné dans `apps/compt
 
 ## Variables et secrets (`apps/comptes`)
 
-| Nom                                             | Où                              | Rôle                                                              |
-| ----------------------------------------------- | ------------------------------- | ----------------------------------------------------------------- |
-| `ENVIRONNEMENT`                                 | vars                            | `dev` / `preview` / `production`                                  |
-| `BETTER_AUTH_SECRET`                            | secret                          | signature des cookies et jetons (≥ 32 caractères)                 |
-| `RESEND_API_KEY`, `COURRIEL_EXPEDITEUR`         | secret, var                     | envoi des codes (absents en dev : journal)                        |
-| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`      | var, secret                     | bouton Google                                                     |
-| `APPLE_CLIENT_ID`, `APPLE_TEAM_ID`, `APPLE_KEY_ID`, `APPLE_PRIVATE_KEY` | var, var, var, secret | bouton Apple                                        |
-| Binding `DB`                                    | D1                              | base des comptes                                                  |
+| Nom                                                                     | Où                    | Rôle                                              |
+| ----------------------------------------------------------------------- | --------------------- | ------------------------------------------------- |
+| `ENVIRONNEMENT`                                                         | vars                  | `dev` / `preview` / `production`                  |
+| `BETTER_AUTH_SECRET`                                                    | secret                | signature des cookies et jetons (≥ 32 caractères) |
+| `RESEND_API_KEY`, `COURRIEL_EXPEDITEUR`                                 | secret, var           | envoi des codes (absents en dev : journal)        |
+| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`                              | var, secret           | bouton Google                                     |
+| `APPLE_CLIENT_ID`, `APPLE_TEAM_ID`, `APPLE_KEY_ID`, `APPLE_PRIVATE_KEY` | var, var, var, secret | bouton Apple                                      |
+| Binding `DB`                                                            | D1                    | base des comptes                                  |
 
 ## MoSCoW
 
-| Story | Priorité | Effort | Dépend de     |
-| ----- | -------- | ------ | ------------- |
-| US-1  | Must     | S      | —             |
-| US-2  | Must     | M      | US-1          |
-| US-3  | Must (Google) / Should (Apple) | S | US-2 |
-| US-4  | Must     | M      | US-2          |
-| US-5  | Must     | S      | US-1          |
-| US-6  | Must     | S      | US-2, US-3    |
-| US-7  | Must     | M      | US-6          |
-| US-8  | Must (profil, déconnexion) / Should (nom, suppression) | M | US-6 |
+| Story | Priorité                                               | Effort | Dépend de  |
+| ----- | ------------------------------------------------------ | ------ | ---------- |
+| US-1  | Must                                                   | S      | —          |
+| US-2  | Must                                                   | M      | US-1       |
+| US-3  | Must (Google) / Should (Apple)                         | S      | US-2       |
+| US-4  | Must                                                   | M      | US-2       |
+| US-5  | Must                                                   | S      | US-1       |
+| US-6  | Must                                                   | S      | US-2, US-3 |
+| US-7  | Must                                                   | M      | US-6       |
+| US-8  | Must (profil, déconnexion) / Should (nom, suppression) | M      | US-6       |
 
 Ordre d'implémentation : US-1 → US-2 → US-3 → US-4 → US-5 → US-6 → US-7 → US-8. Effort total : ~L (une session).
 
@@ -293,3 +293,12 @@ Ordre d'implémentation : US-1 → US-2 → US-3 → US-4 → US-5 → US-6 → 
 - **Ce qui pourrait être faux** : les noms exacts des routes et codes d'erreur de Better Auth 1.7 (vérifiés dans le paquet installé pendant l'architecture, et par les tests) ; la faisabilité d'un test Miniflare + D1 en Node (repli : SQLite Node si Miniflare ne se lance pas dans Vitest).
 - **Ce qui a changé après relecture** : `fournisseurs` renvoie aussi `email` (faux en production sans clé Resend) pour que la page ne propose jamais une méthode qui échouerait ; l'écran Mes projets connecté annonce « synchronisation bientôt » au lieu de laisser un bouton mort ; la suppression du compte exige une session fraîche (comportement par défaut de Better Auth) plutôt qu'une vérification par e-mail, pour rester simple.
 - **Limites assumées** : pas de changement d'e-mail, pas de liaison manuelle d'un second fournisseur (Better Auth relie automatiquement les comptes Google/Apple à un utilisateur existant si l'e-mail est vérifié), pas d'envoi d'e-mail réel avant la vérification du domaine chez Resend.
+
+## Écarts à l'implémentation
+
+- US-2 : un envoi de code qui échoue (Resend en panne) ne rend pas d'erreur : Better Auth répond « envoyé » ; l'échec est journalisé sans l'adresse et l'écran propose « Renvoyer un code ». Les autres types de code sont refusés avant Better Auth (400 `TYPE_NON_PRIS_EN_CHARGE`).
+- US-2 : 10 saisies de code par minute et par IP (au lieu des 3 du plugin), pour qu'un code invalidé après 3 erreurs puisse être remplacé tout de suite.
+- US-4 : la base est testée à travers une D1 simulée sur `node:sqlite` (Miniflare ne démarre pas sur la machine de développement) ; pas de `kysely-d1`, Better Auth reconnaît le binding D1.
+- US-5 : le worker n'est déposé dans `dist/` qu'avec `DEKLIC_COMPTES=1` (le bundle exige le flag `nodejs_compat` sur Pages).
+- US-6 : client web en fetch + Zod plutôt que le client Better Auth.
+- US-8 : une session de plus d'un jour rend 400 `SESSION_EXPIRED` à la suppression (et non `SESSION_NOT_FRESH`) ; l'écran demande de se reconnecter.

@@ -1,205 +1,124 @@
 # Architecture — `comptes` : connexion Google, Apple, code e-mail
 
-Specs : `.product/specs/comptes-specs.md` · Décision : `.product/adr/006-comptes-better-auth.md`.
+Specs : `.product/specs/comptes-specs.md` · Décision : `.product/adr/006-comptes-better-auth.md` · État : `.product/pipeline/comptes.json`.
 
 ## Vue d'ensemble
 
 ```
-Navigateur (apps/web, SPA)                      Cloudflare Pages (une seule origine)
-┌────────────────────────────┐    /api/auth/*      ┌──────────────────────────────────┐
-│ /connexion  /compte        │ ─────────────────▶ │ dist/_worker.js  (= apps/comptes) │
-│ barre latérale (profil)    │ ◀───── cookie ──── │  Hono                             │
-│ src/compte/ : ClientCompte │    /api/comptes/*   │   ├ /api/comptes/sante            │
-│  ├ reseau.ts (Better Auth  │                     │   ├ /api/comptes/fournisseurs     │
-│  │   client + emailOTP)    │                     │   └ /api/auth/*  → Better Auth    │
-│  └ memoire.ts (tests)      │    tout le reste    │        (instance par requête)     │
-└────────────────────────────┘ ── statique ──────▶ │ _routes.json : include ["/api/*"] │
-                                 (_redirects SPA)  └─────┬────────────────┬────────────┘
-                                                         ▼                ▼
-                                                   D1 « deklic-comptes »  Resend (e-mails)
-                                                   user · session ·       Google · Apple (OAuth)
-                                                   account · verification
+Navigateur (apps/web, SPA)                         Cloudflare Pages (une seule origine)
+┌───────────────────────────────┐   /api/auth/*     ┌─────────────────────────────────────────┐
+│ /connexion (hors coque)       │ ────────────────▶ │ dist/_worker.js = apps/comptes          │
+│ /compte, profil (barre)       │ ◀──── cookie ──── │  index.ts : /api/* → app, sinon ASSETS  │
+│ src/compte/                   │   /api/comptes/*  │  app.ts (Hono)                          │
+│  reseau.ts  fetch + Zod       │                   │   ├ GET /api/comptes/sante              │
+│  memoire.ts double de test    │                   │   ├ GET /api/comptes/fournisseurs       │
+│  CompteContext.tsx            │   tout le reste   │   └ /api/auth/* → garde → Better Auth   │
+└───────────────────────────────┘ ── statique ────▶ │ _routes.json : include ["/api/*"]       │
+                                    (_redirects)     └──────┬───────────────────┬──────────────┘
+                                                            ▼                   ▼
+                                                  D1 « deklic-comptes »     Resend (codes)
+                                                  user · session ·          Google · Apple (OAuth)
+                                                  account · verification
 ```
 
-Développement : `wrangler dev` sur `apps/comptes` (port 8787, D1 locale, `.dev.vars`) et Vite (`server.proxy['/api'] → 8787`). Production : le build de `apps/web` bundle `apps/comptes` en `dist/_worker.js` (plugin Vite `closeBundle` → `wrangler deploy --dry-run --outdir`).
+- Production : `DEKLIC_COMPTES=1` (variable de build Pages) fait déposer `dist/_worker.js` par le build de `apps/web` (plugin Vite `workerDesComptes` : `wrangler deploy --dry-run` dans `apps/comptes`). Sans cette variable, pas de worker : le site se déploie sans flag `nodejs_compat` ni base, et le client voit la connexion « indisponible ».
+- Développement : `npm run dev -w apps/comptes` (migrations D1 locales puis `wrangler dev` sur 8787) et `npm run dev -w apps/web` (Vite relaie `/api` vers 8787).
 
-## Fichiers
-
-### À créer — `apps/comptes` (nouveau workspace `@loupe/comptes`)
-
-```
-apps/comptes/
-├── package.json             dev (wrangler dev), build (wrangler deploy --dry-run --outdir dist), typecheck, test, test:coverage, migration:generer
-├── wrangler.toml            name loupe-comptes, main src/index.ts, compatibility_date, compatibility_flags ["nodejs_compat"], [vars] ENVIRONNEMENT, [[d1_databases]] DB (migrations_dir), [observability]
-├── .dev.vars.example        ENVIRONNEMENT=dev, BETTER_AUTH_SECRET, RESEND_API_KEY, COURRIEL_EXPEDITEUR, GOOGLE_*, APPLE_*
-├── tsconfig.json            comme apps/worker (types @cloudflare/workers-types) + scripts/
-├── vitest.config.ts         name 'comptes', environnement node, tests/**, couverture src/** (hors index.ts)
-├── migrations/0001_comptes.sql   généré par Better Auth (getMigrations → compileMigrations) sur une D1 locale
-├── scripts/generer-migration.ts  Miniflare D1 vide + optionsAuth → SQL → migrations/0001_comptes.sql
-├── src/
-│   ├── index.ts             export default { fetch } : creerApp(dependancesDepuisEnv(env)) une fois par isolat ; /api/* → app ; sinon env.ASSETS.fetch (ou 404 en dev)
-│   ├── app.ts               creerApp(deps) : GET /api/comptes/sante, GET /api/comptes/fournisseurs, app.on(['GET','POST'], '/api/auth/*', → auth(origine).handler(requête)), notFound, onError
-│   ├── dependances.ts       Bindings (DB: D1Database, ASSETS?, variables) ; VariablesSchema (Zod) ; Dependances ; dependancesDepuisEnv(env)
-│   ├── auth.ts              optionsAuth(deps, origine) : BetterAuthOptions ; creerAuth(deps) : (origine) => Auth (cache par origine)
-│   ├── fournisseurs.ts      ConfigFournisseurs (google?, apple?) depuis les variables ; disponibles(deps) → { email, google, apple } ; secretClientApple(config, maintenant) (jose, ES256, 180 jours)
-│   ├── courriel.ts          Envoyeur { envoyer(message) } ; envoyeurResend(cle, expediteur, fetcher) ; envoyeurJournal(journal) ; messageCode(code) (sujet, texte, html en français)
-│   ├── journal.ts           journal structuré (copie de apps/worker : la seule console autorisée) + journalMemoire
-│   └── erreurs.ts           CodeErreur ('INTROUVABLE' | 'ERREUR_INTERNE'), reponseErreur, ErreurConfiguration
-└── tests/
-    ├── aide.ts              banc(surcharges) : memoryAdapter, envoyeur mémoire (garde les codes), journal mémoire, horloge, jarre à cookies
-    ├── app.test.ts          santé, fournisseurs (selon config), 404, 500 + journal, index.ts (routage /api vs ASSETS)
-    ├── auth.test.ts         flux code complet (envoi → cookie → session → déconnexion), code faux / expiré / 3 essais, e-mail invalide, 429, update-user, list-accounts, delete-user (session fraîche / ancienne), sign-in/social Google (URL) et fournisseur absent, secret Apple
-    ├── modules.test.ts      dependances (Zod, config invalide), fournisseurs, courriel (Resend : requête, erreur HTTP ; journal en dev), erreurs
-    └── migration.test.ts    Miniflare D1 : applique 0001_comptes.sql, joue le flux code sur D1 (même code que la production), vérifie les lignes
-```
-
-### À créer — `apps/web`
+## `apps/comptes` (`@loupe/comptes`)
 
 ```
-apps/web/
-├── public/_routes.json                 { "version": 1, "include": ["/api/*"], "exclude": [] }
-├── src/compte/
-│   ├── types.ts                        Utilisateur, Fournisseurs, CodeErreurCompte, ClientCompte (contrat)
-│   ├── reseau.ts                       clientReseau(fetch?) : createAuthClient (better-auth/client + emailOTPClient) → ClientCompte ; traduction des erreurs en codes
-│   ├── memoire.ts                      clientMemoire(options) : double déterministe pour les tests (code attendu, fournisseurs, utilisateur initial)
-│   └── CompteContext.tsx               CompteProvider({ client }) : etat 'chargement' | 'anonyme' | 'connecte', utilisateur, actions ; useCompte()
-├── src/textes/compte.ts                phrases des codes d'erreur, libellés des fournisseurs, initiales(nom)
-├── src/ecrans/Connexion.tsx            page classique (hors coque) : logotype, boutons, e-mail → code, erreurs, retour
-├── src/ecrans/Compte.tsx               page Mon compte (dans la coque) : e-mail, nom, méthodes, déconnexion, suppression
-├── src/coque/Profil.tsx                bloc bas de la barre latérale (anonyme / connecté)
-└── tests/compte.test.tsx, tests/connexion.test.tsx  (+ ajustements de app.test.tsx)
+src/
+├── index.ts         creerGestionnaire : /api/* → application (construite une fois par isolat) ; configuration
+│                    incomplète → 503 CONFIGURATION_INCOMPLETE (journalisé) ; le reste → env.ASSETS (ou 404)
+├── app.ts           creerApp(deps) : sante, fournisseurs (Cache-Control: no-store), garde puis Better Auth, 404, 500
+├── garde.ts         avant Better Auth : hôte connu (origineConnue, * = un sous-domaine), liste blanche ROUTES_AUTH,
+│                    demande de code : envoyeur présent (503) et type « sign-in » seulement (400)
+├── auth.ts          optionsAuth(deps, origine) ; creerAuth : une instance par origine (8 au plus) ; envoyerCode
+│                    (échec journalisé sans l'adresse) ; masquerCourriels pour le journal de Better Auth
+├── sociaux.ts       fournisseursSociaux (Google prompt select_account ; Apple : secret signé, clé illisible → Apple
+│                    désactivé) ; originesDeConfiance (+ appleid.apple.com si Apple)
+├── fournisseurs.ts  lireConfigFournisseurs (tout ou rien par fournisseur), disponibles, secretClientApple (JWT ES256, 180 j)
+├── courriel.ts      Envoyeur ; envoyeurResend (POST api.resend.com/emails) ; envoyeurJournal (dev) ; messageCode
+├── dependances.ts   Bindings → Dependances ; variables validées par Zod ; ENVIRONNEMENT = production par défaut
+│                    (secret exigé, pas d'origine locale) ; binding DB exigé
+├── erreurs.ts       codes (INTROUVABLE, ORIGINE_INCONNUE, TYPE_NON_PRIS_EN_CHARGE, COURRIEL_INDISPONIBLE,
+│                    CONFIGURATION_INCOMPLETE, ERREUR_INTERNE), reponseErreur, ErreurConfiguration, messageDe
+└── journal.ts       une ligne JSON par événement ; journalMemoire pour les tests
+migrations/0001_comptes.sql   tables Better Auth, générée par scripts/generer-migration.ts (npm run migration:generer)
+scripts/migration.ts          compilerMigration (getMigrations sur node:sqlite vide), contenuMigration, lireMigration
+types/                        alias WebCrypto et fetch pour typer Better Auth sous Node ; stub bun:sqlite
+tests/                        aide.ts (banc : base mémoire, envoyeur mémoire, jarre à cookies, IP unique par banc),
+                              d1.ts (D1 simulée sur node:sqlite, contrôles de types de D1), app, auth, fournisseurs,
+                              modules, migration (fichier = schéma attendu ; parcours complet à travers l'interface D1)
 ```
 
-### À modifier
+### Options Better Auth
 
-| Fichier                              | Changement                                                                                                           |
-| ------------------------------------ | -------------------------------------------------------------------------------------------------------------------- |
-| `apps/web/package.json`              | dépendance `better-auth` (client), devDependency `wrangler` (bundle du worker)                                        |
-| `apps/web/vite.config.ts`            | `server.proxy['/api']` → `http://localhost:8787` ; plugin `workerPages()` (closeBundle : bundle `apps/comptes` → `dist/_worker.js`) |
-| `apps/web/wrangler.toml`             | `compatibility_flags = ["nodejs_compat"]`, `[vars]`, `[[d1_databases]]` DB (id à renseigner)                          |
-| `apps/web/src/App.tsx`               | routes `/connexion` (hors coque) et `/compte` ; `CompteProvider` (réseau) ; `AppEnMemoire({ compte })`               |
-| `apps/web/src/coque/Sidebar.tsx`     | bloc profil → `<Profil />`                                                                                           |
-| `apps/web/src/ecrans/MesProjets.tsx` | carte « Créer mon compte » active (lien `/connexion`) ; connectée : « synchronisation bientôt »                     |
-| `vitest.config.ts` (racine)          | seuils 100 % : `apps/comptes/src/**`, `apps/web/src/compte/**` (+ `textes` déjà couvert)                             |
-| `eslint.config.js` (racine)          | `no-console` off pour `apps/comptes/src/journal.ts` (une ligne)                                                      |
-| `.claude/launch.json`                | configuration `comptes` (`npm run dev -w apps/comptes`, port 8787)                                                   |
-| Docs (fin)                           | README (mise en place), CLAUDE.md, technical-spec, functional-spec, architecture-overview, registre, `_commun.md`     |
+| Option                 | Valeur                                                                                                                                                         |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `database`             | le binding D1 (Better Auth 1.7 le détecte et prend son dialecte D1, sans transaction) ; mémoire en test                                                        |
+| `baseURL` / `basePath` | origine de la requête (vérifiée par la garde) / `/api/auth`                                                                                                    |
+| `trustedOrigins`       | `https://loupeprojet.pages.dev`, `https://*.loupeprojet.pages.dev`, localhost:5173 et 8787 en dev, `ORIGINES_AUTORISEES`, `https://appleid.apple.com` si Apple |
+| `plugins`              | `emailOTP` : 6 chiffres, 600 s, 3 essais                                                                                                                       |
+| `rateLimit`            | activé, 60 requêtes/min par IP ; plugin : 3 envois/min ; règle `/sign-in/email-otp` : 10 saisies/min                                                           |
+| `user.deleteUser`      | activé ; session de moins d'un jour (sinon 400 `SESSION_EXPIRED`)                                                                                              |
+| `advanced`             | `cookiePrefix: deklic`, `useSecureCookies` si https, IP = `cf-connecting-ip`, `disableOriginCheck: false` explicite                                            |
+| `telemetry` / `logger` | désactivée / niveau warn, messages masqués (adresses e-mail) vers le journal                                                                                   |
 
-## Interfaces
+### Contrat HTTP
 
-```ts
-// apps/comptes/src/dependances.ts
-export interface Bindings {
-  readonly DB: D1Database;
-  readonly ASSETS?: { fetch(requete: Request): Promise<Response> } | undefined;
-  readonly ENVIRONNEMENT?: string; readonly BETTER_AUTH_SECRET?: string;
-  readonly RESEND_API_KEY?: string; readonly COURRIEL_EXPEDITEUR?: string;
-  readonly GOOGLE_CLIENT_ID?: string; readonly GOOGLE_CLIENT_SECRET?: string;
-  readonly APPLE_CLIENT_ID?: string; readonly APPLE_TEAM_ID?: string; readonly APPLE_KEY_ID?: string; readonly APPLE_PRIVATE_KEY?: string;
-  readonly ORIGINES_AUTORISEES?: string;
-}
-export interface Dependances {
-  readonly environnement: 'dev' | 'preview' | 'production';
-  readonly secret: string;                         // ≥ 32 caractères (BETTER_AUTH_SECRET) ; en dev, valeur par défaut
-  readonly base: BetterAuthOptions['database'];    // D1Database en production, memoryAdapter en test
-  readonly fournisseurs: ConfigFournisseurs;       // { google?: { clientId, clientSecret }, apple?: { clientId, teamId, keyId, privateKey } }
-  readonly courriel: Envoyeur | null;              // null → journal (dev) ; Resend en production
-  readonly origines: readonly string[];            // origines de confiance supplémentaires
-  readonly journal: Journal;
-  readonly maintenant: () => number;
-}
+| Route                                                                                                                                                                    | Réponse                                                                                                                                  |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET /api/comptes/sante`                                                                                                                                                 | `{ ok, version, environnement }`                                                                                                         |
+| `GET /api/comptes/fournisseurs`                                                                                                                                          | `{ email, google, apple }`                                                                                                               |
+| `POST /api/auth/email-otp/send-verification-otp`                                                                                                                         | `{ email, type: 'sign-in' }` → `{ success: true }` ; 400 `TYPE_NON_PRIS_EN_CHARGE` / `INVALID_EMAIL` ; 429 ; 503 `COURRIEL_INDISPONIBLE` |
+| `POST /api/auth/sign-in/email-otp`                                                                                                                                       | `{ email, otp }` → `{ token, user }` + cookie ; 400 `INVALID_OTP` / `OTP_EXPIRED` / `TOO_MANY_ATTEMPTS`                                  |
+| `POST /api/auth/sign-in/social`                                                                                                                                          | `{ provider, callbackURL, errorCallbackURL }` → `{ url, redirect }` ; 404 `PROVIDER_NOT_FOUND` ; 403 URL de retour étrangère             |
+| `GET /api/auth/callback/google`, `GET` et `POST /api/auth/callback/apple`                                                                                                | redirection vers `callbackURL` (cookie posé) ou `errorCallbackURL?error=…`                                                               |
+| `GET /api/auth/get-session`, `POST /api/auth/sign-out`, `POST /api/auth/update-user`, `GET /api/auth/list-accounts`, `POST /api/auth/delete-user`, `GET /api/auth/error` | Better Auth                                                                                                                              |
+| Toute autre route `/api/auth/*`                                                                                                                                          | 404 `INTROUVABLE` (mot de passe, changement d'adresse… fermés) ; hôte inconnu : 403 `ORIGINE_INCONNUE`                                   |
 
-// apps/comptes/src/auth.ts
-export function optionsAuth(deps: Dependances, origine: string): BetterAuthOptions; // baseURL = origine, basePath '/api/auth'
-export function creerAuth(deps: Dependances): (origine: string) => ReturnType<typeof betterAuth>;
-
-// apps/web/src/compte/types.ts
-export interface Utilisateur { readonly id: string; readonly nom: string; readonly email: string; readonly image: string | null; }
-export interface Fournisseurs { readonly email: boolean; readonly google: boolean; readonly apple: boolean; }
-export type CodeErreurCompte = 'email_invalide' | 'code_invalide' | 'code_expire' | 'trop_essais' | 'trop_de_demandes' | 'session_ancienne' | 'fournisseur_indisponible' | 'reseau' | 'inconnue';
-export type Resultat<T = void> = { ok: true; valeur: T } | { ok: false; code: CodeErreurCompte };
-export interface ClientCompte {
-  session(): Promise<Utilisateur | null>;
-  fournisseurs(): Promise<Fournisseurs>;
-  demanderCode(email: string): Promise<Resultat>;
-  verifierCode(email: string, code: string): Promise<Resultat<Utilisateur>>;
-  continuerAvec(fournisseur: 'google' | 'apple', retour: string): Promise<Resultat>; // redirige le navigateur
-  deconnecter(): Promise<void>;
-  renommer(nom: string): Promise<Resultat<Utilisateur>>;
-  methodes(): Promise<readonly string[]>;   // providerId des comptes liés
-  supprimer(): Promise<Resultat>;
-}
-```
-
-## Options Better Auth (décisions)
-
-| Option                    | Valeur                                                                                                             |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| `database`                | le binding D1 tel quel (Better Auth 1.7 détecte `prepare/batch/exec` et utilise son dialecte D1, sans transaction) ; `memoryAdapter` en test |
-| `baseURL` / `basePath`    | origine de la requête / `/api/auth`                                                                                |
-| `secret`                  | `BETTER_AUTH_SECRET` (obligatoire hors dev)                                                                        |
-| `trustedOrigins`          | `https://loupeprojet.pages.dev`, `https://*.loupeprojet.pages.dev`, `http://localhost:5173`, `http://localhost:8787`, `https://appleid.apple.com`, + `ORIGINES_AUTORISEES` |
-| `plugins`                 | `emailOTP({ otpLength: 6, expiresIn: 600, allowedAttempts: 3, sendVerificationOTP })` — envoi seulement pour `type === 'sign-in'` |
-| `socialProviders`         | `google` (`prompt: 'select_account'`) et `apple` (secret JWT ES256 généré et mis en cache) seulement si configurés |
-| `session`                 | défauts (7 jours, renouvelée après 1 jour, `freshAge` 1 jour)                                                      |
-| `user.deleteUser`         | `{ enabled: true }` (session fraîche exigée)                                                                       |
-| `account.accountLinking`  | défaut (liaison automatique quand le fournisseur confirme l'e-mail)                                                |
-| `rateLimit`               | `enabled: true`, fenêtre 60 s / 60 requêtes ; le plugin impose 3/min sur l'envoi de codes                          |
-| `advanced`                | `cookiePrefix: 'deklic'`, `useSecureCookies: origine https`, `ipAddress.ipAddressHeaders: ['cf-connecting-ip']`   |
-| `logger`                  | routé vers le journal JSON (niveau warn+), messages seuls                                                          |
-| `emailAndPassword`        | désactivé (défaut)                                                                                                 |
-
-## Flux
+## `apps/web`
 
 ```
-Code e-mail : page /connexion → client.demanderCode(email) → POST /api/auth/email-otp/send-verification-otp
-   → Better Auth crée une vérification (identifiant sign-in-otp:<email>, valeur code:essais) → sendVerificationOTP → Envoyeur (Resend | journal)
-   → client.verifierCode(email, code) → POST /api/auth/sign-in/email-otp → utilisateur créé si absent (e-mail vérifié) → session en base → Set-Cookie deklic.session_token
-   → CompteProvider passe à 'connecte' → navigation vers la page d'origine
-
-Google : client.continuerAvec('google', '/projets') → POST /api/auth/sign-in/social { provider, callbackURL, errorCallbackURL: '/connexion?erreur=fournisseur' }
-   → { url } → redirection navigateur → Google → GET /api/auth/callback/google?code&state → compte lié ou créé → cookie → 302 callbackURL
-
-Ouverture de l'app : CompteProvider → client.session() → GET /api/auth/get-session → 'anonyme' | 'connecte'
+src/compte/types.ts          Utilisateur, Fournisseurs, CodeErreurCompte, Resultat, ClientCompte
+src/compte/reseau.ts         clientReseau(recuperer, naviguer) : fetch same-origin, réponses validées par Zod, codes serveur → codes
+                             de l'interface (429 → trop_de_demandes, 5xx → indisponible), panne → session nulle, aucun fournisseur
+src/compte/memoire.ts        clientMemoire(options) : code 123456, erreurs forcées, redirections et codes demandés enregistrés
+src/compte/CompteContext.tsx CompteProvider (session et fournisseurs lus au lancement ; état chargement / anonyme / connecté), useCompte
+src/compte/saisie.ts         emailPlausible, normaliserCode, codeComplet, cheminDeRetour (interne uniquement)
+src/textes/compte.ts         phrases des erreurs, noms des fournisseurs, initiales, nomAffiche
+src/textes/connexion.ts      textes de la page de connexion ; src/textes/mon-compte.ts : profil, Mon compte, carte de Mes projets
+src/ecrans/Connexion.tsx     page hors coque ; connexion/ : BoutonsFournisseurs, FormulaireEmail, FormulaireCode, styles
+src/ecrans/Compte.tsx        profil (nom), méthodes liées, déconnexion, suppression confirmée, reconnexion si session ancienne
+src/coque/Profil.tsx         bas de la barre latérale : « Sans compte · Se connecter » ou initiales, nom, « Mon compte »
+src/composants/IconesFournisseurs.tsx   « G » de Google, pomme d'Apple
+vite.config.ts               proxy /api → 8787 ; plugin workerDesComptes (opt-in DEKLIC_COMPTES=1)
+public/_routes.json          include ["/api/*"]
 ```
 
-## Sécurité
+`App` fournit `CompteProvider` avec `clientReseau()` ; `AppEnMemoire` avec un client mémoire anonyme (ou celui du test). Couverture 100 % exigée sur `src/compte/**` et `src/textes/**`.
 
-- Cookies `HttpOnly`, `SameSite=Lax`, `Secure` sur https ; jeton de session opaque en base, jamais dans `localStorage`.
-- Origine vérifiée par Better Auth sur toute requête POST (`Origin` ∈ baseURL + trustedOrigins) ; `callbackURL` restreinte aux origines de confiance.
-- Codes : 6 chiffres, 10 minutes, 3 essais, 3 envois/minute/IP ; `sign-in/email-otp` limité par la fenêtre globale.
-- Journal : événements sans e-mail, sans code, sans IP (le journal de dev écrit le code, en dev seulement).
-- Secrets uniquement dans les variables du worker ; le client ne voit que `fournisseurs` (booléens).
-- Aucune suppression sans session fraîche ; suppression en cascade des sessions et comptes liés.
+## Décisions prises pendant l'implémentation
 
-## Ordre d'implémentation
+- **Garde avant Better Auth** : Better Auth avale les erreurs lancées par `sendVerificationOTP` et répond « envoyé » ; le refus des autres types de code et l'absence d'envoyeur sont donc traités avant lui. La liste blanche ferme les routes inutilisées (mot de passe, changement d'adresse, vérification par lien).
+- **Contrôle d'origine explicite** : Better Auth le désactive quand il détecte un environnement de test ; `disableOriginCheck: false` rend le comportement testé identique à la production.
+- **Échec fermé** : sans `ENVIRONNEMENT`, c'est la production ; sans secret ou sans base, `/api/*` répond 503 et le site reste servi.
+- **D1 simulée** : Miniflare 5 (alpha) et `getPlatformProxy` ne démarrent pas sur la machine de développement ; la migration et le parcours complet sont testés à travers une D1 simulée sur `node:sqlite` qui refuse les mêmes types que D1. Miniflare retiré des dépendances.
+- **Client web sans bibliothèque** : fetch + Zod sur les routes Better Auth plutôt que le client Better Auth : aucune dépendance ajoutée au site, réponses validées, erreurs traduites en codes.
+- **Pas d'image tierce** : le profil affiche des initiales, jamais la photo Google (aucune ressource tierce chargée).
+- **Worker opt-in** : le bundle importe `node:crypto` (utilitaires de Better Auth) ; Pages refuserait le déploiement sans `nodejs_compat`. `DEKLIC_COMPTES=1` évite de casser les déploiements de `master` avant la mise en service.
 
-1. US-1 socle `apps/comptes` (package, wrangler, deps, app, journal, erreurs, tests) → commit
-2. US-2 Better Auth + code e-mail (auth.ts, courriel.ts, tests du flux) → commit
-3. US-3 Google et Apple (fournisseurs.ts, secret Apple, tests) → commit
-4. US-4 D1 (script de génération, migration SQL, test Miniflare) → commit
-5. US-5 déploiement (vite plugin, `_routes.json`, wrangler Pages, proxy, launch.json) → commit
-6. US-6 client web (`src/compte/`, textes, provider, tests) → commit
-7. US-7 page `/connexion` → commit
-8. US-8 profil + `/compte` + Mes projets → commit
-9. Refactor, QA, audit, docs, PR.
+## Tests
 
-## Risques et parades
-
-| Risque                                                            | Parade                                                                                                  |
-| ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| Miniflare ne démarre pas dans Vitest (workerd sous Windows)       | Test D1 dans un fichier séparé ; repli : dialecte `node:sqlite` de `@better-auth/kysely-adapter`        |
-| `_worker.js` non pris en charge par le projet Pages (flags, D1)   | Documenter le tableau de bord (Bindings, Compatibility flags) en plus de `wrangler.toml`                |
-| Instance Better Auth par requête coûteuse                         | Cache par origine dans l'isolat (bindings stables)                                                      |
-| Cookie non `Secure` en production                                 | `useSecureCookies` calculé sur l'origine https, vérifié par un test                                     |
-| Conflit `package-lock.json` avec les PR parallèles                | `git merge origin/master` + `npm install` avant l'auto-merge                                            |
-
-## Pré-implémentation
-
-- [x] Aucun conflit avec le code existant (nouveau workspace ; `apps/web` touché sur la coque, App, Mes projets ; fichiers des autres sessions intacts)
-- [x] Patterns du dépôt : `creerApp(deps)`, journal, codes d'erreur, `AppEnMemoire`, `Carte`/`Bouton`/`Pastille`
-- [x] Migration versionnée (montée seulement : D1 n'a pas de « down » ; une suppression de table serait une migration séparée)
-- [x] Aucun changement des routes existantes
-- [x] Entrées validées (Zod pour l'environnement, Better Auth pour les corps), auth appliquée par Better Auth
-- [x] Aucun fichier > 300 lignes prévu ; fonctions courtes
-- [x] Cas limites listés : e-mail invalide, code faux/expiré/épuisé, 429, fournisseur absent, session ancienne, ASSETS absent, secret manquant hors dev
+| Où                                        | Quoi                                                                                                                                     |
+| ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `apps/comptes/tests/app.test.ts`          | santé, fournisseurs, 404, 500 journalisé, gestionnaire Pages (API, statique, configuration incomplète)                                   |
+| `apps/comptes/tests/auth.test.ts`         | parcours code complet, code faux / expiré / épuisé, 429, 503, types refusés, échec d'envoi, CSRF, cookie https, garde, gestion du compte |
+| `apps/comptes/tests/fournisseurs.test.ts` | secret Apple (JWT vérifié), URL Google et Apple, clé illisible, fournisseur absent, URL de retour étrangère                              |
+| `apps/comptes/tests/modules.test.ts`      | variables et dépendances, origines connues, courriel (Resend, journal), erreurs, journal                                                 |
+| `apps/comptes/tests/migration.test.ts`    | fichier = schéma attendu, application sur base vide, parcours complet à travers l'interface D1                                           |
+| `apps/web/tests/compte.test.tsx`          | client réseau (toutes les routes et erreurs), client mémoire, textes, CompteProvider                                                     |
+| `apps/web/tests/saisie.test.ts`           | adresse plausible, code, chemin de retour                                                                                                |
+| `apps/web/tests/connexion.test.tsx`       | page de connexion : méthodes proposées, code, renvoi, Google/Apple, erreurs, retour, déjà connecté                                       |
+| `apps/web/tests/profil.test.tsx`          | profil de la barre latérale, carte de Mes projets, page Mon compte (renommage, déconnexion, suppression)                                 |

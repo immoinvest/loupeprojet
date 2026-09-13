@@ -12,13 +12,14 @@ loupeprojet/
 ├── eslint.config.js        typescript-eslint strict-type-checked + stylistic, no-console, max-lines 300, prettier
 ├── marque/                 identité de marque Deklic (ADR-005) : logos SVG, favicon, icônes, image de partage, palette, guide
 ├── .prettierrc             printWidth 100, singleQuote, trailingComma all, LF
-├── vitest.config.ts        projets = packages/*, apps/*, data ; seuils 100 % moteur, worker, data, modules de logique du web
+├── vitest.config.ts        projets = packages/*, apps/*, data ; seuils 100 % moteur, capture, worker, comptes, extension, data, modules de logique du web
 ├── .github/workflows/ci.yml  Node 22 : npm ci → lint → format:check → typecheck → test:coverage → build ; job e2e : Playwright Chromium (npm run test:e2e)
 ├── .github/workflows/referentiels.yml  cron mensuel + manuel : génère data/dist puis aws s3 sync vers R2 deklic-data
 ├── packages/moteur/        ← livré (feature moteur-calcul)
 ├── packages/capture/       ← livré (feature extension) : contrat de capture et moteur de règles, partagés par l'extension, le favori et le web
 ├── apps/web/               ← livré (socle, nouveau projet, hypothèses, onglets, lecture de la capture, bouton-favori, page /extension) ; e2e Playwright
 ├── apps/worker/            ← socle livré (feature worker-socle)
+├── apps/comptes/           ← livré (feature comptes) : Better Auth sur Hono, servi par le worker Pages, D1
 ├── apps/extension/         ← livré (feature extension) : WebExtension MV3, règles par portail, build esbuild vers dist/chrome et dist/firefox
 └── data/                   ← livré (feature referentiels) : pré-agrégation des référentiels publics
 ```
@@ -52,11 +53,15 @@ tests/                       un dossier par module + integration/ ; 204 tests ; 
 
 ## `apps/web` (socle livré)
 
-Voir `architecture/web-socle.md`. React 19 + Vite 7 + Tailwind v4 (`@theme` = tokens ADR-004), React Router 7 déclaratif (`useRoutes`), stockage local Zod (`loupe.projets.v1`), textes des codes du moteur dans `src/textes/`, Vitest + Testing Library (jsdom). Cloudflare Pages : `wrangler.toml`, `public/_redirects`. Couverture 100 % exigée sur `stockage/`, `formatage/`, `textes/` ; les écrans sont couverts par des tests de rendu et de navigation (`AppEnMemoire`). Tests de bout en bout : `apps/web/e2e/` avec Playwright (Chromium, build de production servi par `vite preview` sur 127.0.0.1:5199, sélecteurs par rôle et libellé, contexte neuf par test), `npm run test:e2e` ; voir `architecture/e2e-playwright.md`.
+Voir `architecture/web-socle.md`. React 19 + Vite 7 + Tailwind v4 (`@theme` = tokens ADR-004), React Router 7 déclaratif (`useRoutes`), stockage local Zod (`loupe.projets.v1`), textes des codes du moteur dans `src/textes/`, Vitest + Testing Library (jsdom). Cloudflare Pages : `wrangler.toml`, `public/_redirects`. Couverture 100 % exigée sur `stockage/`, `formatage/`, `textes/`, `compte/` ; les écrans sont couverts par des tests de rendu et de navigation (`AppEnMemoire`). Tests de bout en bout : `apps/web/e2e/` avec Playwright (Chromium, build de production servi par `vite preview` sur 127.0.0.1:5199, sélecteurs par rôle et libellé, contexte neuf par test), `npm run test:e2e` ; voir `architecture/e2e-playwright.md`.
 
 ## `apps/worker` (socle livré)
 
 Voir `architecture/worker-socle.md`. Hono 4 sur Cloudflare Workers (`wrangler.toml` : KV `KV_CACHE`, binding Rate Limiting `LIMITEUR` 60/min/IP, `[observability]`), dépendances injectées (`creerApp(deps)`), `GET /health`, `GET /proxy/:service` avec liste blanche de services (`services/`), cache KV par empreinte des paramètres validés, réponses amont validées et normalisées au contrat Loupe, erreurs en codes. Premier service : géocodage Géoplateforme. `POST /extract` : lecture du texte d'une annonce par un modèle de langage (connecteur « chat completions », OpenRouter par défaut), 20 champs validés un par un, cache 30 jours (voir `architecture/extraction-llm.md`). Tests Vitest en Node via `app.request()` et doubles ; couverture 100 % sur `src/**`. Build = `wrangler deploy --dry-run`.
+
+## `apps/comptes` (livré, feature comptes)
+
+Voir `architecture/comptes.md` et `adr/006-comptes-better-auth.md`. Better Auth 1.7 sur Hono, servi sur l'origine du site par le worker Cloudflare Pages (le build de `apps/web` dépose `dist/_worker.js` si `DEKLIC_COMPTES=1` ; `public/_routes.json` n'y envoie que `/api/*`). `src/index.ts` (gestionnaire Pages : `/api/*` vers l'application, le reste vers `ASSETS`, configuration incomplète : 503), `app.ts` (santé, fournisseurs, garde puis Better Auth), `garde.ts` (hôte connu, liste blanche des routes, code de connexion seulement), `auth.ts` (options, instance par origine, envoi du code, journal sans adresse e-mail), `sociaux.ts` et `fournisseurs.ts` (Google, Apple, secret JWT ES256), `courriel.ts` (Resend, journal en dev), `dependances.ts` (Zod, production par défaut). Base D1 `deklic-comptes` : `migrations/0001_comptes.sql` générée par `scripts/generer-migration.ts` et vérifiée par un test (schéma identique, parcours complet à travers une D1 simulée sur `node:sqlite`). Tests Vitest (Node) via `app.request()` avec base mémoire, envoyeur mémoire et jarre à cookies ; couverture 100 % sur `src/**`. Build = `wrangler deploy --dry-run`. Web : `src/compte/` (client fetch + Zod, client mémoire, `CompteProvider`), écrans `Connexion.tsx`, `Compte.tsx`, `coque/Profil.tsx`.
 
 ## `packages/capture` et `apps/extension` (livrés, feature extension)
 
@@ -89,13 +94,14 @@ Voir `architecture/referentiels.md` et `data/SOURCES.md`. Workspace `@loupe/data
 
 ## Tests
 
-| Type             | Outil                                                               | Où                                     |
-| ---------------- | ------------------------------------------------------------------- | -------------------------------------- |
-| Unitaires moteur | Vitest                                                              | `packages/moteur/tests/<module>`       |
-| Intégration      | Vitest                                                              | `packages/moteur/tests/integration`    |
-| Worker           | Vitest (Node) + `app.request()` et doubles                          | `apps/worker/tests/`                   |
-| Référentiels     | Vitest (Node) + faux `fetch` et fixtures réelles                    | `data/tests/`                          |
-| Capture          | Vitest (jsdom) : pages synthétiques via `DOMParser`                 | `packages/capture/tests/`              |
-| Extension        | Vitest (jsdom) : pages enregistrées, faux `chrome`                  | `apps/extension/tests/`                |
-| E2E web          | Playwright (Chromium, build de production servi par `vite preview`) | `apps/web/e2e/`                        |
-| Annonce témoin   | GitHub Action quotidienne (à venir)                                 | `.github/workflows/annonce-temoin.yml` |
+| Type             | Outil                                                                       | Où                                     |
+| ---------------- | --------------------------------------------------------------------------- | -------------------------------------- |
+| Unitaires moteur | Vitest                                                                      | `packages/moteur/tests/<module>`       |
+| Intégration      | Vitest                                                                      | `packages/moteur/tests/integration`    |
+| Worker           | Vitest (Node) + `app.request()` et doubles                                  | `apps/worker/tests/`                   |
+| Comptes          | Vitest (Node) + `app.request()`, base mémoire, D1 simulée sur `node:sqlite` | `apps/comptes/tests/`                  |
+| Référentiels     | Vitest (Node) + faux `fetch` et fixtures réelles                            | `data/tests/`                          |
+| Capture          | Vitest (jsdom) : pages synthétiques via `DOMParser`                         | `packages/capture/tests/`              |
+| Extension        | Vitest (jsdom) : pages enregistrées, faux `chrome`                          | `apps/extension/tests/`                |
+| E2E web          | Playwright (Chromium, build de production servi par `vite preview`)         | `apps/web/e2e/`                        |
+| Annonce témoin   | GitHub Action quotidienne (à venir)                                         | `.github/workflows/annonce-temoin.yml` |

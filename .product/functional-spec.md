@@ -17,7 +17,7 @@ Concurrents : Horiz.io (8–20 €/mois, complet, saisie manuelle), Lybox (9–4
 1. Une seule entrée : le lien. Saisie manuelle (prix, surface, ville) seulement sans lien.
 2. Jamais de case vide : défaut sourcé + badge de provenance. L'utilisateur corrige, il ne remplit pas.
 3. Chaque chiffre s'explique en une phrase (textes écrits une fois, pas de LLM).
-4. Gratuit et sans compte. Compte optionnel pour synchroniser.
+4. Gratuit et sans compte. Compte optionnel (Google, Apple ou code par e-mail) ; la synchronisation des projets suivra.
 5. L'IA lit, elle ne calcule pas. Calculs déterministes dans le navigateur.
 
 ## Parcours v1 (6 étapes)
@@ -27,7 +27,7 @@ Concurrents : Horiz.io (8–20 €/mois, complet, saisie manuelle), Lybox (9–4
 3. **Enrichir** — géocodage puis en parallèle : DVF 500 m, DPE ADEME, loyers ANIL, taux TF (REI), Géorisques, zonage ABC, population. Zéro LLM.
 4. **Vérifier** — un écran, quatre blocs (bien, financement, location, fiscalité), badges `annonce` / `donnée publique` / `estimé` / `à toi`. Cinq confirmations max : loyer visé, apport, durée, TMI, mode de location.
 5. **Le rapport** — verdict + cinq feux, puis Financement, Cash-flow, Fiscalité (4 régimes), Revente, Rendement & TRI. Tout modifiable en place, recalcul instantané.
-6. **Garder** — sauvegarde locale, PDF via impression, lien de partage (projet encodé dans l'URL), compte par lien magique (v1.5).
+6. **Garder** — sauvegarde locale, PDF via impression, lien de partage (projet encodé dans l'URL), compte optionnel par Google, Apple ou code à 6 chiffres reçu par e-mail (livré le 13/09/2026, ADR-006 ; synchronisation des projets à venir).
 
 ## Pipeline technique (9 étapes)
 
@@ -131,7 +131,7 @@ Page de l'annonce (structuré) · texte (LLM) · Géoplateforme (géocodage) · 
 ## Roadmap
 
 - **v1 (8–10 sem.)** : extension + bookmarklet (LBC, SeLoger, Bien'ici, PAP, Logic-Immo) ; pipeline complet ; texte collé et saisie manuelle ; 5 volets, verdict, scénarios ; sauvegarde locale, PDF, partage ; test réel Marseille/Lyon/Aix.
-- **v1.5 (+4)** : compte lien magique, sync ; comparaison 2–5 projets, statuts ; Safari iOS, partage mobile ; portails supplémentaires.
+- **v1.5 (+4)** : compte (livré : code e-mail, Google, Apple), sync ; comparaison 2–5 projets, statuts ; Safari iOS, partage mobile ; portails supplémentaires.
 - **v2 (+6)** : historique de prix (extension), loyers infra-communaux, registre copro, DPE PDF, photos → travaux (option).
 - **v3** : suivi après achat, liasse LMNP, monétisation (affiliation, export premium).
 - **Pas en v1** : recherche/alertes d'annonces, chat IA, SCI IS, carte au-delà des DVF, app native.

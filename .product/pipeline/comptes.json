@@ -2,10 +2,10 @@
   "feature_slug": "comptes",
   "title": "Comptes utilisateurs : connexion Google, Apple ou code e-mail (Better Auth sur Cloudflare Pages + D1), page de connexion classique dans le visuel Deklic",
   "started_at": "2026-09-13T19:00:00Z",
-  "current_step": "implement",
+  "current_step": "push",
   "scope": "full-stack : apps/comptes (nouveau), apps/web (connexion, compte, barre latérale), docs",
   "branch": "feat/comptes",
-  "base": "origin/master (e1477d1, après la PR #9 worker-socle)",
+  "base": "origin/master (e1477d1, après la PR #9 worker-socle), puis fusions de origin/master",
   "worktree": "C:/Users/errei/Claude/loupeprojet/.claude/worktrees/auth-comptes (le dossier principal sert une autre session)",
   "baseline": {
     "tests_passed": 306,
@@ -26,17 +26,17 @@
       "status": "completed",
       "output": ".product/specs/comptes-specs.md",
       "stories_count": 8,
-      "self_review": "fournisseurs.email dépend d'un envoyeur réel ; carte Mes projets connectée sans bouton mort ; suppression = session fraîche (défaut Better Auth) ; routes et codes Better Auth 1.7 vérifiés dans les sources."
+      "self_review": "fournisseurs.email dépend d'un envoyeur réel ; carte Mes projets connectée sans bouton mort ; suppression = session fraîche ; écarts à l'implémentation listés en fin de document."
     },
     "architecture": {
       "status": "completed",
       "output": ".product/architecture/comptes.md",
       "adr": ".product/adr/006-comptes-better-auth.md",
-      "self_review": "Better Auth 1.7 détecte le binding D1 nativement (pas de kysely-d1) ; instance par origine dans l'isolat ; _worker.js produit par un plugin Vite de apps/web ; _routes.json limite le worker à /api/*. Risque : Miniflare dans Vitest (repli node:sqlite)."
+      "self_review": "Architecture réécrite après implémentation : garde avant Better Auth, instance par origine, D1 simulée sur node:sqlite, client web fetch + Zod, worker opt-in DEKLIC_COMPTES."
     },
     "implement": {
-      "status": "in_progress",
-      "stories_completed": 5,
+      "status": "completed",
+      "stories_completed": 8,
       "stories_total": 8,
       "commits": [
         "7471d00 docs(product): discovery, specs, architecture, ADR-006",
@@ -44,20 +44,71 @@
         "ffae9f9 US-2 code e-mail, garde, Resend",
         "859bcd3 US-3 Google et Apple",
         "58facfa US-4 migration D1 testée",
-        "2c0818a US-5 worker déployé avec le site"
+        "2c0818a US-5 worker déployé avec le site",
+        "2480ef7 US-6 client des comptes",
+        "97ff279 US-7 page de connexion",
+        "3ffebff merge origin/master (extension, e2e, référentiels, extraction)",
+        "59ab623 US-8 profil, Mon compte, carte Mes projets",
+        "e85c7a0 fix(web) worker opt-in DEKLIC_COMPTES",
+        "c9a369d fix(comptes) update-user limité au nom (audit)",
+        "603457a chore(comptes) serveur de dev Node"
       ],
       "ecarts": [
         "Better Auth avale les erreurs de sendVerificationOTP : garde HTTP avant Better Auth (routes utilisées, hôte connu, type de code) ; échec d'envoi journalisé, réponse « envoyé ».",
         "Better Auth désactive le contrôle d'origine sous Vitest : disableOriginCheck: false explicite (même comportement en test et en production).",
         "ENVIRONNEMENT vaut « production » par défaut (échec fermé) : sans secret ni base, /api/* répond 503 CONFIGURATION_INCOMPLETE, le site reste servi.",
-        "Miniflare 5 (alpha) et getPlatformProxy ne démarrent pas sur la machine de Pierre : la migration est testée à travers une D1 simulée sur node:sqlite (mêmes contrôles de types que D1) ; Miniflare retiré.",
+        "Miniflare 5 (alpha), getPlatformProxy et wrangler dev (workerd) plantent sur la machine de Pierre : migration testée à travers une D1 simulée sur node:sqlite ; serveur de dev Node (npm run dev:node -w apps/comptes) ; Miniflare retiré.",
         "Client web en fetch + Zod plutôt que le client Better Auth : aucune dépendance ajoutée au site, réponses validées, erreurs traduites en codes.",
+        "Le bundle importe node:crypto : _worker.js déposé seulement avec DEKLIC_COMPTES=1 pour ne pas casser les déploiements de master avant le flag nodejs_compat.",
         "Suppression refusée avec SESSION_EXPIRED (400) et non SESSION_NOT_FRESH : comportement réel de Better Auth 1.7."
       ]
     },
-    "refactor": { "status": "pending" },
-    "qa_tests": { "status": "pending" },
-    "security": { "status": "pending" },
-    "push": { "status": "pending" }
+    "refactor": {
+      "status": "completed",
+      "note": "Miniflare retiré (inutilisé) ; styles des écrans de compte factorisés (connexion/styles.ts) ; Connexion découpée en BoutonsFournisseurs, FormulaireEmail, FormulaireCode ; aucun fichier source au-delà de 300 lignes (ESLint max-lines)."
+    },
+    "qa_tests": {
+      "status": "completed",
+      "tests_ajoutes": {
+        "apps/comptes": 58,
+        "apps/web (compte, saisie, connexion, profil)": 33
+      },
+      "couverture": "100 % lignes, branches, fonctions sur apps/comptes/src et apps/web/src/compte ; textes couverts à 100 %",
+      "navigateur": "Parcours réel sur le serveur de dev (web 5190 + API Node 8787) : page de connexion, code reçu dans le journal (sans adresse), connexion, redirection vers Mes projets, profil « Mon compte », cookie de session invisible en JavaScript, rechargement de /compte avec session conservée, renommage, déconnexion."
+    },
+    "security": {
+      "status": "completed",
+      "score": 94,
+      "grade": "A",
+      "corriges": [
+        "MOYEN : update-user acceptait un nom de longueur quelconque et une URL d'image arbitraire (données stockées sans usage) : la garde n'accepte plus que le nom, 80 caractères au plus (c9a369d)."
+      ],
+      "restants": [
+        "FAIBLE : limite de débit de Better Auth en mémoire, par isolat ; la limite de 3 essais par code est en base et tient. Piste : règle de limite Cloudflare (WAF) sur /api/auth/email-otp/* ou stockage KV.",
+        "FAIBLE : un ENVIRONNEMENT=dev posé par erreur en production réactiverait le secret de développement ; le README demande de ne rien poser en production (production par défaut)."
+      ],
+      "informations": [
+        "Better Auth enregistre l'adresse IP et le navigateur de chaque session (données personnelles, D1 en UE) : à mentionner dans la politique de confidentialité.",
+        "npm audit : vitest / @vitest/mocker (modéré) remonte comme dépendance optionnelle de Better Auth ; outil de test, absent des bundles : exclu."
+      ],
+      "controles": "Cookies HttpOnly / SameSite=Lax / Secure en https, contrôle d'origine (CSRF), URL de retour limitée aux origines connues, hôte vérifié, routes Better Auth en liste blanche, aucun secret côté client, aucune adresse e-mail ni code dans les journaux de production, entrées validées par Zod, aucune requête SQL construite à la main."
+    },
+    "push": { "status": "in_progress" }
+  },
+  "post_mortem": {
+    "blockers_encountered": [
+      "workerd (Miniflare, getPlatformProxy, wrangler dev) plante ou bloque sur la machine Windows : D1 simulée sur node:sqlite pour les tests, serveur Node pour le développement.",
+      "Better Auth avale les erreurs lancées dans sendVerificationOTP et coupe le contrôle d'origine sous Vitest : garde HTTP et option explicite.",
+      "Les types de Better Auth citent des globaux du navigateur : typescript-eslint voyait des types « error » sous Node (alias dans apps/comptes/types/).",
+      "Deux vagues de PR parallèles fusionnées pendant la feature : deux fusions de origin/master (tests de seuils, App.tsx, package-lock)."
+    ],
+    "patterns_discovered": [
+      "Tester une application Better Auth par app.request() avec une jarre à cookies et une IP distincte par banc (la limite de débit est partagée par le processus).",
+      "Rendre un worker Pages opt-in au build quand il exige un flag de compatibilité non encore activé sur le projet."
+    ],
+    "improvements_for_next_time": [
+      "Fusionner origin/master tôt et souvent quand plusieurs sessions livrent le même jour.",
+      "Vérifier le runtime local (workerd) dès la discovery sur la machine de Pierre."
+    ]
   }
 }
