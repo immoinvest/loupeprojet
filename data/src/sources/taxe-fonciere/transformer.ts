@@ -34,6 +34,14 @@ function tauxDepuisCumul(cumul: Cumul): TauxTaxeFonciere {
 }
 
 /**
+ * Le REI de l'OFGL perd le zéro initial des codes INSEE des départements 01 à 09 (« 1109 » pour 01109) :
+ * un code de quatre chiffres est complété à cinq. Les codes corses (2A004) et d'outre-mer (97101) sont intacts.
+ */
+export function normaliserCodeInsee(code: string): string {
+  return /^\d{4}$/.test(code) ? `0${code}` : code;
+}
+
+/**
  * Additionne, commune par commune, les variables REI retenues (format long : une ligne par variable).
  * Les variables hors liste (taux votés, autres taxes) et les montants vides sont ignorés.
  */
@@ -51,7 +59,7 @@ export async function tauxDepuisLignes(
     if (Number.isNaN(valeur)) {
       continue;
     }
-    const code = champ(ligne, 'idcom');
+    const code = normaliserCodeInsee(champ(ligne, 'idcom'));
     let cumul = cumuls.get(code);
     if (cumul === undefined) {
       cumul = nouveauCumul();
