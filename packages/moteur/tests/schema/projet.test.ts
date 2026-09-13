@@ -117,6 +117,19 @@ describe('ProjetSchema', () => {
     ).toBe(true);
   });
 
+  it('accepte une source d’annonce (portail, id, URL) et refuse une URL invalide', () => {
+    const source = {
+      portail: 'leboncoin',
+      id: '2214738851',
+      url: 'https://www.leboncoin.fr/ad/x/2214738851',
+    };
+    expect(ProjetSchema.parse({ ...projetExemple, source }).source).toEqual(source);
+    expect(
+      ProjetSchema.safeParse({ ...projetExemple, source: { ...source, url: 'pas une url' } })
+        .success,
+    ).toBe(false);
+  });
+
   it('refuse une version de règles inconnue', () => {
     const resultat = ProjetSchema.safeParse({ ...projetExemple, versionRegles: '2031-01' });
     expect(resultat.success).toBe(false);

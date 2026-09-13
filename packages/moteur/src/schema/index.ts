@@ -35,8 +35,10 @@ export {
 export {
   ProjetSchema,
   ProvenanceSchema,
+  SourceAnnonceSchema,
   VersionReglesSchema,
   type Projet,
   type ProjetEntree,
   type Provenance,
+  type SourceAnnonce,
 } from './projet';
