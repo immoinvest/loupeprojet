@@ -27,6 +27,7 @@ export {
   type ReponseMarche,
   type ResultatGeocodage,
   type StatistiquesPrix,
+  type TendanceAdresse,
 } from './contrat';
 export {
   completerAvecIa,

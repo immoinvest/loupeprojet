@@ -76,6 +76,7 @@ export function TableauVentes({ analyse }: { analyse: ReponseAdresse }): JSX.Ele
               <th className={ENTETE}>Surface</th>
               <th className={ENTETE}>Prix</th>
               <th className={ENTETE}>Prix au m²</th>
+              <th className={ENTETE}>Au prix d'aujourd'hui</th>
               <th className={ENTETE}>Distance</th>
               <th className={ENTETE}>Place</th>
             </tr>
@@ -88,6 +89,7 @@ export function TableauVentes({ analyse }: { analyse: ReponseAdresse }): JSX.Ele
                 <td className={CELLULE}>{nombre(v.surface)} m²</td>
                 <td className={CELLULE}>{euros(v.prix)}</td>
                 <td className={CELLULE}>{prixM2(v.prixM2)}</td>
+                <td className={CELLULE}>{prixM2(v.prixM2Actualise ?? v.prixM2)}</td>
                 <td className={CELLULE}>
                   {v.distanceMetres === null ? '—' : `${String(v.distanceMetres)} m`}
                 </td>

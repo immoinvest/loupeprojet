@@ -74,6 +74,7 @@ describe('sectionsMethode', () => {
       'nu_reel',
       'revente',
       'tri',
+      'estimation',
       'verdict',
       'scenarios',
       'defauts',
@@ -134,7 +135,25 @@ describe('sectionsMethode', () => {
     expect(taxeCommunale?.aConfirmer).toBe(false);
     expect(section('micro_foncier').constantes[0]?.chemin).toBeUndefined();
     expect(section('micro_foncier').constantes[0]?.aConfirmer).toBe(false);
-    expect(sections.flatMap((s) => s.constantes).filter((c) => c.aConfirmer).length).toBe(3);
+    // 3 constantes fiscales + 6 coefficients de l'estimation (DPE ×2, étage ×2, extérieur, charges).
+    expect(sections.flatMap((s) => s.constantes).filter((c) => c.aConfirmer).length).toBe(9);
+  });
+
+  it('expose les coefficients de l’estimation et leur source, lus dans les règles', () => {
+    const v = valeurs('estimation');
+    expect(v).toContain('A +16 % · B +12 % · C +6 % · E −4 % · F −12 % · G −12 %');
+    expect(v).toContain('F −25 % · G −25 % · A, B, C, E non publiées');
+    expect(v).toContain('rez-de-chaussée −9,9 % · 4e étage et plus +4 %');
+    expect(v).toContain('rez-de-chaussée −9,6 % · 3e étage et plus −0,9 %');
+    expect(v).toContain('+8,8 %');
+    expect(v).toContain('26 € par m² et par an · effet borné à ±15 %');
+    expect(v).toContain(
+      'à rénover 25 % · à rafraîchir 37,5 % · bon état 50 % · rénové 75 % des ventes',
+    );
+    expect(n(section('estimation').etapes[5] ?? '')).toContain(
+      '±5 % avec au moins 10 ventes comparables dans 300 m, ±8 % avec 5 ventes dans 1 000 m, ±12 % sinon',
+    );
+    expect(section('estimation').constantes.every((c) => c.source.length > 3)).toBe(true);
   });
 
   it('décrit les honoraires selon le défaut', () => {
