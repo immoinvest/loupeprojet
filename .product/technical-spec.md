@@ -16,7 +16,7 @@ loupeprojet/
 ├── .github/workflows/ci.yml  Node 22 : npm ci → lint → format:check → typecheck → test:coverage → build ; job e2e : Playwright Chromium (npm run test:e2e)
 ├── .github/workflows/referentiels.yml  cron mensuel + manuel : génère data/dist puis aws s3 sync vers R2 loupe-data
 ├── packages/moteur/        ← livré (feature moteur-calcul)
-├── apps/web/               ← livré (socle, nouveau projet, hypothèses, onglets) ; tests de bout en bout Playwright dans e2e/
+├── apps/web/               ← livré (socle, nouveau projet, hypothèses, onglets, garder) ; tests de bout en bout Playwright dans e2e/
 ├── apps/worker/            ← socle livré (feature worker-socle)
 ├── apps/extension/         ← à venir (fiche .product/sessions/extension.md)
 └── data/                   ← livré (feature referentiels) : pré-agrégation des référentiels publics
@@ -52,6 +52,8 @@ tests/                       un dossier par module + integration/ ; 204 tests ; 
 ## `apps/web` (socle livré)
 
 Voir `architecture/web-socle.md`. React 19 + Vite 7 + Tailwind v4 (`@theme` = tokens ADR-004), React Router 7 déclaratif (`useRoutes`), stockage local Zod (`loupe.projets.v1`), textes des codes du moteur dans `src/textes/`, Vitest + Testing Library (jsdom). Cloudflare Pages : `wrangler.toml`, `public/_redirects`. Couverture 100 % exigée sur `stockage/`, `formatage/`, `textes/` ; les écrans sont couverts par des tests de rendu et de navigation (`AppEnMemoire`). Tests de bout en bout : `apps/web/e2e/` avec Playwright (Chromium, build de production servi par `vite preview` sur 127.0.0.1:5199, sélecteurs par rôle et libellé, contexte neuf par test), `npm run test:e2e` ; voir `architecture/e2e-playwright.md`.
+
+Feature `garder` : voir `architecture/garder.md`. Route `/projets/:id/imprimer` hors coque, rendue sous `ModeDocument` (contexte `composants/document.tsx` : boutons masqués, explications dépliées, grilles à deux colonnes) avec `@media print` dans `index.css` ; partage par fragment d'URL (`stockage/partage.ts`, base64url + Zod, jamais d'exception) ; Comparer (`analyses/comparaison.ts`) ; Méthode générée depuis `obtenirRegles()` (`textes/methode*.ts`, défauts lus par `analyses/defauts.ts`). Couverture 100 % sur ces modules (globs `stockage`, `analyses`, `textes`).
 
 ## `apps/worker` (socle livré)
 
