@@ -11,7 +11,7 @@ export default defineConfig({
       // En mode projets, seuls les seuils déclarés ici sont appliqués (ceux des sous-projets sont ignorés).
       thresholds: {
         'packages/moteur/src/**': { lines: 100, functions: 100, branches: 100, statements: 100 },
-        'apps/web/src/{stockage,formatage,textes}/**': {
+        'apps/web/src/{stockage,formatage,textes,annonces}/**': {
           lines: 100,
           functions: 100,
           branches: 100,

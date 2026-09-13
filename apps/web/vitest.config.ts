@@ -14,7 +14,7 @@ export default defineConfig({
     setupFiles: ['tests/setup.ts'],
     coverage: {
       provider: 'v8',
-      include: ['src/stockage/**', 'src/formatage/**', 'src/textes/**'],
+      include: ['src/stockage/**', 'src/formatage/**', 'src/textes/**', 'src/annonces/**'],
       thresholds: { lines: 100, functions: 100, branches: 100, statements: 100 },
     },
   },
