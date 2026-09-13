@@ -1,6 +1,6 @@
 @import 'tailwindcss';
 
-/* Tokens de la direction visuelle « Le guide » (ADR-004). */
+/* Tokens : direction visuelle « Le guide » (ADR-004) et identité Deklic (ADR-005). */
 @theme {
   --font-display: 'Outfit', 'Segoe UI', system-ui, sans-serif;
   --font-sans: 'Nunito Sans', 'Segoe UI', system-ui, sans-serif;
@@ -14,11 +14,16 @@
   --color-encre-3: #6b7280;
   --color-encre-4: #9ca3af;
 
-  --color-accent: #4f55d8;
-  --color-accent-fonce: #3a3fb0;
-  --color-accent-doux: #eeeeff;
-  --color-accent-fond: #f7f5ff;
-  --color-accent-bordure: #e4e3ff;
+  /* Bleu électrique Deklic : actions, liens, focus, logo. */
+  --color-accent: #2b4bf2;
+  --color-accent-fonce: #1f38c4;
+  --color-accent-doux: #e8ecff;
+  --color-accent-fond: #f5f7ff;
+  --color-accent-bordure: #d9dfff;
+
+  /* Orange flash Deklic : l'éclat du logo et les moments de célébration. Jamais pour un état sémantique. */
+  --color-flash: #ff7a1a;
+  --color-flash-fond: #fff1e6;
 
   --color-bon: #2e9e6b;
   --color-bon-texte: #1f7a4d;

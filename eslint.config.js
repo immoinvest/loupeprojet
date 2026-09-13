@@ -13,6 +13,8 @@ export default defineConfig(
       '**/.wrangler/**',
       '**/playwright-report/**',
       '**/test-results/**',
+      // Worktrees des sessions parallèles (Claude Code) : du code en cours d'écriture, hors dépôt.
+      '.claude/worktrees/**',
     ],
   },
   eslint.configs.recommended,
@@ -41,7 +43,12 @@ export default defineConfig(
     },
   },
   {
-    files: ['**/*.test.ts', '**/*.test.tsx', '**/tests/setup.ts'],
+    // Le journal structuré du Worker est le seul endroit qui écrit sur la console.
+    files: ['apps/worker/src/journal.ts'],
+    rules: { 'no-console': 'off' },
+  },
+  {
+    files: ['**/*.test.ts', '**/*.test.tsx', '**/tests/setup.ts', '**/tests/aide.ts'],
     rules: {
       'max-lines': 'off',
       '@typescript-eslint/no-non-null-assertion': 'off',

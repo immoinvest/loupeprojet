@@ -4,3 +4,4 @@ coverage
 .wrangler
 .product/reference
 package-lock.json
+.claude/worktrees

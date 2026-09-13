@@ -2,7 +2,7 @@
   "name": "loupe",
   "version": "0.1.0",
   "private": true,
-  "description": "Loupe : colle le lien d'une annonce, obtiens l'analyse complète de rentabilité locative.",
+  "description": "Deklic : colle le lien d'une annonce, obtiens l'analyse complète de rentabilité locative.",
   "author": "Pierre Georgel",
   "license": "UNLICENSED",
   "type": "module",
