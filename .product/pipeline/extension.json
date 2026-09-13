@@ -24,7 +24,10 @@
       "status": "completed",
       "note": "fragment validé par Zod (longueurs, enums, nombres finis), jamais interprété comme HTML, effacé de l'adresse ; aucun réseau depuis le script de contenu ni le favori ; permissions activeTab + scripting seulement ; pas d'eval ; URL javascript: du favori posée par setAttribute (React la bloque en prop) ; capture.js généré, ignoré par git/ESLint/Prettier"
     },
-    "push": { "status": "in_progress", "note": "PR feat/extension à ouvrir avec merge automatique" }
+    "push": {
+      "status": "completed",
+      "note": "PR #16 ouverte, merge automatique armé (check verify)"
+    }
   },
   "decisions": {
     "contrat": "packages/capture porte le schéma, l'encodage base64url, la résolution d'URL et le moteur de règles ; l'extension et le bouton-favori ne sont que des enveloppes",
