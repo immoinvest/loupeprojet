@@ -23,9 +23,15 @@
       "stories_total": 5,
       "commits": ["5315e3c data US-1", "e35ab11 worker US-2", "5ba9cc1 moteur US-3"]
     },
-    "qa_tests": { "status": "pending" },
-    "security": { "status": "pending" },
-    "push": { "status": "pending" }
+    "qa_tests": {
+      "status": "completed",
+      "note": "859 tests après merge de master : tendance (semestres, séries, seuils, publication), actualisation Worker (lissage, coefficients, choix de série, route avec et sans tendance), estimation moteur (chaque correction, bornes, confiance, positions, feu prix), web (textes, écran Estimation, Rapport, Méthode, lecture de l'état et de l'extérieur) ; couverture 100 % sur les modules de logique"
+    },
+    "security": {
+      "status": "completed",
+      "note": "aucun modèle de langage dans l'estimation ; aucun nouvel appel réseau (mêmes lectures R2) ; entrées validées par Zod (ProjetSchema, contrat /marche/adresse, contrat /extract) ; coefficients statiques versionnés dans les règles ; rien de personnel stocké côté serveur"
+    },
+    "push": { "status": "done", "pr": 26 }
   },
   "decisions": {
     "tendance": "médiane €/m² par semestre sur 5 ans de DVF, seuil 20 ventes, commune sinon département, moyenne mobile pondérée sur 3 semestres",
