@@ -105,7 +105,7 @@ export function NouveauProjet(): JSX.Element {
           <div className="flex flex-col gap-1">
             <h2 className="m-0 font-display text-[22px] font-semibold">Le texte de l'annonce</h2>
             <p className="m-0 text-sm text-encre-2">
-              L'extension Loupe lira la page à votre place, bientôt. En attendant : sur l'annonce,
+              L'extension Deklic lira la page à votre place, bientôt. En attendant : sur l'annonce,
               tout sélectionner (Ctrl+A), copier (Ctrl+C), et coller ici. Le texte n'est pas
               conservé, seulement ce qu'on y lit.
             </p>

@@ -1,10 +1,10 @@
-# Loupe — Spécification fonctionnelle (résumé de travail)
+# Deklic — Spécification fonctionnelle (résumé de travail)
 
 Source de vérité : `reference/spec-produit-v1.html` (v1, 13/09/2026). Ce résumé sert aux skills ; en cas de doute, la spec HTML prime.
 
 ## Positionnement
 
-« Tu as trouvé une annonce ? Colle-la ici. Loupe te dit si c'est cher, si ça s'autofinance, ce que tu paieras d'impôts et ce qu'il te restera à la revente — en deux minutes, gratuitement, et en t'expliquant chaque chiffre. »
+« Tu as trouvé une annonce ? Colle-la ici. Deklic te dit si c'est cher, si ça s'autofinance, ce que tu paieras d'impôts et ce qu'il te restera à la revente — en deux minutes, gratuitement, et en t'expliquant chaque chiffre. »
 
 Concurrents : Horiz.io (8–20 €/mois, complet, saisie manuelle), Lybox (9–49 €/mois, chasse intensive), IMMONAI/ImmoIA (IA, gratuit très limité), Rendify (gratuit, formulaire), Rentila (gestion, étape d'après). Trou : zéro friction + lecture automatique + analyse complète + gratuit sans quota visible.
 
