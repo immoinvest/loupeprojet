@@ -1,0 +1,14 @@
+[
+  {
+    "nom": "Marseille 1er Arrondissement",
+    "code": "13201",
+    "codesPostaux": ["13001"],
+    "population": 37599
+  },
+  {
+    "nom": "Marseille 2e Arrondissement",
+    "code": "13202",
+    "codesPostaux": ["13002"],
+    "population": 24378
+  }
+]
