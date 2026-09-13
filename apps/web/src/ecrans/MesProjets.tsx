@@ -151,7 +151,11 @@ export function MesProjets(): JSX.Element {
             </button>
           ))}
         </div>
-        <Bouton disabled title="Bientôt : comparer 2 à 5 projets">
+        <Bouton
+          onClick={() => {
+            void naviguer('/comparer');
+          }}
+        >
           Comparer
         </Bouton>
         <Bouton

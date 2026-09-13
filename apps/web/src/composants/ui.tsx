@@ -1,6 +1,8 @@
 import type { Feu } from '@loupe/moteur';
 import type { JSX, ReactNode } from 'react';
 
+import { useModeDocument } from './document';
+
 export type TonPastille = Feu | 'neutre' | 'accent';
 
 const TONS: Readonly<Record<TonPastille, string>> = {
@@ -55,12 +57,16 @@ export function Pastille({
 export function Carte({
   children,
   className = '',
+  id,
 }: {
   children: ReactNode;
   className?: string;
+  /** Ancre (sommaire de la page Méthode). */
+  id?: string;
 }): JSX.Element {
   return (
     <section
+      id={id}
       className={`flex flex-col gap-3 rounded-carte border border-bordure bg-surface p-6 shadow-carte ${className}`}
     >
       {children}
@@ -75,8 +81,10 @@ export function TitreCarte({
   children: ReactNode;
   action?: ReactNode;
 }): JSX.Element {
+  // En mode document, l'action (souvent une explication dépliée) passe sous le titre.
+  const document = useModeDocument();
   return (
-    <div className="flex items-baseline justify-between gap-4">
+    <div className={document ? 'flex flex-col gap-2' : 'flex items-baseline justify-between gap-4'}>
       <h2 className="m-0 font-display text-[22px] font-semibold">{children}</h2>
       {action}
     </div>
@@ -131,7 +139,9 @@ export function Ligne({
   );
 }
 
-/** Explication longue, repliée par défaut. */
+const CLASSE_EXPLICATION = 'rounded-encart bg-accent-fond p-3 leading-relaxed text-encre-2';
+
+/** Explication longue, repliée par défaut ; toujours visible dans un document. */
 export function Pourquoi({
   texte,
   libelle = 'Pourquoi ?',
@@ -139,16 +149,18 @@ export function Pourquoi({
   texte: string;
   libelle?: string;
 }): JSX.Element {
+  if (useModeDocument()) {
+    return <p className={`m-0 text-sm ${CLASSE_EXPLICATION}`}>{texte}</p>;
+  }
   return (
     <details className="text-sm">
       <summary className="cursor-pointer list-none font-bold text-accent">{libelle}</summary>
-      <p className="mt-2 mb-0 rounded-encart bg-accent-fond p-3 leading-relaxed text-encre-2">
-        {texte}
-      </p>
+      <p className={`mt-2 mb-0 ${CLASSE_EXPLICATION}`}>{texte}</p>
     </details>
   );
 }
 
+/** Un document n'a pas de boutons : rendu nul en mode document. */
 export function Bouton({
   children,
   onClick,
@@ -163,7 +175,8 @@ export function Bouton({
   type?: 'button' | 'submit';
   disabled?: boolean;
   title?: string;
-}): JSX.Element {
+}): JSX.Element | null {
+  if (useModeDocument()) return null;
   const style =
     variante === 'primaire'
       ? 'bg-accent text-white hover:bg-accent-fonce'

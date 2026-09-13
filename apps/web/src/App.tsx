@@ -4,17 +4,23 @@ import { BrowserRouter, MemoryRouter, Navigate, useRoutes, type RouteObject } fr
 import { AppLayout } from './coque/AppLayout';
 import { ProjetLayout } from './coque/ProjetLayout';
 import { Bientot } from './ecrans/Bientot';
+import { Comparer } from './ecrans/Comparer';
 import { Extension } from './ecrans/Extension';
 import { Fiscalite } from './ecrans/Fiscalite';
 import { Hypotheses } from './ecrans/Hypotheses';
+import { Imprimer } from './ecrans/Imprimer';
 import { MesProjets } from './ecrans/MesProjets';
+import { Methode } from './ecrans/Methode';
 import { NouveauProjet } from './ecrans/NouveauProjet';
+import { Partage } from './ecrans/Partage';
 import { Rapport } from './ecrans/Rapport';
 import { Revente } from './ecrans/Revente';
 import { Visite } from './ecrans/Visite';
 import { ProjetsProvider } from './stockage/ProjetsContext';
 
 export const routes: RouteObject[] = [
+  // Hors coque : le document imprimable, sans barre latérale ni onglets.
+  { path: 'projets/:id/imprimer', element: <Imprimer /> },
   {
     element: <AppLayout />,
     children: [
@@ -32,19 +38,9 @@ export const routes: RouteObject[] = [
           { path: 'visite', element: <Visite /> },
         ],
       },
-      {
-        path: 'comparer',
-        element: <Bientot titre="Comparer" phrase="Bientôt : deux à cinq projets côte à côte." />,
-      },
-      {
-        path: 'methode',
-        element: (
-          <Bientot
-            titre="Comment c'est calculé"
-            phrase="Bientôt : chaque formule, chaque source, chaque hypothèse par défaut."
-          />
-        ),
-      },
+      { path: 'partage', element: <Partage /> },
+      { path: 'comparer', element: <Comparer /> },
+      { path: 'methode', element: <Methode /> },
       { path: 'extension', element: <Extension /> },
       {
         path: '*',
