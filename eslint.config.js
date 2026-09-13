@@ -41,8 +41,8 @@ export default defineConfig(
     },
   },
   {
-    // Le journal structuré du Worker est le seul endroit qui écrit sur la console.
-    files: ['apps/worker/src/journal.ts'],
+    // Les journaux structurés des workers sont les seuls endroits qui écrivent sur la console.
+    files: ['apps/worker/src/journal.ts', 'apps/comptes/src/journal.ts'],
     rules: { 'no-console': 'off' },
   },
   {
