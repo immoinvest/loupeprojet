@@ -2,7 +2,7 @@
   "feature_slug": "moteur-calcul",
   "title": "Moteur de calcul Loupe (packages/moteur) + mise en place du monorepo",
   "started_at": "2026-09-13T00:00:00Z",
-  "current_step": "push",
+  "current_step": "completed",
   "scope": "packages/moteur + racine du monorepo",
   "branch": "feat/moteur-calcul",
   "baseline": {
@@ -69,7 +69,11 @@
       "status": "completed",
       "note": "aucun secret, aucune I/O, aucun eval, .env ignorés, node_modules et dist retirés du suivi"
     },
-    "push": { "status": "in_progress", "note": "PR à ouvrir avec gh ; jamais de merge automatique" }
+    "push": {
+      "status": "completed",
+      "pr": "https://github.com/immoinvest/loupeprojet/pull/1",
+      "note": "PR ouverte le 13/09/2026 ; merge par Pierre uniquement"
+    }
   },
   "decisions": {
     "stack": "ADR-001 : spec Loupe (Cloudflare, SPA, Mistral) avec React au lieu de Svelte",
