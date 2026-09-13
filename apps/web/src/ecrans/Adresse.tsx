@@ -13,7 +13,9 @@ import { useProjets } from '@/stockage/ProjetsContext';
 import type { AdresseBien } from '@/stockage/projets';
 import { PHRASES_ADRESSE, phrasePrecision, phraseReference } from '@/textes/adresse';
 
+import { CarteEstimation } from './adresse/Estimation';
 import { TableauGroupes, TableauVentes } from './adresse/Tableaux';
+import { Tendance } from './adresse/Tendance';
 
 type Etat =
   | { readonly etape: 'saisie' }
@@ -93,7 +95,10 @@ export function Adresse(): JSX.Element {
 
   const utiliserRepere = (): void => {
     if (etat.etape !== 'resultat' || reference === null) return;
-    const repere = marcheDepuisReference(reference);
+    const repere = marcheDepuisReference(
+      reference,
+      etat.analyse.tendance?.periodeReference ?? null,
+    );
     mettreAJour(
       enregistre.id,
       {
@@ -109,11 +114,11 @@ export function Adresse(): JSX.Element {
     <div className="flex flex-col gap-5 px-10 pt-8 pb-10">
       <div className="flex flex-col gap-2">
         <h1 className="m-0 max-w-[26ch] font-display text-[36px] leading-[1.1] font-bold tracking-tight">
-          L'adresse exacte, pour un prix au m² précis.
+          Combien vaut ce bien, à l'adresse exacte ?
         </h1>
         <p className="m-0 max-w-[64ch] text-[17px] text-encre-2">
-          Même immeuble, parcelles voisines, même côté de la rue ou en face : les ventes réelles au
-          plus près du bien.
+          Les ventes réelles au plus près du bien, ramenées au prix d'aujourd'hui, puis corrigées
+          selon son état et ses caractéristiques. Chaque chiffre montre sa source.
         </p>
       </div>
 
@@ -153,37 +158,43 @@ export function Adresse(): JSX.Element {
       </Carte>
 
       {etat.etape === 'resultat' && (
-        <>
-          <Carte className="border-accent-bordure bg-accent-fond">
-            <h2 className="m-0 font-display text-[22px] font-semibold">Le repère de prix</h2>
-            <p className="m-0 text-[17px]">
-              {reference !== null
-                ? phraseReference(
-                    reference,
-                    ecartAuRepere(prixM2Bien, reference.statistiques.medianeM2),
-                  )
-                : etat.analyse.ventesCommune === 0
-                  ? PHRASES_ADRESSE.sansVentes
-                  : PHRASES_ADRESSE.sansRepere}
-            </p>
-            <div className="flex flex-wrap items-center gap-2">
-              {reference !== null &&
-                (repereUtilise ? (
-                  <Pastille ton="bon" compacte>
-                    {PHRASES_ADRESSE.repereUtilise}
-                  </Pastille>
-                ) : (
-                  <Bouton variante="primaire" onClick={utiliserRepere}>
-                    Utiliser ce repère pour le verdict
-                  </Bouton>
-                ))}
-              {etat.analyse.cadastre === 'indisponible' && (
-                <Pastille ton="surveiller" compacte>
-                  {PHRASES_ADRESSE.cadastreIndisponible}
+        <Carte>
+          <h2 className="m-0 font-display text-[22px] font-semibold">Le repère de prix</h2>
+          <p className="m-0 text-[17px]">
+            {reference !== null
+              ? phraseReference(
+                  reference,
+                  ecartAuRepere(prixM2Bien, reference.statistiques.medianeM2),
+                )
+              : etat.analyse.ventesCommune === 0
+                ? PHRASES_ADRESSE.sansVentes
+                : PHRASES_ADRESSE.sansRepere}
+          </p>
+          <div className="flex flex-wrap items-center gap-2">
+            {reference !== null &&
+              (repereUtilise ? (
+                <Pastille ton="bon" compacte>
+                  {PHRASES_ADRESSE.repereUtilise}
                 </Pastille>
-              )}
-            </div>
-          </Carte>
+              ) : (
+                <Bouton variante="primaire" onClick={utiliserRepere}>
+                  Utiliser ce repère pour l'estimation
+                </Bouton>
+              ))}
+            {etat.analyse.cadastre === 'indisponible' && (
+              <Pastille ton="surveiller" compacte>
+                {PHRASES_ADRESSE.cadastreIndisponible}
+              </Pastille>
+            )}
+          </div>
+        </Carte>
+      )}
+
+      <CarteEstimation />
+
+      {etat.etape === 'resultat' && (
+        <>
+          {etat.analyse.tendance != null && <Tendance tendance={etat.analyse.tendance} />}
           <TableauGroupes analyse={etat.analyse} />
           <TableauVentes analyse={etat.analyse} />
           <p className="m-0 text-xs text-encre-3">

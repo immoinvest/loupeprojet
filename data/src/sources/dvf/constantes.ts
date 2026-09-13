@@ -9,8 +9,17 @@ export const SOURCE_DVF: Source = {
 /** Fenêtre glissante des ventes publiées, en mois, se terminant à la dernière vente connue. */
 export const FENETRE_MOIS = 24;
 
-/** Dossiers annuels lus pour couvrir la fenêtre : le plus récent ne contient parfois qu'un semestre. */
-export const ANNEES_LUES = 3;
+/**
+ * Dossiers annuels lus : cinq ans pour mesurer la tendance des prix ; les CSV publiés ne gardent que
+ * la fenêtre de 24 mois. Le plus récent ne contient parfois qu'un semestre.
+ */
+export const ANNEES_LUES = 5;
+
+/** Un semestre compte dans la tendance à partir de 20 ventes : en dessous, la médiane est trop bruitée. */
+export const SEUIL_VENTES_SEMESTRE = 20;
+
+/** Une série de tendance a au moins deux semestres : un seul point ne dit rien de l'évolution. */
+export const MINIMUM_POINTS_TENDANCE = 2;
 
 /** Bornes de plausibilité d'une vente de logement ; en dehors, la ligne est écartée et comptée. */
 export interface FiltresDvf {

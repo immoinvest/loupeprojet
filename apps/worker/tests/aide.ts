@@ -78,6 +78,8 @@ export const REPONSE_MODELE = {
   coproEnProcedure: false,
   loyerActuel: null,
   chauffage: 'individuel',
+  etat: null,
+  exterieur: null,
 };
 
 export function reponseJson(corps: unknown, statut = 200): Response {

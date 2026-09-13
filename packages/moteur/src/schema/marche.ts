@@ -14,7 +14,13 @@ export const DvfSchema = z.object({
   q3M2: z.number().positive().optional(),
   nombreVentes: z.number().int().nonnegative(),
   rayonMetres: z.number().positive().optional(),
+  /** Semestre auquel les prix ont été ramenés par la tendance locale (`2025-S1`) ; absent = prix des actes. */
+  actualiseAu: z
+    .string()
+    .regex(/^\d{4}-S[12]$/)
+    .optional(),
 });
+export type Dvf = z.infer<typeof DvfSchema>;
 
 /** Données de marché autour du bien. Tout est optionnel : le moteur sait calculer sans. */
 export const MarcheSchema = z.object({

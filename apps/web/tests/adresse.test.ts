@@ -87,6 +87,14 @@ describe('repère de l’analyse d’adresse', () => {
         'marche.dvf.rayonMetres': 'dvf',
       },
     });
+    expect(marcheDepuisReference(REFERENCE, '2025-S1').dvf).toEqual({
+      medianM2: 3600,
+      q1M2: 3440,
+      q3M2: 3750,
+      nombreVentes: 6,
+      rayonMetres: 90,
+      actualiseAu: '2025-S1',
+    });
     expect(ecartAuRepere(2700, 3600)).toBeCloseTo(-0.25, 10);
   });
 });

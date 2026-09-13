@@ -21,6 +21,13 @@ const OUI_NON = [
   { v: 'non', l: 'non' },
 ];
 const DPE = [{ v: '', l: '?' }, ...['A', 'B', 'C', 'D', 'E', 'F', 'G'].map((l) => ({ v: l, l }))];
+const ETATS = [
+  { v: '', l: '?' },
+  { v: 'a_renover', l: 'À rénover' },
+  { v: 'a_rafraichir', l: 'À rafraîchir' },
+  { v: 'bon_etat', l: 'Bon état' },
+  { v: 'renove', l: 'Rénové' },
+];
 const TYPES = [
   { v: 'appartement', l: 'Appartement' },
   { v: 'maison', l: 'Maison' },
@@ -82,6 +89,8 @@ export function FormulaireProjet({
           <Champ cle="annee" libelle="Année de construction" {...c} />
           <Champ cle="dpe" libelle="DPE" options={DPE} {...c} />
           <Champ cle="ges" libelle="GES" options={DPE} {...c} />
+          <Champ cle="etat" libelle="État" options={ETATS} {...c} />
+          <Champ cle="exterieur" libelle="Balcon ou terrasse" options={OUI_NON} {...c} />
           <Champ cle="codePostal" libelle="Code postal" erreur={erreurs.codePostal} {...c} />
           <Champ cle="ville" libelle="Ville" erreur={erreurs.ville} {...c} />
           <Champ cle="travaux" libelle="Travaux prévus" unite="€" {...c} />

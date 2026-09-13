@@ -2,6 +2,7 @@ import {
   VERSION_REGLES_COURANTE,
   obtenirRegles,
   type ClasseEnergie,
+  type EtatBien,
   type ModeLocation,
   type ProjetEntree,
   type TypeBien,
@@ -28,6 +29,8 @@ export interface SaisieProjet {
   readonly ascenseur?: boolean | undefined;
   readonly annee?: number | undefined;
   readonly dpe?: ClasseEnergie | undefined;
+  readonly etat?: EtatBien | undefined;
+  readonly exterieur?: boolean | undefined;
   readonly codePostal: string;
   readonly ville: string;
   readonly chargesCoproMois?: number | undefined;
@@ -109,6 +112,10 @@ export function construireProjet(
   if (s.dpe !== undefined) provenance['bien.dpe'] = s.provenance.dpe ?? 'utilisateur';
   if (s.typeBien !== undefined) provenance['bien.type'] = s.provenance.typeBien ?? 'utilisateur';
   if (s.ges !== undefined) provenance['bien.ges'] = s.provenance.ges ?? 'utilisateur';
+  if (s.etat !== undefined) provenance['bien.etat'] = s.provenance.etat ?? 'utilisateur';
+  if (s.exterieur !== undefined) {
+    provenance['bien.exterieur'] = s.provenance.exterieur ?? 'utilisateur';
+  }
   if (s.lotsCopro !== undefined) {
     provenance['bien.copro.lots'] = s.provenance.lotsCopro ?? 'utilisateur';
   }
@@ -139,6 +146,8 @@ export function construireProjet(
       ...(s.ascenseur === undefined ? {} : { ascenseur: s.ascenseur }),
       ...(s.annee === undefined ? {} : { annee: s.annee }),
       ...(s.dpe === undefined ? {} : { dpe: s.dpe }),
+      ...(s.etat === undefined ? {} : { etat: s.etat }),
+      ...(s.exterieur === undefined ? {} : { exterieur: s.exterieur }),
       departement: departementDuCodePostal(s.codePostal),
     },
     ...(enrichi === null ? {} : { marche: enrichi.marche }),

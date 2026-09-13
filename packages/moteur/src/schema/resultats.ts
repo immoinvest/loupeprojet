@@ -241,6 +241,39 @@ export const ScenariosSchema = z.strictObject({
   ),
 });
 
+const EtatSchema = z.enum(['a_renover', 'a_rafraichir', 'bon_etat', 'renove']);
+
+export const EstimationResultatSchema = z.strictObject({
+  etat: EtatSchema,
+  etatSuppose: z.boolean(),
+  prixM2Marche: n,
+  corrections: z.array(
+    z.strictObject({
+      code: z.enum(['dpe', 'etage', 'exterieur', 'charges']),
+      taux: n,
+      montant: n,
+      ignoree: z.boolean(),
+    }),
+  ),
+  prixM2Estime: n,
+  centre: n,
+  bas: n,
+  haut: n,
+  selonEtat: z.strictObject({ a_renover: n, a_rafraichir: n, bon_etat: n, renove: n }),
+  confiance: z.enum(['elevee', 'moyenne', 'faible']),
+  marge: n,
+  charges: z
+    .strictObject({
+      repereAnnuel: n,
+      excedentAnnuel: n,
+      rendementLocal: n,
+      borneAtteinte: z.boolean(),
+    })
+    .nullable(),
+  actualiseAu: z.string().nullable(),
+  ecartPrix: n,
+});
+
 export const ResultatsSchema = z.strictObject({
   projet: ProjetSchema,
   financement: FinancementSchema,
@@ -248,6 +281,7 @@ export const ResultatsSchema = z.strictObject({
   fiscalite: FiscaliteResultatSchema,
   revente: ReventeResultatSchema,
   rendement: RendementSchema,
+  estimation: EstimationResultatSchema.nullable(),
   verdict: VerdictSchema,
   scenarios: ScenariosSchema.nullable(),
   meta: z.strictObject({

@@ -14,7 +14,7 @@ test('au premier lancement, la racine mène à « Mes projets » avec le projet 
   await expect(liste.getByText('1 projet · sauvegardés sur cet appareil')).toBeVisible();
   await expect(liste.getByText('Visite prévue')).toBeVisible();
   await expect(liste.getByText('−210 €/mois')).toBeVisible();
-  await expect(liste.getByText('−22 %')).toBeVisible();
+  await expect(liste.getByText('−25 %')).toBeVisible();
 
   // La barre latérale liste aussi le projet et compte « 1 projet ».
   const barre = page.getByRole('navigation', { name: 'Mes projets' });

@@ -37,6 +37,8 @@ export const NOMS_CHAMPS = [
   'coproEnProcedure',
   'loyerActuel',
   'chauffage',
+  'etat',
+  'exterieur',
 ] as const;
 export type NomChamp = (typeof NOMS_CHAMPS)[number];
 
@@ -62,6 +64,8 @@ const SCHEMAS: Readonly<Record<NomChamp, z.ZodType>> = {
   coproEnProcedure: z.boolean(),
   loyerActuel: nombre(0, 20_000),
   chauffage: z.enum(['individuel', 'collectif']),
+  etat: z.enum(['a_renover', 'a_rafraichir', 'bon_etat', 'renove']),
+  exterieur: z.boolean(),
 };
 
 export type ChampsAnnonce = Readonly<Record<NomChamp, unknown>>;

@@ -1,4 +1,4 @@
-import type { ClasseEnergie, ModeLocation, TypeBien } from '@loupe/moteur';
+import type { ClasseEnergie, EtatBien, ModeLocation, TypeBien } from '@loupe/moteur';
 
 import type { AnnonceResolue, ChampsExtraits, Provenance, SaisieProjet } from '@/annonces';
 
@@ -16,6 +16,8 @@ export type Cle =
   | 'ascenseur'
   | 'annee'
   | 'dpe'
+  | 'etat'
+  | 'exterieur'
   | 'codePostal'
   | 'ville'
   | 'chargesCoproMois'
@@ -51,6 +53,8 @@ const VIDE: Valeurs = {
   ascenseur: '',
   annee: '',
   dpe: '',
+  etat: '',
+  exterieur: '',
   codePostal: '',
   ville: '',
   chargesCoproMois: '',
@@ -86,6 +90,8 @@ export function valeursDepuisChamps(champs: ChampsExtraits): ValeursInitiales {
   poser('ascenseur', champs.ascenseur);
   poser('annee', champs.annee);
   poser('dpe', champs.dpe);
+  poser('etat', champs.etat);
+  poser('exterieur', champs.exterieur);
   poser('codePostal', champs.codePostal);
   poser('ville', champs.ville);
   poser('chargesCoproMois', champs.chargesCoproMois);
@@ -143,6 +149,8 @@ export function versSaisie(
     ascenseur: v.ascenseur === '' ? undefined : v.ascenseur === 'oui',
     annee: opt('annee'),
     dpe: v.dpe === '' ? undefined : (v.dpe as ClasseEnergie),
+    etat: v.etat === '' ? undefined : (v.etat as EtatBien),
+    exterieur: v.exterieur === '' ? undefined : v.exterieur === 'oui',
     codePostal: v.codePostal.trim(),
     ville: v.ville.trim(),
     chargesCoproMois: opt('chargesCoproMois'),

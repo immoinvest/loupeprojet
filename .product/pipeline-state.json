@@ -1,35 +1,42 @@
 {
-  "feature_slug": "dvf-adresse",
-  "title": "Analyse DVF à l'adresse exacte, sans modèle de langage : même immeuble, parcelles voisines (cadastre IGN), même côté de la rue et en face, cercles de 100 à 300 m, repère de prix appliqué au verdict",
-  "started_at": "2026-09-13T00:00:00Z",
-  "current_step": "push",
-  "scope": "data/src/sources/dvf (CSV adressé), apps/worker/src/{adresse,donnees,marche/millesime}, apps/web/src/{enrichissement/adresse,ecrans/Adresse,textes/adresse,stockage}",
-  "branch": "feat/dvf-adresse",
-  "base": "master (73c46dd)",
+  "feature_slug": "estimation-prix",
+  "title": "Estimation du prix du bien : prix DVF actualisés par la tendance locale, fourchette à rénover / rénové, corrections sourcées (DPE, étage, ascenseur, extérieur, charges), confiance",
+  "started_at": "2026-09-14T00:00:00Z",
+  "current_step": "implement",
+  "scope": "data/src/sources/dvf (tendance), apps/worker/src/adresse (actualisation), packages/moteur/src/estimation, apps/web (onglet Estimation, Rapport, Méthode, Hypothèses, lecture d'annonce)",
+  "branch": "feat/estimation-prix",
+  "base": "master (ad63237)",
+  "next_feature": "marche-complet",
   "steps": {
     "discovery": {
       "status": "completed",
-      "output": ".product/features/dvf-adresse-discovery.md"
+      "output": ".product/features/estimation-prix-discovery.md"
     },
-    "implement": { "status": "completed", "stories_completed": 5, "stories_total": 5 },
-    "refactor": {
+    "specs": { "status": "completed", "stories_count": 5 },
+    "architecture": {
       "status": "completed",
-      "note": "lecture des référentiels mise en commun (donnees/passe.ts) pour /marche et /marche/adresse ; moteur d'analyse pur séparé du cadastre et de la route"
+      "output": ".product/architecture/estimation-prix.md"
+    },
+    "implement": {
+      "status": "completed",
+      "stories_completed": 5,
+      "stories_total": 5,
+      "commits": ["5315e3c data US-1", "e35ab11 worker US-2", "5ba9cc1 moteur US-3"]
     },
     "qa_tests": {
       "status": "completed",
-      "note": "données : vente adressée et CSV publié ; Worker : lecture CSV, géométrie, statistiques, classement, repère, cadastre (mitoyenneté, pannes), route (cache, pannes, sans numéro, débit) ; web : clé BAN, repère, textes, client, écran complet avec faux Worker et six cas d'échec"
+      "note": "859 tests après merge de master : tendance (semestres, séries, seuils, publication), actualisation Worker (lissage, coefficients, choix de série, route avec et sans tendance), estimation moteur (chaque correction, bornes, confiance, positions, feu prix), web (textes, écran Estimation, Rapport, Méthode, lecture de l'état et de l'extérieur) ; couverture 100 % sur les modules de logique"
     },
     "security": {
       "status": "completed",
-      "note": "aucun modèle de langage ; paramètres validés par Zod ; réponses du cadastre validées ; adresse du bien stockée dans le navigateur seulement ; clés de cache par empreinte"
+      "note": "aucun modèle de langage dans l'estimation ; aucun nouvel appel réseau (mêmes lectures R2) ; entrées validées par Zod (ProjetSchema, contrat /marche/adresse, contrat /extract) ; coefficients statiques versionnés dans les règles ; rien de personnel stocké côté serveur"
     },
-    "push": { "status": "done", "pr": 24 }
+    "push": { "status": "done", "pr": 26 }
   },
   "decisions": {
-    "sans_llm": "égalité de parcelle et de code de voie, parité des numéros, distances : reproductible et gratuit",
-    "voisinage": "API Carto IGN : parcelle au point, candidates dans une boîte élargie de 0,00015°, voisines = contour à moins de 3 m",
-    "repere": "premier groupe à ≥ 5 comparables (immeuble → voisines → même côté → 100 m → en face → 200 m → 300 m), appliqué sur clic avec rayonMetres",
-    "donnees": "colonnes idParcelle, numero, suffixe, codeVoie, voie, carrez ajoutées en fin de CSV ; republication DVF du département 13 après fusion"
+    "tendance": "médiane €/m² par semestre sur 5 ans de DVF, seuil 20 ventes, commune sinon département, moyenne mobile pondérée sur 3 semestres",
+    "etat": "à rénover = 1er quartile, rafraîchir = entre 1er quartile et médiane, bon état = médiane, rénové = 3e quartile",
+    "corrections": "coefficients d'études publiées (Notaires valeur verte 2024, MeilleursAgents étage 2017 et extérieur 2020, ARC charges 2024), versionnés dans les règles et marqués à confirmer",
+    "sans_llm": "aucun modèle de langage dans l'estimation"
   }
 }

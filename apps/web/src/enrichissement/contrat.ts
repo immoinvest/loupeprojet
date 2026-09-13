@@ -26,6 +26,9 @@ export const ReponseExtractionSchema = z.object({
     taxeFonciere: z.number().nonnegative().nullable(),
     honorairesAgence: z.number().nonnegative().nullable(),
     meuble: z.boolean().nullable(),
+    /** Absents des réponses mises en cache avant la version 2 du prompt. */
+    etat: z.enum(['a_renover', 'a_rafraichir', 'bon_etat', 'renove']).nullable().optional(),
+    exterieur: z.boolean().nullable().optional(),
   }),
   modele: z.string(),
 });
@@ -131,6 +134,9 @@ export const ReponseAdresseSchema = z.object({
       prix: z.number().positive(),
       surface: z.number().positive(),
       prixM2: z.number().positive(),
+      /** Prix au m² ramené au dernier semestre connu ; absent dans les réponses d'avant la tendance. */
+      prixM2Actualise: z.number().positive().optional(),
+      coefficient: z.number().positive().optional(),
       pieces: z.number().int().nonnegative(),
       type: z.enum(['appartement', 'maison']),
       adresse: z.string().nullable(),
@@ -138,9 +144,28 @@ export const ReponseAdresseSchema = z.object({
       groupes: z.array(CodeGroupeSchema),
     }),
   ),
+  /** Évolution locale des prix qui a servi à actualiser les ventes ; `null` quand elle est inconnue. */
+  tendance: z
+    .object({
+      zone: z.enum(['commune', 'departement']),
+      periodeReference: z.string().regex(/^\d{4}-S[12]$/),
+      evolution1an: z.number().nullable(),
+      evolution2ans: z.number().nullable(),
+      points: z.array(
+        z.object({
+          periode: z.string().regex(/^\d{4}-S[12]$/),
+          ventes: z.number().int().positive(),
+          medianeM2: z.number().positive(),
+          indice: z.number().positive(),
+        }),
+      ),
+    })
+    .nullable()
+    .optional(),
   sources: z.array(SourceSchema),
 });
 export type ReponseAdresse = z.infer<typeof ReponseAdresseSchema>;
+export type TendanceAdresse = NonNullable<ReponseAdresse['tendance']>;
 export type ReferenceAdresse = NonNullable<ReponseAdresse['reference']>;
 
 /** Corps d'erreur du Worker : un code, jamais un texte. */

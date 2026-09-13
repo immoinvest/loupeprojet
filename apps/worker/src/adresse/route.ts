@@ -6,11 +6,19 @@ import type { Dependances } from '../dependances';
 import { lireTexte, nouvellePasse, type Passe } from '../donnees/passe';
 import { reponseErreur } from '../erreurs';
 import { ecrireCache, lireCache, repondre } from '../http';
-import { TypeLogementSchema } from '../marche/fichiers';
+import { TypeLogementSchema, type TypeLogement } from '../marche/fichiers';
 import { millesimesDvfAEssayer } from '../marche/millesime';
 import { cleCache } from '../proxy/cache';
-import { analyserAdresse } from './analyse';
+import { analyserAdresse, type Actualiser } from './analyse';
 import { voisinageDe, type Voisinage } from './cadastre';
+import {
+  coefficientPour,
+  lireTendance,
+  lisser,
+  resumeTendance,
+  serieRetenue,
+  type ResumeTendance,
+} from './tendance';
 import { lireVentes, type VenteDvf } from './ventes';
 
 /** Une analyse vaut 24 heures (les ventes changent au mieux chaque semestre). */
@@ -18,7 +26,7 @@ export const TTL_ADRESSE_SECONDES = 24 * 3600;
 /** Le parcellaire change rarement : 30 jours. */
 export const TTL_CADASTRE_SECONDES = 30 * 24 * 3600;
 /** À incrémenter quand le contrat de réponse change : les réponses en cache en dépendent. */
-const VERSION_CONTRAT = 1;
+const VERSION_CONTRAT = 2;
 
 export const SOURCE_DVF = {
   nom: 'Demandes de valeurs foncières géolocalisées (Etalab, à partir des données DGFiP)',
@@ -68,10 +76,12 @@ async function voisinageEnCache(
   return voisinage;
 }
 
-async function ventesCommune(
-  passe: Passe,
-  codeInsee: string,
-): Promise<{ readonly millesime: string; readonly ventes: VenteDvf[] } | null> {
+interface VentesCommune {
+  readonly millesime: string;
+  readonly ventes: VenteDvf[];
+}
+
+async function ventesCommune(passe: Passe, codeInsee: string): Promise<VentesCommune | null> {
   for (const millesime of await millesimesDvfAEssayer(passe)) {
     const texte = await lireTexte(passe, `dvf/${millesime}/${codeInsee}.csv`);
     if (texte !== null) return { millesime, ventes: lireVentes(texte) };
@@ -79,9 +89,32 @@ async function ventesCommune(
   return null;
 }
 
+interface Actualisation {
+  readonly actualiser: Actualiser;
+  readonly resume: ResumeTendance;
+}
+
+/** Tendance des prix du millésime lu : série de la commune ou du département, lissée. */
+async function actualisation(
+  passe: Passe,
+  millesime: string,
+  codeInsee: string,
+  type: TypeLogement,
+): Promise<Actualisation | null> {
+  const tendance = await lireTendance(passe, millesime, codeInsee);
+  const serie = tendance === null ? null : serieRetenue(tendance, codeInsee, type);
+  if (serie === null) return null;
+  const indices = lisser(serie.points);
+  return {
+    actualiser: (date) => coefficientPour(indices, date),
+    resume: resumeTendance(serie.zone, indices),
+  };
+}
+
 /**
  * GET /marche/adresse?codeInsee&lat&lon&numero&codeVoie&type&surface : ventes réelles autour d'une adresse
- * précise (même immeuble, parcelles voisines, même côté de la rue, en face, 100 à 300 m) et repère de prix.
+ * précise (même immeuble, parcelles voisines, même côté de la rue, en face, 100 à 300 m), prix ramenés au
+ * dernier semestre connu par la tendance locale, et repère de prix.
  */
 export function creerAnalyseAdresse(deps: Dependances): Handler<BlankEnv, '/marche/adresse'> {
   return async (c) => {
@@ -100,15 +133,21 @@ export function creerAnalyseAdresse(deps: Dependances): Handler<BlankEnv, '/marc
       ventesCommune(passe, p.codeInsee),
       voisinageEnCache(deps, p.lat, p.lon),
     ]);
-    const analyse = analyserAdresse(commune?.ventes ?? [], {
-      point: { lat: p.lat, lon: p.lon },
-      numero: p.numero ?? null,
-      codeVoie: p.codeVoie ?? null,
-      idParcelle: voisinage?.idParcelle ?? null,
-      voisines: voisinage?.voisines ?? [],
-      type: p.type,
-      surface: p.surface,
-    });
+    const tendance =
+      commune === null ? null : await actualisation(passe, commune.millesime, p.codeInsee, p.type);
+    const analyse = analyserAdresse(
+      commune?.ventes ?? [],
+      {
+        point: { lat: p.lat, lon: p.lon },
+        numero: p.numero ?? null,
+        codeVoie: p.codeVoie ?? null,
+        idParcelle: voisinage?.idParcelle ?? null,
+        voisines: voisinage?.voisines ?? [],
+        type: p.type,
+        surface: p.surface,
+      },
+      tendance?.actualiser,
+    );
     const texte = JSON.stringify({
       codeInsee: p.codeInsee,
       millesime: commune?.millesime ?? null,
@@ -116,6 +155,7 @@ export function creerAnalyseAdresse(deps: Dependances): Handler<BlankEnv, '/marc
       parcellesVoisines: voisinage?.voisines ?? [],
       cadastre: voisinage === null ? 'indisponible' : 'ok',
       ...analyse,
+      tendance: tendance?.resume ?? null,
       sources: commune === null ? [] : [SOURCE_DVF],
       obtenuLe: new Date(deps.maintenant()).toISOString(),
     });

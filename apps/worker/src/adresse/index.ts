@@ -11,6 +11,7 @@ export {
   statistiquesPrix,
   TOLERANCE_SURFACE,
   valeurAuRang,
+  type Actualiser,
   type AnalyseAdresse,
   type BienAdresse,
   type CodeGroupe,
@@ -44,4 +45,20 @@ export {
   TTL_ADRESSE_SECONDES,
   TTL_CADASTRE_SECONDES,
 } from './route';
+export {
+  coefficientPour,
+  lireTendance,
+  lisser,
+  resumeTendance,
+  semestreDe,
+  semestreDecale,
+  serieRetenue,
+  TendanceSchema,
+  type PointIndice,
+  type PointTendance,
+  type ResumeTendance,
+  type SerieRetenue,
+  type Tendance,
+  type ZoneTendance,
+} from './tendance';
 export { lireVentes, type VenteDvf } from './ventes';

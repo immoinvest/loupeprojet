@@ -71,6 +71,7 @@ export interface Groupe {
   readonly ventes: number;
   /** Celles qui ressemblent au bien (type, surface) : ce sont elles qui font les prix. */
   readonly comparables: number;
+  /** Prix au m² actualisés (ramenés au dernier semestre connu). */
   readonly statistiques: StatistiquesPrix | null;
   readonly distanceMaxMetres: number | null;
 }
@@ -79,7 +80,11 @@ export interface VenteProche {
   readonly date: string;
   readonly prix: number;
   readonly surface: number;
+  /** Prix au m² de l'acte, à sa date. */
   readonly prixM2: number;
+  /** Même prix ramené au dernier semestre connu par la tendance locale. */
+  readonly prixM2Actualise: number;
+  readonly coefficient: number;
   readonly pieces: number;
   readonly type: TypeLogement;
   readonly adresse: string | null;
@@ -99,6 +104,11 @@ export interface AnalyseAdresse {
   readonly reference: Reference | null;
   readonly ventesProches: readonly VenteProche[];
 }
+
+/** Coefficient d'actualisation d'une vente selon sa date ; 1 quand la tendance est inconnue. */
+export type Actualiser = (date: string) => number;
+
+const SANS_ACTUALISATION: Actualiser = () => 1;
 
 /** Valeur à un rang d'une liste ; un rang hors liste est une erreur de programmation. */
 export function valeurAuRang(liste: readonly number[], rang: number): number {
@@ -174,7 +184,8 @@ interface VenteSituee {
   readonly distance: number | null;
   readonly groupes: readonly CodeGroupe[];
   readonly comparable: boolean;
-  readonly prixM2: number;
+  readonly coefficient: number;
+  readonly prixM2Actualise: number;
 }
 
 function groupe(code: CodeGroupe, situees: readonly VenteSituee[]): Groupe {
@@ -185,27 +196,34 @@ function groupe(code: CodeGroupe, situees: readonly VenteSituee[]): Groupe {
     code,
     ventes: membres.length,
     comparables: comparables.length,
-    statistiques: statistiquesPrix(comparables.map((s) => s.prixM2)),
+    statistiques: statistiquesPrix(comparables.map((s) => s.prixM2Actualise)),
     distanceMaxMetres: distances.length === 0 ? null : Math.round(Math.max(...distances)),
   };
 }
 
 /**
  * Analyse des ventes de la commune autour d'une adresse précise : même immeuble, parcelles voisines,
- * même côté de la rue, en face, cercles de 100 à 300 m. Pure, sans réseau, sans modèle de langage.
+ * même côté de la rue, en face, cercles de 100 à 300 m. Les prix sont actualisés par `actualiser`
+ * avant les statistiques. Pure, sans réseau, sans modèle de langage.
  */
-export function analyserAdresse(ventes: readonly VenteDvf[], bien: BienAdresse): AnalyseAdresse {
+export function analyserAdresse(
+  ventes: readonly VenteDvf[],
+  bien: BienAdresse,
+  actualiser: Actualiser = SANS_ACTUALISATION,
+): AnalyseAdresse {
   const situees: VenteSituee[] = ventes.map((vente) => {
     const distance =
       vente.lat === null || vente.lon === null
         ? null
         : distanceMetres(bien.point, { lat: vente.lat, lon: vente.lon });
+    const coefficient = actualiser(vente.date);
     return {
       vente,
       distance,
       groupes: groupesDe(vente, bien, distance),
       comparable: estComparable(vente, bien),
-      prixM2: vente.prix / vente.surface,
+      coefficient,
+      prixM2Actualise: (vente.prix / vente.surface) * coefficient,
     };
   });
   const parCode = Object.fromEntries(
@@ -229,7 +247,9 @@ export function analyserAdresse(ventes: readonly VenteDvf[], bien: BienAdresse):
       date: s.vente.date,
       prix: s.vente.prix,
       surface: s.vente.surface,
-      prixM2: Math.round(s.prixM2),
+      prixM2: Math.round(s.vente.prix / s.vente.surface),
+      prixM2Actualise: Math.round(s.prixM2Actualise),
+      coefficient: Math.round(s.coefficient * 10_000) / 10_000,
       pieces: s.vente.pieces,
       type: s.vente.type,
       adresse: adresseDe(s.vente),

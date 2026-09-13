@@ -74,6 +74,33 @@ export const IndexDvfDepartementSchema = MetaSchema.extend({
 });
 export type IndexDvfDepartement = z.infer<typeof IndexDvfDepartementSchema>;
 
+/** Médiane du prix au m² d'un semestre (`2024-S2`) et nombre de ventes qui la font. */
+export const PointTendanceSchema = z.object({
+  periode: z.string().regex(/^\d{4}-S[12]$/),
+  ventes: z.number().int().positive(),
+  medianeM2: z.number().positive(),
+});
+export type PointTendance = z.infer<typeof PointTendanceSchema>;
+
+/** Séries semestrielles par type de logement ; un type absent n'a pas assez de ventes. */
+export const SeriesTendanceSchema = z.object({
+  appartement: z.array(PointTendanceSchema).min(2).optional(),
+  maison: z.array(PointTendanceSchema).min(2).optional(),
+});
+export type SeriesTendance = z.infer<typeof SeriesTendanceSchema>;
+
+/**
+ * `dvf/<millesime>/tendance/<departement>.json` : évolution des prix sur cinq ans, pour remettre les ventes
+ * passées à la date du dernier semestre connu. Séries du département, puis des communes assez actives.
+ */
+export const TendanceDvfDepartementSchema = MetaSchema.extend({
+  departement: CodeDepartementSchema,
+  seuilVentes: z.number().int().positive(),
+  seriesDepartement: SeriesTendanceSchema,
+  communes: z.record(CodeInseeSchema, SeriesTendanceSchema),
+});
+export type TendanceDvfDepartement = z.infer<typeof TendanceDvfDepartementSchema>;
+
 /** `dvf/<millesime>/index.json` : fusion nationale, écrite seulement quand la passe couvre tous les départements. */
 export const IndexDvfNationalSchema = MetaSchema.extend({
   departements: z.array(CodeDepartementSchema),

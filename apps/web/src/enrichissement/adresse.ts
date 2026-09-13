@@ -26,8 +26,14 @@ export interface MarcheAdresse {
 
 const CHAMPS_DVF = ['medianM2', 'q1M2', 'q3M2', 'nombreVentes', 'rayonMetres'] as const;
 
-/** Repère de l'analyse d'adresse → bloc `marche.dvf` du moteur, provenance « donnée publique ». */
-export function marcheDepuisReference(reference: ReferenceAdresse): MarcheAdresse {
+/**
+ * Repère de l'analyse d'adresse → bloc `marche.dvf` du moteur, provenance « donnée publique ». `actualiseAu` :
+ * semestre auquel les prix ont été ramenés, quand la tendance locale était connue.
+ */
+export function marcheDepuisReference(
+  reference: ReferenceAdresse,
+  actualiseAu: string | null = null,
+): MarcheAdresse {
   const { statistiques: s } = reference;
   const provenance: Record<string, string> = {};
   for (const champ of CHAMPS_DVF) provenance[`marche.dvf.${champ}`] = 'dvf';
@@ -38,6 +44,7 @@ export function marcheDepuisReference(reference: ReferenceAdresse): MarcheAdress
       q3M2: s.q3M2,
       nombreVentes: s.ventes,
       rayonMetres: reference.rayonMetres,
+      ...(actualiseAu === null ? {} : { actualiseAu }),
     },
     provenance,
   };

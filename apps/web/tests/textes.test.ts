@@ -197,7 +197,7 @@ describe('verdict', () => {
   it('prix bon + cash-flow négatif (exemple)', () => {
     const t = texteVerdict(calculerProjet(projetExemple));
     expect(t.titre).toBe('Le prix est bon. Le loyer ne couvre pas tout.');
-    expect(n(t.sousTitre)).toContain('−22 % par rapport aux ventes du quartier');
+    expect(n(t.sousTitre)).toContain('−25 % par rapport au prix estimé');
     expect(n(t.sousTitre)).toContain("banque d'accord (effort 25 %)");
     expect(n(t.sousTitre)).toContain('210 € à sortir chaque mois');
   });

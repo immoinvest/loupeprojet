@@ -3,7 +3,11 @@ import { join } from 'node:path';
 import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { ErreurCsv } from '../../../src/commun/csv.ts';
 import { ErreurTelechargement } from '../../../src/commun/telechargement.ts';
-import { IndexDvfDepartementSchema, IndexDvfNationalSchema } from '../../../src/schemas/dvf.ts';
+import {
+  IndexDvfDepartementSchema,
+  IndexDvfNationalSchema,
+  TendanceDvfDepartementSchema,
+} from '../../../src/schemas/dvf.ts';
 import { urlDvf } from '../../../src/sources/dvf/constantes.ts';
 import { detecterMillesime, executerDvf } from '../../../src/sources/dvf/source.ts';
 import {
@@ -59,7 +63,7 @@ describe('detecterMillesime', () => {
   it("échoue si aucun dossier récent n'existe", async () => {
     const faux = fauxContexte(() => undefined, dossier);
     await expect(detecterMillesime(faux.contexte, '2A')).rejects.toThrow(
-      'aucun dossier DVF trouvé entre 2024 et 2026',
+      'aucun dossier DVF trouvé entre 2022 et 2026',
     );
   });
 });
@@ -101,6 +105,18 @@ describe('executerDvf', () => {
       '2A062': { maison: { ventes: 2, medianeM2: 2570, q1M2: 2535, q3M2: 2606 } },
       '2A065': { appartement: { ventes: 1, medianeM2: 3804, q1M2: 3804, q3M2: 3804 } },
       '2A247': { appartement: { ventes: 1, medianeM2: 5217, q1M2: 5217, q3M2: 5217 } },
+    });
+
+    // Trop peu de ventes par semestre dans les fixtures : la tendance est publiée, vide.
+    const tendance = TendanceDvfDepartementSchema.parse(
+      JSON.parse(await lireSortie('dvf/2025/tendance/2A.json')),
+    );
+    expect(tendance).toMatchObject({
+      millesime: '2025',
+      departement: '2A',
+      seuilVentes: 20,
+      seriesDepartement: {},
+      communes: {},
     });
 
     const bilan = faux.journal.find((entree) => entree.message === 'DVF : département publié');

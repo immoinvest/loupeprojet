@@ -121,7 +121,7 @@ async function ouvrir(client: ClientWorker): Promise<string> {
   await screen.findByRole('heading', { name: 'Mes projets' });
   const id = lireProjets(window.localStorage)[0]?.id ?? '';
   render(<AppEnMemoire chemin={`/projets/${id}/adresse`} client={client} />);
-  await screen.findByRole('heading', { name: /L'adresse exacte/ });
+  await screen.findByRole('heading', { name: /l'adresse exacte/ });
   return id;
 }
 
@@ -181,7 +181,7 @@ describe('Onglet Adresse', () => {
       expect(screen.getByText('144 RUE DE L OLIVIER')).toBeInTheDocument();
       expect(screen.getByText(/parcelle 132058200E0318/)).toBeInTheDocument();
 
-      await u.click(screen.getByRole('button', { name: 'Utiliser ce repère pour le verdict' }));
+      await u.click(screen.getByRole('button', { name: "Utiliser ce repère pour l'estimation" }));
       expect(await screen.findByText(PHRASES_ADRESSE.repereUtilise)).toBeInTheDocument();
       const enregistre = lireProjets(window.localStorage)[0];
       expect(enregistre?.projet.marche.dvf).toEqual({

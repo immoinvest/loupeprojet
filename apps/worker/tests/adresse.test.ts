@@ -518,6 +518,7 @@ describe('GET /marche/adresse', () => {
       'dvf/courant.json',
       'dvf/2026/13205.csv',
       'dvf/2025/13205.csv',
+      'dvf/2025/tendance/13.json',
     ]);
 
     expect((await requete(REQUETE)).headers.get('x-loupe-cache')).toBe('HIT');
