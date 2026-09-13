@@ -1,0 +1,28 @@
+{
+  "feature_slug": "referentiels",
+  "title": "Référentiels : données publiques pré-agrégées (DVF, loyers ANIL, taxe foncière REI, zonage ABC, usure, communes) publiées sur R2 par GitHub Action",
+  "started_at": "2026-09-13T17:30:00Z",
+  "current_step": "implement",
+  "scope": "data/ (workspace @loupe/data), .github/workflows/referentiels.yml, vitest.config.ts et package.json racine (ajout du workspace)",
+  "branch": "feat/referentiels",
+  "base": "master (768c556)",
+  "baseline": { "typecheck": "ok", "tests": "en cours de vérification" },
+  "steps": {
+    "discovery": { "status": "completed", "output": ".product/features/referentiels-discovery.md" },
+    "specs": {
+      "status": "completed",
+      "stories_count": 9,
+      "note": "stories dans le document de discovery"
+    },
+    "architecture": { "status": "in_progress", "output": ".product/architecture/referentiels.md" },
+    "implement": { "status": "pending", "stories_completed": 0, "stories_total": 9, "commits": [] },
+    "qa_tests": { "status": "pending" },
+    "security": { "status": "pending" },
+    "push": { "status": "pending" }
+  },
+  "decisions": {
+    "publication": "aws s3 sync vers l'API S3 de R2 (34 000 fichiers DVF) au lieu de wrangler r2 object put fichier par fichier",
+    "usure": "fichiers trimestriels saisis à la main dans data/sources/usure/, aucune source ouverte automatisable sans clé",
+    "execution": "node --experimental-strip-types sur les sources TypeScript, sans étape de build"
+  }
+}
