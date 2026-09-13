@@ -34,7 +34,9 @@ function workerDesComptes(): Plugin {
   let sortie = '';
   return {
     name: 'deklic-worker-comptes',
-    apply: 'build',
+    // Opt-in : sans DEKLIC_COMPTES=1 (variable de build du projet Pages), aucun worker n'est déposé, donc
+    // ni flag nodejs_compat ni base D1 requis ; le site se déploie comme avant, la connexion est indisponible.
+    apply: (_config, { command }) => command === 'build' && process.env.DEKLIC_COMPTES === '1',
     configResolved(config) {
       sortie = join(config.root, config.build.outDir);
     },
