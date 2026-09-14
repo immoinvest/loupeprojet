@@ -56,8 +56,10 @@
       "note": "aucune donnée nouvelle, aucun appel réseau, aucun innerHTML ; seules des classes CSS et deux variables CSS numériques (px arrondis) sont écrites dans le DOM"
     },
     "push": {
-      "status": "in_progress",
-      "branch": "feat/coque-fixe"
+      "status": "completed",
+      "branch": "feat/coque-fixe",
+      "pr": "https://github.com/immoinvest/loupeprojet/pull/39",
+      "note": "auto-merge armé ; origin/master inchangé pendant la feature (aucun conflit) ; 971 tests Vitest (139 fichiers) et 60 tests Playwright verts en local"
     }
   },
   "decisions": {
