@@ -42,7 +42,7 @@
     },
     "push": {
       "status": "in_progress",
-      "note": "suite complète, couverture, fusion de master puis PR avec auto-merge"
+      "note": "master fusionné (coque fixe, curseur de revente, confiance de l'estimation : conflits bénins, les deux côtés gardés) ; suite complète et couverture après fusion, puis PR avec auto-merge"
     }
   },
   "decisions": {
