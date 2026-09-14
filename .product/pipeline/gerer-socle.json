@@ -49,7 +49,9 @@
         "1a24ad5 fix(web) « J’ai acheté ce bien » en icône de 768 à 1 279 px",
         "a35af28 docs communes",
         "21ba83c fusion de master (rapport-cashflow, achat-negociation)",
-        "fusion de master (visite-questions, correctifs #51 et #52)"
+        "fusion de master (visite-questions, correctifs #51 et #52)",
+        "e2e/reponses-gestion.ts (formats.ts sous 300 lignes)",
+        "fusion de master (location-types, confiance rue, hypotheses-financement, simulateur-pret) : rubrique « Outils » en bas de la barre latérale"
       ],
       "incidents": [
         "suites qui ne démarrent pas (Timeout calling fetch) sous la charge de 58 processus Node : relance avec --maxWorkers=1",
@@ -66,11 +68,11 @@
     },
     "qa_tests": {
       "status": "completed",
-      "tests": 1359,
-      "fichiers": 176,
+      "tests": 1543,
+      "fichiers": 197,
       "par_projet": {
-        "web": 523,
-        "moteur": 282,
+        "web": 624,
+        "moteur": 365,
         "data": 144,
         "worker": 114,
         "comptes": 89,
@@ -79,7 +81,7 @@
         "gestion": 62
       },
       "gates": "lint, format:check, typecheck, test:coverage (seuils 100 %), build : verts",
-      "e2e": "12 parcours ciblés verts (formats 320, 768, 1 024, 1 440 px avec les écrans de Gérer ; coque sur ordinateur, téléphone, tablette ; menu)"
+      "e2e": "formats 320, 768, 1 024, 1 440 px (25 écrans dont les quatre de Gérer), menu, coque sur ordinateur, téléphone et tablette"
     },
     "security": {
       "status": "completed",
@@ -93,7 +95,7 @@
       "pr": 53,
       "url": "https://github.com/immoinvest/loupeprojet/pull/53",
       "auto_merge": true,
-      "note": "trois fusions de master avant la PR (coque fixe ; rapport-cashflow et achat-negociation ; visite-questions)"
+      "note": "quatre fusions de master (coque fixe ; rapport-cashflow et achat-negociation ; visite-questions ; location-types, hypotheses-financement, simulateur-pret)"
     }
   },
   "auto_revue": {
