@@ -1,0 +1,48 @@
+{
+  "feature_slug": "gestion-locative",
+  "title": "Gérer : gestion locative après l'achat (biens, locataires, locations, loyers, quittances automatiques, banque, vie du bail, bilan et déclaration) — deux clics pour que tout fonctionne",
+  "started_at": "2026-09-14T00:00:00Z",
+  "current_step": "specs_pretes",
+  "scope": "documentation seule : .product/features/gestion-locative-discovery.md, .product/specs/gestion-locative-specs.md, .product/design/gestion-locative-ux.md, .product/design/gestion-locative-maquettes.html",
+  "branch": "docs/gestion-locative",
+  "base": "master (c0a0f0a)",
+  "consigne": "Pierre, 14/09/2026 : « ne développe rien, prépare les spécifications, UX, fonctionnalités » ; « en deux clics, tout doit être prêt et fonctionner »",
+  "steps": {
+    "discovery": {
+      "status": "completed",
+      "output": ".product/features/gestion-locative-discovery.md"
+    },
+    "specs": {
+      "status": "completed",
+      "output": ".product/specs/gestion-locative-specs.md",
+      "stories_count": 33,
+      "features": ["gerer-socle", "quittances-auto", "banque", "vie-du-bail", "bilan-declaration"]
+    },
+    "ux": {
+      "status": "completed",
+      "output": [
+        ".product/design/gestion-locative-ux.md",
+        ".product/design/gestion-locative-maquettes.html"
+      ]
+    },
+    "architecture": {
+      "status": "pending",
+      "note": "à faire au début de la session de chaque feature"
+    },
+    "implement": { "status": "not_requested" },
+    "qa_tests": { "status": "not_requested" },
+    "security": { "status": "not_requested" },
+    "push": { "status": "pending", "note": "PR de documentation" }
+  },
+  "decisions_pierre": {
+    "banque": "fournisseur et budget (aucune offre gratuite : GoCardless fermé depuis juillet 2025 ; Enable Banking, Powens, Bridge sur devis) — recommandation : devis maintenant, G1 et G2 sans banque",
+    "offre": "Gérer gratuit sans banque, synchronisation bancaire payante — recommandation",
+    "menu": "sélecteur Analyser · Gérer — recommandation",
+    "import_rentila": "à tester sur les exports de Pierre"
+  },
+  "auto_revue": [
+    "Rentila exploré jusqu'aux formulaires ; import bancaire et déclarations décrits d'après l'aide en ligne (onglet figé)",
+    "règles légales à vérifier sur Légifrance à l'architecture (drapeau à confirmer)",
+    "compte obligatoire pour Gérer : écart limité à cet espace, à confirmer par Pierre"
+  ]
+}
