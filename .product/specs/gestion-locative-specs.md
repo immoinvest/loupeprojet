@@ -500,7 +500,7 @@ Scénario : copie
 
 ### G3 — `banque`
 
-Prérequis : contrat avec un fournisseur agréé (décision 1 de la discovery) ; ADR « fournisseur bancaire ». G3-5 (import de fichier) peut être livrée seule sans contrat.
+Décision de Pierre (14/09/2026) : comme Rentila, la connexion passe par les **API bancaires** (DSP2, lecture des comptes) pour détecter le virement du loyer ; c'est le cœur de Gérer et la feature suivante après `gerer-socle`. Prérequis : ADR « fournisseur bancaire » au début de G3 (recommandation : Enable Banking, gratuit en « production restreinte » sur les propres comptes de Pierre pour développer et tester ; contrat au volume avant l'ouverture au public). G3-5 (import de fichier) reste un repli.
 
 #### G3-1 : Connecter une banque
 

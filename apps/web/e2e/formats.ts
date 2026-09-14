@@ -1,5 +1,6 @@
 import { expect, type Browser, type BrowserContext, type Page } from '@playwright/test';
 
+import { simulerGestion } from './reponses-gestion';
 import { ADRESSE_SIMULEE, simulerWorker } from './reponses-worker';
 
 /** Un format d'écran de la spec (largeur × hauteur, en px CSS). */
@@ -145,6 +146,12 @@ async function simulerSession(page: Page): Promise<void> {
   );
 }
 
+/** Une personne connectée qui gère trois biens (voir `reponses-gestion.ts`). */
+async function simulerSessionEtGestion(page: Page): Promise<void> {
+  await simulerSession(page);
+  await simulerGestion(page);
+}
+
 export interface Ecran {
   readonly nom: string;
   readonly chemin: string;
@@ -154,7 +161,10 @@ export interface Ecran {
   readonly ouvrir?: (page: Page) => Promise<void>;
 }
 
-/** Les écrans de référence ; la session simulée de « Mon compte » reste active : il vient en dernier. */
+/**
+ * Les écrans de référence. Une session simulée reste active jusqu'à la fin : les écrans sans compte
+ * passent d'abord, ceux de Gérer avec un compte ensuite, « Mon compte » en dernier.
+ */
 export function ecransDeReference({
   id,
   idAvecAdresse,
@@ -225,8 +235,19 @@ export function ecransDeReference({
     { nom: 'Simulation imprimée', chemin: '/simulateur-pret/imprimer' },
     { nom: 'Projet partagé', chemin: lienPartage },
     { nom: "Aperçu d'impression", chemin: `${projet}/imprimer` },
+    { nom: 'Gérer (sans compte)', chemin: '/gerer' },
     { nom: 'Connexion', chemin: '/connexion', avant: simulerFournisseurs },
-    { nom: 'Mon compte', chemin: '/compte', avant: simulerSession },
+    {
+      nom: 'Gérer (loyers du mois)',
+      chemin: '/gerer',
+      avant: simulerSessionEtGestion,
+      ouvrir: async (page) => {
+        await expect(page.getByRole('main').getByText('Studio Baille').first()).toBeVisible();
+      },
+    },
+    { nom: 'Ajouter un bien', chemin: '/gerer/ajouter' },
+    { nom: 'Prêt à gérer', chemin: `/gerer/pret/${id}` },
+    { nom: 'Mon compte', chemin: '/compte' },
   ];
 }
 

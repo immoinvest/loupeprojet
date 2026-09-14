@@ -1,0 +1,70 @@
+import {
+  BienGereSchema,
+  LocataireSchema,
+  LocationGereeSchema,
+  PaiementSchema,
+  PREFERENCES_PAR_DEFAUT,
+  PreferencesMenuSchema,
+  type BienGere,
+  type Locataire,
+  type LocationGeree,
+  type Paiement,
+  type PreferencesMenu,
+} from '@loupe/gestion';
+
+/** Une ligne telle que D1 la rend : colonnes nommées, NULL pour « absent », booléens en 0/1. */
+export type Ligne = Readonly<Record<string, unknown>>;
+
+export type ValeurSql = string | number | null;
+
+/** Pour D1 : `undefined` devient NULL, un booléen 0 ou 1. */
+export function valeurSql(valeur: string | number | boolean | undefined): ValeurSql {
+  if (valeur === undefined) return null;
+  if (typeof valeur === 'boolean') return valeur ? 1 : 0;
+  return valeur;
+}
+
+/** Les schémas ont des champs optionnels, pas nullables : une colonne NULL est un champ absent. */
+function sansNulls(ligne: Ligne): Record<string, unknown> {
+  return Object.fromEntries(Object.entries(ligne).filter(([, valeur]) => valeur !== null));
+}
+
+/** L'instantané du projet, s'il se relit comme un objet ; un contenu abîmé est ignoré, pas fatal. */
+function lireProjet(texte: unknown): Record<string, unknown> | undefined {
+  if (typeof texte !== 'string') return undefined;
+  try {
+    const valeur: unknown = JSON.parse(texte);
+    const estObjet = typeof valeur === 'object' && valeur !== null && !Array.isArray(valeur);
+    return estObjet ? (valeur as Record<string, unknown>) : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+export function versBien(ligne: Ligne): BienGere {
+  const { projet, meuble, ...reste } = sansNulls(ligne);
+  const instantane = lireProjet(projet);
+  return BienGereSchema.parse({
+    ...reste,
+    meuble: meuble === 1,
+    ...(instantane === undefined ? {} : { projet: instantane }),
+  });
+}
+
+export function versLocataire(ligne: Ligne): Locataire {
+  return LocataireSchema.parse(sansNulls(ligne));
+}
+
+export function versLocation(ligne: Ligne): LocationGeree {
+  return LocationGereeSchema.parse(sansNulls(ligne));
+}
+
+export function versPaiement(ligne: Ligne): Paiement {
+  return PaiementSchema.parse(sansNulls(ligne));
+}
+
+/** Sans ligne enregistrée, les deux sections du menu sont affichées. */
+export function versPreferences(ligne: Ligne | undefined): PreferencesMenu {
+  if (ligne === undefined) return PREFERENCES_PAR_DEFAUT;
+  return PreferencesMenuSchema.parse({ analyser: ligne.analyser === 1, gerer: ligne.gerer === 1 });
+}

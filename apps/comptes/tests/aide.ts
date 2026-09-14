@@ -1,8 +1,12 @@
 import { memoryAdapter } from 'better-auth/adapters/memory';
+import { DatabaseSync } from 'node:sqlite';
 
+import { d1SurSqlite } from '../scripts/d1-sqlite';
+import { appliquerMigrations } from '../scripts/migration';
 import { creerApp } from '../src/app';
 import type { Envoyeur, Message } from '../src/courriel';
 import type { Dependances } from '../src/dependances';
+import { depotD1, type OptionsDepot } from '../src/gestion/depot-d1';
 import { journalMemoire } from '../src/journal';
 
 export const ORIGINE = 'http://localhost:5173';
@@ -75,9 +79,13 @@ export function jarre(): {
 }
 
 export interface OptionsRequete {
-  readonly method?: 'GET' | 'POST';
+  readonly method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
   readonly corps?: unknown;
+  /** Corps envoyé tel quel (JSON illisible, corps trop gros). */
+  readonly brut?: string;
   readonly headers?: Readonly<Record<string, string>>;
+  /** En-tête Origin : celui du banc par défaut, `null` pour ne pas l'envoyer. */
+  readonly origine?: string | null;
 }
 
 export interface Banc {
@@ -99,6 +107,8 @@ export function banc(surcharges: Partial<Dependances> = {}, origine = ORIGINE): 
     environnement: 'dev',
     secret: 'secret-de-test-assez-long-pour-better-auth-0123',
     base: memoryAdapter({ user: [], session: [], account: [], verification: [] }),
+    // Sans tables : une route de gestion rendrait 503 ; les tests de gestion utilisent bancD1.
+    gestion: depotD1(d1SurSqlite(new DatabaseSync(':memory:')).base),
     courriel,
     fournisseurs: {},
     origines: ORIGINES_BANC,
@@ -115,17 +125,19 @@ export function banc(surcharges: Partial<Dependances> = {}, origine = ORIGINE): 
     cookies,
     ip,
     requete: async (chemin, options = {}) => {
-      const headers: Record<string, string> = {
-        Origin: origine,
-        'cf-connecting-ip': ip,
-        ...options.headers,
-      };
+      const headers: Record<string, string> = { 'cf-connecting-ip': ip };
+      const enteteOrigine = options.origine === undefined ? origine : options.origine;
+      if (enteteOrigine !== null) headers.Origin = enteteOrigine;
+      // Les en-têtes du test l'emportent (un test CSRF fournit son propre Origin).
+      Object.assign(headers, options.headers);
       const cookie = cookies.entete();
       if (cookie !== undefined) headers.Cookie = cookie;
       const init: RequestInit = { method: options.method ?? 'GET', headers };
-      if (options.corps !== undefined) {
+      const corps =
+        options.brut ?? (options.corps === undefined ? undefined : JSON.stringify(options.corps));
+      if (corps !== undefined) {
         headers['Content-Type'] = 'application/json';
-        init.body = JSON.stringify(options.corps);
+        init.body = corps;
         init.method = options.method ?? 'POST';
       }
       const reponse = await app.request(`${origine}${chemin}`, init);
@@ -133,4 +145,47 @@ export function banc(surcharges: Partial<Dependances> = {}, origine = ORIGINE): 
       return reponse;
     },
   };
+}
+
+export interface OptionsBancD1 {
+  readonly surcharges?: Partial<Dependances>;
+  /** Réglages du dépôt de gestion (limite de biens, horloge). */
+  readonly optionsDepot?: OptionsDepot;
+  /** Une base existante (plusieurs comptes sur les mêmes données) ; sinon une base neuve en mémoire. */
+  readonly sqlite?: DatabaseSync;
+  /** Nombre de migrations appliquées à une base neuve (toutes par défaut). */
+  readonly migrations?: number;
+  readonly origine?: string;
+}
+
+export interface BancD1 extends Banc {
+  readonly sqlite: DatabaseSync;
+}
+
+/** Comptes et gestion sur la même D1 simulée : vraies requêtes SQL, vraies clés étrangères. */
+export function bancD1(options: OptionsBancD1 = {}): BancD1 {
+  const sqlite = options.sqlite ?? new DatabaseSync(':memory:');
+  if (options.sqlite === undefined) appliquerMigrations(sqlite, options.migrations);
+  const d1 = d1SurSqlite(sqlite);
+  const b = banc(
+    { base: d1.base, gestion: depotD1(d1.base, options.optionsDepot), ...options.surcharges },
+    options.origine,
+  );
+  return { ...b, sqlite };
+}
+
+/** Ouvre une session par code e-mail sur le banc (le cookie reste dans sa jarre). */
+export async function connecter(b: Banc, email: string): Promise<void> {
+  await b.requete('/api/auth/email-otp/send-verification-otp', {
+    corps: { email, type: 'sign-in' },
+  });
+  const reponse = await b.requete('/api/auth/sign-in/email-otp', {
+    corps: { email, otp: b.courriel.dernierCode() },
+  });
+  if (reponse.status !== 200) throw new Error(`Connexion impossible (${String(reponse.status)})`);
+}
+
+/** Nombre de lignes d'une table de la base simulée. */
+export function compter(sqlite: DatabaseSync, table: string): number {
+  return Number(sqlite.prepare(`select count(*) as n from "${table}"`).get()?.n ?? 0);
 }

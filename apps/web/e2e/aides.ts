@@ -29,13 +29,13 @@ export async function ouvrirVolet(page: Page, volet: Volet, titre: string | RegE
 }
 
 /**
- * La navigation « Mes projets » : barre latérale à partir de 1 024 px, tiroir en dessous.
- * Ouvre le tiroir quand le bouton de menu est affiché.
+ * La section « Analyser » du menu (nouveau projet, projets récents, Comparer) : barre latérale à
+ * partir de 1 024 px, tiroir en dessous. Ouvre le tiroir quand le bouton de menu est affiché.
  */
 export async function ouvrirNavigation(page: Page): Promise<Locator> {
   const menu = page.getByRole('button', { name: 'Ouvrir le menu' });
   if (await menu.isVisible()) await menu.click();
-  const navigation = page.getByRole('navigation', { name: 'Mes projets' });
+  const navigation = page.getByRole('navigation', { name: 'Analyser' });
   await expect(navigation).toBeVisible();
   return navigation;
 }

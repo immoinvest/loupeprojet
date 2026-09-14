@@ -1,4 +1,5 @@
 import { calculerProjet, type Resultats } from '@loupe/moteur';
+import { KeyRound } from 'lucide-react';
 import {
   createContext,
   useContext,
@@ -13,9 +14,11 @@ import { Link, NavLink, Outlet, useLocation, useNavigate, useParams } from 'reac
 
 import { MARGES_LATERALES, Page, TitrePage } from '@/composants/mise-en-page';
 import { Bouton } from '@/composants/ui';
+import { useGestion } from '@/gestion/GestionContext';
 import { useProjets } from '@/stockage/ProjetsContext';
 import { STATUTS, StatutProjetSchema, type ProjetEnregistre } from '@/stockage/projets';
 import { libellePrixEnTete } from '@/textes/achat';
+import { TEXTES_PRET } from '@/textes/gerer-pret';
 import { MODES } from '@/textes/regimes';
 import { visiteDe } from '@/visite';
 
@@ -113,6 +116,7 @@ function useOngletActifEnVue(): RefObject<HTMLElement | null> {
 function EnTete(): JSX.Element {
   const { enregistre, resultats } = useProjetCourant();
   const { changerStatut } = useProjets();
+  const { sections } = useGestion();
   const naviguer = useNavigate();
   const bandeRef = useOngletActifEnVue();
   const { location } = enregistre.projet.hypotheses;
@@ -172,6 +176,23 @@ function EnTete(): JSX.Element {
           PDF
         </Bouton>
         <BoutonPartager enregistre={enregistre} />
+        {/*
+         * Lien croisé vers Gérer : masqué si la section l'est, ou si le bien est déjà acheté.
+         * De 768 à 1 279 px, les actions tiennent sur la rangée du nom : icône seule, libellé lu
+         * par les lecteurs d'écran et en infobulle, pour ne pas écraser le nom du projet.
+         */}
+        {sections.gerer && enregistre.statut !== 'achete' && (
+          <Bouton
+            variante="primaire"
+            title={TEXTES_PRET.jaiAchete}
+            onClick={() => {
+              void naviguer(`/gerer/pret/${enregistre.id}`);
+            }}
+          >
+            <KeyRound size={18} className="shrink-0" aria-hidden="true" />
+            <span className="md:max-xl:sr-only">{TEXTES_PRET.jaiAchete}</span>
+          </Bouton>
+        )}
       </div>
     </header>
   );
