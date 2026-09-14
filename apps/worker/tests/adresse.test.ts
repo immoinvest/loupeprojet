@@ -405,28 +405,38 @@ describe('même adresse et correction de surface', () => {
   });
 
   it('garde toutes les ventes du même immeuble, prix au m² ramené à la surface du bien', () => {
-    // 120 m² à 3 000 €/m² pour un bien de 60 m², pente −0,2 : 3 000 × (60/120)^−0,2 = 3 446 €/m².
-    const memeAdresse = vente({ idParcelle: '132058200E0999', surface: 120, prix: 360_000 });
+    // La vente du même immeuble compte aussi dans la pente : on la place sur la courbe de la commune.
+    // 120 m² pour un bien de 60 m², pente −0,2 : son prix au m² × (60/120)^−0,2 = celui d'un 60 m².
+    const prixM2A120 = Math.round(10_000 * 120 ** -0.2);
+    const prixM2A60 = Math.round(10_000 * 60 ** -0.2);
+    const memeAdresse = vente({
+      idParcelle: '132058200E0999',
+      surface: 120,
+      prix: Math.round(10_000 * 120 ** -0.2 * 120),
+    });
     const r = analyserAdresse([...communeAvecPente(-0.2), memeAdresse], BIEN);
     const parCode = Object.fromEntries(r.groupes.map((g) => [g.code, g]));
     expect(parCode.meme_parcelle).toMatchObject({ ventes: 1, comparables: 1 });
-    expect(parCode.meme_parcelle?.statistiques?.medianeM2).toBe(3446);
+    expect(parCode.meme_parcelle?.statistiques?.medianeM2).toBe(prixM2A60);
     // Ailleurs, la tolérance de surface s'applique toujours.
     expect(parCode.meme_cote).toMatchObject({ ventes: 1, comparables: 0 });
     expect(r.ventesProches).toHaveLength(1);
     expect(r.ventesProches[0]).toMatchObject({
       adresse: '144 RUE DE L OLIVIER',
-      prixM2: 3000,
-      prixM2Actualise: 3000,
+      prixM2: prixM2A120,
+      prixM2Actualise: prixM2A120,
       correctionSurface: 1.1487,
-      prixM2Corrige: 3446,
+      prixM2Corrige: prixM2A60,
     });
     // Surface du bien inconnue : aucune correction.
     const sansSurface = analyserAdresse([...communeAvecPente(-0.2), memeAdresse], {
       ...BIEN,
       surface: undefined,
     });
-    expect(sansSurface.ventesProches[0]).toMatchObject({ correctionSurface: 1, prixM2Corrige: 3000 });
+    expect(sansSurface.ventesProches[0]).toMatchObject({
+      correctionSurface: 1,
+      prixM2Corrige: prixM2A120,
+    });
   });
 });
 
