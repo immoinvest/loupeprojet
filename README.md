@@ -163,16 +163,17 @@ npm run migration:generer -w apps/comptes   # après une montée de version de B
 
 ### Mettre en service les comptes (une fois, compte Cloudflare de Pierre)
 
-Tant que ces étapes ne sont pas faites, le site se déploie comme avant et la page de connexion indique que la connexion n'est pas disponible.
+État au 14/09/2026 : étapes 1 à 4 configurées en Production, Apple non configuré. Sans ces réglages, le site se déploie comme avant et la page de connexion indique que la connexion n'est pas disponible.
 
 1. **Base D1** : fait le 14/09/2026. La base `deklic-comptes` est créée dans la juridiction UE (`npx wrangler d1 create deklic-comptes --jurisdiction eu`), son identifiant est dans `apps/comptes/wrangler.toml` et la migration 0001 est appliquée. Nouvelle migration : `npx wrangler d1 migrations apply deklic-comptes --remote` depuis `apps/comptes`.
 2. **Projet Pages `deklic`** (adresse loupeprojet.pages.dev ; tableau de bord Cloudflare, Workers & Pages, deklic, Settings), en Production (Preview facultatif) :
    - Bindings : D1 database, nom de variable `DB`, base `deklic-comptes` ;
    - Runtime : Compatibility flags, `nodejs_compat` ;
    - Variables and Secrets : `DEKLIC_COMPTES` = `1` (type Text, lu au build), `BETTER_AUTH_SECRET` (type Secret, 32 caractères ou plus, par exemple `node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"`) ;
-   - puis relancer un déploiement.
-3. **E-mails (Resend)** : une clé API en secret `RESEND_API_KEY`, l'expéditeur en variable `COURRIEL_EXPEDITEUR` (par exemple `Deklic <bonjour@deklic.io>`). Tant que le domaine n'est pas vérifié chez Resend, seuls les e-mails vers l'adresse du compte Resend partent.
-4. **Google** : console.cloud.google.com, API et services, Identifiants, ID client OAuth « Application Web » ; URI de redirection autorisés `https://loupeprojet.pages.dev/api/auth/callback/google` et `http://localhost:5173/api/auth/callback/google` ; écran de consentement publié. Secrets `GOOGLE_CLIENT_ID` et `GOOGLE_CLIENT_SECRET`.
+   - tout ce qui est secret en type **Secret** : une valeur en type Text reste lisible dans le tableau de bord et s'affiche avec `wrangler pages download config` ;
+   - puis relancer un déploiement : les réglages de Pages ne s'appliquent qu'aux déploiements suivants (nouveau commit sur `master`, ou « Retry deployment » sur le dernier déploiement de production).
+3. **E-mails (Resend)** : une clé API « Sending access » en type Secret `RESEND_API_KEY`, l'expéditeur en variable `COURRIEL_EXPEDITEUR` (par exemple `Deklic <bonjour@deklic.io>`). Tant que le domaine n'est pas vérifié chez Resend, seuls les e-mails vers l'adresse du compte Resend partent.
+4. **Google** : console.cloud.google.com, Google Auth Platform (audience External, application publiée par « Publish app »), Clients, client « Web application », URI de redirection autorisée `https://loupeprojet.pages.dev/api/auth/callback/google`. `GOOGLE_CLIENT_ID` en type Text, `GOOGLE_CLIENT_SECRET` en type Secret : le secret commence par `GOCSPX-`, ne s'affiche qu'à la création et se régénère par « Add Secret » sur la fiche du client.
 5. **Apple** (programme développeur, 99 $/an, facultatif) : un Services ID (`APPLE_CLIENT_ID`) avec « Sign in with Apple », domaine `loupeprojet.pages.dev`, retour `https://loupeprojet.pages.dev/api/auth/callback/apple` ; une clé « Sign in with Apple » : `APPLE_KEY_ID`, `APPLE_PRIVATE_KEY` (contenu du fichier .p8) et `APPLE_TEAM_ID`. Apple ne fonctionne pas sur localhost.
 
 ## Les référentiels (`@loupe/data`)
