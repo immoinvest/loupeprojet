@@ -74,17 +74,17 @@ export function sectionScenarios(regles: Regles): SectionMethode {
     resume: EXPLICATIONS.leviers,
     etapes: [
       'Négocier : le prix qui met le cash-flow à zéro avec vos hypothèses (à défaut, −10 %) ; trois prix cibles : cash-flow nul, rendement net 6 %, rendement brut 8 %.',
-      `Colocation : loyer total +${pct(e.primeColocation)}, ${String(e.vacanceSemainesColocation)} semaines de vacance, en meublé, sans travaux d'aménagement.`,
+      `Colocation : loyer total +${pct(e.primeColocation)} réparti entre les chambres du bien, ${String(e.parType.colocation.vacanceSemaines)} semaines de vacance par chambre, forfait de charges et abonnements du propriétaire, sans travaux d'aménagement ; absent quand le projet est déjà une colocation.`,
       'Durée du prêt : 20 ans (15 ans si le prêt fait déjà 20 ans). Taux : +0,5 point.',
-      `Passer en nu ou en meublé : loyer ÷ ou × (1 + ${pct(e.primeMeuble)}), avec le régime réel correspondant.`,
-      "Deux mois vides par an : 8 semaines de vacance ; en courte durée, 15 points d'occupation en moins.",
+      `Passer en nu ou en meublé : loyer ÷ ou × (1 + ${pct(e.primeMeuble)}), avec le régime réel correspondant ; depuis une colocation, une courte ou une moyenne durée, passer en meublé longue durée au loyer de référence (loyer de marché en courte durée quand il est connu).`,
+      'Deux mois vides par an : 8 semaines de vacance ; en courte durée, deux mois de nuitées en moins.',
       "Chaque scénario recalcule tout le projet ; le rapport montre l'écart avec la référence.",
     ],
     constantes: [
       {
         libelle: 'Repli de négociation, durées alternatives, hausse de taux, vacance longue',
         valeur:
-          '−10 % · 20 ou 15 ans · +0,5 point · 8 semaines (−15 points d’occupation en courte durée)',
+          '−10 % · 20 ou 15 ans · +0,5 point · 8 semaines (deux mois de nuitées en moins en courte durée)',
         source: 'Scénarios prédéfinis du moteur (packages/moteur, scenarios/predefinis.ts)',
       },
     ],

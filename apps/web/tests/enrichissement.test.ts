@@ -243,7 +243,7 @@ describe('données de marché', () => {
     pieces: 3,
     codePostal: '13005',
     ville: 'Marseille 5e',
-    mode: 'meuble_lld',
+    mode: 'meuble',
     loyerHc: 980,
     apport: 15000,
     dureeAnnees: 25,

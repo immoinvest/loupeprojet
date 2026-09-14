@@ -56,7 +56,7 @@ describe('lireProjets', () => {
     expect(lus[0]?.id).toBe('id-1');
     expect(lus[0]?.nom).toBe('Test');
     expect(lus[0]?.projet.hypotheses.achat.prix).toBe(155_000);
-    expect(lus[0]?.projet.hypotheses.location.vacanceSemaines).toBe(3);
+    expect(lus[0]?.projet.hypotheses.location).toMatchObject({ vacanceSemaines: 3 });
   });
 });
 
@@ -137,14 +137,18 @@ describe('ProjetsProvider / useProjets', () => {
         ...b.projet,
         hypotheses: {
           ...b.projet.hypotheses,
-          location: { ...b.projet.hypotheses.location, loyerHc: 1_100 },
+          location: { mode: 'meuble', loyerHc: 1_100 },
         },
       });
     });
     expect(retour).toEqual({ ok: true });
-    expect(result.current.trouver(b.id)?.projet.hypotheses.location.loyerHc).toBe(1_100);
-    expect(result.current.trouver(a.id)?.projet.hypotheses.location.loyerHc).toBe(980);
-    expect(lireProjets(stockage)[1]?.projet.hypotheses.location.loyerHc).toBe(1_100);
+    expect(result.current.trouver(b.id)?.projet.hypotheses.location).toMatchObject({
+      loyerHc: 1_100,
+    });
+    expect(result.current.trouver(a.id)?.projet.hypotheses.location).toMatchObject({
+      loyerHc: 980,
+    });
+    expect(lireProjets(stockage)[1]?.projet.hypotheses.location).toMatchObject({ loyerHc: 1_100 });
 
     act(() => {
       retour = result.current.mettreAJour(a.id, {

@@ -60,7 +60,7 @@ const VIDE: Valeurs = {
   chargesCoproMois: '',
   taxeFonciere: '',
   travaux: '',
-  mode: 'meuble_lld',
+  mode: 'meuble',
   loyerHc: '',
   apport: '',
   dureeAnnees: '25',

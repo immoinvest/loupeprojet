@@ -1,4 +1,4 @@
-import { ProjetEnregistreSchema, type ProjetEnregistre } from './projets';
+import { ProjetEnregistreSchema, migrerEnregistre, type ProjetEnregistre } from './projets';
 
 /**
  * Partage sans compte : le projet enregistré, entier, encodé en base64url dans le fragment
@@ -40,7 +40,7 @@ export function decoderPartage(texte: string): Decodage {
   } catch {
     return { ok: false, raison: 'illisible' };
   }
-  const resultat = ProjetEnregistreSchema.safeParse(brut);
+  const resultat = ProjetEnregistreSchema.safeParse(migrerEnregistre(brut));
   return resultat.success
     ? { ok: true, enregistre: resultat.data }
     : { ok: false, raison: 'invalide' };

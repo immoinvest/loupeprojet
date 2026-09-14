@@ -23,9 +23,13 @@ const CATEGORIE_PAR_CODE: Readonly<Record<CodeVigilance, CategorieVigilance>> = 
   CONFIRMER_CHARGES_COPRO: 'documents',
   CONFIRMER_TAXE_FONCIERE: 'documents',
   COPRO_EN_PROCEDURE: 'documents',
+  CHANGEMENT_USAGE_COURTE_DUREE: 'documents',
+  REGLEMENT_COPRO_LOCATION: 'documents',
   VERIFIER_DPE: 'sur_place',
   RENOVATION_ENERGETIQUE_OBLIGATOIRE: 'sur_place',
+  DPE_MEUBLE_TOURISME: 'sur_place',
   SANS_ASCENSEUR_ETAGE_ELEVE: 'sur_place',
+  SURFACE_CHAMBRES_COLOCATION: 'sur_place',
   RISQUE_NATUREL: 'sur_place',
   EXPLIQUER_PRIX_SOUS_MARCHE: 'sur_place',
   EFFORT_HCSF_DEPASSE: 'finances',
@@ -33,6 +37,7 @@ const CATEGORIE_PAR_CODE: Readonly<Record<CodeVigilance, CategorieVigilance>> = 
   PLAFOND_MICRO_DEPASSE: 'finances',
   LOYER_AU_DESSUS_PLAFOND: 'finances',
   PS_BIC_A_CONFIRMER: 'finances',
+  BAIL_MOBILITE_CONDITIONS: 'finances',
 };
 
 export function categorieVigilance(code: CodeVigilance): CategorieVigilance {
@@ -85,5 +90,21 @@ export function phraseVigilance(point: PointVigilance): string {
       return `Loyer au-dessus du plafond d'encadrement (${euros(nombreParam(point, 'plafond'))}).`;
     case 'PS_BIC_A_CONFIRMER':
       return `Prélèvements sociaux du meublé à ${pourcentage(nombreParam(point, 'taux'))} : taux à confirmer.`;
+    case 'CHANGEMENT_USAGE_COURTE_DUREE': {
+      const jours = String(param(point, 'joursResidencePrincipale'));
+      return param(point, 'zone') === 'plein_droit'
+        ? `Courte durée : autorisation de changement d'usage obligatoire ici (Paris et petite couronne) et enregistrement en mairie ; une résidence principale ne se loue que ${jours} jours par an.`
+        : `Courte durée : vérifier en mairie si le changement d'usage demande une autorisation (villes de plus de 200 000 habitants et communes qui l'ont décidé) et faire l'enregistrement ; une résidence principale ne se loue que ${jours} jours par an.`;
+    }
+    case 'DPE_MEUBLE_TOURISME':
+      return `DPE ${String(param(point, 'dpe'))} : un meublé de tourisme doit être classé ${String(param(point, 'classeMinimale'))} au moins pour une nouvelle autorisation, ${String(param(point, 'classeTous'))} pour tous dès ${String(param(point, 'annee'))}.`;
+    case 'REGLEMENT_COPRO_LOCATION':
+      return param(point, 'mode') === 'courte_duree'
+        ? "Lire le règlement de copropriété : il peut interdire la location de courte durée (clause d'habitation bourgeoise)."
+        : 'Lire le règlement de copropriété : il peut restreindre la colocation ou la division du logement.';
+    case 'SURFACE_CHAMBRES_COLOCATION':
+      return `Mesurer les ${String(param(point, 'chambres'))} chambres : ${String(param(point, 'surfaceMinimale'))} m² et ${String(param(point, 'volumeMinimal'))} m³ au moins chacune pour des baux individuels (${String(param(point, 'surfaceParChambre'))} m² par chambre, parties communes comprises).`;
+    case 'BAIL_MOBILITE_CONDITIONS':
+      return `Bail mobilité : ${String(param(point, 'dureeMin'))} à ${String(param(point, 'dureeMax'))} mois, non renouvelable, pour un locataire en études, formation, stage, service civique ou mission ; pas de dépôt de garantie, charges au forfait.`;
   }
 }

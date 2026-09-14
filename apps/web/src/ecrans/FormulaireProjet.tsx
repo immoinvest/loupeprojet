@@ -34,9 +34,11 @@ const TYPES = [
   { v: 'maison', l: 'Maison' },
 ];
 const MODES = [
-  { v: 'meuble_lld', l: 'Meublé longue durée' },
   { v: 'nu', l: 'Location nue' },
+  { v: 'meuble', l: 'Meublée longue durée' },
+  { v: 'colocation', l: 'Colocation' },
   { v: 'courte_duree', l: 'Courte durée' },
+  { v: 'moyenne_duree', l: 'Moyenne durée (bail mobilité)' },
 ];
 const TMI = [
   { v: '0', l: '0 %' },

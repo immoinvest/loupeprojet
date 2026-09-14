@@ -194,7 +194,7 @@ describe('Onglet Estimation : DPE, loyer, risques', () => {
       );
       await u.click(screen.getByRole('button', { name: /comme loyer visé/ }));
       expect(await screen.findByText(PHRASES_DONNEES_ADRESSE.loyerApplique)).toBeInTheDocument();
-      expect(enregistre(id)?.projet.hypotheses.location.loyerHc).toBe(1032);
+      expect(enregistre(id)?.projet.hypotheses.location).toMatchObject({ loyerHc: 1032 });
       expect(enregistre(id)?.projet.provenance['location.loyerHc']).toBe('anil');
     },
   );

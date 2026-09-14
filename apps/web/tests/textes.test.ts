@@ -56,7 +56,7 @@ describe('feux', () => {
     expect(Object.keys(AXES)).toHaveLength(5);
     expect(Object.keys(ETATS)).toHaveLength(4);
     expect(Object.keys(REGIMES)).toHaveLength(4);
-    expect(Object.keys(MODES)).toHaveLength(3);
+    expect(Object.keys(MODES)).toHaveLength(5);
     expect(Object.keys(SCENARIOS)).toHaveLength(7);
     expect(Object.keys(CRITERES_PRIX)).toHaveLength(3);
   });
@@ -84,6 +84,11 @@ describe('vigilance', () => {
       'PLAFOND_MICRO_DEPASSE',
       'LOYER_AU_DESSUS_PLAFOND',
       'PS_BIC_A_CONFIRMER',
+      'CHANGEMENT_USAGE_COURTE_DUREE',
+      'DPE_MEUBLE_TOURISME',
+      'REGLEMENT_COPRO_LOCATION',
+      'SURFACE_CHAMBRES_COLOCATION',
+      'BAIL_MOBILITE_CONDITIONS',
     ];
     const parametres = {
       lots: 24,
@@ -96,6 +101,16 @@ describe('vigilance', () => {
       dureeMax: 25,
       plafond: 900,
       taux: 0.186,
+      zone: 'plein_droit',
+      joursResidencePrincipale: 120,
+      classeMinimale: 'E',
+      classeTous: 'D',
+      mode: 'courte_duree',
+      chambres: 3,
+      surfaceParChambre: 22,
+      surfaceMinimale: 9,
+      volumeMinimal: 20,
+      dureeMin: 1,
     };
     for (const code of codes) {
       expect(phraseVigilance(p(code, parametres)).length).toBeGreaterThan(10);
@@ -139,7 +154,7 @@ describe('régimes : explications et ordre', () => {
 
   it('LMNP réel imposé et nu réel jamais imposé : les autres phrases', () => {
     const riche = calculerProjet(
-      variante({ location: { mode: 'meuble_lld', loyerHc: 2_300, vacanceSemaines: 0 } }),
+      variante({ location: { mode: 'meuble', loyerHc: 2_300, vacanceSemaines: 0 } }),
     );
     expect(riche.fiscalite.regimes.lmnp_reel.premiereAnneeImposable).not.toBeNull();
     expect(explicationRegime(riche.fiscalite.regimes.lmnp_reel, dix)).toMatch(
@@ -159,7 +174,7 @@ describe('régimes : explications et ordre', () => {
 
   it('plafond dépassé', () => {
     const gros = calculerProjet(
-      variante({ location: { mode: 'meuble_lld', loyerHc: 8_000, vacanceSemaines: 0 } }),
+      variante({ location: { mode: 'meuble', loyerHc: 8_000, vacanceSemaines: 0 } }),
     );
     expect(explicationRegime(gros.fiscalite.regimes.micro_bic, dix)).toContain('inaccessible');
   });
@@ -182,6 +197,11 @@ describe('catégories de vigilance', () => {
       'PLAFOND_MICRO_DEPASSE',
       'LOYER_AU_DESSUS_PLAFOND',
       'PS_BIC_A_CONFIRMER',
+      'CHANGEMENT_USAGE_COURTE_DUREE',
+      'DPE_MEUBLE_TOURISME',
+      'REGLEMENT_COPRO_LOCATION',
+      'SURFACE_CHAMBRES_COLOCATION',
+      'BAIL_MOBILITE_CONDITIONS',
     ] as const;
     for (const code of codes) {
       expect(ORDRE_CATEGORIES).toContain(categorieVigilance(code));
@@ -206,7 +226,7 @@ describe('verdict', () => {
     const r = calculerProjet(
       variante({
         achat: { ...projetExemple.hypotheses.achat, prix: 198_000 },
-        location: { mode: 'meuble_lld', loyerHc: 1_600, vacanceSemaines: 0 },
+        location: { mode: 'meuble', loyerHc: 1_600, vacanceSemaines: 0 },
       }),
     );
     const t = texteVerdict(r);
@@ -218,7 +238,7 @@ describe('verdict', () => {
     const r = calculerProjet(
       variante({
         achat: { ...projetExemple.hypotheses.achat, prix: 240_000 },
-        location: { mode: 'meuble_lld', loyerHc: 1_500, vacanceSemaines: 0 },
+        location: { mode: 'meuble', loyerHc: 1_500, vacanceSemaines: 0 },
         revenusMensuels: 1_500,
       }),
     );
@@ -239,7 +259,7 @@ describe('verdict', () => {
 
   it('cash-flow presque : entre −100 et 0', () => {
     const r = calculerProjet(
-      variante({ location: { mode: 'meuble_lld', loyerHc: 1_120, vacanceSemaines: 0 } }),
+      variante({ location: { mode: 'meuble', loyerHc: 1_120, vacanceSemaines: 0 } }),
     );
     expect(r.cashflow.mensuel).toBeGreaterThan(-100);
     expect(r.cashflow.mensuel).toBeLessThan(0);

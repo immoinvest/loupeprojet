@@ -1,4 +1,4 @@
-import type { Resultats } from '@loupe/moteur';
+import { vacanceSemaines, type Resultats } from '@loupe/moteur';
 import type { JSX } from 'react';
 
 import { Chapo, Page, TitrePage } from '@/composants/mise-en-page';
@@ -38,7 +38,7 @@ function CarteCashflow({ r }: { r: Resultats }): JSX.Element {
           valeur={eurosSignes(-c.chargesAnnuelles / 12)}
         />
         <Ligne
-          libelle={`${nombre(r.projet.hypotheses.location.vacanceSemaines)} semaines vides par an`}
+          libelle={`${nombre(vacanceSemaines(r.projet.hypotheses.location))} semaines vides par an`}
           valeur={eurosSignes(-c.recettes.vacance / 12)}
         />
         <Ligne

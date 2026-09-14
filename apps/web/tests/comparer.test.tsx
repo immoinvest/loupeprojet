@@ -40,7 +40,7 @@ describe('Comparer', () => {
     ecrireProjets(window.localStorage, [
       projet('Marseille'),
       projet('Lyon rentable', {
-        location: { mode: 'meuble_lld', loyerHc: 1_500, vacanceSemaines: 0 },
+        location: { mode: 'meuble', loyerHc: 1_500, vacanceSemaines: 0 },
       }),
       projet(
         'Écarté cher',

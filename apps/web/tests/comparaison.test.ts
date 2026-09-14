@@ -28,7 +28,7 @@ function projet(
 
 const exemple = projet('exemple');
 const rentable = projet('rentable', {
-  location: { mode: 'meuble_lld', loyerHc: 1_500, vacanceSemaines: 0 },
+  location: { mode: 'meuble', loyerHc: 1_500, vacanceSemaines: 0 },
 });
 
 describe('comparerProjets', () => {
