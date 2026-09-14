@@ -1,5 +1,5 @@
-import { projetExemple } from '@loupe/moteur';
-import { render, screen } from '@testing-library/react';
+import { calculerProjet, projetExemple, questionsPourProjet } from '@loupe/moteur';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -78,6 +78,27 @@ describe('encoderPartage / decoderPartage', () => {
     expect(lien.length).toBeLessThan(4_000);
   });
 
+  it('transporte la visite et ses réponses ; au pire (toutes répondues, notes longues) le lien reste court', () => {
+    const complet = projetComplet();
+    const r = calculerProjet(complet.projet);
+    const questions = questionsPourProjet(r.projet, r);
+    expect(questions.length).toBeGreaterThan(40);
+    const etats = ['ok', 'probleme', 'sans_objet'] as const;
+    const reponses = Object.fromEntries(
+      questions.map((q, i) => [q.id, { etat: etats[i % 3] ?? 'ok', note: 'n'.repeat(120) }]),
+    );
+    const avecVisite: ProjetEnregistre = {
+      ...complet,
+      visite: { faite: true, date: DATE, reponses },
+    };
+    const retour = decoderPartage(encoderPartage(avecVisite));
+    expect(retour.ok).toBe(true);
+    if (retour.ok) expect(retour.enregistre).toEqual(avecVisite);
+    const lien = lienPartage('https://loupe.app', avecVisite);
+    expect(lien.length).toBeGreaterThan(4_000);
+    expect(lien.length).toBeLessThan(20_000);
+  });
+
   it('refuse proprement un lien vide, abîmé, non JSON ou hors schéma', () => {
     expect(decoderPartage('')).toEqual({ ok: false, raison: 'vide' });
     expect(decoderPartage('   ')).toEqual({ ok: false, raison: 'vide' });
@@ -135,6 +156,44 @@ describe('Page /partage', () => {
     expect(
       await screen.findByRole('navigation', { name: 'Volets du rapport' }),
     ).toBeInTheDocument();
+  });
+
+  it('« Ajouter » reprend l’adresse et la visite du projet reçu', async () => {
+    const adresse = {
+      libelle: '10 rue Paradis, Marseille',
+      lat: 43.29,
+      lon: 5.38,
+      codeInsee: '13206',
+      codeVoie: '7100',
+      numero: 10,
+    };
+    const visite = {
+      faite: true,
+      date: DATE,
+      reponses: { DOC_TAXE_FONCIERE: { etat: 'ok' as const, note: 'vu' } },
+    };
+    const partage = creerProjet({
+      nom: 'Avec visite',
+      genererId: () => 'emetteur',
+      maintenant: () => DATE,
+      adresse,
+      visite,
+    });
+    const utilisateur = userEvent.setup();
+    render(<AppEnMemoire chemin={`/partage#p=${encoderPartage(partage)}`} />);
+    expect(await screen.findByText('Projet partagé')).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { level: 1, name: 'Compte rendu de visite' }),
+    ).toBeInTheDocument();
+
+    await utilisateur.click(screen.getByRole('button', { name: 'Ajouter à mes projets' }));
+    const ajoute = lireProjets(window.localStorage)[0];
+    expect(ajoute?.nom).toBe('Avec visite');
+    expect(ajoute?.adresse).toEqual(adresse);
+    expect(ajoute?.visite).toEqual(visite);
+    // Visite faite : pas d'onglet Visite dans le projet ajouté.
+    const volets = await screen.findByRole('navigation', { name: 'Volets du rapport' });
+    expect(within(volets).queryByRole('link', { name: 'Visite' })).not.toBeInTheDocument();
   });
 
   it('explique un lien vide, abîmé ou hors schéma sans rien enregistrer', async () => {

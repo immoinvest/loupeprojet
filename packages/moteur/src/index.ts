@@ -27,4 +27,5 @@ export * from './scenarios';
 export * from './schema';
 export * from './schema/resultats';
 export * from './verdict';
+export * from './visite';
 export { projetExemple } from './exemples/t3-marseille';

@@ -39,7 +39,13 @@ export function Partage(): JSX.Element {
   const { enregistre } = decodage;
 
   const ajouter = (): void => {
-    const nouveau = creer({ nom: enregistre.nom, source: enregistre.projet });
+    // L'adresse exacte et la visite (réponses, compte rendu) suivent le projet.
+    const nouveau = creer({
+      nom: enregistre.nom,
+      source: enregistre.projet,
+      ...(enregistre.adresse === undefined ? {} : { adresse: enregistre.adresse }),
+      ...(enregistre.visite === undefined ? {} : { visite: enregistre.visite }),
+    });
     void naviguer(`/projets/${nouveau.id}`);
   };
 
