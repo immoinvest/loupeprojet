@@ -1,13 +1,14 @@
 import type { Regles } from './types';
 
 /**
- * Règles connues au 13 septembre 2026.
- * Sources : .product/functional-spec.md (section « Moteur de calcul ») et ses liens.
+ * Règles connues au 14 septembre 2026.
+ * Sources : .product/functional-spec.md (section « Moteur de calcul ») et ses liens ;
+ * .product/features/location-types-discovery.md (§ 5) pour les types d'exploitation.
  * Toute valeur marquée dans `aConfirmer` attend une source officielle consolidée.
  */
 export const regles202609: Regles = {
   version: '2026-09',
-  dateReference: '2026-09-13',
+  dateReference: '2026-09-14',
 
   acquisition: {
     // Taux départemental relevé à 5 % par la plupart des départements (LF 2025, jusqu'au 31/03/2028).
@@ -43,10 +44,58 @@ export const regles202609: Regles = {
   },
 
   exploitation: {
+    // Spec Deklic : +15 à +25 % de loyer en meublé selon les villes.
     primeMeuble: 0.15,
+    // Spec Deklic : +30 à +45 % de loyer total en colocation.
     primeColocation: 0.35,
-    vacanceSemainesColocation: 4,
     interdictionLocationDpe: { G: 2025, F: 2028, E: 2034 },
+    parType: {
+      // Spec Deklic : 2 à 3 semaines de vacance en location nue ; auto-gestion par défaut.
+      nu: { vacanceSemaines: 3, gestionTaux: 0 },
+      // Spec Deklic : 3 semaines en meublé longue durée (8 à 10 en étudiant : à saisir).
+      meuble: { vacanceSemaines: 3, gestionTaux: 0 },
+      // Spec Deklic : un mois de vacance par chambre. Énergie et internet : Excel « Projet 92K »
+      // de Pierre (feuille « Calcul de l'autofinancement », lue le 14/09/2026), à confirmer.
+      colocation: { vacanceSemaines: 4, gestionTaux: 0, energieMensuel: 190, internetMensuel: 30 },
+      // Excel « Projet 92K » : scénario médian 15 nuits et 4 séjours par mois, ménage 27 € par séjour ;
+      // plateforme : Airbnb, centre d'aide art. 1857 (lu le 14/09/2026), frais partagés 3 % pour
+      // l'hôte (15,5 % en frais uniques) ; conciergerie 0 = auto-gestion ; nuitée de départ = deux
+      // loyers journaliers (choix Deklic, repris de l'ancien formulaire). Tout à confirmer.
+      courte_duree: {
+        nuiteesParMois: 15,
+        dureeSejourNuits: 4,
+        menageParSejour: 27,
+        plateformeTaux: 0.03,
+        conciergerieTaux: 0,
+        nuiteeEnLoyersJournaliers: 2,
+        energieMensuel: 190,
+        internetMensuel: 30,
+      },
+      // Choix Deklic sans source publique : 4 semaines vides par an, séjours de 4 mois (milieu de
+      // 1 à 10), ménage et plateforme à saisir. Énergie et internet : Excel « Projet 92K ». À confirmer.
+      moyenne_duree: {
+        vacanceSemaines: 4,
+        dureeSejourMois: 4,
+        menageParSejour: 0,
+        plateformeTaux: 0,
+        gestionTaux: 0,
+        energieMensuel: 190,
+        internetMensuel: 30,
+      },
+    },
+    // Loi n° 89-462 art. 8-1 (ALUR, ELAN) et décret n° 2002-120 : colocation à baux individuels.
+    colocation: { surfaceMinChambreM2: 9, volumeMinChambreM3: 20 },
+    // Loi n° 2024-1039 du 19/11/2024 (Le Meur) ; CCH art. L. 631-7 (Paris et petite couronne de plein
+    // droit, communes de plus de 200 000 habitants ; toute commune peut l'instaurer par délibération).
+    meubleTourisme: {
+      dpeMinNouvelleAutorisation: 'E',
+      dpeMinTous: 'D',
+      dpeMinTousDes: 2034,
+      joursMaxResidencePrincipale: 120,
+      departementsChangementUsage: ['75', '92', '93', '94'],
+    },
+    // Loi n° 89-462 art. 25-12 (loi ELAN du 23/11/2018).
+    bailMobilite: { dureeMinMois: 1, dureeMaxMois: 10 },
   },
 
   fiscalite: {
@@ -58,8 +107,9 @@ export const regles202609: Regles = {
     },
     microBic: {
       abattement: 0.5,
+      // Loi n° 2024-1039 du 19/11/2024 (Le Meur), CGI art. 50-0 : meublé de tourisme non classé.
       abattementTourismeNonClasse: 0.3,
-      // Seuil 2026-2028.
+      // Seuil 2026-2028 (meublé classique et meublé de tourisme classé).
       plafond: 83_600,
       plafondTourismeNonClasse: 15_000,
     },
@@ -156,10 +206,12 @@ export const regles202609: Regles = {
     charges: { repereM2An: 26, borne: 0.15 },
     // Choix Deklic (14/09/2026) : note sur 100 = localisation (35) + comparables (20) + dispersion (30)
     // + ancienneté (15). Barèmes en paliers interpolés, bornés au premier et au dernier palier.
+    // Rue : 30 points tant que ses ventes tiennent dans 150 m ; au-delà, les points du quartier pour
+    // son étendue (demande de Pierre, 14/09/2026 : une rue de 531 m ne vaut pas mieux qu'un cercle).
     confiance: {
       localisation: {
         immeuble: 35,
-        rue: 30,
+        rue: { points: 30, jusquaMetres: 150 },
         quartier: [
           { jusquaMetres: 100, points: 26 },
           { jusquaMetres: 200, points: 22 },
@@ -200,6 +252,19 @@ export const regles202609: Regles = {
     'estimation.etage',
     'estimation.exterieur',
     'estimation.charges',
+    'exploitation.parType.colocation.energieMensuel',
+    'exploitation.parType.colocation.internetMensuel',
+    'exploitation.parType.courte_duree.nuiteesParMois',
+    'exploitation.parType.courte_duree.dureeSejourNuits',
+    'exploitation.parType.courte_duree.menageParSejour',
+    'exploitation.parType.courte_duree.plateformeTaux',
+    'exploitation.parType.courte_duree.nuiteeEnLoyersJournaliers',
+    'exploitation.parType.courte_duree.energieMensuel',
+    'exploitation.parType.courte_duree.internetMensuel',
+    'exploitation.parType.moyenne_duree.vacanceSemaines',
+    'exploitation.parType.moyenne_duree.dureeSejourMois',
+    'exploitation.parType.moyenne_duree.energieMensuel',
+    'exploitation.parType.moyenne_duree.internetMensuel',
   ],
   simplifications: [
     'Estimation : l’état du bien le place entre le premier et le troisième quartile des ventes comparables',
@@ -211,6 +276,9 @@ export const regles202609: Regles = {
     'Recettes BIC = loyers hors charges (charges refacturées ignorées)',
     'Intérêts capitalisés pendant un différé total non déduits fiscalement',
     'Rendement net et net-net calculés sur la première année pleine',
-    'Scénario colocation : loyer total +35 % et 4 semaines de vacance, sans travaux d’aménagement',
+    'Scénario colocation : loyer total +35 % et 4 semaines de vacance par chambre, sans travaux d’aménagement',
+    'Forfaits de charges et ménage facturé comptés dans les recettes imposables ; frais de plateforme, conciergerie et ménage payé déductibles au réel seulement',
+    'Courte durée : nuitées réparties uniformément sur l’année, sans saisonnalité',
+    'Colocation : vacance appliquée de la même façon à toutes les chambres',
   ],
 };

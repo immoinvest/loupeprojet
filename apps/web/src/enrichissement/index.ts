@@ -21,6 +21,7 @@ export {
   appliquerLoyerReference,
   appliquerLoyerVise,
   loyerDeReference,
+  loyerParChambre,
   loyerPourBien,
   loyerVise,
   loyerViseDepuisReference,

@@ -6,6 +6,7 @@ import { calculerFinancement } from '../../src/financement';
 import { projeterMicroFoncier } from '../../src/fiscalite/micro-foncier';
 import { projeterNuReel } from '../../src/fiscalite/nu-reel';
 import type { ContexteFiscal } from '../../src/fiscalite/types';
+import { vacanceSemaines } from '../../src/location';
 import { obtenirRegles } from '../../src/regles';
 import { parserComplet, type ProjetEntree, type Regime } from '../../src/schema';
 
@@ -14,7 +15,16 @@ const regles = obtenirRegles('2026-09');
 function contexteNu(entree: ProjetEntree, regime: Regime, loyerHc: number): ContexteFiscal {
   const projet = parserComplet(entree);
   const financement = calculerFinancement(projet, regles);
-  const cashflow = calculerCashflow(projet, financement, { regime, mode: 'nu', loyerHc });
+  const cashflow = calculerCashflow(projet, financement, {
+    regime,
+    location: {
+      mode: 'nu',
+      loyerHc,
+      chargesLocataire: 0,
+      vacanceSemaines: vacanceSemaines(projet.hypotheses.location),
+      gestionTaux: 0,
+    },
+  });
   return { projet, financement, cashflow, regles };
 }
 

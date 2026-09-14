@@ -22,10 +22,14 @@ const n = (s: string): string => s.replace(/\s/g, ' ');
 const exemple = rapportComplet(projetExemple);
 /** Loyer 1 600 € sans vacance : cash-flow positif, loyer au-dessus du point mort. */
 const confortable = rapportComplet(
-  variante({ location: { mode: 'meuble_lld', loyerHc: 1_600, vacanceSemaines: 0 } }),
+  variante({ location: { mode: 'meuble', loyerHc: 1_600, vacanceSemaines: 0 } }),
 );
 const microBic = rapportComplet(variante({ fiscalite: { tmi: 0.3, regime: 'micro_bic' } }));
 const nuitees = rapportComplet(courteDuree());
+/** Une colocation : seuls les deux régimes du meublé sont possibles. */
+const coloc = rapportComplet(
+  variante({ location: { mode: 'colocation', chambres: 3, loyerChambre: 450 } }),
+);
 
 describe('explications fixes', () => {
   it('restent disponibles pour la page Méthode', () => {
@@ -89,8 +93,10 @@ describe('autofinancement', () => {
       "L'impôt du meublé micro-BIC coûte en moyenne 224 € par mois sur 10 ans.",
     );
 
+    // En courte durée, le ménage facturé s'ajoute au loyer ; ménage payé et conciergerie sont des charges.
     const cd = n(explicationAutofinancement(nuitees));
-    expect(cd).toContain('le ménage et la conciergerie (');
+    expect(cd).toContain('de forfaits et de ménage facturés');
+    expect(cd).toContain('entretien, conciergerie, ménage (');
     expect(cd).not.toContain('semaines');
   });
 });
@@ -101,11 +107,14 @@ describe('repères', () => {
     expect(t).toContain('(827 €), représente 84 % du loyer (980 €)');
     expect(t).toContain('Sous 100 %');
 
-    const cher = rapportComplet(variante({ location: { mode: 'meuble_lld', loyerHc: 700 } }));
+    const cher = rapportComplet(variante({ location: { mode: 'meuble', loyerHc: 700 } }));
     expect(n(explicationCouverture(cher))).toContain('118 %');
     expect(explicationCouverture(cher)).toContain('Au-dessus de 100 %');
 
-    expect(explicationCouverture(nuitees)).toContain('Sans loyer');
+    // Courte durée : le loyer mensuel équivalent vaut nuitée × nuits par mois (80 € × 18,25).
+    expect(n(explicationCouverture(nuitees))).toContain('du loyer (1 460 €)');
+    const sansLoyer = rapportComplet(variante({ location: { mode: 'nu', loyerHc: 0 } }));
+    expect(explicationCouverture(sansLoyer)).toContain('Sans loyer');
   });
 
   it('effort d’épargne ou excédent', () => {
@@ -122,6 +131,8 @@ describe('repères', () => {
     expect(t).toContain('il manque 223 € par mois');
     expect(explicationPointMort(confortable)).toContain('vous êtes au-dessus');
     expect(explicationPointMort(nuitees)).toContain('En courte durée');
+    // Colocation : le point mort se compare au loyer total des chambres.
+    expect(n(explicationPointMort(coloc))).toContain('contre 1 350 € visés');
   });
 });
 
@@ -141,8 +152,10 @@ describe('rendements', () => {
     expect(netNet).toContain('1 664 € ÷ 172 987 € = 1,0 %');
   });
 
-  it('en courte durée, le net retire le ménage et la conciergerie', () => {
-    expect(explicationRendement(nuitees, 'net')).toContain('le ménage et la conciergerie (');
+  it('en courte durée, le net ne retire pas de vacance et nomme les frais du type', () => {
+    const net = explicationRendement(nuitees, 'net');
+    expect(net).toContain('les nuits non louées (déjà hors des recettes)');
+    expect(net).toContain('conciergerie, ménage)');
   });
 });
 
@@ -157,6 +170,11 @@ describe('impôts et revente', () => {
     expect(m).toContain("le meublé micro-BIC coûte 26 928 € d'impôt");
     expect(m).toContain('Abattement de 50 %');
     expect(m).toContain('est le meublé au réel (0 €)');
+
+    // Colocation : un seul autre régime possible, jamais un régime nu.
+    const c = n(explicationFiscalite(coloc));
+    expect(c).toMatch(/L'autre régime possible est le meublé micro-BIC \(/);
+    expect(c).not.toContain(' nu ');
   });
 
   it('revente : valeur, frais, capital restant dû, IRA, impôt, net vendeur', () => {

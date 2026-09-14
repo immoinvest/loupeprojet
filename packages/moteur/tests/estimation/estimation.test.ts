@@ -16,6 +16,7 @@ import {
   type Bien,
   type Projet,
   type ProjetEntree,
+  loyerConnu,
 } from '../../src/schema';
 
 const regles = obtenirRegles('2026-09');
@@ -100,7 +101,7 @@ describe('effetCharges', () => {
         marche: { dvf: DVF },
         hypotheses: {
           ...projetExemple.hypotheses,
-          location: { ...projetExemple.hypotheses.location, loyerHc: 0 },
+          location: { mode: 'meuble', loyerHc: 0 },
         },
       },
     );
@@ -113,7 +114,7 @@ describe('effetCharges', () => {
       {},
       { marche: { dvf: DVF }, hypotheses: { ...projetExemple.hypotheses, location } },
     );
-    expect(loyerInconnu.hypotheses.location.loyerHc).toBeUndefined();
+    expect(loyerConnu(loyerInconnu.hypotheses.location)).toBe(false);
     expect(effetCharges(loyerInconnu, DVF, regles, 200_000)).toBeNull();
     // Avec le loyer de référence ANIL, le loyer visé n'est pas nécessaire.
     const anilSeul = projet({}, { hypotheses: { ...projetExemple.hypotheses, location } });

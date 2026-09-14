@@ -1,4 +1,4 @@
-import { obtenirRegles } from '@loupe/moteur';
+import { loyerConnu, loyerMensuelHc, obtenirRegles } from '@loupe/moteur';
 import type { JSX } from 'react';
 
 import { Bouton, Carte, Pastille } from '@/composants/ui';
@@ -34,7 +34,8 @@ export function CarteLoyer({ resultat }: { resultat: Resultat<ReponseMarche> }):
   const vise = loyerVise(loyer, projet.hypotheses.location.mode);
   const sources = resultat.ok ? resultat.valeur.sources : [];
   const mention = sources.find((s) => s.mention !== undefined)?.mention;
-  const loyerActuel = projet.hypotheses.location.loyerHc;
+  const { location } = projet.hypotheses;
+  const loyerActuel = loyerConnu(location) ? loyerMensuelHc(location) : undefined;
 
   return (
     <Carte>

@@ -1,8 +1,4 @@
-import type { ProjetEntree } from '@loupe/moteur';
-
 import type { Groupe } from './types';
-
-const courteDuree = (p: ProjetEntree): boolean => p.hypotheses.location.mode === 'courte_duree';
 
 export const GROUPE_FINANCEMENT: Groupe = {
   titre: 'Le financement',
@@ -51,89 +47,6 @@ export const GROUPE_FINANCEMENT: Groupe = {
   ],
 };
 
-export const GROUPE_LOCATION: Groupe = {
-  titre: 'La location',
-  champs: [
-    {
-      chemin: 'hypotheses.location.mode',
-      libelle: 'Mode de location',
-      type: 'enum',
-      aToi: true,
-      options: [
-        { v: 'meuble_lld', l: 'Meublé longue durée' },
-        { v: 'nu', l: 'Location nue' },
-        { v: 'courte_duree', l: 'Courte durée' },
-      ],
-    },
-    {
-      chemin: 'hypotheses.location.loyerHc',
-      libelle: 'Loyer visé, hors charges',
-      type: 'euros',
-      unite: '€/mois',
-      aToi: true,
-    },
-    // L'encadrement des loyers n'est dans aucun référentiel : à saisir, à côté du loyer visé.
-    {
-      chemin: 'marche.plafondLoyerMensuel',
-      libelle: "Plafond d'encadrement",
-      type: 'euros',
-      unite: '€/mois',
-    },
-    {
-      chemin: 'hypotheses.location.loyerHcNu',
-      libelle: 'Loyer si loué nu',
-      type: 'euros',
-      unite: '€/mois',
-    },
-    {
-      chemin: 'hypotheses.location.chargesLocataire',
-      libelle: 'Charges refacturées',
-      type: 'euros',
-      unite: '€/mois',
-    },
-    {
-      chemin: 'hypotheses.location.vacanceSemaines',
-      libelle: 'Vacance',
-      type: 'nombre',
-      unite: 'semaines / an',
-    },
-    {
-      chemin: 'hypotheses.location.gestionTaux',
-      libelle: 'Gestion déléguée',
-      type: 'pourcent',
-      unite: '% des loyers',
-    },
-    {
-      chemin: 'hypotheses.location.courteDuree.nuitee',
-      libelle: 'Prix de la nuitée',
-      type: 'euros',
-      unite: '€',
-      visibleSi: courteDuree,
-    },
-    {
-      chemin: 'hypotheses.location.courteDuree.tauxOccupation',
-      libelle: "Taux d'occupation",
-      type: 'pourcent',
-      unite: '%',
-      visibleSi: courteDuree,
-    },
-    {
-      chemin: 'hypotheses.location.courteDuree.fraisMenageParNuit',
-      libelle: 'Ménage par nuit',
-      type: 'euros',
-      unite: '€',
-      visibleSi: courteDuree,
-    },
-    {
-      chemin: 'hypotheses.location.courteDuree.conciergerieTaux',
-      libelle: 'Conciergerie',
-      type: 'pourcent',
-      unite: '% des recettes',
-      visibleSi: courteDuree,
-    },
-  ],
-};
-
 export const GROUPE_CHARGES: Groupe = {
   titre: 'Les charges',
   champs: [
@@ -157,6 +70,18 @@ export const GROUPE_CHARGES: Groupe = {
     },
     { chemin: 'hypotheses.charges.comptable', libelle: 'Comptable', type: 'euros', unite: '€/an' },
     { chemin: 'hypotheses.charges.cfe', libelle: 'CFE', type: 'euros', unite: '€/an' },
+    {
+      chemin: 'hypotheses.charges.energieMensuel',
+      libelle: 'Énergie payée par le propriétaire',
+      type: 'euros',
+      unite: '€/mois',
+    },
+    {
+      chemin: 'hypotheses.charges.internetMensuel',
+      libelle: 'Internet et TV payés par le propriétaire',
+      type: 'euros',
+      unite: '€/mois',
+    },
     {
       chemin: 'hypotheses.charges.entretienTaux',
       libelle: 'Provision entretien',

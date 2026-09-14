@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 import { BienSchema } from './bien';
 import { ReglagesEstimationSchema } from './estimation';
-import { HypothesesSchema, type HypothesesCompletes } from './hypotheses';
+import { HypothesesSchema, loyerConnu, type HypothesesCompletes } from './hypotheses';
 import { MarcheSchema } from './marche';
 
 export const VersionReglesSchema = z.enum(['2026-09']);
@@ -37,7 +37,7 @@ export type ProjetEntree = z.input<typeof ProjetSchema>;
 export type ProjetComplet = Projet & { readonly hypotheses: HypothesesCompletes };
 
 export function estComplet(projet: Projet): projet is ProjetComplet {
-  return projet.hypotheses.location.loyerHc !== undefined;
+  return loyerConnu(projet.hypotheses.location);
 }
 
 /** Valide une entrée et exige le loyer : pour ce qui ne sait calculer qu'un projet complet. */

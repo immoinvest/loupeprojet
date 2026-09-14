@@ -22,17 +22,19 @@ export const variante = (
   hypotheses: { ...projetExemple.hypotheses, ...h },
 });
 
-/** Un projet en courte durée : nuitée 80 €, 60 % d'occupation, ménage 10 € par nuit, conciergerie 20 %. */
+/**
+ * Un projet en courte durée : nuitée 80 €, 60 % d'occupation (18,25 nuits par mois), séjours de
+ * 4 nuits, ménage facturé 25 € et payé 40 € par séjour, conciergerie 20 %.
+ */
 export const courteDuree = (): ProjetEntree =>
   variante({
     location: {
       mode: 'courte_duree',
-      loyerHc: 0,
-      courteDuree: {
-        nuitee: 80,
-        tauxOccupation: 0.6,
-        fraisMenageParNuit: 10,
-        conciergerieTaux: 0.2,
-      },
+      nuitee: 80,
+      nuiteesParMois: 18.25,
+      dureeSejourNuits: 4,
+      menageFactureParSejour: 25,
+      menageCoutParSejour: 40,
+      conciergerieTaux: 0.2,
     },
   });

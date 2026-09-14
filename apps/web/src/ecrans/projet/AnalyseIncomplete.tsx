@@ -1,4 +1,4 @@
-import { obtenirRegles, type Manque } from '@loupe/moteur';
+import type { Manque } from '@loupe/moteur';
 import { useState, type JSX } from 'react';
 
 import { useModeDocument } from '@/composants/document';
@@ -25,11 +25,7 @@ export function AnalyseIncomplete({ manque }: { manque: Manque }): JSX.Element {
   const [erreur, setErreur] = useState<string | undefined>(undefined);
   const t = MANQUES[manque.code];
   const descripteur = descripteurParChemin(manque.champ);
-  const regles = obtenirRegles(enregistre.projet.versionRegles);
-  const reference =
-    manque.code === 'LOYER_ABSENT'
-      ? loyerDeReference(enregistre.projet, regles.exploitation.primeMeuble)
-      : null;
+  const reference = loyerDeReference(enregistre.projet);
 
   const appliquer = (): void => {
     const application = appliquerSaisie(enregistre.projet, descripteur, texte);

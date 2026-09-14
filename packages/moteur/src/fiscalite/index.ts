@@ -1,8 +1,14 @@
 import { calculerCashflow, type ResultatCashflow } from '../cashflow';
 import { estMeuble } from '../cashflow/charges';
 import type { ResultatFinancement } from '../financement';
+import { loyerMensuelReference } from '../location/equivalents';
 import type { Regles } from '../regles/types';
-import type { HypothesesCompletes, ModeLocation, Regime } from '../schema/hypotheses';
+import {
+  regimesCompatibles,
+  type HypothesesCompletes,
+  type LocationComplete,
+  type Regime,
+} from '../schema/hypotheses';
 import type { ProjetComplet } from '../schema/projet';
 import { projeterLmnpReel } from './lmnp-reel';
 import { projeterMicroBic } from './micro-bic';
@@ -19,49 +25,68 @@ const PROJECTEURS: Readonly<Record<Regime, (ctx: ContexteFiscal) => ResultatRegi
   nu_reel: projeterNuReel,
 };
 
-export interface LocationPourRegime {
-  readonly mode: ModeLocation;
-  readonly loyerHc: number;
-}
-
 /**
- * Chaque régime est projeté avec le loyer de son mode : les régimes nus avec le loyer nu
- * (hypothèse, sinon déduit de la prime meublé), les régimes meublés avec le loyer meublé.
+ * La location à projeter pour un régime : les régimes du meublé prennent la location du projet
+ * (ou une meublée au loyer majoré de la prime pour une location nue) ; les régimes fonciers prennent
+ * une location nue (loyer nu saisi, sinon loyer meublé de référence ÷ (1 + prime)), avec la vacance
+ * et la gestion du projet quand le type les porte.
  */
 export function locationPourRegime(
   hypotheses: HypothesesCompletes,
   regime: Regime,
   regles: Regles,
-): LocationPourRegime {
+): LocationComplete {
   const { location } = hypotheses;
   const prime = 1 + regles.exploitation.primeMeuble;
   if (estMeuble(regime)) {
-    return location.mode === 'nu'
-      ? { mode: 'meuble_lld', loyerHc: location.loyerHc * prime }
-      : { mode: location.mode, loyerHc: location.loyerHc };
+    if (location.mode !== 'nu') return location;
+    return {
+      mode: 'meuble',
+      loyerHc: location.loyerHc * prime,
+      chargesLocataire: location.chargesLocataire,
+      vacanceSemaines: location.vacanceSemaines,
+      gestionTaux: location.gestionTaux,
+    };
   }
-  const loyerNu =
-    location.loyerHcNu ?? (location.mode === 'nu' ? location.loyerHc : location.loyerHc / prime);
-  return { mode: 'nu', loyerHc: loyerNu };
+  if (location.mode === 'nu') return location;
+  const defauts = regles.exploitation.parType.nu;
+  if (location.mode === 'meuble') {
+    return {
+      mode: 'nu',
+      loyerHc: location.loyerHcNu ?? location.loyerHc / prime,
+      chargesLocataire: location.chargesLocataire,
+      vacanceSemaines: location.vacanceSemaines,
+      gestionTaux: location.gestionTaux,
+    };
+  }
+  const courteDuree = location.mode === 'courte_duree';
+  return {
+    mode: 'nu',
+    loyerHc: loyerMensuelReference(location, regles) / prime,
+    chargesLocataire: 0,
+    vacanceSemaines: courteDuree ? defauts.vacanceSemaines : location.vacanceSemaines,
+    gestionTaux: courteDuree ? defauts.gestionTaux : location.gestionTaux,
+  };
 }
 
-/** Cash-flow avant impôt d'un régime, avec le loyer et les charges de son mode. */
+/** Cash-flow avant impôt d'un régime, avec le loyer et les charges de sa location. */
 export function cashflowDuRegime(
   projet: ProjetComplet,
   financement: ResultatFinancement,
   regime: Regime,
   regles: Regles,
 ): ResultatCashflow {
-  const { mode, loyerHc } = locationPourRegime(projet.hypotheses, regime, regles);
-  return calculerCashflow(projet, financement, { regime, mode, loyerHc });
+  const location = locationPourRegime(projet.hypotheses, regime, regles);
+  return calculerCashflow(projet, financement, { regime, location });
 }
 
 function meilleurSelon(
   regimes: readonly ResultatRegime[],
+  compatibles: readonly Regime[],
   score: (r: ResultatRegime) => number,
 ): Regime {
-  const eligibles = regimes.filter((r) => r.eligible);
-  return eligibles.reduce((meilleur, r) => (score(r) > score(meilleur) ? r : meilleur)).regime;
+  const candidats = regimes.filter((r) => r.eligible && compatibles.includes(r.regime));
+  return candidats.reduce((meilleur, r) => (score(r) > score(meilleur) ? r : meilleur)).regime;
 }
 
 export function calculerFiscalite(
@@ -77,11 +102,13 @@ export function calculerFiscalite(
     Regime,
     ResultatRegime
   >;
+  const compatibles = regimesCompatibles(projet.hypotheses.location.mode);
   return {
     regimes,
+    compatibles,
     retenu: projet.hypotheses.fiscalite.regime,
-    meilleur: meilleurSelon(resultats, (r) => r.cashflowApresImpotTotal),
-    meilleurImpot: meilleurSelon(resultats, (r) => -r.impotTotal),
+    meilleur: meilleurSelon(resultats, compatibles, (r) => r.cashflowApresImpotTotal),
+    meilleurImpot: meilleurSelon(resultats, compatibles, (r) => -r.impotTotal),
   };
 }
 

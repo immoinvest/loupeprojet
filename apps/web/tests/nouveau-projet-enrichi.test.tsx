@@ -95,7 +95,7 @@ describe('Nouveau projet — avec le Worker', () => {
       expect(projet?.marche.loyerReferenceM2).toBe(13.83);
       expect(projet?.provenance['marche.dvf.medianM2']).toBe('dvf');
       // 13,83 €/m² × 65 m² × 1,15 (meublé) = 1 034 €, provenance « anil » ; taxe foncière lue dans l'annonce.
-      expect(projet?.hypotheses.location.loyerHc).toBe(1_034);
+      expect(projet?.hypotheses.location).toMatchObject({ loyerHc: 1_034 });
       expect(projet?.provenance['location.loyerHc']).toBe('anil');
       expect(projet?.hypotheses.charges.taxeFonciere).toBe(980);
       expect(projet?.hypotheses.pret.apport).toBe(0);

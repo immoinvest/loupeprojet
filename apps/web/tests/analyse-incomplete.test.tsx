@@ -23,8 +23,11 @@ function amorcerSansLoyer(options: { sansMarche?: boolean } = {}): string {
   return p.id;
 }
 
-const loyerEnregistre = (): number | undefined =>
-  lireProjets(window.localStorage)[0]?.projet.hypotheses.location.loyerHc;
+/** Le loyer mensuel enregistré du projet (meublé), absent tant qu'il n'est pas indiqué. */
+function loyerEnregistre(): number | undefined {
+  const location = lireProjets(window.localStorage)[0]?.projet.hypotheses.location;
+  return location !== undefined && 'loyerHc' in location ? location.loyerHc : undefined;
+}
 
 describe('Rapport sans loyer', () => {
   it('dit ce qui manque, garde le prix, met les autres cartes « à compléter »', async () => {

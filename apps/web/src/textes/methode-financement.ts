@@ -132,8 +132,8 @@ export function sectionCashflow(regles: Regles, defauts: Defauts): SectionMethod
     resume: EXPLICATIONS.cashflow,
     etapes: [
       `Loyers nets = loyer hors charges × 12 − vacance (semaines vides ÷ 52 ; ${String(defauts.vacanceSemaines)} semaines par défaut).`,
-      "Courte durée : nuitée × 365 × taux d'occupation − ménage − conciergerie ; la vacance est déjà dans l'occupation.",
-      `Charges pleines : taxe foncière, copropriété, assurance propriétaire, comptable (réel meublé), CFE (meublé), gestion (% des loyers), entretien (${pct(defauts.entretienTaux)} du prix par an).`,
+      'Colocation : loyer par chambre × chambres louées × 12, plus les forfaits de charges comprises ; la vacance vaut pour chaque chambre. Courte durée : nuitée × nuits louées par mois × 12, plus le ménage facturé aux voyageurs ; la vacance est déjà dans les nuitées. Moyenne durée : loyer et forfait de charges × 12, vacance entre deux séjours.',
+      `Charges pleines : taxe foncière, copropriété, assurance propriétaire, comptable (réel meublé), CFE (meublé), gestion (% des loyers), conciergerie et commission de plateforme (% des recettes), ménage payé par séjour, énergie et internet payés par le propriétaire, entretien (${pct(defauts.entretienTaux)} du prix par an).`,
       "Cash-flow mensuel = (loyers nets − charges − 12 mensualités assurance comprise) ÷ 12 ; effort d'épargne = ce qu'il manque quand il est négatif.",
       'Point mort = loyer qui met le cash-flow à zéro ; taux de couverture = mensualité assurance comprise ÷ loyer.',
       `Régimes nus : loyer nu saisi, sinon loyer meublé ÷ (1 + ${pct(e.primeMeuble)}). Régimes meublés d'un bien loué nu : loyer × (1 + ${pct(e.primeMeuble)}).`,
@@ -147,7 +147,7 @@ export function sectionCashflow(regles: Regles, defauts: Defauts): SectionMethod
       },
       {
         libelle: 'Colocation : supplément de loyer total et vacance',
-        valeur: `+${pct(e.primeColocation)} · ${String(e.vacanceSemainesColocation)} semaines par an`,
+        valeur: `+${pct(e.primeColocation)} · ${String(e.parType.colocation.vacanceSemaines)} semaines par an et par chambre`,
         source: 'Spec Deklic (+30 à +45 % observés, un mois de vacance)',
       },
       {

@@ -1,7 +1,9 @@
 import { z } from 'zod';
 
+import { CODES_CHARGES } from '../cashflow/charges';
 import { ModeLocationSchema, RegimeSchema } from './hypotheses';
 import { CodeManqueSchema, ManqueSchema } from './manques';
+import { EstimationResultatSchema } from './resultats-estimation';
 import { ProjetSchema, VersionReglesSchema } from './projet';
 
 /**
@@ -85,15 +87,15 @@ export const CashflowSchema = z.strictObject({
   recettes: z.strictObject({
     mode: ModeLocationSchema,
     loyersBruts: n,
+    chargesRecuperees: n,
     vacance: n,
     loyersNets: n,
-    courteDuree: z
-      .strictObject({ nuitees: n, recettesBrutes: n, menage: n, conciergerie: n })
-      .nullable(),
+    nuitees: nOuNull,
+    sejours: nOuNull,
   }),
   charges: z.array(
     z.strictObject({
-      code: z.enum(['taxeFonciere', 'copro', 'pno', 'comptable', 'cfe', 'gestion', 'entretien']),
+      code: z.enum(CODES_CHARGES),
       annuel: n,
     }),
   ),
@@ -144,6 +146,7 @@ export const FiscaliteResultatSchema = z.strictObject({
     micro_foncier: RegimeResultatSchema,
     nu_reel: RegimeResultatSchema,
   }),
+  compatibles: z.array(RegimeSchema),
   retenu: RegimeSchema,
   meilleur: RegimeSchema,
   meilleurImpot: RegimeSchema,
@@ -243,51 +246,7 @@ export const ScenariosSchema = z.strictObject({
   ),
 });
 
-const EtatSchema = z.enum(['a_renover', 'a_rafraichir', 'bon_etat', 'renove']);
-
-export const EstimationResultatSchema = z.strictObject({
-  etat: EtatSchema,
-  etatSuppose: z.boolean(),
-  prixM2Marche: n,
-  corrections: z.array(
-    z.strictObject({
-      code: z.enum(['dpe', 'etage', 'exterieur', 'charges']),
-      taux: n,
-      montant: n,
-      ignoree: z.boolean(),
-    }),
-  ),
-  prixM2Estime: n,
-  centre: n,
-  bas: n,
-  haut: n,
-  selonEtat: z.strictObject({ a_renover: n, a_rafraichir: n, bon_etat: n, renove: n }),
-  confiance: z.strictObject({
-    note: n,
-    niveau: z.enum(['tres_faible', 'faible', 'moyenne', 'bonne', 'elevee']),
-    precision: z.enum(['immeuble', 'rue', 'quartier', 'commune']),
-    composantes: z.array(
-      z.strictObject({
-        code: z.enum(['localisation', 'comparables', 'dispersion', 'anciennete']),
-        valeur: nOuNull,
-        points: n,
-        maximum: n,
-        supposee: z.boolean(),
-      }),
-    ),
-  }),
-  marge: n,
-  charges: z
-    .strictObject({
-      repereAnnuel: n,
-      excedentAnnuel: n,
-      rendementLocal: n,
-      borneAtteinte: z.boolean(),
-    })
-    .nullable(),
-  actualiseAu: z.string().nullable(),
-  ecartPrix: n,
-});
+export { EstimationResultatSchema } from './resultats-estimation';
 
 /** Ce que tout rapport porte, complet ou partiel. */
 const communs = {

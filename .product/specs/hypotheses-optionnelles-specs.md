@@ -2,6 +2,8 @@
 
 Discovery : `../features/hypotheses-optionnelles-discovery.md`. Branche : `feat/hypotheses-optionnelles`. Périmètre : `packages/moteur`, `apps/web`, tests e2e, docs. Aucun changement du Worker.
 
+> **Mise à jour après fusion (14/09/2026).** La fiche 01 a retiré les revenus de Deklic : les scénarios sur `REVENUS_ABSENTS` et le feu « effort » ne s'appliquent plus. Le seul manque est le loyer, et le feu `couverture` porte sa raison. Depuis `location-types`, « le loyer » désigne le champ de loyer du type : loyer mensuel, loyer par chambre ou nuitée. Détails dans l'architecture, « Notes d'implémentation ».
+
 ## Épics
 
 | Épic | Titre                                                 | Stories    |

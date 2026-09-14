@@ -50,7 +50,7 @@ describe('micro-BIC', () => {
 
   it('devient inéligible au-dessus du plafond', () => {
     const gros = contexte(
-      variante({ location: { mode: 'meuble_lld', loyerHc: 8_000, vacanceSemaines: 0 } }),
+      variante({ location: { mode: 'meuble', loyerHc: 8_000, vacanceSemaines: 0 } }),
       'micro_bic',
     );
     const rr = projeterMicroBic(gros);
@@ -61,11 +61,7 @@ describe('micro-BIC', () => {
   it('en meublé de tourisme non classé : abattement 30 % et plafond 15 000 €', () => {
     const cd = contexte(
       variante({
-        location: {
-          mode: 'courte_duree',
-          loyerHc: 0,
-          courteDuree: { nuitee: 90, tauxOccupation: 0.5 },
-        },
+        location: { mode: 'courte_duree', nuitee: 90, nuiteesParMois: 182.5 / 12 },
       }),
       'micro_bic',
     );
@@ -80,8 +76,9 @@ describe('micro-BIC', () => {
       variante({
         location: {
           mode: 'courte_duree',
-          loyerHc: 0,
-          courteDuree: { nuitee: 90, tauxOccupation: 0.5, tourismeClasse: true },
+          nuitee: 90,
+          nuiteesParMois: 182.5 / 12,
+          tourismeClasse: true,
         },
       }),
       'micro_bic',
@@ -136,7 +133,7 @@ describe('LMNP réel — résultat positif (pas de crédit, loyer élevé)', () 
   const ctx = contexte(
     variante({
       pret: { ...projetExemple.hypotheses.pret, apport: 500_000 },
-      location: { mode: 'meuble_lld', loyerHc: 2_300, vacanceSemaines: 0 },
+      location: { mode: 'meuble', loyerHc: 2_300, vacanceSemaines: 0 },
     }),
     'lmnp_reel',
   );
@@ -195,7 +192,7 @@ describe('LMNP réel — cas particuliers', () => {
       variante({
         achat: { ...projetExemple.hypotheses.achat, travaux: 0, mobilier: 0 },
         pret: { ...projetExemple.hypotheses.pret, apport: 500_000 },
-        location: { mode: 'meuble_lld', loyerHc: 2_500, vacanceSemaines: 0 },
+        location: { mode: 'meuble', loyerHc: 2_500, vacanceSemaines: 0 },
       }),
     );
     const financement = calculerFinancement(projet, sansAmortissement);
@@ -214,7 +211,7 @@ describe('LMNP réel — imputation d’un déficit antérieur', () => {
     const ctx = contexte(
       variante({
         pret: { ...projetExemple.hypotheses.pret, apport: 150_000 },
-        location: { mode: 'meuble_lld', loyerHc: 1_200, vacanceSemaines: 0 },
+        location: { mode: 'meuble', loyerHc: 1_200, vacanceSemaines: 0 },
       }),
       'lmnp_reel',
     );

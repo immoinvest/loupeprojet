@@ -1,4 +1,4 @@
-import { ProjetSchema, projetExemple } from '@loupe/moteur';
+import { ProjetSchema, projetExemple, type ProjetEntree } from '@loupe/moteur';
 import { describe, expect, it } from 'vitest';
 
 import { construireProjet, type SaisieProjet } from '@/annonces';
@@ -284,7 +284,7 @@ describe('données de marché', () => {
     pieces: 3,
     codePostal: '13005',
     ville: 'Marseille 5e',
-    mode: 'meuble_lld',
+    mode: 'meuble',
     loyerHc: 980,
     apport: 15000,
     dureeAnnees: 25,
@@ -357,26 +357,41 @@ describe('loyer de marché du projet', () => {
   const projet = ProjetSchema.parse(projetExemple);
 
   it('déduit le loyer visé du loyer de référence hors charges, selon le mode', () => {
-    expect(loyerViseDepuisReference(15.1, 65, 'meuble_lld', 0.15)).toBe(1_129);
+    expect(loyerViseDepuisReference(15.1, 65, 'meuble', 0.15)).toBe(1_129);
     expect(loyerViseDepuisReference(15.1, 65, 'courte_duree', 0.15)).toBe(1_129);
     expect(loyerViseDepuisReference(15.1, 65, 'nu', 0.15)).toBe(982);
   });
 
   it('lit la référence rangée dans le projet, ou rend null sans référence', () => {
-    expect(loyerDeReference(projet, 0.15)).toBe(1_129);
+    expect(loyerDeReference(projet)).toBe(1_129);
     expect(
-      loyerDeReference(
-        { ...projet, marche: { ...projet.marche, loyerReferenceM2: undefined } },
-        0.15,
-      ),
+      loyerDeReference({ ...projet, marche: { ...projet.marche, loyerReferenceM2: undefined } }),
     ).toBeNull();
   });
 
   it('applique le loyer de marché comme loyer visé, provenance « anil »', () => {
     const applique = appliquerLoyerDeReference(projet, 1_129);
-    expect(applique.hypotheses.location.loyerHc).toBe(1_129);
+    expect(applique.hypotheses.location).toMatchObject({ loyerHc: 1_129, loyerHcNu: 850 });
     expect(applique.provenance['location.loyerHc']).toBe('anil');
-    expect(applique.hypotheses.location.loyerHcNu).toBe(850);
-    expect(projet.hypotheses.location.loyerHc).toBe(980);
+    expect(projet.hypotheses.location).toMatchObject({ loyerHc: 980 });
+  });
+
+  it('colocation : le loyer par chambre ; courte durée : rien à proposer ni à appliquer', () => {
+    const avecLocation = (
+      location: ProjetEntree['hypotheses']['location'],
+    ): ReturnType<typeof ProjetSchema.parse> =>
+      ProjetSchema.parse({
+        ...projetExemple,
+        hypotheses: { ...projetExemple.hypotheses, location },
+      });
+    const coloc = avecLocation({ mode: 'colocation', chambres: 3 });
+    // 15,1 €/m² × 65 m² × 1,15 (meublé) × 1,35 (colocation) ÷ 3 chambres.
+    expect(loyerDeReference(coloc)).toBe(Math.round((15.1 * 65 * 1.15 * 1.35) / 3));
+    const applique = appliquerLoyerDeReference(coloc, 505);
+    expect(applique.hypotheses.location).toMatchObject({ mode: 'colocation', loyerChambre: 505 });
+    expect(applique.provenance['location.loyerChambre']).toBe('anil');
+    const cd = avecLocation({ mode: 'courte_duree', nuiteesParMois: 15 });
+    expect(loyerDeReference(cd)).toBeNull();
+    expect(appliquerLoyerDeReference(cd, 900)).toBe(cd);
   });
 });

@@ -71,10 +71,17 @@ export function calculerScenarios(
 ): ResultatScenarios {
   const ref = indicateurs(reference);
   return {
-    scenarios: TRANSFORMATIONS.map((t) => evaluerVariante(t(projet, regles), ref, regles)),
+    scenarios: TRANSFORMATIONS.map((t) => t(projet, regles))
+      .filter((v): v is Variante => v !== null)
+      .map((v) => evaluerVariante(v, ref, regles)),
     prixCibles: CRITERES_PRIX.map((critere) => prixCible(projet, critere, regles)),
   };
 }
 
-export { TRANSFORMATIONS, type CodeScenario, type Variante } from './predefinis';
+export {
+  TRANSFORMATIONS,
+  type CodeScenario,
+  type Transformation,
+  type Variante,
+} from './predefinis';
 export { CRITERES_PRIX, avecPrix, prixCible, type CriterePrix, type PrixCible } from './prix-cible';

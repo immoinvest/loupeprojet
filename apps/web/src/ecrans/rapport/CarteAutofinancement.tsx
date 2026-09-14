@@ -1,4 +1,4 @@
-import type { ResultatsComplets } from '@loupe/moteur';
+import { loyerMensuelHc, vacanceSemaines, type ResultatsComplets } from '@loupe/moteur';
 import type { JSX, ReactNode } from 'react';
 
 import { cascadeAutofinancement } from '@/analyses/rapport';
@@ -60,11 +60,18 @@ const tonSelonSigne = (valeur: number): string => (valeur < 0 ? 'text-probleme' 
 
 function Cascade({ r }: { r: ResultatsComplets }): JSX.Element {
   const c = cascadeAutofinancement(r);
-  const courteDuree = r.cashflow.recettes.courteDuree !== null;
+  const { location } = r.projet.hypotheses;
   const annees = String(r.projet.hypotheses.revente.annees);
   return (
     <div>
       <Ligne libelle="Loyer" valeur={eurosSignes(c.loyer)} tonValeur="font-bold text-bon" />
+      {c.recuperees > 0 && (
+        <Ligne
+          libelle="Forfaits de charges et ménage facturés"
+          valeur={eurosSignes(c.recuperees)}
+          tonValeur="text-bon"
+        />
+      )}
       <Ligne libelle="Crédit et assurance" valeur={eurosSignes(-c.credit)} />
       <Ligne
         libelle={libelleSousTotal('Après le crédit')}
@@ -72,11 +79,10 @@ function Cascade({ r }: { r: ResultatsComplets }): JSX.Element {
         tonValeur={`font-semibold ${tonSelonSigne(c.apresCredit)}`}
       />
       <Ligne libelle="Charges, impôts locaux, entretien" valeur={eurosSignes(-c.charges)} />
-      {courteDuree ? (
-        <Ligne libelle="Ménage et conciergerie" valeur={eurosSignes(-c.fraisCourteDuree)} />
-      ) : (
+      {/* En courte durée, les nuits louées portent déjà la vacance ; les frais sont dans les charges. */}
+      {location.mode !== 'courte_duree' && (
         <Ligne
-          libelle={`${nombre(r.projet.hypotheses.location.vacanceSemaines)} semaines vides par an`}
+          libelle={`${nombre(vacanceSemaines(location))} semaines vides par an`}
           valeur={eurosSignes(-c.vacance)}
         />
       )}
@@ -108,7 +114,8 @@ function Cascade({ r }: { r: ResultatsComplets }): JSX.Element {
 
 function Reperes({ r }: { r: ResultatsComplets }): JSX.Element {
   const c = r.cashflow;
-  const { loyerHc } = r.projet.hypotheses.location;
+  // Loyer mensuel équivalent : total des chambres en colocation, nuitées × nuitée en courte durée.
+  const loyerHc = loyerMensuelHc(r.projet.hypotheses.location);
   const mensualite = r.financement.mensualiteTotale;
   return (
     <div className="grid grid-cols-2 content-start gap-2.5 md:grid-cols-1 print:grid-cols-1">

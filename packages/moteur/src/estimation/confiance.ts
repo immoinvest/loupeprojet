@@ -7,7 +7,7 @@ export type CodeComposante = 'localisation' | 'comparables' | 'dispersion' | 'an
 export interface ComposanteConfiance {
   readonly code: CodeComposante;
   /**
-   * Grandeur mesurée : rayon du repère en mètres (localisation, `null` hors quartier), nombre de ventes,
+   * Grandeur mesurée : rayon du repère en mètres (localisation d'une rue ou d'un quartier, `null` sinon), nombre de ventes,
    * écart interquartile ÷ médiane (`null` sans quartiles), ancienneté médiane en mois.
    */
   readonly valeur: number | null;
@@ -60,22 +60,32 @@ export function dispersionDe(dvf: Dvf): number | null {
   return (dvf.q3M2 - dvf.q1M2) / dvf.medianM2;
 }
 
+/** Points d'un cercle selon son rayon ; rayon inconnu : le dernier palier, le plus large. */
+function pointsQuartier(rayonMetres: number | undefined, regles: Regles): number {
+  const { quartier } = regles.estimation.confiance.localisation;
+  const dernier = quartier[quartier.length - 1]?.points ?? 0;
+  if (rayonMetres === undefined) return dernier;
+  const palier = quartier.find((p) => p.jusquaMetres === null || rayonMetres <= p.jusquaMetres);
+  return palier?.points ?? dernier;
+}
+
 export function pointsLocalisation(
   precision: PrecisionDvf,
   rayonMetres: number | undefined,
   regles: Regles,
 ): number {
   const l = regles.estimation.confiance.localisation;
-  if (precision !== 'quartier') return l[precision];
-  const dernier = l.quartier[l.quartier.length - 1]?.points ?? 0;
-  if (rayonMetres === undefined) return dernier;
-  const palier = l.quartier.find((p) => p.jusquaMetres === null || rayonMetres <= p.jusquaMetres);
-  return palier?.points ?? dernier;
+  if (precision === 'immeuble' || precision === 'commune') return l[precision];
+  if (precision === 'quartier') return pointsQuartier(rayonMetres, regles);
+  // Une rue dont les ventes s'étirent au-delà de sa limite ne situe pas mieux le bien qu'un cercle
+  // du même rayon : elle prend les points du quartier pour son étendue, jamais plus que ceux d'une rue.
+  if (rayonMetres === undefined || rayonMetres <= l.rue.jusquaMetres) return l.rue.points;
+  return Math.min(l.rue.points, pointsQuartier(rayonMetres, regles));
 }
 
 function maximumLocalisation(regles: Regles): number {
   const l = regles.estimation.confiance.localisation;
-  return Math.max(l.immeuble, l.rue, l.commune, ...l.quartier.map((p) => p.points));
+  return Math.max(l.immeuble, l.rue.points, l.commune, ...l.quartier.map((p) => p.points));
 }
 
 /**
@@ -91,7 +101,7 @@ export function confianceEstimation(dvf: Dvf, regles: Regles): ConfianceEstimati
   const composantes: readonly ComposanteConfiance[] = [
     {
       code: 'localisation',
-      valeur: precision === 'quartier' ? (dvf.rayonMetres ?? null) : null,
+      valeur: precision === 'quartier' || precision === 'rue' ? (dvf.rayonMetres ?? null) : null,
       points: arrondir(pointsLocalisation(precision, dvf.rayonMetres, regles), 0),
       maximum: maximumLocalisation(regles),
       supposee: false,

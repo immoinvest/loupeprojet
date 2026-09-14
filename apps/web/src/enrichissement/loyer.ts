@@ -1,4 +1,4 @@
-import type { ModeLocation, Projet } from '@loupe/moteur';
+import { obtenirRegles, type ModeLocation, type Projet } from '@loupe/moteur';
 
 import type { ReponseMarche } from './contrat';
 import { PART_CHARGES_LOYER } from './marche';
@@ -31,12 +31,12 @@ export function loyerPourBien(loyer: LoyerAnil, surface: number, primeMeuble: nu
   };
 }
 
-/** Le loyer visé selon le mode : nu en location nue, meublé sinon (courte durée comprise, en équivalent mensuel). */
+/** Le loyer mensuel visé selon le type : nu en location nue, meublé pour tous les autres. */
 export function loyerVise(loyer: LoyerBien, mode: ModeLocation): number {
   return mode === 'nu' ? loyer.nuMensuel : loyer.meubleMensuel;
 }
 
-/** Loyer visé déduit du loyer de référence hors charges (€/m² par mois) rangé dans le projet. */
+/** Loyer visé déduit du loyer de référence hors charges (€/m² par mois) : nu en location nue, meublé sinon. */
 export function loyerViseDepuisReference(
   referenceM2: number,
   surface: number,
@@ -47,27 +47,47 @@ export function loyerViseDepuisReference(
   return Math.round(mode === 'nu' ? nu : nu * (1 + primeMeuble));
 }
 
-/** Le loyer de marché d'un projet (référence ANIL de la commune, posée à la création) ; `null` sans référence. */
-export function loyerDeReference(projet: Projet, primeMeuble: number): number | null {
-  const reference = projet.marche.loyerReferenceM2;
-  if (reference === undefined) return null;
-  return loyerViseDepuisReference(
-    reference,
-    projet.bien.surface,
-    projet.hypotheses.location.mode,
-    primeMeuble,
-  );
+/** En colocation, le loyer meublé du logement majoré de la prime colocation, réparti entre les chambres. */
+export function loyerParChambre(
+  loyer: LoyerBien,
+  chambres: number,
+  primeColocation: number,
+): number {
+  return Math.round((loyer.meubleMensuel * (1 + primeColocation)) / Math.max(1, chambres));
 }
 
-/** Un loyer de marché devient le loyer visé du projet, provenance « anil ». */
+/**
+ * Le loyer de marché d'un projet (référence ANIL de la commune, posée à la création), dans l'unité du
+ * champ qui manque : loyer mensuel en nue, meublée et moyenne durée, loyer par chambre en colocation.
+ * `null` sans référence, et en courte durée (une nuitée ne se déduit pas d'un loyer de marché).
+ */
+export function loyerDeReference(projet: Projet): number | null {
+  const reference = projet.marche.loyerReferenceM2;
+  const { location } = projet.hypotheses;
+  if (reference === undefined || location.mode === 'courte_duree') return null;
+  const { primeMeuble, primeColocation } = obtenirRegles(projet.versionRegles).exploitation;
+  if (location.mode === 'colocation') {
+    const meuble = reference * projet.bien.surface * (1 + primeMeuble);
+    return Math.round((meuble * (1 + primeColocation)) / Math.max(1, location.chambres));
+  }
+  return loyerViseDepuisReference(reference, projet.bien.surface, location.mode, primeMeuble);
+}
+
+/** Un loyer de marché devient le loyer du projet (le champ du type), provenance « anil ». */
 export function appliquerLoyerDeReference(projet: Projet, loyer: number): Projet {
+  const { location } = projet.hypotheses;
+  if (location.mode === 'courte_duree') return projet;
+  const colocation = location.mode === 'colocation';
   return {
     ...projet,
     hypotheses: {
       ...projet.hypotheses,
-      location: { ...projet.hypotheses.location, loyerHc: loyer },
+      location: colocation ? { ...location, loyerChambre: loyer } : { ...location, loyerHc: loyer },
     },
-    provenance: { ...projet.provenance, 'location.loyerHc': 'anil' },
+    provenance: {
+      ...projet.provenance,
+      [colocation ? 'location.loyerChambre' : 'location.loyerHc']: 'anil',
+    },
   };
 }
 
@@ -80,17 +100,22 @@ export function appliquerLoyerReference(projet: Projet, loyer: LoyerBien): Proje
   };
 }
 
-/** Le loyer de marché devient le loyer visé du projet, provenance « anil ». */
+/**
+ * Le loyer de marché devient le loyer visé du projet, provenance « anil » : loyer mensuel en nue,
+ * meublée et moyenne durée, loyer par chambre en colocation ; rien en courte durée (pas de loyer mensuel).
+ */
 export function appliquerLoyerVise(projet: Projet, loyer: LoyerBien): Projet {
+  const { location } = projet.hypotheses;
+  if (location.mode === 'courte_duree') return projet;
+  const { primeColocation } = obtenirRegles(projet.versionRegles).exploitation;
+  const suivante =
+    location.mode === 'colocation'
+      ? { ...location, loyerChambre: loyerParChambre(loyer, location.chambres, primeColocation) }
+      : { ...location, loyerHc: loyerVise(loyer, location.mode) };
+  const cle = location.mode === 'colocation' ? 'location.loyerChambre' : 'location.loyerHc';
   return {
     ...projet,
-    hypotheses: {
-      ...projet.hypotheses,
-      location: {
-        ...projet.hypotheses.location,
-        loyerHc: loyerVise(loyer, projet.hypotheses.location.mode),
-      },
-    },
-    provenance: { ...projet.provenance, 'location.loyerHc': 'anil' },
+    hypotheses: { ...projet.hypotheses, location: suivante },
+    provenance: { ...projet.provenance, [cle]: 'anil' },
   };
 }

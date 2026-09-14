@@ -168,7 +168,7 @@ describe('Nouveau projet — à la main', () => {
         { timeout: 10_000 },
       );
       const p = lireProjets(window.localStorage)[0]?.projet;
-      expect(p?.hypotheses.location.loyerHc).toBeUndefined();
+      expect(p?.hypotheses.location).not.toHaveProperty('loyerHc');
       expect(p?.hypotheses.pret).toMatchObject({ apport: 0, dureeAnnees: 25, tauxNominal: 0.0335 });
       expect(p?.hypotheses.fiscalite.tmi).toBe(0.3);
       expect(p?.hypotheses.revenusMensuels).toBeUndefined();

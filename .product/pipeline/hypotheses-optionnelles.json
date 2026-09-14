@@ -5,7 +5,7 @@
   "current_step": "push",
   "scope": "packages/moteur/src/{schema/manques.ts,schema/hypotheses.ts,schema/projet.ts,schema/resultats.ts,calculer-base.ts,calculer-projet.ts,financement/effort.ts,verdict,estimation,cashflow,fiscalite,scenarios}, apps/web/src/{annonces/construire.ts,ecrans/formulaire,ecrans/FormulaireProjet.tsx,ecrans/projet/AnalyseIncomplete.tsx,ecrans/rapport/CarteACompleter.tsx,ecrans/{Rapport,Fiscalite,Revente,Hypotheses,MesProjets}.tsx,ecrans/adresse/Loyer.tsx,hypotheses,analyses,enrichissement/loyer.ts,textes/{manques,feux,verdict,methode-verdict}.ts}, apps/web/e2e, docs",
   "branch": "feat/hypotheses-optionnelles",
-  "base": "master (9d38892), puis trois fusions de origin/master le 14/09/2026 : PR #39 à #45 ; #51 et #52 ; #49 visite-questions",
+  "base": "master (9d38892), puis cinq fusions de origin/master le 14/09/2026 : PR #39 à #45 ; #51 et #52 ; #49 visite-questions ; #48 hypotheses-financement ; #46 location-types et #47",
   "prealables": {
     "fiche_01_hypotheses-financement": "non fusionnée au 14/09/2026 (worktree charming-margulis-6cbc94 à la tête de master, aucun commit, aucune PR)",
     "fiche_04_achat-negociation": "non fusionnée au 14/09/2026 (worktree trusting-proskuriakova-d8c7d3 à la tête de master, aucun commit, aucune PR)",

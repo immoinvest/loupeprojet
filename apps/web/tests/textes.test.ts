@@ -83,7 +83,7 @@ describe('feux', () => {
     expect(Object.keys(AXES)).toHaveLength(5);
     expect(Object.keys(ETATS)).toHaveLength(4);
     expect(Object.keys(REGIMES)).toHaveLength(4);
-    expect(Object.keys(MODES)).toHaveLength(3);
+    expect(Object.keys(MODES)).toHaveLength(5);
     expect(Object.keys(SCENARIOS)).toHaveLength(7);
     expect(Object.keys(CRITERES_PRIX)).toHaveLength(3);
   });
@@ -140,7 +140,7 @@ describe('régimes : explications et ordre', () => {
 
   it('LMNP réel imposé et nu réel jamais imposé : les autres phrases', () => {
     const riche = calculerProjet(
-      variante({ location: { mode: 'meuble_lld', loyerHc: 2_300, vacanceSemaines: 0 } }),
+      variante({ location: { mode: 'meuble', loyerHc: 2_300, vacanceSemaines: 0 } }),
     );
     expect(riche.fiscalite!.regimes.lmnp_reel.premiereAnneeImposable).not.toBeNull();
     expect(explicationRegime(riche.fiscalite!.regimes.lmnp_reel, dix)).toMatch(
@@ -160,7 +160,7 @@ describe('régimes : explications et ordre', () => {
 
   it('plafond dépassé', () => {
     const gros = calculerProjet(
-      variante({ location: { mode: 'meuble_lld', loyerHc: 8_000, vacanceSemaines: 0 } }),
+      variante({ location: { mode: 'meuble', loyerHc: 8_000, vacanceSemaines: 0 } }),
     );
     expect(explicationRegime(gros.fiscalite!.regimes.micro_bic, dix)).toContain('inaccessible');
   });
@@ -239,7 +239,7 @@ describe('verdict', () => {
     const r = calculerProjet(
       variante({
         achat: { ...projetExemple.hypotheses.achat, prix: 198_000 },
-        location: { mode: 'meuble_lld', loyerHc: 1_600, vacanceSemaines: 0 },
+        location: { mode: 'meuble', loyerHc: 1_600, vacanceSemaines: 0 },
       }),
     );
     const t = texteVerdict(r);
@@ -251,7 +251,7 @@ describe('verdict', () => {
     const r = calculerProjet(
       variante({
         achat: { ...projetExemple.hypotheses.achat, prix: 240_000 },
-        location: { mode: 'meuble_lld', loyerHc: 1_100, vacanceSemaines: 0 },
+        location: { mode: 'meuble', loyerHc: 1_100, vacanceSemaines: 0 },
       }),
     );
     const t = texteVerdict(r);
@@ -269,7 +269,7 @@ describe('verdict', () => {
 
   it('cash-flow presque : entre −100 et 0', () => {
     const r = calculerProjet(
-      variante({ location: { mode: 'meuble_lld', loyerHc: 1_120, vacanceSemaines: 0 } }),
+      variante({ location: { mode: 'meuble', loyerHc: 1_120, vacanceSemaines: 0 } }),
     );
     expect(r.cashflow!.mensuel).toBeGreaterThan(-100);
     expect(r.cashflow!.mensuel).toBeLessThan(0);

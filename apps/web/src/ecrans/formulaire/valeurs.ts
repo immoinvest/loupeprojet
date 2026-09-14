@@ -73,7 +73,7 @@ const VIDE: Valeurs = {
   chargesCoproMois: '',
   taxeFonciere: '',
   travaux: '',
-  mode: 'meuble_lld',
+  mode: 'meuble',
   loyerHc: '',
   apport: String(APPORT_DEFAUT),
   dureeAnnees: String(DUREE_DEFAUT_ANNEES),

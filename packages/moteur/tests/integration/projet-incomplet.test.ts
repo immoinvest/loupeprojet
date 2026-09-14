@@ -9,18 +9,15 @@ import { ResultatsCompletsSchema, ResultatsSchema } from '../../src/schema/resul
 
 const regles = obtenirRegles('2026-09');
 
-/** Copie d'un objet sans l'une de ses clés. */
-function sansCle<T extends object, K extends keyof T>(objet: T, cle: K): Omit<T, K> {
-  return Object.fromEntries(Object.entries(objet).filter(([k]) => k !== cle)) as Omit<T, K>;
-}
-
 /** Le T3 d'exemple sans loyer visé. */
 function sansLoyer(): ProjetEntree {
   return {
     ...projetExemple,
     hypotheses: {
       ...projetExemple.hypotheses,
-      location: sansCle(projetExemple.hypotheses.location, 'loyerHc'),
+      location: Object.fromEntries(
+        Object.entries(projetExemple.hypotheses.location).filter(([k]) => k !== 'loyerHc'),
+      ) as ProjetEntree['hypotheses']['location'],
     },
   };
 }

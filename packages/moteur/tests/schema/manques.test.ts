@@ -6,7 +6,9 @@ import {
   ManqueSchema,
   ProjetSchema,
   TMI_PAR_DEFAUT,
+  champLoyer,
   estComplet,
+  loyerConnu,
   manquesDe,
   parserComplet,
   raisonParmi,
@@ -53,10 +55,12 @@ describe('manquesDe', () => {
   });
 
   it('signale le loyer avec le chemin du champ ; estComplet et parserComplet le savent', () => {
-    const location = sansCle(projetExemple.hypotheses.location, 'loyerHc');
+    const location = Object.fromEntries(
+      Object.entries(projetExemple.hypotheses.location).filter(([k]) => k !== 'loyerHc'),
+    );
     const entree = avecHypotheses({ ...projetExemple.hypotheses, location });
     const projet = ProjetSchema.parse(entree);
-    expect(projet.hypotheses.location.loyerHc).toBeUndefined();
+    expect(projet.hypotheses.location).not.toHaveProperty('loyerHc');
     expect(estComplet(projet)).toBe(false);
     const manques = manquesDe(projet);
     expect(manques).toEqual([{ code: 'LOYER_ABSENT', champ: CHAMP_LOYER }]);
@@ -65,19 +69,29 @@ describe('manquesDe', () => {
     expect(() => parserComplet(entree)).toThrow(/loyer visé manque/);
     const complet = parserComplet(projetExemple);
     expect(estComplet(complet)).toBe(true);
-    expect(complet.hypotheses.location.loyerHc).toBe(980);
+    expect(complet.hypotheses.location).toMatchObject({ loyerHc: 980 });
   });
 
-  it('courte durée sans loyer : accepté par le schéma, mais le projet reste incomplet', () => {
-    const projet = ProjetSchema.parse(
+  it('chaque type a son champ de loyer : sans lui, le projet reste incomplet et le manque le nomme', () => {
+    const cas = [
+      [{ mode: 'nu' }, 'hypotheses.location.loyerHc'],
+      [{ mode: 'colocation', chambres: 3 }, 'hypotheses.location.loyerChambre'],
+      [{ mode: 'courte_duree', nuiteesParMois: 15 }, 'hypotheses.location.nuitee'],
+      [{ mode: 'moyenne_duree' }, 'hypotheses.location.loyerHc'],
+    ] as const;
+    for (const [location, champ] of cas) {
+      const projet = ProjetSchema.parse(avecHypotheses({ ...projetExemple.hypotheses, location }));
+      expect(estComplet(projet)).toBe(false);
+      expect(manquesDe(projet)).toEqual([{ code: 'LOYER_ABSENT', champ }]);
+      expect(champLoyer(location.mode)).toBe(champ);
+    }
+    const nuitee = ProjetSchema.parse(
       avecHypotheses({
         ...projetExemple.hypotheses,
-        location: { mode: 'courte_duree', courteDuree: { nuitee: 75, tauxOccupation: 0.6 } },
+        location: { mode: 'courte_duree', nuitee: 80, nuiteesParMois: 15 },
       }),
     );
-    expect(projet.hypotheses.location.courteDuree?.nuitee).toBe(75);
-    expect(estComplet(projet)).toBe(false);
-    expect(manquesDe(projet).map((m) => m.code)).toEqual(['LOYER_ABSENT']);
+    expect(loyerConnu(nuitee.hypotheses.location)).toBe(true);
   });
 
   it('raisonParmi rend le premier manque parmi les codes cherchés, sinon null', () => {

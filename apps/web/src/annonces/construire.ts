@@ -1,6 +1,7 @@
 import {
   TMI_PAR_DEFAUT,
   VERSION_REGLES_COURANTE,
+  estModeMeuble,
   obtenirRegles,
   type ClasseEnergie,
   type EtatBien,
@@ -9,10 +10,9 @@ import {
   type TypeBien,
 } from '@loupe/moteur';
 
-import { loyerViseDepuisReference } from '@/enrichissement/loyer';
 import type { MarcheEnrichi } from '@/enrichissement/marche';
-import { NUITEE_DEFAUT } from '@/hypotheses/appliquer';
 
+import { construireLocation, loyerRetenu } from './location-saisie';
 import type { AnnonceResolue } from './resoudre';
 
 export type Provenance = 'annonce' | 'estime' | 'utilisateur';
@@ -42,9 +42,20 @@ export interface SaisieProjet {
   readonly chargesCoproMois?: number | undefined;
   readonly taxeFonciere?: number | undefined;
   readonly travaux?: number | undefined;
+  /** Type d'exploitation. */
   readonly mode: ModeLocation;
-  /** Absent : le loyer de marché de la commune s'il est connu, sinon le rapport attend le loyer. */
+  /**
+   * Loyer mensuel hors charges visé pour le logement entier : loyer d'une nue, meublée ou moyenne
+   * durée ; loyer total d'une colocation ; loyer meublé de référence d'une courte durée. Absent : le
+   * loyer de marché de la commune s'il est connu, sinon le rapport attend le loyer.
+   */
   readonly loyerHc?: number | undefined;
+  /** Colocation : chambres louées (sinon celles du bien) et loyer par chambre (sinon loyer ÷ chambres). */
+  readonly chambresLouees?: number | undefined;
+  readonly loyerChambre?: number | undefined;
+  /** Courte durée : nuitée et nuits par mois (sinon déduites du loyer et des règles). */
+  readonly nuitee?: number | undefined;
+  readonly nuiteesParMois?: number | undefined;
   readonly apport?: number | undefined;
   readonly dureeAnnees?: number | undefined;
   readonly tmi?: 0 | 0.11 | 0.3 | 0.41 | 0.45 | undefined;
@@ -88,31 +99,6 @@ export function nomDuProjet(s: SaisieProjet): string {
   return `${type} · ${s.ville}`;
 }
 
-interface LoyerRetenu {
-  readonly valeur: number;
-  readonly provenance: string;
-}
-
-/**
- * Le loyer visé : celui de la saisie (« Estimer le loyer » l'a pris dans les loyers ANIL, sinon il
- * vient de la personne), à défaut le loyer de marché de la commune ramené au bien, sinon rien.
- */
-function loyerRetenu(s: SaisieProjet, enrichi: MarcheEnrichi | null): LoyerRetenu | null {
-  if (s.loyerHc !== undefined) {
-    return {
-      valeur: s.loyerHc,
-      provenance: s.provenance.loyerHc === 'estime' ? 'anil' : 'utilisateur',
-    };
-  }
-  const reference = enrichi?.marche.loyerReferenceM2;
-  if (reference === undefined) return null;
-  const prime = obtenirRegles(VERSION_REGLES_COURANTE).exploitation.primeMeuble;
-  return {
-    valeur: loyerViseDepuisReference(reference, s.surface, s.mode, prime),
-    provenance: 'anil',
-  };
-}
-
 /**
  * Assemble un projet à partir de la saisie vérifiée, avec des défauts sourcés et, quand le Worker a
  * répondu, les données de marché de la commune. Sans loyer connu, le projet n'en porte pas : le
@@ -123,7 +109,7 @@ export function construireProjet(
   id: string,
   enrichi: MarcheEnrichi | null = null,
 ): ProjetEntree {
-  const meuble = s.mode !== 'nu';
+  const meuble = estModeMeuble(s.mode);
   const regime = meuble ? 'lmnp_reel' : 'nu_reel';
   const loyer = loyerRetenu(s, enrichi);
   const apport = s.apport ?? APPORT_DEFAUT;
@@ -137,9 +123,12 @@ export function construireProjet(
   /** Une valeur absente de la saisie est estimée ; présente, elle porte sa provenance ou vient de la personne. */
   const provenanceDe = (cle: keyof SaisieProjet, valeur: unknown): Provenance =>
     valeur === undefined ? 'estime' : (s.provenance[cle] ?? 'utilisateur');
+  const location = construireLocation(s, loyer);
   const provenance: Record<string, string> = {
     'achat.prix': s.provenance.prix ?? 'utilisateur',
     'bien.surface': s.provenance.surface ?? 'utilisateur',
+    'location.mode': s.provenance.mode ?? 'utilisateur',
+    ...location.provenance,
     'pret.apport': provenanceDe('apport', s.apport),
     'pret.dureeAnnees': provenanceDe('dureeAnnees', s.dureeAnnees),
     'pret.tauxNominal': 'usure',
@@ -155,7 +144,8 @@ export function construireProjet(
     'charges.cfe': 'estime',
     'achat.mobilier': 'estime',
   };
-  if (loyer !== null) provenance['location.loyerHc'] = loyer.provenance;
+  if (location.charges.energieMensuel > 0) provenance['charges.energieMensuel'] = 'estime';
+  if (location.charges.internetMensuel > 0) provenance['charges.internetMensuel'] = 'estime';
   if (s.dpe !== undefined) provenance['bien.dpe'] = s.provenance.dpe ?? 'utilisateur';
   if (s.typeBien !== undefined) provenance['bien.type'] = s.provenance.typeBien ?? 'utilisateur';
   if (s.ges !== undefined) provenance['bien.ges'] = s.provenance.ges ?? 'utilisateur';
@@ -178,7 +168,6 @@ export function construireProjet(
             ...(s.coproEnProcedure === undefined ? {} : { procedure: s.coproEnProcedure }),
           },
         };
-  const nuitee = loyer === null ? NUITEE_DEFAUT : Math.round((loyer.valeur / 30) * 2);
 
   return {
     id,
@@ -216,17 +205,15 @@ export function construireProjet(
         fraisDossier: FRAIS_DOSSIER_DEFAUT,
         fraisGarantie: FRAIS_GARANTIE_DEFAUT,
       },
-      location: {
-        mode: s.mode,
-        ...(loyer === null ? {} : { loyerHc: loyer.valeur }),
-        ...(s.mode === 'courte_duree' ? { courteDuree: { nuitee, tauxOccupation: 0.6 } } : {}),
-      },
+      location: location.location,
       charges: {
         taxeFonciere,
         coproAnnuel,
         pno: PNO_DEFAUT,
         comptable: meuble ? COMPTABLE_DEFAUT : 0,
         cfe: meuble ? CFE_DEFAUT : 0,
+        energieMensuel: location.charges.energieMensuel,
+        internetMensuel: location.charges.internetMensuel,
       },
       fiscalite: { tmi, regime },
     },
