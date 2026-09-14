@@ -48,7 +48,8 @@
         "7e1f522 fusion de master (coque fixe)",
         "1a24ad5 fix(web) « J’ai acheté ce bien » en icône de 768 à 1 279 px",
         "a35af28 docs communes",
-        "21ba83c fusion de master (rapport-cashflow, achat-negociation)"
+        "21ba83c fusion de master (rapport-cashflow, achat-negociation)",
+        "fusion de master (visite-questions, correctifs #51 et #52)"
       ],
       "incidents": [
         "suites qui ne démarrent pas (Timeout calling fetch) sous la charge de 58 processus Node : relance avec --maxWorkers=1",
@@ -65,11 +66,11 @@
     },
     "qa_tests": {
       "status": "completed",
-      "tests": 1303,
-      "fichiers": 172,
+      "tests": 1359,
+      "fichiers": 176,
       "par_projet": {
-        "web": 497,
-        "moteur": 252,
+        "web": 523,
+        "moteur": 282,
         "data": 144,
         "worker": 114,
         "comptes": 89,
@@ -88,7 +89,11 @@
       "ouvert": "export des données de gestion, prévu en G1b"
     },
     "push": {
-      "status": "in_progress"
+      "status": "completed",
+      "pr": 53,
+      "url": "https://github.com/immoinvest/loupeprojet/pull/53",
+      "auto_merge": true,
+      "note": "trois fusions de master avant la PR (coque fixe ; rapport-cashflow et achat-negociation ; visite-questions)"
     }
   },
   "auto_revue": {
