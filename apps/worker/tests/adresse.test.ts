@@ -12,7 +12,10 @@ import {
   estComparable,
   groupesDe,
   lireVentes,
+  MIN_VENTES_PENTE,
   ParametresAdresseSchema,
+  PENTE_MIN,
+  pentePrixSurface,
   periodeDe,
   quantile,
   statistiquesPrix,
@@ -355,6 +358,78 @@ describe('statistiques et groupes', () => {
   });
 });
 
+/** Ventes loin du bien dont le prix au m² suit surface^pente (10 000 € au m² pour 1 m²). */
+function communeAvecPente(pente: number, nombre = MIN_VENTES_PENTE): VenteDvf[] {
+  return Array.from({ length: nombre }, (_, i) => {
+    const surface = 20 + i * 5;
+    return vente({
+      surface,
+      prix: Math.round(10_000 * surface ** pente * surface),
+      idParcelle: '132058200F0003',
+      codeVoie: '9999',
+      numero: 1,
+      lat: LAT + 900 * M_LAT,
+    });
+  });
+}
+
+describe('même adresse et correction de surface', () => {
+  it('une vente au même numéro de la même rue est du même immeuble, même sur une autre parcelle', () => {
+    // 680 avenue de Bagatelle (Aix) : le point de l'adresse tombe sur une parcelle, les ventes sur une autre.
+    expect(groupesDe(vente({ idParcelle: '132058200E0999' }), BIEN, 55)).toEqual([
+      'meme_parcelle',
+      'meme_cote',
+      'rayon_100',
+      'rayon_200',
+      'rayon_300',
+    ]);
+    // Cadastre indisponible : l'adresse suffit.
+    expect(groupesDe(vente(), { ...BIEN, idParcelle: null }, 0)).toContain('meme_parcelle');
+    expect(groupesDe(vente({ numero: 146 }), { ...BIEN, idParcelle: null }, 0)).not.toContain(
+      'meme_parcelle',
+    );
+  });
+
+  it('pente du prix au m² selon la surface, mesurée sur les ventes de la commune du même type', () => {
+    expect(pentePrixSurface(communeAvecPente(-0.2), 'appartement')).toBeCloseTo(-0.2, 3);
+    expect(pentePrixSurface(communeAvecPente(-0.2, MIN_VENTES_PENTE - 1), 'appartement')).toBe(0);
+    expect(pentePrixSurface(communeAvecPente(-0.2), 'maison')).toBe(0);
+    // Communes voisines ignorées : la pente est celle de la commune du bien.
+    const voisine = communeAvecPente(-0.2).map((v) => ({ ...v, codeInsee: '13206' }));
+    expect(pentePrixSurface(voisine, 'appartement')).toBe(0);
+    // Garde-fous : jamais positive, jamais sous PENTE_MIN, nulle quand toutes les surfaces sont égales.
+    expect(pentePrixSurface(communeAvecPente(0.3), 'appartement')).toBe(0);
+    expect(pentePrixSurface(communeAvecPente(-1.2), 'appartement')).toBe(PENTE_MIN);
+    const egales = Array.from({ length: MIN_VENTES_PENTE }, () => vente());
+    expect(pentePrixSurface(egales, 'appartement')).toBe(0);
+  });
+
+  it('garde toutes les ventes du même immeuble, prix au m² ramené à la surface du bien', () => {
+    // 120 m² à 3 000 €/m² pour un bien de 60 m², pente −0,2 : 3 000 × (60/120)^−0,2 = 3 446 €/m².
+    const memeAdresse = vente({ idParcelle: '132058200E0999', surface: 120, prix: 360_000 });
+    const r = analyserAdresse([...communeAvecPente(-0.2), memeAdresse], BIEN);
+    const parCode = Object.fromEntries(r.groupes.map((g) => [g.code, g]));
+    expect(parCode.meme_parcelle).toMatchObject({ ventes: 1, comparables: 1 });
+    expect(parCode.meme_parcelle?.statistiques?.medianeM2).toBe(3446);
+    // Ailleurs, la tolérance de surface s'applique toujours.
+    expect(parCode.meme_cote).toMatchObject({ ventes: 1, comparables: 0 });
+    expect(r.ventesProches).toHaveLength(1);
+    expect(r.ventesProches[0]).toMatchObject({
+      adresse: '144 RUE DE L OLIVIER',
+      prixM2: 3000,
+      prixM2Actualise: 3000,
+      correctionSurface: 1.1487,
+      prixM2Corrige: 3446,
+    });
+    // Surface du bien inconnue : aucune correction.
+    const sansSurface = analyserAdresse([...communeAvecPente(-0.2), memeAdresse], {
+      ...BIEN,
+      surface: undefined,
+    });
+    expect(sansSurface.ventesProches[0]).toMatchObject({ correctionSurface: 1, prixM2Corrige: 3000 });
+  });
+});
+
 describe('analyserAdresse', () => {
   it('prend le même côté de la rue comme repère quand il compte au moins 5 comparables', () => {
     const r = analyserAdresse(lireVentes(CSV), BIEN);
@@ -580,7 +655,8 @@ describe('GET /marche/adresse', () => {
       parcelle: null,
       parcellesVoisines: [],
     });
-    expect(corps.groupes.find((g) => g.code === 'meme_parcelle')?.ventes).toBe(0);
+    // Sans cadastre, les deux ventes au 144 rue de l'Olivier restent du même immeuble par l'adresse.
+    expect(corps.groupes.find((g) => g.code === 'meme_parcelle')?.ventes).toBe(2);
     expect(corps.groupes.find((g) => g.code === 'meme_cote')?.ventes).toBe(6);
     expect((await requete(REQUETE)).headers.get('x-loupe-cache')).toBe('MISS');
   });
