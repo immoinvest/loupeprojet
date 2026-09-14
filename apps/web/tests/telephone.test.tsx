@@ -55,61 +55,61 @@ async function ouvrirProjet(): Promise<{
 }
 
 describe('Partager un projet depuis le téléphone', () => {
-  it('au doigt, ouvre la feuille de partage avec le nom, une phrase et le lien', async () => {
+  it('au doigt, la boîte montre le lien copié et « Envoyer » ouvre la feuille de partage', async () => {
     ecranTactile();
     const share = feuilleDePartage(() => Promise.resolve());
     const { utilisateur, writeText } = await ouvrirProjet();
+    writeText.mockResolvedValue(undefined);
 
     await utilisateur.click(screen.getByRole('button', { name: TEXTES_PARTAGE_PROJET.partager }));
+    const boite = await screen.findByRole('dialog', { name: TEXTES_PARTAGE_PROJET.titre });
+    expect(
+      await within(boite).findByRole('button', { name: TEXTES_PARTAGE_PROJET.copie }),
+    ).toBeInTheDocument();
+    expect(writeText).toHaveBeenCalledWith(expect.stringContaining('/partage#p='));
+    expect(share).not.toHaveBeenCalled();
+
+    await utilisateur.click(
+      within(boite).getByRole('button', { name: TEXTES_PARTAGE_PROJET.envoyer }),
+    );
     expect(share).toHaveBeenCalledWith({
       title: 'À partager',
       text: TEXTES_PARTAGE_PROJET.message('À partager'),
       url: expect.stringContaining('/partage#p=') as string,
     });
-    expect(
-      await screen.findByRole('button', { name: TEXTES_PARTAGE_PROJET.partage }),
-    ).toBeInTheDocument();
-    expect(screen.getByText(TEXTES_PARTAGE_PROJET.avertissement)).toBeInTheDocument();
-    expect(writeText).not.toHaveBeenCalled();
+    expect(await within(boite).findByRole('status')).toHaveTextContent(
+      TEXTES_PARTAGE_PROJET.partage,
+    );
+    expect(within(boite).getByText(TEXTES_PARTAGE_PROJET.avertissement)).toBeInTheDocument();
   });
 
-  it('feuille fermée sans choisir : ni copie, ni message', async () => {
+  it('feuille fermée sans choisir : la boîte reste, sans « Lien partagé »', async () => {
     ecranTactile();
     const share = feuilleDePartage(() => Promise.reject(new DOMException('fermée', 'AbortError')));
-    const { utilisateur, writeText } = await ouvrirProjet();
-
-    await utilisateur.click(screen.getByRole('button', { name: TEXTES_PARTAGE_PROJET.partager }));
-    expect(share).toHaveBeenCalledTimes(1);
-    expect(writeText).not.toHaveBeenCalled();
-    expect(
-      screen.getByRole('button', { name: TEXTES_PARTAGE_PROJET.partager }),
-    ).toBeInTheDocument();
-    expect(screen.queryByText(TEXTES_PARTAGE_PROJET.avertissement)).toBeNull();
-  });
-
-  it('autre refus de la feuille de partage : le lien est copié', async () => {
-    ecranTactile();
-    feuilleDePartage(() => Promise.reject(new DOMException('refusé', 'NotAllowedError')));
     const { utilisateur, writeText } = await ouvrirProjet();
     writeText.mockResolvedValue(undefined);
 
     await utilisateur.click(screen.getByRole('button', { name: TEXTES_PARTAGE_PROJET.partager }));
-    expect(
-      await screen.findByRole('button', { name: TEXTES_PARTAGE_PROJET.copie }),
-    ).toBeInTheDocument();
-    expect(writeText).toHaveBeenCalledWith(expect.stringContaining('/partage#p='));
+    const boite = await screen.findByRole('dialog', { name: TEXTES_PARTAGE_PROJET.titre });
+    await utilisateur.click(
+      within(boite).getByRole('button', { name: TEXTES_PARTAGE_PROJET.envoyer }),
+    );
+    expect(share).toHaveBeenCalledTimes(1);
+    expect(within(boite).getByRole('status')).not.toHaveTextContent(TEXTES_PARTAGE_PROJET.partage);
   });
 
-  it('à la souris, le lien est copié et l’avertissement s’affiche', async () => {
+  it('à la souris, pas de bouton « Envoyer » : le lien copié suffit', async () => {
     const share = feuilleDePartage(() => Promise.resolve());
     const { utilisateur, writeText } = await ouvrirProjet();
     writeText.mockResolvedValue(undefined);
 
     await utilisateur.click(screen.getByRole('button', { name: TEXTES_PARTAGE_PROJET.partager }));
+    const boite = await screen.findByRole('dialog', { name: TEXTES_PARTAGE_PROJET.titre });
     expect(
-      await screen.findByRole('button', { name: TEXTES_PARTAGE_PROJET.copie }),
+      await within(boite).findByRole('button', { name: TEXTES_PARTAGE_PROJET.copie }),
     ).toBeInTheDocument();
-    expect(screen.getByText(TEXTES_PARTAGE_PROJET.avertissement)).toBeInTheDocument();
+    expect(within(boite).getByText(TEXTES_PARTAGE_PROJET.avertissement)).toBeInTheDocument();
+    expect(within(boite).queryByRole('button', { name: TEXTES_PARTAGE_PROJET.envoyer })).toBeNull();
     expect(share).not.toHaveBeenCalled();
   });
 });
