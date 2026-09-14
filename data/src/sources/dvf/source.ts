@@ -131,7 +131,9 @@ async function traiterDepartement(
   }
   const dossier = join(contexte.dossierSortie, 'dvf', String(millesime));
   let ventesPubliees = 0;
-  for (const [code, ventes] of retenues) {
+  // Le CSV d'une commune garde toutes les ventes collectées (cinq ans) : là où elles sont rares, les plus
+  // anciennes comptent, et le Worker les ramène au dernier semestre par la tendance. L'index reste sur 24 mois.
+  for (const [code, ventes] of collecte.ventesParCommune) {
     ventesPubliees += ventes.length;
     await ecrireTexte(join(dossier, `${code}.csv`), csvDesVentes(ventes));
   }
@@ -165,7 +167,7 @@ async function traiterDepartement(
   return index;
 }
 
-/** Ventes de logements des 24 derniers mois : un CSV par commune, un index par département, l'index national si passe complète. */
+/** Ventes de logements des cinq dossiers annuels : un CSV par commune ; index des 24 derniers mois par département, national si passe complète. */
 export async function executerDvf(contexte: Contexte, options: OptionsDvf): Promise<void> {
   const millesime =
     options.millesime ?? (await detecterMillesime(contexte, elementA(options.departements, 0)));

@@ -8,6 +8,7 @@ import { TYPES_LOCATION } from '@/textes/regimes';
 import { Champ } from './formulaire/Champ';
 import { EstimerLoyer, type CleLoyerEstime } from './formulaire/EstimerLoyer';
 import {
+  nombre,
   valider,
   versSaisie,
   type Cle,
@@ -44,6 +45,8 @@ const TMI = [
   { v: '0.45', l: '45 %' },
 ];
 
+const GRILLE = 'grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3';
+
 export function FormulaireProjet({
   initial,
   annonce,
@@ -56,6 +59,8 @@ export function FormulaireProjet({
   const [valeurs, setValeurs] = useState<Valeurs>(initial.valeurs);
   const [provenance, setProvenance] = useState(initial.provenance);
   const [erreurs, setErreurs] = useState<Erreurs>({});
+  // Les travaux sont facultatifs : le champ n'apparaît que si l'on en prévoit.
+  const [travauxOuverts, setTravauxOuverts] = useState((nombre(initial.valeurs.travaux) ?? 0) > 0);
 
   const changer = (cle: Cle, v: string): void => {
     setValeurs((prev) => ({ ...prev, [cle]: v }));
@@ -74,6 +79,10 @@ export function FormulaireProjet({
       setValeurs((prev) => ({ ...prev, chambresLouees: prev.chambres }));
     }
   };
+  const basculerTravaux = (): void => {
+    if (travauxOuverts) setValeurs((prev) => ({ ...prev, travaux: '' }));
+    setTravauxOuverts(!travauxOuverts);
+  };
 
   return (
     <form
@@ -88,7 +97,7 @@ export function FormulaireProjet({
     >
       <Carte>
         <h2 className="m-0 font-display text-[22px] font-semibold">Le bien</h2>
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+        <div className={GRILLE}>
           <Champ cle="typeBien" libelle="Type de bien" options={TYPES} {...c} />
 
           <Champ cle="prix" libelle="Prix affiché" unite="€" erreur={erreurs.prix} {...c} />
@@ -105,7 +114,22 @@ export function FormulaireProjet({
           <Champ cle="exterieur" libelle="Balcon ou terrasse" options={OUI_NON} {...c} />
           <Champ cle="codePostal" libelle="Code postal" erreur={erreurs.codePostal} {...c} />
           <Champ cle="ville" libelle="Ville" erreur={erreurs.ville} {...c} />
-          <Champ cle="travaux" libelle="Travaux prévus" unite="€" {...c} />
+        </div>
+        <div className="flex flex-col gap-2">
+          <button
+            type="button"
+            aria-expanded={travauxOuverts}
+            aria-controls="champ-travaux"
+            onClick={basculerTravaux}
+            className="inline-flex min-h-[44px] items-center gap-2 self-start rounded-full border border-bordure bg-surface px-4 text-sm font-semibold text-encre-2 hover:bg-accent-fond"
+          >
+            {travauxOuverts ? '− Retirer les travaux' : '+ Ajouter des travaux'}
+          </button>
+          {travauxOuverts && (
+            <div id="champ-travaux" className={GRILLE}>
+              <Champ cle="travaux" libelle="Travaux prévus" unite="€" {...c} />
+            </div>
+          )}
         </div>
       </Carte>
 
@@ -121,7 +145,7 @@ export function FormulaireProjet({
           )}
         </div>
         <SelecteurMode nom="type-location-verifier" valeur={mode} onChange={changerMode} />
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+        <div className={GRILLE}>
           {(mode === 'nu' || mode === 'meuble' || mode === 'moyenne_duree') && (
             <Champ
               cle="loyerHc"
@@ -181,7 +205,7 @@ export function FormulaireProjet({
 
       <Carte>
         <h2 className="m-0 font-display text-[22px] font-semibold">Vous</h2>
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+        <div className={GRILLE}>
           <Champ cle="apport" libelle="Apport" unite="€" aToi erreur={erreurs.apport} {...c} />
           <Champ
             cle="dureeAnnees"
@@ -208,7 +232,7 @@ export function FormulaireProjet({
         <p className="m-0 text-sm text-encre-2">
           Laissez vide si vous ne savez pas : on estime, et ce sera marqué comme tel.
         </p>
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+        <div className={GRILLE}>
           <Champ cle="chargesCoproMois" libelle="Charges de copropriété" unite="€/mois" {...c} />
           <Champ cle="taxeFonciere" libelle="Taxe foncière" unite="€/an" {...c} />
           <Champ cle="lotsCopro" libelle="Lots de copropriété" {...c} />

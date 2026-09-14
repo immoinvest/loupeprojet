@@ -28,7 +28,7 @@ export function sectionVerdict(regles: Regles): SectionMethode {
     titre: 'Le verdict : cinq feux',
     resume: 'Pas de note globale : cinq lectures séparées, chacune avec ses seuils.',
     etapes: [
-      `Prix : écart du prix au m² affiché au prix au m² estimé du bien (voir l'estimation), calculé sur les ventes réelles (DVF). Bon jusqu'à ${pctSigne(v.prix.bonJusqua)}, à surveiller jusqu'à ${pctSigne(v.prix.surveillerJusqua)}, problème au-delà ; inconnu sans ventes autour du bien.`,
+      `Prix : écart du prix au m² retenu (négocié) au prix au m² estimé du bien (voir l'estimation), calculé sur les ventes réelles (DVF). Bon jusqu'à ${pctSigne(v.prix.bonJusqua)}, à surveiller jusqu'à ${pctSigne(v.prix.surveillerJusqua)}, problème au-delà ; inconnu sans ventes autour du bien.`,
       `Rendement net : bon dès ${pct(v.rendementNet.bonDes)}, à surveiller dès ${pct(v.rendementNet.surveillerDes)}, problème en dessous.`,
       `Cash-flow mensuel : bon dès ${euros(v.cashflowMensuel.bonDes)}, à surveiller dès ${euros(v.cashflowMensuel.surveillerDes)}, problème en dessous.`,
       `Effort bancaire : bon jusqu'à ${pct(v.effort.bonJusqua)}, à surveiller jusqu'à ${pct(v.effort.surveillerJusqua)}, problème au-delà ; inconnu sans revenus.`,
@@ -73,7 +73,7 @@ export function sectionScenarios(regles: Regles): SectionMethode {
     titre: 'Les scénarios « et si »',
     resume: EXPLICATIONS.leviers,
     etapes: [
-      'Négocier : le prix qui met le cash-flow à zéro avec vos hypothèses (à défaut, −10 %) ; trois prix cibles : cash-flow nul, rendement net 6 %, rendement brut 8 %.',
+      'Négocier : le prix qui met le cash-flow à zéro avec vos hypothèses (à défaut, −10 % du prix retenu) ; trois prix cibles : cash-flow nul, rendement net 6 %, rendement brut 8 %.',
       `Colocation : loyer total +${pct(e.primeColocation)} réparti entre les chambres du bien, ${String(e.parType.colocation.vacanceSemaines)} semaines de vacance par chambre, forfait de charges et abonnements du propriétaire, sans travaux d'aménagement ; absent quand le projet est déjà une colocation.`,
       'Durée du prêt : 20 ans (15 ans si le prêt fait déjà 20 ans). Taux : +0,5 point.',
       `Passer en nu ou en meublé : loyer ÷ ou × (1 + ${pct(e.primeMeuble)}), avec le régime réel correspondant ; depuis une colocation, une courte ou une moyenne durée, passer en meublé longue durée au loyer de référence (loyer de marché en courte durée quand il est connu).`,
@@ -84,7 +84,7 @@ export function sectionScenarios(regles: Regles): SectionMethode {
       {
         libelle: 'Repli de négociation, durées alternatives, hausse de taux, vacance longue',
         valeur:
-          '−10 % · 20 ou 15 ans · +0,5 point · 8 semaines (deux mois de nuitées en moins en courte durée)',
+          '−10 % du prix retenu · 20 ou 15 ans · +0,5 point · 8 semaines (deux mois de nuitées en moins en courte durée)',
         source: 'Scénarios prédéfinis du moteur (packages/moteur, scenarios/predefinis.ts)',
       },
     ],
@@ -114,6 +114,11 @@ export function sectionDefauts(defauts: Defauts): SectionMethode {
         libelle: 'Assurance emprunteur',
         valeur: `${pct(d.tauxAssurance)} du capital par an`,
         source: 'Spec Deklic (0,10 à 0,35 % selon l’âge)',
+      },
+      {
+        libelle: 'Négociation du prix affiché',
+        valeur: `${pct(d.negociationTaux)} : prix affiché retenu tel quel`,
+        source: 'Curseur de 0 à −15 % dans Hypothèses ; le prix retenu sert à tout le rapport',
       },
       {
         libelle: "Honoraires d'agence",

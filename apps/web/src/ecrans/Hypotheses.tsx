@@ -7,6 +7,7 @@ import { useProjetCourant } from '@/coque/ProjetLayout';
 import { eurosParMois, pourcentage } from '@/formatage/nombres';
 import {
   GROUPES,
+  GROUPE_ACHAT,
   appliquerSaisie,
   cleProvenance,
   valeurActuelle,
@@ -17,6 +18,7 @@ import { CHEMIN_MODE } from '@/hypotheses/groupes-location';
 import { useProjets } from '@/stockage/ProjetsContext';
 import { TYPES_LOCATION } from '@/textes/regimes';
 
+import { CarteAchat } from './hypotheses/CarteAchat';
 import { SelecteurMode } from './hypotheses/SelecteurMode';
 import {
   BADGES,
@@ -60,7 +62,7 @@ function Synthese(): JSX.Element {
 }
 
 export function Hypotheses(): JSX.Element {
-  const { enregistre } = useProjetCourant();
+  const { enregistre, resultats } = useProjetCourant();
   const { mettreAJour } = useProjets();
   const projet: ProjetEntree = enregistre.projet;
   const [textes, setTextes] = useState<Readonly<Record<string, string>>>({});
@@ -83,6 +85,19 @@ export function Hypotheses(): JSX.Element {
     setErreurs((prev) => Object.fromEntries(Object.entries(prev).filter(([k]) => k !== d.chemin)));
   };
 
+  const rendre = (d: Descripteur): JSX.Element => (
+    <ChampHypothese
+      key={d.chemin}
+      descripteur={d}
+      texte={textes[d.chemin] ?? versTexte(valeurActuelle(projet, d), d.type)}
+      erreur={erreurs[d.chemin]}
+      badge={badgePour(projet, d)}
+      onChange={(t) => {
+        changer(d, t);
+      }}
+    />
+  );
+
   return (
     <Page haut="serre">
       <Synthese />
@@ -102,6 +117,17 @@ export function Hypotheses(): JSX.Element {
         </span>
       </div>
       {GROUPES.map((g) => {
+        if (g === GROUPE_ACHAT) {
+          return (
+            <CarteAchat
+              key={g.titre}
+              projet={projet}
+              resultats={resultats}
+              rendre={rendre}
+              changer={changer}
+            />
+          );
+        }
         const visibles = g.champs.filter((d) => d.visibleSi === undefined || d.visibleSi(projet));
         // Le type d'exploitation est la première question de sa carte, en boutons, et son titre le répète.
         const champMode = visibles.find((d) => d.chemin === CHEMIN_MODE);
@@ -121,20 +147,7 @@ export function Hypotheses(): JSX.Element {
               />
             )}
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
-              {visibles
-                .filter((d) => d !== champMode)
-                .map((d) => (
-                  <ChampHypothese
-                    key={d.chemin}
-                    descripteur={d}
-                    texte={textes[d.chemin] ?? versTexte(valeurActuelle(projet, d), d.type)}
-                    erreur={erreurs[d.chemin]}
-                    badge={badgePour(projet, d)}
-                    onChange={(t) => {
-                      changer(d, t);
-                    }}
-                  />
-                ))}
+              {visibles.filter((d) => d !== champMode).map(rendre)}
             </div>
           </Carte>
         );

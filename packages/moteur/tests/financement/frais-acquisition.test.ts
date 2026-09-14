@@ -67,3 +67,30 @@ describe('fraisAcquisition (référence vérifiée à la main, T3 Marseille)', (
     expect(frais.total / frais.base).toBeCloseTo(0.081, 3);
   });
 });
+
+describe('fraisAcquisition — prix négocié (cas « 92 K », vérifié à la main)', () => {
+  // 92 000 € affichés dont 5 000 € d'honoraires acquéreur, négociés à 5 % :
+  // prix retenu 87 400 €, honoraires inchangés en euros, base 82 400 €.
+  const achat = AchatSchema.parse({ prix: 92_000, honorairesAgence: 5_000, negociationTaux: 0.05 });
+  const frais = fraisAcquisition(achat, '13', regles);
+
+  it('la base retire les honoraires du prix retenu', () => {
+    expect(baseFraisAcquisition(achat)).toBe(82_400);
+    expect(frais.base).toBe(82_400);
+  });
+
+  it('droits = 82 400 × (5 % × 1,0237 + 1,2 %) = 5 206,44 €', () => {
+    expect(frais.droits).toBeCloseTo(5_206.44, 2);
+  });
+
+  it('émoluments HT = 6 500 × 3,87 % + 10 500 × 1,596 % + 43 000 × 1,064 % + 22 400 × 0,799 % = 1 055,63 €', () => {
+    expect(frais.emolumentsHt).toBeCloseTo(1_055.63, 2);
+    expect(frais.emolumentsTtc).toBeCloseTo(1_055.626 * 1.2, 2);
+  });
+
+  it('total = 5 206,44 + 1 266,75 + 82,40 + 329,60 = 6 885,19 € (± 1 €)', () => {
+    expect(frais.contributionSecuriteImmobiliere).toBeCloseTo(82.4, 2);
+    expect(frais.debours).toBeCloseTo(329.6, 2);
+    expect(Math.abs(frais.total - 6_885.19)).toBeLessThanOrEqual(1);
+  });
+});

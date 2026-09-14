@@ -150,6 +150,9 @@ export const ReponseAdresseSchema = z.object({
       /** Prix au m² ramené au dernier semestre connu ; absent dans les réponses d'avant la tendance. */
       prixM2Actualise: z.number().positive().optional(),
       coefficient: z.number().positive().optional(),
+      /** Prix au m² actualisé et ramené à la surface du bien ; absent dans les réponses plus anciennes. */
+      prixM2Corrige: z.number().positive().optional(),
+      correctionSurface: z.number().positive().optional(),
       pieces: z.number().int().nonnegative(),
       type: z.enum(['appartement', 'maison']),
       adresse: z.string().nullable(),
