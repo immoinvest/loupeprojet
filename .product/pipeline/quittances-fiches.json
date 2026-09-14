@@ -53,8 +53,18 @@
         "US-7 : une branche non couverte (louer sans liste de colocataires, que l'API accepte) ; test ajouté"
       ]
     },
-    "qa_tests": { "status": "pending" },
-    "security": { "status": "pending" },
+    "qa_tests": {
+      "status": "completed",
+      "fusion": "c920c8d fusion de master (accueil-menu #67, sync-projets #68 et sa migration 0004, retrait de Méthode, correctifs e2e) : conflits résolus dans migration.ts, erreurs.ts, migration.test.ts, SectionGerer.tsx, textes/gerer.ts, menu-sections.test.tsx",
+      "verification": "comme la CI : lint, format:check, typecheck, 234 fichiers et 1 881 tests avec les seuils de couverture, build de tous les espaces",
+      "formats": "spec des formats : 32 écrans sur 9 formats (Loyers, fiche d'un bien, louer, quittance ajoutés) ; premier passage : cibles trop petites au doigt sur Gérer et Loyers (lien du bien 24 px, « Voir tous les loyers » 20 px), corrigées par pointer-coarse:min-h-11 ; second passage vert (12 formats et mesures, 4,6 min, configuration locale sur le port 5299)"
+    },
+    "migrations_production": "vérifié le 14/09/2026 (wrangler d1 migrations list --remote, lecture seule) : 0002 et 0004 appliquées, reste 0003_gestion_documents.sql ; à appliquer par Pierre AVANT la fusion (le code de G1b lit les nouvelles tables ; sans elles, 503 GESTION_INDISPONIBLE) ; appliquée avant, elle ne gêne pas le code de G1a",
+    "security": {
+      "status": "completed",
+      "score": "96/100",
+      "notes": "requêtes filtrées par compte (404 hors compte), Origin exigé pour écrire, corps validés par Zod et limités à 64 Ko, contenu figé relu par Zod, React échappe tout le document, bornes (50 locations par bien, 10 colocataires, un document par clé, paiements jamais au-dessus du dû) ; restes bénins : deux locations simultanées de la même chambre peuvent passer le contrôle de chevauchement, un paiement peut s'insérer entre le contrôle et l'écriture d'une sortie (même compte, bouton désactivé pendant l'envoi)"
+    },
     "push": { "status": "pending" }
   },
   "auto_revue": {

@@ -127,6 +127,7 @@ Le contenu stocke des **codes de mention** (`pour_acquit`, `annule_recus`) et de
 - **Fichiers web** : `LigneDeLoyer.tsx` (et non `LigneLoyer.tsx`, nom du type du paquet), `RetoursLoyer.tsx` (bandeau Annuler, erreur, carte d'identité), `EcranAttente.tsx` (sans compte, chargement, erreur, partagé par Gérer, Loyers, la fiche et le document), `ImprimerDocument.tsx` et `DocumentLoyer.tsx` (et non `DocumentGestion.tsx` / `document/PageDocument.tsx`), `gestion/memoire-documents.ts`, `gestion/fiche.ts` (état du bien, frise), `fiche/CarteLocation.tsx`.
 - **Paquet** : `montantAcceptable` vit dans `loyers.ts` (pas de `paiements.ts`) ; `refusFin` remplace `finAcceptee` ; les contenus rendent `{ ok: false, refus }`. Numéro d'un reçu : 6 caractères du paiement (`R-AAAAMM-XXXXXXXX-YYYYYY`).
 - **API** : `apps/comptes/src/gestion/ecritures.ts` écrit locataire, colocataires et location pour la création d'un bien loué comme pour `louer`.
+- **Menu** (après la fusion de `accueil-menu`, PR #67) : le lien de `/gerer` s'appelle « Loyers du mois » et garde la pastille des retards ; la page `/gerer/loyers` a son propre lien « Tous les loyers » (la spec US-4 prévoyait un lien « Loyers » portant la pastille ; deux liens « Loyers » et « Loyers du mois » auraient prêté à confusion).
 - **Biens vacants** : leurs noms sur l'accueil sont des liens vers la fiche, où l'on ajoute le locataire (US-7).
 
 ## 6. Données personnelles et sécurité
