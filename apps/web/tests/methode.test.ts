@@ -35,6 +35,7 @@ describe('defautsDuMoteur', () => {
       fraisAgenceTaux: 0.04,
       diagnostics: 500,
       honorairesChargeAcquereur: true,
+      negociationTaux: 0,
       pno: 150,
       comptable: 420,
       cfe: 180,

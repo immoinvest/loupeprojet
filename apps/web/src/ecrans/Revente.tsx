@@ -145,7 +145,7 @@ export function Revente(): JSX.Element {
           <div className="grid grid-cols-1 md:grid-cols-2 md:gap-x-10 print:grid-cols-2 print:gap-x-10">
             <div>
               <Ligne libelle="Prix de cession, frais déduits" valeur={euros(pv.prixCession)} />
-              <Ligne libelle="Prix d'achat" valeur={euros(r.projet.hypotheses.achat.prix)} />
+              <Ligne libelle="Prix d'achat" valeur={euros(r.achat.prixRetenu)} />
               <Ligne libelle="Frais d'acquisition retenus" valeur={eurosSignes(pv.fraisRetenus)} />
               <Ligne libelle="Travaux retenus" valeur={eurosSignes(pv.travauxRetenus)} />
               {pv.reintegration > 0 && (

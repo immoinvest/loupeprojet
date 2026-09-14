@@ -58,7 +58,7 @@ describe('Comparer', () => {
     expect(screen.getByRole('checkbox', { name: /Écarté cher/ })).not.toBeChecked();
     expect(colonnes()).toEqual(['Marseille', 'Lyon rentable']);
     const table = screen.getByRole('table');
-    expect(within(table).getAllByRole('row')).toHaveLength(15);
+    expect(within(table).getAllByRole('row')).toHaveLength(16);
     expect(within(table).getByRole('link', { name: 'Marseille' })).toHaveAttribute(
       'href',
       '/projets/marseille',

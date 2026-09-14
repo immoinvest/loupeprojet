@@ -13,9 +13,9 @@ import { Link, NavLink, Outlet, useLocation, useNavigate, useParams } from 'reac
 
 import { MARGES_LATERALES, Page, TitrePage } from '@/composants/mise-en-page';
 import { Bouton } from '@/composants/ui';
-import { euros } from '@/formatage/nombres';
 import { useProjets } from '@/stockage/ProjetsContext';
 import { STATUTS, StatutProjetSchema, type ProjetEnregistre } from '@/stockage/projets';
+import { libellePrixEnTete } from '@/textes/achat';
 import { MODES } from '@/textes/regimes';
 
 import { BoutonPartager } from './BoutonPartager';
@@ -99,11 +99,11 @@ function useOngletActifEnVue(): RefObject<HTMLElement | null> {
  * seule rangée ; en dessous, elle écraserait le nom du projet sur quelques mots par ligne.
  */
 function EnTete(): JSX.Element {
-  const { enregistre } = useProjetCourant();
+  const { enregistre, resultats } = useProjetCourant();
   const { changerStatut } = useProjets();
   const naviguer = useNavigate();
   const bandeRef = useOngletActifEnVue();
-  const { achat, location } = enregistre.projet.hypotheses;
+  const { location } = enregistre.projet.hypotheses;
 
   return (
     <header
@@ -120,7 +120,7 @@ function EnTete(): JSX.Element {
           / {enregistre.nom}
         </span>
         <span className="font-display text-lg font-bold sm:text-xl">
-          {euros(achat.prix)} · {MODES[location.mode]}
+          {libellePrixEnTete(resultats.achat)} · {MODES[location.mode]}
         </span>
       </div>
       <div className="hidden 2xl:block 2xl:flex-1" />

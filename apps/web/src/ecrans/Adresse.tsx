@@ -1,4 +1,4 @@
-import { obtenirRegles } from '@loupe/moteur';
+import { obtenirRegles, prixRetenu } from '@loupe/moteur';
 import { useEffect, useState, type JSX } from 'react';
 
 import { Chapo, Page, TitrePage } from '@/composants/mise-en-page';
@@ -144,7 +144,7 @@ export function Adresse(): JSX.Element {
     if (adresseEnregistree !== undefined) void analyser(adresseEnregistree);
   }, []);
 
-  const prixM2Bien = projet.hypotheses.achat.prix / projet.bien.surface;
+  const prixM2Bien = prixRetenu(projet.hypotheses.achat) / projet.bien.surface;
   const analyse = etat.etape === 'resultat' ? etat.donnees.analyse : null;
   const reference = analyse?.reference ?? null;
   const repereUtilise =

@@ -4,13 +4,14 @@ import { useLayoutEffect, useRef, useState, type JSX } from 'react';
 import { rangerLibelles } from '@/analyses/reperes';
 import { Carte, GrosChiffre, Pourquoi, TitreCarte } from '@/composants/ui';
 import { nombre } from '@/formatage/nombres';
+import { phrasePrixAffiche } from '@/textes/achat';
 import { eurosArrondis, LIBELLES_CONFIANCE } from '@/textes/estimation';
 import { EXPLICATIONS } from '@/textes/explications';
 import { reponseCourte } from '@/textes/verdict';
 
 function JaugePrix({ r }: { r: Resultats }): JSX.Element {
   const dvf = r.projet.marche.dvf;
-  const prixM2 = r.projet.hypotheses.achat.prix / r.projet.bien.surface;
+  const prixM2 = r.achat.prixRetenu / r.projet.bien.surface;
   if (dvf === undefined) {
     return (
       <p className="m-0 text-[15px] text-encre-2">
@@ -149,6 +150,7 @@ export function CartePrix({ r }: { r: Resultats }): JSX.Element {
           {reponseCourte(reponse)}
         </GrosChiffre>
       )}
+      <p className="m-0 text-[15px] text-encre-2">{phrasePrixAffiche(r.achat)}</p>
       <JaugePrix r={r} />
       {r.estimation !== null && (
         <p className="m-0 text-[15px] leading-relaxed text-encre-2">
