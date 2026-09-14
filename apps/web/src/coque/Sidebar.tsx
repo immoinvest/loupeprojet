@@ -59,7 +59,7 @@ export function Sidebar({
         <NavLink
           to="/"
           aria-label={TEXTES_LOGO}
-          className="flex items-center px-2 py-1 pointer-coarse:min-h-11"
+          className="flex items-center rounded-encart px-2 py-1 survol-fond pointer-coarse:min-h-11"
         >
           <LogotypeDeklic hauteur={26} />
         </NavLink>
@@ -68,7 +68,7 @@ export function Sidebar({
           type="button"
           onClick={onFermer}
           aria-label="Fermer le menu"
-          className="flex h-11 w-11 items-center justify-center rounded-full text-encre-2 hover:bg-accent-fond lg:hidden"
+          className="flex h-11 w-11 items-center justify-center rounded-full text-encre-2 survol-fond lg:hidden"
         >
           <X size={22} aria-hidden="true" />
         </button>
@@ -113,7 +113,7 @@ export function Sidebar({
               onClick={() => {
                 void installation.installer();
               }}
-              className="flex min-h-[44px] items-center justify-center gap-2 rounded-encart border border-accent-bordure bg-accent-fond px-3 text-[15px] font-semibold text-accent hover:bg-accent-doux"
+              className="flex min-h-[44px] items-center justify-center gap-2 rounded-encart border border-accent-bordure bg-accent-fond px-3 text-[15px] font-semibold text-accent survol-fond-fort"
             >
               <Download size={18} aria-hidden="true" />
               {TEXTES_INSTALLATION.bouton}

@@ -101,7 +101,7 @@ function LigneAnnee({
               aria-expanded={ouverte}
               aria-label={`${ouverte ? B.masquerMois : B.voirMois} de l'année ${String(a.annee)}`}
               onClick={onBasculer}
-              className="inline-flex min-h-9 items-center rounded-full border border-bordure px-3 text-xs font-semibold text-encre-2 hover:bg-accent-fond pointer-coarse:min-h-11"
+              className="inline-flex min-h-9 items-center rounded-full border border-bordure px-3 text-xs font-semibold text-encre-2 survol-fond pointer-coarse:min-h-11"
             >
               {ouverte ? B.masquerMois : B.voirMois}
             </button>
@@ -271,7 +271,7 @@ export function TableauxAmortissement({
               className={`inline-flex min-h-11 items-center rounded-full border px-4 text-sm font-semibold ${
                 i === index
                   ? 'border-accent bg-accent-doux text-encre'
-                  : 'border-bordure bg-surface text-encre-2 hover:bg-accent-fond'
+                  : 'border-bordure bg-surface text-encre-2 survol-fond'
               }`}
             >
               {o.nom}

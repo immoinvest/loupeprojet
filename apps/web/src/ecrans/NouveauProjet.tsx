@@ -195,7 +195,7 @@ export function NouveauProjet(): JSX.Element {
           <button
             type="button"
             onClick={passerEnManuel}
-            className="font-bold text-accent pointer-coarse:min-h-11"
+            className="font-bold text-accent survol-texte pointer-coarse:min-h-11"
           >
             Je n'ai pas de lien, je saisis à la main
           </button>

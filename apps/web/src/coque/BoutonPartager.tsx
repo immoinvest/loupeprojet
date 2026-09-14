@@ -106,7 +106,7 @@ export function BoutonPartager({ enregistre }: { enregistre: ProjetEnregistre })
               type="button"
               aria-label={T.fermer}
               onClick={fermer}
-              className="inline-flex size-11 items-center justify-center rounded-full text-encre-3 hover:bg-accent-fond hover:text-encre"
+              className="inline-flex size-11 items-center justify-center rounded-full text-encre-3 survol-fond hover:text-encre"
             >
               <X size={20} aria-hidden="true" />
             </button>

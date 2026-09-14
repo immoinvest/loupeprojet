@@ -1,14 +1,14 @@
 import { LogOut } from 'lucide-react';
-import { useEffect, useRef, useState, type JSX } from 'react';
+import { useRef, useState, type JSX } from 'react';
 import { Navigate } from 'react-router';
 
 import { useCompte } from '@/compte/CompteContext';
-import type { CodeErreurCompte, FournisseurSocial, Resultat } from '@/compte/types';
+import type { CodeErreurCompte, Resultat } from '@/compte/types';
 import { Page, TitrePage } from '@/composants/mise-en-page';
-import { Bouton, Carte, Ligne, Pastille, TitreCarte } from '@/composants/ui';
+import { Bouton, Carte, Ligne, TitreCarte } from '@/composants/ui';
 import { useProjets } from '@/stockage/ProjetsContext';
 import { useSynchro } from '@/stockage/synchro/SynchroContext';
-import { ERREURS_COMPTE, initiales, nomAffiche, NOMS_FOURNISSEURS } from '@/textes/compte';
+import { ERREURS_COMPTE, initiales, nomAffiche } from '@/textes/compte';
 import { TEXTES_MON_COMPTE as T } from '@/textes/mon-compte';
 import { ligneSauvegarde } from '@/textes/synchro';
 
@@ -22,25 +22,18 @@ interface Message {
 
 const ALLER_A_LA_CONNEXION = '/connexion?retour=/compte';
 
-/** La page « Mon compte » : profil, méthodes de connexion, déconnexion, suppression du compte. */
+/** La page « Mon compte » : profil, projets, menu, déconnexion, suppression du compte. */
 export function Compte(): JSX.Element {
   const compte = useCompte();
   const { projets } = useProjets();
   const { statut } = useSynchro();
   const [nom, setNom] = useState<string | null>(null);
-  const [methodes, setMethodes] = useState<readonly FournisseurSocial[]>([]);
   const [message, setMessage] = useState<Message | null>(null);
   const [confirmation, setConfirmation] = useState(false);
   const [sessionAncienne, setSessionAncienne] = useState(false);
   const [occupe, setOccupe] = useState(false);
   // Où aller quand la session disparaît : la connexion par défaut, l'accueil après une sortie voulue.
   const destination = useRef(ALLER_A_LA_CONNEXION);
-
-  const connecte = compte.etat === 'connecte';
-  const { client } = compte;
-  useEffect(() => {
-    if (connecte) void client.methodes().then(setMethodes);
-  }, [connecte, client]);
 
   if (compte.etat === 'chargement') {
     return <p className="m-0 px-4 py-8 text-encre-3 sm:p-10">{T.chargement}</p>;
@@ -168,20 +161,6 @@ export function Compte(): JSX.Element {
       <MonMenu />
 
       <Carte>
-        <TitreCarte>{T.connexion}</TitreCarte>
-        <div className="flex flex-wrap gap-2">
-          <Pastille ton="accent" compacte>
-            {T.methodeEmail}
-          </Pastille>
-          {methodes.map((m) => (
-            <Pastille key={m} ton="neutre" compacte>
-              {NOMS_FOURNISSEURS[m]}
-            </Pastille>
-          ))}
-        </div>
-      </Carte>
-
-      <Carte>
         <TitreCarte>{T.supprimer}</TitreCarte>
         <p className="m-0 text-sm text-encre-2">{T.explicationSuppression}</p>
         <div className="flex flex-wrap gap-2">
@@ -193,7 +172,7 @@ export function Compte(): JSX.Element {
                 onClick={() => {
                   void supprimer();
                 }}
-                className="inline-flex min-h-[44px] items-center rounded-full bg-probleme px-4 text-sm font-semibold text-white disabled:opacity-50"
+                className="inline-flex min-h-[44px] items-center rounded-full bg-probleme px-4 text-sm font-semibold text-white survol-danger-plein disabled:opacity-50"
               >
                 {T.confirmerSuppression}
               </button>

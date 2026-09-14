@@ -91,7 +91,7 @@ export function Extension(): JSX.Element {
               e.preventDefault();
               copierFavori();
             }}
-            className="inline-flex min-h-[44px] cursor-grab items-center gap-2 rounded-full border-2 border-dashed border-accent px-4 text-sm font-semibold text-accent"
+            className="inline-flex min-h-[44px] cursor-grab items-center gap-2 rounded-full border-2 border-dashed border-accent px-4 text-sm font-semibold text-accent no-underline hover:bg-accent-fond active:cursor-grabbing"
           >
             {NOM_FAVORI}
           </a>

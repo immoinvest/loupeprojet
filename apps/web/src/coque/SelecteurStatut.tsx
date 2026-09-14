@@ -27,7 +27,7 @@ export function SelecteurStatut({
   const couleur = COULEURS[statut];
   return (
     <label
-      className={`relative inline-flex min-h-[44px] items-center rounded-full border font-semibold ${couleur.pastille}`}
+      className={`relative inline-flex min-h-[44px] items-center rounded-full border font-semibold survol-pastille ${couleur.pastille}`}
     >
       <span className="sr-only">Statut du projet</span>
       <span

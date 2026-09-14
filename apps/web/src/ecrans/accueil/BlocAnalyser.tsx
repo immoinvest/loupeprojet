@@ -62,7 +62,7 @@ function AvecProjets({ resume }: { resume: ResumeAnalyser }): JSX.Element {
       {meilleur !== null && (
         <Link
           to={`/projets/${meilleur.projet.id}`}
-          className="flex min-h-11 flex-wrap items-center justify-between gap-x-3 gap-y-0.5 rounded-encart border border-bordure px-3 py-2 text-encre no-underline hover:bg-accent-fond"
+          className="flex min-h-11 flex-wrap items-center justify-between gap-x-3 gap-y-0.5 rounded-encart border border-bordure px-3 py-2 text-encre no-underline survol-fond"
         >
           <span className="flex min-w-0 flex-col">
             <span className="text-xs text-encre-3">{T.meilleurCashflow}</span>
