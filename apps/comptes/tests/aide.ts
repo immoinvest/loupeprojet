@@ -6,7 +6,7 @@ import { appliquerMigrations } from '../scripts/migration';
 import { creerApp } from '../src/app';
 import type { Envoyeur, Message } from '../src/courriel';
 import type { Dependances } from '../src/dependances';
-import { depotD1 } from '../src/gestion/depot-d1';
+import { depotD1, type OptionsDepot } from '../src/gestion/depot-d1';
 import { journalMemoire } from '../src/journal';
 
 export const ORIGINE = 'http://localhost:5173';
@@ -149,6 +149,8 @@ export function banc(surcharges: Partial<Dependances> = {}, origine = ORIGINE): 
 
 export interface OptionsBancD1 {
   readonly surcharges?: Partial<Dependances>;
+  /** Réglages du dépôt de gestion (limite de biens, horloge). */
+  readonly optionsDepot?: OptionsDepot;
   /** Une base existante (plusieurs comptes sur les mêmes données) ; sinon une base neuve en mémoire. */
   readonly sqlite?: DatabaseSync;
   /** Nombre de migrations appliquées à une base neuve (toutes par défaut). */
@@ -166,7 +168,7 @@ export function bancD1(options: OptionsBancD1 = {}): BancD1 {
   if (options.sqlite === undefined) appliquerMigrations(sqlite, options.migrations);
   const d1 = d1SurSqlite(sqlite);
   const b = banc(
-    { base: d1.base, gestion: depotD1(d1.base), ...options.surcharges },
+    { base: d1.base, gestion: depotD1(d1.base, options.optionsDepot), ...options.surcharges },
     options.origine,
   );
   return { ...b, sqlite };

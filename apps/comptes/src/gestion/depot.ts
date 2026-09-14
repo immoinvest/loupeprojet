@@ -8,7 +8,13 @@ import type {
 } from '@loupe/gestion';
 
 /** Les erreurs métier que les routes traduisent en réponses ; toute autre erreur est interne. */
-export type CodeErreurGestion = 'INTROUVABLE' | 'PERIODE_DEJA_RECUE';
+export type CodeErreurGestion =
+  | 'INTROUVABLE'
+  | 'PERIODE_DEJA_RECUE'
+  /** Un loyer marqué reçu avant l'entrée, après la sortie ou plus d'un an à l'avance. */
+  | 'HORS_LOCATION'
+  /** Le compte a atteint le nombre maximal de biens (borne contre l'abus du quota D1). */
+  | 'LIMITE_ATTEINTE';
 
 export class ErreurGestion extends Error {
   readonly code: CodeErreurGestion;

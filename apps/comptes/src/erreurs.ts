@@ -12,6 +12,8 @@ export type CodeErreur =
   | 'NON_CONNECTE'
   | 'CORPS_TROP_GROS'
   | 'PERIODE_DEJA_RECUE'
+  | 'HORS_LOCATION'
+  | 'LIMITE_ATTEINTE'
   | 'GESTION_INDISPONIBLE';
 
 /** Réponse JSON d'erreur, indépendante du contexte Hono (utilisable dans notFound, onError et index). */

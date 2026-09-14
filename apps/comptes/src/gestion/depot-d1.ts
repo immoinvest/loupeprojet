@@ -1,8 +1,10 @@
 import type { D1Database, D1PreparedStatement } from '@cloudflare/workers-types';
 import {
+  ajouterJours,
   CreationReponseSchema,
   occupationDe,
   PaiementSchema,
+  periodeDe,
   type BienGere,
   type Locataire,
   type LocationGeree,
@@ -21,9 +23,33 @@ import {
 } from './lignes';
 
 export interface OptionsDepot {
-  /** Horodatage ISO des créations ; l'horloge réelle par défaut. */
+  /** Horodatage ISO des créations et date du jour des contrôles ; l'horloge réelle par défaut. */
   readonly maintenant?: () => string;
   readonly genererId?: () => string;
+  /** Nombre maximal de biens par compte (réglable pour les tests). */
+  readonly limiteBiens?: number;
+}
+
+/**
+ * Au-delà d'un investisseur particulier, et une borne contre l'abus : sans elle, un compte pourrait
+ * épuiser le quota d'écritures de la base partagée.
+ */
+export const LIMITE_BIENS = 200;
+
+/** Un loyer ne se marque pas reçu plus d'un an à l'avance. */
+const JOURS_D_AVANCE_MAX = 366;
+
+interface BornesLocation {
+  readonly debut: string;
+  readonly fin: string | null;
+}
+
+/** La période payée tombe dans la location : pas avant l'entrée, pas après la sortie, pas trop tôt. */
+function periodeAcceptee(periode: string, location: BornesLocation, aujourdhui: string): boolean {
+  const avantEntree = periode < periodeDe(location.debut);
+  const apresSortie = location.fin !== null && periode > periodeDe(location.fin);
+  const tropEnAvance = periode > periodeDe(ajouterJours(aujourdhui, JOURS_D_AVANCE_MAX));
+  return !avantEntree && !apresSortie && !tropEnAvance;
 }
 
 type Lier = (
@@ -37,7 +63,8 @@ const SQL = {
   locations: 'select * from gestion_location where userId = ? order by debut, id',
   paiements: 'select * from gestion_paiement where userId = ? order by periode, id',
   preferences: 'select * from gestion_preference where userId = ?',
-  locationDuCompte: 'select id from gestion_location where id = ? and userId = ?',
+  locationDuCompte: 'select debut, fin from gestion_location where id = ? and userId = ?',
+  nombreDeBiens: 'select count(*) as n from gestion_bien where userId = ?',
   insererBien:
     'insert into gestion_bien (id, userId, nom, adresse, codePostal, ville, type, surface, meuble, projetId, projet, creeLe, modifieLe) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
   insererLocataire:
@@ -111,6 +138,7 @@ function insererPaiement(lier: Lier, userId: string, p: Paiement): D1PreparedSta
 export function depotD1(base: D1Database, options: OptionsDepot = {}): DepotGestion {
   const maintenant = options.maintenant ?? ((): string => new Date().toISOString());
   const genererId = options.genererId ?? ((): string => crypto.randomUUID());
+  const limiteBiens = options.limiteBiens ?? LIMITE_BIENS;
   const lier: Lier = (sql, ...valeurs) => base.prepare(sql).bind(...valeurs.map(valeurSql));
   const lire = async (sql: string, userId: string): Promise<Ligne[]> =>
     (await lier(sql, userId).all<Ligne>()).results;
@@ -134,6 +162,9 @@ export function depotD1(base: D1Database, options: OptionsDepot = {}): DepotGest
     },
 
     async creer(userId, creation) {
+      const { results: compte } = await lier(SQL.nombreDeBiens, userId).all<{ n: number }>();
+      const nombre = compte.reduce((somme, ligne) => somme + ligne.n, 0);
+      if (nombre >= limiteBiens) throw new ErreurGestion('LIMITE_ATTEINTE');
       const horodatage = maintenant();
       const bien: BienGere = {
         id: genererId(),
@@ -164,8 +195,16 @@ export function depotD1(base: D1Database, options: OptionsDepot = {}): DepotGest
     },
 
     async payer(userId, nouveau) {
-      const siens = await lier(SQL.locationDuCompte, nouveau.locationId, userId).first();
-      if (siens === null) throw new ErreurGestion('INTROUVABLE');
+      const { results } = await lier(
+        SQL.locationDuCompte,
+        nouveau.locationId,
+        userId,
+      ).all<BornesLocation>();
+      const [location] = results;
+      if (location === undefined) throw new ErreurGestion('INTROUVABLE');
+      if (!periodeAcceptee(nouveau.periode, location, maintenant().slice(0, 10))) {
+        throw new ErreurGestion('HORS_LOCATION');
+      }
       const paiement = PaiementSchema.parse({
         id: genererId(),
         ...nouveau,
