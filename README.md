@@ -36,7 +36,7 @@ npm run test:e2e      # vite build puis playwright test : parcours complets dans
 npm run build         # build de chaque workspace
 ```
 
-Node 22 ou plus. La CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) exécute ces six commandes sur chaque pull request (971 tests au 14/09/2026, dont 135 pour les référentiels, 119 pour la capture, l'extension et le bouton-favori, 30 pour l'impression, le partage, Comparer et Méthode, 91 pour les comptes, 65 pour le responsive et l'application mobile, et 10 pour la coque fixe). Une PR est fusionnée automatiquement dès que le check `verify` est vert (`gh pr merge <n> --auto --merge`) ; `master` refuse tout merge sans ce check. Un second job `e2e` joue les parcours Playwright dans Chromium sur ordinateur, téléphone et tablette, puis mesure 16 écrans sur 9 formats ; il n'est pas encore requis pour fusionner.
+Node 22 ou plus. La CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) exécute ces six commandes sur chaque pull request (1 008 tests au 14/09/2026, dont 135 pour les référentiels, 119 pour la capture, l'extension et le bouton-favori, 30 pour l'impression, le partage, Comparer et Méthode, 91 pour les comptes, 65 pour le responsive et l'application mobile, 10 pour la coque fixe, et 35 pour le Rapport expliqué : icône ⓘ, cascade de l'autofinancement, rendements, liens vers les onglets). Une PR est fusionnée automatiquement dès que le check `verify` est vert (`gh pr merge <n> --auto --merge`) ; `master` refuse tout merge sans ce check. Un second job `e2e` joue les parcours Playwright dans Chromium sur ordinateur, téléphone et tablette, puis mesure 16 écrans sur 9 formats ; il n'est pas encore requis pour fusionner.
 
 ## Le moteur (`@loupe/moteur`)
 

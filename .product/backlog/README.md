@@ -28,9 +28,9 @@ Statuts : `idée` → `en discussion` → `spécifiée` → `en cours` → `livr
 
 ## Ordre suggéré
 
-Livrée : `10` (14/09/2026).
+Livrées : `10` et `11` (14/09/2026).
 
-`08` (spécifiée, prête à implémenter) → `03` (une heure) → `11` et `06` (visuel, sans moteur) → `01` → `04` → `02` (touche au moteur et à tous les onglets : mieux après 01 et 04) → `09` → `05` (le plus gros : moteur + formulaires + fiscalité) → `07`.
+`08` (spécifiée, prête à implémenter) → `03` (une heure) → `06` (visuel, sans moteur) → `01` → `04` → `02` (touche au moteur et à tous les onglets : mieux après 01 et 04) → `09` → `05` (le plus gros : moteur + formulaires + fiscalité) → `07`.
 
 ## Sources
 
