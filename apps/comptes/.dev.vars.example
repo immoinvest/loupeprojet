@@ -1,0 +1,19 @@
+# Copier en .dev.vars (ignoré par git) pour `npm run dev -w apps/comptes`.
+ENVIRONNEMENT=dev
+# Secret de signature des cookies et des jetons (32 caractères ou plus). Obligatoire hors dev.
+BETTER_AUTH_SECRET=
+# Envoi des codes par e-mail (Resend). Vide en dev : le code est écrit dans le journal du worker.
+# Sans domaine vérifié chez Resend, seul le propriétaire du compte Resend reçoit les e-mails.
+RESEND_API_KEY=
+COURRIEL_EXPEDITEUR=Deklic <onboarding@resend.dev>
+# Bouton Google : console.cloud.google.com → Identifiants → ID client OAuth (application Web),
+# URL de redirection autorisée : http://localhost:5173/api/auth/callback/google (et la production).
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+# Bouton Apple : programme développeur Apple (Services ID, Team ID, Key ID, clé privée .p8 sur une ligne, \n pour les retours).
+APPLE_CLIENT_ID=
+APPLE_TEAM_ID=
+APPLE_KEY_ID=
+APPLE_PRIVATE_KEY=
+# Origines de confiance supplémentaires (séparées par des virgules), en plus de la production, des previews et de localhost.
+ORIGINES_AUTORISEES=

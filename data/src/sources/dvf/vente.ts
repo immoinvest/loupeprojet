@@ -57,6 +57,28 @@ function coordonnee(texte: string): number | null {
   return texte === '' ? null : Number(texte);
 }
 
+function texteOuNull(texte: string): string | null {
+  const nettoye = texte.trim();
+  return nettoye === '' ? null : nettoye;
+}
+
+function entierOuNull(texte: string): number | null {
+  const valeur = Number.parseInt(texte, 10);
+  return Number.isNaN(valeur) ? null : valeur;
+}
+
+const NUMEROS_LOTS = ['1', '2', '3', '4', '5'] as const;
+
+/** Surface Carrez du logement : somme des lots de sa ligne qui en mentionnent une. */
+function surfaceCarrez(ligne: EnregistrementCsv): number | null {
+  let total = 0;
+  for (const numero of NUMEROS_LOTS) {
+    const surface = Number.parseFloat(champ(ligne, `lot${numero}_surface_carrez`));
+    if (surface > 0) total += surface;
+  }
+  return total > 0 ? Math.round(total * 100) / 100 : null;
+}
+
 /**
  * Transforme une mutation en vente de logement, ou l'écarte avec un motif :
  * nature « Vente » seulement, une seule valeur foncière, aucun local commercial,
@@ -107,6 +129,12 @@ export function venteDepuisMutation(
         pieces: entierOuZero(champ(logement, 'nombre_pieces_principales')),
         lat: coordonnee(champ(logement, 'latitude')),
         lon: coordonnee(champ(logement, 'longitude')),
+        idParcelle: texteOuNull(champ(logement, 'id_parcelle')),
+        numero: entierOuNull(champ(logement, 'adresse_numero')),
+        suffixe: texteOuNull(champ(logement, 'adresse_suffixe')),
+        codeVoie: texteOuNull(champ(logement, 'adresse_code_voie')),
+        voie: texteOuNull(champ(logement, 'adresse_nom_voie')),
+        carrez: surfaceCarrez(logement),
       },
     },
   };

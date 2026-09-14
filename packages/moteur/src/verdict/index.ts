@@ -1,3 +1,4 @@
+import type { EstimationPrix } from '../estimation';
 import type { ResultatFinancement } from '../financement';
 import type { ResultatFiscalite } from '../fiscalite/types';
 import type { Regles } from '../regles/types';
@@ -38,9 +39,15 @@ export function calculerVerdict(
   fiscalite: ResultatFiscalite,
   rendement: ResultatRendement,
   regles: Regles,
+  estimation: EstimationPrix | null = null,
 ): ResultatVerdict {
   const retenu = fiscalite.regimes[fiscalite.retenu];
-  const prix = feuPrix(projet.hypotheses.achat.prix / projet.bien.surface, projet.marche, regles);
+  const prix = feuPrix(
+    projet.hypotheses.achat.prix / projet.bien.surface,
+    projet.marche,
+    regles,
+    estimation?.prixM2Estime ?? null,
+  );
   const feux: readonly FeuVerdict[] = [
     prix,
     feuRendement(rendement.rendements.net, regles),

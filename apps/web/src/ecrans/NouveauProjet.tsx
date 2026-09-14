@@ -14,10 +14,11 @@ import {
 import { Chapo, Page, TitrePage } from '@/composants/mise-en-page';
 import { Bouton, Carte, Pastille } from '@/composants/ui';
 import { useClientWorker } from '@/coque/ClientWorker';
-import { enrichirSaisie, lireAnnonce, type ModeLecture } from '@/enrichissement';
+import { completerAvecIa, enrichirSaisie, lireAnnonce, type ModeLecture } from '@/enrichissement';
 import { useProjets } from '@/stockage/ProjetsContext';
 
 import { FormulaireProjet, valeursDepuisChamps } from './FormulaireProjet';
+import { EtatLectureAuto, useLectureAutomatique } from './nouveau-projet/LectureAuto';
 
 type Etape = 'lien' | 'texte' | 'verifier';
 
@@ -34,6 +35,7 @@ export function NouveauProjet(): JSX.Element {
   // Le fragment est lu une seule fois, au premier rendu, puis effacé de l'adresse (effet ci-dessous).
   const [fragment] = useState(() => lireFragmentCapture(hash));
   const capture: CaptureImportee | null = fragment.statut === 'lue' ? fragment.capture : null;
+  const [importee, setImportee] = useState<CaptureImportee | null>(capture);
   const [url, setUrl] = useState(capture?.annonce.urlCanonique ?? '');
   const [texte, setTexte] = useState('');
   const [etape, setEtape] = useState<Etape>(capture === null ? 'lien' : 'verifier');
@@ -42,15 +44,46 @@ export function NouveauProjet(): JSX.Element {
   const [nbChamps, setNbChamps] = useState(
     capture === null ? 0 : Object.keys(capture.champs).length,
   );
+  // Change à chaque lecture : le formulaire repart des nouvelles valeurs.
+  const [version, setVersion] = useState(0);
   const client = useClientWorker();
   const [lecture, setLecture] = useState<ModeLecture | null>(null);
   const [enCours, setEnCours] = useState<'lecture' | 'creation' | null>(null);
+
+  const annonce: AnnonceResolue | null = resoudreAnnonce(url);
+
+  const appliquerCapture = (lue: CaptureImportee, mode: ModeLecture | null): void => {
+    setImportee(lue);
+    setInitial(valeursDepuisChamps(lue.champs));
+    setNbChamps(Object.keys(lue.champs).length);
+    setLecture(mode);
+    setVersion((v) => v + 1);
+    setEtape('verifier');
+  };
+
+  const auto = useLectureAutomatique(
+    annonce,
+    !manuel && importee === null,
+    client,
+    appliquerCapture,
+  );
 
   useEffect(() => {
     if (fragment.statut !== 'absente') void naviguer(CHEMIN, { replace: true });
   }, [fragment.statut, naviguer]);
 
-  const annonce: AnnonceResolue | null = resoudreAnnonce(url);
+  useEffect(() => {
+    // Capture reçue par l'adresse (clic sur l'extension, favori) : l'IA complète les trous du texte.
+    if (capture === null) return;
+    let vivant = true;
+    void completerAvecIa(capture, client).then((complete) => {
+      if (vivant && complete.mode === 'ia') appliquerCapture(complete.capture, complete.mode);
+    });
+    return () => {
+      vivant = false;
+    };
+    // Une seule fois, pour la capture du premier rendu.
+  }, []);
 
   const lireTexte = async (): Promise<void> => {
     setEnCours('lecture');
@@ -58,6 +91,7 @@ export function NouveauProjet(): JSX.Element {
     setInitial(valeursDepuisChamps(champs));
     setNbChamps(Object.keys(champs).length);
     setLecture(mode);
+    setVersion((v) => v + 1);
     setEnCours(null);
     setEtape('verifier');
   };
@@ -77,6 +111,8 @@ export function NouveauProjet(): JSX.Element {
     const enregistre = creer({ nom, source });
     void naviguer(`/projets/${enregistre.id}`);
   };
+
+  const lectureEnCours = auto.lecture?.statut === 'en-cours';
 
   return (
     <Page espacement="large">
@@ -100,8 +136,12 @@ export function NouveauProjet(): JSX.Element {
               value={url}
               placeholder="https://www.leboncoin.fr/ad/ventes_immobilieres/…"
               onChange={(e) => {
+                const nouvelle = resoudreAnnonce(e.target.value);
                 setUrl(e.target.value);
-                setEtape(resoudreAnnonce(e.target.value) === null ? 'lien' : 'texte');
+                setEtape(nouvelle === null ? 'lien' : 'texte');
+                if (importee !== null && nouvelle?.urlCanonique !== importee.annonce.urlCanonique) {
+                  setImportee(null);
+                }
               }}
               className="min-h-[52px] rounded-encart border border-bordure bg-surface px-4 text-[16px]"
             />
@@ -115,9 +155,9 @@ export function NouveauProjet(): JSX.Element {
                 <Pastille ton="neutre" compacte>
                   annonce {annonce.id}
                 </Pastille>
-                {capture !== null && (
+                {importee !== null && (
                   <Pastille ton="accent" compacte>
-                    {capture.mode === 'bookmarklet'
+                    {importee.mode === 'bookmarklet'
                       ? 'lue par le bouton-favori'
                       : "lue par l'extension"}
                   </Pastille>
@@ -137,63 +177,73 @@ export function NouveauProjet(): JSX.Element {
               </span>
             )}
           </div>
+          {importee === null && (
+            <EtatLectureAuto
+              extension={auto.extension}
+              lecture={auto.lecture}
+              lienReconnu={annonce !== null}
+              relancer={auto.relancer}
+            />
+          )}
         </Carte>
       )}
 
-      {!manuel && (etape === 'texte' || etape === 'verifier' || url.trim() !== '') && (
-        <Carte>
-          <div className="flex flex-col gap-1">
-            <h2 className="m-0 font-display text-[22px] font-semibold">
-              {capture === null ? "Le texte de l'annonce" : 'Il manque quelque chose ?'}
-            </h2>
-            <p className="m-0 text-sm text-encre-2">
-              {capture === null ? (
-                <>
-                  Avec l'
-                  <Link to="/extension" className="font-bold text-accent">
-                    extension Deklic
-                  </Link>{' '}
-                  ou le bouton-favori, la page est lue en un clic. Sinon : sur l'annonce, tout
-                  sélectionner (Ctrl+A), copier (Ctrl+C), et coller ici.
-                </>
-              ) : (
-                'Collez le texte de l’annonce pour compléter ce qui a été lu.'
-              )}{' '}
-              Le texte n'est pas conservé, seulement ce qu'on y lit.
-            </p>
-          </div>
-          <textarea
-            name="texte"
-            value={texte}
-            onChange={(e) => {
-              setTexte(e.target.value);
-            }}
-            rows={7}
-            placeholder="Appartement T3 de 65 m² au 3e étage… Prix 155 000 €… DPE D…"
-            className="rounded-encart border border-bordure bg-surface p-3 text-[15px] pointer-coarse:text-base"
-          />
-          <div className="flex flex-wrap items-center gap-3">
-            <Bouton
-              variante="primaire"
-              onClick={() => {
-                void lireTexte();
+      {!manuel &&
+        !lectureEnCours &&
+        (etape === 'texte' || etape === 'verifier' || url.trim() !== '') && (
+          <Carte>
+            <div className="flex flex-col gap-1">
+              <h2 className="m-0 font-display text-[22px] font-semibold">
+                {importee === null ? "Le texte de l'annonce" : 'Il manque quelque chose ?'}
+              </h2>
+              <p className="m-0 text-sm text-encre-2">
+                {importee === null ? (
+                  <>
+                    Avec l'
+                    <Link to="/extension" className="font-bold text-accent">
+                      extension Deklic
+                    </Link>
+                    , coller le lien suffit. Sinon : sur l'annonce, tout sélectionner (Ctrl+A),
+                    copier (Ctrl+C), et coller ici.
+                  </>
+                ) : (
+                  'Collez le texte de l’annonce pour compléter ce qui a été lu.'
+                )}{' '}
+                Le texte n'est pas conservé, seulement ce qu'on y lit.
+              </p>
+            </div>
+            <textarea
+              name="texte"
+              value={texte}
+              onChange={(e) => {
+                setTexte(e.target.value);
               }}
-              disabled={texte.trim() === '' || enCours !== null}
-            >
-              {enCours === 'lecture' ? 'Lecture en cours…' : 'Lire le texte'}
-            </Bouton>
-            {etape === 'verifier' && enCours !== 'lecture' && (
-              <span className="text-sm text-encre-2">
-                {nbChamps === 0
-                  ? 'Rien de reconnu : remplissez le formulaire ci-dessous.'
-                  : `${pluriel(nbChamps, 'champ')} ${nbChamps > 1 ? 'lus' : 'lu'} dans l'annonce${lecture === 'ia' ? " par l'IA" : ''}, à vérifier ci-dessous.`}
-              </span>
-            )}
-          </div>
-        </Carte>
-      )}
+              rows={7}
+              placeholder="Appartement T3 de 65 m² au 3e étage… Prix 155 000 €… DPE D…"
+              className="rounded-encart border border-bordure bg-surface p-3 text-[15px] pointer-coarse:text-base"
+            />
+            <div className="flex flex-wrap items-center gap-3">
+              <Bouton
+                variante="primaire"
+                onClick={() => {
+                  void lireTexte();
+                }}
+                disabled={texte.trim() === '' || enCours !== null}
+              >
+                {enCours === 'lecture' ? 'Lecture en cours…' : 'Lire le texte'}
+              </Bouton>
+              {etape === 'verifier' && enCours !== 'lecture' && (
+                <span className="text-sm text-encre-2">
+                  {nbChamps === 0
+                    ? 'Rien de reconnu : remplissez le formulaire ci-dessous.'
+                    : `${pluriel(nbChamps, 'champ')} ${nbChamps > 1 ? 'lus' : 'lu'} dans l'annonce${lecture === 'ia' ? " par l'IA" : ''}, à vérifier ci-dessous.`}
+                </span>
+              )}
+            </div>
+          </Carte>
+        )}
 
-      {etape !== 'verifier' && !manuel && (
+      {etape !== 'verifier' && !manuel && !lectureEnCours && (
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-encre-3">
           <span>Pas de lien ?</span>
           <button
@@ -224,7 +274,7 @@ export function NouveauProjet(): JSX.Element {
             </span>
           </div>
           <FormulaireProjet
-            key={`${String(manuel)}-${String(nbChamps)}-${texte.length.toString()}`}
+            key={`${String(manuel)}-${String(version)}`}
             initial={initial}
             annonce={manuel ? null : annonce}
             onCreer={(saisie) => {

@@ -1,4 +1,4 @@
-# ADR-006 : L'application mobile est une application web installable (PWA)
+# ADR-007 : L'application mobile est une application web installable (PWA)
 
 **Date** : 2026-09-14 · **Statut** : accepté · **Décideur** : session `responsive`, sur la demande de Pierre (« facilement utilisable à travers une application mobile »), dans le cadre de la spec v1
 

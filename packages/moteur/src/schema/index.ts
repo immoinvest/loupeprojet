@@ -2,11 +2,19 @@ export {
   BienSchema,
   ClasseEnergieSchema,
   CoproSchema,
+  EtatBienSchema,
   TypeBienSchema,
   type Bien,
   type ClasseEnergie,
+  type EtatBien,
   type TypeBien,
 } from './bien';
+export {
+  CodeCorrectionSchema,
+  ReglagesEstimationSchema,
+  type CodeCorrection,
+  type ReglagesEstimation,
+} from './estimation';
 export {
   AchatSchema,
   ChargesSchema,
@@ -29,6 +37,7 @@ export {
   MarcheSchema,
   NiveauRisqueSchema,
   RisqueSchema,
+  type Dvf,
   type Marche,
   type Risque,
 } from './marche';

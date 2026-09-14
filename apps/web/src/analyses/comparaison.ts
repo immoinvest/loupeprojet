@@ -71,7 +71,7 @@ export const INDICATEURS: readonly Indicateur[] = [
   },
   {
     code: 'ecartMarche',
-    libelle: 'Écart avec les ventes du quartier',
+    libelle: 'Écart avec le prix estimé',
     sens: 'bas',
     meilleur: true,
     axe: 'prix',

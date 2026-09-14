@@ -26,6 +26,7 @@ export default defineConfig({
         'src/hypotheses/**',
         'src/analyses/**',
         'src/bookmarklet/**',
+        'src/compte/**',
         'src/enrichissement/**',
         'src/application/**',
         'src/hors-ligne/**',

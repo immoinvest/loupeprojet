@@ -3,6 +3,7 @@ import { Trash2 } from 'lucide-react';
 import { useMemo, useState, type JSX } from 'react';
 import { Link, useNavigate } from 'react-router';
 
+import { useCompte } from '@/compte/CompteContext';
 import { Page, TitrePage } from '@/composants/mise-en-page';
 import { Bouton, Carte, Pastille, Point } from '@/composants/ui';
 import {
@@ -14,6 +15,7 @@ import {
 } from '@/formatage/nombres';
 import { useProjets } from '@/stockage/ProjetsContext';
 import { STATUTS, type ProjetEnregistre } from '@/stockage/projets';
+import { TEXTES_MON_COMPTE } from '@/textes/mon-compte';
 import { MODES } from '@/textes/regimes';
 
 type Filtre = 'tous' | 'en_cours' | 'ecartes';
@@ -122,6 +124,7 @@ function CarteProjet({
 
 export function MesProjets(): JSX.Element {
   const { projets, supprimer } = useProjets();
+  const connecte = useCompte().etat === 'connecte';
   const naviguer = useNavigate();
   const [filtre, setFiltre] = useState<Filtre>('tous');
   const visibles = projets.filter((p) => garder(p, filtre));
@@ -195,15 +198,22 @@ export function MesProjets(): JSX.Element {
       <Carte className="border-accent-bordure bg-accent-fond sm:flex-row sm:items-center sm:gap-5">
         <div className="flex flex-1 flex-col gap-1">
           <span className="font-display text-[17px] font-bold">
-            Retrouvez vos projets sur tous vos appareils
+            {connecte ? TEXTES_MON_COMPTE.carteTitreConnecte : TEXTES_MON_COMPTE.carteTitre}
           </span>
           <span className="text-sm text-encre-2">
-            Un compte par e-mail, sans mot de passe. Gratuit.
+            {connecte ? TEXTES_MON_COMPTE.carteTexteConnecte : TEXTES_MON_COMPTE.carteTexte}
           </span>
         </div>
-        <Bouton variante="primaire" disabled title="Bientôt">
-          Créer mon compte
-        </Bouton>
+        {!connecte && (
+          <Bouton
+            variante="primaire"
+            onClick={() => {
+              void naviguer('/connexion');
+            }}
+          >
+            {TEXTES_MON_COMPTE.creerCompte}
+          </Bouton>
+        )}
       </Carte>
 
       <p className="m-0 text-xs text-encre-3">

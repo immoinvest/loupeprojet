@@ -1,5 +1,5 @@
 import { calculerProjet } from '@loupe/moteur';
-import { Columns2, Download, Info, Plus, Puzzle, Settings, X } from 'lucide-react';
+import { Columns2, Download, Info, Plus, Puzzle, X } from 'lucide-react';
 import { useEffect, useRef, type JSX } from 'react';
 import { NavLink, useNavigate } from 'react-router';
 
@@ -10,6 +10,7 @@ import type { ProjetEnregistre } from '@/stockage/projets';
 import { TEXTES_INSTALLATION } from '@/textes/application';
 
 import { useInstallation } from './Installation';
+import { Profil } from './Profil';
 
 /** Identifiant de la navigation principale, visé par le bouton de menu (`aria-controls`). */
 export const ID_NAVIGATION = 'navigation-principale';
@@ -118,7 +119,7 @@ export function Sidebar({
 
       <div className="flex-1" />
 
-      <div className="flex flex-col gap-3 border-t border-bordure pt-3">
+      <div className="flex flex-col gap-3">
         {/* Seulement quand le navigateur propose l'installation (Chrome, Edge, Android). */}
         {installation.etat === 'disponible' && (
           <button
@@ -132,18 +133,7 @@ export function Sidebar({
             {TEXTES_INSTALLATION.bouton}
           </button>
         )}
-        <div className="flex items-center gap-3 px-2.5">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent-doux font-display text-[15px] font-bold text-accent">
-            ?
-          </div>
-          <div className="flex flex-1 flex-col">
-            <span className="text-[15px] font-bold">Sans compte</span>
-            <span className="text-xs text-encre-3">
-              Gratuit · {projets.length} {projets.length > 1 ? 'projets' : 'projet'}
-            </span>
-          </div>
-          <Settings size={18} className="text-encre-3" aria-hidden="true" />
-        </div>
+        <Profil />
       </div>
     </aside>
   );

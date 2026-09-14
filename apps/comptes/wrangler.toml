@@ -1,0 +1,24 @@
+# Comptes Deklic : API d'authentification (Better Auth) servie sur l'origine du site.
+# En production, ce code est bundlé dans apps/web/dist/_worker.js par le build de apps/web et déployé
+# avec le site sur Cloudflare Pages (bindings et secrets : apps/web/wrangler.toml ou tableau de bord Pages).
+# En local : `npm run dev -w apps/comptes` (D1 locale automatique, secrets dans .dev.vars).
+# Base D1 de production : `deklic-comptes`, juridiction UE, créée le 14/09/2026 par
+# `npx wrangler d1 create deklic-comptes --jurisdiction eu` ; migration 0001 appliquée le même jour.
+# Nouvelles migrations : `npx wrangler d1 migrations apply deklic-comptes --remote` depuis apps/comptes.
+name = "loupe-comptes"
+main = "src/index.ts"
+compatibility_date = "2026-09-01"
+compatibility_flags = ["nodejs_compat"]
+workers_dev = false
+
+[observability]
+enabled = true
+
+[vars]
+ENVIRONNEMENT = "dev"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "deklic-comptes"
+database_id = "6a33f5a5-7674-4b6a-a274-5fb066fd3262"
+migrations_dir = "migrations"

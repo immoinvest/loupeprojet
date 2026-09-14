@@ -29,7 +29,7 @@ describe('Mes projets', () => {
     render(<AppEnMemoire chemin="/projets" />);
     await screen.findByRole('heading', { name: 'Mes projets' });
     expect(n(screen.getByText(/−210 €\/mois/).textContent)).toBe('−210 €/mois');
-    expect(n(screen.getByText(/−22 %/).textContent)).toBe('−22 %');
+    expect(n(screen.getByText(/−25 %/).textContent)).toBe('−25 %');
     expect(screen.getByText('Visite prévue')).toBeInTheDocument();
   });
 

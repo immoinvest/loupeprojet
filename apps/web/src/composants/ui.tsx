@@ -64,10 +64,17 @@ export function Carte({
   /** Ancre (sommaire de la page Méthode). */
   id?: string;
 }): JSX.Element {
+  // Deux utilitaires de même propriété ne s'annulent pas selon leur ordre dans l'attribut
+  // mais selon leur ordre dans la feuille : le fond et la bordure passés par l'appelant
+  // remplacent donc les valeurs par défaut au lieu de s'y ajouter.
+  const fond = /(^|\s)bg-/.test(className) ? '' : 'bg-surface';
+  const bordure = /(^|\s)border-(?!\d|[xytblrse](\s|$|-\d))/.test(className)
+    ? ''
+    : 'border-bordure';
   return (
     <section
       id={id}
-      className={`flex flex-col gap-3 rounded-carte border border-bordure bg-surface p-4 shadow-carte sm:p-6 print:p-6 ${className}`}
+      className={`flex flex-col gap-3 rounded-carte border ${bordure} ${fond} p-4 shadow-carte sm:p-6 print:p-6 ${className}`}
     >
       {children}
     </section>

@@ -5,6 +5,7 @@ import {
   creerProjet,
   ecrireProjets,
   lireProjets,
+  type AdresseBien,
   type OptionsCreation,
   type ProjetEnregistre,
   type StatutProjet,
@@ -16,8 +17,15 @@ export interface ContexteProjets {
   readonly supprimer: (id: string) => void;
   readonly changerStatut: (id: string, statut: StatutProjet) => void;
   readonly trouver: (id: string | undefined) => ProjetEnregistre | undefined;
-  /** Remplace le projet après validation Zod ; une entrée invalide n'est pas enregistrée. */
-  readonly mettreAJour: (id: string, projet: ProjetEntree) => MiseAJour;
+  /**
+   * Remplace le projet après validation Zod ; une entrée invalide n'est pas enregistrée.
+   * Le complément (adresse exacte) est enregistré dans la même écriture, pour ne rien écraser.
+   */
+  readonly mettreAJour: (
+    id: string,
+    projet: ProjetEntree,
+    complement?: { readonly adresse?: AdresseBien },
+  ) => MiseAJour;
 }
 
 export type MiseAJour =
@@ -73,7 +81,7 @@ export function ProjetsProvider({ stockage, children }: ProjetsProviderProps): R
         );
       },
       trouver: (id) => projets.find((p) => p.id === id),
-      mettreAJour: (id, projet) => {
+      mettreAJour: (id, projet, complement = {}) => {
         const resultat = ProjetSchema.safeParse(projet);
         if (!resultat.success) {
           const erreurs: Record<string, string> = {};
@@ -84,7 +92,14 @@ export function ProjetsProvider({ stockage, children }: ProjetsProviderProps): R
         }
         remplacer(
           projets.map((p) =>
-            p.id === id ? { ...p, projet: resultat.data, modifieLe: new Date().toISOString() } : p,
+            p.id === id
+              ? {
+                  ...p,
+                  ...complement,
+                  projet: resultat.data,
+                  modifieLe: new Date().toISOString(),
+                }
+              : p,
           ),
         );
         return { ok: true };

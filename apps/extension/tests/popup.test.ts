@@ -61,7 +61,11 @@ beforeEach(() => {
   fermer.mockReset();
   create.mockResolvedValue({});
   Object.assign(globalThis, {
-    chrome: { tabs: { query, create }, scripting: { executeScript } },
+    chrome: {
+      tabs: { query, create },
+      scripting: { executeScript },
+      permissions: { contains: () => Promise.resolve(true), request: () => Promise.resolve(true) },
+    },
   });
   window.close = fermer;
   chargerPopup();

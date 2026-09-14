@@ -45,7 +45,7 @@ export function texteVerdict(r: Resultats): TexteVerdict {
   const morceaux: string[] = [];
   for (const f of r.verdict.feux) {
     if (f.axe === 'prix' && f.valeur !== null) {
-      morceaux.push(`${pourcentageSigne(f.valeur)} par rapport aux ventes du quartier`);
+      morceaux.push(`${pourcentageSigne(f.valeur)} par rapport au prix estimé`);
     }
   }
   const effort = r.financement.effort.hcsf;

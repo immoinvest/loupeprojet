@@ -10,37 +10,8 @@ import { libelleFeu } from '@/textes/feux';
 import { REGIMES } from '@/textes/regimes';
 import { reponseCourte, texteVerdict } from '@/textes/verdict';
 
-import { JaugePrix } from './rapport/JaugePrix';
+import { CartePrix } from './rapport/CartePrix';
 import { Leviers } from './rapport/Leviers';
-
-function CartePrix({ r }: { r: Resultats }): JSX.Element {
-  const feu = r.verdict.feux.find((f) => f.axe === 'prix')?.feu ?? 'inconnu';
-  const reponse = feu === 'bon' ? 'non' : feu === 'surveiller' ? 'presque' : 'oui';
-  const n = r.projet.marche.dvf?.nombreVentes ?? 0;
-  return (
-    <Carte>
-      <TitreCarte action={<Pourquoi texte={EXPLICATIONS.prix} />}>
-        Est-ce que c'est cher ?
-      </TitreCarte>
-      {feu === 'inconnu' ? (
-        <GrosChiffre ton="encre">On ne sait pas.</GrosChiffre>
-      ) : (
-        <GrosChiffre ton={feu === 'bon' ? 'bon' : feu === 'surveiller' ? 'surveiller' : 'probleme'}>
-          {reponseCourte(reponse)}
-        </GrosChiffre>
-      )}
-      <JaugePrix r={r} />
-      {n > 0 && (
-        <p className="m-0 text-[15px] leading-relaxed text-encre-2">
-          {n} ventes réelles autour du bien.{' '}
-          {feu === 'bon'
-            ? 'Un prix aussi bas se vérifie en visite : pourquoi le vendeur baisse ?'
-            : ''}
-        </p>
-      )}
-    </Carte>
-  );
-}
 
 function CarteCashflow({ r }: { r: Resultats }): JSX.Element {
   const c = r.cashflow;

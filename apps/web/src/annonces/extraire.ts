@@ -1,7 +1,14 @@
-import type { ClasseEnergie } from '@loupe/moteur';
+import type { ClasseEnergie, EtatBien, TypeBien } from '@loupe/moteur';
 
-/** Champs qu'on sait lire dans le texte d'une annonce, par règles. Absent = non trouvé. */
+/**
+ * Champs lus dans une annonce (texte par règles, IA, ou données de la page lues par l'extension).
+ * Absent = non trouvé. Type, GES, lots et procédure ne viennent que des données de la page.
+ */
 export interface ChampsExtraits {
+  readonly typeBien?: TypeBien;
+  readonly ges?: ClasseEnergie;
+  readonly lotsCopro?: number;
+  readonly coproEnProcedure?: boolean;
   readonly prix?: number;
   readonly surface?: number;
   readonly pieces?: number;
@@ -16,6 +23,9 @@ export interface ChampsExtraits {
   readonly taxeFonciere?: number;
   readonly honorairesAgence?: number;
   readonly meuble?: boolean;
+  readonly etat?: EtatBien;
+  /** Balcon, terrasse ou loggia. */
+  readonly exterieur?: boolean;
 }
 
 const PRIX_MINIMUM = 20_000;
@@ -103,6 +113,21 @@ function honoraires(texte: string): number | undefined {
   return m?.[1] === undefined ? undefined : montant(m[1]);
 }
 
+/** Les mots des annonces, du plus défavorable au plus favorable : « à rénover » l'emporte sur « rénové ». */
+function etat(texte: string): EtatBien | undefined {
+  if (/(?:à|a)\s+r[ée]nover|travaux\s+(?:à|a)\s+pr[ée]voir|gros\s+travaux/i.test(texte)) {
+    return 'a_renover';
+  }
+  if (/(?:à|a)\s+rafra[îi]chir/i.test(texte)) return 'a_rafraichir';
+  if (/refait\s+(?:à|a)\s+neuf|r[ée]nov[ée](?:e|s|es)?(?![\p{L}])/iu.test(texte)) return 'renove';
+  return /bon\s+[ée]tat/i.test(texte) ? 'bon_etat' : undefined;
+}
+
+function exterieur(texte: string): boolean | undefined {
+  if (/sans\s+(?:balcon|terrasse|ext[ée]rieur)/i.test(texte)) return false;
+  return /(?<![\p{L}])(?:balcons?|terrasses?|loggias?)(?![\p{L}])/iu.test(texte) ? true : undefined;
+}
+
 /** Extraction par règles : sans réseau, sans LLM. Chaque champ absent reste absent. */
 export function extraireChamps(texte: string): ChampsExtraits {
   const bruts: Record<string, unknown> = {
@@ -119,6 +144,8 @@ export function extraireChamps(texte: string): ChampsExtraits {
     taxeFonciere: taxeFonciere(texte),
     honorairesAgence: honoraires(texte),
     meuble: /meubl[ée]/i.test(texte) ? true : undefined,
+    etat: etat(texte),
+    exterieur: exterieur(texte),
   };
   const champs: Record<string, unknown> = {};
   for (const [cle, valeur] of Object.entries(bruts)) {

@@ -21,6 +21,17 @@ const OUI_NON = [
   { v: 'non', l: 'non' },
 ];
 const DPE = [{ v: '', l: '?' }, ...['A', 'B', 'C', 'D', 'E', 'F', 'G'].map((l) => ({ v: l, l }))];
+const ETATS = [
+  { v: '', l: '?' },
+  { v: 'a_renover', l: 'À rénover' },
+  { v: 'a_rafraichir', l: 'À rafraîchir' },
+  { v: 'bon_etat', l: 'Bon état' },
+  { v: 'renove', l: 'Rénové' },
+];
+const TYPES = [
+  { v: 'appartement', l: 'Appartement' },
+  { v: 'maison', l: 'Maison' },
+];
 const MODES = [
   { v: 'meuble_lld', l: 'Meublé longue durée' },
   { v: 'nu', l: 'Location nue' },
@@ -67,6 +78,8 @@ export function FormulaireProjet({
       <Carte>
         <h2 className="m-0 font-display text-[22px] font-semibold">Le bien</h2>
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+          <Champ cle="typeBien" libelle="Type de bien" options={TYPES} {...c} />
+
           <Champ cle="prix" libelle="Prix affiché" unite="€" erreur={erreurs.prix} {...c} />
           <Champ cle="honorairesAgence" libelle="dont honoraires d'agence" unite="€" {...c} />
           <Champ cle="surface" libelle="Surface" unite="m²" erreur={erreurs.surface} {...c} />
@@ -76,6 +89,9 @@ export function FormulaireProjet({
           <Champ cle="ascenseur" libelle="Ascenseur" options={OUI_NON} {...c} />
           <Champ cle="annee" libelle="Année de construction" {...c} />
           <Champ cle="dpe" libelle="DPE" options={DPE} {...c} />
+          <Champ cle="ges" libelle="GES" options={DPE} {...c} />
+          <Champ cle="etat" libelle="État" options={ETATS} {...c} />
+          <Champ cle="exterieur" libelle="Balcon ou terrasse" options={OUI_NON} {...c} />
           <Champ cle="codePostal" libelle="Code postal" erreur={erreurs.codePostal} {...c} />
           <Champ cle="ville" libelle="Ville" erreur={erreurs.ville} {...c} />
           <Champ cle="travaux" libelle="Travaux prévus" unite="€" {...c} />
@@ -123,6 +139,13 @@ export function FormulaireProjet({
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
           <Champ cle="chargesCoproMois" libelle="Charges de copropriété" unite="€/mois" {...c} />
           <Champ cle="taxeFonciere" libelle="Taxe foncière" unite="€/an" {...c} />
+          <Champ cle="lotsCopro" libelle="Lots de copropriété" {...c} />
+          <Champ
+            cle="coproEnProcedure"
+            libelle="Copropriété en procédure"
+            options={OUI_NON}
+            {...c}
+          />
         </div>
       </Carte>
 

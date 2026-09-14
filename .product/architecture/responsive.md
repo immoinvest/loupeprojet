@@ -1,6 +1,6 @@
 # Architecture : Responsive et application mobile
 
-Discovery : `../features/responsive-discovery.md`. Specs : `../specs/responsive-specs.md`. Décision de fond : `../adr/006-application-mobile.md`. État de la session : `../pipeline/responsive.json`.
+Discovery : `../features/responsive-discovery.md`. Specs : `../specs/responsive-specs.md`. Décision de fond : `../adr/007-application-mobile.md`. État de la session : `../pipeline/responsive.json`.
 
 ## 1. Existant réutilisé
 
@@ -55,7 +55,7 @@ apps/web/tests/
 ├── partage-recu.test.ts              lecture des paramètres de partage
 ├── hors-ligne.test.ts                stratégie de cache, fichiers de la coque, caches périmés, enregistrement
 └── telephone.test.tsx                partage natif (navigator.share simulé), partage reçu dans Nouveau projet, carte Extension
-.product/adr/006-application-mobile.md
+.product/adr/007-application-mobile.md
 ```
 
 ### À modifier
@@ -177,7 +177,7 @@ Remplacer le contenu de `src/sw/service-worker.ts` par un gestionnaire `activate
 
 ## 8. Ordre d'implémentation (un commit par étape)
 
-1. Docs : discovery, specs, architecture, ADR-006
+1. Docs : discovery, specs, architecture, ADR-007
 2. US-1 : `mise-en-page.tsx`, `menu.ts`, `BarreApp`, `AppLayout`, `Sidebar`, `menu.test.tsx`
 3. US-2 : `ProjetLayout` (en-tête), `BoutonPartager` extrait sans changement de comportement
 4. US-3a : MesProjets, NouveauProjet, FormulaireProjet, Champ, Rapport, Partage, `ui.tsx`

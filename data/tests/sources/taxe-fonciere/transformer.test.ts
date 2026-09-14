@@ -2,7 +2,10 @@ import { describe, expect, it } from 'vitest';
 import { lireCsv } from '../../../src/commun/csv.ts';
 import { decoderTexte, depuisMorceaux } from '../../../src/commun/flux.ts';
 import { urlAnneesRei, urlExportRei } from '../../../src/sources/taxe-fonciere/constantes.ts';
-import { tauxDepuisLignes } from '../../../src/sources/taxe-fonciere/transformer.ts';
+import {
+  normaliserCodeInsee,
+  tauxDepuisLignes,
+} from '../../../src/sources/taxe-fonciere/transformer.ts';
 import { lireFixture } from '../../aides/faux-contexte.ts';
 
 describe('urlExportRei', () => {
@@ -62,5 +65,30 @@ describe('tauxDepuisLignes', () => {
       tse: 0,
       total: 0.025,
     });
+  });
+
+  it('rétablit le zéro initial perdu par le REI pour les départements 01 à 09', async () => {
+    const communes = await tauxDepuisLignes(
+      depuisMorceaux([
+        { idcom: '1109', var: 'E12', valeur: '29.9' },
+        { idcom: '1109', var: 'E32', valeur: '1.1' },
+        { idcom: '97101', var: 'E12', valeur: '40' },
+      ]),
+    );
+    expect(Object.keys(communes).sort()).toEqual(['01109', '97101']);
+    expect(communes['01109']).toMatchObject({
+      commune: 0.299,
+      intercommunalite: 0.011,
+      total: 0.31,
+    });
+  });
+});
+
+describe('normaliserCodeInsee', () => {
+  it('complète un code de quatre chiffres et laisse les autres intacts', () => {
+    expect(normaliserCodeInsee('1109')).toBe('01109');
+    expect(normaliserCodeInsee('13055')).toBe('13055');
+    expect(normaliserCodeInsee('2A004')).toBe('2A004');
+    expect(normaliserCodeInsee('97101')).toBe('97101');
   });
 });

@@ -64,18 +64,23 @@ describe('MetaSchema', () => {
 });
 
 describe('DVF', () => {
-  it('valide une vente avec ou sans coordonnées', () => {
-    expect(
-      VenteSchema.parse({
-        date: '2025-01-09',
-        prix: 136000,
-        surface: 66,
-        type: 'appartement',
-        pieces: 4,
-        lat: 41.934774,
-        lon: 8.740565,
-      }).type,
-    ).toBe('appartement');
+  it('valide une vente avec ou sans coordonnées ni adresse', () => {
+    const complete = {
+      date: '2025-01-09',
+      prix: 136000,
+      surface: 66,
+      type: 'appartement',
+      pieces: 4,
+      lat: 41.934774,
+      lon: 8.740565,
+      idParcelle: '2A004000BO0412',
+      numero: 9001,
+      suffixe: null,
+      codeVoie: 'A090',
+      voie: 'RES DES CANNES',
+      carrez: 67.09,
+    };
+    expect(VenteSchema.parse(complete).type).toBe('appartement');
     expect(
       VenteSchema.safeParse({
         date: '2025-06-15',
@@ -85,8 +90,15 @@ describe('DVF', () => {
         pieces: 1,
         lat: null,
         lon: null,
+        idParcelle: null,
+        numero: null,
+        suffixe: null,
+        codeVoie: null,
+        voie: null,
+        carrez: null,
       }).success,
     ).toBe(true);
+    expect(VenteSchema.safeParse({ ...complete, idParcelle: '2A004-BO-412' }).success).toBe(false);
     expect(
       VenteSchema.safeParse({ date: '2025-06-15', prix: 0, surface: 31, type: 'maison' }).success,
     ).toBe(false);

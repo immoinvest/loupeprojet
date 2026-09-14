@@ -22,6 +22,12 @@ describe('calculerProjet — T3 Marseille', () => {
     expect(resultats.scenarios?.prixCibles).toHaveLength(3);
   });
 
+  it('estime le prix du bien et juge le prix affiché contre cette estimation', () => {
+    expect(resultats.estimation).toMatchObject({ centre: 206_733, prixM2Estime: 3181 });
+    expect(resultats.verdict.feux[0]?.valeur).toBeCloseTo(155_000 / 65 / 3181 - 1, 6);
+    expect(resultats.meta.aConfirmer).toContain('estimation.dpe');
+  });
+
   it('porte la version des règles et les drapeaux à afficher', () => {
     expect(resultats.meta.versionRegles).toBe('2026-09');
     expect(resultats.meta.aConfirmer).toContain('fiscalite.prelevementsSociaux.bic');

@@ -5,6 +5,12 @@ const OUI_NON: readonly Option[] = [
   { v: 'non', l: 'non' },
 ];
 const DPE: readonly Option[] = ['A', 'B', 'C', 'D', 'E', 'F', 'G'].map((l) => ({ v: l, l }));
+const ETATS: readonly Option[] = [
+  { v: 'a_renover', l: 'à rénover' },
+  { v: 'a_rafraichir', l: 'à rafraîchir' },
+  { v: 'bon_etat', l: 'bon état' },
+  { v: 'renove', l: 'rénové' },
+];
 
 export const OPTIONS_OUI_NON = OUI_NON;
 
@@ -18,6 +24,8 @@ export const GROUPE_BIEN: Groupe = {
     { chemin: 'bien.ascenseur', libelle: 'Ascenseur', type: 'bool', options: OUI_NON },
     { chemin: 'bien.annee', libelle: 'Année de construction', type: 'entier' },
     { chemin: 'bien.dpe', libelle: 'DPE', type: 'enum', options: DPE },
+    { chemin: 'bien.etat', libelle: 'État', type: 'enum', options: ETATS },
+    { chemin: 'bien.exterieur', libelle: 'Balcon ou terrasse', type: 'bool', options: OUI_NON },
     { chemin: 'bien.departement', libelle: 'Département', type: 'texte', obligatoire: true },
     { chemin: 'bien.copro.lots', libelle: 'Lots de copropriété', type: 'entier' },
   ],

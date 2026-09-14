@@ -1,3 +1,5 @@
+import type { ClasseEnergie, EtatBien, TypeBien } from '../schema/bien';
+
 /**
  * Toutes les constantes datées du moteur (barèmes, taux, seuils).
  * Une version = un fichier. Un projet porte la version qui l'a calculé.
@@ -23,6 +25,17 @@ export interface ComposantAmortissement {
   /** Part de la base amortissable (hors terrain). */
   readonly part: number;
   readonly dureeAnnees: number;
+}
+
+/** Précision de l'estimation du prix selon le nombre et la proximité des ventes comparables. */
+export type NiveauConfiance = 'elevee' | 'moyenne' | 'faible';
+
+export interface EffetEtage {
+  /** Rez-de-chaussée (ou en dessous), par rapport au 2e étage. */
+  readonly rezDeChaussee: number;
+  /** Premier étage à partir duquel `hauts` s'applique. */
+  readonly hautsAPartirDe: number;
+  readonly hauts: number;
 }
 
 export interface Regles {
@@ -116,6 +129,33 @@ export interface Regles {
     readonly rendementNet: { readonly bonDes: number; readonly surveillerDes: number };
     readonly cashflowMensuel: { readonly bonDes: number; readonly surveillerDes: number };
     readonly effort: { readonly bonJusqua: number; readonly surveillerJusqua: number };
+  };
+
+  readonly estimation: {
+    /** Quantile des ventes comparables où se place un bien selon son état (0,25 = premier quartile). */
+    readonly positionsEtat: Readonly<Record<EtatBien, number>>;
+    /** Écart de prix à la classe D ; `null` = écart non publié, aucune correction. */
+    readonly dpe: Readonly<Record<TypeBien, Readonly<Record<ClasseEnergie, number | null>>>>;
+    readonly etage: {
+      readonly avecAscenseur: EffetEtage;
+      readonly sansAscenseur: EffetEtage;
+    };
+    /** Prime d'un balcon ou d'une terrasse. */
+    readonly exterieur: number;
+    readonly charges: {
+      /** Charges de copropriété courantes, en € par m² et par an. */
+      readonly repereM2An: number;
+      /** Effet maximal des charges sur le prix, en proportion. */
+      readonly borne: number;
+    };
+    readonly confiance: {
+      readonly eleveeVentes: number;
+      readonly eleveeRayonMetres: number;
+      readonly moyenneVentes: number;
+      readonly moyenneRayonMetres: number;
+    };
+    /** Demi-largeur de la fourchette d'estimation selon la confiance. */
+    readonly marges: Readonly<Record<NiveauConfiance, number>>;
   };
 
   /** Chemins (notation pointée) des valeurs sans source officielle consolidée. */

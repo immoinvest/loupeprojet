@@ -1,8 +1,12 @@
-import type { ClasseEnergie, ModeLocation } from '@loupe/moteur';
+import type { ClasseEnergie, EtatBien, ModeLocation, TypeBien } from '@loupe/moteur';
 
 import type { AnnonceResolue, ChampsExtraits, Provenance, SaisieProjet } from '@/annonces';
 
 export type Cle =
+  | 'typeBien'
+  | 'ges'
+  | 'lotsCopro'
+  | 'coproEnProcedure'
   | 'prix'
   | 'honorairesAgence'
   | 'surface'
@@ -12,6 +16,8 @@ export type Cle =
   | 'ascenseur'
   | 'annee'
   | 'dpe'
+  | 'etat'
+  | 'exterieur'
   | 'codePostal'
   | 'ville'
   | 'chargesCoproMois'
@@ -34,6 +40,10 @@ export interface ValeursInitiales {
 }
 
 const VIDE: Valeurs = {
+  typeBien: 'appartement',
+  ges: '',
+  lotsCopro: '',
+  coproEnProcedure: '',
   prix: '',
   honorairesAgence: '',
   surface: '',
@@ -43,6 +53,8 @@ const VIDE: Valeurs = {
   ascenseur: '',
   annee: '',
   dpe: '',
+  etat: '',
+  exterieur: '',
   codePostal: '',
   ville: '',
   chargesCoproMois: '',
@@ -65,6 +77,10 @@ export function valeursDepuisChamps(champs: ChampsExtraits): ValeursInitiales {
     valeurs[cle] = typeof v === 'boolean' ? (v ? 'oui' : 'non') : String(v);
     provenance[cle] = 'annonce';
   };
+  poser('typeBien', champs.typeBien);
+  poser('ges', champs.ges);
+  poser('lotsCopro', champs.lotsCopro);
+  poser('coproEnProcedure', champs.coproEnProcedure);
   poser('prix', champs.prix);
   poser('honorairesAgence', champs.honorairesAgence);
   poser('surface', champs.surface);
@@ -74,6 +90,8 @@ export function valeursDepuisChamps(champs: ChampsExtraits): ValeursInitiales {
   poser('ascenseur', champs.ascenseur);
   poser('annee', champs.annee);
   poser('dpe', champs.dpe);
+  poser('etat', champs.etat);
+  poser('exterieur', champs.exterieur);
   poser('codePostal', champs.codePostal);
   poser('ville', champs.ville);
   poser('chargesCoproMois', champs.chargesCoproMois);
@@ -118,6 +136,10 @@ export function versSaisie(
 ): SaisieProjet {
   const opt = (cle: Cle): number | undefined => nombre(v[cle]);
   return {
+    typeBien: v.typeBien as TypeBien,
+    ges: v.ges === '' ? undefined : (v.ges as ClasseEnergie),
+    lotsCopro: opt('lotsCopro'),
+    coproEnProcedure: v.coproEnProcedure === '' ? undefined : v.coproEnProcedure === 'oui',
     prix: nombre(v.prix) ?? 0,
     honorairesAgence: opt('honorairesAgence'),
     surface: nombre(v.surface) ?? 0,
@@ -127,6 +149,8 @@ export function versSaisie(
     ascenseur: v.ascenseur === '' ? undefined : v.ascenseur === 'oui',
     annee: opt('annee'),
     dpe: v.dpe === '' ? undefined : (v.dpe as ClasseEnergie),
+    etat: v.etat === '' ? undefined : (v.etat as EtatBien),
+    exterieur: v.exterieur === '' ? undefined : v.exterieur === 'oui',
     codePostal: v.codePostal.trim(),
     ville: v.ville.trim(),
     chargesCoproMois: opt('chargesCoproMois'),

@@ -42,6 +42,9 @@ const popup = options(
   'popup.ts',
   dev ? { banner: { js: `globalThis.LOUPE_BASE_URL = ${JSON.stringify(BASE_URL_DEV)};` } } : {},
 );
+const pont = options('pont.ts', {});
+const arrierePlan = options('arriere-plan.ts', {});
+const entrees = [contenu, popup, pont, arrierePlan];
 
 function copierStatiques(): void {
   mkdirSync(join(dossierChrome, 'icones'), { recursive: true });
@@ -53,7 +56,10 @@ function copierStatiques(): void {
   }
 }
 
-/** Firefox exige un identifiant d'extension et une version minimale pour le Manifest V3. */
+/**
+ * Firefox exige un identifiant d'extension et une version minimale pour le Manifest V3, et lance
+ * l'arrière-plan comme script d'événements plutôt que comme service worker.
+ */
 function deriverFirefox(): void {
   rmSync(dossierFirefox, { recursive: true, force: true });
   cpSync(dossierChrome, dossierFirefox, { recursive: true });
@@ -63,20 +69,21 @@ function deriverFirefox(): void {
   manifeste.browser_specific_settings = {
     gecko: { id: 'loupe@loupeprojet.pages.dev', strict_min_version: '128.0' },
   };
+  manifeste.background = { scripts: ['arriere-plan.js'] };
   writeFileSync(join(dossierFirefox, 'manifest.json'), `${JSON.stringify(manifeste, null, 2)}\n`);
 }
 
 rmSync(join(racine, 'dist'), { recursive: true, force: true });
 copierStatiques();
 if (surveiller) {
-  const contextes = await Promise.all([context(contenu), context(popup)]);
+  const contextes = await Promise.all(entrees.map((entree) => context(entree)));
   await Promise.all(contextes.map((c) => c.watch()));
   deriverFirefox();
   process.stdout.write(
     `Extension en veille (${dev ? BASE_URL_DEV : 'production'}) : ${dossierChrome}\n`,
   );
 } else {
-  await Promise.all([build(contenu), build(popup)]);
+  await Promise.all(entrees.map((entree) => build(entree)));
   deriverFirefox();
   process.stdout.write(`Extension construite : ${dossierChrome} et ${dossierFirefox}\n`);
 }

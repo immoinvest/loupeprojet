@@ -40,6 +40,7 @@ describe('champsDepuisCapture', () => {
       etage: 3,
       ascenseur: false,
       dpe: 'D',
+      ges: 'B',
       codePostal: '13005',
       ville: 'Marseille',
       // Idem pour l'année : 1962 (structuré) plutôt que 1958 (texte).

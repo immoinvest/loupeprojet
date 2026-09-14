@@ -78,6 +78,20 @@ body {
   background: var(--accent-fonce);
 }
 
+.bouton-secondaire {
+  background: var(--surface);
+  color: var(--accent);
+  border: 2px solid var(--accent);
+}
+
+.bouton-secondaire:hover:not(:disabled) {
+  background: var(--accent-fond);
+}
+
+.bouton[hidden] {
+  display: none;
+}
+
 .bouton:disabled {
   opacity: 0.5;
   cursor: not-allowed;

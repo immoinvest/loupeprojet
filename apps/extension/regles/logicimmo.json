@@ -3,21 +3,49 @@
   "portail": "logicimmo",
   "champs": {
     "prix": [
-      { "source": "jsonld", "chemin": "offers.price", "type": "montant" },
-      { "source": "meta", "nom": "product:price:amount", "type": "montant" },
       {
-        "source": "css",
-        "selecteur": "[data-testid=\"cdp-price\"], .price, [class*=\"Price\"], [class*=\"price\"]",
-        "regex": "(\\d[\\d\\s.]*)\\s*€",
+        "source": "jsonld",
+        "chemin": "offers.price",
+        "typeLd": "RealEstateListing",
         "type": "montant"
+      },
+      {
+        "source": "json",
+        "selecteur": "#__UFRN_LIFECYCLE_SERVERREQUEST__",
+        "chemin": "app_cldp.data.classified.sections.mortgage.price",
+        "type": "montant"
+      },
+      { "source": "meta", "nom": "og:title", "regex": "(\\d[\\d\\s.]*)\\s*€", "type": "montant" }
+    ],
+    "typeBien": [
+      {
+        "source": "json",
+        "selecteur": "#__UFRN_LIFECYCLE_SERVERREQUEST__",
+        "chemin": "app_cldp.data.classified.rawData.propertyType",
+        "regex": "^apartment$",
+        "type": "texte",
+        "valeur": "appartement"
+      },
+      {
+        "source": "json",
+        "selecteur": "#__UFRN_LIFECYCLE_SERVERREQUEST__",
+        "chemin": "app_cldp.data.classified.rawData.propertyType",
+        "regex": "^house$",
+        "type": "texte",
+        "valeur": "maison"
       }
     ],
     "surface": [
-      { "source": "jsonld", "chemin": "floorSize.value", "type": "nombre" },
       {
-        "source": "css",
-        "selecteur": "[data-testid=\"cdp-summary\"] li, .mainInfos li, [class*=\"features\"] li, h1",
-        "regex": "(\\d+(?:[,.]\\d+)?)\\s*m²",
+        "source": "json",
+        "selecteur": "#__UFRN_LIFECYCLE_SERVERREQUEST__",
+        "chemin": "app_cldp.data.classified.sections.hardFacts.facts[type=livingSpace].splitValue",
+        "type": "nombre"
+      },
+      {
+        "source": "jsonld",
+        "chemin": "itemOffered.floorSize.value",
+        "typeLd": "RealEstateListing",
         "type": "nombre"
       },
       {
@@ -28,93 +56,118 @@
       }
     ],
     "pieces": [
-      { "source": "jsonld", "chemin": "numberOfRooms", "type": "entier" },
       {
-        "source": "css",
-        "selecteur": "[data-testid=\"cdp-summary\"] li, .mainInfos li, [class*=\"features\"] li, h1",
-        "regex": "(\\d+)\\s*pièces?",
+        "source": "json",
+        "selecteur": "#__UFRN_LIFECYCLE_SERVERREQUEST__",
+        "chemin": "app_cldp.data.classified.sections.hardFacts.facts[type=numberOfRooms].splitValue",
+        "type": "entier"
+      },
+      {
+        "source": "jsonld",
+        "chemin": "itemOffered.numberOfRooms",
+        "typeLd": "RealEstateListing",
         "type": "entier"
       },
       { "source": "meta", "nom": "og:title", "regex": "(\\d+)\\s*pièces?", "type": "entier" }
     ],
     "chambres": [
-      { "source": "jsonld", "chemin": "numberOfBedrooms", "type": "entier" },
       {
-        "source": "css",
-        "selecteur": "[data-testid=\"cdp-summary\"] li, .mainInfos li, [class*=\"features\"] li",
-        "regex": "(\\d+)\\s*chambres?",
+        "source": "json",
+        "selecteur": "#__UFRN_LIFECYCLE_SERVERREQUEST__",
+        "chemin": "app_cldp.data.classified.sections.hardFacts.facts[type=numberOfBedrooms].splitValue",
         "type": "entier"
       }
     ],
     "etage": [
       {
-        "source": "css",
-        "selecteur": "[data-testid=\"cdp-summary\"] li, .mainInfos li, [class*=\"features\"] li",
-        "regex": "(\\d+)\\s*(?:er|e|ème|eme)?\\s*étage|(?:rez[-\\s]de[-\\s]chauss[ée]e|RDC)",
+        "source": "json",
+        "selecteur": "#__UFRN_LIFECYCLE_SERVERREQUEST__",
+        "chemin": "app_cldp.data.classified.sections.features.preview[icon=floors].value",
+        "regex": "(\\d+)\\s*(?:er|e|ème)?\\s*étage|rez-de-chauss\\S*",
+        "type": "etage"
+      },
+      {
+        "source": "json",
+        "selecteur": "#__UFRN_LIFECYCLE_SERVERREQUEST__",
+        "chemin": "app_cldp.data.classified.sections.hardFacts.facts[type=numberOfFloors].label",
+        "regex": "^(\\d+)/",
         "type": "etage"
       }
     ],
     "ascenseur": [
       {
-        "source": "css",
-        "selecteur": "[data-testid=\"cdp-summary\"] li, .mainInfos li, [class*=\"features\"] li",
-        "regex": "^sans\\s+ascenseur$",
+        "source": "json",
+        "selecteur": "#__UFRN_LIFECYCLE_SERVERREQUEST__",
+        "chemin": "app_cldp.data.classified.sections.features.preview[icon=elevator].value",
+        "regex": "^pas d",
         "type": "booleen",
         "valeur": false
       },
       {
-        "source": "css",
-        "selecteur": "[data-testid=\"cdp-summary\"] li, .mainInfos li, [class*=\"features\"] li",
-        "regex": "^ascenseur$",
+        "source": "json",
+        "selecteur": "#__UFRN_LIFECYCLE_SERVERREQUEST__",
+        "chemin": "app_cldp.data.classified.sections.features.preview[icon=elevator].value",
+        "regex": "ascenseur",
         "type": "booleen",
         "valeur": true
       }
     ],
     "dpe": [
       {
-        "source": "css",
-        "selecteur": "[data-testid=\"cdp-dpe\"] [class*=\"active\"], .dpe [class*=\"active\"], [class*=\"dpe\"] [class*=\"active\"]",
-        "regex": "\\b([A-G])\\b",
+        "source": "json",
+        "selecteur": "#__UFRN_LIFECYCLE_SERVERREQUEST__",
+        "chemin": "app_cldp.data.classified.sections.energy.certificates[0].scales[type=FR_ENERGY_AFTER_2021].efficiencyClass.rating",
+        "type": "classe"
+      },
+      {
+        "source": "json",
+        "selecteur": "#__UFRN_LIFECYCLE_SERVERREQUEST__",
+        "chemin": "app_cldp.data.classified.sections.energy.certificates[0].scales[type=FR_ENERGY_BEFORE_2021].efficiencyClass.rating",
         "type": "classe"
       }
     ],
     "ges": [
       {
-        "source": "css",
-        "selecteur": "[data-testid=\"cdp-ges\"] [class*=\"active\"], .ges [class*=\"active\"], [class*=\"ges\"] [class*=\"active\"]",
-        "regex": "\\b([A-G])\\b",
+        "source": "json",
+        "selecteur": "#__UFRN_LIFECYCLE_SERVERREQUEST__",
+        "chemin": "app_cldp.data.classified.sections.energy.certificates[0].scales[type=FR_GHG_AFTER_2021].efficiencyClass.rating",
+        "type": "classe"
+      },
+      {
+        "source": "json",
+        "selecteur": "#__UFRN_LIFECYCLE_SERVERREQUEST__",
+        "chemin": "app_cldp.data.classified.sections.energy.certificates[0].scales[type=FR_GHG_BEFORE_2021].efficiencyClass.rating",
         "type": "classe"
       }
     ],
     "ville": [
-      { "source": "jsonld", "chemin": "address.addressLocality", "type": "texte" },
       {
-        "source": "css",
-        "selecteur": "[data-testid=\"cdp-location\"], .address, [class*=\"ddress\"]",
-        "regex": "^(.+?)\\s*\\(?\\d{5}\\)?",
-        "type": "texte"
-      },
-      {
-        "source": "meta",
-        "nom": "og:title",
-        "regex": "\\b(?:à|-)\\s+([\\p{L}'’ -]+?)\\s*\\(?\\d{5}",
+        "source": "json",
+        "selecteur": "#__UFRN_LIFECYCLE_SERVERREQUEST__",
+        "chemin": "app_cldp.data.classified.sections.location.address.city",
         "type": "texte"
       }
     ],
     "codePostal": [
-      { "source": "jsonld", "chemin": "address.postalCode", "type": "codePostal" },
       {
-        "source": "css",
-        "selecteur": "[data-testid=\"cdp-location\"], .address, [class*=\"ddress\"]",
+        "source": "json",
+        "selecteur": "#__UFRN_LIFECYCLE_SERVERREQUEST__",
+        "chemin": "app_cldp.data.classified.sections.location.address.zipCode",
         "type": "codePostal"
       },
       { "source": "meta", "nom": "og:title", "type": "codePostal" }
     ],
     "description": [
-      { "source": "jsonld", "chemin": "description", "type": "texte" },
       {
-        "source": "css",
-        "selecteur": "[data-testid=\"cdp-description\"], .description, [class*=\"escription\"]",
+        "source": "json",
+        "selecteur": "#__UFRN_LIFECYCLE_SERVERREQUEST__",
+        "chemin": "app_cldp.data.classified.sections.description.description",
+        "type": "texte"
+      },
+      {
+        "source": "jsonld",
+        "chemin": "description",
+        "typeLd": "RealEstateListing",
         "type": "texte"
       },
       { "source": "meta", "nom": "og:description", "type": "texte" }

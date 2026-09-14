@@ -3,6 +3,7 @@ import type { Regles } from '@loupe/moteur';
 import type { Defauts } from '@/analyses';
 
 import { pct, pctSigne, type ConstanteMethode, type SectionMethode } from './methode-commun';
+import { sectionEstimation } from './methode-estimation';
 import {
   sectionAcquisition,
   sectionCashflow,
@@ -34,6 +35,7 @@ export function sectionsMethode(regles: Regles, defauts: Defauts): SectionMethod
     sectionNuReel(regles),
     sectionRevente(regles, defauts),
     sectionTri(),
+    sectionEstimation(regles),
     sectionVerdict(regles),
     sectionScenarios(regles),
     sectionDefauts(defauts),

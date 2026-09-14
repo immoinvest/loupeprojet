@@ -2,13 +2,26 @@ import { lireChemin } from './chemin';
 import { appliquerRegex, normaliserTexte } from './convertir';
 import type { Extracteur } from './schema';
 
-function analyserJson(texte: string | null): unknown {
-  if (texte === null) return undefined;
+function essayerJson(texte: string): unknown {
   try {
     return JSON.parse(texte) as unknown;
   } catch {
     return undefined;
   }
+}
+
+/**
+ * Contenu JSON d'un `<script>` : du JSON pur (`__NEXT_DATA__`), ou un état posé par
+ * `window["X"]=JSON.parse("…")` (SeLoger, Logic-Immo), dont la chaîne est décodée puis lue.
+ */
+export function analyserJson(texte: string | null): unknown {
+  if (texte === null) return undefined;
+  const direct = essayerJson(texte);
+  if (direct !== undefined) return direct;
+  const litteral = /JSON\.parse\(("(?:[^"\\]|\\.)*")\)/s.exec(texte)?.[1];
+  if (litteral === undefined) return undefined;
+  const chaine = essayerJson(litteral);
+  return typeof chaine === 'string' ? essayerJson(chaine) : undefined;
 }
 
 /** Tous les nœuds JSON-LD de la page : tableaux et `@graph` aplatis, blocs illisibles ignorés. */
@@ -104,16 +117,26 @@ function lireCss(
   return undefined;
 }
 
-/** La valeur brute que désigne un extracteur dans le document, ou `undefined`. Ne lève jamais. */
-export function lireSource(document: Document, extracteur: Extracteur): unknown {
+function premierScriptLisible(document: Document, selecteur: string): unknown {
+  for (const script of selectionner(document, selecteur)) {
+    const valeur = analyserJson(script.textContent);
+    if (valeur !== undefined) return valeur;
+  }
+  return undefined;
+}
+
+/**
+ * La valeur brute que désigne un extracteur dans le document (ou dans les données chargées pour
+ * l'annonce, source `donnees`), ou `undefined`. Ne lève jamais.
+ */
+export function lireSource(document: Document, extracteur: Extracteur, donnees?: unknown): unknown {
   switch (extracteur.source) {
     case 'jsonld':
       return lireJsonLd(document, extracteur.chemin, extracteur.typeLd);
     case 'json':
-      return lireChemin(
-        analyserJson(selectionner(document, extracteur.selecteur)[0]?.textContent ?? null),
-        extracteur.chemin,
-      );
+      return lireChemin(premierScriptLisible(document, extracteur.selecteur), extracteur.chemin);
+    case 'donnees':
+      return lireChemin(donnees, extracteur.chemin);
     case 'meta':
       return (
         selectionner(

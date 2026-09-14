@@ -15,8 +15,25 @@
         "chemin": "props.pageProps.ad.price",
         "type": "montant"
       },
-      { "source": "jsonld", "chemin": "offers.price", "type": "montant" },
       { "source": "css", "selecteur": "[data-qa-id=\"adview_price\"]", "type": "montant" }
+    ],
+    "typeBien": [
+      {
+        "source": "json",
+        "selecteur": "#__NEXT_DATA__",
+        "chemin": "props.pageProps.ad.attributes[key=real_estate_type].value_label",
+        "regex": "^appartement",
+        "type": "texte",
+        "valeur": "appartement"
+      },
+      {
+        "source": "json",
+        "selecteur": "#__NEXT_DATA__",
+        "chemin": "props.pageProps.ad.attributes[key=real_estate_type].value_label",
+        "regex": "^maison",
+        "type": "texte",
+        "valeur": "maison"
+      }
     ],
     "surface": [
       {
@@ -52,12 +69,6 @@
         "selecteur": "#__NEXT_DATA__",
         "chemin": "props.pageProps.ad.attributes[key=bedrooms].value",
         "type": "entier"
-      },
-      {
-        "source": "css",
-        "selecteur": "[data-qa-id=\"criteria_item_bedrooms\"]",
-        "regex": "(\\d+)",
-        "type": "entier"
       }
     ],
     "etage": [
@@ -65,12 +76,6 @@
         "source": "json",
         "selecteur": "#__NEXT_DATA__",
         "chemin": "props.pageProps.ad.attributes[key=floor_number].value",
-        "type": "etage"
-      },
-      {
-        "source": "css",
-        "selecteur": "[data-qa-id=\"criteria_item_floor_number\"]",
-        "regex": "(\\d+|rez[-\\s]de[-\\s]chauss[ée]e|RDC)",
         "type": "etage"
       }
     ],
@@ -80,12 +85,6 @@
         "selecteur": "#__NEXT_DATA__",
         "chemin": "props.pageProps.ad.attributes[key=elevator].value_label",
         "type": "booleen"
-      },
-      {
-        "source": "css",
-        "selecteur": "[data-qa-id=\"criteria_item_elevator\"]",
-        "regex": "\\b(oui|non)\\b",
-        "type": "booleen"
       }
     ],
     "dpe": [
@@ -93,12 +92,6 @@
         "source": "json",
         "selecteur": "#__NEXT_DATA__",
         "chemin": "props.pageProps.ad.attributes[key=energy_rate].value",
-        "type": "classe"
-      },
-      {
-        "source": "css",
-        "selecteur": "[data-qa-id=\"criteria_item_energy_rate\"]",
-        "regex": "\\b([A-G])\\b",
         "type": "classe"
       }
     ],
@@ -108,28 +101,9 @@
         "selecteur": "#__NEXT_DATA__",
         "chemin": "props.pageProps.ad.attributes[key=ges].value",
         "type": "classe"
-      },
-      {
-        "source": "css",
-        "selecteur": "[data-qa-id=\"criteria_item_ges\"]",
-        "regex": "\\b([A-G])\\b",
-        "type": "classe"
       }
     ],
     "chargesCopro": [
-      {
-        "source": "css",
-        "selecteur": "[data-qa-id=\"criteria_item_annual_charges\"]",
-        "regex": "(\\d[\\d\\s]*)\\s*€\\s*/\\s*mois",
-        "type": "montant"
-      },
-      {
-        "source": "css",
-        "selecteur": "[data-qa-id=\"criteria_item_annual_charges\"]",
-        "regex": "(\\d[\\d\\s]*)\\s*€\\s*/\\s*an",
-        "type": "montant",
-        "diviser": 12
-      },
       {
         "source": "json",
         "selecteur": "#__NEXT_DATA__",
@@ -138,17 +112,19 @@
         "diviser": 12
       }
     ],
+    "taxeFonciere": [
+      {
+        "source": "json",
+        "selecteur": "#__NEXT_DATA__",
+        "chemin": "props.pageProps.ad.attributes[key=property_tax].value",
+        "type": "montant"
+      }
+    ],
     "anneeConstruction": [
       {
         "source": "json",
         "selecteur": "#__NEXT_DATA__",
         "chemin": "props.pageProps.ad.attributes[key=building_year].value",
-        "type": "entier"
-      },
-      {
-        "source": "css",
-        "selecteur": "[data-qa-id=\"criteria_item_building_year\"]",
-        "regex": "((?:18|19|20)\\d\\d)",
         "type": "entier"
       }
     ],

@@ -1,6 +1,6 @@
 /** Explications longues, écrites une fois, affichées derrière « Pourquoi ? ». */
 export const EXPLICATIONS = {
-  prix: "On compare aux ventes signées chez le notaire (base DVF), pas aux prix affichés dans les annonces, qui sont 5 à 10 % au-dessus du prix final. Le rayon dépend de la précision de l'adresse.",
+  prix: "On compare au prix estimé du bien, calculé sur les ventes signées chez le notaire (base DVF) ramenées à aujourd'hui, pas aux prix affichés dans les annonces, qui sont 5 à 10 % au-dessus du prix final. L'état, l'étage, le DPE, le balcon et les charges ajustent l'estimation ; l'onglet Estimation montre chaque vente et chaque source.",
   cashflow:
     "Le cash-flow retient toutes les charges : crédit et assurance, taxe foncière, copropriété, assurance propriétaire, comptable, CFE, provision d'entretien, et les semaines sans locataire. C'est ce que les annonces oublient.",
   fiscalite:

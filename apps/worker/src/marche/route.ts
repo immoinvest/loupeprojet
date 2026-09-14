@@ -3,7 +3,8 @@ import type { BlankEnv } from 'hono/types';
 import { z } from 'zod';
 
 import type { Dependances } from '../dependances';
-import { messageDe, reponseErreur } from '../erreurs';
+import { lireJsonValide, nouvellePasse, type Passe } from '../donnees/passe';
+import { reponseErreur } from '../erreurs';
 import { ecrireCache, lireCache, repondre } from '../http';
 import { cleCache } from '../proxy/cache';
 import { assemblerMarche, type ParametresMarche } from './assembler';
@@ -13,12 +14,12 @@ import {
   departementDe,
   IndexDvfSchema,
   LoyersSchema,
-  millesimesDvfCandidats,
   TypeLogementSchema,
   ZonageSchema,
   type IndexDvf,
   type Loyers,
 } from './fichiers';
+import { millesimesDvfAEssayer } from './millesime';
 
 /** Les référentiels changent au mieux une fois par mois : une réponse vaut 24 heures. */
 export const TTL_MARCHE_SECONDES = 24 * 3600;
@@ -35,47 +36,23 @@ export const ParametresMarcheSchema = z.object({
   pieces: z.coerce.number().int().min(1).max(30).optional(),
 });
 
-/** Une passe de lecture : note si un fichier n'a pas pu être lu (on ne met pas alors la réponse en cache). */
-interface Passe {
-  readonly deps: Dependances;
-  panne: boolean;
-}
-
-async function lire<T>(passe: Passe, cle: string, schema: z.ZodType<T>): Promise<T | null> {
-  let brut: unknown;
-  try {
-    brut = await passe.deps.donnees.lireJson(cle);
-  } catch (erreur) {
-    passe.panne = true;
-    passe.deps.journal.erreur('donnees.lecture_impossible', { cle, raison: messageDe(erreur) });
-    return null;
-  }
-  if (brut === null) return null;
-  const lecture = schema.safeParse(brut);
-  if (!lecture.success) {
-    passe.deps.journal.erreur('donnees.invalides', { cle });
-    return null;
-  }
-  return lecture.data;
-}
-
-/** `dvf/courant.json` n'existe qu'après une passe France entière : sinon, on essaie les derniers millésimes. */
 async function lireDvf(passe: Passe, departement: string): Promise<IndexDvf | null> {
-  const courant = await lire(passe, 'dvf/courant.json', CourantSchema);
-  const millesimes =
-    courant === null ? millesimesDvfCandidats(passe.deps.maintenant()) : [courant.millesime];
-  for (const millesime of millesimes) {
-    const index = await lire(passe, `dvf/${millesime}/index/${departement}.json`, IndexDvfSchema);
+  for (const millesime of await millesimesDvfAEssayer(passe)) {
+    const index = await lireJsonValide(
+      passe,
+      `dvf/${millesime}/index/${departement}.json`,
+      IndexDvfSchema,
+    );
     if (index !== null) return index;
   }
   return null;
 }
 
 async function lireLoyers(passe: Passe, departement: string): Promise<Loyers | null> {
-  const courant = await lire(passe, 'loyers/courant.json', CourantSchema);
+  const courant = await lireJsonValide(passe, 'loyers/courant.json', CourantSchema);
   return courant === null
     ? null
-    : lire(passe, `loyers/${courant.millesime}/${departement}.json`, LoyersSchema);
+    : lireJsonValide(passe, `loyers/${courant.millesime}/${departement}.json`, LoyersSchema);
 }
 
 /**
@@ -95,12 +72,12 @@ export function creerMarche(deps: Dependances): Handler<BlankEnv, '/marche'> {
     if (enCache !== null) return repondre(c, enCache, 'HIT');
 
     const departement = departementDe(parametres.codeInsee);
-    const passe: Passe = { deps, panne: false };
+    const passe = nouvellePasse(deps);
     const [communes, dvf, loyers, zonage] = await Promise.all([
-      lire(passe, `communes/${departement}.json`, CommunesSchema),
+      lireJsonValide(passe, `communes/${departement}.json`, CommunesSchema),
       lireDvf(passe, departement),
       lireLoyers(passe, departement),
-      lire(passe, `zonage/${departement}.json`, ZonageSchema),
+      lireJsonValide(passe, `zonage/${departement}.json`, ZonageSchema),
     ]);
     const reponse = assemblerMarche(parametres, departement, { communes, dvf, loyers, zonage });
     const texte = JSON.stringify({

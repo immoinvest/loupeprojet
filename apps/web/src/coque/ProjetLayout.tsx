@@ -59,6 +59,7 @@ export function ProjetIntrouvable(): JSX.Element {
 
 const ONGLETS = [
   { to: '', libelle: 'Rapport' },
+  { to: 'adresse', libelle: 'Estimation' },
   { to: 'hypotheses', libelle: 'Hypothèses' },
   { to: 'fiscalite', libelle: 'Fiscalité' },
   { to: 'revente', libelle: 'Revente' },

@@ -2,8 +2,10 @@ import {
   VERSION_REGLES_COURANTE,
   obtenirRegles,
   type ClasseEnergie,
+  type EtatBien,
   type ModeLocation,
   type ProjetEntree,
+  type TypeBien,
 } from '@loupe/moteur';
 
 import type { MarcheEnrichi } from '@/enrichissement';
@@ -14,6 +16,10 @@ export type Provenance = 'annonce' | 'estime' | 'utilisateur';
 
 /** Ce que l'écran Vérifier envoie : les valeurs et, pour chacune, d'où elle vient. */
 export interface SaisieProjet {
+  readonly typeBien?: TypeBien | undefined;
+  readonly ges?: ClasseEnergie | undefined;
+  readonly lotsCopro?: number | undefined;
+  readonly coproEnProcedure?: boolean | undefined;
   readonly prix: number;
   readonly honorairesAgence?: number | undefined;
   readonly surface: number;
@@ -23,6 +29,8 @@ export interface SaisieProjet {
   readonly ascenseur?: boolean | undefined;
   readonly annee?: number | undefined;
   readonly dpe?: ClasseEnergie | undefined;
+  readonly etat?: EtatBien | undefined;
+  readonly exterieur?: boolean | undefined;
   readonly codePostal: string;
   readonly ville: string;
   readonly chargesCoproMois?: number | undefined;
@@ -102,12 +110,35 @@ export function construireProjet(
     'achat.mobilier': 'estime',
   };
   if (s.dpe !== undefined) provenance['bien.dpe'] = s.provenance.dpe ?? 'utilisateur';
+  if (s.typeBien !== undefined) provenance['bien.type'] = s.provenance.typeBien ?? 'utilisateur';
+  if (s.ges !== undefined) provenance['bien.ges'] = s.provenance.ges ?? 'utilisateur';
+  if (s.etat !== undefined) provenance['bien.etat'] = s.provenance.etat ?? 'utilisateur';
+  if (s.exterieur !== undefined) {
+    provenance['bien.exterieur'] = s.provenance.exterieur ?? 'utilisateur';
+  }
+  if (s.lotsCopro !== undefined) {
+    provenance['bien.copro.lots'] = s.provenance.lotsCopro ?? 'utilisateur';
+  }
+  if (s.coproEnProcedure !== undefined) {
+    provenance['bien.copro.procedure'] = s.provenance.coproEnProcedure ?? 'utilisateur';
+  }
+  const copro =
+    s.lotsCopro === undefined && s.coproEnProcedure === undefined
+      ? {}
+      : {
+          copro: {
+            ...(s.lotsCopro === undefined ? {} : { lots: s.lotsCopro }),
+            ...(s.coproEnProcedure === undefined ? {} : { procedure: s.coproEnProcedure }),
+          },
+        };
 
   return {
     id,
     versionRegles: VERSION_REGLES_COURANTE,
     bien: {
-      type: 'appartement',
+      type: s.typeBien ?? 'appartement',
+      ...(s.ges === undefined ? {} : { ges: s.ges }),
+      ...copro,
       surface: s.surface,
       pieces: s.pieces ?? Math.max(1, Math.round(s.surface / 22)),
       ...(s.chambres === undefined ? {} : { chambres: s.chambres }),
@@ -115,6 +146,8 @@ export function construireProjet(
       ...(s.ascenseur === undefined ? {} : { ascenseur: s.ascenseur }),
       ...(s.annee === undefined ? {} : { annee: s.annee }),
       ...(s.dpe === undefined ? {} : { dpe: s.dpe }),
+      ...(s.etat === undefined ? {} : { etat: s.etat }),
+      ...(s.exterieur === undefined ? {} : { exterieur: s.exterieur }),
       departement: departementDuCodePostal(s.codePostal),
     },
     ...(enrichi === null ? {} : { marche: enrichi.marche }),

@@ -2,7 +2,7 @@
 
 Colle le lien d'une annonce immobilière, obtiens l'analyse complète de rentabilité locative : financement, cash-flow, fiscalité (quatre régimes côte à côte), revente, rendement et TRI, verdict à cinq feux, scénarios « et si ».
 
-Gratuit, sans compte, tout se calcule dans le navigateur. Spécification produit : [`.product/reference/spec-produit-v1.html`](.product/reference/spec-produit-v1.html). Décisions d'architecture : [`.product/adr/`](.product/adr/).
+Gratuit, sans compte obligatoire (compte optionnel par Google, Apple ou code e-mail), tout se calcule dans le navigateur. Spécification produit : [`.product/reference/spec-produit-v1.html`](.product/reference/spec-produit-v1.html). Décisions d'architecture : [`.product/adr/`](.product/adr/).
 
 ## Stack
 
@@ -15,6 +15,7 @@ packages/moteur/     Moteur de calcul pur (TypeScript + Zod), 100 % couvert par 
 packages/capture/    Contrat de capture d'une annonce (schéma, encodage pour fragment d'URL, règles de lecture par portail), partagé par l'extension, le bouton-favori et le web
 apps/web/            Application React + Vite + Tailwind v4 (coque SaaS, Mes projets, Nouveau projet, Rapport, Hypothèses, Fiscalité, Revente, Visite, Comparer, Méthode, impression, partage, Extension), Cloudflare Pages
 apps/worker/         Serveur Hono sur Cloudflare Workers : proxy des données publiques (cache KV, limite de débit)
+apps/comptes/        Comptes optionnels (Better Auth sur Hono) : Google, Apple ou code e-mail, servis par le worker Pages sur l'origine du site, base D1
 apps/extension/      Extension navigateur (Manifest V3, Chrome/Edge/Firefox) : lit l'annonce ouverte et l'envoie à Deklic ; règles par portail
 data/                Référentiels publics pré-agrégés (DVF, loyers ANIL, taxe foncière, zonage ABC, usure, communes) publiés sur R2 par GitHub Action
 marque/              Identité de marque Deklic : logos SVG, favicon, icônes, image de partage, guide (ADR-005)
@@ -30,12 +31,12 @@ npm run lint          # eslint . --max-warnings=0
 npm run format:check  # prettier --check .
 npm run typecheck     # tsc --noEmit dans chaque workspace
 npm run test          # vitest run
-npm run test:coverage # vitest run --coverage (seuil 100 % sur packages/moteur, apps/worker, data et les modules de logique d'apps/web)
+npm run test:coverage # vitest run --coverage (seuil 100 % sur packages/moteur, packages/capture, apps/worker, apps/comptes, apps/extension, data et les modules de logique d'apps/web)
 npm run test:e2e      # vite build puis playwright test : parcours complets dans Chromium (apps/web/e2e)
 npm run build         # build de chaque workspace
 ```
 
-Node 22 ou plus. La CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) exécute ces six commandes sur chaque pull request (609 tests au 13/09/2026, dont 135 pour les référentiels, 119 pour la capture, l'extension et le bouton-favori, et 30 pour l'impression, le partage, Comparer et Méthode). Une PR est fusionnée automatiquement dès que le check `verify` est vert (`gh pr merge <n> --auto --merge`) ; `master` refuse tout merge sans ce check. Un second job `e2e` joue les huit parcours Playwright dans Chromium ; il n'est pas encore requis pour fusionner.
+Node 22 ou plus. La CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) exécute ces six commandes sur chaque pull request (727 tests au 13/09/2026, dont 135 pour les référentiels, 119 pour la capture, l'extension et le bouton-favori, 30 pour l'impression, le partage, Comparer et Méthode, et 91 pour les comptes). Une PR est fusionnée automatiquement dès que le check `verify` est vert (`gh pr merge <n> --auto --merge`) ; `master` refuse tout merge sans ce check. Un second job `e2e` joue les huit parcours Playwright dans Chromium ; il n'est pas encore requis pour fusionner.
 
 ## Le moteur (`@loupe/moteur`)
 
@@ -76,13 +77,15 @@ npm run build -w apps/web    # apps/web/dist
 - Onglet **Revente** : horizons 5 / 10 / 15 / 20 ans cliquables (`src/analyses/`), revente et enrichissement détaillés, plus-value poste par poste (abattements, IR, prélèvements sociaux, surtaxe, réintégration des amortissements).
 - Onglet **Visite** : les points de vigilance du projet, cochables, classés en documents à demander, à vérifier sur place, à régler avant l'offre.
 - **Enrichissement** (`src/enrichissement/`) : « Lire le texte » fait lire l'annonce par l'IA du Worker (les règles comblent ses trous, ou prennent le relais s'il ne répond pas) ; à la création, le bien est situé (code postal + ville) et reçoit la médiane et les quartiles des ventes réelles (DVF) de son arrondissement ou de sa commune, et le loyer de référence ANIL, marqués « donnée publique ». Sans Worker, le projet est créé comme avant, sans repère de marché. Adresse du Worker : variable `VITE_WORKER_URL` au build (production par défaut).
+- Onglet **Estimation** : le prix estimé du bien, comme un estimateur en ligne mais chiffre par chiffre. Une fois l'adresse exacte connue (agence, diagnostics), le Worker (`GET /marche/adresse`) classe les ventes réelles de la commune en même immeuble (parcelle cadastrale), parcelles voisines (API Carto de l'IGN), même côté de la rue et en face (code de voie et parité des numéros), cercles de 100, 200 et 300 m, et ramène chaque vente au prix d'aujourd'hui par l'évolution locale mesurée sur cinq ans (courbe par semestre). « Utiliser ce repère pour l'estimation » donne au moteur les ventes comparables ; l'estimation place le bien selon son état (à rénover = premier quartile, rénové = troisième), puis applique des corrections sourcées et désactivables : DPE (Notaires de France), étage et ascenseur, balcon ou terrasse (MeilleursAgents), charges de copropriété comparées au repère ARC. Fourchette et confiance selon le nombre et la proximité des ventes ; le feu prix compare le prix affiché à cette estimation. Aucun modèle de langage. L'adresse est gardée avec le projet ; l'analyse est refaite à l'ouverture.
 - **PDF** : le bouton de l'en-tête projet ouvre `/projets/:id/imprimer`, le dossier complet (Rapport, Fiscalité, Revente, Visite, un volet par page, en-tête et avertissement), et lance l'impression du navigateur ; « Enregistrer au format PDF » donne le fichier. Styles `@media print` dans `src/index.css`.
 - **Partager** : le bouton copie un lien `/partage#p=…` qui contient le projet entier (base64url dans le fragment de l'URL, jamais envoyé au serveur, validé par Zod à l'ouverture). La personne qui le reçoit lit le dossier et peut l'ajouter à ses projets ; un lien abîmé est refusé avec une phrase.
 - **Comparer** (`/comparer`) : deux à cinq projets côte à côte (prix, prix au m², écart avec les ventes, loyer, cash-flow, rendements, effort, impôt, revente, TRI, enrichissement, risques) avec leurs feux ; tri par ligne, meilleure valeur en vert.
 - **Comment c'est calculé** (`/methode`) : chaque module du moteur expliqué, chaque constante avec sa valeur lue dans les règles datées et sa source, les valeurs « à confirmer » signalées, les simplifications assumées.
 - Projets stockés dans le navigateur (`localStorage`, clé `loupe.projets.v1`), validés par Zod ; le premier lancement crée le projet d'exemple.
 - Textes centralisés dans `src/textes/` : les codes du moteur deviennent des phrases là et nulle part ailleurs.
-- Tests : Vitest + Testing Library (jsdom), couverture 100 % sur `stockage/`, `formatage/`, `textes/`, `annonces/`, `hypotheses/`, `analyses/`, `bookmarklet/`, `enrichissement/`. Les tests n'appellent jamais le réseau : `AppEnMemoire` utilise un client du Worker hors ligne, ou le faux client qu'on lui passe.
+- Compte optionnel : page **Connexion** (`/connexion`, hors de la coque : Google, Apple, code par e-mail), page **Mon compte** (`/compte` : nom, méthodes liées, déconnexion, suppression), profil dans la barre latérale ; client `src/compte/` (voir « Les comptes »).
+- Tests : Vitest + Testing Library (jsdom), couverture 100 % sur `stockage/`, `formatage/`, `textes/`, `annonces/`, `hypotheses/`, `analyses/`, `bookmarklet/`, `enrichissement/`, `compte/`. Les tests n'appellent jamais le réseau : `AppEnMemoire` utilise un client du Worker hors ligne et un client des comptes en mémoire, ou les faux clients qu'on lui passe.
 
 ## L'extension navigateur (`@loupe/extension`) et le contrat de capture (`@loupe/capture`)
 
@@ -92,7 +95,8 @@ npm run build:dev -w apps/extension   # idem, en visant http://localhost:5173
 npm run dev -w apps/extension         # reconstruction à chaque modification
 ```
 
-- Sur une annonce LeBonCoin, SeLoger, Bien'ici, PAP ou Logic-Immo, l'icône Deklic puis **Analyser dans Deklic** : la page est lue dans le navigateur (jamais par nos serveurs), un onglet Deklic s'ouvre avec le formulaire Vérifier pré-rempli. Permissions `activeTab` et `scripting` seulement, aucun réseau, aucun stockage.
+- **Coller le lien suffit** : dans Nouveau projet, un lien LeBonCoin, SeLoger, Bien'ici, PAP ou Logic-Immo collé est lu par l'extension dans un onglet du navigateur (ouvert caché à côté de Deklic, affiché un instant si la page l'exige, puis refermé) ; l'IA complète à partir du texte ce que la page ne donne pas ; le formulaire Vérifier se remplit. Dialogue page ↔ extension par `window.postMessage` et un script « pont » sur les pages Deklic ; voir [`.product/architecture/lecture-auto.md`](.product/architecture/lecture-auto.md).
+- Sur une annonce ouverte, l'icône Deklic puis **Analyser dans Deklic** fait la même lecture. Permissions : `activeTab`, `scripting` et accès aux cinq portails ; aucun stockage, aucune requête vers nos serveurs (seule la requête `/realEstateAd.json` que Bien'ici fait lui-même, sur Bien'ici).
 - Règles de lecture par portail dans `apps/extension/regles/<portail>.json` (versionnées `<portail>-AAAA-MM-JJ`) : pour chaque champ, JSON-LD schema.org, puis état applicatif de la page, puis balises `og:`, puis sélecteurs CSS. Un portail qui change de maquette se corrige en éditant un JSON et sa fixture. La structure de PAP est relevée sur une vraie annonce ; LeBonCoin, SeLoger, Bien'ici et Logic-Immo sont construits d'après la structure connue des portails et restent à vérifier sur une vraie annonce.
 - `@loupe/capture` : `CaptureSchema` (version 1), `encoderCapture` / `decoderCapture` (base64url, jamais d'exception), `resoudreAnnonce`, moteur de règles (`capturer`, `creerRegistre`). Tests : 68 pour le contrat et le moteur de règles, 33 pour l'extension (règles sur pages enregistrées, popup avec un faux `chrome`), couverture 100 %.
 - Installation : voir [`apps/extension/README.md`](apps/extension/README.md) (charger l'extension non empaquetée dans Chrome, Edge ou Firefox). La publication sur les stores est une décision à part (compte et frais).
@@ -117,7 +121,7 @@ npm run build -w apps/worker    # wrangler deploy --dry-run
 npm run deploy -w apps/worker   # déploiement (compte Cloudflare connecté par `npx wrangler login`)
 ```
 
-- Hono sur Cloudflare Workers. Routes : `GET /health` ; `GET /proxy/geocodage?q=…&limit=…&codePostal=…` (Géoplateforme IGN), réponse au contrat Loupe : libellé, score, latitude/longitude, précision (adresse, rue, lieu-dit, commune), clé BAN, code INSEE ; `POST /extract { texte }` : un modèle de langage lit le texte d'une annonce et rend 20 champs (prix, surface, étage, ascenseur, DPE, charges, taxe foncière, année, lots, loyer actuel…), chacun validé ou `null`, jamais inventé ; `GET /marche?codeInsee=…&codePostal=…&type=…&pieces=…` : médiane et quartiles des ventes DVF, loyer d'annonce ANIL et zone ABC de la commune (ou de l'arrondissement désigné par le code postal), lus dans le bucket R2 `deklic-data` et gardés en cache 24 h, avec la source de chaque valeur.
+- Hono sur Cloudflare Workers. Routes : `GET /health` ; `GET /proxy/geocodage?q=…&limit=…&codePostal=…` (Géoplateforme IGN), réponse au contrat Loupe : libellé, score, latitude/longitude, précision (adresse, rue, lieu-dit, commune), clé BAN, code INSEE ; `POST /extract { texte }` : un modèle de langage lit le texte d'une annonce et rend 22 champs (prix, surface, étage, ascenseur, DPE, charges, taxe foncière, année, lots, loyer actuel, état du bien, balcon ou terrasse…), chacun validé ou `null`, jamais inventé ; `GET /marche?codeInsee=…&codePostal=…&type=…&pieces=…` : médiane et quartiles des ventes DVF, loyer d'annonce ANIL et zone ABC de la commune (ou de l'arrondissement désigné par le code postal), lus dans le bucket R2 `deklic-data` et gardés en cache 24 h, avec la source de chaque valeur.
 - Lecture des annonces : connecteur « chat completions » réglé par `LLM_URL` et `LLM_MODELE` (OpenRouter et le modèle gratuit `nvidia/nemotron-3-super-120b-a12b:free` par défaut ; Mistral direct en changeant l'URL), secret `OPENROUTER_API_KEY` posé dans Cloudflare. Le texte n'est ni stocké ni journalisé : son empreinte sert de clé de cache 30 jours. Sans clé, `/extract` répond `503 EXTRACTION_INDISPONIBLE` et l'application garde sa lecture par règles.
 - Chaque réponse amont est validée (Zod) puis gardée en cache KV 24 h, partagé entre tous les utilisateurs ; en-tête `X-Loupe-Cache: HIT|MISS`. Limite : 60 requêtes par minute et par adresse IP. CORS : production, previews Pages, localhost.
 - Erreurs en codes (`SERVICE_INCONNU`, `PARAMETRES_INVALIDES`, `TROP_DE_REQUETES`, `AMONT_INDISPONIBLE`, `AMONT_SATURE`, `AMONT_INVALIDE`) : l'interface les traduit. Journal structuré (une ligne JSON par événement), sans adresse IP ni adresse saisie.
@@ -135,8 +139,41 @@ Le Worker est déployé sur `https://loupe-worker.erreip-gorguel.workers.dev` (e
 1. Dans le tableau de bord Cloudflare, créer un projet Pages connecté au dépôt GitHub.
 2. Commande de build : `npm ci && npm run build -w apps/web` · dossier de sortie : `apps/web/dist` · Node 22.
 3. `apps/web/public/_redirects` gère le rechargement des routes de l'application.
+4. Comptes : voir « Mettre en service les comptes » (variable de build `DEKLIC_COMPTES=1`, binding D1 `DB`, flag `nodejs_compat`, secrets).
 
 En local : `npx wrangler pages deploy dist` depuis `apps/web` (compte Cloudflare requis).
+
+## Les comptes (`@loupe/comptes`)
+
+Compte optionnel : connexion par Google, Apple ou un code à 6 chiffres reçu par e-mail ([ADR-006](.product/adr/006-comptes-better-auth.md), Better Auth). Rien n'est verrouillé sans compte ; les projets restent sur l'appareil (la synchronisation viendra ensuite).
+
+```bash
+npm run dev -w apps/comptes                 # API sur http://localhost:8787 (D1 locale, migrations appliquées)
+npm run dev:node -w apps/comptes            # la même API sur Node (base SQLite locale), si wrangler dev ne démarre pas
+npm run dev -w apps/web                     # le site relaie /api vers le port 8787
+npm run migration:generer -w apps/comptes   # après une montée de version de Better Auth
+```
+
+- L'API répond **sur l'origine du site** : avec `DEKLIC_COMPTES=1`, le build de `apps/web` dépose le worker des comptes dans `dist/_worker.js` et `dist/_routes.json`, qui ne lui envoie que `/api/*` (cookie de session de première partie).
+- Routes : `GET /api/comptes/sante`, `GET /api/comptes/fournisseurs` (boutons à afficher), `/api/auth/*` (Better Auth, derrière une garde : hôte connu, routes utilisées seulement, code de connexion seulement).
+- Code valable 10 minutes, invalidé après 3 erreurs ; 3 envois et 10 saisies par minute par adresse IP ; session de 7 jours en cookie `HttpOnly`, `SameSite=Lax`, `Secure` ; suppression du compte réservée aux sessions de moins d'un jour ; aucune adresse e-mail dans les journaux.
+- Base D1 `deklic-comptes` (tables de Better Auth), migration `apps/comptes/migrations/0001_comptes.sql`, testée à travers une D1 simulée sur `node:sqlite`.
+- En développement, sans clé Resend, le code s'affiche dans le terminal du worker (événement `courriel.dev`).
+- Web : `src/compte/` (client réseau fetch + Zod, client mémoire, `CompteProvider`), écrans `/connexion` et `/compte`, profil dans la barre latérale.
+
+### Mettre en service les comptes (une fois, compte Cloudflare de Pierre)
+
+Tant que ces étapes ne sont pas faites, le site se déploie comme avant et la page de connexion indique que la connexion n'est pas disponible.
+
+1. **Base D1** : fait le 14/09/2026. La base `deklic-comptes` est créée dans la juridiction UE (`npx wrangler d1 create deklic-comptes --jurisdiction eu`), son identifiant est dans `apps/comptes/wrangler.toml` et la migration 0001 est appliquée. Nouvelle migration : `npx wrangler d1 migrations apply deklic-comptes --remote` depuis `apps/comptes`.
+2. **Projet Pages `deklic`** (adresse loupeprojet.pages.dev ; tableau de bord Cloudflare, Workers & Pages, deklic, Settings), en Production (Preview facultatif) :
+   - Bindings : D1 database, nom de variable `DB`, base `deklic-comptes` ;
+   - Runtime : Compatibility flags, `nodejs_compat` ;
+   - Variables and Secrets : `DEKLIC_COMPTES` = `1` (type Text, lu au build), `BETTER_AUTH_SECRET` (type Secret, 32 caractères ou plus, par exemple `node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"`) ;
+   - puis relancer un déploiement.
+3. **E-mails (Resend)** : une clé API en secret `RESEND_API_KEY`, l'expéditeur en variable `COURRIEL_EXPEDITEUR` (par exemple `Deklic <bonjour@deklic.io>`). Tant que le domaine n'est pas vérifié chez Resend, seuls les e-mails vers l'adresse du compte Resend partent.
+4. **Google** : console.cloud.google.com, API et services, Identifiants, ID client OAuth « Application Web » ; URI de redirection autorisés `https://loupeprojet.pages.dev/api/auth/callback/google` et `http://localhost:5173/api/auth/callback/google` ; écran de consentement publié. Secrets `GOOGLE_CLIENT_ID` et `GOOGLE_CLIENT_SECRET`.
+5. **Apple** (programme développeur, 99 $/an, facultatif) : un Services ID (`APPLE_CLIENT_ID`) avec « Sign in with Apple », domaine `loupeprojet.pages.dev`, retour `https://loupeprojet.pages.dev/api/auth/callback/apple` ; une clé « Sign in with Apple » : `APPLE_KEY_ID`, `APPLE_PRIVATE_KEY` (contenu du fichier .p8) et `APPLE_TEAM_ID`. Apple ne fonctionne pas sur localhost.
 
 ## Les référentiels (`@loupe/data`)
 

@@ -1,35 +1,42 @@
 {
-  "feature_slug": "enrichissement-marche",
-  "title": "Enrichissement marché : le web lit l'annonce par l'IA et crée chaque projet avec les ventes réelles (DVF), le loyer ANIL et la zone ABC de sa commune, lus sur R2 par le Worker",
-  "started_at": "2026-09-13T00:00:00Z",
-  "current_step": "push",
-  "scope": "apps/worker/src/marche, apps/worker/src/donnees, wrangler.toml (binding R2), apps/web/src/enrichissement, coque/ClientWorker, annonces/construire, ecrans/NouveauProjet, App",
-  "branch": "feat/enrichissement-marche",
-  "base": "master (56b6c39)",
+  "feature_slug": "estimation-prix",
+  "title": "Estimation du prix du bien : prix DVF actualisés par la tendance locale, fourchette à rénover / rénové, corrections sourcées (DPE, étage, ascenseur, extérieur, charges), confiance",
+  "started_at": "2026-09-14T00:00:00Z",
+  "current_step": "implement",
+  "scope": "data/src/sources/dvf (tendance), apps/worker/src/adresse (actualisation), packages/moteur/src/estimation, apps/web (onglet Estimation, Rapport, Méthode, Hypothèses, lecture d'annonce)",
+  "branch": "feat/estimation-prix",
+  "base": "master (ad63237)",
+  "next_feature": "marche-complet",
   "steps": {
     "discovery": {
       "status": "completed",
-      "output": ".product/features/enrichissement-marche-discovery.md"
+      "output": ".product/features/estimation-prix-discovery.md"
     },
-    "implement": { "status": "completed", "stories_completed": 5, "stories_total": 5 },
-    "refactor": {
+    "specs": { "status": "completed", "stories_count": 5 },
+    "architecture": {
       "status": "completed",
-      "note": "assemblage pur séparé des lectures R2 ; source citée seulement si une valeur en vient ; NouveauProjet touché aux deux seuls points d'appel (PR extension #16 ouverte sur le même écran)"
+      "output": ".product/architecture/estimation-prix.md"
+    },
+    "implement": {
+      "status": "completed",
+      "stories_completed": 5,
+      "stories_total": 5,
+      "commits": ["5315e3c data US-1", "e35ab11 worker US-2", "5ba9cc1 moteur US-3"]
     },
     "qa_tests": {
       "status": "completed",
-      "note": "Worker : route /marche (arrondissement, courant.json, maison, rien de publié, fichier invalide, panne R2, débit), assemblage, lecteurs ; web : client, lecture IA ou règles, conversion, enrichissement, parcours avec faux Worker ; délais d'attente de création portés à 10 s (appel réseau + machine chargée)"
+      "note": "859 tests après merge de master : tendance (semestres, séries, seuils, publication), actualisation Worker (lissage, coefficients, choix de série, route avec et sans tendance), estimation moteur (chaque correction, bornes, confiance, positions, feu prix), web (textes, écran Estimation, Rapport, Méthode, lecture de l'état et de l'extérieur) ; couverture 100 % sur les modules de logique"
     },
     "security": {
       "status": "completed",
-      "note": "bucket R2 privé lu par le Worker seulement ; réponses du Worker revalidées par Zod dans le navigateur ; tests sans réseau (client hors ligne par défaut) ; panne R2 jamais mise en cache"
+      "note": "aucun modèle de langage dans l'estimation ; aucun nouvel appel réseau (mêmes lectures R2) ; entrées validées par Zod (ProjetSchema, contrat /marche/adresse, contrat /extract) ; coefficients statiques versionnés dans les règles ; rien de personnel stocké côté serveur"
     },
-    "push": { "status": "in_progress" }
+    "push": { "status": "done", "pr": 26 }
   },
   "decisions": {
-    "maille": "arrondissement désigné par le code postal, commune sinon, commune parente en repli ; rayon autour de l'adresse reporté à marche-complet",
-    "millesime_dvf": "dvf/courant.json s'il existe, sinon l'année en cours et les deux précédentes",
-    "loyer_reference": "loyer d'annonce ANIL × 0,92 (−8 % de charges), provenance anil ; le loyer visé reste saisi par l'utilisateur",
-    "hors_ligne": "AppEnMemoire et le contexte par défaut n'appellent jamais le réseau ; une panne du Worker ramène le comportement d'avant"
+    "tendance": "médiane €/m² par semestre sur 5 ans de DVF, seuil 20 ventes, commune sinon département, moyenne mobile pondérée sur 3 semestres",
+    "etat": "à rénover = 1er quartile, rafraîchir = entre 1er quartile et médiane, bon état = médiane, rénové = 3e quartile",
+    "corrections": "coefficients d'études publiées (Notaires valeur verte 2024, MeilleursAgents étage 2017 et extérieur 2020, ARC charges 2024), versionnés dans les règles et marqués à confirmer",
+    "sans_llm": "aucun modèle de langage dans l'estimation"
   }
 }

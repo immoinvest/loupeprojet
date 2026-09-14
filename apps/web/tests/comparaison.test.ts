@@ -39,7 +39,8 @@ describe('comparerProjets', () => {
     expect(c!.id).toBe('exemple');
     expect(c!.valeurs.prix).toBe(155_000);
     expect(c!.valeurs.prixM2).toBeCloseTo(155_000 / 65, 6);
-    expect(c!.valeurs.ecartMarche).toBeCloseTo(155_000 / 65 / 3050 - 1, 6);
+    // Écart au prix au m² estimé du bien (3 181 €/m²), plus à la seule médiane.
+    expect(c!.valeurs.ecartMarche).toBeCloseTo(155_000 / 65 / 3181 - 1, 6);
     expect(c!.valeurs.loyer).toBe(980);
     expect(c!.valeurs.cashflow).toBeCloseTo(r.cashflow.mensuel, 6);
     expect(c!.valeurs.net).toBeCloseTo(r.rendement.rendements.net, 6);
@@ -69,7 +70,7 @@ describe('comparerProjets', () => {
     );
     expect(formats.prix).toBe('155 000 €');
     expect(formats.prixM2).toBe('2 385 €/m²');
-    expect(formats.ecartMarche).toBe('−22 %');
+    expect(formats.ecartMarche).toBe('−25 %');
     expect(formats.cashflow).toBe('−210 €/mois');
     expect(formats.effort).toBe('25 %');
     expect(formats.horizon).toBe('10 ans');

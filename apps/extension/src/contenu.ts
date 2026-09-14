@@ -1,14 +1,20 @@
 /**
- * Script de contenu, injecté dans l'onglet de l'annonce au clic sur « Analyser dans Loupe ».
- * Il lit la page et dépose le résultat dans son monde isolé ; il n'émet aucune requête réseau
- * et ne modifie pas la page. Le build ajoute en dernière ligne `globalThis.__loupeCapture;` :
- * c'est la valeur que `chrome.scripting.executeScript` rend au popup.
+ * Script de contenu, injecté dans l'onglet de l'annonce (clic sur l'icône, ou lecture demandée par
+ * Deklic). Il lit la page, charge au besoin les données que la page elle-même charge (Bien'ici),
+ * sur le portail et jamais ailleurs, et dépose le résultat (une promesse) dans son monde isolé.
+ * Le build ajoute en dernière ligne `globalThis.__loupeCapture;` : c'est la valeur que
+ * `chrome.scripting.executeScript` attend puis rend.
  */
-import { lirePage } from './logique/lire-page';
+import { chargeurDuPortail, lirePage } from './logique/lire-page';
 import { REGISTRE } from './regles';
 
 interface MondeIsole {
   __loupeCapture?: unknown;
 }
 
-(globalThis as MondeIsole).__loupeCapture = lirePage(document, location.href, REGISTRE);
+(globalThis as MondeIsole).__loupeCapture = lirePage(
+  document,
+  location.href,
+  REGISTRE,
+  chargeurDuPortail((adresse, init) => fetch(adresse, init), location.origin),
+);

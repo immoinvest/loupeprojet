@@ -27,35 +27,97 @@
     "architecture": {
       "status": "completed",
       "output": ".product/architecture/responsive.md",
-      "adr": ".product/adr/006-application-mobile.md"
+      "adr": ".product/adr/007-application-mobile.md"
     },
     "implement": {
       "status": "in_progress",
-      "stories_completed": 5,
+      "stories_completed": 8,
       "stories_total": 11,
       "commits": [
-        { "etape": "docs", "hash": "9c06b16" },
-        { "etape": "docs (Prettier)", "hash": "3ed6e26" },
-        { "etape": "US-1", "hash": "9ad8a69", "tests": 645, "fichiers_de_test": 91 },
-        { "etape": "US-2", "hash": "7fad103", "tests": 645, "fichiers_de_test": 91 },
-        { "etape": "refactor Rapport (300 lignes)", "hash": "e2fb7bf" },
-        { "etape": "US-3a", "hash": "61b4539", "tests": 645, "fichiers_de_test": 91 },
-        { "etape": "US-3b", "hash": "2619e1f", "tests": 645, "fichiers_de_test": 91 },
-        { "etape": "US-4", "hash": "097ab49", "tests": 645, "fichiers_de_test": 91 },
-        { "etape": "US-4 (cibles restantes)", "hash": "7cac872" },
-        { "etape": "US-10", "hash": "e0b3a4c", "e2e": 36, "duree_e2e_locale_s": 72 },
-        { "etape": "US-5", "hash": "7801133", "tests": 658, "fichiers_de_test": 94 }
+        {
+          "etape": "docs",
+          "hash": "9c06b16"
+        },
+        {
+          "etape": "docs (Prettier)",
+          "hash": "3ed6e26"
+        },
+        {
+          "etape": "US-1",
+          "hash": "9ad8a69",
+          "tests": 645,
+          "fichiers_de_test": 91
+        },
+        {
+          "etape": "US-2",
+          "hash": "7fad103",
+          "tests": 645,
+          "fichiers_de_test": 91
+        },
+        {
+          "etape": "refactor Rapport (300 lignes)",
+          "hash": "e2fb7bf"
+        },
+        {
+          "etape": "US-3a",
+          "hash": "61b4539",
+          "tests": 645,
+          "fichiers_de_test": 91
+        },
+        {
+          "etape": "US-3b",
+          "hash": "2619e1f",
+          "tests": 645,
+          "fichiers_de_test": 91
+        },
+        {
+          "etape": "US-4",
+          "hash": "097ab49",
+          "tests": 645,
+          "fichiers_de_test": 91
+        },
+        {
+          "etape": "US-4 (cibles restantes)",
+          "hash": "7cac872"
+        },
+        {
+          "etape": "US-10",
+          "hash": "e0b3a4c",
+          "e2e": 36,
+          "duree_e2e_locale_s": 72
+        },
+        {
+          "etape": "US-5",
+          "hash": "7801133",
+          "tests": 658,
+          "fichiers_de_test": 94
+        },
+        {
+          "etape": "US-6",
+          "hash": "7858182",
+          "e2e_hors_ligne": 3
+        }
       ],
       "notes": [
         "Audit temporaire déplacé dans le scratchpad ; il devient e2e/formats.ts et responsive.spec.ts en US-10",
         "US-1 vérifiée dans le navigateur : focus dans le tiroir, retour au bouton après Échap, focus au contenu après navigation, ordinateur inchangé à 1 280 px",
-        "Styles globaux non « layered » dans index.css (a, :focus-visible) : ils l'emportent sur les utilitaires Tailwind ; hors périmètre, contournés localement"
+        "Styles globaux non « layered » dans index.css (a, :focus-visible) : ils l'emportent sur les utilitaires Tailwind ; hors périmètre, contournés localement",
+        "US-6 : Vary: Origin de vite preview rendait le cache introuvable hors ligne ; lectures du cache avec ignoreVary",
+        "Fusion de origin/master (comptes, lecture automatique, DVF à l'adresse, estimation) : 8 conflits résolus, ADR responsive renuméroté 007 ; écrans Estimation, Compte et Connexion à adapter (US-3c) ; /api/* à ignorer par le service worker"
       ]
     },
-    "refactor": { "status": "pending" },
-    "qa_tests": { "status": "pending" },
-    "security": { "status": "pending" },
-    "push": { "status": "pending" }
+    "refactor": {
+      "status": "pending"
+    },
+    "qa_tests": {
+      "status": "pending"
+    },
+    "security": {
+      "status": "pending"
+    },
+    "push": {
+      "status": "pending"
+    }
   },
   "decisions": {
     "application_mobile": "PWA installable (spec : pas d'app native en v1) ; applications de boutique hors périmètre, décision de Pierre",
