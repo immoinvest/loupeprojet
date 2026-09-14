@@ -128,6 +128,7 @@ export function FormulaireProjet({
           <Champ cle="ges" libelle="GES" options={DPE} {...c} />
           <Champ cle="etat" libelle="État" options={ETATS} {...c} />
           <Champ cle="exterieur" libelle="Balcon ou terrasse" options={OUI_NON} {...c} />
+          <Champ cle="venduLoue" libelle="Vendu loué" options={OUI_NON} {...c} />
           <Champ cle="codePostal" libelle="Code postal" erreur={erreurs.codePostal} {...c} />
           <Champ cle="ville" libelle="Ville" erreur={erreurs.ville} {...c} />
         </div>
