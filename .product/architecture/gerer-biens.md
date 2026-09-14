@@ -130,6 +130,12 @@ Un commit par story ; `master` fusionnée avant la QA et juste avant la PR ; PR 
 
 - **Migration sans reprise** (ADR-G14) : les specs prévoyaient de copier chaque location en première période ; les montants d'entrée restant sur la location, rien n'est copié. Même comportement vu de l'API.
 
+- **Locataires sans location (US-3)** : supprimés par une seconde instruction du même lot, après la cascade, au lieu d'être calculés avant : même effet, puisque chaque locataire créé par l'API a une location ; le lot reste atomique.
+- **Carte de la location (US-5)** : elle montre les montants de ce mois-ci et, quand un changement est programmé, une ligne « Loyer hors charges à partir d'octobre 2026 » ; « depuis octobre 2026 » s'affiche une fois le mois arrivé.
+- **APL (US-6)** : la mention « à confirmer » ne s'affiche qu'à l'aperçu du document (barre non imprimée), jamais sur la quittance remise au locataire.
+- **Menu** : « Mes biens · N » puis « Mes locataires » (sans nombre, comme dans l'UX de l'épic), après « Tous les loyers ».
+- **Migration 0005 et code en production** : `depot-documents.ts` lit `l.apl` ; sans la colonne, l'émission d'un document échouerait en 500 (et non en 503) : la migration doit précéder le déploiement du code, comme 0003.
+
 ## Auto-revue (checkpoint validé par Claude, sur autorisation de Pierre)
 
 - **ADR-G14 plutôt qu'une table de périodes complète** : c'est le choix le moins risqué pour des données déjà en production (Pierre gère de vrais biens) ; la lecture reste une seule fonction pure.

@@ -2,14 +2,14 @@
   "feature_slug": "gerer-biens",
   "title": "Mes biens et vie de la location (G1c) : pages Biens et Locataires, modifier une location, supprimer un bien, APL versée au bailleur",
   "started_at": "2026-09-14T21:10:00Z",
-  "current_step": "implement",
+  "current_step": "qa_tests",
   "scope": "packages/gestion, apps/comptes (src/gestion, migration 0005), apps/web (gestion/, ecrans/gerer, menu Gérer)",
   "branch": "feat/gerer-biens",
   "worktree": "C:\\Users\\errei\\Claude\\loupe-gestion",
   "base": "master (79a35e1)",
   "consigne": "Pierre, 14/09/2026 : « crée [Mes biens] dans la prochaine étape. Et commence la prochaine étape. Fais la PR uniquement lorsque toutes les autres PR : 65, 77, 78 sont mergées » ; G1c choisie avant G2 (question posée) ; auto-validation des étapes",
   "pr_apres": [65, 77, 78],
-  "pr_apres_etat": "#65 fusionnée le 14/09/2026 à 23 h 14 ; #77 et #78 ouvertes (vérifié à 23 h 30)",
+  "pr_apres_etat": "#65 fusionnée le 14/09/2026 à 23 h 14, #77 à 23 h 32, #78 à 23 h 53 (vérifié le 15/09) : la PR peut être ouverte",
   "baseline": {
     "status": "completed",
     "source": "CI de master verte sur 79a35e1 (fusion de la PR #73), base exacte de la branche ; npm ci du worktree refait le 14/09/2026 à 23 h 10"
@@ -28,7 +28,25 @@
       "status": "completed",
       "output": ".product/architecture/gerer-biens.md"
     },
-    "implement": { "status": "pending" },
+    "implement": {
+      "status": "completed",
+      "stories_completed": 7,
+      "stories_total": 7,
+      "commits": [
+        "fc6256d docs : discovery, specs, architecture",
+        "71fefbf US-1 paquet @loupe/gestion : montants par periode (changements a partir d un mois, premier mois modifiable, horizon d un an), APL comprise dans le total (123 tests, 100 %)",
+        "5428822 US-2 PATCH /locations/:id, migration 0005 (gestion_changement, colonne apl), 409 PERIODE_PAYEE par insertion conditionnelle, paiements et documents avec les changements (137 tests comptes, 100 %)",
+        "42eb030 US-3 DELETE /biens/:id en un lot D1, cascade et locataires sans location (139 tests comptes, 100 %)",
+        "f1eaafb4 US-4 page Mes biens et entree du menu avec le nombre de biens (218 tests web de Gerer, 100 % sur les nouveaux fichiers)",
+        "527bd409 US-5 fiche du bien : Modifier une location en deux clics, Supprimer ce bien confirme par le nom ; clients reseau et memoire, contexte (240 tests web, src/gestion 100 %)",
+        "3db6be75 US-6 APL dans les trois saisies, ligne du loyer, quittance et recu, mention a confirmer a l apercu, rappel CAF a la sortie (248 tests web, 100 %)",
+        "93452ae8 US-7 Mes locataires : en ce moment et anciens, nom et e-mail corriges en deux clics, PATCH /locataires/:id (257 tests web, 141 tests comptes, 100 %)"
+      ],
+      "ecarts": [
+        "US-3 : les locataires sans location sont supprimes par une instruction apres le bien (au lieu d un calcul prealable) : equivalent, chaque locataire cree par l API a une location",
+        "US-5 : la carte d une location montre le prochain loyer change (Loyer hors charges a partir d octobre 2026) en plus des montants de ce mois"
+      ]
+    },
     "qa_tests": { "status": "pending" },
     "security": { "status": "pending" },
     "push": { "status": "pending" }
