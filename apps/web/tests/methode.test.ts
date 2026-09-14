@@ -66,6 +66,7 @@ describe('sectionsMethode', () => {
     expect(sections.map((s) => s.code)).toEqual([
       'acquisition',
       'credit',
+      'simulateur',
       'cashflow',
       'rendement',
       'micro_bic',

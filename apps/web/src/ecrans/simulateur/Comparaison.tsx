@@ -38,7 +38,7 @@ export function Comparaison({
       <TitreCarte>{TITRES_SIMULATEUR.comparaison}</TitreCarte>
       <p className="m-0 text-[17px] font-semibold">{phraseSynthese(comparaison, noms)}</p>
       {dureesDifferentes && <p className="m-0 text-sm text-encre-2">{PHRASES.dureesDifferentes}</p>}
-      <div className="overflow-x-auto">
+      <div className="relative overflow-x-auto">
         <table className="w-full border-collapse text-[15px]">
           <caption className="sr-only">Comparaison des deux offres, critère par critère</caption>
           <thead>

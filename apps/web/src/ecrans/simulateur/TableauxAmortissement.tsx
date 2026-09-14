@@ -139,7 +139,7 @@ function TableauAnnees({
     'Reste à rembourser',
   ];
   return (
-    <div className="overflow-x-auto">
+    <div className="relative overflow-x-auto">
       <table className="w-full border-collapse text-[15px]">
         <caption className="pb-2 text-left text-sm font-semibold text-encre-2">
           Tableau d'amortissement, {nom}, {offre.dureeAnnees} ans à{' '}
