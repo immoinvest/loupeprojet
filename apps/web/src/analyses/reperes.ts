@@ -12,9 +12,7 @@ export interface LibelleRepere {
 export function rangerLibelles(libelles: readonly LibelleRepere[], ecart = 8): number[] {
   const lignes = libelles.map(() => 0);
   const findeLigne: number[] = [];
-  const ordre = libelles
-    .map((l, i) => ({ ...l, i }))
-    .sort((a, b) => a.centre - b.centre);
+  const ordre = libelles.map((l, i) => ({ ...l, i })).sort((a, b) => a.centre - b.centre);
   for (const l of ordre) {
     const gauche = l.centre - l.largeur / 2;
     let ligne = findeLigne.findIndex((fin) => fin + ecart <= gauche);

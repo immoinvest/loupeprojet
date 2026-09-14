@@ -106,10 +106,7 @@ function Jauge({
             className="absolute top-[18px] flex flex-col items-center"
             style={{ left: pos(x.valeur), transform: 'translateX(-50%)' }}
           >
-            <span
-              className="w-0.5 bg-encre/40"
-              style={{ height: 18 + ligne * HAUTEUR_LIGNE }}
-            />
+            <span className="w-0.5 bg-encre/40" style={{ height: 18 + ligne * HAUTEUR_LIGNE }} />
             <span
               ref={(el) => {
                 libelles.current[i] = el;
