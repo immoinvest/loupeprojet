@@ -47,8 +47,17 @@
         "US-5 : la carte d une location montre le prochain loyer change (Loyer hors charges a partir d octobre 2026) en plus des montants de ce mois"
       ]
     },
-    "qa_tests": { "status": "pending" },
-    "security": { "status": "pending" },
+    "qa_tests": {
+      "status": "completed",
+      "fusion": "15fdeb13 fusion de master (PR #65 vendu-loue, #77 alleger-textes, #78 lien-sans-texte) sans conflit ; controles rapides verts (lint, format, typecheck, 280 tests web de Gerer, du menu et du compte)",
+      "verification": "comme la CI : 262 fichiers et 2 119 tests avec les seuils de couverture, build de tous les espaces (15/09/2026, 1 h 40) ; puis correctif de securite 3acd00f3 reteste (124 tests gestion, 142 comptes, 258 web, 100 %) : 2 122 tests",
+      "formats": "spec des formats Playwright en local (port 5299) : 36 ecrans sur 9 formats, 4 de plus (Mes biens, Mes locataires, Modifier une location, Supprimer un bien) ; resultat a reporter"
+    },
+    "security": {
+      "status": "completed",
+      "score": "96/100",
+      "notes": "routes sous la garde de session, Origin exige pour PATCH et DELETE, requetes filtrees par compte (404 hors compte, teste pour les trois routes), corps valides par Zod et limites a 64 Ko, changement sur un mois paye impossible par insertion conditionnelle, suppression en un lot D1 ; correctif : la borne de 120 changements par location etait a la lecture sans l etre a l ecriture (un compte pouvait rendre son etat illisible), deplacee a l ecriture (409 LIMITE_ATTEINTE) ; restes benins : libelle modifie en meme temps qu une nouvelle location de la meme chambre (controle non atomique, deja note en G1b), code web limite qui affiche la phrase des 200 biens pour toute limite (inatteignable par l interface)"
+    },
     "push": { "status": "pending" }
   },
   "auto_revue": {

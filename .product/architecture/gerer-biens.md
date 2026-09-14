@@ -145,3 +145,28 @@ Un commit par story ; `master` fusionnée avant la QA et juste avant la PR ; PR 
 - **Lot D1 (G17)** : `batch` est atomique sur D1 et simulé par `d1-sqlite.ts` ; les locataires orphelins sont calculés avant la cascade (après, leurs liens ont disparu).
 - **Pas de nouvelle route de lecture (G18)** : Mes biens tient sur l'état ; « 200 biens par compte » (G1a) borne sa taille.
 - **APL enregistrée dans le total (G16)** : cohérent avec « Reçu » en un clic ; la banque (G3) pourra séparer les deux virements sans changer le dû.
+
+## Audit de sécurité (G1c)
+
+Périmètre : `PATCH /api/gestion/locations/:id`, `DELETE /api/gestion/biens/:id`, `PATCH /api/gestion/locataires/:id`, lectures partagées (`lecture.ts`), écrans Mes biens, Mes locataires, Modifier, Supprimer, APL.
+
+| Contrôle               | Constat                                                                                                                                                                                                              | État    |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| Authentification       | Les trois routes passent par `acces` : hôte connu, session Better Auth, `no-store`                                                                                                                                   | OK      |
+| CSRF                   | PATCH et DELETE sont des écritures : en-tête `Origin` connu exigé (en plus du cookie `SameSite=Lax`)                                                                                                                 | OK      |
+| Isolement des comptes  | Chaque requête SQL filtre par `userId` ; ressource d'un autre compte : 404 (testé pour les trois routes)                                                                                                             | OK      |
+| Validation des entrées | Corps par Zod (`ModificationLocationSchema`, `NouveauLocataireSchema`), 64 Ko au plus ; APL ≤ loyer + charges refusée dès le schéma ; mois hors location ou à plus d'un an : 400                                     | OK      |
+| Injection SQL          | Requêtes préparées uniquement, aucune concaténation                                                                                                                                                                  | OK      |
+| Intégrité des montants | Changement sur un mois payé impossible, garanti à l'écriture par `insert … where not exists (paiement période ≥ mois)` (aucune course) ; documents émis figés (relus par Zod)                                        | OK      |
+| Suppression            | Confirmation par le nom côté web ; côté API, un lot D1 atomique (cascade des clés étrangères, puis locataires sans location) ; export proposé avant                                                                  | OK      |
+| XSS                    | React échappe tout ; aucun `dangerouslySetInnerHTML` ; le nom affiché après suppression vient de l'état de navigation de l'application et s'affiche en texte                                                         | OK      |
+| Données personnelles   | Aucun nouveau champ sensible (e-mail déjà présent) ; journaux sans nom ni e-mail ; suppression d'un bien retire aussi les locataires orphelins (minimisation)                                                        | OK      |
+| Bornes contre l'abus   | Nombre de changements par location : borné à la lecture (120) mais pas à l'écriture → un compte pouvait casser son propre état → **corrigé** : borne à l'écriture (409 `LIMITE_ATTEINTE`), aucune borne à la lecture | corrigé |
+
+Restes bénins, documentés :
+
+- Libellé modifié en même temps qu'une nouvelle location de la même chambre : le contrôle de chevauchement n'est pas atomique (même compte, deux onglets) — déjà noté pour G1b.
+- Un paiement enregistré entre le calcul du dû et l'écriture d'un changement : l'insertion conditionnelle refuse le changement (409), aucune incohérence.
+- Le code web `limite` affiche la phrase des 200 biens pour toute limite atteinte (50 locations par bien, 120 changements) : inatteignable par l'interface.
+
+Score : 96/100.
