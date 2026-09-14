@@ -3,6 +3,7 @@ import {
   DemandeDocumentSchema,
   FinLocationSchema,
   IdentiteBailleurSchema,
+  ModificationLocationSchema,
   NouveauPaiementSchema,
   NouvelleOccupationSchema,
   PreferencesMenuSchema,
@@ -33,6 +34,7 @@ const STATUTS_METIER = {
   FIN_AVANT_ENTREE: 400,
   PAIEMENTS_APRES_SORTIE: 409,
   BIEN_OCCUPE: 409,
+  PERIODE_PAYEE: 409,
 } as const;
 
 /** Le corps JSON validé par le schéma, ou `null` s'il est illisible ou invalide. */
@@ -98,6 +100,14 @@ export function routeurGestion(
   app.get('/documents/:id', async (c) =>
     c.json(await deps.gestion.document(c.get('userId'), c.req.param('id'))),
   );
+
+  app.patch('/locations/:id', async (c) => {
+    const modification = await lireCorps(c, ModificationLocationSchema);
+    if (modification === null) return reponseErreur(400, 'CHAMPS_INVALIDES');
+    return c.json(
+      await deps.gestion.modifierLocation(c.get('userId'), c.req.param('id'), modification),
+    );
+  });
 
   app.post('/locations/:id/fin', async (c) => {
     const corps = await lireCorps(c, FinLocationSchema);

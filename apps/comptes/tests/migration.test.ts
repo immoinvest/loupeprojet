@@ -117,6 +117,7 @@ describe('migration 0002 : gestion locative', () => {
       '0002_gestion.sql',
       '0003_gestion_documents.sql',
       '0004_projets.sql',
+      '0005_gestion_changements.sql',
     ]);
   });
 
@@ -196,13 +197,14 @@ describe('migration 0003 : paiements partiels, bailleur, documents', () => {
     ).toThrow(/FOREIGN KEY constraint failed/);
   });
 
-  it('tables et index après 0003 (et 0004)', () => {
+  it('tables et index après 0003 (et les suivantes)', () => {
     const base = baseDeG1a();
     appliquerMigrations(base);
     expect(noms(base, 'table')).toEqual([
       'account',
       'gestion_bailleur',
       'gestion_bien',
+      'gestion_changement',
       'gestion_colocataire',
       'gestion_document',
       'gestion_locataire',
@@ -217,6 +219,7 @@ describe('migration 0003 : paiements partiels, bailleur, documents', () => {
     expect(noms(base, 'index')).toEqual([
       'account_userId_idx',
       'gestion_bien_userId_idx',
+      'gestion_changement_userId_idx',
       'gestion_colocataire_userId_idx',
       'gestion_document_userId_idx',
       'gestion_locataire_userId_idx',
@@ -269,5 +272,25 @@ describe('migration 0003 : paiements partiels, bailleur, documents', () => {
 
     base.prepare('delete from gestion_location where id = ?').run('l1');
     expect(base.prepare('select count(*) as n from gestion_colocataire').get()).toEqual({ n: 0 });
+  });
+
+  it('migration 0005 : APL à 0 pour les locations existantes, un changement par mois, supprimé avec la location', () => {
+    const base = baseDeG1a();
+    appliquerMigrations(base);
+    expect(
+      base.prepare('select apl, loyerHorsCharges from gestion_location where id = ?').get('l1'),
+    ).toEqual({ apl: 0, loyerHorsCharges: 65_000 });
+    const changement = base.prepare(
+      'insert into gestion_changement (locationId, userId, aPartirDe, loyerHorsCharges, charges, apl, modifieLe) values (?, ?, ?, ?, ?, ?, ?)',
+    );
+    changement.run('l1', 'u1', '2026-11', 68_000, 5_000, 0, H);
+    expect(() => changement.run('l1', 'u1', '2026-11', 69_000, 5_000, 0, H)).toThrow(
+      /UNIQUE constraint failed/,
+    );
+    expect(() => changement.run('inconnue', 'u1', '2026-12', 1, 0, 0, H)).toThrow(
+      /FOREIGN KEY constraint failed/,
+    );
+    base.prepare('delete from gestion_location where id = ?').run('l1');
+    expect(base.prepare('select count(*) as n from gestion_changement').get()).toEqual({ n: 0 });
   });
 });

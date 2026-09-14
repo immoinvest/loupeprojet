@@ -8,6 +8,7 @@ import type {
   IdentiteBailleur,
   Locataire,
   LocationGeree,
+  ModificationLocation,
   NouveauPaiement,
   NouvelleOccupation,
   Paiement,
@@ -17,7 +18,7 @@ import type {
 /** Les erreurs métier que les routes traduisent en réponses ; toute autre erreur est interne. */
 export type CodeErreurGestion =
   | 'INTROUVABLE'
-  /** Un loyer marqué reçu avant l'entrée, après la sortie ou plus d'un an à l'avance. */
+  /** Un loyer marqué reçu, ou un changement de montants, avant l'entrée, après la sortie ou plus d'un an à l'avance. */
   | 'HORS_LOCATION'
   /** Le compte a atteint le nombre maximal de biens (borne contre l'abus du quota D1). */
   | 'LIMITE_ATTEINTE'
@@ -38,7 +39,9 @@ export type CodeErreurGestion =
   /** Des loyers sont déjà reçus pour des mois après la sortie demandée. */
   | 'PAIEMENTS_APRES_SORTIE'
   /** La nouvelle location chevauche une location du bien au même libellé. */
-  | 'BIEN_OCCUPE';
+  | 'BIEN_OCCUPE'
+  /** Un paiement existe pour le mois du changement de montants ou après (ADR-G15). */
+  | 'PERIODE_PAYEE';
 
 /** Un document rendu par l'émission : `nouveau` est faux s'il existait déjà (même clé). */
 export interface Emission {
@@ -92,6 +95,12 @@ export interface DepotGestion {
   terminerLocation(userId: string, locationId: string, fin: string): Promise<LocationGeree>;
   /** Lève INTROUVABLE, BIEN_OCCUPE ou LIMITE_ATTEINTE. */
   louer(userId: string, bienId: string, occupation: NouvelleOccupation): Promise<OccupationCreee>;
+  /** Montants à partir d'un mois, jour, dépôt, libellé ; lève INTROUVABLE, HORS_LOCATION, PERIODE_PAYEE ou BIEN_OCCUPE. */
+  modifierLocation(
+    userId: string,
+    locationId: string,
+    modification: ModificationLocation,
+  ): Promise<LocationGeree>;
   /** Toutes les données de gestion du compte, documents complets compris. */
   exporter(userId: string): Promise<ExportGestion>;
 }
@@ -102,7 +111,7 @@ function message(erreur: unknown): string {
   return erreur instanceof Error ? erreur.message : '';
 }
 
-/** La base n'a pas encore reçu une migration de gestion (0002 ou 0003 pas encore appliquée). */
+/** La base n'a pas encore reçu une migration de gestion (0002, 0003 ou 0005 pas encore appliquée). */
 export function estTableAbsente(erreur: unknown): boolean {
   return message(erreur).includes(TABLE_ABSENTE);
 }
