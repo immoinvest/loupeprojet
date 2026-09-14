@@ -99,7 +99,7 @@ export function LoyersDuMois({ donnees }: { donnees: EtatGestion }): JSX.Element
           {vacants.map((bien, i) => (
             <Fragment key={bien.id}>
               {i > 0 && ', '}
-              <Link to={`/gerer/biens/${bien.id}`}>{bien.nom}</Link>
+              <Link to={`/gerer/biens/${bien.id}?louer=1`}>{bien.nom}</Link>
             </Fragment>
           ))}
         </p>

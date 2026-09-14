@@ -48,6 +48,13 @@ export function etatDuBien(donnees: Donnees, bienId: string, aujourdhui: string)
   return { statut: 'loue', locations };
 }
 
+/** La dernière location du bien par date d'entrée, terminée ou non : elle préremplit « Louer ». */
+export function derniereLocation(donnees: Donnees, bienId: string): LocationGeree | undefined {
+  return donnees.locations
+    .filter((l) => l.bienId === bienId)
+    .sort((a, b) => b.debut.localeCompare(a.debut))[0];
+}
+
 export const MOIS_DE_LA_FRISE = 12;
 
 export interface MoisDuBien {

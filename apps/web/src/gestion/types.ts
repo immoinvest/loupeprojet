@@ -7,6 +7,8 @@ import type {
   IdentiteBailleur,
   LocationGeree,
   NouveauPaiement,
+  NouvelleOccupation,
+  OccupationCreee,
   Paiement,
   PreferencesMenu,
 } from '@loupe/gestion';
@@ -50,4 +52,6 @@ export interface ClientGestion {
   document(id: string): Promise<ResultatGestion<DocumentComplet>>;
   /** Enregistre (ou déplace) la date de sortie du locataire. */
   terminerLocation(locationId: string, fin: string): Promise<ResultatGestion<LocationGeree>>;
+  /** Loue un bien existant : vacant, ou une autre chambre ; refusé si la même chambre est déjà louée. */
+  louer(bienId: string, occupation: NouvelleOccupation): Promise<ResultatGestion<OccupationCreee>>;
 }

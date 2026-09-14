@@ -1,7 +1,7 @@
 import type { EtatGestion, LocationGeree } from '@loupe/gestion';
 import { describe, expect, it } from 'vitest';
 
-import { etatDuBien, friseDuBien, MOIS_DE_LA_FRISE } from '@/gestion/fiche';
+import { derniereLocation, etatDuBien, friseDuBien, MOIS_DE_LA_FRISE } from '@/gestion/fiche';
 
 import { ETAT_SEPTEMBRE, LOCATION_JULIE, PAIEMENT_JULIE } from './gestion-exemples';
 
@@ -71,6 +71,17 @@ describe('etatDuBien', () => {
       statut: 'loue',
       locations: [{ id: 'julie' }, { id: 'suivant' }],
     });
+  });
+});
+
+describe('derniereLocation', () => {
+  it('la plus récente par date d’entrée, terminée ou non ; aucune pour un bien jamais loué', () => {
+    const etat = avec([
+      location('recente', { debut: '2026-01-01' }),
+      location('ancienne', { debut: '2024-01-01', fin: '2025-12-31' }),
+    ]);
+    expect(derniereLocation(etat, 'bien-lices')?.id).toBe('recente');
+    expect(derniereLocation(etat, 'parking')).toBeUndefined();
   });
 });
 

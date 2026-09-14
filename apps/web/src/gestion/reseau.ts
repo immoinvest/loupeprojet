@@ -4,6 +4,7 @@ import {
   EtatGestionSchema,
   IdentiteBailleurSchema,
   LocationGereeSchema,
+  OccupationCreeeSchema,
   PaiementSchema,
   PreferencesMenuSchema,
 } from '@loupe/gestion';
@@ -100,6 +101,13 @@ export function clientGestionReseau(
         `/locations/${encodeURIComponent(locationId)}/fin`,
         { fin },
         LocationGereeSchema,
+      ),
+    louer: (bienId, occupation) =>
+      appeler(
+        'POST',
+        `/biens/${encodeURIComponent(bienId)}/locations`,
+        occupation,
+        OccupationCreeeSchema,
       ),
   };
 }

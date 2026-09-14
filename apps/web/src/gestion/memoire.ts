@@ -1,4 +1,5 @@
 import {
+  chevauche,
   cleDocument,
   CreationLocationSchema,
   DemandeDocumentSchema,
@@ -8,6 +9,7 @@ import {
   loyerDuMois,
   montantAcceptable,
   NouveauPaiementSchema,
+  NouvelleOccupationSchema,
   occupationDe,
   PREFERENCES_PAR_DEFAUT,
   PreferencesMenuSchema,
@@ -18,6 +20,8 @@ import {
   type Locataire,
   type LocationGeree,
   type NouveauLocataire,
+  type Occupation,
+  type OccupationCreee,
   type Paiement,
   type RefusFin,
 } from '@loupe/gestion';
@@ -75,6 +79,31 @@ export function clientGestionMemoire(options: OptionsGestionMemoire = {}): Clien
     return complet === undefined ? INTROUVABLE : { ok: true, valeur: complet };
   };
 
+  /** Le locataire en titre, ses colocataires et la location d'un bien, écrits comme l'API les écrit. */
+  const occuper = (bienId: string, occupation: Occupation): OccupationCreee => {
+    const enregistrer = (l: NouveauLocataire): Locataire => ({
+      id: identifiant('locataire'),
+      ...l,
+      creeLe: maintenant,
+    });
+    const locataire = enregistrer(occupation.locataire);
+    const colocataires = occupation.colocataires.map(enregistrer);
+    const location: LocationGeree = {
+      id: identifiant('location'),
+      bienId,
+      locataireId: locataire.id,
+      colocataireIds: colocataires.map((c) => c.id),
+      ...occupation.location,
+      creeLe: maintenant,
+    };
+    donnees = {
+      ...donnees,
+      locataires: [...donnees.locataires, locataire, ...colocataires],
+      locations: [...donnees.locations, location],
+    };
+    return { locataire, location, colocataires };
+  };
+
   function executer<T>(
     action: ActionGestion,
     faire: () => ResultatGestion<T>,
@@ -98,38 +127,13 @@ export function clientGestionMemoire(options: OptionsGestionMemoire = {}): Clien
           creeLe: maintenant,
           modifieLe: maintenant,
         };
+        donnees = { ...donnees, biens: [...donnees.biens, bien] };
         const occupation = occupationDe(lu.data);
-        let locataire: Locataire | null = null;
-        let location: LocationGeree | null = null;
-        let colocataires: Locataire[] = [];
-        if (occupation !== null) {
-          const enregistrer = (l: NouveauLocataire): Locataire => ({
-            id: identifiant('locataire'),
-            ...l,
-            creeLe: maintenant,
-          });
-          locataire = enregistrer(occupation.locataire);
-          colocataires = occupation.colocataires.map(enregistrer);
-          location = {
-            id: identifiant('location'),
-            bienId: bien.id,
-            locataireId: locataire.id,
-            colocataireIds: colocataires.map((c) => c.id),
-            ...occupation.location,
-            creeLe: maintenant,
-          };
-        }
-        donnees = {
-          ...donnees,
-          biens: [...donnees.biens, bien],
-          locataires: [
-            ...donnees.locataires,
-            ...(locataire === null ? [] : [locataire]),
-            ...colocataires,
-          ],
-          locations: location === null ? donnees.locations : [...donnees.locations, location],
-        };
-        return { ok: true, valeur: { bien, locataire, location, colocataires } };
+        const occupee =
+          occupation === null
+            ? { locataire: null, location: null, colocataires: [] }
+            : occuper(bien.id, occupation);
+        return { ok: true, valeur: { bien, ...occupee } };
       }),
     payer: (nouveau) =>
       executer('payer', () => {
@@ -216,6 +220,16 @@ export function clientGestionMemoire(options: OptionsGestionMemoire = {}): Clien
           locations: donnees.locations.map((l) => (l.id === locationId ? terminee : l)),
         };
         return { ok: true, valeur: terminee };
+      }),
+    louer: (bienId, occupation) =>
+      executer('louer', () => {
+        const lu = NouvelleOccupationSchema.safeParse(occupation);
+        if (!lu.success) return INVALIDE;
+        if (!donnees.biens.some((b) => b.id === bienId)) return INTROUVABLE;
+        const duBien = donnees.locations.filter((l) => l.bienId === bienId);
+        if (chevauche(duBien, lu.data.location)) return { ok: false, code: 'bien_occupe' };
+        const colocataires = lu.data.colocataires ?? [];
+        return { ok: true, valeur: occuper(bienId, { ...lu.data, colocataires }) };
       }),
   };
 }

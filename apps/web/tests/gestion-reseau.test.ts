@@ -110,6 +110,25 @@ describe('clientGestionReseau', () => {
     });
   });
 
+  it('loue un bien par POST, identifiant encodé, et revalide locataire, location et colocataires', async () => {
+    const occupation = {
+      locataire: { prenom: 'Julie', nom: 'Martin' },
+      location: { ...LOCATION_JULIE, libelle: 'Chambre 2' },
+    };
+    const creee = {
+      locataire: ETAT_SEPTEMBRE.locataires[0],
+      location: LOCATION_JULIE,
+      colocataires: [],
+    };
+    const { recuperer, appels } = serveur(() => json(201, creee));
+    expect(await clientGestionReseau(recuperer).louer('b/1', occupation)).toEqual({
+      ok: true,
+      valeur: creee,
+    });
+    expect(appels[0]?.url).toBe('/api/gestion/biens/b%2F1/locations');
+    expect(appels[0]?.init?.body).toBe(JSON.stringify(occupation));
+  });
+
   it('annule un paiement par DELETE, identifiant encodé, réponse 204 sans corps', async () => {
     const { recuperer, appels } = serveur(() => new Response(null, { status: 204 }));
     expect(await clientGestionReseau(recuperer).annulerPaiement('p/1 ?')).toEqual({

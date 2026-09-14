@@ -121,6 +121,14 @@ Le contenu stocke des **codes de mention** (`pour_acquit`, `annule_recus`) et de
 | `BIEN_OCCUPE`            | 409  | `bien_occupe`            | « Ce bien a déjà une location à ces dates. »                                                 |
 | `PERIODE_DEJA_RECUE`     | —    | —                        | retiré (remplacé par `MONTANT_DEPASSE`)                                                      |
 
+### Écarts à l'implémentation (US-3 à US-6)
+
+- **Codes web** : chaque code serveur a son propre code web, `date_invalide`, `loyer_regle` et `fin_avant_entree` compris ; les phrases vivent dans `apps/web/src/textes/gerer.ts`, au vouvoiement comme les autres erreurs de gestion. `bailleur_manquant` ouvre la carte d'identité sans message. Le code G1a `PERIODE_DEJA_RECUE` n'est plus reconnu (« inconnue »).
+- **Fichiers web** : `LigneDeLoyer.tsx` (et non `LigneLoyer.tsx`, nom du type du paquet), `RetoursLoyer.tsx` (bandeau Annuler, erreur, carte d'identité), `EcranAttente.tsx` (sans compte, chargement, erreur, partagé par Gérer, Loyers, la fiche et le document), `ImprimerDocument.tsx` et `DocumentLoyer.tsx` (et non `DocumentGestion.tsx` / `document/PageDocument.tsx`), `gestion/memoire-documents.ts`, `gestion/fiche.ts` (état du bien, frise), `fiche/CarteLocation.tsx`.
+- **Paquet** : `montantAcceptable` vit dans `loyers.ts` (pas de `paiements.ts`) ; `refusFin` remplace `finAcceptee` ; les contenus rendent `{ ok: false, refus }`. Numéro d'un reçu : 6 caractères du paiement (`R-AAAAMM-XXXXXXXX-YYYYYY`).
+- **API** : `apps/comptes/src/gestion/ecritures.ts` écrit locataire, colocataires et location pour la création d'un bien loué comme pour `louer`.
+- **Biens vacants** : leurs noms sur l'accueil sont des liens vers la fiche, où l'on ajoute le locataire (US-7).
+
 ## 6. Données personnelles et sécurité
 
 - Le contenu d'un document contient le nom du locataire, l'adresse du logement et l'identité du bailleur : lu seulement par son compte (`where userId = ?`, 404 sinon), jamais journalisé, relu par Zod avant d'être renvoyé.

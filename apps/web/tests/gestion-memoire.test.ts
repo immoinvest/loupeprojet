@@ -279,6 +279,68 @@ describe('clientGestionMemoire', () => {
     expect(client.donnees().locations).toEqual([terminee, LOCATION_ANTOINE]);
   });
 
+  it('louer : invalide, bien inconnu, même chambre occupée ; une autre chambre en colocation acceptée', async () => {
+    const client = clientGestionMemoire({ etat: ETAT_SEPTEMBRE });
+    const occupation = {
+      locataire: { prenom: 'Hugo', nom: 'Petit' },
+      location: {
+        type: 'meublee' as const,
+        debut: '2026-10-01',
+        jourLoyer: 1,
+        loyerHorsCharges: 49_000,
+        charges: 4_000,
+        depot: 98_000,
+      },
+    };
+    expect(
+      await client.louer('bien-lices', { ...occupation, locataire: { prenom: '', nom: '' } }),
+    ).toEqual(INVALIDE);
+    expect(await client.louer('inconnu', occupation)).toEqual(INTROUVABLE);
+    // Julie loue le T2 Lices en entier, sans fin : une autre location entière le chevauche.
+    expect(await client.louer('bien-lices', occupation)).toEqual({
+      ok: false,
+      code: 'bien_occupe',
+    });
+
+    const chambre = await client.louer('bien-lices', {
+      ...occupation,
+      location: { ...occupation.location, libelle: 'Chambre 2' },
+      colocataires: [{ prenom: 'Léa', nom: 'Bernard' }],
+    });
+    expect(chambre).toMatchObject({
+      ok: true,
+      valeur: {
+        locataire: { id: 'locataire-1', prenom: 'Hugo' },
+        colocataires: [{ id: 'locataire-2', prenom: 'Léa' }],
+        location: {
+          id: 'location-3',
+          bienId: 'bien-lices',
+          locataireId: 'locataire-1',
+          colocataireIds: ['locataire-2'],
+          libelle: 'Chambre 2',
+        },
+      },
+    });
+    expect(client.donnees().locations).toHaveLength(3);
+    expect(client.donnees().locataires.map((l) => l.prenom)).toEqual([
+      'Julie',
+      'Antoine',
+      'Hugo',
+      'Léa',
+    ]);
+
+    // Sans liste de colocataires (l'API l'accepte absente) : une chambre de plus, sans colocataire.
+    expect(
+      await client.louer('bien-lices', {
+        ...occupation,
+        location: { ...occupation.location, libelle: 'Chambre 3' },
+      }),
+    ).toMatchObject({
+      ok: true,
+      valeur: { colocataires: [], location: { libelle: 'Chambre 3', colocataireIds: [] } },
+    });
+  });
+
   it('une erreur forcée remplace le résultat et l’appel est compté', async () => {
     const client = clientGestionMemoire({ erreurs: { etat: 'indisponible', payer: 'reseau' } });
     expect(await client.etat()).toEqual({ ok: false, code: 'indisponible' });

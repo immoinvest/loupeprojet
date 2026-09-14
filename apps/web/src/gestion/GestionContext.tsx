@@ -9,6 +9,8 @@ import {
   type IdentiteBailleur,
   type LocationGeree,
   type NouveauPaiement,
+  type NouvelleOccupation,
+  type OccupationCreee,
   type Paiement,
   type PreferencesMenu,
 } from '@loupe/gestion';
@@ -48,6 +50,10 @@ export interface ContexteGestion {
     locationId: string,
     fin: string,
   ) => Promise<ResultatGestion<LocationGeree>>;
+  readonly louer: (
+    bienId: string,
+    occupation: NouvelleOccupation,
+  ) => Promise<ResultatGestion<OccupationCreee>>;
 }
 
 const Contexte = createContext<ContexteGestion | null>(null);
@@ -184,6 +190,18 @@ export function GestionProvider({
           fusionner((e) => ({
             ...e,
             locations: e.locations.map((l) => (l.id === terminee.id ? terminee : l)),
+          }));
+        }
+        return r;
+      },
+      louer: async (bienId, occupation) => {
+        const r = await client.louer(bienId, occupation);
+        if (r.ok) {
+          const { locataire, location, colocataires } = r.valeur;
+          fusionner((e) => ({
+            ...e,
+            locataires: [...e.locataires, locataire, ...colocataires],
+            locations: [...e.locations, location],
           }));
         }
         return r;

@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 
-import { chevauche, FinLocationSchema, NouvelleOccupationSchema, refusFin } from '../src/baux';
+import {
+  chevauche,
+  FinLocationSchema,
+  NouvelleOccupationSchema,
+  OccupationCreeeSchema,
+  refusFin,
+} from '../src/baux';
 import { location, paiement } from './exemples';
 
 describe('refusFin', () => {
@@ -62,6 +68,20 @@ describe('chevauche', () => {
 });
 
 describe('schémas des baux', () => {
+  it('occupation créée : locataire, location et colocataires, tels que l’API les rend', () => {
+    const creee = {
+      locataire: { id: 't1', prenom: 'Léa', nom: 'Bernard', creeLe: '2026-09-14T09:00:00.000Z' },
+      location: location('l1', { colocataireIds: ['t2'], libelle: 'Chambre 2' }),
+      colocataires: [
+        { id: 't2', prenom: 'Hugo', nom: 'Petit', creeLe: '2026-09-14T09:00:00.000Z' },
+      ],
+    };
+    expect(OccupationCreeeSchema.parse(creee)).toEqual(creee);
+    expect(OccupationCreeeSchema.safeParse({ ...creee, colocataires: undefined }).success).toBe(
+      false,
+    );
+  });
+
   it('fin de location : un vrai jour', () => {
     expect(FinLocationSchema.safeParse({ fin: '2027-03-14' }).success).toBe(true);
     expect(FinLocationSchema.safeParse({ fin: '2027-02-30' }).success).toBe(false);

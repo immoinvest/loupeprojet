@@ -3,6 +3,8 @@ import { z } from 'zod';
 import { JourSchema, periodeDe } from './dates';
 import {
   ColocatairesSchema,
+  LocataireSchema,
+  LocationGereeSchema,
   NouveauLocataireSchema,
   NouvelleLocationSchema,
   type LocationGeree,
@@ -19,8 +21,16 @@ export const NouvelleOccupationSchema = z.object({
   colocataires: ColocatairesSchema.optional(),
 });
 
+/** Ce que rend la location d'un bien : le locataire, la location et les colocataires, écrits ensemble. */
+export const OccupationCreeeSchema = z.object({
+  locataire: LocataireSchema,
+  location: LocationGereeSchema,
+  colocataires: z.array(LocataireSchema),
+});
+
 export type FinLocation = z.infer<typeof FinLocationSchema>;
 export type NouvelleOccupation = z.infer<typeof NouvelleOccupationSchema>;
+export type OccupationCreee = z.infer<typeof OccupationCreeeSchema>;
 
 export type RefusFin = 'FIN_AVANT_ENTREE' | 'PAIEMENTS_APRES_SORTIE';
 

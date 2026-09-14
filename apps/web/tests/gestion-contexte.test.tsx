@@ -164,6 +164,38 @@ describe('GestionProvider', () => {
     expect(contexte().donnees?.locations.map((l) => l.fin)).toEqual(['2026-12-31', undefined]);
   });
 
+  it('louer : locataire, colocataires et location rejoignent l’état ; refusé, rien ne change', async () => {
+    monter({ gestion: clientGestionMemoire({ etat: ETAT_SEPTEMBRE }) });
+    await statut('pret');
+    const occupation = {
+      locataire: { prenom: 'Hugo', nom: 'Petit' },
+      location: {
+        type: 'meublee' as const,
+        debut: '2026-10-01',
+        jourLoyer: 1,
+        loyerHorsCharges: 49_000,
+        charges: 4_000,
+        depot: 98_000,
+      },
+    };
+    await act(async () => {
+      expect((await contexte().louer('bien-lices', occupation)).ok).toBe(false);
+      const chambre = {
+        ...occupation,
+        location: { ...occupation.location, libelle: 'Chambre 2' },
+        colocataires: [{ prenom: 'Léa', nom: 'Bernard' }],
+      };
+      expect((await contexte().louer('bien-lices', chambre)).ok).toBe(true);
+    });
+    expect(contexte().donnees?.locations).toHaveLength(3);
+    expect(contexte().donnees?.locataires.map((l) => l.prenom)).toEqual([
+      'Julie',
+      'Antoine',
+      'Hugo',
+      'Léa',
+    ]);
+  });
+
   it('erreur de lecture : statut erreur ; une action réussie n’invente pas de données ; recharger relit', async () => {
     const base = clientGestionMemoire({ etat: ETAT_SEPTEMBRE });
     let lectures = 0;
