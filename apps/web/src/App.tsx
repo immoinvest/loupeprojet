@@ -22,6 +22,7 @@ import { Compte } from './ecrans/Compte';
 import { Connexion } from './ecrans/Connexion';
 import { Extension } from './ecrans/Extension';
 import { Fiscalite } from './ecrans/Fiscalite';
+import { AjouterMain } from './ecrans/gerer/AjouterMain';
 import { Gerer } from './ecrans/gerer/Gerer';
 import { Hypotheses } from './ecrans/Hypotheses';
 import { Imprimer } from './ecrans/Imprimer';
@@ -58,6 +59,7 @@ export const routes: RouteObject[] = [
         ],
       },
       { path: 'gerer', element: <Gerer /> },
+      { path: 'gerer/ajouter', element: <AjouterMain /> },
       { path: 'compte', element: <Compte /> },
       { path: 'partage', element: <Partage /> },
       { path: 'comparer', element: <Comparer /> },
