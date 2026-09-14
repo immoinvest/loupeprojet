@@ -1,0 +1,38 @@
+{
+  "feature_slug": "hypotheses-financement",
+  "title": "Hypothèses et financement : onglet Financement, revenus retirés, feu couverture, bouton Simuler un prêt, Hypothèses sans Le marché (fiches 01 et 03)",
+  "started_at": "2026-09-14T15:00:00Z",
+  "current_step": "implement",
+  "scope": "packages/moteur/src/{schema,financement,regles,verdict,exemples}, apps/web/src/{hypotheses,analyses/simulation-pret.ts,analyses/comparaison.ts,stockage/base64url.ts,ecrans/Financement.tsx,ecrans/financement,ecrans/hypotheses,ecrans/Hypotheses.tsx,ecrans/FormulaireProjet.tsx,ecrans/formulaire,annonces/construire.ts,coque/ProjetLayout.tsx,App.tsx,textes}, apps/web/e2e, docs",
+  "branch": "feat/hypotheses-financement",
+  "base": "master (9d38892)",
+  "steps": {
+    "discovery": {
+      "status": "completed",
+      "output": ".product/features/hypotheses-financement-discovery.md",
+      "note": "auto-validée avec revue critique : onglet plutôt que carte, feu couverture (70 % / 100 %) plutôt que feu gris, revenus retirés (moteur prêt à les reprendre), axe renommé"
+    },
+    "specs": {
+      "status": "completed",
+      "output": ".product/specs/hypotheses-financement-specs.md",
+      "note": "6 stories : US-1 moteur, US-2 revenus retirés, US-3 fiche 03, US-4 onglet Financement, US-5 lien du simulateur, US-6 docs"
+    },
+    "architecture": {
+      "status": "completed",
+      "output": ".product/architecture/hypotheses-financement.md",
+      "note": "ADR-HF1 à HF6 ; registre TOUS_LES_GROUPES ; schéma local du lien #s= ; base64url partagé"
+    },
+    "implement": { "status": "in_progress", "stories_completed": 0, "stories_total": 6 },
+    "refactor": { "status": "pending" },
+    "qa_tests": { "status": "pending" },
+    "security": { "status": "pending" },
+    "push": { "status": "pending" }
+  },
+  "decisions": {
+    "onglet": "Financement entre Estimation et Hypothèses ; hypothèses du prêt en haut, lecture dessous ; la carte Le financement quitte Hypothèses (confirmation demandée à Pierre, option par défaut)",
+    "feu": "couverture = mensualité assurance comprise ÷ loyer HC du régime retenu ; bon ≤ 70 %, à surveiller ≤ 100 %, problème au-delà ; inconnu sans loyer",
+    "revenus": "revenusMensuels facultatif dans le moteur, jamais demandé par le web ; HCSF et son point de vigilance seulement pour les projets anciens qui en portent",
+    "simulateur": "lien /simulateur-pret#s= selon le contrat de la fiche 08 (schéma local dans analyses/), page Bientôt en attendant l'outil",
+    "marche": "carte Le marché supprimée, plafond d'encadrement dans La location, aucune saisie manuelle du repère DVF"
+  }
+}
