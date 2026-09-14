@@ -82,6 +82,26 @@ test('menu et en-tête restent en vue quand le contenu défile ; changer de vole
   expect(await defilementDeLaFenetre(page)).toBe(0);
 });
 
+test('formulaire Vérifier : les choix réservés aux lecteurs d’écran ne font pas défiler la fenêtre', async ({
+  page,
+}) => {
+  await ouvrirMesProjets(page);
+  await page.getByRole('main').getByRole('button', { name: 'Nouveau projet' }).click();
+  await page.getByRole('button', { name: /je saisis à la main/ }).click();
+  await expect(
+    page.getByRole('button', { name: 'Créer le projet et voir le rapport' }),
+  ).toBeVisible();
+
+  // Le document tient dans la fenêtre : aucun élément ne dépasse de la coque.
+  const depassement = await page.evaluate(
+    () => document.documentElement.scrollHeight - document.documentElement.clientHeight,
+  );
+  expect(depassement).toBeLessThanOrEqual(1);
+
+  await defilerEnBas(page);
+  expect(await defilementDeLaFenetre(page)).toBe(0);
+});
+
 test('trente projets : le menu en montre trois puis « Tous mes projets », le profil reste en bas', async ({
   page,
 }) => {
