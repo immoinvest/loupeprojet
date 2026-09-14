@@ -1,4 +1,4 @@
-import { projetExemple } from '@loupe/moteur';
+import { calculerProjet, projetExemple, questionsPourProjet } from '@loupe/moteur';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
@@ -80,6 +80,27 @@ describe('encoderPartage / decoderPartage', () => {
     expect(lien.startsWith('https://loupe.app/partage#p=')).toBe(true);
     expect(lien.length).toBeGreaterThan(1_000);
     expect(lien.length).toBeLessThan(4_000);
+  });
+
+  it('transporte la visite et ses réponses ; au pire (toutes répondues, notes longues) le lien reste court', () => {
+    const complet = projetComplet();
+    const r = calculerProjet(complet.projet);
+    const questions = questionsPourProjet(r.projet, r);
+    expect(questions.length).toBeGreaterThan(40);
+    const etats = ['ok', 'probleme', 'sans_objet'] as const;
+    const reponses = Object.fromEntries(
+      questions.map((q, i) => [q.id, { etat: etats[i % 3] ?? 'ok', note: 'n'.repeat(120) }]),
+    );
+    const avecVisite: ProjetEnregistre = {
+      ...complet,
+      visite: { faite: true, date: DATE, reponses },
+    };
+    const retour = decoderPartage(encoderPartage(avecVisite));
+    expect(retour.ok).toBe(true);
+    if (retour.ok) expect(retour.enregistre).toEqual(avecVisite);
+    const lien = lienPartage('https://loupe.app', avecVisite);
+    expect(lien.length).toBeGreaterThan(4_000);
+    expect(lien.length).toBeLessThan(20_000);
   });
 
   it('refuse proprement un lien vide, abîmé, non JSON ou hors schéma', () => {

@@ -84,6 +84,39 @@ describe('creerProjet', () => {
   it('nomParDefaut pour un appartement', () => {
     expect(nomParDefaut(projetExemple)).toBe('T3 · 65 m² · dépt 13');
   });
+
+  it('reprend une visite et une adresse quand on les lui donne, rien sinon', () => {
+    const sans = creerProjet();
+    expect(sans).not.toHaveProperty('visite');
+    expect(sans).not.toHaveProperty('adresse');
+    const visite = { faite: true, date: '2026-09-14T10:00:00.000Z', reponses: {} };
+    const avec = creerProjet({ visite });
+    expect(avec.visite).toEqual(visite);
+  });
+});
+
+describe('migration douce de la visite', () => {
+  it('accepte un projet enregistré sans visite, avec visite, et refuse une visite invalide', () => {
+    const p = creerProjet({ genererId: () => 'ancien' });
+    stockage().setItem(CLE_STOCKAGE, JSON.stringify([p]));
+    const [lu] = lireProjets(stockage());
+    expect(lu?.id).toBe('ancien');
+    expect(lu).not.toHaveProperty('visite');
+
+    const visite = {
+      faite: true,
+      date: '2026-09-14',
+      reponses: { A: { etat: 'probleme', note: 'n' } },
+    };
+    stockage().setItem(CLE_STOCKAGE, JSON.stringify([{ ...p, visite }]));
+    expect(lireProjets(stockage())[0]?.visite).toEqual(visite);
+
+    stockage().setItem(
+      CLE_STOCKAGE,
+      JSON.stringify([{ ...p, visite: { faite: 'oui', reponses: {} } }]),
+    );
+    expect(lireProjets(stockage())).toEqual([]);
+  });
 });
 
 describe('ProjetsProvider / useProjets', () => {
@@ -158,6 +191,35 @@ describe('ProjetsProvider / useProjets', () => {
     expect(retour?.ok).toBe(false);
     expect(retour?.ok === false && retour.erreurs['hypotheses.pret.dureeAnnees']).toBeTruthy();
     expect(result.current.trouver(a.id)?.projet.hypotheses.pret.dureeAnnees).toBe(25);
+  });
+
+  it('mettreAJour enregistre la visite passée en complément sans écraser l’adresse', () => {
+    const stockage = stockageMemoire();
+    const adresse = {
+      libelle: '10 rue Paradis, Marseille',
+      lat: 43.29,
+      lon: 5.38,
+      codeInsee: '13206',
+      codeVoie: '7100',
+      numero: 10,
+    };
+    const a = creerProjet({ nom: 'A', adresse });
+    ecrireProjets(stockage, [a]);
+    const enveloppe = ({ children }: { children: ReactNode }): ReactNode => (
+      <ProjetsProvider stockage={stockage}>{children}</ProjetsProvider>
+    );
+    const { result } = renderHook(() => useProjets(), { wrapper: enveloppe });
+    const visite = { faite: false, reponses: { DOC_TAXE_FONCIERE: { etat: 'ok' as const } } };
+    act(() => {
+      result.current.mettreAJour(a.id, a.projet, { visite });
+    });
+    expect(result.current.trouver(a.id)?.visite).toEqual(visite);
+    expect(result.current.trouver(a.id)?.adresse).toEqual(adresse);
+    expect(lireProjets(stockage)[0]?.visite).toEqual(visite);
+    act(() => {
+      result.current.mettreAJour(a.id, a.projet);
+    });
+    expect(result.current.trouver(a.id)?.visite).toEqual(visite);
   });
 
   it('réutilise une liste déjà présente sans la réamorcer', () => {

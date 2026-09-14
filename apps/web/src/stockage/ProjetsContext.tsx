@@ -9,7 +9,14 @@ import {
   type OptionsCreation,
   type ProjetEnregistre,
   type StatutProjet,
+  type Visite,
 } from './projets';
+
+/** Ce qui s'enregistre avec le projet sans passer par le moteur : adresse exacte, visite. */
+export interface ComplementProjet {
+  readonly adresse?: AdresseBien;
+  readonly visite?: Visite;
+}
 
 export interface ContexteProjets {
   readonly projets: readonly ProjetEnregistre[];
@@ -19,12 +26,12 @@ export interface ContexteProjets {
   readonly trouver: (id: string | undefined) => ProjetEnregistre | undefined;
   /**
    * Remplace le projet après validation Zod ; une entrée invalide n'est pas enregistrée.
-   * Le complément (adresse exacte) est enregistré dans la même écriture, pour ne rien écraser.
+   * Le complément (adresse exacte, visite) est enregistré dans la même écriture, pour ne rien écraser.
    */
   readonly mettreAJour: (
     id: string,
     projet: ProjetEntree,
-    complement?: { readonly adresse?: AdresseBien },
+    complement?: ComplementProjet,
   ) => MiseAJour;
 }
 
