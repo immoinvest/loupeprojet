@@ -111,7 +111,7 @@ export function CarteAchat({
           onClick={() => {
             setTravauxOuverts((ouverts) => !ouverts);
           }}
-          className="inline-flex min-h-[44px] items-center gap-2 self-start rounded-full border border-bordure bg-surface px-4 text-sm font-semibold text-encre-2 hover:bg-accent-fond"
+          className="inline-flex min-h-[44px] items-center gap-2 self-start rounded-full border border-bordure bg-surface px-4 text-sm font-semibold text-encre-2 survol-fond"
         >
           {resumeTravaux(travaux, mobilier)}
         </button>

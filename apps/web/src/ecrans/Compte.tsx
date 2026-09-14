@@ -172,7 +172,7 @@ export function Compte(): JSX.Element {
                 onClick={() => {
                   void supprimer();
                 }}
-                className="inline-flex min-h-[44px] items-center rounded-full bg-probleme px-4 text-sm font-semibold text-white disabled:opacity-50"
+                className="inline-flex min-h-[44px] items-center rounded-full bg-probleme px-4 text-sm font-semibold text-white survol-danger-plein disabled:opacity-50"
               >
                 {T.confirmerSuppression}
               </button>

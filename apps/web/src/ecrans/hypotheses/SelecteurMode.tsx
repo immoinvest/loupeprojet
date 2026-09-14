@@ -46,7 +46,7 @@ export function SelecteurMode({
             className={`inline-flex min-h-[44px] cursor-pointer items-center rounded-full border px-4 text-sm font-semibold has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-accent ${
               choisi
                 ? 'border-accent bg-accent text-white'
-                : 'border-bordure bg-surface text-encre-2 hover:bg-accent-fond'
+                : 'border-bordure bg-surface text-encre-2 survol-fond'
             }`}
           >
             <input

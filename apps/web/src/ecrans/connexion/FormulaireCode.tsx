@@ -61,7 +61,7 @@ export function FormulaireCode({
         <button
           type="button"
           onClick={onChangerAdresse}
-          className="font-semibold text-encre-3 hover:text-encre pointer-coarse:min-h-11"
+          className="font-semibold text-encre-3 survol-discret pointer-coarse:min-h-11"
         >
           {TEXTES_CONNEXION.changerAdresse}
         </button>
