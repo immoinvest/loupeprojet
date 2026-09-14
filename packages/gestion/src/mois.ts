@@ -16,7 +16,7 @@ export interface LigneLoyer extends SuiviLoyer {
 
 export interface ResumeMois {
   readonly periode: string;
-  /** En retard d'abord, puis attendus, à venir, reçus ; à statut égal, par date due puis par bien. */
+  /** En retard d'abord, puis partiels, attendus, à venir, reçus ; à statut égal, par date due puis par bien. */
   readonly lignes: readonly LigneLoyer[];
   readonly nombreRecus: number;
   readonly nombreEnRetard: number;
@@ -29,9 +29,10 @@ type Donnees = Pick<EtatGestion, 'biens' | 'locataires' | 'locations' | 'paiemen
 
 const ORDRE: Readonly<Record<StatutLoyer, number>> = {
   en_retard: 0,
-  attendu: 1,
-  a_venir: 2,
-  recu: 3,
+  partiel: 1,
+  attendu: 2,
+  a_venir: 3,
+  recu: 4,
 };
 
 /** Un bien introuvable (données incohérentes) se range en tête plutôt que de faire échouer le tri. */

@@ -34,6 +34,7 @@ export const STATUTS_LOYER: Readonly<Record<StatutLoyer, string>> = {
   a_venir: 'À venir',
   attendu: 'Attendu',
   en_retard: 'En retard',
+  partiel: 'Partiel',
   recu: 'Reçu',
 };
 
@@ -41,6 +42,7 @@ export const TONS_LOYER: Readonly<Record<StatutLoyer, TonPastille>> = {
   a_venir: 'neutre',
   attendu: 'accent',
   en_retard: 'probleme',
+  partiel: 'surveiller',
   recu: 'bon',
 };
 

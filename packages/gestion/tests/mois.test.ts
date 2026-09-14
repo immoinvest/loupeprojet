@@ -95,6 +95,32 @@ describe('resumeDuMois', () => {
     ]);
   });
 
+  it('un loyer partiel se range entre les retards et les attendus, avec son reste dû', () => {
+    const etat: EtatGestion = {
+      ...ETAT,
+      locations: [...ETAT.locations, location('retard', { bienId: 'bien-lices', jourLoyer: 2 })],
+      paiements: [
+        ...ETAT.paiements,
+        paiement('p-antoine', 'antoine', '2026-09', 20_000, '2026-09-04'),
+      ],
+    };
+    const resume = resumeDuMois(etat, '2026-09', AUJOURDHUI);
+    expect(resume.lignes.map((l) => `${l.location.id} ${l.statut}`)).toEqual([
+      'retard en_retard',
+      'antoine partiel',
+      'lea recu',
+      'hugo recu',
+      'julie recu',
+    ]);
+    expect(resume.lignes[1]?.resteDu).toBe(23_000);
+    expect(resume).toMatchObject({
+      nombreRecus: 3,
+      nombreEnRetard: 1,
+      montantRecu: 188_000,
+      montantDu: 281_000,
+    });
+  });
+
   it('à date due égale, le bien départage ; un bien inconnu passe en premier', () => {
     const etat: EtatGestion = {
       ...ETAT,
