@@ -16,7 +16,6 @@ packages/capture/    Contrat de capture d'une annonce (schéma, encodage pour fr
 packages/gestion/    Calcul pur de la gestion locative (loyers dus, retards, résumé du mois, schémas Zod), 100 % couvert par les tests
 packages/projets/    Projets enregistrés : schémas Zod, contrat de synchronisation avec le compte, règles de fusion de l'appareil, 100 % couvert par les tests
 apps/web/            Application React + Vite + Tailwind v4 (coque SaaS, Accueil, menu Analyser et Gérer, Mes projets, Nouveau projet, Rapport, Hypothèses, Fiscalité, Revente, Visite, Comparer, Simulateur de prêt, impression, partage, Extension, Gérer : loyers du mois, ajouter un bien, « J'ai acheté ce bien »), Cloudflare Pages
->>>>>>> origin/master
 apps/worker/         Serveur Hono sur Cloudflare Workers : proxy des données publiques (cache KV, limite de débit)
 apps/comptes/        Comptes optionnels (Better Auth sur Hono) : Google, Apple ou code e-mail, synchronisation des projets et API de la gestion locative, servis par le worker Pages sur l'origine du site, base D1
 apps/extension/      Extension navigateur (Manifest V3, Chrome/Edge/Firefox) : lit l'annonce ouverte et l'envoie à Deklic ; règles par portail
