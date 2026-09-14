@@ -39,6 +39,8 @@ export function fusionnerChamps(regles: ChampsExtraits, ia: ChampsIa): ChampsExt
     const valeur = ia[cle];
     if (valeur !== null && valeur !== undefined) champs[cle] = valeur;
   }
+  // Le type de location du modèle devient le type du formulaire.
+  if (ia.typeLocation !== null && ia.typeLocation !== undefined) champs.mode = ia.typeLocation;
   return champs;
 }
 

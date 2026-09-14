@@ -59,8 +59,14 @@ Concurrents : Horiz.io (8–20 €/mois, complet, saisie manuelle), Lybox (9–4
 
 ### Cash-flow
 
-- Trois modes : meublé longue durée, nu, courte durée (nuitée × occupation − ménage/conciergerie).
-- Sorties : crédit, assurance, TF, copro, PNO, énergie/internet si inclus, CFE, comptable, gestion (%), **vacance** (3 sem/an LLD, 1 mois colocation), **entretien** (0,5 %/an du prix).
+- Cinq types d'exploitation (feature `location-types`, fiche 05), choisis en tête de la carte « La location » :
+  - **Nue** : loyer × 12 − vacance (3 semaines).
+  - **Meublée longue durée** : loyer × 12 − vacance (3 semaines ; 8 à 10 pour un logement étudiant, à saisir) ; loyer nu déduit par ÷ 1,15 pour comparer les régimes nus.
+  - **Colocation** : chambres louées × loyer par chambre × 12 + forfait de charges par chambre ; vacance par chambre (4 semaines) ; énergie et internet payés par le propriétaire. Décence : 9 m² et 20 m³ par chambre en baux individuels (loi 89-462 art. 8-1, décret 2002-120).
+  - **Courte durée** : nuitée × nuits louées par mois × 12 + ménage facturé par séjour ; séjours = nuits ÷ durée moyenne d'un séjour ; ménage payé par séjour, commission de plateforme (3 %, Airbnb, à confirmer) et conciergerie en charges. Changement d'usage, enregistrement et DPE des meublés de tourisme (loi Le Meur du 19/11/2024) en points de vigilance.
+  - **Moyenne durée** (bail mobilité, 1 à 10 mois, loi ELAN) : loyer et forfait de charges × 12, vacance entre deux séjours (4 semaines, à confirmer), ménage par séjour.
+- Valeurs de départ par type dans `regles/2026-09.ts` (`exploitation.parType`), badgées « estimé » ; celles qui viennent de l'Excel « Projet 92K » ou d'un choix Deklic sont « à confirmer ».
+- Sorties : crédit, assurance, TF, copro, PNO, énergie/internet payés par le propriétaire, CFE, comptable, gestion (%), conciergerie et plateforme (% des recettes), ménage par séjour, **vacance**, **entretien** (0,5 %/an du prix retenu). Forfaits de charges et ménage facturé sont des recettes (imposables).
 - Résultats : cash-flow mensuel, effort d'épargne, point mort (loyer d'équilibre), taux de couverture.
 
 ### Fiscalité — quatre régimes côte à côte
@@ -74,6 +80,8 @@ Concurrents : Horiz.io (8–20 €/mois, complet, saisie manuelle), Lybox (9–4
 
 Projection année par année sur la durée de détention avec stocks de déficits/amortissements ; afficher **l'année où l'on commence à payer**.
 
+Régimes compatibles avec le type : nue et meublée comparent les quatre régimes ; colocation, courte et moyenne durée n'ont que les deux régimes du meublé (le moteur projette toujours les quatre, `ResultatFiscalite.compatibles` guide l'affichage et le choix du meilleur ; un régime incompatible est refusé). Micro-BIC d'un meublé de tourisme non classé : abattement 30 %, plafond 15 000 € ; classé : 50 %, plafond général.
+
 ### Revente
 
 - Prix = valeur × (1 + évolution)^n − agence − diagnostics − IRA − CRD → **cash net vendeur**.
@@ -86,7 +94,7 @@ Projection année par année sur la durée de détention avec stocks de déficit
 - **TRI réel** sur flux annuels (apport + mobilier en année 0, cash-flows après impôt, cash net de revente en N).
 - Enrichissement = capital remboursé + plus-value nette + cash-flows cumulés − apport.
 - **Verdict cinq feux** (bon / à surveiller / problème) : prix vs DVF, rendement net, cash-flow, couverture (crédit ÷ loyer), risques (DPE F/G, copro en procédure, zone à risque). Pas de note globale.
-- **Scénarios** : négocier (prix cible pour cash-flow 0, net 6 %, brut 8 % ; à défaut −10 % du prix retenu), colocation, durée, taux +0,5 pt, nu, vacance.
+- **Scénarios** : négocier (prix cible pour cash-flow 0, net 6 %, brut 8 % ; à défaut −10 % du prix retenu), « et si je passais en colocation » (chambres du bien, loyer meublé de référence × 1,35 ÷ chambres, forfait et abonnements ; absent pour une colocation), durée, taux +0,5 pt, nu ou meublé (depuis colocation, courte ou moyenne durée : meublé longue durée au loyer de référence), vacance (8 semaines ; en courte durée, deux mois de nuits en moins).
 
 ## Cas de référence : « Ton Excel → Loupe » (projet 92K, prix 155 000 €)
 

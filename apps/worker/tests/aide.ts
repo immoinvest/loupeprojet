@@ -80,6 +80,7 @@ export const REPONSE_MODELE = {
   chauffage: 'individuel',
   etat: null,
   exterieur: null,
+  typeLocation: null,
 };
 
 export function reponseJson(corps: unknown, statut = 200): Response {

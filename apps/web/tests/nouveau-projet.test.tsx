@@ -220,7 +220,7 @@ describe('Nouveau projet — à la main', () => {
       await utilisateur.type(screen.getByLabelText(/Surface/), '32,5');
       await utilisateur.type(screen.getByLabelText(/Code postal/), '20000');
       await utilisateur.type(screen.getByLabelText(/^Ville/), 'Ajaccio');
-      await utilisateur.selectOptions(screen.getByLabelText(/Mode de location/), 'nu');
+      await utilisateur.click(screen.getByRole('radio', { name: 'Nue' }));
       await utilisateur.selectOptions(screen.getByLabelText(/Tranche/), '0.11');
       await utilisateur.selectOptions(screen.getByLabelText(/Ascenseur/), 'oui');
       await utilisateur.selectOptions(screen.getByLabelText(/^DPE/), 'E');

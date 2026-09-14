@@ -141,7 +141,10 @@ describe('Rapport', () => {
       expect(screen.queryByLabelText(/Différé total/)).not.toBeInTheDocument();
       expect(screen.queryByRole('heading', { name: 'Le marché' })).not.toBeInTheDocument();
 
-      await utilisateur.selectOptions(screen.getByLabelText(/Type de location/), 'courte_duree');
+      await utilisateur.click(screen.getByRole('radio', { name: 'Courte durée' }));
+      expect(
+        screen.getByRole('heading', { name: 'La location — Courte durée' }),
+      ).toBeInTheDocument();
       // 1 300 € / 30 nuits × 2 = 86,7 → 87 € ; 15 nuits par mois par défaut (règles 2026-09).
       expect(screen.getByLabelText(/Prix de la nuitée/)).toHaveValue('87');
       expect(screen.getByLabelText(/Nuits louées par mois/)).toHaveValue('15');

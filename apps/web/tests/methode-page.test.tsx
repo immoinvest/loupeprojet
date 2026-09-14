@@ -12,7 +12,7 @@ describe('Page Méthode', () => {
     expect(screen.getByText(/Règles du 14 sept\. 2026 \(version 2026-09\)/)).toBeInTheDocument();
 
     const sommaire = screen.getByRole('navigation', { name: 'Sommaire' });
-    expect(within(sommaire).getAllByRole('link')).toHaveLength(15);
+    expect(within(sommaire).getAllByRole('link')).toHaveLength(16);
     expect(within(sommaire).getByRole('link', { name: 'Le crédit' })).toHaveAttribute(
       'href',
       '#credit',
@@ -28,8 +28,8 @@ describe('Page Méthode', () => {
     // Le libellé exact (la liste des simplifications contient une phrase plus longue).
     expect(screen.getByText('Surtaxe sur les plus-values élevées')).toBeInTheDocument();
     expect(screen.getByText('CGI art. 1594 D', { exact: false })).toBeInTheDocument();
-    expect(screen.getAllByText('à confirmer')).toHaveLength(9);
-    expect(screen.getByText(/9 valeurs attendent une source officielle/)).toBeInTheDocument();
+    expect(screen.getAllByText('à confirmer')).toHaveLength(18);
+    expect(screen.getByText(/18 valeurs attendent une source officielle/)).toBeInTheDocument();
     expect(screen.getByText(/Frais d’acquisition passés en charge/)).toBeInTheDocument();
     expect(screen.getAllByRole('table').length).toBeGreaterThanOrEqual(10);
   });

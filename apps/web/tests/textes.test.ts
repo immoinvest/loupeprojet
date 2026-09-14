@@ -138,6 +138,22 @@ describe('régimes : explications et ordre', () => {
     expect(explicationRegime(r.fiscalite!.regimes.micro_foncier, dix)).toContain('30 %');
   });
 
+  it('micro-BIC : l’abattement lu sur la première année (30 % en meublé de tourisme non classé)', () => {
+    const micro = r.fiscalite!.regimes.micro_bic;
+    const premiere = micro.annees[0];
+    if (premiere === undefined) throw new Error('année 1 attendue');
+    const tourisme = {
+      ...micro,
+      annees: [{ ...premiere, recettes: 10_000, baseImposable: 7_000 }],
+    };
+    expect(n(explicationRegime(tourisme, dix))).toContain('Abattement de 30 % sur les recettes');
+    const sansRecettes = { ...micro, annees: [{ ...premiere, recettes: 0, baseImposable: 0 }] };
+    expect(explicationRegime(sansRecettes, dix)).toContain(
+      'Abattement forfaitaire sur les recettes',
+    );
+    expect(explicationRegime({ ...micro, annees: [] }, dix)).toContain('Abattement forfaitaire');
+  });
+
   it('LMNP réel imposé et nu réel jamais imposé : les autres phrases', () => {
     const riche = calculerProjet(
       variante({ location: { mode: 'meuble', loyerHc: 2_300, vacanceSemaines: 0 } }),

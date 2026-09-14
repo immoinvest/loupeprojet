@@ -35,6 +35,16 @@ describe('contrat : normalisation des champs', () => {
     expect(n.rejetes).toEqual(['prix', 'ascenseur', 'dpe']);
   });
 
+  it('lit le type de location parmi les cinq et écarte un type inconnu', () => {
+    expect(normaliserChamps({ typeLocation: 'colocation' }).champs.typeLocation).toBe('colocation');
+    expect(normaliserChamps({ typeLocation: 'courte_duree' }).champs.typeLocation).toBe(
+      'courte_duree',
+    );
+    const inconnu = normaliserChamps({ typeLocation: 'airbnb' });
+    expect(inconnu.champs.typeLocation).toBeNull();
+    expect(inconnu.rejetes).toEqual(['typeLocation']);
+  });
+
   it('refuse ce qui n’est pas un objet', () => {
     expect(() => normaliserChamps(null)).toThrow(ErreurAmontInvalide);
     expect(() => normaliserChamps('texte')).toThrow(ErreurAmontInvalide);
@@ -50,8 +60,10 @@ describe('prompt', () => {
     expect(m[0]?.role).toBe('system');
     expect(m[0]?.content).toContain('chargesCoproMois');
     expect(m[0]?.content).toContain('null');
+    expect(m[0]?.content).toContain('typeLocation');
+    expect(m[0]?.content).toContain('Airbnb');
     expect(m[1]).toEqual({ role: 'user', content: 'texte annonce' });
-    expect(VERSION_PROMPT).toBe(2);
+    expect(VERSION_PROMPT).toBe(3);
   });
 });
 

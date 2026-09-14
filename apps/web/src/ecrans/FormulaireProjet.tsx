@@ -1,10 +1,12 @@
+import type { ModeLocation } from '@loupe/moteur';
 import { useState, type JSX } from 'react';
 
 import type { AnnonceResolue, SaisieProjet } from '@/annonces';
-import { Bouton, Carte } from '@/composants/ui';
+import { Bouton, Carte, Pastille } from '@/composants/ui';
+import { TYPES_LOCATION } from '@/textes/regimes';
 
 import { Champ } from './formulaire/Champ';
-import { EstimerLoyer } from './formulaire/EstimerLoyer';
+import { EstimerLoyer, type CleLoyerEstime } from './formulaire/EstimerLoyer';
 import {
   nombre,
   valider,
@@ -14,6 +16,7 @@ import {
   type ValeursInitiales,
   type Valeurs,
 } from './formulaire/valeurs';
+import { SelecteurMode } from './hypotheses/SelecteurMode';
 
 export { valeursDepuisChamps } from './formulaire/valeurs';
 
@@ -33,13 +36,6 @@ const ETATS = [
 const TYPES = [
   { v: 'appartement', l: 'Appartement' },
   { v: 'maison', l: 'Maison' },
-];
-const MODES = [
-  { v: 'nu', l: 'Location nue' },
-  { v: 'meuble', l: 'Meublée longue durée' },
-  { v: 'colocation', l: 'Colocation' },
-  { v: 'courte_duree', l: 'Courte durée' },
-  { v: 'moyenne_duree', l: 'Moyenne durée (bail mobilité)' },
 ];
 const TMI = [
   { v: '0', l: '0 %' },
@@ -85,9 +81,17 @@ export function FormulaireProjet({
     setProvenance((prev) => ({ ...prev, [cle]: 'utilisateur' }));
   };
   const c = { valeurs, provenance, onChange: changer };
-  const loyerEstime = (v: string): void => {
-    setValeurs((prev) => ({ ...prev, loyerHc: v }));
-    setProvenance((prev) => ({ ...prev, loyerHc: 'estime' }));
+  const loyerEstime = (cle: CleLoyerEstime, v: string): void => {
+    setValeurs((prev) => ({ ...prev, [cle]: v }));
+    setProvenance((prev) => ({ ...prev, [cle]: 'estime' }));
+  };
+  const mode = valeurs.mode as ModeLocation;
+  const changerMode = (m: ModeLocation): void => {
+    changer('mode', m);
+    // En colocation, les chambres du bien sont une bonne première valeur des chambres louées.
+    if (m === 'colocation' && valeurs.chambresLouees === '' && valeurs.chambres !== '') {
+      setValeurs((prev) => ({ ...prev, chambresLouees: prev.chambres }));
+    }
   };
   const basculerTravaux = (): void => {
     if (travauxOuverts) setValeurs((prev) => ({ ...prev, travaux: '' }));
@@ -146,19 +150,80 @@ export function FormulaireProjet({
       </Carte>
 
       <Carte>
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+          <h2 className="m-0 font-display text-[22px] font-semibold">
+            La location — {TYPES_LOCATION[mode]}
+          </h2>
+          {provenance.mode === 'annonce' && (
+            <Pastille ton="neutre" compacte>
+              annonce
+            </Pastille>
+          )}
+        </div>
+        <SelecteurMode nom="type-location-verifier" valeur={mode} onChange={changerMode} />
+        <div className={GRILLE}>
+          {(mode === 'nu' || mode === 'meuble' || mode === 'moyenne_duree') && (
+            <Champ
+              cle="loyerHc"
+              libelle="Loyer visé, hors charges"
+              unite="€/mois"
+              aToi
+              erreur={erreurs.loyerHc}
+              indication={INDICATIONS.loyerHc}
+              {...c}
+            />
+          )}
+          {mode === 'colocation' && (
+            <>
+              <Champ
+                cle="chambresLouees"
+                libelle="Chambres louées"
+                aToi
+                erreur={erreurs.chambresLouees}
+                {...c}
+              />
+              <Champ
+                cle="loyerChambre"
+                libelle="Loyer par chambre, hors charges"
+                unite="€/mois"
+                aToi
+                erreur={erreurs.loyerChambre}
+                {...c}
+              />
+            </>
+          )}
+          {mode === 'courte_duree' && (
+            <>
+              <Champ
+                cle="nuitee"
+                libelle="Prix de la nuitée, hors ménage"
+                unite="€"
+                aToi
+                erreur={erreurs.nuitee}
+                {...c}
+              />
+              <Champ
+                cle="nuiteesParMois"
+                libelle="Nuits louées par mois"
+                unite="nuits"
+                aToi
+                erreur={erreurs.nuiteesParMois}
+                {...c}
+              />
+            </>
+          )}
+          <EstimerLoyer valeurs={valeurs} onEstime={loyerEstime} />
+        </div>
+        <p className="m-0 text-sm text-encre-3">
+          Vacance, ménage, plateforme et charges comprises partent des valeurs de référence du type,
+          marquées « estimé » et modifiables dans les hypothèses.
+        </p>
+      </Carte>
+
+      <Carte>
         <h2 className="m-0 font-display text-[22px] font-semibold">Vous</h2>
         <p className="m-0 text-sm text-encre-2">{INDICATIONS.vous}</p>
         <div className={GRILLE}>
-          <Champ cle="mode" libelle="Mode de location" options={MODES} aToi {...c} />
-          <Champ
-            cle="loyerHc"
-            libelle="Loyer visé, hors charges"
-            unite="€/mois"
-            aToi
-            erreur={erreurs.loyerHc}
-            indication={INDICATIONS.loyerHc}
-            {...c}
-          />
           <Champ cle="apport" libelle="Apport" unite="€" aToi erreur={erreurs.apport} {...c} />
           <Champ
             cle="dureeAnnees"
@@ -169,7 +234,6 @@ export function FormulaireProjet({
             {...c}
           />
           <Champ cle="tmi" libelle="Tranche d'imposition" options={TMI} aToi {...c} />
-          <EstimerLoyer valeurs={valeurs} onEstime={loyerEstime} />
         </div>
       </Carte>
 

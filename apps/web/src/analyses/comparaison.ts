@@ -11,7 +11,7 @@ import {
 import type { ProjetEnregistre, StatutProjet } from '@/stockage/projets';
 import { libelleTauxNegociation } from '@/textes/achat';
 import { libelleRisques } from '@/textes/feux';
-import { REGIMES } from '@/textes/regimes';
+import { MODES, REGIMES } from '@/textes/regimes';
 
 export type CodeIndicateur =
   | 'prix'
@@ -95,6 +95,8 @@ export const INDICATEURS: readonly Indicateur[] = [
     meilleur: false,
     extraire: (r) => (r.complet ? r.cashflow.recettes.loyersBruts / 12 : null),
     formater: euros,
+    // Un loyer de colocation ou de courte durée ne se lit qu'avec son type.
+    detail: (r) => MODES[r.projet.hypotheses.location.mode],
   },
   {
     code: 'cashflow',

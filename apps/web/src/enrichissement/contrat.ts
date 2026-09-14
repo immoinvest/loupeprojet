@@ -29,6 +29,11 @@ export const ReponseExtractionSchema = z.object({
     /** Absents des réponses mises en cache avant la version 2 du prompt. */
     etat: z.enum(['a_renover', 'a_rafraichir', 'bon_etat', 'renove']).nullable().optional(),
     exterieur: z.boolean().nullable().optional(),
+    /** Absent des réponses mises en cache avant la version 3 du prompt. */
+    typeLocation: z
+      .enum(['nu', 'meuble', 'colocation', 'courte_duree', 'moyenne_duree'])
+      .nullable()
+      .optional(),
   }),
   modele: z.string(),
 });
