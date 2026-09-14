@@ -5,7 +5,6 @@ import {
   PARAMETRES_PARTAGE,
   annoncePartagee,
   lirePartageRecu,
-  resoudreAnnonce,
 } from '@/annonces';
 
 import { assemblage, tirage } from './tirage';
@@ -93,15 +92,17 @@ describe('partages tirés au hasard', () => {
     expect(ecarts).toEqual([]);
   });
 
-  it('Nouveau projet s’ouvre sur le texte seulement avec un lien reconnu ou un texte à lire', () => {
+  it('Nouveau projet reçoit un lien ou un texte à lire, jamais les deux', () => {
     const hasard = tirage(14_092_026);
     const ecarts: string[] = [];
     for (let i = 0; i < NB_CAS; i += 1) {
       const entree = rechercheAuHasard(hasard);
       const annonce = annoncePartagee(false, entree);
-      const lienReconnu = annonce.lien !== null && resoudreAnnonce(annonce.lien) !== null;
-      if ((annonce.etape === 'texte') !== (lienReconnu || annonce.texte !== '')) {
-        ecarts.push(`étape « ${annonce.etape} » pour ${entree}`);
+      if (annonce.lien !== null && annonce.texte !== '') {
+        ecarts.push(`lien et texte pour ${entree}`);
+      }
+      if (annonce.recue !== (annonce.lien !== null || annonce.texte !== '')) {
+        ecarts.push(`partage reçu sans rien à lire pour ${entree}`);
       }
       if (annoncePartagee(true, entree).recue) ecarts.push(`capture ignorée pour ${entree}`);
     }

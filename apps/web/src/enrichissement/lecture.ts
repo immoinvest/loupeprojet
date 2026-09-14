@@ -45,7 +45,8 @@ export function fusionnerChamps(regles: ChampsExtraits, ia: ChampsIa): ChampsExt
 }
 
 /**
- * Lit le texte collé : lecture par le modèle quand le Worker répond, par règles sinon.
+ * Lit le texte d'une annonce (description capturée ou texte partagé) : lecture par le modèle quand
+ * le Worker répond, par règles sinon.
  * Le texte part au Worker pour la lecture et n'est conservé nulle part.
  */
 export async function lireAnnonce(texte: string, client: ClientWorker): Promise<LectureAnnonce> {

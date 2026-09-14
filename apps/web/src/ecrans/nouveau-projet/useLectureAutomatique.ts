@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { importerCapture, type AnnonceResolue, type CaptureImportee } from '@/annonces';
 import { detecterExtension, lireParExtension } from '@/annonces/extension';
 import { lireParServeur, type RaisonEchecServeur } from '@/annonces/lecture-serveur';
-import { completerAvecIa, type ClientWorker, type ModeLecture } from '@/enrichissement';
+import { completerAvecIa, type ClientWorker } from '@/enrichissement';
 
 export type EtatExtension = 'inconnue' | 'presente' | 'absente';
 
@@ -35,18 +35,23 @@ export const PAUSE_AVANT_LECTURE_MS = 600;
 /** L'extension n'a pas pu ouvrir ou lire l'annonce : Deklic prend le relais par son serveur. */
 const RELAIS_SERVEUR: readonly RaisonEchecLecture[] = ['chargement', 'vide'];
 
+const INDISPONIBLE: EtatLecture = { statut: 'echec', par: 'serveur', raison: 'indisponible' };
+
 /**
  * Lien d'annonce reconnu : l'extension le lit si elle est installée, sinon le Worker rapporte la
  * page (ADR-008) ; l'IA complète les trous à partir du texte, puis `surCapture` reçoit le résultat.
+ * Dès que le lien est reconnu, la lecture est annoncée comme en cours, même pendant la pause.
  */
 export function useLectureAutomatique(
   annonce: AnnonceResolue | null,
   actif: boolean,
   client: ClientWorker,
-  surCapture: (capture: CaptureImportee, mode: ModeLecture | null) => void,
+  surCapture: (capture: CaptureImportee) => void,
 ): LectureAutomatique {
   const [extension, setExtension] = useState<EtatExtension>('inconnue');
   const [lecture, setLecture] = useState<EtatLecture>(null);
+  // Instant où le lien a été collé : l'écran d'attente part de là, pas de la fin de la pause.
+  const [debutAttente, setDebutAttente] = useState(() => Date.now());
   const derniere = useRef<string | null>(null);
   const enCours = useRef<AbortController | null>(null);
   const url = annonce?.urlCanonique ?? null;
@@ -72,18 +77,23 @@ export function useLectureAutomatique(
     async (capture: Capture): Promise<void> => {
       const complete = await completerAvecIa(importerCapture(capture), client);
       setLecture(null);
-      rappel.current(complete.capture, complete.mode);
+      rappel.current(complete.capture);
     },
     [client],
   );
 
   const lireServeur = useCallback(
-    async (url: string, portail: Portail, siIndisponible: EtatLecture): Promise<void> => {
+    async (
+      url: string,
+      portail: Portail,
+      siIndisponible: EtatLecture = INDISPONIBLE,
+      debut: number = Date.now(),
+    ): Promise<void> => {
       derniere.current = url;
       enCours.current?.abort();
       const controleur = new AbortController();
       enCours.current = controleur;
-      setLecture({ statut: 'en-cours', par: 'serveur', portail, debut: Date.now() });
+      setLecture({ statut: 'en-cours', par: 'serveur', portail, debut });
       const resultat = await lireParServeur(url, client, { signal: controleur.signal });
       // Annulée, remplacée par une autre lecture ou lien changé entre-temps : le résultat ne sert plus.
       if (enCours.current !== controleur) return;
@@ -121,6 +131,7 @@ export function useLectureAutomatique(
   // Le lien a changé ou a été effacé : la lecture de l'ancien est abandonnée, son état effacé.
   useEffect(() => {
     urlCourante.current = url;
+    setDebutAttente(Date.now());
     if (derniere.current === null || derniere.current === url) return;
     derniere.current = null;
     enCours.current?.abort();
@@ -132,19 +143,21 @@ export function useLectureAutomatique(
     if (!actif || extension === 'inconnue' || url === null || portail === null) return;
     if (derniere.current === url) return;
     const minuterie = setTimeout(() => {
+      // Annulée pendant la pause : rien ne part.
+      if (derniere.current === url) return;
       void (extension === 'presente'
         ? lireExtension(url, portail)
-        : lireServeur(url, portail, null));
+        : lireServeur(url, portail, INDISPONIBLE, debutAttente));
     }, PAUSE_AVANT_LECTURE_MS);
     return () => {
       clearTimeout(minuterie);
     };
-  }, [actif, extension, url, portail, lireExtension, lireServeur]);
+  }, [actif, extension, url, portail, debutAttente, lireExtension, lireServeur]);
 
   const relancer = useCallback(() => {
     if (url === null || portail === null) return;
     void (lecture?.par === 'serveur' || extension !== 'presente'
-      ? lireServeur(url, portail, null)
+      ? lireServeur(url, portail)
       : lireExtension(url, portail));
   }, [url, portail, lecture, extension, lireServeur, lireExtension]);
 
@@ -153,10 +166,21 @@ export function useLectureAutomatique(
   }, [url, portail, lecture, lireServeur]);
 
   const annuler = useCallback(() => {
+    // Ce lien compte comme lu : la lecture prévue après la pause ne démarre pas.
+    derniere.current = urlCourante.current;
     enCours.current?.abort();
     enCours.current = null;
     setLecture({ statut: 'echec', par: 'serveur', raison: 'annulee' });
   }, []);
 
-  return { extension, lecture, relancer, lireSansExtension, annuler };
+  // Lien reconnu, lecture pas encore partie (pause, détection de l'extension) : l'attente s'affiche
+  // déjà, sans laisser voir un instant ce qui précède. Toute lecture finit en capture ou en échec.
+  const imminente = actif && portail !== null && lecture === null;
+  const affichee: EtatLecture = !imminente
+    ? lecture
+    : extension === 'presente'
+      ? { statut: 'en-cours', par: 'extension' }
+      : { statut: 'en-cours', par: 'serveur', portail, debut: debutAttente };
+
+  return { extension, lecture: affichee, relancer, lireSansExtension, annuler };
 }

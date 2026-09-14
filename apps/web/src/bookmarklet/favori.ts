@@ -7,7 +7,7 @@
 export const NOM_FAVORI = 'Analyser dans Deklic';
 
 export const MESSAGE_SITE_BLOQUANT =
-  "Deklic : ce site bloque le chargement du favori. Utilisez l'extension Deklic, ou collez le texte de l'annonce dans Deklic.";
+  "Deklic : ce site bloque le chargement du favori. Utilisez l'extension Deklic, ou collez le lien de l'annonce dans Deklic.";
 
 /** URL `javascript:` du favori, pour l'origine de Deklic donnée (production ou aperçu). */
 export function codeFavori(origine: string): string {

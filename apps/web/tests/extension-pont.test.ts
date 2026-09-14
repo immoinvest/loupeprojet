@@ -128,6 +128,6 @@ describe('texteEchecLecture', () => {
     ).map(texteEchecLecture);
     expect(new Set(phrases).size).toBe(6);
     expect(texteEchecLecture('permission')).toMatch(/Autoriser la lecture automatique/);
-    expect(texteEchecLecture('vide')).toMatch(/Collez le texte/);
+    expect(texteEchecLecture('vide')).toMatch(/saisir les chiffres à la main/);
   });
 });

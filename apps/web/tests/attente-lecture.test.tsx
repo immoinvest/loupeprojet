@@ -54,12 +54,12 @@ describe('AttenteLecture', () => {
     expect(screen.getByText(ASTUCES_ATTENTE[1] ?? '')).toBeInTheDocument();
   });
 
-  it('« Annuler et coller le texte » appelle annuler ; plus de minuterie après démontage', () => {
+  it('« Annuler » appelle annuler ; plus de minuterie après démontage', () => {
     const annuler = vi.fn();
     const { unmount } = render(
       <AttenteLecture portail="leboncoin" debut={0} annuler={annuler} maintenant={maintenant} />,
     );
-    fireEvent.click(screen.getByRole('button', { name: 'Annuler et coller le texte' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Annuler' }));
     expect(annuler).toHaveBeenCalledTimes(1);
     unmount();
     expect(vi.getTimerCount()).toBe(0);

@@ -27,7 +27,7 @@ La publication sur les stores (Chrome Web Store, Add-ons Mozilla) demande un com
 1. **Coller un lien** : dans Deklic, « Nouveau projet », coller le lien de l'annonce. « L'extension Deklic lit l'annonce… » s'affiche ; un onglet s'ouvre un instant puis se referme ; le formulaire se remplit (badge « lue par l'extension »). Si le portail affiche une vérification anti-robot, la valider dans l'onglet : la lecture reprend toute seule.
 2. **Depuis l'annonce** : cliquer sur l'icône Deklic, puis **Analyser dans Deklic**.
 
-En cas d'échec, Deklic dit pourquoi (annonce retirée, autorisation manquante, page qui n'a pas répondu, rien de lisible), propose **Réessayer la lecture** et garde le texte collé et la saisie manuelle.
+En cas d'échec, Deklic dit pourquoi (annonce retirée, autorisation manquante, page qui n'a pas répondu, rien de lisible), propose **Réessayer la lecture** et **Saisir à la main**.
 
 ## Permissions
 

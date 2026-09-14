@@ -83,10 +83,8 @@ export interface AnnoncePartagee {
   readonly recue: boolean;
   /** Le lien trouvé dans le partage, sinon `null`. */
   readonly lien: string | null;
-  /** Le texte partagé sans lien, sinon vide. */
+  /** Le texte partagé sans lien, lu dès l'ouverture ; sinon vide. */
   readonly texte: string;
-  /** Lien d'annonce reconnu ou texte à lire : l'écran s'ouvre sur « Le texte de l'annonce ». */
-  readonly etape: 'lien' | 'texte';
 }
 
 /** Une capture de l'extension reçue en même temps reste prioritaire : le partage est alors ignoré. */
@@ -94,6 +92,5 @@ export function annoncePartagee(captureRecue: boolean, recherche: string): Annon
   const partage: PartageRecu = captureRecue ? { statut: 'absent' } : lirePartageRecu(recherche);
   const lien = partage.statut === 'recu' && 'url' in partage ? partage.url : null;
   const texte = partage.statut === 'recu' && 'texte' in partage ? partage.texte : '';
-  const aLire = (lien !== null && resoudreAnnonce(lien) !== null) || texte !== '';
-  return { recue: partage.statut === 'recu', lien, texte, etape: aLire ? 'texte' : 'lien' };
+  return { recue: partage.statut === 'recu', lien, texte };
 }

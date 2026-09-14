@@ -53,11 +53,11 @@ export function PastillesLien({
         </>
       ) : url.trim() !== '' ? (
         <Pastille ton="surveiller" compacte>
-          Site non reconnu : collez le texte ci-dessous, ça marche aussi
+          Site non reconnu : saisissez les chiffres à la main
         </Pastille>
       ) : captureIllisible ? (
         <Pastille ton="surveiller" compacte>
-          La capture reçue est illisible : collez le lien, puis le texte de l'annonce
+          La capture reçue est illisible : collez le lien de l'annonce
         </Pastille>
       ) : (
         <span className="text-sm text-encre-3">LeBonCoin, SeLoger, Bien'ici, PAP, Logic-Immo.</span>

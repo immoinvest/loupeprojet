@@ -1,5 +1,5 @@
 import { useEffect, useState, type JSX } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router';
+import { useLocation, useNavigate } from 'react-router';
 
 import {
   annoncePartagee,
@@ -13,22 +13,18 @@ import {
 } from '@/annonces';
 import { annonceLue } from '@/annonces/fiche';
 import { Chapo, Page, TitrePage } from '@/composants/mise-en-page';
-import { Bouton, Carte, Pastille } from '@/composants/ui';
+import { Carte, Pastille } from '@/composants/ui';
 import { useClientWorker } from '@/coque/ClientWorker';
-import { completerAvecIa, enrichirSaisie, lireAnnonce, type ModeLecture } from '@/enrichissement';
+import { completerAvecIa, enrichirSaisie, lireAnnonce } from '@/enrichissement';
 import { useProjets } from '@/stockage/ProjetsContext';
 
 import { FormulaireProjet, valeursDepuisChamps, type OptionsFormulaire } from './FormulaireProjet';
 import { EtatLectureAuto, useLectureAutomatique } from './nouveau-projet/LectureAuto';
 import { PastillesLien } from './nouveau-projet/PastillesLien';
 
-type Etape = 'lien' | 'texte' | 'verifier';
+type Etape = 'lien' | 'verifier';
 
 const CHEMIN = '/projets/nouveau';
-
-function pluriel(n: number, mot: string): string {
-  return `${String(n)} ${mot}${n > 1 ? 's' : ''}`;
-}
 
 export function NouveauProjet(): JSX.Element {
   const { creer } = useProjets();
@@ -41,33 +37,28 @@ export function NouveauProjet(): JSX.Element {
   const capture: CaptureImportee | null = fragment.statut === 'lue' ? fragment.capture : null;
   const [importee, setImportee] = useState<CaptureImportee | null>(capture);
   const [url, setUrl] = useState(capture?.annonce.urlCanonique ?? partage.lien ?? '');
-  const [texte, setTexte] = useState(partage.texte);
-  const [etape, setEtape] = useState<Etape>(capture === null ? partage.etape : 'verifier');
+  const [etape, setEtape] = useState<Etape>(capture === null ? 'lien' : 'verifier');
   const [manuel, setManuel] = useState(false);
   const [initial, setInitial] = useState(() => valeursDepuisChamps(capture?.champs ?? {}));
-  const [nbChamps, setNbChamps] = useState(
-    capture === null ? 0 : Object.keys(capture.champs).length,
-  );
   // Change à chaque lecture : le formulaire repart des nouvelles valeurs.
   const [version, setVersion] = useState(0);
   const client = useClientWorker();
-  const [lecture, setLecture] = useState<ModeLecture | null>(null);
-  const [enCours, setEnCours] = useState<'lecture' | 'creation' | null>(null);
+  const [enCours, setEnCours] = useState<'lecture' | 'creation' | null>(
+    partage.texte === '' ? null : 'lecture',
+  );
 
   const annonce: AnnonceResolue | null = resoudreAnnonce(url);
 
-  const appliquerCapture = (lue: CaptureImportee, mode: ModeLecture | null): void => {
+  const appliquerCapture = (lue: CaptureImportee): void => {
     setImportee(lue);
     setInitial(valeursDepuisChamps(lue.champs));
-    setNbChamps(Object.keys(lue.champs).length);
-    setLecture(mode);
     setVersion((v) => v + 1);
     setEtape('verifier');
   };
 
   const auto = useLectureAutomatique(
     annonce,
-    !manuel && importee === null,
+    !manuel && importee === null && etape === 'lien',
     client,
     appliquerCapture,
   );
@@ -78,32 +69,39 @@ export function NouveauProjet(): JSX.Element {
   }, [fragment.statut, partage.recue, naviguer]);
 
   useEffect(() => {
-    // Capture reçue par l'adresse (clic sur l'extension, favori) : l'IA complète les trous du texte.
-    if (capture === null) return;
     let vivant = true;
-    void completerAvecIa(capture, client).then((complete) => {
-      if (vivant && complete.mode === 'ia') appliquerCapture(complete.capture, complete.mode);
-    });
+    // Capture reçue par l'adresse (clic sur l'extension, favori) : l'IA complète les trous du texte.
+    if (capture !== null) {
+      void completerAvecIa(capture, client).then((complete) => {
+        if (vivant && complete.mode === 'ia') appliquerCapture(complete.capture);
+      });
+    } else if (partage.texte !== '') {
+      // Texte partagé sans lien : lu tout de suite, puis oublié ; seul le formulaire en garde les chiffres.
+      void lireAnnonce(partage.texte, client).then(({ champs }) => {
+        if (!vivant) return;
+        setInitial(valeursDepuisChamps(champs));
+        setVersion((v) => v + 1);
+        setEnCours(null);
+        setEtape('verifier');
+      });
+    }
     return () => {
       vivant = false;
     };
-    // Une seule fois, pour la capture du premier rendu.
+    // Une seule fois, pour la capture ou le partage du premier rendu.
   }, []);
 
-  const lireTexte = async (): Promise<void> => {
-    setEnCours('lecture');
-    const { champs, mode } = await lireAnnonce(texte, client);
-    setInitial(valeursDepuisChamps(champs));
-    setNbChamps(Object.keys(champs).length);
-    setLecture(mode);
-    setVersion((v) => v + 1);
-    setEnCours(null);
-    setEtape('verifier');
-  };
-
+  /** Sans lien : formulaire vide, sans annonce. */
   const passerEnManuel = (): void => {
     setManuel(true);
     setInitial(valeursDepuisChamps({}));
+    setEtape('verifier');
+  };
+
+  /** Lecture impossible : le lien reste (source du projet), les chiffres se saisissent à la main. */
+  const saisirALaMain = (): void => {
+    setInitial(valeursDepuisChamps({}));
+    setVersion((v) => v + 1);
     setEtape('verifier');
   };
 
@@ -129,8 +127,6 @@ export function NouveauProjet(): JSX.Element {
     void naviguer(`/projets/${enregistre.id}`);
   };
 
-  const lectureEnCours = auto.lecture?.statut === 'en-cours';
-
   return (
     <Page espacement="large">
       <div className="flex flex-col gap-2">
@@ -155,9 +151,13 @@ export function NouveauProjet(): JSX.Element {
               onChange={(e) => {
                 const nouvelle = resoudreAnnonce(e.target.value);
                 setUrl(e.target.value);
-                setEtape(nouvelle === null ? 'lien' : 'texte');
-                if (importee !== null && nouvelle?.urlCanonique !== importee.annonce.urlCanonique) {
+                // Même annonce que celle déjà lue : le formulaire reste ; sinon on repart du lien.
+                if (
+                  nouvelle?.urlCanonique !== importee?.annonce.urlCanonique ||
+                  importee === null
+                ) {
                   setImportee(null);
+                  setEtape('lien');
                 }
               }}
               className="min-h-[52px] rounded-encart border border-bordure bg-surface px-4 text-[16px]"
@@ -170,68 +170,26 @@ export function NouveauProjet(): JSX.Element {
             captureIllisible={fragment.statut === 'illisible'}
             partagee={url === partage.lien}
           />
-          {importee === null && (
+          {importee === null && etape === 'lien' && (
             <EtatLectureAuto
               extension={auto.extension}
               lecture={auto.lecture}
-              lienReconnu={annonce !== null}
               relancer={auto.relancer}
               lireSansExtension={auto.lireSansExtension}
               annuler={auto.annuler}
+              saisirALaMain={saisirALaMain}
             />
           )}
         </Carte>
       )}
 
-      {/* Une annonce lue (extension, favori ou Deklic) n'a plus besoin de son texte collé. */}
-      {!manuel &&
-        !lectureEnCours &&
-        importee === null &&
-        (etape === 'texte' || etape === 'verifier' || url.trim() !== '') && (
-          <Carte>
-            <div className="flex flex-col gap-1">
-              <h2 className="m-0 font-display text-[22px] font-semibold">Le texte de l'annonce</h2>
-              <p className="m-0 text-sm text-encre-2">
-                Avec l'
-                <Link to="/extension" className="font-bold text-accent">
-                  extension Deklic
-                </Link>
-                , coller le lien suffit. Sinon : sur l'annonce, tout sélectionner (Ctrl+A), copier
-                (Ctrl+C), et coller ici. Le texte n'est pas conservé, seulement ce qu'on y lit.
-              </p>
-            </div>
-            <textarea
-              name="texte"
-              value={texte}
-              onChange={(e) => {
-                setTexte(e.target.value);
-              }}
-              rows={7}
-              placeholder="Appartement T3 de 65 m² au 3e étage… Prix 155 000 €… DPE D…"
-              className="rounded-encart border border-bordure bg-surface p-3 text-[15px] pointer-coarse:text-base"
-            />
-            <div className="flex flex-wrap items-center gap-3">
-              <Bouton
-                variante="primaire"
-                onClick={() => {
-                  void lireTexte();
-                }}
-                disabled={texte.trim() === '' || enCours !== null}
-              >
-                {enCours === 'lecture' ? 'Lecture en cours…' : 'Lire le texte'}
-              </Bouton>
-              {etape === 'verifier' && enCours !== 'lecture' && (
-                <span className="text-sm text-encre-2">
-                  {nbChamps === 0
-                    ? 'Rien de reconnu : remplissez le formulaire ci-dessous.'
-                    : `${pluriel(nbChamps, 'champ')} ${nbChamps > 1 ? 'lus' : 'lu'} dans l'annonce${lecture === 'ia' ? " par l'IA" : ''}, à vérifier ci-dessous.`}
-                </span>
-              )}
-            </div>
-          </Carte>
-        )}
+      {enCours === 'lecture' && (
+        <p role="status" className="m-0 text-sm text-encre-2">
+          On lit l'annonce partagée…
+        </p>
+      )}
 
-      {etape !== 'verifier' && !manuel && !lectureEnCours && (
+      {etape === 'lien' && !manuel && annonce === null && enCours === null && (
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-encre-3">
           <span>Pas de lien ?</span>
           <button
