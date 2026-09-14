@@ -36,7 +36,8 @@ src/
 ├── commun/                  arrondi, résolution par bissection, VAN, erreurs nommées
 ├── achat/                   prixRetenu (prix affiché × (1 − négociation), arrondi à l'euro), resumerAchat, tauxPourPrixRetenu
 ├── financement/             frais-acquisition (base = prix retenu − honoraires acquéreur), mensualite, amortissement (différés), taeg, effort (HCSF), ira
-├── cashflow/                recettes (3 modes), charges (par régime), point mort, couverture, projection annuelle
+├── location/                loyerMensuelHc, loyerMensuelReference, defautsPourMode (valeurs de départ par type), vacanceSemaines, tauxProportionnel
+├── cashflow/                recettes (5 types : loyers bruts, charges récupérées, vacance, nuitées, séjours), charges (par régime et par type), point mort, couverture, projection annuelle
 ├── fiscalite/               amortissements, deficits, interets, micro-bic, lmnp-reel (39 C), micro-foncier, nu-reel, index (4 régimes)
 ├── revente/                 valeur, plus-value (abattements, surtaxe, réintégration), index
 ├── rendement/               rendements, tri, enrichissement, index

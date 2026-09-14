@@ -120,3 +120,10 @@ Point mort (hors courte durée) : `L = ((chargesFixes + crédit) ÷ ((1 − v)(1
 - **Frais en charges, pas en recettes** : le micro-BIC se calcule sur les recettes brutes (CGI art. 50-0) ; conciergerie, plateforme et ménage ne sont déductibles qu'au réel. Changement assumé par rapport au modèle précédent (documenté dans `simplifications`).
 - **Quatre régimes toujours calculés** : le contrat de sortie ne change pas de forme ; `compatibles` guide l'affichage et le choix du meilleur.
 - **Défauts dans les règles, pas dans les écrans** : `defautsPourMode` est la seule source des valeurs de départ (Vérifier, Hypothèses, scénario colocation).
+
+## 5. Écarts constatés à l’implémentation
+
+- **Fusion avec la fiche 04 (achat-negociation)** : toute lecture du prix passe par `prixRetenu(achat)` ; l’entretien, le rendement local de l’estimation et le repli du scénario « Négocier » gardent `prixRetenu`, combinés au loyer mensuel équivalent.
+- **Fusion avec la fiche 10 (rapport-cashflow)** : la cascade de l’autofinancement (`analyses/rapport.ts`) remplace « ménage et conciergerie » par `recuperees` (forfaits et ménage facturés ÷ 12, ajoutés au loyer) ; la ligne de vacance disparaît en courte durée ; `textes/explications.ts` nomme les charges du type quand le projet en paie et ne compare que les régimes compatibles.
+- **Hypothèses** : le sélecteur rend le descripteur `hypotheses.location.mode` en boutons ; les autres champs passent par la fonction `rendre` de la carte « L’achat ».
+- **Vérifier** : « Mode de location » et le loyer quittent la carte « Vous » pour la carte « La location — type » ; le loyer du logement envoyé à `construireProjet` vaut chambres × loyer par chambre en colocation et nuitée × 30 ÷ 2 en courte durée.

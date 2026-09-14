@@ -4,7 +4,7 @@
   "started_at": "2026-09-14T09:00:00Z",
   "current_step": "push",
   "scope": "packages/moteur (schema/hypotheses, schema/migration, regles, cashflow, fiscalite, scenarios, verdict/vigilance, location/defauts), apps/web (hypotheses, ecrans/FormulaireProjet, annonces/construire, enrichissement/loyer, textes, rapport/Leviers, Comparer, stockage), apps/worker/src/extraction (prompt v3)",
-  "branch": "feat/location-types",
+  "branch": "feat/location-types (PR 1), feat/location-types-ecrans (PR 2)",
   "base": "master (9d38892), puis fusion de master (coque-fixe, f2a2f1a)",
   "backlog": ".product/backlog/05-location-types-exploitation.md",
   "steps": {
@@ -21,14 +21,14 @@
       "output": ".product/architecture/location-types.md"
     },
     "implement": {
-      "status": "in_progress",
-      "stories_completed": 8,
+      "status": "completed",
+      "stories_completed": 13,
       "stories_total": 13,
-      "note": "PR 1 : US-1 à US-8 (moteur + web minimum) ; PR 2 : US-9 à US-13 (écrans)"
+      "note": "PR 1 : US-1 à US-8 ; PR 2 : US-9 à US-13"
     },
     "qa_tests": {
-      "status": "in_progress",
-      "note": "moteur : 263 tests, couverture 100 % ; web : tests adaptés + location-types.test.ts (migration, loyer par type, phrases)"
+      "status": "completed",
+      "note": "moteur 296 tests après fusion de master, couverture 100 % ; web : location-types.test.ts, location-types-ecrans.test.tsx, tests de master adaptés (explications, cascade, achat) ; Worker : typeLocation"
     },
     "security": {
       "status": "completed",
@@ -36,7 +36,8 @@
     },
     "push": {
       "status": "in_progress",
-      "prs": []
+      "prs": ["https://github.com/immoinvest/loupeprojet/pull/46"],
+      "note": "PR 1 : deux fusions de master (estimation-confiance, achat-negociation, rapport-cashflow) ; conflits résolus en gardant prixRetenu et les cinq types"
     }
   },
   "decisions": {
@@ -46,6 +47,7 @@
     "regimes": "compatibles par type ; nue et meublée gardent les quatre, les trois autres seulement micro-BIC et LMNP réel",
     "loyer_anil": "par m² sauf colocation (× prime colocation ÷ chambres) ; rien en courte durée",
     "levier_2": "« Et si je passais en colocation » avec les nouveaux champs ; absent pour une colocation",
-    "migration": "migrerProjet exporté par le moteur, appliqué à la lecture du stockage et du partage ; ProjetSchema n'accepte que le nouveau format"
+    "migration": "migrerProjet exporté par le moteur, appliqué à la lecture du stockage et du partage ; ProjetSchema n'accepte que le nouveau format",
+    "fusions": "prixRetenu(achat) de la fiche 04 conservé dans charges, estimation et scénarios ; cascade du Rapport (fiche 10) passée aux forfaits facturés au lieu de ménage et conciergerie retranchés"
   }
 }
