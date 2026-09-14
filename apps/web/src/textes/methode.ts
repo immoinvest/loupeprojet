@@ -9,6 +9,7 @@ import {
   sectionCashflow,
   sectionCredit,
   sectionRendements,
+  sectionSimulateur,
 } from './methode-financement';
 import {
   sectionLmnpReel,
@@ -27,6 +28,7 @@ export function sectionsMethode(regles: Regles, defauts: Defauts): SectionMethod
   const sections: readonly SectionMethode[] = [
     sectionAcquisition(regles),
     sectionCredit(regles),
+    sectionSimulateur(regles, defauts),
     sectionCashflow(regles, defauts),
     sectionRendements(),
     sectionMicroBic(regles),

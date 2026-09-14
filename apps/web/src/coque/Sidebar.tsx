@@ -1,5 +1,5 @@
 import { calculerProjet } from '@loupe/moteur';
-import { Columns2, Download, Info, Plus, Puzzle, X } from 'lucide-react';
+import { Calculator, Columns2, Download, Info, Plus, Puzzle, X } from 'lucide-react';
 import { useEffect, useRef, type JSX } from 'react';
 import { NavLink, useNavigate } from 'react-router';
 
@@ -103,6 +103,16 @@ export function Sidebar({
         <NavLink to="/comparer" className={lien}>
           <Columns2 size={18} aria-hidden="true" />
           Comparer
+        </NavLink>
+      </nav>
+
+      <nav aria-label="Outils" className="flex flex-col gap-1">
+        <div className="px-3.5 pb-1.5 text-xs font-bold tracking-wider text-encre-4 uppercase">
+          Outils
+        </div>
+        <NavLink to="/simulateur-pret" className={lien}>
+          <Calculator size={18} aria-hidden="true" />
+          Simulateur de prêt
         </NavLink>
       </nav>
 
