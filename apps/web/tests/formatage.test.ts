@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   dateCourte,
   euros,
+  eurosCentimes,
   eurosParMois,
   eurosSignes,
   nombre,
@@ -54,5 +55,15 @@ describe('pourcentages et nombres', () => {
 
   it('dateCourte', () => {
     expect(n(dateCourte('2026-09-13T10:00:00.000Z'))).toMatch(/13 sept\.? 2026/);
+  });
+});
+
+describe('eurosCentimes', () => {
+  it('garde deux décimales, avec le vrai signe moins et jamais « −0,00 € »', () => {
+    expect(n(eurosCentimes(807.234))).toBe('807,23 €');
+    expect(n(eurosCentimes(155000))).toBe('155 000,00 €');
+    expect(n(eurosCentimes(-12.346))).toBe('−12,35 €');
+    expect(n(eurosCentimes(-0.001))).toBe('0,00 €');
+    expect(n(eurosCentimes(0))).toBe('0,00 €');
   });
 });

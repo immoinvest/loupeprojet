@@ -1,4 +1,4 @@
-import type { ModeLocation, Projet } from '@loupe/moteur';
+import { obtenirRegles, type ModeLocation, type Projet } from '@loupe/moteur';
 
 import type { ReponseMarche } from './contrat';
 import { PART_CHARGES_LOYER } from './marche';
@@ -31,9 +31,18 @@ export function loyerPourBien(loyer: LoyerAnil, surface: number, primeMeuble: nu
   };
 }
 
-/** Le loyer visé selon le mode : nu en location nue, meublé sinon (courte durée comprise, en équivalent mensuel). */
+/** Le loyer mensuel visé selon le type : nu en location nue, meublé pour tous les autres. */
 export function loyerVise(loyer: LoyerBien, mode: ModeLocation): number {
   return mode === 'nu' ? loyer.nuMensuel : loyer.meubleMensuel;
+}
+
+/** En colocation, le loyer meublé du logement majoré de la prime colocation, réparti entre les chambres. */
+export function loyerParChambre(
+  loyer: LoyerBien,
+  chambres: number,
+  primeColocation: number,
+): number {
+  return Math.round((loyer.meubleMensuel * (1 + primeColocation)) / Math.max(1, chambres));
 }
 
 /** Loyer de référence du marché dans le projet, provenance « anil ». */
@@ -45,17 +54,22 @@ export function appliquerLoyerReference(projet: Projet, loyer: LoyerBien): Proje
   };
 }
 
-/** Le loyer de marché devient le loyer visé du projet, provenance « anil ». */
+/**
+ * Le loyer de marché devient le loyer visé du projet, provenance « anil » : loyer mensuel en nue,
+ * meublée et moyenne durée, loyer par chambre en colocation ; rien en courte durée (pas de loyer mensuel).
+ */
 export function appliquerLoyerVise(projet: Projet, loyer: LoyerBien): Projet {
+  const { location } = projet.hypotheses;
+  if (location.mode === 'courte_duree') return projet;
+  const { primeColocation } = obtenirRegles(projet.versionRegles).exploitation;
+  const suivante =
+    location.mode === 'colocation'
+      ? { ...location, loyerChambre: loyerParChambre(loyer, location.chambres, primeColocation) }
+      : { ...location, loyerHc: loyerVise(loyer, location.mode) };
+  const cle = location.mode === 'colocation' ? 'location.loyerChambre' : 'location.loyerHc';
   return {
     ...projet,
-    hypotheses: {
-      ...projet.hypotheses,
-      location: {
-        ...projet.hypotheses.location,
-        loyerHc: loyerVise(loyer, projet.hypotheses.location.mode),
-      },
-    },
-    provenance: { ...projet.provenance, 'location.loyerHc': 'anil' },
+    hypotheses: { ...projet.hypotheses, location: suivante },
+    provenance: { ...projet.provenance, [cle]: 'anil' },
   };
 }

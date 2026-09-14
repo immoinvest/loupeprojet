@@ -13,7 +13,7 @@ describe('cascade de l’autofinancement', () => {
     expect(c.apresCredit).toBeCloseTo(153.35, 2);
     expect(c.charges).toBeCloseTo(307.08, 2);
     expect(c.vacance).toBeCloseTo(56.54, 2);
-    expect(c.fraisCourteDuree).toBe(0);
+    expect(c.recuperees).toBe(0);
     expect(c.apresCharges).toBeCloseTo(-210.27, 2);
     // Meublé au réel : aucun impôt sur dix ans.
     expect(c.impot).toBe(0);
@@ -24,7 +24,7 @@ describe('cascade de l’autofinancement', () => {
     for (const projet of [projetExemple, courteDuree()]) {
       const r = calculerProjet(projet);
       const c = cascadeAutofinancement(r);
-      expect(c.loyer - c.credit - c.charges - c.vacance - c.fraisCourteDuree).toBeCloseTo(
+      expect(c.loyer + c.recuperees - c.credit - c.charges - c.vacance).toBeCloseTo(
         r.cashflow.mensuel,
         6,
       );
@@ -36,14 +36,17 @@ describe('cascade de l’autofinancement', () => {
     }
   });
 
-  it('en courte durée : ménage et conciergerie, pas de vacance', () => {
+  it('en courte durée : ménage facturé en recettes, ménage payé et conciergerie en charges, pas de vacance', () => {
     const r = calculerProjet(courteDuree());
     const c = cascadeAutofinancement(r);
     expect(c.vacance).toBe(0);
-    expect(c.fraisCourteDuree).toBeGreaterThan(0);
-    const cd = r.cashflow.recettes.courteDuree;
-    expect(cd).not.toBeNull();
-    expect(c.fraisCourteDuree).toBeCloseTo((cd!.menage + cd!.conciergerie) / 12, 6);
+    // 18,25 nuits × 12 ÷ 4 nuits = 54,75 séjours × 25 € facturés.
+    expect(c.recuperees).toBeCloseTo((54.75 * 25) / 12, 6);
+    expect(c.recuperees).toBeCloseTo(r.cashflow.recettes.chargesRecuperees / 12, 6);
+    const ligne = (code: string): number =>
+      r.cashflow.charges.find((l) => l.code === code)?.annuel ?? 0;
+    expect(ligne('menage')).toBeCloseTo(54.75 * 40, 6);
+    expect(ligne('conciergerie')).toBeGreaterThan(0);
   });
 
   it('un régime imposé retire l’impôt mensuel moyen sur la période', () => {

@@ -58,3 +58,17 @@ export function dateCourte(iso: string): string {
     year: 'numeric',
   }).format(new Date(iso));
 }
+
+const formatCentimes = new Intl.NumberFormat('fr-FR', {
+  style: 'currency',
+  currency: 'EUR',
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
+
+/** 807.234 → « 807,23 € » ; −0.001 → « 0,00 € » (jamais « −0,00 € »). */
+export function eurosCentimes(valeur: number): string {
+  const arrondi = Math.round(valeur * 100) / 100;
+  const propre = arrondi === 0 ? 0 : arrondi;
+  return signe(propre, formatCentimes.format(Math.abs(propre)), false);
+}

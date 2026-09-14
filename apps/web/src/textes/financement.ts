@@ -40,10 +40,3 @@ export function phraseCouverture(feu: Feu): string {
       return 'Indiquez un loyer pour savoir si le crédit est couvert.';
   }
 }
-
-/** Page « Bientôt » du simulateur, en attendant l'outil. */
-export const TEXTES_SIMULATEUR_BIENTOT = {
-  titre: 'Simulateur de prêt',
-  phrase:
-    'Bientôt : deux offres de banque côte à côte, comparaison critère par critère, tableaux d’amortissement à télécharger et à imprimer. Le prêt de votre projet est déjà dans le lien.',
-} as const;

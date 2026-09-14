@@ -17,7 +17,7 @@ loupeprojet/
 ├── .github/workflows/referentiels.yml  cron mensuel + manuel : génère data/dist puis aws s3 sync vers R2 deklic-data
 ├── packages/moteur/        ← livré (feature moteur-calcul)
 ├── packages/capture/       ← livré (feature extension) : contrat de capture et moteur de règles, partagés par l'extension, le favori et le web
-├── apps/web/               ← livré (socle, nouveau projet, hypothèses, onglets, lecture de la capture, bouton-favori, page /extension, garder) ; e2e Playwright
+├── apps/web/               ← livré (socle, nouveau projet, hypothèses, onglets, lecture de la capture, bouton-favori, page /extension, garder, simulateur de prêt) ; e2e Playwright
 ├── apps/worker/            ← socle livré (feature worker-socle)
 ├── apps/comptes/           ← livré (feature comptes) : Better Auth sur Hono, servi par le worker Pages, D1
 ├── apps/extension/         ← livré (feature extension) : WebExtension MV3, règles par portail, build esbuild vers dist/chrome et dist/firefox
@@ -122,6 +122,8 @@ Voir `architecture/referentiels.md` et `data/SOURCES.md`. Workspace `@loupe/data
 | Référentiels     | Vitest (Node) + faux `fetch` et fixtures réelles                                                                                                | `data/tests/`                          |
 | Capture          | Vitest (jsdom) : pages synthétiques via `DOMParser`                                                                                             | `packages/capture/tests/`              |
 | Extension        | Vitest (jsdom) : pages enregistrées, faux `chrome`                                                                                              | `apps/extension/tests/`                |
-| E2E web          | Playwright (Chromium : ordinateur, téléphone, tablette ; spec des formats 18 écrans × 9 formats ; build de production servi par `vite preview`) | `apps/web/e2e/`                        |
+| E2E web          | Playwright (Chromium : ordinateur, téléphone, tablette ; spec des formats 21 écrans × 9 formats ; build de production servi par `vite preview`) | `apps/web/e2e/`                        |
 | Propriétés web   | Vitest, tirages pseudo-aléatoires à graine fixe (`tests/tirage.ts`)                                                                             | `apps/web/tests/*.proprietes.test.ts`  |
 | Annonce témoin   | GitHub Action quotidienne (à venir)                                                                                                             | `.github/workflows/annonce-temoin.yml` |
+
+Feature `simulateur-pret` : voir `architecture/simulateur-pret.md`. Moteur `packages/moteur/src/pret/` (schémas bornés avec messages français, `simulerPret` sur `tableauAmortissement` / `taeg` / `echeancier`, `comparerOffres`, `fraisNotaireEstimes`). Web `apps/web/src/simulateur/` (saisie texte → `versSimulation` carte par carte, `calculer`, `etatInitial`, lien `#s=` par `stockage/base64url.ts` partagé avec le partage d'un projet, mémoire `loupe.simulateur.v1`, `csvAmortissement`), écrans `ecrans/SimulateurPret.tsx`, `ecrans/simulateur/*`, `ecrans/SimulateurImprimer.tsx` (`ModeDocument`) ; seul effet hors React : `ecrans/simulateur/telecharger.ts` (Blob + lien `download`). Couverture 100 % sur `simulateur/` (glob ajouté aux seuils). e2e `apps/web/e2e/simulateur.spec.ts` (téléchargement vérifié par `waitForEvent('download')`), écrans « Simulateur de prêt » et « Simulation imprimée » dans `e2e/formats.ts`.

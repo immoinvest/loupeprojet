@@ -125,7 +125,7 @@ describe('carte « L’achat » : travaux repliés', () => {
 
     const utilisateur = userEvent.setup();
     await utilisateur.selectOptions(
-      screen.getByRole('combobox', { name: /^Mode de location/ }),
+      screen.getByRole('combobox', { name: /^Type de location/ }),
       'nu',
     );
     const renovation = screen.getByRole('combobox', { name: /classes E, F ou G/ });

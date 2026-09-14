@@ -3,9 +3,9 @@ import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 
-import { decoderSimulation, lireFragmentSimulation } from '@/analyses';
 import { AppEnMemoire } from '@/App';
 import { euros } from '@/formatage/nombres';
+import { decoderSimulation, lireFragmentSimulation } from '@/simulateur';
 import { creerProjet, ecrireProjets, lireProjets } from '@/stockage/projets';
 
 const n = (s: string | null | undefined): string => (s ?? '').replace(/\s/g, ' ');
@@ -142,9 +142,24 @@ describe('Financement', () => {
     expect(n(carte('Le loyer porte-t-il le crédit ?').textContent)).toContain('0 %');
   });
 
-  it('la page du simulateur annonce l’outil en attendant la fiche 08', async () => {
-    render(<AppEnMemoire chemin="/simulateur-pret#s=abc" />);
-    expect(await screen.findByRole('heading', { name: 'Simulateur de prêt' })).toBeInTheDocument();
-    expect(screen.getByText(/déjà dans le lien/)).toBeInTheDocument();
+  it('« Simuler un prêt » ouvre le simulateur avec le prêt du projet, en offre A seule', async () => {
+    const r = calculerProjet(projetExemple);
+    const utilisateur = userEvent.setup();
+    amorcer('lien-simulateur', {});
+    render(<AppEnMemoire chemin="/projets/lien-simulateur/financement" />);
+    await screen.findByRole('heading', { name: TITRE });
+    await utilisateur.click(screen.getByRole('link', { name: 'Simuler un prêt' }));
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Comparer deux offres de prêt' }),
+    ).toBeInTheDocument();
+    const offreA = screen
+      .getAllByRole('heading', { level: 2, name: 'Offre A' })[0]
+      ?.closest('section');
+    if (offreA === null || offreA === undefined) throw new Error('carte Offre A absente');
+    expect(within(offreA).getByLabelText(/Durée/)).toHaveValue(
+      String(r.projet.hypotheses.pret.dureeAnnees),
+    );
+    expect(within(offreA).getByLabelText(/Taux nominal/)).toHaveValue('3.35');
+    expect(screen.getByRole('button', { name: 'Ajouter une offre B' })).toBeInTheDocument();
   });
 });
