@@ -1,0 +1,48 @@
+{
+  "feature_slug": "location-types",
+  "title": "Location : cinq types d'exploitation (nue, meublée, colocation, courte durée, moyenne durée), champs et défauts par type",
+  "started_at": "2026-09-14T09:00:00Z",
+  "current_step": "implement",
+  "scope": "packages/moteur (schema/hypotheses, schema/migration, regles, cashflow, fiscalite, scenarios, verdict/vigilance, location/defauts), apps/web (hypotheses, ecrans/FormulaireProjet, annonces/construire, enrichissement/loyer, textes, rapport/Leviers, Comparer, stockage), apps/worker/src/extraction (prompt v3)",
+  "branch": "feat/location-types",
+  "base": "master (9d38892, docs/gestion-locative-menu fusionné)",
+  "backlog": ".product/backlog/05-location-types-exploitation.md",
+  "steps": {
+    "discovery": {
+      "status": "completed",
+      "output": ".product/features/location-types-discovery.md"
+    },
+    "specs": {
+      "status": "completed",
+      "output": ".product/specs/location-types-specs.md"
+    },
+    "architecture": {
+      "status": "completed",
+      "output": ".product/architecture/location-types.md"
+    },
+    "implement": {
+      "status": "in_progress",
+      "stories_completed": 0,
+      "stories_total": 13
+    },
+    "qa_tests": {
+      "status": "pending"
+    },
+    "security": {
+      "status": "pending"
+    },
+    "push": {
+      "status": "pending",
+      "prs": []
+    }
+  },
+  "decisions": {
+    "types": "cinq types en v1 ; pas de type étudiant (vacance à saisir)",
+    "courte_duree": "nuitées par mois + durée moyenne de séjour ; ménage par séjour facturé (recette) et payé (charge) ; plateforme 3 % (Airbnb, à confirmer)",
+    "colocation": "loyer par chambre unique × chambres, forfait de charges par chambre, charges propriétaire énergie/internet",
+    "regimes": "compatibles par type ; nue et meublée gardent les quatre, les trois autres seulement micro-BIC et LMNP réel",
+    "loyer_anil": "par m² sauf colocation (× prime colocation ÷ chambres) ; rien en courte durée",
+    "levier_2": "« Et si je passais en colocation » avec les nouveaux champs ; absent pour une colocation",
+    "migration": "migrerProjet exporté par le moteur, appliqué à la lecture du stockage et du partage ; ProjetSchema n'accepte que le nouveau format"
+  }
+}
