@@ -76,7 +76,7 @@ const ONGLETS = [
 /** Un volet occupe toute la hauteur de sa bande : son trait actif se pose sur celui de l'en-tête. */
 const onglet = ({ isActive }: { isActive: boolean }): string =>
   `flex h-full shrink-0 items-center border-b-2 px-4 text-[15px] font-semibold whitespace-nowrap ${
-    isActive ? 'border-accent text-accent' : 'border-transparent text-encre-3 hover:text-encre'
+    isActive ? 'border-accent text-accent' : 'border-transparent text-encre-3 survol-discret'
   }`;
 
 /** Sous 1 536 px, la bande des volets va d'un bord à l'autre de l'en-tête et défile au doigt. */
@@ -131,7 +131,7 @@ function EnTete(): JSX.Element {
         <span className="min-w-0 text-[13px] break-words text-encre-3 md:truncate">
           <Link
             to="/projets"
-            className="text-encre-3 no-underline hover:text-accent pointer-coarse:inline-flex pointer-coarse:min-h-11 pointer-coarse:items-center"
+            className="text-encre-3 no-underline survol-texte pointer-coarse:inline-flex pointer-coarse:min-h-11 pointer-coarse:items-center"
           >
             Mes projets
           </Link>
@@ -152,7 +152,7 @@ function EnTete(): JSX.Element {
       </nav>
       <div className="hidden 2xl:block 2xl:flex-1" />
       <div className="flex min-h-11 flex-wrap items-center gap-2 pb-2 md:h-12 md:flex-nowrap md:justify-end md:pb-0 2xl:h-14">
-        <label className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-bordure bg-surface px-3.5 text-sm font-semibold text-encre-2">
+        <label className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-bordure bg-surface px-3.5 text-sm font-semibold text-encre-2 survol-fond">
           <span className="sr-only">Statut du projet</span>
           <select
             value={enregistre.statut}

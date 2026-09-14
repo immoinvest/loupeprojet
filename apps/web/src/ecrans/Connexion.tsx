@@ -102,7 +102,7 @@ export function Connexion(): JSX.Element {
         <Link
           to="/"
           aria-label={TEXTES_LOGO}
-          className="self-center pointer-coarse:inline-flex pointer-coarse:min-h-11 pointer-coarse:items-center"
+          className="self-center rounded-encart px-2 py-1 survol-fond pointer-coarse:inline-flex pointer-coarse:min-h-11 pointer-coarse:items-center"
         >
           <LogotypeDeklic hauteur={32} />
         </Link>
