@@ -12,7 +12,7 @@ describe('Page Méthode', () => {
     expect(screen.getByText(/Règles du 14 sept\. 2026 \(version 2026-09\)/)).toBeInTheDocument();
 
     const sommaire = screen.getByRole('navigation', { name: 'Sommaire' });
-    expect(within(sommaire).getAllByRole('link')).toHaveLength(15);
+    expect(within(sommaire).getAllByRole('link')).toHaveLength(16);
     expect(within(sommaire).getByRole('link', { name: 'Le crédit' })).toHaveAttribute(
       'href',
       '#credit',
