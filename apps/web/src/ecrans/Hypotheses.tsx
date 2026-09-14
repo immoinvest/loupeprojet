@@ -1,37 +1,12 @@
-import type { ProjetEntree } from '@loupe/moteur';
-import { useState, type JSX } from 'react';
+import type { JSX } from 'react';
 
 import { Page, TitrePage } from '@/composants/mise-en-page';
 import { Carte, Pastille } from '@/composants/ui';
 import { useProjetCourant } from '@/coque/ProjetLayout';
 import { eurosParMois, pourcentage } from '@/formatage/nombres';
-import {
-  GROUPES,
-  appliquerSaisie,
-  cleProvenance,
-  valeurActuelle,
-  versTexte,
-  type Descripteur,
-} from '@/hypotheses';
-import { useProjets } from '@/stockage/ProjetsContext';
+import { GROUPES } from '@/hypotheses';
 
-import { ChampHypothese, type BadgeProvenance } from './hypotheses/ChampHypothese';
-
-const BADGES: Readonly<Record<string, BadgeProvenance>> = {
-  annonce: { ton: 'neutre', libelle: 'annonce' },
-  utilisateur: { ton: 'accent', libelle: 'à toi' },
-  estime: { ton: 'surveiller', libelle: 'estimé' },
-  ademe: { ton: 'bon', libelle: 'donnée publique' },
-  anil: { ton: 'bon', libelle: 'donnée publique' },
-  dvf: { ton: 'bon', libelle: 'donnée publique' },
-  usure: { ton: 'bon', libelle: 'taux du mois' },
-};
-
-function badgePour(projet: ProjetEntree, d: Descripteur): BadgeProvenance | null {
-  const source = projet.provenance?.[cleProvenance(d.chemin)];
-  if (source !== undefined) return BADGES[source] ?? { ton: 'neutre', libelle: source };
-  return d.aToi === true ? (BADGES.utilisateur ?? null) : null;
-}
+import { GrilleHypotheses } from './hypotheses/GrilleHypotheses';
 
 function Synthese(): JSX.Element {
   const { resultats: r } = useProjetCourant();
@@ -64,27 +39,6 @@ function Synthese(): JSX.Element {
 
 export function Hypotheses(): JSX.Element {
   const { enregistre } = useProjetCourant();
-  const { mettreAJour } = useProjets();
-  const projet: ProjetEntree = enregistre.projet;
-  const [textes, setTextes] = useState<Readonly<Record<string, string>>>({});
-  const [erreurs, setErreurs] = useState<Readonly<Record<string, string>>>({});
-
-  const changer = (d: Descripteur, texte: string): void => {
-    setTextes((prev) => ({ ...prev, [d.chemin]: texte }));
-    const application = appliquerSaisie(projet, d, texte);
-    if (!application.ok) {
-      setErreurs((prev) => ({ ...prev, [d.chemin]: application.erreur }));
-      return;
-    }
-    const resultat = mettreAJour(enregistre.id, application.projet);
-    if (!resultat.ok) {
-      const message =
-        resultat.erreurs[d.chemin] ?? Object.values(resultat.erreurs)[0] ?? 'Valeur refusée.';
-      setErreurs((prev) => ({ ...prev, [d.chemin]: message }));
-      return;
-    }
-    setErreurs((prev) => Object.fromEntries(Object.entries(prev).filter(([k]) => k !== d.chemin)));
-  };
 
   return (
     <Page haut="serre">
@@ -101,32 +55,16 @@ export function Hypotheses(): JSX.Element {
           <Pastille ton="accent" compacte>
             à toi
           </Pastille>
-          Chaque valeur dit d'où elle vient.
+          Chaque valeur dit d'où elle vient. Le prêt se règle dans Financement.
         </span>
       </div>
-      {GROUPES.map((g) => {
-        const visibles = g.champs.filter((d) => d.visibleSi === undefined || d.visibleSi(projet));
-        return (
-          <Carte key={g.titre}>
-            <h2 className="m-0 font-display text-[22px] font-semibold">{g.titre}</h2>
-            {g.sousTitre !== undefined && <p className="m-0 text-sm text-encre-2">{g.sousTitre}</p>}
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
-              {visibles.map((d) => (
-                <ChampHypothese
-                  key={d.chemin}
-                  descripteur={d}
-                  texte={textes[d.chemin] ?? versTexte(valeurActuelle(projet, d), d.type)}
-                  erreur={erreurs[d.chemin]}
-                  badge={badgePour(projet, d)}
-                  onChange={(t) => {
-                    changer(d, t);
-                  }}
-                />
-              ))}
-            </div>
-          </Carte>
-        );
-      })}
+      {GROUPES.map((g) => (
+        <Carte key={g.titre}>
+          <h2 className="m-0 font-display text-[22px] font-semibold">{g.titre}</h2>
+          {g.sousTitre !== undefined && <p className="m-0 text-sm text-encre-2">{g.sousTitre}</p>}
+          <GrilleHypotheses key={enregistre.id} groupe={g} />
+        </Carte>
+      ))}
     </Page>
   );
 }

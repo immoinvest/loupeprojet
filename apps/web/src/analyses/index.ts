@@ -15,3 +15,14 @@ export {
 } from './comparaison';
 export { defautsDuMoteur, type Defauts } from './defauts';
 export { HORIZONS, variantesRevente, type VarianteRevente } from './revente';
+export {
+  CHEMIN_SIMULATEUR,
+  SimulationPretEntreeSchema,
+  decoderSimulation,
+  encoderSimulation,
+  lienSimulateurPret,
+  lireFragmentSimulation,
+  simulationDepuisResultats,
+  type DecodageSimulation,
+  type SimulationPretEntree,
+} from './simulation-pret';

@@ -133,13 +133,9 @@ describe('Rapport', () => {
       expect(screen.queryByText('Cette valeur est nécessaire au calcul.')).not.toBeInTheDocument();
       expect(lireProjets(window.localStorage)[0]?.projet.hypotheses.achat.prix).toBe(150_000);
 
-      // « 4 » puis « 40 » sont valides et enregistrés ; « 400 » dépasse la durée du prêt et
-      // est refusé : la dernière valeur valide (40) reste en vigueur.
-      const differe = screen.getByLabelText(/Différé total/);
-      await utilisateur.clear(differe);
-      await utilisateur.type(differe, '400');
-      expect(screen.getByText(/différé doit être plus court/)).toBeInTheDocument();
-      expect(lireProjets(window.localStorage)[0]?.projet.hypotheses.pret.differeTotalMois).toBe(40);
+      // Le prêt n'est plus dans Hypothèses : il se règle dans Financement.
+      expect(screen.queryByLabelText(/Différé total/)).not.toBeInTheDocument();
+      expect(screen.queryByRole('heading', { name: 'Le marché' })).not.toBeInTheDocument();
 
       await utilisateur.selectOptions(screen.getByLabelText(/Mode de location/), 'courte_duree');
       // 1 300 € / 30 nuits × 2 = 86,7 → 87 €

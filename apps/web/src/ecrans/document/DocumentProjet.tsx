@@ -4,6 +4,7 @@ import { ModeDocument } from '@/composants/document';
 import { MARGES_LATERALES } from '@/composants/mise-en-page';
 import { useProjetCourant } from '@/coque/ProjetLayout';
 import { dateCourte, euros, nombre } from '@/formatage/nombres';
+import { Financement } from '@/ecrans/Financement';
 import { Fiscalite } from '@/ecrans/Fiscalite';
 import { Rapport } from '@/ecrans/Rapport';
 import { Revente } from '@/ecrans/Revente';
@@ -13,13 +14,14 @@ import { MODES } from '@/textes/regimes';
 
 const VOLETS: readonly { readonly titre: string; readonly Volet: () => JSX.Element }[] = [
   { titre: 'Rapport', Volet: Rapport },
+  { titre: 'Financement', Volet: Financement },
   { titre: 'Fiscalité', Volet: Fiscalite },
   { titre: 'Revente', Volet: Revente },
   { titre: 'Visite', Volet: Visite },
 ];
 
 /**
- * Le projet complet en un seul document : en-tête, les quatre volets (un par page à
+ * Le projet complet en un seul document : en-tête, les cinq volets (un par page à
  * l'impression), pied de page. Rendu en mode document : lecture seule, explications visibles.
  */
 export function DocumentProjet({

@@ -1,5 +1,6 @@
 import type { Feu } from '@loupe/moteur';
 import type { JSX, ReactNode } from 'react';
+import { Link } from 'react-router';
 
 import { useModeDocument } from './document';
 
@@ -178,6 +179,16 @@ export function Pourquoi({
   );
 }
 
+type VarianteBouton = 'primaire' | 'secondaire';
+
+function classeBouton(variante: VarianteBouton): string {
+  const style =
+    variante === 'primaire'
+      ? 'bg-accent text-white hover:bg-accent-fonce'
+      : 'border border-bordure bg-surface text-encre-2 hover:bg-accent-fond';
+  return `inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full px-4 text-sm font-semibold ${style}`;
+}
+
 /** Un document n'a pas de boutons : rendu nul en mode document. */
 export function Bouton({
   children,
@@ -189,25 +200,39 @@ export function Bouton({
 }: {
   children: ReactNode;
   onClick?: () => void;
-  variante?: 'primaire' | 'secondaire';
+  variante?: VarianteBouton;
   type?: 'button' | 'submit';
   disabled?: boolean;
   title?: string;
 }): JSX.Element | null {
   if (useModeDocument()) return null;
-  const style =
-    variante === 'primaire'
-      ? 'bg-accent text-white hover:bg-accent-fonce'
-      : 'border border-bordure bg-surface text-encre-2 hover:bg-accent-fond';
   return (
     <button
       type={type}
       onClick={onClick}
       disabled={disabled}
       title={title}
-      className={`inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full px-4 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-50 ${style}`}
+      className={`${classeBouton(variante)} disabled:cursor-not-allowed disabled:opacity-50`}
     >
       {children}
     </button>
+  );
+}
+
+/** Un lien de l'application habillé comme un bouton ; nul en mode document, comme `Bouton`. */
+export function LienBouton({
+  to,
+  children,
+  variante = 'secondaire',
+}: {
+  to: string;
+  children: ReactNode;
+  variante?: VarianteBouton;
+}): JSX.Element | null {
+  if (useModeDocument()) return null;
+  return (
+    <Link to={to} className={`${classeBouton(variante)} no-underline`}>
+      {children}
+    </Link>
   );
 }

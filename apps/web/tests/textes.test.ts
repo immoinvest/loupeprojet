@@ -7,6 +7,7 @@ import {
 import { describe, expect, it } from 'vitest';
 
 import { AXES, ETATS, libelleFeu } from '@/textes/feux';
+import { PHASES, TEXTES_FINANCEMENT, phraseCouverture } from '@/textes/financement';
 import {
   CRITERES_PRIX,
   MODES,
@@ -32,6 +33,18 @@ const variante = (
   ...projetExemple,
   ...(marche === undefined ? {} : { marche }),
   hypotheses: { ...projetExemple.hypotheses, ...h },
+});
+
+describe('financement', () => {
+  it('a une phrase par feu de couverture et des libellés paramétrés', () => {
+    expect(phraseCouverture('bon')).toContain('porte le crédit');
+    expect(phraseCouverture('surveiller')).toContain('couvre la mensualité');
+    expect(phraseCouverture('probleme')).toContain('ne couvre même pas');
+    expect(phraseCouverture('inconnu')).toContain('Indiquez un loyer');
+    expect(TEXTES_FINANCEMENT.dureeMax(27)).toBe('plus long que le maximum bancaire de 27 ans');
+    expect(TEXTES_FINANCEMENT.effortDepasse('35 %')).toBe('au-dessus de 35 %');
+    expect(Object.keys(PHASES)).toEqual(['differe_total', 'differe_partiel', 'amortissement']);
+  });
 });
 
 describe('feux', () => {

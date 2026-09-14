@@ -3,7 +3,8 @@ import { expect, type Locator, type Page } from '@playwright/test';
 /** Nom du projet créé au premier lancement (voir `ProjetsProvider`). */
 export const NOM_EXEMPLE = 'T3 · 65 m² · Marseille 5e';
 
-export type Volet = 'Rapport' | 'Hypothèses' | 'Fiscalité' | 'Revente' | 'Visite';
+export type Volet =
+  'Rapport' | 'Estimation' | 'Financement' | 'Hypothèses' | 'Fiscalité' | 'Revente' | 'Visite';
 
 /** Ouvre la liste « Mes projets » et attend son titre. */
 export async function ouvrirMesProjets(page: Page): Promise<void> {

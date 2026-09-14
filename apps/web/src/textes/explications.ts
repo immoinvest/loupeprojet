@@ -9,4 +9,8 @@ export const EXPLICATIONS = {
     "Valeur estimée à la revente, moins l'agence, le capital restant dû, l'indemnité de remboursement anticipé et l'impôt sur la plus-value. Depuis 2025, les amortissements du meublé au réel sont réintégrés dans la plus-value.",
   leviers:
     'Le prix de négociation est celui qui met le cash-flow à zéro avec vos hypothèses. La colocation majore le loyer total de 35 % et compte un mois de vacance par an.',
+  financement:
+    "Mensualité constante sur le taux nominal, assurance calculée sur le capital emprunté. Le TAEG ajoute les frais de dossier et la garantie, puis se compare au taux d'usure. Le coût total du crédit additionne intérêts, assurance et frais bancaires sur toute la durée.",
+  couverture:
+    "Mensualité assurance comprise divisée par le loyer hors charges. La banque compte 70 % des loyers comme revenu, le reste absorbant charges et mois vides : sous 70 %, le loyer porte le crédit dans sa propre lecture. Deklic ne demande pas vos revenus ; l'effort bancaire, c'est elle qui le calculera.",
 } as const;

@@ -3,6 +3,8 @@ export { ecrireChemin, lireChemin } from './chemins';
 export { depuisTexte, versTexte, type Conversion, type TypeChamp } from './conversion';
 export {
   GROUPES,
+  GROUPE_FINANCEMENT,
+  TOUS_LES_GROUPES,
   cleProvenance,
   descripteurParChemin,
   valeurActuelle,
@@ -10,3 +12,4 @@ export {
   type Groupe,
   type Option,
 } from './descripteurs';
+export { texteLisible } from './lisible';

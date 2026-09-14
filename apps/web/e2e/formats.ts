@@ -151,6 +151,7 @@ export function ecransDeReference({
         ).toBeVisible();
       },
     },
+    { nom: 'Financement', chemin: `${projet}/financement` },
     { nom: 'Hypothèses', chemin: `${projet}/hypotheses` },
     { nom: 'Fiscalité', chemin: `${projet}/fiscalite` },
     { nom: 'Revente', chemin: `${projet}/revente` },
