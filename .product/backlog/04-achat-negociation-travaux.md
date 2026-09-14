@@ -1,6 +1,8 @@
 # 04 — Achat : curseur de négociation, « rénovation énergétique », travaux facultatifs
 
-Statut : `idée` · Notée le 14/09/2026 · Dépend de : rien (la fiche 02 reprend la partie « travaux facultatifs »)
+Statut : `livrée` (feature `achat-negociation`, 14/09/2026, PR `feat/achat-negociation` ; discovery `../features/achat-negociation-discovery.md`, specs `../specs/achat-negociation-specs.md`, architecture `../architecture/achat-negociation.md`) · Notée le 14/09/2026 · Dépend de : rien (la fiche 02 reprend la partie « travaux facultatifs »)
+
+Décisions prises : le **taux** de négociation est stocké (`achat.negociationTaux`, 0 à 30 %, défaut 0), le montant et le prix retenu sont affichés ; la négociation porte sur le prix total affiché, les honoraires d'agence restent en euros ; curseur 0 à −15 % par pas de 0,5 % avec un champ % à côté (jusqu'à 30 %), pas de surenchère ; « Viser le prix estimé » règle le curseur (arrondi au pas, plafond 15 %) et disparaît si le prix affiché est déjà sous l'estimation ; le prix retenu remplace le prix affiché dans tout le moteur et dans l'en-tête, Mes projets, Comparer (indicateur « Négociation »), Revente, Adresse et le document ; la règle « rénovation énergétique » reste dans le moteur, la case n'apparaît qu'en location nue avec des travaux ; travaux et mobilier repliés derrière « + Ajouter des travaux » (Hypothèses et Vérifier) ; pas de curseur à la création ; migration douce (champ absent = 0).
 
 ## La demande de Pierre
 

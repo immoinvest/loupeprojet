@@ -1,61 +1,30 @@
-import { vacanceSemaines, type Resultats } from '@loupe/moteur';
+import type { Resultats } from '@loupe/moteur';
 import type { JSX } from 'react';
 
+import { multipleSurApport } from '@/analyses/rapport';
+import { useModeDocument } from '@/composants/document';
+import { Info } from '@/composants/info';
 import { Chapo, Page, TitrePage } from '@/composants/mise-en-page';
-import { Carte, GrosChiffre, Ligne, Pastille, Pourquoi, TitreCarte } from '@/composants/ui';
+import { Carte, GrosChiffre, Ligne, LienOnglet, Pastille, TitreCarte } from '@/composants/ui';
 import { euros, eurosSignes, nombre, pourcentage } from '@/formatage/nombres';
 import { useProjetCourant } from '@/coque/ProjetLayout';
-import { EXPLICATIONS } from '@/textes/explications';
+import {
+  explicationFiscalite,
+  explicationMultiple,
+  explicationRevente,
+} from '@/textes/explications';
 import { libelleFeu } from '@/textes/feux';
 import { REGIMES } from '@/textes/regimes';
-import { reponseCourte, texteVerdict } from '@/textes/verdict';
+import { texteVerdict } from '@/textes/verdict';
 
+import { CarteAutofinancement } from './rapport/CarteAutofinancement';
 import { CartePrix } from './rapport/CartePrix';
+import { CarteRendements } from './rapport/CarteRendements';
 import { Leviers } from './rapport/Leviers';
 
-function CarteCashflow({ r }: { r: Resultats }): JSX.Element {
-  const c = r.cashflow;
-  const ton = c.mensuel >= 0 ? 'bon' : c.mensuel >= -100 ? 'surveiller' : 'probleme';
-  const reponse = c.mensuel >= 0 ? 'oui' : c.mensuel >= -100 ? 'presque' : 'non';
-  return (
-    <Carte>
-      <TitreCarte action={<Pourquoi texte={EXPLICATIONS.cashflow} />}>
-        Est-ce que ça s'autofinance ?
-      </TitreCarte>
-      <GrosChiffre ton={ton}>{reponseCourte(reponse)}</GrosChiffre>
-      <div>
-        <Ligne
-          libelle="Loyer"
-          valeur={eurosSignes(c.recettes.loyersBruts / 12)}
-          tonValeur="font-bold text-bon"
-        />
-        <Ligne
-          libelle="Crédit et assurance"
-          valeur={eurosSignes(-r.financement.mensualiteTotale)}
-        />
-        <Ligne
-          libelle="Charges, impôts locaux, entretien"
-          valeur={eurosSignes(-c.chargesAnnuelles / 12)}
-        />
-        <Ligne
-          libelle={`${nombre(vacanceSemaines(r.projet.hypotheses.location))} semaines vides par an`}
-          valeur={eurosSignes(-c.recettes.vacance / 12)}
-        />
-        <Ligne
-          libelle="Reste chaque mois"
-          valeur={eurosSignes(c.mensuel)}
-          fort
-          tonValeur={c.mensuel < 0 ? 'text-probleme' : 'text-bon'}
-        />
-      </div>
-      {c.pointMort !== null && (
-        <p className="m-0 text-[15px] text-encre-2">
-          À l'équilibre avec un loyer de <strong>{euros(c.pointMort)}</strong>.
-        </p>
-      )}
-    </Carte>
-  );
-}
+const TITRE_FISCALITE = "Combien d'impôts ?";
+const TITRE_REVENTE = "Qu'est-ce qu'il vous restera ?";
+const TITRE_MULTIPLE = 'Multiple sur apport';
 
 function CarteFiscalite({ r }: { r: Resultats }): JSX.Element {
   const f = r.fiscalite;
@@ -66,10 +35,8 @@ function CarteFiscalite({ r }: { r: Resultats }): JSX.Element {
   const annees = r.projet.hypotheses.revente.annees;
   return (
     <Carte>
-      <TitreCarte
-        action={<Pourquoi texte={EXPLICATIONS.fiscalite} libelle="Comparer les 4 régimes" />}
-      >
-        Combien d'impôts ?
+      <TitreCarte info={<Info sujet={TITRE_FISCALITE} texte={explicationFiscalite(r)} />}>
+        {TITRE_FISCALITE}
       </TitreCarte>
       <GrosChiffre
         ton={retenu.impotTotal === 0 ? 'bon' : 'encre'}
@@ -91,6 +58,7 @@ function CarteFiscalite({ r }: { r: Resultats }): JSX.Element {
           </Pastille>
         ))}
       </div>
+      <LienOnglet vers="fiscalite">Voir la fiscalité</LienOnglet>
     </Carte>
   );
 }
@@ -98,10 +66,14 @@ function CarteFiscalite({ r }: { r: Resultats }): JSX.Element {
 function CarteRevente({ r }: { r: Resultats }): JSX.Element {
   const e = r.rendement.enrichissement;
   const annees = r.projet.hypotheses.revente.annees;
+  const multiple = multipleSurApport(r);
+  // Sur papier, l'explication du multiple vient sous les lignes plutôt qu'à côté de son libellé.
+  const document = useModeDocument();
+  const infoMultiple = <Info sujet={TITRE_MULTIPLE} texte={explicationMultiple(r)} />;
   return (
     <Carte>
-      <TitreCarte action={<Pourquoi texte={EXPLICATIONS.revente} libelle="Détail" />}>
-        Qu'est-ce qu'il vous restera ?
+      <TitreCarte info={<Info sujet={TITRE_REVENTE} texte={explicationRevente(r)} />}>
+        {TITRE_REVENTE}
       </TitreCarte>
       <GrosChiffre complement={`dans ${String(annees)} ans`}>
         {euros(r.revente.cashNetVendeur)}
@@ -121,11 +93,36 @@ function CarteRevente({ r }: { r: Resultats }): JSX.Element {
           valeur={eurosSignes(e.total)}
           fort
         />
+        {multiple !== null && (
+          <Ligne
+            libelle={
+              document ? (
+                TITRE_MULTIPLE
+              ) : (
+                <span className="flex items-center gap-0.5">
+                  {TITRE_MULTIPLE}
+                  {infoMultiple}
+                </span>
+              )
+            }
+            valeur={`× ${multiple < 0 ? '−' : ''}${nombre(Math.abs(multiple), 1)}`}
+            tonValeur="font-semibold"
+          />
+        )}
       </div>
+      {document && multiple !== null ? infoMultiple : null}
+      <LienOnglet vers="revente">Voir la revente</LienOnglet>
     </Carte>
   );
 }
 
+/** Deux cartes côte à côte sur tablette, ordinateur et papier ; empilées sur téléphone. */
+const DEUX_CARTES = 'grid grid-cols-1 gap-5 md:grid-cols-2 print:grid-cols-2';
+
+/**
+ * Le Rapport : le verdict, les cinq feux, puis l'autofinancement en carte principale, le prix et
+ * les rendements, les leviers, les impôts et la revente.
+ */
 export function Rapport(): JSX.Element {
   const { resultats: r } = useProjetCourant();
   const verdict = texteVerdict(r);
@@ -144,12 +141,13 @@ export function Rapport(): JSX.Element {
           ))}
         </div>
       </div>
-      <div className="grid grid-cols-1 gap-5 md:grid-cols-2 print:grid-cols-2">
+      <CarteAutofinancement r={r} />
+      <div className={DEUX_CARTES}>
         <CartePrix r={r} />
-        <CarteCashflow r={r} />
+        <CarteRendements r={r} />
       </div>
       <Leviers r={r} />
-      <div className="grid grid-cols-1 gap-5 md:grid-cols-2 print:grid-cols-2">
+      <div className={DEUX_CARTES}>
         <CarteFiscalite r={r} />
         <CarteRevente r={r} />
       </div>

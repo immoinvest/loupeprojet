@@ -220,3 +220,23 @@ describe('HypothesesSchema — régime compatible avec le type', () => {
     ).toBe(true);
   });
 });
+
+describe('AchatSchema — négociation', () => {
+  it('vaut 0 quand le champ manque (projets enregistrés avant la négociation)', () => {
+    expect(ProjetSchema.parse(projetExemple).hypotheses.achat.negociationTaux).toBe(0);
+  });
+
+  it('refuse un taux négatif ou au-delà de 30 % en nommant le champ', () => {
+    for (const negociationTaux of [-0.01, 0.31]) {
+      const resultat = ProjetSchema.safeParse({
+        ...projetExemple,
+        hypotheses: {
+          ...projetExemple.hypotheses,
+          achat: { ...projetExemple.hypotheses.achat, negociationTaux },
+        },
+      });
+      expect(resultat.success).toBe(false);
+      expect(resultat.error?.issues[0]?.path).toEqual(['hypotheses', 'achat', 'negociationTaux']);
+    }
+  });
+});

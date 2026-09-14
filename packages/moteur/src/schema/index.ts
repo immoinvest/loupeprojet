@@ -18,6 +18,7 @@ export {
 export {
   AchatSchema,
   ChargesSchema,
+  NEGOCIATION_MAX,
   FiscaliteSchema,
   HypothesesSchema,
   LocationColocationSchema,

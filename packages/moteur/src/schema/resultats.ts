@@ -291,6 +291,12 @@ export const EstimationResultatSchema = z.strictObject({
 
 export const ResultatsSchema = z.strictObject({
   projet: ProjetSchema,
+  achat: z.strictObject({
+    prixAffiche: n,
+    prixRetenu: n,
+    negociationTaux: n,
+    negociationMontant: n,
+  }),
   financement: FinancementSchema,
   cashflow: CashflowSchema,
   fiscalite: FiscaliteResultatSchema,

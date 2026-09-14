@@ -1,3 +1,4 @@
+import { prixRetenu } from '../achat';
 import type { Hypotheses, Location, Regime } from '../schema/hypotheses';
 import type { Recettes } from './recettes';
 
@@ -98,7 +99,7 @@ export function chargesExploitation(
     { code: 'menage', annuel: frais.menage },
     { code: 'energie', annuel: charges.energieMensuel * MOIS_PAR_AN },
     { code: 'internet', annuel: charges.internetMensuel * MOIS_PAR_AN },
-    { code: 'entretien', annuel: charges.entretienTaux * achat.prix },
+    { code: 'entretien', annuel: charges.entretienTaux * prixRetenu(achat) },
   ];
 }
 

@@ -84,6 +84,7 @@ export function ChampHypothese({
           ))}
         </select>
       )}
+      {d.aide !== undefined && <span className="text-xs text-encre-3">{d.aide}</span>}
       {erreur !== undefined && <span className="text-xs text-probleme">{erreur}</span>}
     </label>
   );

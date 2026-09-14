@@ -1,0 +1,59 @@
+{
+  "feature_slug": "rapport-cashflow",
+  "title": "Rapport : icônes d'information, liens vers les onglets, autofinancement au centre, rendement brut",
+  "started_at": "2026-09-14T09:00:00Z",
+  "current_step": "push",
+  "scope": "apps/web/src/composants/{info.tsx,ui.tsx} (Info, LienOnglet, TitreCarte), ecrans/Rapport.tsx, ecrans/rapport/{CarteAutofinancement,CarteRendements,CartePrix}.tsx, analyses/rapport.ts, textes/explications.ts, tests, e2e/rapport.spec.ts",
+  "branch": "feat/rapport-cashflow",
+  "base": "master (b74bbc6, après la PR #37 docs/backlog)",
+  "backlog": ".product/backlog/10-rapport-icones-cashflow.md",
+  "steps": {
+    "discovery": {
+      "status": "completed",
+      "output": ".product/features/rapport-cashflow-discovery.md"
+    },
+    "maquettes": {
+      "status": "completed",
+      "output": ".product/design/rapport-cashflow-maquettes.html",
+      "artifact": "https://claude.ai/code/artifact/ecdced8e-83e3-4d91-bc4b-d4dc0ef00300",
+      "note": "A retenue par défaut (Pierre n'a pas répondu pendant la session) ; B reste dans le fichier"
+    },
+    "specs": {
+      "status": "completed",
+      "output": ".product/specs/rapport-cashflow-specs.md",
+      "stories": 5
+    },
+    "architecture": {
+      "status": "completed",
+      "output": ".product/architecture/rapport-cashflow.md"
+    },
+    "implement": {
+      "status": "completed",
+      "stories_completed": 5,
+      "stories_total": 5
+    },
+    "qa_tests": {
+      "status": "completed",
+      "note": "35 tests ajoutés : info (9 : souris, clavier, Échap, clic dehors, une seule bulle, mode document, décalage, TitreCarte, LienOnglet), rapport-analyses (6), explications (12), rapport (8 : cascade, repères, bulles, rendements, liens, multiple, document) ; couverture 100 % sur analyses/ et textes/ ; suite web 325 tests verts avant fusion, 1 061 tests au total après les deux fusions ; e2e Rapport : bulle dans l'écran (ordinateur, téléphone, tablette), Échap, une seule bulle, liens vers les trois onglets"
+    },
+    "security": {
+      "status": "completed",
+      "note": "aucun innerHTML ni eval ; les textes des bulles sont composés depuis les résultats du moteur et rendus comme texte ; aucun appel réseau ; rien de persisté"
+    },
+    "push": {
+      "status": "completed",
+      "pr": "https://github.com/immoinvest/loupeprojet/pull/43",
+      "note": "PR #43 fusionnée le 14/09/2026 à 11:50Z par auto-merge (verify vert) après deux fusions de master ; le job e2e (non requis) est tombé sur master : e2e/responsive.spec.ts « impression A4 » attendait deux grilles dans le Rapport imprimé, la disposition A en a cinq ([2, 1, 2, 3, 2]). Correctif : branche fix/rapport-impression-grilles (attente mise à jour, test relancé en local : vert)."
+    }
+  },
+  "decisions": {
+    "cashflow": "le « Reste chaque mois » reste avant impôt (cohérent avec le feu et le verdict) ; la ligne « Après l'impôt » vient dessous, impôt mensuel moyen du régime retenu sur la période",
+    "couverture": "affichée comme part du loyer prise par le crédit (mensualité ÷ loyer, définition du glossaire), pas son inverse",
+    "info": "bulle absolue sous l'icône, role=tooltip, pas de popover natif (jsdom, ancrage CSS) ; décalage calculé à l'ouverture depuis le conteneur pour tenir dans l'écran (vérifié sur téléphone : 54 → 374 px sur 390)",
+    "liens": "LienOnglet séparé de l'icône, en bas de carte, nul en mode document",
+    "explications": "EXPLICATIONS fixes conservées pour la page Méthode ; fonctions chiffrées (r) => string ajoutées ; Pourquoi supprimé",
+    "disposition": "A : autofinancement pleine largeur, puis Prix et Rendements, Leviers, Impôts et Revente",
+    "impression": "les explications des trois rendements passent sous les chiffres en pleine largeur (trois colonnes étroites illisibles)",
+    "lecon": "toute modification des grilles d'un volet imprimable passe par npx playwright test --project=formats avant la PR ; après fusion, vérifier aussi le job e2e"
+  }
+}

@@ -208,3 +208,37 @@ describe('appliquerSaisie', () => {
     expect(r2.ok && r2.projet.marche?.dvf?.medianM2).toBe(3050);
   });
 });
+
+describe('carte « L’achat » : descripteurs', () => {
+  const renovation = champ('hypotheses.achat.travauxRenovationEnergetique');
+  const avec = (mode: 'nu' | 'meuble', travaux?: number): ProjetEntree => ({
+    ...projetExemple,
+    hypotheses: {
+      ...projetExemple.hypotheses,
+      location: { mode, loyerHc: 980 },
+      achat: {
+        prix: projetExemple.hypotheses.achat.prix,
+        ...(travaux === undefined ? {} : { travaux }),
+      },
+    },
+  });
+
+  it('la rénovation énergétique n’est visible qu’en location nue avec des travaux', () => {
+    expect(renovation.visibleSi?.(avec('nu', 6_000))).toBe(true);
+    expect(renovation.visibleSi?.(avec('nu', 0))).toBe(false);
+    expect(renovation.visibleSi?.(avec('nu'))).toBe(false);
+    expect(renovation.visibleSi?.(avec('meuble', 6_000))).toBe(false);
+    expect(renovation.aide?.replace(/\s/g, ' ')).toMatch(/10 700 € à 21 400 €/);
+  });
+
+  it('la négociation est un pourcentage « à toi », convertie comme les autres taux', () => {
+    const negociation = champ('hypotheses.achat.negociationTaux');
+    expect(negociation.type).toBe('pourcent');
+    expect(negociation.aToi).toBe(true);
+    const application = appliquerSaisie(projetExemple, negociation, '5');
+    expect(application.ok && application.projet.hypotheses.achat.negociationTaux).toBe(0.05);
+    expect(application.ok && application.projet.provenance?.['achat.negociationTaux']).toBe(
+      'utilisateur',
+    );
+  });
+});
