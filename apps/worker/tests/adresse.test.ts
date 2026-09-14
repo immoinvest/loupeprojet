@@ -13,6 +13,7 @@ import {
   groupesDe,
   lireVentes,
   MIN_VENTES_PENTE,
+  MAX_VENTES_CARTE,
   ParametresAdresseSchema,
   PENTE_MIN,
   pentePrixSurface,
@@ -472,6 +473,10 @@ describe('analyserAdresse', () => {
       distanceMetres: 0,
     });
     expect(r.ventesProches.map((v) => v.distanceMetres)).toEqual([0, 0, 12, 18, 40, 60, 90, 150]);
+    // La carte : les mêmes comparables, tous à 300 m au plus, avec leurs coordonnées.
+    expect(r.ventesCarte.map((v) => v.distanceMetres)).toEqual([0, 0, 12, 18, 40, 60, 90, 150]);
+    expect(r.ventesCarte[0]).toMatchObject({ lat: LAT, lon: LON });
+    expect(r.ventesCarte.every((v) => v.prixM2Corrige > 0 && v.groupes.length > 0)).toBe(true);
   });
 
   it('sans assez de comparables : pas de repère ; ventes sans coordonnées classées en dernier', () => {
@@ -500,6 +505,36 @@ describe('analyserAdresse', () => {
       null,
       null,
     ]);
+    // Sans coordonnées, pas de point sur la carte.
+    expect(r.ventesCarte.map((v) => v.distanceMetres)).toEqual([30]);
+  });
+
+  it('carte : ventes comparables à 300 m au plus, les plus proches d’abord, plafonnées', () => {
+    const loin = ligne({ idParcelle: '132058200E0900', numero: 300, lat: LAT + 320 * M_LAT });
+    const autreType = ligne({
+      idParcelle: '132058200E0901',
+      numero: 302,
+      type: 'maison',
+      lon: LON + 50 * M_LON,
+    });
+    const nombreuses = Array.from({ length: MAX_VENTES_CARTE + 5 }, (_, i) =>
+      ligne({ idParcelle: '132058200E0902', numero: 400, lat: LAT + ((i % 50) + 1) * M_LAT }),
+    );
+    const r = analyserAdresse(
+      lireVentes([ENTETE, loin, autreType, ...nombreuses, ''].join('\n')),
+      BIEN,
+    );
+    // Seules, la vente à 320 m est bien un comparable (ventes proches) mais reste hors de la carte,
+    // et la maison n'est ni l'une ni l'autre.
+    const seules = analyserAdresse(lireVentes([ENTETE, loin, autreType, ''].join('\n')), BIEN);
+    expect(seules.ventesProches.map((v) => v.distanceMetres)).toHaveLength(1);
+    expect(seules.ventesProches[0]?.distanceMetres).toBeGreaterThan(300);
+    expect(seules.ventesCarte).toEqual([]);
+    expect(r.ventesCarte).toHaveLength(MAX_VENTES_CARTE);
+    const distances = r.ventesCarte.map((v) => v.distanceMetres);
+    expect(distances[0]).toBe(1);
+    expect([...distances].sort((a, b) => a - b)).toEqual(distances);
+    expect(Math.max(...distances)).toBeLessThanOrEqual(300);
   });
 });
 
@@ -622,6 +657,7 @@ describe('GET /marche/adresse', () => {
         ancienneteMedianeMois: 18,
       },
     });
+    expect((corps as unknown as { ventesCarte: unknown[] }).ventesCarte).toHaveLength(8);
     expect(corps.sources.map((s) => s.nom)).toEqual([
       'Demandes de valeurs foncières géolocalisées (Etalab, à partir des données DGFiP)',
     ]);

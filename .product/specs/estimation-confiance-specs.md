@@ -210,7 +210,9 @@ Scénario: Méthode
 
 ### US-7 : Ventes géolocalisées dans `/marche/adresse`
 
-Contrat v5 : `ventesCarte` = toutes les ventes comparables situées à 300 m ou moins et portant des coordonnées (plafond 300, les plus proches d'abord) avec `lat`, `lon`, `prixM2Actualise`, `date`, `surface`, `groupes`. `ventesProches` inchangé.
+Contrat v6 (la v5 a porté la correction selon la surface) : `ventesCarte` = toutes les ventes comparables situées à 300 m ou moins et portant des coordonnées (plafond 300, les plus proches d'abord) avec `lat`, `lon`, `prixM2Actualise`, `date`, `surface`, `groupes`. `ventesProches` inchangé.
+
+Fond de carte : Plan IGN de la Géoplateforme, décision de Pierre du 14/09/2026.
 
 ### US-8 : Composant `CarteVentes`
 

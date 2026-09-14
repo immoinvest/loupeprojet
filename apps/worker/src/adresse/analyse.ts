@@ -1,4 +1,5 @@
 import { distanceMetres, type Point } from './geometrie';
+import { ventesSurCarte, type VenteSurCarte } from './carte';
 import type { VenteDvf } from './ventes';
 
 export type TypeLogement = 'appartement' | 'maison';
@@ -122,6 +123,8 @@ export interface AnalyseAdresse {
   readonly groupes: readonly Groupe[];
   readonly reference: Reference | null;
   readonly ventesProches: readonly VenteProche[];
+  /** Ventes comparables géolocalisées à 300 m au plus, pour la carte du quartier. */
+  readonly ventesCarte: readonly VenteSurCarte[];
 }
 
 /** Coefficient d'actualisation d'une vente (selon sa date et sa commune) ; 1 quand la tendance est inconnue. */
@@ -239,9 +242,11 @@ export function adresseDe(vente: VenteDvf): string | null {
   return `${numero}${vente.voie}`;
 }
 
-interface VenteSituee {
+export interface VenteSituee {
   readonly vente: VenteDvf;
   readonly distance: number | null;
+  /** Coordonnées et distance au bien ; `null` quand la vente n'est pas géolocalisée. */
+  readonly position: { readonly point: Point; readonly distance: number } | null;
   readonly groupes: readonly CodeGroupe[];
   readonly comparable: boolean;
   readonly memeType: boolean;
@@ -284,10 +289,14 @@ export function analyserAdresse(
   const surfaceBien = bien.surface;
   const pente = surfaceBien === undefined ? 0 : pentePrixSurface(ventes, bien.type);
   const situees: VenteSituee[] = ventes.map((vente) => {
-    const distance =
+    const position =
       vente.lat === null || vente.lon === null
         ? null
-        : distanceMetres(bien.point, { lat: vente.lat, lon: vente.lon });
+        : {
+            point: { lat: vente.lat, lon: vente.lon },
+            distance: distanceMetres(bien.point, { lat: vente.lat, lon: vente.lon }),
+          };
+    const distance = position?.distance ?? null;
     const coefficient = actualiser(vente);
     const prixM2Actualise = (vente.prix / vente.surface) * coefficient;
     const correctionSurface =
@@ -295,6 +304,7 @@ export function analyserAdresse(
     return {
       vente,
       distance,
+      position,
       groupes: groupesDe(vente, bien, distance),
       comparable: estComparable(vente, bien),
       memeType: vente.type === bien.type,
@@ -321,8 +331,10 @@ export function analyserAdresse(
       break;
     }
   }
+  const estUnComparable = (s: VenteSituee): boolean =>
+    s.groupes.some((code) => comparableDans(s, code));
   const ventesProches = situees
-    .filter((s) => s.groupes.some((code) => comparableDans(s, code)))
+    .filter(estUnComparable)
     .sort(
       (a, b) => (a.distance ?? Number.POSITIVE_INFINITY) - (b.distance ?? Number.POSITIVE_INFINITY),
     )
@@ -347,5 +359,6 @@ export function analyserAdresse(
     groupes: GROUPES.map((code) => parCode[code]),
     reference,
     ventesProches,
+    ventesCarte: ventesSurCarte(situees, estUnComparable),
   };
 }

@@ -80,6 +80,17 @@ const ANALYSE = {
     distanceMetres: 20 + i * 25,
     groupes: ['rayon_200'],
   })),
+  // 24 ventes à moins de 300 m, en spirale autour du bien, prix de part et d'autre des quartiles.
+  ventesCarte: Array.from({ length: 24 }, (_, i) => ({
+    lat: 43.294813 + Math.cos(i) * (0.0003 + i * 0.0001),
+    lon: 5.393807 + Math.sin(i) * (0.0004 + i * 0.00012),
+    date: `2025-0${String(1 + (i % 9))}-15`,
+    prix: 170_000 + i * 4_000,
+    surface: 50 + (i % 20),
+    prixM2Corrige: 3_150 + i * 40,
+    distanceMetres: 30 + i * 11,
+    groupes: ['rayon_300'],
+  })),
   tendance: {
     zone: 'commune',
     periodeReference: '2025-S1',
@@ -231,7 +242,19 @@ export const ADRESSE_SIMULEE = {
 };
 
 /** Répond à la place du Worker ; l'application l'appelle depuis une autre origine (CORS). */
+/** Une tuile PNG transparente de 1 × 1 px : les tuiles IGN ne sont jamais demandées au vrai service en test. */
+export const TUILE_VIDE = Buffer.from(
+  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAMAASsJTYQAAAAASUVORK5CYII=',
+  'base64',
+);
+
+export const HOTE_TUILES_IGN = 'data.geopf.fr';
+
 export async function simulerWorker(page: Page): Promise<void> {
+  await page.route(
+    (url) => url.hostname === HOTE_TUILES_IGN,
+    (route: Route) => route.fulfill({ contentType: 'image/png', body: TUILE_VIDE }),
+  );
   await page.route(
     (url) => REPONSES.has(url.pathname),
     (route: Route) =>
