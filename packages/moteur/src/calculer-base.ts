@@ -1,3 +1,4 @@
+import { resumerAchat, type ResumeAchat } from './achat';
 import type { ResultatCashflow } from './cashflow';
 import { estimerPrix, type EstimationPrix } from './estimation';
 import { calculerFinancement, type ResultatFinancement } from './financement';
@@ -11,6 +12,8 @@ import { calculerVerdict, type ResultatVerdict } from './verdict';
 /** Tout le rapport sauf les scénarios (qui recalculent une base par variante). */
 export interface ResultatsBase {
   readonly projet: Projet;
+  /** Prix affiché, prix retenu après négociation, écart : le prix sur lequel tout est calculé. */
+  readonly achat: ResumeAchat;
   readonly financement: ResultatFinancement;
   /** Cash-flow du régime retenu. */
   readonly cashflow: ResultatCashflow;
@@ -32,6 +35,7 @@ export function calculerBase(projet: Projet, regles: Regles): ResultatsBase {
   const verdict = calculerVerdict(projet, financement, fiscalite, rendement, regles, estimation);
   return {
     projet,
+    achat: resumerAchat(projet.hypotheses.achat),
     financement,
     cashflow: fiscalite.regimes[fiscalite.retenu].cashflow,
     fiscalite,

@@ -13,6 +13,7 @@ export {
   type OptionsCalcul,
   type Resultats,
 } from './calculer-projet';
+export * from './achat';
 export * from './cashflow';
 export * from './commun';
 export * from './estimation';

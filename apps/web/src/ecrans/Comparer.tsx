@@ -1,3 +1,4 @@
+import { prixRetenu } from '@loupe/moteur';
 import { useMemo, useState, type JSX } from 'react';
 import { Link, useNavigate } from 'react-router';
 
@@ -56,7 +57,7 @@ function Selection({
             />
             {p.nom}
             <span className="font-normal text-encre-3">
-              {euros(p.projet.hypotheses.achat.prix)}
+              {euros(prixRetenu(p.projet.hypotheses.achat))}
             </span>
           </label>
         );

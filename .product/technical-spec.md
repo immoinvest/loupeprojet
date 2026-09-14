@@ -34,7 +34,8 @@ src/
 ├── schema/                  bien, marche, hypotheses, projet (entrée) ; resultats (sortie, strictObject)
 ├── regles/                  types.ts, 2026-09.ts (toutes les constantes datées, aConfirmer, simplifications), index.ts
 ├── commun/                  arrondi, résolution par bissection, VAN, erreurs nommées
-├── financement/             frais-acquisition, mensualite, amortissement (différés), taeg, effort (HCSF), ira
+├── achat/                   prixRetenu (prix affiché × (1 − négociation), arrondi à l'euro), resumerAchat, tauxPourPrixRetenu
+├── financement/             frais-acquisition (base = prix retenu − honoraires acquéreur), mensualite, amortissement (différés), taeg, effort (HCSF), ira
 ├── cashflow/                recettes (3 modes), charges (par régime), point mort, couverture, projection annuelle
 ├── fiscalite/               amortissements, deficits, interets, micro-bic, lmnp-reel (39 C), micro-foncier, nu-reel, index (4 régimes)
 ├── revente/                 valeur, plus-value (abattements, surtaxe, réintégration), index

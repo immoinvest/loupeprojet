@@ -1,3 +1,4 @@
+import { prixRetenu } from '../achat';
 import type { EstimationPrix } from '../estimation';
 import type { ResultatFinancement } from '../financement';
 import type { ResultatFiscalite } from '../fiscalite/types';
@@ -43,7 +44,7 @@ export function calculerVerdict(
 ): ResultatVerdict {
   const retenu = fiscalite.regimes[fiscalite.retenu];
   const prix = feuPrix(
-    projet.hypotheses.achat.prix / projet.bien.surface,
+    prixRetenu(projet.hypotheses.achat) / projet.bien.surface,
     projet.marche,
     regles,
     estimation?.prixM2Estime ?? null,

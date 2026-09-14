@@ -1,3 +1,4 @@
+import { prixRetenu } from '../achat';
 import type { ResultatFinancement } from '../financement';
 import type { ResultatFiscalite } from '../fiscalite/types';
 import type { ResultatRevente } from '../revente';
@@ -40,7 +41,7 @@ export function calculerRendement(
 
   return {
     rendements: rendements({
-      coutTotal: achat.prix + achat.travaux + financement.fraisAcquisition.total,
+      coutTotal: prixRetenu(achat) + achat.travaux + financement.fraisAcquisition.total,
       loyersBruts: retenu.cashflow.recettes.loyersBruts,
       loyersNets: retenu.cashflow.recettes.loyersNets,
       chargesAnnuelles: retenu.cashflow.chargesAnnuelles,

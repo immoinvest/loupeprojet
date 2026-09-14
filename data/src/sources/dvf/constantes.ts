@@ -6,12 +6,12 @@ export const SOURCE_DVF: Source = {
   licence: 'Licence Ouverte 2.0',
 };
 
-/** Fenêtre glissante des ventes publiées, en mois, se terminant à la dernière vente connue. */
+/** Fenêtre glissante de l'index des prix, en mois, se terminant à la dernière vente connue. */
 export const FENETRE_MOIS = 24;
 
 /**
- * Dossiers annuels lus : cinq ans pour mesurer la tendance des prix ; les CSV publiés ne gardent que
- * la fenêtre de 24 mois. Le plus récent ne contient parfois qu'un semestre.
+ * Dossiers annuels lus : cinq ans, publiés en entier dans les CSV par commune et utilisés pour la tendance
+ * des prix ; seul l'index se limite à la fenêtre de 24 mois. Le plus récent ne contient parfois qu'un semestre.
  */
 export const ANNEES_LUES = 5;
 

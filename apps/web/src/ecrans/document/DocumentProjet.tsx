@@ -1,15 +1,17 @@
+import { resumerAchat } from '@loupe/moteur';
 import type { JSX } from 'react';
 
 import { ModeDocument } from '@/composants/document';
 import { MARGES_LATERALES } from '@/composants/mise-en-page';
 import { useProjetCourant } from '@/coque/ProjetLayout';
-import { dateCourte, euros, nombre } from '@/formatage/nombres';
+import { dateCourte, nombre } from '@/formatage/nombres';
 import { Fiscalite } from '@/ecrans/Fiscalite';
 import { Rapport } from '@/ecrans/Rapport';
 import { Revente } from '@/ecrans/Revente';
 import { Visite } from '@/ecrans/Visite';
 import { LogotypeDeklic } from '@/marque/Logo';
 import type { ProjetEnregistre } from '@/stockage/projets';
+import { libellePrixEnTete } from '@/textes/achat';
 import { MODES } from '@/textes/regimes';
 import { aDesReponses, visiteDe } from '@/visite';
 
@@ -69,8 +71,9 @@ export function DocumentProjet({
               {enregistre.nom}
             </h1>
             <span className="text-[15px] text-encre-2">
-              {euros(hypotheses.achat.prix)} · {MODES[hypotheses.location.mode]} ·{' '}
-              {nombre(bien.surface)} m² · département {bien.departement}
+              {libellePrixEnTete(resumerAchat(hypotheses.achat))} ·{' '}
+              {MODES[hypotheses.location.mode]} · {nombre(bien.surface)} m² · département{' '}
+              {bien.departement}
             </span>
           </div>
           <dl className="m-0 flex flex-col gap-0.5 text-[13px] text-encre-3 sm:text-right print:text-right">

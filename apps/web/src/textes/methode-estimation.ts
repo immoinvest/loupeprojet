@@ -54,7 +54,7 @@ export function sectionEstimation(regles: Regles): SectionMethode {
     resume:
       'Comme un estimateur en ligne, mais chaque vente, chaque correction et chaque source sont montrées.',
     etapes: [
-      'Ventes comparables : même type de logement, surface à 40 % près, du même immeuble au cercle de 300 m (onglet Estimation), sinon la commune.',
+      'Ventes comparables : même type de logement, surface à 40 % près, du même immeuble au cercle de 300 m (onglet Estimation), sinon la commune. Même immeuble = même parcelle ou même adresse : toutes ses ventes du même type comptent. Chaque prix au m² est ramené à la surface du bien par la pente des prix de la commune (les petits logements se vendent plus cher au m²), mesurée sur au moins 30 ventes et bornée.',
       'Date : chaque vente est ramenée au dernier semestre publié par la médiane du prix au m² par semestre de sa commune (ou du département), lissée sur trois semestres, sur cinq ans de ventes DVF.',
       `État : à rénover = premier quartile des ventes comparables, à rafraîchir = entre premier quartile et médiane, bon état = médiane (supposé par défaut), rénové = troisième quartile. DVF ne dit rien de l'état des biens vendus.`,
       'Corrections : DPE, étage et ascenseur, balcon ou terrasse, en pourcentage du prix de marché, additionnées. Chacune se désactive pour un projet.',
