@@ -59,10 +59,9 @@ function pointsBien(projet: Projet, regles: Regles): PointVigilance[] {
   return points;
 }
 
-function pointsFinanciers(
-  projet: Projet,
+/** Les points qui ne demandent que le financement et le prix : présents même sans loyer. */
+function pointsFinancement(
   financement: ResultatFinancement,
-  fiscalite: ResultatFiscalite,
   feuPrix: FeuVerdict,
 ): PointVigilance[] {
   const points: PointVigilance[] = [];
@@ -79,15 +78,19 @@ function pointsFinanciers(
       parametres: { dureeMax: financement.effort.dureeMaxAnnees },
     });
   }
+  return points;
+}
+
+/** Les points qui demandent le loyer et la fiscalité : absents d'un rapport partiel. */
+function pointsFiscaux(projet: Projet, fiscalite: ResultatFiscalite): PointVigilance[] {
+  const points: PointVigilance[] = [];
   const retenu = fiscalite.regimes[fiscalite.retenu];
   if (!retenu.eligible) {
     points.push({ code: 'PLAFOND_MICRO_DEPASSE', parametres: { regime: fiscalite.retenu } });
   }
   const { plafondLoyerMensuel } = projet.marche;
-  if (
-    plafondLoyerMensuel !== undefined &&
-    projet.hypotheses.location.loyerHc > plafondLoyerMensuel
-  ) {
+  const { loyerHc } = projet.hypotheses.location;
+  if (plafondLoyerMensuel !== undefined && loyerHc !== undefined && loyerHc > plafondLoyerMensuel) {
     points.push({ code: 'LOYER_AU_DESSUS_PLAFOND', parametres: { plafond: plafondLoyerMensuel } });
   }
   if (estMeuble(fiscalite.retenu)) {
@@ -103,12 +106,13 @@ function pointsFinanciers(
 export function pointsDeVigilance(
   projet: Projet,
   financement: ResultatFinancement,
-  fiscalite: ResultatFiscalite,
+  fiscalite: ResultatFiscalite | null,
   feuPrix: FeuVerdict,
   regles: Regles,
 ): PointVigilance[] {
   return [
     ...pointsBien(projet, regles),
-    ...pointsFinanciers(projet, financement, fiscalite, feuPrix),
+    ...pointsFinancement(financement, feuPrix),
+    ...(fiscalite === null ? [] : pointsFiscaux(projet, fiscalite)),
   ];
 }

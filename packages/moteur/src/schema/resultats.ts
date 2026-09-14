@@ -276,21 +276,43 @@ export const EstimationResultatSchema = z.strictObject({
   ecartPrix: n,
 });
 
-export const ResultatsSchema = z.strictObject({
+/** Ce que tout rapport porte, complet ou partiel. */
+const communs = {
   projet: ProjetSchema,
   financement: FinancementSchema,
-  cashflow: CashflowSchema,
-  fiscalite: FiscaliteResultatSchema,
-  revente: ReventeResultatSchema,
-  rendement: RendementSchema,
   estimation: EstimationResultatSchema.nullable(),
   verdict: VerdictSchema,
   manques: z.array(ManqueSchema),
-  scenarios: ScenariosSchema.nullable(),
   meta: z.strictObject({
     versionRegles: VersionReglesSchema,
     dateReference: z.string(),
     aConfirmer: z.array(z.string()),
     simplifications: z.array(z.string()),
   }),
+};
+
+export const ResultatsCompletsSchema = z.strictObject({
+  ...communs,
+  complet: z.literal(true),
+  cashflow: CashflowSchema,
+  fiscalite: FiscaliteResultatSchema,
+  revente: ReventeResultatSchema,
+  rendement: RendementSchema,
+  scenarios: ScenariosSchema.nullable(),
 });
+
+/** Sans loyer : les sections qui en dépendent sont nulles, ensemble ; `manques` dit pourquoi. */
+export const ResultatsPartielsSchema = z.strictObject({
+  ...communs,
+  complet: z.literal(false),
+  cashflow: z.null(),
+  fiscalite: z.null(),
+  revente: z.null(),
+  rendement: z.null(),
+  scenarios: z.null(),
+});
+
+export const ResultatsSchema = z.discriminatedUnion('complet', [
+  ResultatsCompletsSchema,
+  ResultatsPartielsSchema,
+]);

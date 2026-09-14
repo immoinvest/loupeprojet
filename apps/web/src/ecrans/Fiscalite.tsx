@@ -8,7 +8,12 @@ import { useProjetCourant } from '@/coque/ProjetLayout';
 import { euros, eurosSignes, pourcentage } from '@/formatage/nombres';
 import { appliquerSaisie, descripteurParChemin } from '@/hypotheses';
 import { useProjets } from '@/stockage/ProjetsContext';
+import { manquesBloquants } from '@/textes/manques';
 import { MODES, ORDRE_REGIMES, REGIMES, explicationRegime } from '@/textes/regimes';
+
+import { AnalyseIncomplete } from './projet/AnalyseIncomplete';
+
+const TITRE = "Combien d'impôts, selon le régime ?";
 
 function CarteRegime({
   r,
@@ -109,11 +114,7 @@ export function Fiscalite(): JSX.Element {
   const { enregistre, resultats: r } = useProjetCourant();
   const { mettreAJour } = useProjets();
   const document = useModeDocument();
-  const f = r.fiscalite;
   const annees = r.projet.hypotheses.revente.annees;
-  const retenu = f.regimes[f.retenu];
-  const meuble = f.retenu === 'micro_bic' || f.retenu === 'lmnp_reel';
-  const psAConfirmer = meuble && r.meta.aConfirmer.includes('fiscalite.prelevementsSociaux.bic');
 
   const retenir = (regime: Regime): void => {
     const application = appliquerSaisie(
@@ -124,10 +125,29 @@ export function Fiscalite(): JSX.Element {
     if (application.ok) mettreAJour(enregistre.id, application.projet);
   };
 
+  if (!r.complet) {
+    return (
+      <Page>
+        <div className="flex flex-col gap-2">
+          <TitrePage taille="volet">{TITRE}</TitrePage>
+          <Chapo>Les quatre régimes se comparent à partir du loyer visé.</Chapo>
+        </div>
+        {manquesBloquants(r.manques).map((m) => (
+          <AnalyseIncomplete key={m.code} manque={m} />
+        ))}
+      </Page>
+    );
+  }
+
+  const f = r.fiscalite;
+  const retenu = f.regimes[f.retenu];
+  const meuble = f.retenu === 'micro_bic' || f.retenu === 'lmnp_reel';
+  const psAConfirmer = meuble && r.meta.aConfirmer.includes('fiscalite.prelevementsSociaux.bic');
+
   return (
     <Page>
       <div className="flex flex-col gap-2">
-        <TitrePage taille="volet">Combien d'impôts, selon le régime ?</TitrePage>
+        <TitrePage taille="volet">{TITRE}</TitrePage>
         <Chapo>
           Les quatre régimes avec votre tranche à{' '}
           {pourcentage(r.projet.hypotheses.fiscalite.tmi, 0)}, projetés sur {annees} ans. Le régime

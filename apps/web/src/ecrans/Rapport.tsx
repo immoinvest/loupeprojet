@@ -1,4 +1,4 @@
-import type { Resultats } from '@loupe/moteur';
+import type { Resultats, ResultatsComplets } from '@loupe/moteur';
 import type { JSX } from 'react';
 
 import { Chapo, Page, TitrePage } from '@/composants/mise-en-page';
@@ -7,20 +7,29 @@ import { euros, eurosSignes, nombre, pourcentage } from '@/formatage/nombres';
 import { useProjetCourant } from '@/coque/ProjetLayout';
 import { EXPLICATIONS } from '@/textes/explications';
 import { libelleFeu } from '@/textes/feux';
+import { manquesBloquants } from '@/textes/manques';
 import { REGIMES } from '@/textes/regimes';
 import { reponseCourte, texteVerdict } from '@/textes/verdict';
 
+import { AnalyseIncomplete } from './projet/AnalyseIncomplete';
+import { CarteACompleter } from './rapport/CarteACompleter';
 import { CartePrix } from './rapport/CartePrix';
 import { Leviers } from './rapport/Leviers';
 
-function CarteCashflow({ r }: { r: Resultats }): JSX.Element {
+const QUESTIONS = {
+  cashflow: "Est-ce que ça s'autofinance ?",
+  fiscalite: "Combien d'impôts ?",
+  revente: "Qu'est-ce qu'il vous restera ?",
+} as const;
+
+function CarteCashflow({ r }: { r: ResultatsComplets }): JSX.Element {
   const c = r.cashflow;
   const ton = c.mensuel >= 0 ? 'bon' : c.mensuel >= -100 ? 'surveiller' : 'probleme';
   const reponse = c.mensuel >= 0 ? 'oui' : c.mensuel >= -100 ? 'presque' : 'non';
   return (
     <Carte>
       <TitreCarte action={<Pourquoi texte={EXPLICATIONS.cashflow} />}>
-        Est-ce que ça s'autofinance ?
+        {QUESTIONS.cashflow}
       </TitreCarte>
       <GrosChiffre ton={ton}>{reponseCourte(reponse)}</GrosChiffre>
       <div>
@@ -57,7 +66,7 @@ function CarteCashflow({ r }: { r: Resultats }): JSX.Element {
   );
 }
 
-function CarteFiscalite({ r }: { r: Resultats }): JSX.Element {
+function CarteFiscalite({ r }: { r: ResultatsComplets }): JSX.Element {
   const f = r.fiscalite;
   const retenu = f.regimes[f.retenu];
   const autres = Object.values(f.regimes)
@@ -69,7 +78,7 @@ function CarteFiscalite({ r }: { r: Resultats }): JSX.Element {
       <TitreCarte
         action={<Pourquoi texte={EXPLICATIONS.fiscalite} libelle="Comparer les 4 régimes" />}
       >
-        Combien d'impôts ?
+        {QUESTIONS.fiscalite}
       </TitreCarte>
       <GrosChiffre
         ton={retenu.impotTotal === 0 ? 'bon' : 'encre'}
@@ -95,13 +104,13 @@ function CarteFiscalite({ r }: { r: Resultats }): JSX.Element {
   );
 }
 
-function CarteRevente({ r }: { r: Resultats }): JSX.Element {
+function CarteRevente({ r }: { r: ResultatsComplets }): JSX.Element {
   const e = r.rendement.enrichissement;
   const annees = r.projet.hypotheses.revente.annees;
   return (
     <Carte>
       <TitreCarte action={<Pourquoi texte={EXPLICATIONS.revente} libelle="Détail" />}>
-        Qu'est-ce qu'il vous restera ?
+        {QUESTIONS.revente}
       </TitreCarte>
       <GrosChiffre complement={`dans ${String(annees)} ans`}>
         {euros(r.revente.cashNetVendeur)}
@@ -126,6 +135,42 @@ function CarteRevente({ r }: { r: Resultats }): JSX.Element {
   );
 }
 
+/** Les cartes du rapport complet. */
+function Analyses({ r }: { r: ResultatsComplets }): JSX.Element {
+  return (
+    <>
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-2 print:grid-cols-2">
+        <CartePrix r={r} />
+        <CarteCashflow r={r} />
+      </div>
+      <Leviers r={r} />
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-2 print:grid-cols-2">
+        <CarteFiscalite r={r} />
+        <CarteRevente r={r} />
+      </div>
+    </>
+  );
+}
+
+/** Sans loyer : le bandeau qui le demande, le prix tel quel, les autres questions « à compléter ». */
+function AnalysesACompleter({ r }: { r: Resultats }): JSX.Element {
+  return (
+    <>
+      {manquesBloquants(r.manques).map((m) => (
+        <AnalyseIncomplete key={m.code} manque={m} />
+      ))}
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-2 print:grid-cols-2">
+        <CartePrix r={r} />
+        <CarteACompleter titre={QUESTIONS.cashflow} />
+      </div>
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-2 print:grid-cols-2">
+        <CarteACompleter titre={QUESTIONS.fiscalite} />
+        <CarteACompleter titre={QUESTIONS.revente} />
+      </div>
+    </>
+  );
+}
+
 export function Rapport(): JSX.Element {
   const { resultats: r } = useProjetCourant();
   const verdict = texteVerdict(r);
@@ -144,15 +189,7 @@ export function Rapport(): JSX.Element {
           ))}
         </div>
       </div>
-      <div className="grid grid-cols-1 gap-5 md:grid-cols-2 print:grid-cols-2">
-        <CartePrix r={r} />
-        <CarteCashflow r={r} />
-      </div>
-      <Leviers r={r} />
-      <div className="grid grid-cols-1 gap-5 md:grid-cols-2 print:grid-cols-2">
-        <CarteFiscalite r={r} />
-        <CarteRevente r={r} />
-      </div>
+      {r.complet ? <Analyses r={r} /> : <AnalysesACompleter r={r} />}
       <p className="m-0 text-xs text-encre-3">
         Règles fiscales {r.meta.versionRegles}. Outil d'aide à la décision, pas un conseil.
       </p>

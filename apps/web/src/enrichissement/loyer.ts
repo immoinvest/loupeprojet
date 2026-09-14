@@ -36,6 +36,41 @@ export function loyerVise(loyer: LoyerBien, mode: ModeLocation): number {
   return mode === 'nu' ? loyer.nuMensuel : loyer.meubleMensuel;
 }
 
+/** Loyer visé déduit du loyer de référence hors charges (€/m² par mois) rangé dans le projet. */
+export function loyerViseDepuisReference(
+  referenceM2: number,
+  surface: number,
+  mode: ModeLocation,
+  primeMeuble: number,
+): number {
+  const nu = referenceM2 * surface;
+  return Math.round(mode === 'nu' ? nu : nu * (1 + primeMeuble));
+}
+
+/** Le loyer de marché d'un projet (référence ANIL de la commune, posée à la création) ; `null` sans référence. */
+export function loyerDeReference(projet: Projet, primeMeuble: number): number | null {
+  const reference = projet.marche.loyerReferenceM2;
+  if (reference === undefined) return null;
+  return loyerViseDepuisReference(
+    reference,
+    projet.bien.surface,
+    projet.hypotheses.location.mode,
+    primeMeuble,
+  );
+}
+
+/** Un loyer de marché devient le loyer visé du projet, provenance « anil ». */
+export function appliquerLoyerDeReference(projet: Projet, loyer: number): Projet {
+  return {
+    ...projet,
+    hypotheses: {
+      ...projet.hypotheses,
+      location: { ...projet.hypotheses.location, loyerHc: loyer },
+    },
+    provenance: { ...projet.provenance, 'location.loyerHc': 'anil' },
+  };
+}
+
 /** Loyer de référence du marché dans le projet, provenance « anil ». */
 export function appliquerLoyerReference(projet: Projet, loyer: LoyerBien): Projet {
   return {

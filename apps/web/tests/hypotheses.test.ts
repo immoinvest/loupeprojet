@@ -136,4 +136,24 @@ describe('appliquerSaisie', () => {
     const r2 = appliquerSaisie(projetExemple, champ('marche.dvf.q1M2'), '2500');
     expect(r2.ok && r2.projet.marche?.dvf?.medianM2).toBe(3050);
   });
+
+  it('le loyer et les revenus acceptent le vide : le projet reste valide, sans la valeur', () => {
+    const sansLoyer = appliquerSaisie(projetExemple, champ('hypotheses.location.loyerHc'), '');
+    expect(sansLoyer.ok && sansLoyer.projet.hypotheses.location.loyerHc).toBeUndefined();
+    expect(sansLoyer.ok && ProjetSchema.safeParse(sansLoyer.projet).success).toBe(true);
+    const sansRevenus = appliquerSaisie(projetExemple, champ('hypotheses.revenusMensuels'), '');
+    expect(sansRevenus.ok && sansRevenus.projet.hypotheses.revenusMensuels).toBeUndefined();
+    expect(sansRevenus.ok && ProjetSchema.safeParse(sansRevenus.projet).success).toBe(true);
+  });
+
+  it('passer en courte durée sans loyer : nuitée de départ à 60 €', () => {
+    const sansLoyer = appliquerSaisie(projetExemple, champ('hypotheses.location.loyerHc'), '');
+    if (!sansLoyer.ok) throw new Error('loyer vide refusé');
+    const r = appliquerSaisie(sansLoyer.projet, champ('hypotheses.location.mode'), 'courte_duree');
+    expect(r.ok && r.projet.hypotheses.location.courteDuree).toEqual({
+      nuitee: 60,
+      tauxOccupation: 0.6,
+    });
+    expect(r.ok && ProjetSchema.safeParse(r.projet).success).toBe(true);
+  });
 });

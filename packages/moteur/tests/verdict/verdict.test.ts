@@ -6,7 +6,13 @@ import { calculerFiscalite } from '../../src/fiscalite';
 import { obtenirRegles } from '../../src/regles';
 import { calculerRendement } from '../../src/rendement';
 import { calculerRevente } from '../../src/revente';
-import { MarcheSchema, ProjetSchema, type Projet, type ProjetEntree } from '../../src/schema';
+import {
+  MarcheSchema,
+  ProjetSchema,
+  parserComplet,
+  type Projet,
+  type ProjetEntree,
+} from '../../src/schema';
 import {
   calculerVerdict,
   feuCashflow,
@@ -14,13 +20,14 @@ import {
   feuPrix,
   feuRendement,
   feuRisques,
+  pointsDeVigilance,
   type ResultatVerdict,
 } from '../../src/verdict';
 
 const regles = obtenirRegles('2026-09');
 
 function verdictDe(entree: ProjetEntree): { projet: Projet; verdict: ResultatVerdict } {
-  const projet = ProjetSchema.parse(entree);
+  const projet = parserComplet(entree);
   const financement = calculerFinancement(projet, regles);
   const fiscalite = calculerFiscalite(projet, financement, regles);
   const revente = calculerRevente(projet, financement, fiscalite, regles);
@@ -245,7 +252,7 @@ describe('calculerVerdict — variantes', () => {
     expect(verdict.synthese.inconnus).toBe(1);
     expect(codes(verdict)).not.toContain('EFFORT_HCSF_DEPASSE');
     // Les manques peuvent aussi être fournis par l'appelant : ils priment sur la lecture du projet.
-    const projet = ProjetSchema.parse(projetExemple);
+    const projet = parserComplet(projetExemple);
     const financement = calculerFinancement(projet, regles);
     const fiscalite = calculerFiscalite(projet, financement, regles);
     const revente = calculerRevente(projet, financement, fiscalite, regles);
@@ -254,6 +261,58 @@ describe('calculerVerdict — variantes', () => {
       manques: [],
     });
     expect(force.feux[3]?.raison).toBeNull();
+  });
+
+  it('sans fiscalité ni rendement (loyer absent) : trois feux inconnus, points fiscaux absents', () => {
+    const projet = ProjetSchema.parse({
+      ...projetExemple,
+      marche: { ...projetExemple.marche, plafondLoyerMensuel: 900 },
+    });
+    const financement = calculerFinancement(projet, regles);
+    const manques = [{ code: 'LOYER_ABSENT' as const, champ: 'hypotheses.location.loyerHc' }];
+    const verdict = calculerVerdict(projet, financement, null, null, regles, { manques });
+    // Le financement, lui, connaît les revenus et le loyer : l'effort reste jugé.
+    expect(verdict.feux.map((f) => f.feu)).toEqual(['bon', 'inconnu', 'inconnu', 'bon', 'bon']);
+    expect(verdict.feux.map((f) => f.raison)).toEqual([
+      null,
+      'LOYER_ABSENT',
+      'LOYER_ABSENT',
+      null,
+      null,
+    ]);
+    const c = codes(verdict);
+    expect(c).toContain('CONFIRMER_TAXE_FONCIERE');
+    expect(c).toContain('EXPLIQUER_PRIX_SOUS_MARCHE');
+    for (const absent of [
+      'PLAFOND_MICRO_DEPASSE',
+      'LOYER_AU_DESSUS_PLAFOND',
+      'PS_BIC_A_CONFIRMER',
+    ]) {
+      expect(c).not.toContain(absent);
+    }
+  });
+
+  it('loyer encadré : le point n’est posé que si le loyer est connu et au-dessus du plafond', () => {
+    const plafonne = { ...projetExemple.marche, plafondLoyerMensuel: 900 };
+    const complet = parserComplet({ ...projetExemple, marche: plafonne });
+    const financement = calculerFinancement(complet, regles);
+    const fiscalite = calculerFiscalite(complet, financement, regles);
+    const feu = feuPrix(2_000, complet.marche, regles);
+    const avecLoyer = pointsDeVigilance(complet, financement, fiscalite, feu, regles);
+    expect(avecLoyer.map((p) => p.code)).toContain('LOYER_AU_DESSUS_PLAFOND');
+    // Même fiscalité, projet sans loyer : le plafond ne peut pas être comparé.
+    const location = Object.fromEntries(
+      Object.entries(complet.hypotheses.location).filter(([k]) => k !== 'loyerHc'),
+    );
+    const sansLoyer = ProjetSchema.parse({
+      ...complet,
+      hypotheses: { ...complet.hypotheses, location },
+    });
+    const codesSansLoyer = pointsDeVigilance(sansLoyer, financement, fiscalite, feu, regles).map(
+      (p) => p.code,
+    );
+    expect(codesSansLoyer).not.toContain('LOYER_AU_DESSUS_PLAFOND');
+    expect(codesSansLoyer).toContain('PS_BIC_A_CONFIRMER');
   });
 
   it('revenus trop faibles et prêt trop long : effort et durée signalés', () => {

@@ -34,6 +34,7 @@ export function CarteLoyer({ resultat }: { resultat: Resultat<ReponseMarche> }):
   const vise = loyerVise(loyer, projet.hypotheses.location.mode);
   const sources = resultat.ok ? resultat.valeur.sources : [];
   const mention = sources.find((s) => s.mention !== undefined)?.mention;
+  const loyerActuel = projet.hypotheses.location.loyerHc;
 
   return (
     <Carte>
@@ -41,9 +42,10 @@ export function CarteLoyer({ resultat }: { resultat: Resultat<ReponseMarche> }):
       <p className="m-0 text-[17px]">{phraseLoyer(loyer)}</p>
       <div className="flex flex-wrap items-center gap-3">
         <span className="text-[15px] text-encre-2">
-          Loyer visé du projet : <strong>{euros(projet.hypotheses.location.loyerHc)}</strong>
+          Loyer visé du projet :{' '}
+          <strong>{loyerActuel === undefined ? 'non renseigné' : euros(loyerActuel)}</strong>
         </span>
-        {projet.hypotheses.location.loyerHc === vise ? (
+        {loyerActuel === vise ? (
           <Pastille ton="bon" compacte>
             {PHRASES_DONNEES_ADRESSE.loyerApplique}
           </Pastille>

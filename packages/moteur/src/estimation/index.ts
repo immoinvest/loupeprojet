@@ -101,11 +101,14 @@ export function effetCharges(
   const { coproAnnuel } = projet.hypotheses.charges;
   if (coproAnnuel === 0 || projet.provenance['charges.coproAnnuel'] === 'estime') return null;
   const { loyerReferenceM2 } = projet.marche;
+  const { loyerHc } = projet.hypotheses.location;
   const rendementLocal =
-    loyerReferenceM2 === undefined
-      ? (projet.hypotheses.location.loyerHc * 12) / projet.hypotheses.achat.prix
-      : (loyerReferenceM2 * 12) / dvf.medianM2;
-  if (rendementLocal <= 0) return null;
+    loyerReferenceM2 !== undefined
+      ? (loyerReferenceM2 * 12) / dvf.medianM2
+      : loyerHc === undefined
+        ? null
+        : (loyerHc * 12) / projet.hypotheses.achat.prix;
+  if (rendementLocal === null || rendementLocal <= 0) return null;
   const repereAnnuel = regles.estimation.charges.repereM2An * projet.bien.surface;
   const excedentAnnuel = coproAnnuel - repereAnnuel;
   const brut = -excedentAnnuel / rendementLocal;

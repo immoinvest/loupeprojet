@@ -4,16 +4,14 @@ import { calculerCashflow } from '../../src/cashflow';
 import { projetExemple } from '../../src/exemples/t3-marseille';
 import { calculerFinancement } from '../../src/financement';
 import { obtenirRegles } from '../../src/regles';
-import { ProjetSchema, type ProjetEntree } from '../../src/schema';
+import { parserComplet, type ProjetComplet, type ProjetEntree } from '../../src/schema';
 
 const regles = obtenirRegles('2026-09');
-const projet = ProjetSchema.parse(projetExemple);
+const projet = parserComplet(projetExemple);
 const financement = calculerFinancement(projet, regles);
 
-const variante = (
-  hypotheses: Partial<ProjetEntree['hypotheses']>,
-): ReturnType<typeof ProjetSchema.parse> =>
-  ProjetSchema.parse({
+const variante = (hypotheses: Partial<ProjetEntree['hypotheses']>): ProjetComplet =>
+  parserComplet({
     ...projetExemple,
     hypotheses: { ...projetExemple.hypotheses, ...hypotheses },
   });

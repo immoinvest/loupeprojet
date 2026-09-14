@@ -97,13 +97,16 @@ function CarteProjet({
       />
       <Metrique
         libelle="Cash-flow"
-        valeur={eurosParMois(r.cashflow.mensuel)}
-        ton={r.cashflow.mensuel < 0 ? 'text-probleme' : 'text-bon'}
+        valeur={r.complet ? eurosParMois(r.cashflow.mensuel) : '—'}
+        ton={!r.complet ? '' : r.cashflow.mensuel < 0 ? 'text-probleme' : 'text-bon'}
       />
-      <Metrique libelle="Rendement net" valeur={pourcentage(r.rendement.rendements.net)} />
+      <Metrique
+        libelle="Rendement net"
+        valeur={r.complet ? pourcentage(r.rendement.rendements.net) : '—'}
+      />
       <Metrique
         libelle="TRI 10 ans"
-        valeur={r.rendement.tri === null ? '—' : pourcentage(r.rendement.tri)}
+        valeur={r.complet && r.rendement.tri !== null ? pourcentage(r.rendement.tri) : '—'}
       />
       <div className="flex gap-1.5 sm:col-span-3 xl:col-span-1" aria-label="Cinq feux">
         {r.verdict.feux.map((f) => (

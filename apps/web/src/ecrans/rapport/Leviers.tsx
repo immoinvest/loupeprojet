@@ -1,4 +1,4 @@
-import type { Resultats } from '@loupe/moteur';
+import type { ResultatsComplets } from '@loupe/moteur';
 import type { JSX } from 'react';
 
 import { useModeDocument } from '@/composants/document';
@@ -7,7 +7,7 @@ import { euros, eurosParMois, pourcentage } from '@/formatage/nombres';
 import { SCENARIOS } from '@/textes/regimes';
 
 /** Les leviers du rapport : négocier le prix, passer en colocation, et les scénarios « et si ». */
-export function Leviers({ r }: { r: Resultats }): JSX.Element | null {
+export function Leviers({ r }: { r: ResultatsComplets }): JSX.Element | null {
   // Sur papier (ou en noir et blanc), la carte pleine d'encre devient une carte claire.
   const document = useModeDocument();
   const s = r.scenarios;

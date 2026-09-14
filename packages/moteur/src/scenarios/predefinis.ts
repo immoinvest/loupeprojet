@@ -1,6 +1,6 @@
 import type { Regles } from '../regles/types';
-import type { Hypotheses } from '../schema/hypotheses';
-import type { Projet } from '../schema/projet';
+import type { HypothesesCompletes } from '../schema/hypotheses';
+import type { ProjetComplet } from '../schema/projet';
 import { avecPrix, prixCible } from './prix-cible';
 
 export type CodeScenario =
@@ -9,10 +9,10 @@ export type CodeScenario =
 export interface Variante {
   readonly code: CodeScenario;
   readonly parametres: Readonly<Record<string, number | string>>;
-  readonly projet: Projet;
+  readonly projet: ProjetComplet;
 }
 
-type Transformation = (projet: Projet, regles: Regles) => Variante;
+type Transformation = (projet: ProjetComplet, regles: Regles) => Variante;
 
 const REPLI_NEGOCIATION = 0.9;
 const DUREE_ALTERNATIVE_ANNEES = 20;
@@ -21,7 +21,7 @@ const HAUSSE_TAUX = 0.005;
 const VACANCE_DEUX_MOIS_SEMAINES = 8;
 const BAISSE_OCCUPATION_COURTE_DUREE = 0.15;
 
-function avecHypotheses(projet: Projet, patch: Partial<Hypotheses>): Projet {
+function avecHypotheses(projet: ProjetComplet, patch: Partial<HypothesesCompletes>): ProjetComplet {
   return { ...projet, hypotheses: { ...projet.hypotheses, ...patch } };
 }
 

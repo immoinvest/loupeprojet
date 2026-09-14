@@ -53,7 +53,6 @@ export const GROUPE_FINANCEMENT: Groupe = {
       libelle: 'Vos revenus nets',
       type: 'euros',
       unite: '€/mois',
-      obligatoire: true,
       aToi: true,
     },
   ],
@@ -78,7 +77,6 @@ export const GROUPE_LOCATION: Groupe = {
       libelle: 'Loyer visé, hors charges',
       type: 'euros',
       unite: '€/mois',
-      obligatoire: true,
       aToi: true,
     },
     {

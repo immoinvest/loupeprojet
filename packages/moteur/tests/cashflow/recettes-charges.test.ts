@@ -3,9 +3,9 @@ import { describe, expect, it } from 'vitest';
 import { chargesExploitation, estMeuble, totalCharges } from '../../src/cashflow/charges';
 import { recettesAnnuelles } from '../../src/cashflow/recettes';
 import { projetExemple } from '../../src/exemples/t3-marseille';
-import { LocationSchema, ProjetSchema } from '../../src/schema';
+import { LocationSchema, parserComplet, type LocationComplete } from '../../src/schema';
 
-const projet = ProjetSchema.parse(projetExemple);
+const projet = parserComplet(projetExemple);
 const location = projet.hypotheses.location;
 
 describe('recettesAnnuelles — longue durée', () => {
@@ -25,17 +25,24 @@ describe('recettesAnnuelles — longue durée', () => {
   });
 
   it('sans vacance, nets = bruts', () => {
-    const sansVacance = LocationSchema.parse({ mode: 'nu', loyerHc: 700, vacanceSemaines: 0 });
+    const sansVacance = { ...location, mode: 'nu' as const, loyerHc: 700, vacanceSemaines: 0 };
     expect(recettesAnnuelles(sansVacance).loyersNets).toBe(8_400);
   });
 });
 
 describe('recettesAnnuelles — courte durée', () => {
-  const cd = LocationSchema.parse({
-    mode: 'courte_duree',
+  const cd: LocationComplete = {
+    ...LocationSchema.parse({
+      mode: 'courte_duree',
+      courteDuree: {
+        nuitee: 75,
+        tauxOccupation: 0.6,
+        fraisMenageParNuit: 15,
+        conciergerieTaux: 0.2,
+      },
+    }),
     loyerHc: 0,
-    courteDuree: { nuitee: 75, tauxOccupation: 0.6, fraisMenageParNuit: 15, conciergerieTaux: 0.2 },
-  });
+  };
 
   it('75 € × 365 × 60 % = 16 425 € − ménage 3 285 € − conciergerie 3 285 € = 9 855 €', () => {
     const r = recettesAnnuelles(cd);

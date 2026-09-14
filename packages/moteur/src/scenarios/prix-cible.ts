@@ -2,7 +2,7 @@ import { calculerFinancement } from '../financement';
 import { cashflowDuRegime } from '../fiscalite';
 import { resoudreOuNull } from '../commun/resolution';
 import type { Regles } from '../regles/types';
-import type { Projet } from '../schema/projet';
+import type { ProjetComplet } from '../schema/projet';
 
 export type CriterePrix = 'cashflow_zero' | 'net_6' | 'brut_8';
 
@@ -20,7 +20,7 @@ const CIBLE_NET = 0.06;
 const CIBLE_BRUT = 0.08;
 const TOLERANCE_EURO = 0.5;
 
-export function avecPrix(projet: Projet, prix: number): Projet {
+export function avecPrix(projet: ProjetComplet, prix: number): ProjetComplet {
   return {
     ...projet,
     hypotheses: { ...projet.hypotheses, achat: { ...projet.hypotheses.achat, prix } },
@@ -29,7 +29,7 @@ export function avecPrix(projet: Projet, prix: number): Projet {
 
 /** Grandeur du critère pour un prix donné : positif quand la cible est dépassée. */
 function ecartAuCritere(
-  projet: Projet,
+  projet: ProjetComplet,
   prix: number,
   critere: CriterePrix,
   regles: Regles,
@@ -59,12 +59,12 @@ function ecartAuCritere(
 }
 
 /** Prix plancher : les honoraires à la charge de l'acquéreur ne peuvent pas dépasser le prix. */
-function prixPlancher(projet: Projet): number {
+function prixPlancher(projet: ProjetComplet): number {
   const { honorairesAgence, honorairesChargeAcquereur } = projet.hypotheses.achat;
   return honorairesChargeAcquereur ? honorairesAgence + 1 : 1;
 }
 
-export function prixCible(projet: Projet, critere: CriterePrix, regles: Regles): PrixCible {
+export function prixCible(projet: ProjetComplet, critere: CriterePrix, regles: Regles): PrixCible {
   const prixAffiche = projet.hypotheses.achat.prix;
   const prix = resoudreOuNull(
     (p) => ecartAuCritere(projet, p, critere, regles),

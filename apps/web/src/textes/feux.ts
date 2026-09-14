@@ -2,6 +2,8 @@ import type { AxeVerdict, Feu, FeuVerdict } from '@loupe/moteur';
 
 import { eurosParMois, pourcentage, pourcentageSigne } from '@/formatage/nombres';
 
+import { MANQUES } from './manques';
+
 export const AXES: Readonly<Record<AxeVerdict, string>> = {
   prix: 'Prix vs ventes réelles',
   rendement: 'Rendement net',
@@ -23,9 +25,14 @@ export function libelleRisques(nombre: number): string {
   return `${String(nombre)} ${nombre === 1 ? 'signal' : 'signaux'}`;
 }
 
-/** Texte court d'une pastille de feu : « Prix −22 % », « Cash-flow −210 €/mois »… */
+/**
+ * Texte court d'une pastille de feu : « Prix −22 % », « Cash-flow −210 €/mois »… Un feu inconnu dit
+ * ce qui manque (« Cash-flow : loyer à indiquer ») ou, sans raison, « pas de données ».
+ */
 export function libelleFeu(feu: FeuVerdict): string {
-  if (feu.valeur === null) return `${AXES[feu.axe]} : pas de données`;
+  if (feu.valeur === null) {
+    return `${AXES[feu.axe]} : ${feu.raison === null ? 'pas de données' : MANQUES[feu.raison].feu}`;
+  }
   switch (feu.axe) {
     case 'prix':
       return `Prix ${pourcentageSigne(feu.valeur)}`;

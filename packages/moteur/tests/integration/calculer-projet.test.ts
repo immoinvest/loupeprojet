@@ -1,13 +1,19 @@
 import { describe, expect, it } from 'vitest';
 import { ZodError } from 'zod';
 
-import { calculerProjet } from '../../src/calculer-projet';
+import { calculerProjet, type Resultats, type ResultatsComplets } from '../../src/calculer-projet';
 import { projetExemple } from '../../src/exemples/t3-marseille';
 import { ResultatsSchema } from '../../src/schema/resultats';
 import type { ProjetEntree } from '../../src/schema';
 
+/** Le projet d'exemple est complet : ses sections sont toutes calculées. */
+function complet(r: Resultats): ResultatsComplets {
+  if (!r.complet) throw new Error('rapport partiel inattendu');
+  return r;
+}
+
 describe('calculerProjet — T3 Marseille', () => {
-  const resultats = calculerProjet(projetExemple);
+  const resultats = complet(calculerProjet(projetExemple));
 
   it('rend un rapport complet que le schéma de sortie accepte tel quel', () => {
     expect(() => ResultatsSchema.parse(resultats)).not.toThrow();
@@ -33,7 +39,7 @@ describe('calculerProjet — T3 Marseille', () => {
     const hypotheses = Object.fromEntries(
       Object.entries(projetExemple.hypotheses).filter(([k]) => k !== 'revenusMensuels'),
     ) as ProjetEntree['hypotheses'];
-    const sansRevenus = calculerProjet({ ...projetExemple, hypotheses });
+    const sansRevenus = complet(calculerProjet({ ...projetExemple, hypotheses }));
     expect(sansRevenus.manques).toEqual([
       { code: 'REVENUS_ABSENTS', champ: 'hypotheses.revenusMensuels' },
     ]);
@@ -83,7 +89,7 @@ describe('calculerProjet — pureté et robustesse', () => {
       bien: { type: 'appartement', surface: 40, pieces: 2, departement: '69' },
       hypotheses: { achat, pret, location, fiscalite, revenusMensuels },
     };
-    const r = calculerProjet(minimal);
+    const r = complet(calculerProjet(minimal));
     expect(r.verdict.feux[0]?.feu).toBe('inconnu');
     expect(r.revente.annees).toBe(10);
     expect(() => ResultatsSchema.parse(r)).not.toThrow();

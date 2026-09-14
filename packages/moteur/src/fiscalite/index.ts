@@ -2,8 +2,8 @@ import { calculerCashflow, type ResultatCashflow } from '../cashflow';
 import { estMeuble } from '../cashflow/charges';
 import type { ResultatFinancement } from '../financement';
 import type { Regles } from '../regles/types';
-import type { Hypotheses, ModeLocation, Regime } from '../schema/hypotheses';
-import type { Projet } from '../schema/projet';
+import type { HypothesesCompletes, ModeLocation, Regime } from '../schema/hypotheses';
+import type { ProjetComplet } from '../schema/projet';
 import { projeterLmnpReel } from './lmnp-reel';
 import { projeterMicroBic } from './micro-bic';
 import { projeterMicroFoncier } from './micro-foncier';
@@ -29,7 +29,7 @@ export interface LocationPourRegime {
  * (hypothèse, sinon déduit de la prime meublé), les régimes meublés avec le loyer meublé.
  */
 export function locationPourRegime(
-  hypotheses: Hypotheses,
+  hypotheses: HypothesesCompletes,
   regime: Regime,
   regles: Regles,
 ): LocationPourRegime {
@@ -47,7 +47,7 @@ export function locationPourRegime(
 
 /** Cash-flow avant impôt d'un régime, avec le loyer et les charges de son mode. */
 export function cashflowDuRegime(
-  projet: Projet,
+  projet: ProjetComplet,
   financement: ResultatFinancement,
   regime: Regime,
   regles: Regles,
@@ -65,7 +65,7 @@ function meilleurSelon(
 }
 
 export function calculerFiscalite(
-  projet: Projet,
+  projet: ProjetComplet,
   financement: ResultatFinancement,
   regles: Regles,
 ): ResultatFiscalite {

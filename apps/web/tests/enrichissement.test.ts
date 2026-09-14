@@ -1,12 +1,16 @@
+import { ProjetSchema, projetExemple } from '@loupe/moteur';
 import { describe, expect, it } from 'vitest';
 
 import { construireProjet, type SaisieProjet } from '@/annonces';
 import {
+  appliquerLoyerDeReference,
   clientHorsLigne,
   clientWorker,
   enrichirSaisie,
   fusionnerChamps,
   lireAnnonce,
+  loyerDeReference,
+  loyerViseDepuisReference,
   marcheDepuisReponse,
   URL_WORKER_DEFAUT,
   urlWorker,
@@ -308,5 +312,33 @@ describe('données de marché', () => {
     for (const client of cas) {
       expect(await enrichirSaisie(saisie, client)).toBeNull();
     }
+  });
+});
+
+describe('loyer de marché du projet', () => {
+  const projet = ProjetSchema.parse(projetExemple);
+
+  it('déduit le loyer visé du loyer de référence hors charges, selon le mode', () => {
+    expect(loyerViseDepuisReference(15.1, 65, 'meuble_lld', 0.15)).toBe(1_129);
+    expect(loyerViseDepuisReference(15.1, 65, 'courte_duree', 0.15)).toBe(1_129);
+    expect(loyerViseDepuisReference(15.1, 65, 'nu', 0.15)).toBe(982);
+  });
+
+  it('lit la référence rangée dans le projet, ou rend null sans référence', () => {
+    expect(loyerDeReference(projet, 0.15)).toBe(1_129);
+    expect(
+      loyerDeReference(
+        { ...projet, marche: { ...projet.marche, loyerReferenceM2: undefined } },
+        0.15,
+      ),
+    ).toBeNull();
+  });
+
+  it('applique le loyer de marché comme loyer visé, provenance « anil »', () => {
+    const applique = appliquerLoyerDeReference(projet, 1_129);
+    expect(applique.hypotheses.location.loyerHc).toBe(1_129);
+    expect(applique.provenance['location.loyerHc']).toBe('anil');
+    expect(applique.hypotheses.location.loyerHcNu).toBe(850);
+    expect(projet.hypotheses.location.loyerHc).toBe(980);
   });
 });

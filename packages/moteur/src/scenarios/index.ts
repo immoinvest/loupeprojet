@@ -1,6 +1,6 @@
-import { calculerBase, type ResultatsBase } from '../calculer-base';
+import { calculerComplet, type ResultatsBaseComplets } from '../calculer-base';
 import type { Regles } from '../regles/types';
-import type { Projet } from '../schema/projet';
+import type { ProjetComplet } from '../schema/projet';
 import { TRANSFORMATIONS, type CodeScenario, type Variante } from './predefinis';
 import { CRITERES_PRIX, prixCible, type PrixCible } from './prix-cible';
 
@@ -25,7 +25,7 @@ export interface ResultatScenarios {
   readonly prixCibles: readonly PrixCible[];
 }
 
-export function indicateurs(base: ResultatsBase): IndicateursScenario {
+export function indicateurs(base: ResultatsBaseComplets): IndicateursScenario {
   const retenu = base.fiscalite.regimes[base.fiscalite.retenu];
   return {
     cashflowMensuel: base.cashflow.mensuel,
@@ -49,13 +49,13 @@ function deltas(
   };
 }
 
-/** Recalcule tout le rapport pour une variante et le compare à la référence. */
+/** Recalcule tout le rapport pour une variante (complète par construction) et le compare à la référence. */
 export function evaluerVariante(
   variante: Variante,
   reference: IndicateursScenario,
   regles: Regles,
 ): ResultatScenario {
-  const ind = indicateurs(calculerBase(variante.projet, regles));
+  const ind = indicateurs(calculerComplet(variante.projet, regles));
   return {
     code: variante.code,
     parametres: variante.parametres,
@@ -65,8 +65,8 @@ export function evaluerVariante(
 }
 
 export function calculerScenarios(
-  projet: Projet,
-  reference: ResultatsBase,
+  projet: ProjetComplet,
+  reference: ResultatsBaseComplets,
   regles: Regles,
 ): ResultatScenarios {
   const ref = indicateurs(reference);

@@ -4,10 +4,10 @@ import { projetExemple } from '../../src/exemples/t3-marseille';
 import { calculerFinancement } from '../../src/financement';
 import { REGIMES, calculerFiscalite, locationPourRegime } from '../../src/fiscalite';
 import { obtenirRegles } from '../../src/regles';
-import { ProjetSchema, type ProjetEntree } from '../../src/schema';
+import { parserComplet, type ProjetEntree } from '../../src/schema';
 
 const regles = obtenirRegles('2026-09');
-const projet = ProjetSchema.parse(projetExemple);
+const projet = parserComplet(projetExemple);
 const financement = calculerFinancement(projet, regles);
 
 const avecLocation = (location: ProjetEntree['hypotheses']['location']): ProjetEntree => ({
@@ -32,12 +32,12 @@ describe('locationPourRegime', () => {
   });
 
   it('sans loyer nu saisi, le déduit de la prime meublé (15 %)', () => {
-    const sansNu = ProjetSchema.parse(avecLocation({ mode: 'meuble_lld', loyerHc: 1_150 }));
+    const sansNu = parserComplet(avecLocation({ mode: 'meuble_lld', loyerHc: 1_150 }));
     expect(locationPourRegime(sansNu.hypotheses, 'nu_reel', regles).loyerHc).toBeCloseTo(1_000, 8);
   });
 
   it('en mode nu, les régimes meublés reçoivent un loyer majoré de la prime', () => {
-    const nu = ProjetSchema.parse(avecLocation({ mode: 'nu', loyerHc: 800 }));
+    const nu = parserComplet(avecLocation({ mode: 'nu', loyerHc: 800 }));
     const meuble = locationPourRegime(nu.hypotheses, 'micro_bic', regles);
     expect(meuble.mode).toBe('meuble_lld');
     expect(meuble.loyerHc).toBeCloseTo(920, 8);
@@ -48,7 +48,7 @@ describe('locationPourRegime', () => {
   });
 
   it('en courte durée, les régimes meublés gardent le mode courte durée', () => {
-    const cd = ProjetSchema.parse(
+    const cd = parserComplet(
       avecLocation({
         mode: 'courte_duree',
         loyerHc: 0,
@@ -90,7 +90,7 @@ describe('calculerFiscalite — T3 Marseille', () => {
   });
 
   it('ignore les régimes inéligibles pour désigner le meilleur', () => {
-    const gros = ProjetSchema.parse(
+    const gros = parserComplet(
       avecLocation({ mode: 'meuble_lld', loyerHc: 7_500, loyerHcNu: 6_500, vacanceSemaines: 0 }),
     );
     const ff = calculerFiscalite(gros, calculerFinancement(gros, regles), regles);

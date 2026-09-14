@@ -46,8 +46,11 @@ export const CourteDureeSchema = z.object({
 export const LocationSchema = z
   .object({
     mode: ModeLocationSchema,
-    /** Loyer mensuel hors charges dans le mode choisi (meublé ou courte durée : équivalent mensuel ignoré). */
-    loyerHc: montant(),
+    /**
+     * Loyer mensuel hors charges dans le mode choisi (meublé ou courte durée : équivalent mensuel ignoré).
+     * Absent : aucune valeur inventée, le rapport est partiel (voir `manques`).
+     */
+    loyerHc: montant().optional(),
     /** Loyer mensuel hors charges si le bien était loué nu (défaut : déduit de la prime meublé). */
     loyerHcNu: montant().optional(),
     chargesLocataire: montant().default(0),
@@ -114,3 +117,8 @@ export const HypothesesSchema = z.object({
 });
 export type Hypotheses = z.infer<typeof HypothesesSchema>;
 export type HypothesesEntree = z.input<typeof HypothesesSchema>;
+
+export type Location = Hypotheses['location'];
+/** Location dont le loyer est connu : ce qu'exigent cash-flow, fiscalité et scénarios. */
+export type LocationComplete = Location & { readonly loyerHc: number };
+export type HypothesesCompletes = Hypotheses & { readonly location: LocationComplete };

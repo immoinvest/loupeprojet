@@ -30,9 +30,9 @@
     },
     "implement": {
       "status": "in_progress",
-      "stories_completed": 1,
+      "stories_completed": 2,
       "stories_total": 7,
-      "note": "US-1 commitée : tranche 30 % par défaut, revenus optionnels, manques, raison des feux (le loyer optionnel arrive avec US-2)"
+      "note": "US-1 et US-2 commitées (US-2 porte aussi les écrans « à compléter », le bandeau et les feux « loyer à indiquer » : le web ne compile pas sans eux)"
     },
     "refactor": {
       "status": "pending"

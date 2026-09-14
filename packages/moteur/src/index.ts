@@ -6,12 +6,21 @@
  */
 export const VERSION_MOTEUR = '0.1.0';
 
-export { calculerBase, type ResultatsBase } from './calculer-base';
+export {
+  calculerBase,
+  calculerComplet,
+  calculerPartiel,
+  type ResultatsBase,
+  type ResultatsBaseComplets,
+  type ResultatsBasePartiels,
+} from './calculer-base';
 export {
   calculerProjet,
   type MetaResultats,
   type OptionsCalcul,
   type Resultats,
+  type ResultatsComplets,
+  type ResultatsPartiels,
 } from './calculer-projet';
 export * from './cashflow';
 export * from './commun';

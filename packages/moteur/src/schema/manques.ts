@@ -27,6 +27,9 @@ export const CHAMP_REVENUS = 'hypotheses.revenusMensuels';
 /** Les données absentes d'un projet validé, dans l'ordre de gravité : le loyer, puis les revenus. */
 export function manquesDe(projet: Projet): Manque[] {
   const manques: Manque[] = [];
+  if (projet.hypotheses.location.loyerHc === undefined) {
+    manques.push({ code: 'LOYER_ABSENT', champ: CHAMP_LOYER });
+  }
   if (projet.hypotheses.revenusMensuels === undefined) {
     manques.push({ code: 'REVENUS_ABSENTS', champ: CHAMP_REVENUS });
   }

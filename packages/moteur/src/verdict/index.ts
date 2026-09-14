@@ -40,17 +40,21 @@ export interface OptionsVerdict {
   readonly manques?: readonly Manque[];
 }
 
+/**
+ * Les cinq feux et les points de vigilance. Fiscalité et rendement sont `null` quand le loyer manque :
+ * les feux rendement, cash-flow et effort sont alors « inconnu » avec cette raison.
+ */
 export function calculerVerdict(
   projet: Projet,
   financement: ResultatFinancement,
-  fiscalite: ResultatFiscalite,
-  rendement: ResultatRendement,
+  fiscalite: ResultatFiscalite | null,
+  rendement: ResultatRendement | null,
   regles: Regles,
   options: OptionsVerdict = {},
 ): ResultatVerdict {
   const estimation = options.estimation ?? null;
   const manques = options.manques ?? manquesDe(projet);
-  const retenu = fiscalite.regimes[fiscalite.retenu];
+  const raisonLoyer = raisonParmi(manques, ['LOYER_ABSENT']);
   const prix = feuPrix(
     projet.hypotheses.achat.prix / projet.bien.surface,
     projet.marche,
@@ -59,8 +63,12 @@ export function calculerVerdict(
   );
   const feux: readonly FeuVerdict[] = [
     prix,
-    feuRendement(rendement.rendements.net, regles),
-    feuCashflow(retenu.cashflow.mensuel, regles),
+    feuRendement(rendement === null ? null : rendement.rendements.net, regles, raisonLoyer),
+    feuCashflow(
+      fiscalite === null ? null : fiscalite.regimes[fiscalite.retenu].cashflow.mensuel,
+      regles,
+      raisonLoyer,
+    ),
     feuEffort(
       financement.effort,
       regles,

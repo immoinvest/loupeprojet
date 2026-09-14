@@ -1,6 +1,6 @@
 import type { ResultatFinancement } from '../financement';
 import type { ModeLocation, Regime } from '../schema/hypotheses';
-import type { Projet } from '../schema/projet';
+import type { ProjetComplet } from '../schema/projet';
 import { chargesExploitation, totalCharges, type LigneCharge } from './charges';
 import { recettesAnnuelles, type Recettes } from './recettes';
 
@@ -39,7 +39,7 @@ export interface OptionsCashflow {
 const SEMAINES_PAR_AN = 52;
 
 function pointMort(
-  projet: Projet,
+  projet: ProjetComplet,
   recettes: Recettes,
   chargesFixes: number,
   creditAnnuel: number,
@@ -56,7 +56,7 @@ function creditDeAnnee(financement: ResultatFinancement, annee: number): number 
 }
 
 export function calculerCashflow(
-  projet: Projet,
+  projet: ProjetComplet,
   financement: ResultatFinancement,
   options: OptionsCashflow = {},
 ): ResultatCashflow {

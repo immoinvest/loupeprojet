@@ -2,6 +2,8 @@ import type { Resultats } from '@loupe/moteur';
 
 import { euros, eurosSignes, pourcentage, pourcentageSigne } from '@/formatage/nombres';
 
+import { TEXTES_A_COMPLETER } from './manques';
+
 export interface TexteVerdict {
   readonly titre: string;
   readonly sousTitre: string;
@@ -29,7 +31,9 @@ function phrasePrix(r: Resultats): string {
   }
 }
 
+/** Sans loyer, le cash-flow n'est pas calculé : la phrase le dit au lieu de conclure. */
 function phraseCashflow(r: Resultats): string {
+  if (!r.complet) return TEXTES_A_COMPLETER.verdictCashflow;
   switch (feu(r, 'cashflow')) {
     case 'bon':
       return 'Le loyer couvre tout.';
@@ -56,15 +60,17 @@ export function texteVerdict(r: Resultats): TexteVerdict {
         : `banque d'accord (effort ${pourcentage(effort, 0)})`,
     );
   }
-  const cf = r.cashflow.mensuel;
-  morceaux.push(
-    cf < 0
-      ? `${euros(Math.abs(cf))} à sortir chaque mois`
-      : `${eurosSignes(cf)} par mois dans la poche`,
-  );
+  if (r.complet) {
+    const cf = r.cashflow.mensuel;
+    morceaux.push(
+      cf < 0
+        ? `${euros(Math.abs(cf))} à sortir chaque mois`
+        : `${eurosSignes(cf)} par mois dans la poche`,
+    );
+  }
   return {
     titre: `${phrasePrix(r)} ${phraseCashflow(r)}`,
-    sousTitre: `${morceaux.join(', ')}.`,
+    sousTitre: morceaux.length === 0 ? TEXTES_A_COMPLETER.sousTitreSeul : `${morceaux.join(', ')}.`,
   };
 }
 

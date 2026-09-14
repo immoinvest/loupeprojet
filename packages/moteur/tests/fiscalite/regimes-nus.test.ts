@@ -7,12 +7,12 @@ import { projeterMicroFoncier } from '../../src/fiscalite/micro-foncier';
 import { projeterNuReel } from '../../src/fiscalite/nu-reel';
 import type { ContexteFiscal } from '../../src/fiscalite/types';
 import { obtenirRegles } from '../../src/regles';
-import { ProjetSchema, type ProjetEntree, type Regime } from '../../src/schema';
+import { parserComplet, type ProjetEntree, type Regime } from '../../src/schema';
 
 const regles = obtenirRegles('2026-09');
 
 function contexteNu(entree: ProjetEntree, regime: Regime, loyerHc: number): ContexteFiscal {
-  const projet = ProjetSchema.parse(entree);
+  const projet = parserComplet(entree);
   const financement = calculerFinancement(projet, regles);
   const cashflow = calculerCashflow(projet, financement, { regime, mode: 'nu', loyerHc });
   return { projet, financement, cashflow, regles };

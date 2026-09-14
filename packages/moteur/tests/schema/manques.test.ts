@@ -7,7 +7,9 @@ import {
   ManqueSchema,
   ProjetSchema,
   TMI_PAR_DEFAUT,
+  estComplet,
   manquesDe,
+  parserComplet,
   raisonParmi,
   type ProjetEntree,
 } from '../../src/schema';
@@ -56,6 +58,36 @@ describe('manquesDe', () => {
     expect(CHAMP_REVENUS).toBe('hypotheses.revenusMensuels');
     expect(CHAMP_LOYER).toBe('hypotheses.location.loyerHc');
     for (const m of manques) expect(() => ManqueSchema.parse(m)).not.toThrow();
+  });
+
+  it('signale le loyer avant les revenus ; estComplet et parserComplet le savent', () => {
+    const location = sansCle(projetExemple.hypotheses.location, 'loyerHc');
+    const entree = avecHypotheses(
+      sansCle({ ...projetExemple.hypotheses, location }, 'revenusMensuels'),
+    );
+    const projet = ProjetSchema.parse(entree);
+    expect(projet.hypotheses.location.loyerHc).toBeUndefined();
+    expect(estComplet(projet)).toBe(false);
+    expect(manquesDe(projet)).toEqual([
+      { code: 'LOYER_ABSENT', champ: CHAMP_LOYER },
+      { code: 'REVENUS_ABSENTS', champ: CHAMP_REVENUS },
+    ]);
+    expect(() => parserComplet(entree)).toThrow(/loyer visé manque/);
+    const complet = parserComplet(projetExemple);
+    expect(estComplet(complet)).toBe(true);
+    expect(complet.hypotheses.location.loyerHc).toBe(980);
+  });
+
+  it('courte durée sans loyer : accepté par le schéma, mais le projet reste incomplet', () => {
+    const projet = ProjetSchema.parse(
+      avecHypotheses({
+        ...projetExemple.hypotheses,
+        location: { mode: 'courte_duree', courteDuree: { nuitee: 75, tauxOccupation: 0.6 } },
+      }),
+    );
+    expect(projet.hypotheses.location.courteDuree?.nuitee).toBe(75);
+    expect(estComplet(projet)).toBe(false);
+    expect(manquesDe(projet).map((m) => m.code)).toEqual(['LOYER_ABSENT']);
   });
 
   it('raisonParmi rend le premier manque parmi les codes cherchés, sinon null', () => {

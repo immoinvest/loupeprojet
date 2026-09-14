@@ -9,12 +9,15 @@ export type Application =
   | { readonly ok: false; readonly erreur: string };
 
 const OCCUPATION_DEFAUT = 0.6;
+/** Nuitée de départ quand le projet n'a pas de loyer dont la déduire. */
+const NUITEE_DEFAUT = 60;
 
 /** Un passage en courte durée sans nuitée connue reçoit des valeurs de départ plausibles. */
 function preparerCourteDuree(projet: ProjetEntree): ProjetEntree {
   if (lireChemin(projet, 'hypotheses.location.courteDuree') !== undefined) return projet;
-  const loyer = Number(lireChemin(projet, 'hypotheses.location.loyerHc'));
-  const nuitee = Math.max(30, Math.round((loyer / 30) * 2));
+  const loyer = lireChemin(projet, 'hypotheses.location.loyerHc');
+  const nuitee =
+    typeof loyer === 'number' ? Math.max(30, Math.round((loyer / 30) * 2)) : NUITEE_DEFAUT;
   return ecrireChemin(projet, 'hypotheses.location.courteDuree', {
     nuitee,
     tauxOccupation: OCCUPATION_DEFAUT,

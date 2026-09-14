@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { calculerBase } from '../../src/calculer-base';
+import { calculerComplet } from '../../src/calculer-base';
 import { calculerProjet } from '../../src/calculer-projet';
 import { projetExemple } from '../../src/exemples/t3-marseille';
 import { obtenirRegles } from '../../src/regles';
@@ -11,13 +11,13 @@ import {
   indicateurs,
   prixCible,
 } from '../../src/scenarios';
-import { ProjetSchema, type ProjetEntree } from '../../src/schema';
+import { parserComplet, type ProjetComplet, type ProjetEntree } from '../../src/schema';
 
 const regles = obtenirRegles('2026-09');
-const projet = ProjetSchema.parse(projetExemple);
+const projet = parserComplet(projetExemple);
 
-const variante = (h: Partial<ProjetEntree['hypotheses']>): ReturnType<typeof ProjetSchema.parse> =>
-  ProjetSchema.parse({ ...projetExemple, hypotheses: { ...projetExemple.hypotheses, ...h } });
+const variante = (h: Partial<ProjetEntree['hypotheses']>): ProjetComplet =>
+  parserComplet({ ...projetExemple, hypotheses: { ...projetExemple.hypotheses, ...h } });
 
 describe('prixCible', () => {
   it('cash-flow nul : un prix plus bas qui équilibre exactement le cash-flow', () => {
@@ -25,19 +25,18 @@ describe('prixCible', () => {
     expect(cible.prix).not.toBeNull();
     expect(cible.prix!).toBeLessThan(155_000);
     expect(cible.ecart!).toBeLessThan(0);
-    const recalcul = calculerBase(avecPrix(projet, cible.prix!), regles);
+    const recalcul = calculerComplet(avecPrix(projet, cible.prix!), regles);
     expect(Math.abs(recalcul.cashflow.mensuel)).toBeLessThan(1);
   });
 
   it('net 6 % et brut 8 % : le rendement recalculé atteint la cible', () => {
     const net = prixCible(projet, 'net_6', regles);
     const brut = prixCible(projet, 'brut_8', regles);
-    expect(calculerBase(avecPrix(projet, net.prix!), regles).rendement.rendements.net).toBeCloseTo(
-      0.06,
-      4,
-    );
     expect(
-      calculerBase(avecPrix(projet, brut.prix!), regles).rendement.rendements.brut,
+      calculerComplet(avecPrix(projet, net.prix!), regles).rendement.rendements.net,
+    ).toBeCloseTo(0.06, 4);
+    expect(
+      calculerComplet(avecPrix(projet, brut.prix!), regles).rendement.rendements.brut,
     ).toBeCloseTo(0.08, 4);
   });
 
@@ -132,7 +131,7 @@ describe('transformations prédéfinies', () => {
   });
 
   it('colocation sans chambres renseignées : pièces − 1, au moins 1', () => {
-    const sansChambres = ProjetSchema.parse({
+    const sansChambres = parserComplet({
       ...projetExemple,
       bien: { ...projetExemple.bien, chambres: undefined, pieces: 1 },
     });
@@ -146,7 +145,7 @@ describe('transformations prédéfinies', () => {
 });
 
 describe('calculerScenarios et deltas', () => {
-  const base = calculerBase(projet, regles);
+  const base = calculerComplet(projet, regles);
   const r = calculerScenarios(projet, base, regles);
 
   it('chaque scénario compare ses indicateurs à la référence', () => {
@@ -172,7 +171,7 @@ describe('calculerScenarios et deltas', () => {
       revente: { annees: 1, evolutionAnnuelle: -0.2 },
     });
     const rr = calculerProjet(perte);
-    expect(rr.rendement.tri).toBeNull();
+    expect(rr.complet && rr.rendement.tri).toBeNull();
     expect(rr.scenarios!.scenarios.every((s) => s.deltas.tri === null)).toBe(true);
   });
 });

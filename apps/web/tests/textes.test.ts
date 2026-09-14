@@ -7,6 +7,7 @@ import {
 import { describe, expect, it } from 'vitest';
 
 import { AXES, ETATS, libelleFeu } from '@/textes/feux';
+import { MANQUES, TEXTES_A_COMPLETER, manquesBloquants } from '@/textes/manques';
 import {
   CRITERES_PRIX,
   MODES,
@@ -139,20 +140,20 @@ describe('régimes : explications et ordre', () => {
   });
 
   it('LMNP réel sans impôt : réserve d’amortissements ; nu réel : première année imposable', () => {
-    expect(n(explicationRegime(r.fiscalite.regimes.lmnp_reel, dix))).toContain(
+    expect(n(explicationRegime(r.fiscalite!.regimes.lmnp_reel, dix))).toContain(
       'aucun impôt sur 10 ans, et 50 807 € restent en réserve',
     );
-    expect(explicationRegime(r.fiscalite.regimes.nu_reel, dix)).toContain("à partir de l'année 6");
-    expect(explicationRegime(r.fiscalite.regimes.micro_bic, dix)).toContain('50 %');
-    expect(explicationRegime(r.fiscalite.regimes.micro_foncier, dix)).toContain('30 %');
+    expect(explicationRegime(r.fiscalite!.regimes.nu_reel, dix)).toContain("à partir de l'année 6");
+    expect(explicationRegime(r.fiscalite!.regimes.micro_bic, dix)).toContain('50 %');
+    expect(explicationRegime(r.fiscalite!.regimes.micro_foncier, dix)).toContain('30 %');
   });
 
   it('LMNP réel imposé et nu réel jamais imposé : les autres phrases', () => {
     const riche = calculerProjet(
       variante({ location: { mode: 'meuble_lld', loyerHc: 2_300, vacanceSemaines: 0 } }),
     );
-    expect(riche.fiscalite.regimes.lmnp_reel.premiereAnneeImposable).not.toBeNull();
-    expect(explicationRegime(riche.fiscalite.regimes.lmnp_reel, dix)).toMatch(
+    expect(riche.fiscalite!.regimes.lmnp_reel.premiereAnneeImposable).not.toBeNull();
+    expect(explicationRegime(riche.fiscalite!.regimes.lmnp_reel, dix)).toMatch(
       /jusqu'à l'année \d+/,
     );
     const nuSansImpot = calculerProjet(
@@ -161,8 +162,8 @@ describe('régimes : explications et ordre', () => {
         fiscalite: { tmi: 0.3, regime: 'nu_reel' },
       }),
     );
-    expect(nuSansImpot.fiscalite.regimes.nu_reel.premiereAnneeImposable).toBeNull();
-    expect(explicationRegime(nuSansImpot.fiscalite.regimes.nu_reel, dix)).toContain(
+    expect(nuSansImpot.fiscalite!.regimes.nu_reel.premiereAnneeImposable).toBeNull();
+    expect(explicationRegime(nuSansImpot.fiscalite!.regimes.nu_reel, dix)).toContain(
       'aucun impôt sur 10 ans',
     );
   });
@@ -171,7 +172,7 @@ describe('régimes : explications et ordre', () => {
     const gros = calculerProjet(
       variante({ location: { mode: 'meuble_lld', loyerHc: 8_000, vacanceSemaines: 0 } }),
     );
-    expect(explicationRegime(gros.fiscalite.regimes.micro_bic, dix)).toContain('inaccessible');
+    expect(explicationRegime(gros.fiscalite!.regimes.micro_bic, dix)).toContain('inaccessible');
   });
 });
 
@@ -251,8 +252,8 @@ describe('verdict', () => {
     const r = calculerProjet(
       variante({ location: { mode: 'meuble_lld', loyerHc: 1_120, vacanceSemaines: 0 } }),
     );
-    expect(r.cashflow.mensuel).toBeGreaterThan(-100);
-    expect(r.cashflow.mensuel).toBeLessThan(0);
+    expect(r.cashflow!.mensuel).toBeGreaterThan(-100);
+    expect(r.cashflow!.mensuel).toBeLessThan(0);
     expect(texteVerdict(r).titre).toContain('Le loyer couvre presque tout.');
   });
 
@@ -260,5 +261,51 @@ describe('verdict', () => {
     expect(reponseCourte('oui')).toBe('Oui.');
     expect(reponseCourte('presque')).toBe('Pas tout à fait.');
     expect(reponseCourte('non')).toBe('Non.');
+  });
+});
+
+describe('données manquantes', () => {
+  const sansLoyer = (marche?: ProjetEntree['marche']): ProjetEntree => {
+    const location = Object.fromEntries(
+      Object.entries(projetExemple.hypotheses.location).filter(([k]) => k !== 'loyerHc'),
+    ) as ProjetEntree['hypotheses']['location'];
+    return variante({ location }, marche);
+  };
+
+  it('chaque code a un titre, une phrase et un complément de feu ; seul le loyer bloque', () => {
+    for (const t of Object.values(MANQUES)) {
+      expect(t.titre.length).toBeGreaterThan(10);
+      expect(t.phrase.length).toBeGreaterThan(20);
+      expect(t.feu).toMatch(/à indiquer$/);
+    }
+    expect(
+      manquesBloquants([
+        { code: 'REVENUS_ABSENTS', champ: 'hypotheses.revenusMensuels' },
+        { code: 'LOYER_ABSENT', champ: 'hypotheses.location.loyerHc' },
+      ]).map((m) => m.code),
+    ).toEqual(['LOYER_ABSENT']);
+    expect(manquesBloquants([])).toEqual([]);
+  });
+
+  it('un feu inconnu dit ce qui manque, ou « pas de données » sans raison', () => {
+    expect(
+      libelleFeu({ axe: 'cashflow', feu: 'inconnu', valeur: null, raison: 'LOYER_ABSENT' }),
+    ).toBe('Cash-flow : loyer à indiquer');
+    expect(
+      libelleFeu({ axe: 'effort', feu: 'inconnu', valeur: null, raison: 'REVENUS_ABSENTS' }),
+    ).toBe('Effort bancaire : revenus à indiquer');
+    expect(libelleFeu({ axe: 'effort', feu: 'inconnu', valeur: null, raison: null })).toBe(
+      'Effort bancaire : pas de données',
+    );
+  });
+
+  it('verdict partiel : le loyer reste à indiquer, sous-titre sans cash-flow', () => {
+    const t = texteVerdict(calculerProjet(sansLoyer()));
+    expect(t.titre).toBe(`Le prix est bon. ${TEXTES_A_COMPLETER.verdictCashflow}`);
+    expect(n(t.sousTitre)).toBe('−25 % par rapport au prix estimé.');
+    // Sans marché ni loyer ni effort : rien à chiffrer, une phrase de repli.
+    const seul = texteVerdict(calculerProjet(sansLoyer({})));
+    expect(seul.titre).toBe(`Prix sans repère de marché. ${TEXTES_A_COMPLETER.verdictCashflow}`);
+    expect(seul.sousTitre).toBe(TEXTES_A_COMPLETER.sousTitreSeul);
   });
 });

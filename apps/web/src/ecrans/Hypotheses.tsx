@@ -35,11 +35,17 @@ function badgePour(projet: ProjetEntree, d: Descripteur): BadgeProvenance | null
 
 function Synthese(): JSX.Element {
   const { resultats: r } = useProjetCourant();
-  const cf = r.cashflow.mensuel;
+  // Sans loyer, ces trois chiffres attendent : « — » plutôt qu'une valeur inventée.
+  const cf = r.complet ? r.cashflow.mensuel : null;
+  const tri = r.complet ? r.rendement.tri : null;
   const kpis = [
-    { l: 'Cash-flow', v: eurosParMois(cf), ton: cf >= 0 ? 'text-bon' : 'text-probleme' },
-    { l: 'Rendement net', v: pourcentage(r.rendement.rendements.net), ton: '' },
-    { l: 'TRI', v: r.rendement.tri === null ? '—' : pourcentage(r.rendement.tri), ton: '' },
+    {
+      l: 'Cash-flow',
+      v: cf === null ? '—' : eurosParMois(cf),
+      ton: cf === null ? '' : cf >= 0 ? 'text-bon' : 'text-probleme',
+    },
+    { l: 'Rendement net', v: r.complet ? pourcentage(r.rendement.rendements.net) : '—', ton: '' },
+    { l: 'TRI', v: tri === null ? '—' : pourcentage(tri), ton: '' },
     {
       l: 'Effort bancaire',
       v: r.financement.effort.hcsf === null ? '—' : pourcentage(r.financement.effort.hcsf, 0),

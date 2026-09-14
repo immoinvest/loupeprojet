@@ -7,12 +7,12 @@ import { fraisDeductiblesAnnee1, projeterLmnpReel } from '../../src/fiscalite/lm
 import { projeterMicroBic } from '../../src/fiscalite/micro-bic';
 import type { ContexteFiscal } from '../../src/fiscalite/types';
 import { obtenirRegles } from '../../src/regles';
-import { ProjetSchema, type ProjetEntree, type Regime } from '../../src/schema';
+import { parserComplet, type ProjetEntree, type Regime } from '../../src/schema';
 
 const regles = obtenirRegles('2026-09');
 
 function contexte(entree: ProjetEntree, regime: Regime): ContexteFiscal {
-  const projet = ProjetSchema.parse(entree);
+  const projet = parserComplet(entree);
   const financement = calculerFinancement(projet, regles);
   const cashflow = calculerCashflow(projet, financement, { regime });
   return { projet, financement, cashflow, regles };
@@ -191,7 +191,7 @@ describe('LMNP réel — cas particuliers', () => {
         amortissement: { ...regles.fiscalite.amortissement, partTerrain: 1 },
       },
     };
-    const projet = ProjetSchema.parse(
+    const projet = parserComplet(
       variante({
         achat: { ...projetExemple.hypotheses.achat, travaux: 0, mobilier: 0 },
         pret: { ...projetExemple.hypotheses.pret, apport: 500_000 },
