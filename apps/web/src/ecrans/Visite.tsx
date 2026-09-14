@@ -68,19 +68,11 @@ export function Visite(): JSX.Element {
           <TitrePage taille="volet">
             {visite.faite ? 'Compte rendu de visite' : 'Préparer la visite'}
           </TitrePage>
-          <Chapo>
-            {visite.faite ? (
-              <>
-                Visite faite{visite.date === undefined ? '' : ` le ${dateCourte(visite.date)}`}. Les
-                réponses sont figées ; le rapport tient compte des valeurs relevées.
-              </>
-            ) : (
-              <>
-                {compte.total} questions pour ce bien, tirées des listes publiques et de ce que
-                l'annonce dit. Répondez sur place : tout est enregistré avec le projet.
-              </>
-            )}
-          </Chapo>
+          {visite.faite && (
+            <Chapo>
+              Visite faite{visite.date === undefined ? '' : ` le ${dateCourte(visite.date)}`}.
+            </Chapo>
+          )}
         </div>
         <Progression compte={compte} />
         <div className="flex flex-wrap gap-2.5" aria-label="Cinq feux">

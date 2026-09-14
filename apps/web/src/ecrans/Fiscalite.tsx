@@ -2,14 +2,14 @@ import type { AnneeFiscale, Regime, ResultatRegime } from '@loupe/moteur';
 import type { JSX } from 'react';
 
 import { useModeDocument } from '@/composants/document';
-import { Chapo, Page, TitrePage } from '@/composants/mise-en-page';
+import { Page, TitrePage } from '@/composants/mise-en-page';
 import { Bouton, Carte, Pastille } from '@/composants/ui';
 import { useProjetCourant } from '@/coque/ProjetLayout';
-import { euros, eurosSignes, pourcentage } from '@/formatage/nombres';
+import { euros, eurosSignes } from '@/formatage/nombres';
 import { appliquerSaisie, descripteurParChemin } from '@/hypotheses';
 import { useProjets } from '@/stockage/ProjetsContext';
 import { manquesBloquants, TEXTES_TRANCHE } from '@/textes/manques';
-import { MODES, ORDRE_REGIMES, REGIMES, explicationRegime } from '@/textes/regimes';
+import { ORDRE_REGIMES, REGIMES, explicationRegime } from '@/textes/regimes';
 
 import { ChampHypothese } from './hypotheses/ChampHypothese';
 import { AnalyseIncomplete } from './projet/AnalyseIncomplete';
@@ -49,9 +49,6 @@ function CarteRegime({
           </Pastille>
         )}
       </div>
-      <p className="m-0 text-sm text-encre-3">
-        Loyer {euros(r.cashflow.recettes.loyersBruts / 12)} par mois, {MODES[r.mode]}.
-      </p>
       <div className="font-display text-[28px] leading-none font-bold sm:text-[32px] print:text-[32px]">
         {euros(r.impotTotal)}
         <span className="ml-2 text-base font-semibold text-encre-3">d'impôt sur {annees} ans</span>
@@ -129,10 +126,7 @@ export function Fiscalite(): JSX.Element {
   if (!r.complet) {
     return (
       <Page>
-        <div className="flex flex-col gap-2">
-          <TitrePage taille="volet">{TITRE}</TitrePage>
-          <Chapo>Les quatre régimes se comparent à partir du loyer visé.</Chapo>
-        </div>
+        <TitrePage taille="volet">{TITRE}</TitrePage>
         {manquesBloquants(r.manques).map((m) => (
           <AnalyseIncomplete key={m.code} manque={m} />
         ))}
@@ -152,17 +146,7 @@ export function Fiscalite(): JSX.Element {
 
   return (
     <Page>
-      <div className="flex flex-col gap-2">
-        <TitrePage taille="volet">{TITRE}</TitrePage>
-        <Chapo>
-          {affiches.length === 4
-            ? 'Les quatre régimes'
-            : `Les deux régimes du meublé (${MODES[r.projet.hypotheses.location.mode]})`}{' '}
-          avec {trancheEstimee ? TEXTES_TRANCHE.supposee : TEXTES_TRANCHE.choisie}{' '}
-          {pourcentage(r.projet.hypotheses.fiscalite.tmi, 0)}, projetés sur {annees} ans. Le régime
-          retenu alimente le rapport ; changez-le ici.
-        </Chapo>
-      </div>
+      <TitrePage taille="volet">{TITRE}</TitrePage>
 
       {trancheEstimee && !document && (
         <Carte className="border-accent-bordure bg-accent-fond">

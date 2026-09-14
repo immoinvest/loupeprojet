@@ -120,7 +120,6 @@ describe('Carte des ventes dans l’onglet Estimation', () => {
       });
       expect(image).toHaveAttribute('data-centre', '43.294813,5.393807');
       expect(image).toHaveAttribute('data-classes', 'bas,milieu,haut');
-      expect(within(carte).getByText(/Plan IGN \(Géoplateforme\)/)).toBeInTheDocument();
     },
   );
 

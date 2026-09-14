@@ -158,7 +158,6 @@ describe('Nouveau projet — à la main', () => {
       expect(screen.getByLabelText(/Tranche/)).toHaveValue('0.3');
       expect(screen.getByLabelText(/Loyer visé/)).toHaveValue('');
       expect(screen.getAllByText('estimé')).toHaveLength(3);
-      expect(screen.getByText(/Vide : le loyer de marché de la commune/)).toBeInTheDocument();
 
       await utilisateur.type(screen.getByLabelText(/Prix affiché/), '120000');
       await utilisateur.type(screen.getByLabelText(/Surface/), '40');

@@ -2,7 +2,7 @@ import { useMemo, type JSX } from 'react';
 
 import { lienSimulateurPret, simulationDepuisResultats } from '@/analyses';
 import { useModeDocument } from '@/composants/document';
-import { Chapo, Page, TitrePage } from '@/composants/mise-en-page';
+import { Page, TitrePage } from '@/composants/mise-en-page';
 import { Carte, LienBouton, TitreCarte } from '@/composants/ui';
 import { useProjetCourant } from '@/coque/ProjetLayout';
 import { GROUPE_FINANCEMENT } from '@/hypotheses';
@@ -20,10 +20,7 @@ export function Financement(): JSX.Element {
 
   return (
     <Page>
-      <div className="flex flex-col gap-2">
-        <TitrePage taille="volet">{T.titre}</TitrePage>
-        <Chapo>{T.chapo}</Chapo>
-      </div>
+      <TitrePage taille="volet">{T.titre}</TitrePage>
 
       <Carte>
         <TitreCarte action={<LienBouton to={simulateur}>{T.simuler}</LienBouton>}>
@@ -32,10 +29,7 @@ export function Financement(): JSX.Element {
         {document ? (
           <LignesHypotheses groupe={GROUPE_FINANCEMENT} />
         ) : (
-          <>
-            <GrilleHypotheses key={enregistre.id} groupe={GROUPE_FINANCEMENT} />
-            <p className="m-0 text-sm text-encre-3">{T.simulateur}</p>
-          </>
+          <GrilleHypotheses key={enregistre.id} groupe={GROUPE_FINANCEMENT} />
         )}
       </Carte>
 

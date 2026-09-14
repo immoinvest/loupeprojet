@@ -30,7 +30,6 @@ export function loyersEnRetard(nombre: number): string {
 export const TEXTES_MON_MENU = {
   titre: 'Mon menu',
   phrase: 'Choisissez ce que Deklic vous montre, dans le menu et sur l’accueil.',
-  partout: 'Le réglage vous suit sur tous vos appareils.',
   chargement: 'Chargement de votre menu…',
 } as const;
 

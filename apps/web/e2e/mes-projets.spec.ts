@@ -17,7 +17,6 @@ test('au premier lancement, la racine est l’accueil ; « Mes projets » montre
 
   const liste = page.getByRole('main');
   await expect(liste.getByRole('link', { name: NOM_EXEMPLE })).toBeVisible();
-  await expect(liste.getByText('1 projet · sauvegardés sur cet appareil')).toBeVisible();
   await expect(liste.getByText('Visite prévue')).toBeVisible();
   await expect(liste.getByText('−210 €/mois')).toBeVisible();
   await expect(liste.getByText('−25 %')).toBeVisible();
@@ -51,7 +50,6 @@ test('un projet saisi à la main a son rapport, apparaît dans la liste et se su
   await page.getByRole('link', { name: 'Mes projets', exact: true }).click();
   await expect(page.getByRole('heading', { level: 1, name: 'Mes projets' })).toBeVisible();
   const liste = page.getByRole('main');
-  await expect(liste.getByText('2 projets · sauvegardés sur cet appareil')).toBeVisible();
   await expect(liste.getByRole('link', { name: NOM_LYON })).toBeVisible();
   await expect(liste.getByRole('link', { name: NOM_EXEMPLE })).toBeVisible();
 
@@ -64,7 +62,6 @@ test('un projet saisi à la main a son rapport, apparaît dans la liste et se su
   await page.getByRole('button', { name: `Supprimer ${NOM_LYON}` }).click();
   await expect(liste.getByRole('link', { name: NOM_LYON })).toHaveCount(0);
   await expect(liste.getByRole('link', { name: NOM_EXEMPLE })).toBeVisible();
-  await expect(liste.getByText('1 projet · sauvegardés sur cet appareil')).toBeVisible();
 });
 
 test('recharger la page conserve les projets, le statut et la route ouverte', async ({ page }) => {
@@ -80,7 +77,6 @@ test('recharger la page conserve les projets, le statut et la route ouverte', as
 
   await ouvrirMesProjets(page);
   const liste = page.getByRole('main');
-  await expect(liste.getByText('2 projets · sauvegardés sur cet appareil')).toBeVisible();
   await expect(liste.getByRole('link', { name: NOM_LYON })).toBeVisible();
   await expect(liste.getByRole('link', { name: NOM_EXEMPLE })).toBeVisible();
   await expect(liste.getByText('Offre faite')).toBeVisible();
