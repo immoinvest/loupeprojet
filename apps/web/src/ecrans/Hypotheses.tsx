@@ -7,6 +7,7 @@ import { useProjetCourant } from '@/coque/ProjetLayout';
 import { eurosParMois, pourcentage } from '@/formatage/nombres';
 import {
   GROUPES,
+  GROUPE_ACHAT,
   appliquerSaisie,
   cleProvenance,
   valeurActuelle,
@@ -15,6 +16,7 @@ import {
 } from '@/hypotheses';
 import { useProjets } from '@/stockage/ProjetsContext';
 
+import { CarteAchat } from './hypotheses/CarteAchat';
 import { ChampHypothese, type BadgeProvenance } from './hypotheses/ChampHypothese';
 
 const BADGES: Readonly<Record<string, BadgeProvenance>> = {
@@ -62,7 +64,7 @@ function Synthese(): JSX.Element {
 }
 
 export function Hypotheses(): JSX.Element {
-  const { enregistre } = useProjetCourant();
+  const { enregistre, resultats } = useProjetCourant();
   const { mettreAJour } = useProjets();
   const projet: ProjetEntree = enregistre.projet;
   const [textes, setTextes] = useState<Readonly<Record<string, string>>>({});
@@ -85,6 +87,19 @@ export function Hypotheses(): JSX.Element {
     setErreurs((prev) => Object.fromEntries(Object.entries(prev).filter(([k]) => k !== d.chemin)));
   };
 
+  const rendre = (d: Descripteur): JSX.Element => (
+    <ChampHypothese
+      key={d.chemin}
+      descripteur={d}
+      texte={textes[d.chemin] ?? versTexte(valeurActuelle(projet, d), d.type)}
+      erreur={erreurs[d.chemin]}
+      badge={badgePour(projet, d)}
+      onChange={(t) => {
+        changer(d, t);
+      }}
+    />
+  );
+
   return (
     <Page haut="serre">
       <Synthese />
@@ -104,24 +119,24 @@ export function Hypotheses(): JSX.Element {
         </span>
       </div>
       {GROUPES.map((g) => {
+        if (g === GROUPE_ACHAT) {
+          return (
+            <CarteAchat
+              key={g.titre}
+              projet={projet}
+              resultats={resultats}
+              rendre={rendre}
+              changer={changer}
+            />
+          );
+        }
         const visibles = g.champs.filter((d) => d.visibleSi === undefined || d.visibleSi(projet));
         return (
           <Carte key={g.titre}>
             <h2 className="m-0 font-display text-[22px] font-semibold">{g.titre}</h2>
             {g.sousTitre !== undefined && <p className="m-0 text-sm text-encre-2">{g.sousTitre}</p>}
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
-              {visibles.map((d) => (
-                <ChampHypothese
-                  key={d.chemin}
-                  descripteur={d}
-                  texte={textes[d.chemin] ?? versTexte(valeurActuelle(projet, d), d.type)}
-                  erreur={erreurs[d.chemin]}
-                  badge={badgePour(projet, d)}
-                  onChange={(t) => {
-                    changer(d, t);
-                  }}
-                />
-              ))}
+              {visibles.map(rendre)}
             </div>
           </Carte>
         );
