@@ -107,7 +107,7 @@ Corrections au modèle Excel : travaux soit en charge soit amortis, jamais les d
 
 ## Estimations
 
-- **Prix** : médiane €/m² DVF 500 m / 24 mois, ±10 % selon surface ; fourchette Q1–Q3.
+- **Prix** : médiane €/m² DVF 500 m / 24 mois, ±10 % selon surface ; fourchette Q1–Q3. Depuis `estimation-confiance` : une **note de confiance sur 100** accompagne l'estimation (localisation du repère 35, dispersion des prix 30, ventes comparables 20, ancienneté des ventes 15 ; cinq niveaux, marge de la fourchette de ±5 % à ±15 % selon le niveau), affichée en tête de l'onglet avec ses raisons ; sans adresse, le repère de commune ou d'arrondissement est montré tel quel (« moins précis »).
 - **Loyer** : ANIL commune par type, −8 % HC, +15–25 % meublé, +30–45 % colocation ; plafonné par l'encadrement.
 - **Travaux** : rafraîchissement 150–300 €/m², moyen 500–800, lourd 1 000–1 500 ; DPE F/G → rénovation énergétique + rappel interdictions (G 2025, F 2028, E 2034).
 - **Taxe foncière** : taux REI × VL estimée, croisé avec 0,8–1,2 mois de loyer ; « estimation, demander l'avis ».

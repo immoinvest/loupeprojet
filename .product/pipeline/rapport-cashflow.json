@@ -27,7 +27,11 @@
       "status": "completed",
       "output": ".product/architecture/rapport-cashflow.md"
     },
-    "implement": { "status": "completed", "stories_completed": 5, "stories_total": 5 },
+    "implement": {
+      "status": "completed",
+      "stories_completed": 5,
+      "stories_total": 5
+    },
     "qa_tests": {
       "status": "completed",
       "note": "35 tests ajoutés : info (9 : souris, clavier, Échap, clic dehors, une seule bulle, mode document, décalage, TitreCarte, LienOnglet), rapport-analyses (6), explications (12), rapport (8 : cascade, repères, bulles, rendements, liens, multiple, document) ; couverture 100 % sur analyses/ et textes/ ; suite web 325 tests verts ; e2e Rapport : bulle dans l'écran (ordinateur, téléphone, tablette), Échap, une seule bulle, liens vers les trois onglets"
@@ -37,8 +41,9 @@
       "note": "aucun innerHTML ni eval ; les textes des bulles sont composés depuis les résultats du moteur et rendus comme texte ; aucun appel réseau ; rien de persisté"
     },
     "push": {
-      "status": "in_progress",
-      "note": "docs à jour, fusion de master puis PR avec auto-merge"
+      "status": "completed",
+      "pr": "https://github.com/immoinvest/loupeprojet/pull/43",
+      "note": "auto-merge armé ; master fusionné une fois (coque-fixe, conflits de docs résolus en gardant les deux côtés) ; 1 008 tests (un test Mon compte en échec sous charge, vert seul) ; e2e Rapport 6/6 sur ordinateur, téléphone et tablette"
     }
   },
   "decisions": {

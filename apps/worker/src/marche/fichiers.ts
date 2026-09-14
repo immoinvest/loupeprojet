@@ -24,6 +24,11 @@ const StatistiquesSchema = z.object({
   medianeM2: z.number().positive(),
   q1M2: z.number().positive(),
   q3M2: z.number().positive(),
+  /** Date de la vente médiane ; absente des index publiés avant le 14/09/2026. */
+  dateMediane: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional(),
 });
 export type Statistiques = z.infer<typeof StatistiquesSchema>;
 
