@@ -7,3 +7,8 @@ OPENROUTER_API_KEY=
 # Facultatif : autre fournisseur compatible « chat completions » et autre modèle.
 # LLM_URL=https://api.mistral.ai/v1/chat/completions
 # LLM_MODELE=mistral-small-latest
+# Lecture d'une annonce quand l'extension ne le peut pas (ADR-008) : clé API Bright Data.
+# Vide = /lecture ne lit que Bien'ici en local (LECTURE_INDISPONIBLE pour les autres portails).
+BRIGHTDATA_API_KEY=
+# Zone « Web Unlocker » du compte Bright Data (défaut : deklic_unlocker).
+# BRIGHTDATA_ZONE=deklic_unlocker

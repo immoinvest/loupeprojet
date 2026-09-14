@@ -374,6 +374,7 @@ describe('dépendances : extracteur depuis l’environnement', () => {
     KV_CACHE: kv,
     LIMITEUR: limiteur,
     LIMITEUR_EXTRACTION: limiteur,
+    LIMITEUR_LECTURE: limiteur,
     DONNEES: { get: () => Promise.resolve(null) },
   };
 

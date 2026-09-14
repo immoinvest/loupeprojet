@@ -10,6 +10,9 @@ export type CodeErreur =
   | 'AMONT_SATURE'
   | 'AMONT_INVALIDE'
   | 'EXTRACTION_INDISPONIBLE'
+  | 'LECTURE_INDISPONIBLE'
+  | 'ANNONCE_INTROUVABLE'
+  | 'AMONT_VIDE'
   | 'ERREUR_INTERNE';
 
 export interface CorpsErreur {

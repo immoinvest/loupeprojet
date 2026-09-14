@@ -381,6 +381,7 @@ describe('lecteurs de données', () => {
       KV_CACHE: { get: () => Promise.resolve(null), put: () => Promise.resolve() },
       LIMITEUR: { limit: () => Promise.resolve({ success: true }) },
       LIMITEUR_EXTRACTION: { limit: () => Promise.resolve({ success: true }) },
+      LIMITEUR_LECTURE: { limit: () => Promise.resolve({ success: true }) },
       DONNEES: {
         get: () =>
           Promise.resolve({
