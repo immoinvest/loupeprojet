@@ -185,6 +185,19 @@ export function etatAttente(
 7. **US-7** carte « Le bien » → commit
 8. Refactor, QA, audit de sécurité, docs, PR
 
+## Audit de sécurité (14/09/2026)
+
+**Score : 83/100 avant correctifs → 100/100 après** (grade A).
+
+| Constat                                                                         | Gravité      | Correctif                                                                                                                                                   |
+| ------------------------------------------------------------------------------- | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/lecture` appelable hors de Deklic : quota Bright Data vidable par des scripts | moyenne (−8) | Origine Deklic exigée (`ORIGINE_REFUSEE`), même liste que le CORS. Reste possible en forgeant l'en-tête : Cloudflare Turnstile à décider si l'abus apparaît |
+| Corps de requête lu avant contrôle de taille                                    | faible (−3)  | `Content-Length` vérifié avant lecture                                                                                                                      |
+| Page du fournisseur lue avant contrôle de taille                                | faible (−3)  | `content-length` vérifié avant lecture, taille contrôlée après                                                                                              |
+| Lien d'annonce `http` ou protocole exotique accepté                             | faible (−3)  | https seulement                                                                                                                                             |
+
+Vérifié sans constat : URL transmise au fournisseur = URL canonique reconstruite (liste blanche des cinq portails, identifiant Bien'ici encodé dans la requête) ; HTML analysé par `DOMParser` (aucun script, aucune ressource) ; photos et lien de la carte « Le bien » filtrés par `surUnPortail` (projet reçu par lien forgé) ; clé Bright Data jamais journalisée (test) ; journal sans URL ni contenu ; React échappe les textes de la fiche ; fixtures sans donnée personnelle.
+
 ## Checklist
 
 - [x] Aucun conflit : `/lecture` est une nouvelle route ; `ClientWorker` gagne une méthode (faux clients à compléter)

@@ -22,7 +22,7 @@ Concurrents : Horiz.io (8–20 €/mois, complet, saisie manuelle), Lybox (9–4
 
 ## Parcours v1 (6 étapes)
 
-1. **Coller le lien** — portail reconnu, id extrait ; extension / bookmarklet / texte collé / saisie manuelle.
+1. **Coller le lien** — portail reconnu, id extrait ; extension / bookmarklet / texte collé / saisie manuelle. Depuis le 14/09/2026 (feature `lecture-serveur`, ADR-008) : sans extension ou si elle échoue, Deklic lit l'annonce par son serveur, à la demande, sans rien garder ; un écran d'attente (étape, progression estimée, temps écoulé, astuces, « Annuler et coller le texte ») couvre les 5 à 75 s. Les photos et la fiche du bien (chauffage, état, étages, extérieurs, équipements, énergie, honoraires, vendeur, quartier) suivent le projet, carte « Le bien » dans le Rapport.
 2. **Lire** — données structurées de la page, puis LLM (JSON strict) pour les champs manquants, repli regex. 0 ou 1 appel, ~2 s.
 3. **Enrichir** — géocodage puis en parallèle : DVF 500 m, DPE ADEME, loyers ANIL, taux TF (REI), Géorisques, zonage ABC, population. Zéro LLM.
 4. **Vérifier** — un écran, badges `annonce` / `donnée publique` / `estimé` / `à toi`. Seuls prix, surface, code postal et ville sont exigés (feature `hypotheses-optionnelles`, 14/09/2026) : apport 0 €, durée 25 ans et tranche 30 % sont pré-remplis et marqués « estimé » ; un loyer vide est pris dans les loyers de marché ANIL de la commune, sinon le projet est créé sans loyer (loyer, loyer par chambre ou nuitée selon le type) ; les revenus ne sont jamais demandés. Sans loyer, le rapport est partiel : prix, financement, estimation et risques sont calculés ; cash-flow, impôts, revente, rendement et scénarios affichent « Il manque le loyer visé pour cette analyse » avec le champ sur place. Les feux rendement, cash-flow et couverture disent « loyer à indiquer » ; l'onglet Financement garde le crédit et attend le loyer pour la couverture.
@@ -32,17 +32,17 @@ Concurrents : Horiz.io (8–20 €/mois, complet, saisie manuelle), Lybox (9–4
 
 ## Pipeline technique (9 étapes)
 
-| #   | Étape      | Où                                 | Sortie                                   |
-| --- | ---------- | ---------------------------------- | ---------------------------------------- |
-| 1   | Résoudre   | Navigateur                         | `{portail, id, url_canonique}`           |
-| 2   | Capturer   | Navigateur (extension/bookmarklet) | champs structurés + texte + URLs photos  |
-| 3   | Extraire   | Worker `/extract`                  | champs manquants + confiance             |
-| 4   | Normaliser | Navigateur                         | schéma `Annonce` + provenance            |
-| 5   | Géocoder   | Worker proxy → Géoplateforme       | lat/lon, INSEE, clé BAN, précision       |
-| 6   | Enrichir   | Navigateur via proxy + cache KV    | bloc `marche`                            |
-| 7   | Estimer    | Navigateur                         | hypothèses pré-remplies sourcées         |
-| 8   | Vérifier   | Navigateur                         | contrôles de cohérence + 5 confirmations |
-| 9   | Calculer   | Navigateur (`packages/moteur`)     | le rapport                               |
+| #   | Étape      | Où                                                                       | Sortie                                   |
+| --- | ---------- | ------------------------------------------------------------------------ | ---------------------------------------- |
+| 1   | Résoudre   | Navigateur                                                               | `{portail, id, url_canonique}`           |
+| 2   | Capturer   | Navigateur (extension/bookmarklet ; page rapportée par `/lecture` sinon) | champs structurés + texte + URLs photos  |
+| 3   | Extraire   | Worker `/extract`                                                        | champs manquants + confiance             |
+| 4   | Normaliser | Navigateur                                                               | schéma `Annonce` + provenance            |
+| 5   | Géocoder   | Worker proxy → Géoplateforme                                             | lat/lon, INSEE, clé BAN, précision       |
+| 6   | Enrichir   | Navigateur via proxy + cache KV                                          | bloc `marche`                            |
+| 7   | Estimer    | Navigateur                                                               | hypothèses pré-remplies sourcées         |
+| 8   | Vérifier   | Navigateur                                                               | contrôles de cohérence + 5 confirmations |
+| 9   | Calculer   | Navigateur (`packages/moteur`)                                           | le rapport                               |
 
 ## Moteur de calcul — règles (septembre 2026)
 

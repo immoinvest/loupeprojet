@@ -29,15 +29,22 @@
       "status": "in_progress",
       "stories_total": 7,
       "stories_completed": 2,
-      "commits": [
-        "727dae7 US-1 capture enrichie",
-        "7b18ceb US-2 règles des cinq portails"
-      ],
+      "commits": ["727dae7 US-1 capture enrichie", "7b18ceb US-2 règles des cinq portails"],
       "notes": "US-1 : un test d'encodage reposait sur photos inconnues ; photos est désormais validé (capture refusée si photos invalides, documenté). US-2 : fixtures réduites et anonymisées tirées des pages réelles ; SeLoger a rendu 2 pages vides sur 6 (nouvelle tentative prévue en US-3) ; contenu.test.ts expire à 5 s sous charge mais passe seul."
     },
-    "refactor": { "status": "pending" },
-    "qa_tests": { "status": "pending" },
-    "security": { "status": "pending" },
+    "refactor": {
+      "status": "completed",
+      "note": "aucun fichier source au-delà de 300 lignes (NouveauProjet.tsx 268) ; hook sorti de LectureAuto.tsx ; REGISTRE_WEB partagé par le favori et la lecture serveur"
+    },
+    "qa_tests": {
+      "status": "in_progress",
+      "note": "capture 108, extension 67, worker 151 (100 %), web +8 fichiers de tests ; portes complètes à relancer après l'audit"
+    },
+    "security": {
+      "status": "completed",
+      "score": "83 → 100",
+      "note": "origine exigée, tailles vérifiées avant lecture, https seulement ; Turnstile à décider si abus"
+    },
     "push": { "status": "pending" }
   },
   "decisions": {
