@@ -18,7 +18,13 @@ import { badgePour } from './badges';
 import { ChampHypothese } from './ChampHypothese';
 
 export function champsVisibles(groupe: Groupe, projet: ProjetEntree): readonly Descripteur[] {
-  return groupe.champs.filter((d) => d.visibleSi === undefined || d.visibleSi(projet));
+  return groupe.champs
+    .filter((d) => d.visibleSi === undefined || d.visibleSi(projet))
+    .map((d) => {
+      const { optionVisibleSi: garder, options } = d;
+      if (garder === undefined || options === undefined) return d;
+      return { ...d, options: options.filter((o) => garder(o.v, projet)) };
+    });
 }
 
 export interface SaisieHypotheses {

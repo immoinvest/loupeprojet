@@ -1,3 +1,5 @@
+import { regimesCompatibles } from '@loupe/moteur';
+
 import type { Groupe } from './types';
 
 export const GROUPE_FINANCEMENT: Groupe = {
@@ -118,6 +120,9 @@ export const GROUPE_FISCALITE: Groupe = {
         { v: 'nu_reel', l: 'Nu au réel' },
         { v: 'micro_foncier', l: 'Nu micro-foncier' },
       ],
+      // Colocation, courte et moyenne durée : régimes du meublé seulement (le moteur refuse les autres).
+      optionVisibleSi: (v, projet) =>
+        (regimesCompatibles(projet.hypotheses.location.mode) as readonly string[]).includes(v),
     },
     {
       chemin: 'hypotheses.fiscalite.psBic',

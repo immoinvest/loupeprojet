@@ -302,3 +302,20 @@ describe('formulaire Vérifier : champs et saisie par type', () => {
     expect(versSaisie({ ...base, mode: 'nu' }, {}, null).loyerHc).toBe(0);
   });
 });
+
+describe('régimes proposés selon le type', () => {
+  it('nue et meublée : les quatre régimes ; colocation, courte et moyenne durée : ceux du meublé', () => {
+    const d = descripteurParChemin('hypotheses.fiscalite.regime');
+    const garder = d.optionVisibleSi;
+    if (garder === undefined) throw new Error('filtre attendu');
+    const proposes = (mode: ProjetEntree['hypotheses']['location']['mode']): string[] => {
+      const projet = { hypotheses: { location: { mode } } } as unknown as ProjetEntree;
+      return (d.options ?? []).filter((o) => garder(o.v, projet)).map((o) => o.v);
+    };
+    expect(proposes('nu')).toEqual(['lmnp_reel', 'micro_bic', 'nu_reel', 'micro_foncier']);
+    expect(proposes('meuble')).toHaveLength(4);
+    for (const mode of ['colocation', 'courte_duree', 'moyenne_duree'] as const) {
+      expect(proposes(mode)).toEqual(['lmnp_reel', 'micro_bic']);
+    }
+  });
+});
