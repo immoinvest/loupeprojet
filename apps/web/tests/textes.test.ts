@@ -17,12 +17,15 @@ import {
   explicationRegime,
 } from '@/textes/regimes';
 import { reponseCourte, texteVerdict } from '@/textes/verdict';
+import { phraseVigilance } from '@/textes/vigilance';
 import {
-  CATEGORIES,
-  ORDRE_CATEGORIES,
-  categorieVigilance,
-  phraseVigilance,
-} from '@/textes/vigilance';
+  CATEGORIES_VISITE,
+  ETATS_REPONSE,
+  ORDRE_ETATS,
+  phraseProgression,
+  phraseVisite,
+  texteQuestion,
+} from '@/textes/visite';
 
 const n = (s: string): string => s.replace(/\s/g, ' ');
 
@@ -79,55 +82,29 @@ describe('vigilance', () => {
     parametres: PointVigilance['parametres'] = {},
   ): PointVigilance => ({ code, parametres });
 
-  it('a une phrase pour chaque code', () => {
+  it('a une phrase pour chaque code financier', () => {
     const codes: PointVigilance['code'][] = [
-      'PV_AG_ET_CARNET',
-      'CONFIRMER_CHARGES_COPRO',
-      'COPRO_EN_PROCEDURE',
-      'VERIFIER_DPE',
-      'RENOVATION_ENERGETIQUE_OBLIGATOIRE',
-      'EXPLIQUER_PRIX_SOUS_MARCHE',
-      'CONFIRMER_TAXE_FONCIERE',
-      'RISQUE_NATUREL',
-      'SANS_ASCENSEUR_ETAGE_ELEVE',
       'EFFORT_HCSF_DEPASSE',
       'DUREE_PRET_HORS_HCSF',
       'PLAFOND_MICRO_DEPASSE',
       'LOYER_AU_DESSUS_PLAFOND',
       'PS_BIC_A_CONFIRMER',
     ];
-    const parametres = {
-      lots: 24,
-      annee: 1962,
-      dpe: 'D',
-      ecart: -0.22,
-      type: 'inondation',
-      etage: 3,
-      seuil: 0.35,
-      dureeMax: 25,
-      plafond: 900,
-      taux: 0.186,
-    };
+    const parametres = { seuil: 0.35, dureeMax: 25, plafond: 900, taux: 0.186 };
     for (const code of codes) {
       expect(phraseVigilance(p(code, parametres)).length).toBeGreaterThan(10);
     }
   });
 
   it('insère les paramètres', () => {
-    expect(phraseVigilance(p('PV_AG_ET_CARNET', { lots: 24, annee: 1962 }))).toContain(
-      '(24 lots, 1962)',
-    );
-    expect(phraseVigilance(p('PV_AG_ET_CARNET', { lots: 0, annee: 0 }))).not.toContain('(');
-    expect(phraseVigilance(p('PV_AG_ET_CARNET', { lots: 12, annee: 0 }))).toContain('(12 lots)');
-    expect(n(phraseVigilance(p('EXPLIQUER_PRIX_SOUS_MARCHE', { ecart: -0.22 })))).toContain(
-      '−22 %',
-    );
-    expect(
-      phraseVigilance(p('RENOVATION_ENERGETIQUE_OBLIGATOIRE', { dpe: 'G', annee: 2025 })),
-    ).toContain('2025');
     expect(n(phraseVigilance(p('LOYER_AU_DESSUS_PLAFOND', { plafond: 900 })))).toContain('900 €');
-    expect(phraseVigilance(p('VERIFIER_DPE'))).toContain('DPE ');
+    expect(phraseVigilance(p('DUREE_PRET_HORS_HCSF', { dureeMax: 25 }))).toContain('25 ans');
+    expect(n(phraseVigilance(p('PS_BIC_A_CONFIRMER', { taux: 0.186 })))).toContain('18,6 %');
     expect(phraseVigilance(p('EFFORT_HCSF_DEPASSE', { seuil: 'x' }))).toContain('0 %');
+    // Paramètre absent : la phrase reste lisible, sans valeur (repli sur une chaîne vide).
+    expect(phraseVigilance(p('DUREE_PRET_HORS_HCSF'))).toBe(
+      'Prêt plus long que le maximum bancaire de  ans.',
+    );
   });
 });
 
@@ -176,31 +153,63 @@ describe('régimes : explications et ordre', () => {
   });
 });
 
-describe('catégories de vigilance', () => {
-  it('chaque code a une catégorie, et chaque catégorie un libellé', () => {
-    const codes = [
-      'PV_AG_ET_CARNET',
-      'CONFIRMER_CHARGES_COPRO',
-      'COPRO_EN_PROCEDURE',
-      'VERIFIER_DPE',
-      'RENOVATION_ENERGETIQUE_OBLIGATOIRE',
-      'EXPLIQUER_PRIX_SOUS_MARCHE',
-      'CONFIRMER_TAXE_FONCIERE',
-      'RISQUE_NATUREL',
-      'SANS_ASCENSEUR_ETAGE_ELEVE',
-      'EFFORT_HCSF_DEPASSE',
-      'DUREE_PRET_HORS_HCSF',
-      'PLAFOND_MICRO_DEPASSE',
-      'LOYER_AU_DESSUS_PLAFOND',
-      'PS_BIC_A_CONFIRMER',
-    ] as const;
-    for (const code of codes) {
-      expect(ORDRE_CATEGORIES).toContain(categorieVigilance(code));
-    }
-    expect(categorieVigilance('PV_AG_ET_CARNET')).toBe('documents');
-    expect(categorieVigilance('VERIFIER_DPE')).toBe('sur_place');
-    expect(categorieVigilance('EFFORT_HCSF_DEPASSE')).toBe('finances');
-    expect(Object.keys(CATEGORIES)).toHaveLength(3);
+describe('textes de la visite', () => {
+  it('nomme les sept catégories et les quatre états', () => {
+    expect(Object.keys(CATEGORIES_VISITE)).toHaveLength(7);
+    expect(CATEGORIES_VISITE.documents).toBe('Documents à demander');
+    expect(Object.keys(ETATS_REPONSE)).toHaveLength(4);
+    expect(ORDRE_ETATS).toEqual(['a_verifier', 'ok', 'probleme', 'sans_objet']);
+    expect(ORDRE_ETATS.map((e) => ETATS_REPONSE[e])).toEqual([
+      'À vérifier',
+      'OK',
+      'Problème',
+      'Sans objet',
+    ]);
+  });
+
+  it('met en forme les paramètres du moteur dans le texte de la question', () => {
+    const t = (texte: string, parametres: Record<string, number | string>): string =>
+      n(texteQuestion({ texte, parametres }));
+    expect(t('Le prix est {ecart} sous', { ecart: -0.224 })).toBe('Le prix est 22 % sous');
+    expect(t('Le prix est {ecart} au-dessus', { ecart: 0.08 })).toBe('Le prix est 8 % au-dessus');
+    expect(t('Honoraires ({honoraires})', { honoraires: 7_000 })).toBe('Honoraires (7 000 €)');
+    expect(t('Travaux ({travaux}), plafond {plafond}', { travaux: 6_000, plafond: 900 })).toBe(
+      'Travaux (6 000 €), plafond 900 €',
+    );
+    expect(t('Zone ({risques})', { risques: 'inondation,retraitGonflementArgile' })).toBe(
+      'Zone (inondation, retrait-gonflement des argiles)',
+    );
+    expect(t('{surface} m²', { surface: 65 })).toBe('65 m²');
+    expect(t('{surface} m²', { surface: 32.5 })).toBe('32,5 m²');
+    expect(
+      t('DPE {dpe}, {etage}e, {annee}{detail}', { dpe: 'D', etage: 3, annee: 1962, detail: '' }),
+    ).toBe('DPE D, 3e, 1962');
+    expect(t('carnet{detail}', { detail: ' (24 lots)' })).toBe('carnet (24 lots)');
+    expect(t('sans {inconnu} paramètre', {})).toBe('sans {inconnu} paramètre');
+  });
+
+  it('phrase la progression et le lien du rapport', () => {
+    expect(phraseProgression({ total: 48, repondues: 0, problemes: 0 })).toBe('0 sur 48 répondues');
+    expect(phraseProgression({ total: 48, repondues: 1, problemes: 1 })).toBe(
+      '1 sur 48 répondue, 1 problème',
+    );
+    expect(phraseProgression({ total: 48, repondues: 12, problemes: 2 })).toBe(
+      '12 sur 48 répondues, 2 problèmes',
+    );
+    const compte = { total: 48, repondues: 12, problemes: 2 };
+    expect(phraseVisite({ faite: false }, compte)).toBe('Préparer la visite : 48 questions');
+    expect(phraseVisite({ faite: false }, { ...compte, total: 1 })).toBe(
+      'Préparer la visite : 1 question',
+    );
+    expect(phraseVisite({ faite: true, date: '2026-09-14T10:00:00.000Z' }, compte)).toBe(
+      'Visite faite le 14 sept. 2026 · 2 problèmes',
+    );
+    expect(phraseVisite({ faite: true }, { ...compte, problemes: 1 })).toBe(
+      'Visite faite · 1 problème',
+    );
+    expect(phraseVisite({ faite: true }, { ...compte, problemes: 0 })).toBe(
+      'Visite faite · aucun problème relevé',
+    );
   });
 });
 

@@ -77,26 +77,12 @@ describe('calculerProjet — projet sans loyer', () => {
     expect(partiel.verdict.synthese).toEqual({ bons: 2, surveiller: 0, problemes: 0, inconnus: 3 });
   });
 
-  it('points de vigilance : ceux du bien, du prix et du prêt ; rien qui dépende du loyer', () => {
+  it('points de vigilance : ceux de la banque seulement, rien qui dépende du loyer ou du régime', () => {
+    // Les signaux du bien (copropriété, DPE, étage) vivent dans les questions de visite, qui ne
+    // lisent que les feux : ils restent disponibles sans loyer.
     const codes = partiel.verdict.vigilance.map((p) => p.code);
-    expect(codes).toEqual(
-      expect.arrayContaining([
-        'PV_AG_ET_CARNET',
-        'CONFIRMER_CHARGES_COPRO',
-        'VERIFIER_DPE',
-        'SANS_ASCENSEUR_ETAGE_ELEVE',
-        'EXPLIQUER_PRIX_SOUS_MARCHE',
-        'CONFIRMER_TAXE_FONCIERE',
-      ]),
-    );
-    for (const absent of [
-      'EFFORT_HCSF_DEPASSE',
-      'PLAFOND_MICRO_DEPASSE',
-      'LOYER_AU_DESSUS_PLAFOND',
-      'PS_BIC_A_CONFIRMER',
-    ]) {
-      expect(codes).not.toContain(absent);
-    }
+    expect(codes).toEqual([]);
+    expect(complet.verdict.vigilance.map((p) => p.code)).toContain('PS_BIC_A_CONFIRMER');
   });
 
   it('sans loyer ni revenus : les deux manques, l’effort sans aucune lecture', () => {

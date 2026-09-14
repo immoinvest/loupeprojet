@@ -59,13 +59,15 @@ export interface DonneesDeTest {
   readonly idAvecAdresse: string;
   /** La copie du projet d'exemple sans loyer visé : le rapport « à compléter ». */
   readonly idSansLoyer: string;
+  /** La copie dont la visite est faite, avec des réponses : son onglet est un compte rendu. */
+  readonly idVisiteFaite: string;
   readonly lienPartage: string;
 }
 
 /**
- * Ouvre Deklic (le projet d'exemple est créé au premier lancement), ajoute une copie pour que
- * Comparer ait deux projets (la copie a une adresse, pour l'onglet Estimation), et fabrique le lien
- * de partage du projet d'exemple.
+ * Ouvre Deklic (le projet d'exemple est créé au premier lancement), ajoute deux copies (l'une avec
+ * une adresse pour l'onglet Estimation, l'autre avec une visite faite pour le compte rendu ; Comparer
+ * a ainsi plusieurs projets), et fabrique le lien de partage du projet d'exemple.
  */
 export async function preparerDonnees(page: Page): Promise<DonneesDeTest> {
   await page.goto('/projets');
@@ -87,7 +89,21 @@ export async function preparerDonnees(page: Page): Promise<DonneesDeTest> {
     sansLoyer.projet.hypotheses.location = Object.fromEntries(
       Object.entries(sansLoyer.projet.hypotheses.location).filter(([k]) => k !== 'loyerHc'),
     );
-    localStorage.setItem(cle, JSON.stringify([exemple, copie, sansLoyer]));
+    const visitee = {
+      ...exemple,
+      id: 'visite-faite',
+      nom: 'Visité · T3 · Marseille',
+      visite: {
+        faite: true,
+        date: '2026-09-14T10:00:00.000Z',
+        reponses: {
+          DOC_TITRE_PLAN: { etat: 'ok' },
+          DOC_TAXE_FONCIERE: { etat: 'probleme', note: 'Avis 2025 : 1 320 €, en hausse.' },
+          LOG_BRUIT: { etat: 'sans_objet' },
+        },
+      },
+    };
+    localStorage.setItem(cle, JSON.stringify([exemple, copie, visitee, sansLoyer]));
     // Même encodage que stockage/partage.ts : base64url du JSON UTF-8 du projet enregistré.
     const octets = new TextEncoder().encode(JSON.stringify(exemple));
     let binaire = '';
@@ -97,6 +113,7 @@ export async function preparerDonnees(page: Page): Promise<DonneesDeTest> {
       id: exemple.id,
       idAvecAdresse: copie.id,
       idSansLoyer: sansLoyer.id,
+      idVisiteFaite: visitee.id,
       lienPartage: `/partage#p=${encode}`,
     };
   }, ADRESSE_SIMULEE);
@@ -142,6 +159,7 @@ export function ecransDeReference({
   id,
   idAvecAdresse,
   idSansLoyer,
+  idVisiteFaite,
   lienPartage,
 }: DonneesDeTest): readonly Ecran[] {
   const projet = `/projets/${id}`;
@@ -188,6 +206,15 @@ export function ecransDeReference({
     { nom: 'Fiscalité', chemin: `${projet}/fiscalite` },
     { nom: 'Revente', chemin: `${projet}/revente` },
     { nom: 'Visite', chemin: `${projet}/visite` },
+    {
+      nom: 'Visite faite (compte rendu)',
+      chemin: `/projets/${idVisiteFaite}/visite`,
+      ouvrir: async (page) => {
+        await expect(
+          page.getByRole('heading', { level: 1, name: 'Compte rendu de visite' }),
+        ).toBeVisible();
+      },
+    },
     { nom: 'Comparer', chemin: '/comparer' },
     { nom: 'Méthode', chemin: '/methode' },
     { nom: 'Extension', chemin: '/extension' },

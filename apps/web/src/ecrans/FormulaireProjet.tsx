@@ -54,6 +54,12 @@ export const INDICATIONS = {
   revenusMensuels: "Sert seulement à l'effort bancaire.",
 } as const;
 
+/** Ce que le formulaire dit du projet sans passer par le moteur. */
+export interface OptionsFormulaire {
+  /** La personne a déjà visité le bien : l'onglet Visite n'a pas lieu d'être. */
+  readonly visiteFaite: boolean;
+}
+
 const GRILLE = 'grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3';
 
 export function FormulaireProjet({
@@ -63,11 +69,13 @@ export function FormulaireProjet({
 }: {
   initial: ValeursInitiales;
   annonce: AnnonceResolue | null;
-  onCreer: (saisie: SaisieProjet) => void;
+  onCreer: (saisie: SaisieProjet, options: OptionsFormulaire) => void;
 }): JSX.Element {
   const [valeurs, setValeurs] = useState<Valeurs>(initial.valeurs);
   const [provenance, setProvenance] = useState(initial.provenance);
   const [erreurs, setErreurs] = useState<Erreurs>({});
+  const [visiteFaite, setVisiteFaite] = useState(false);
+
   // Les travaux sont facultatifs : le champ n'apparaît que si l'on en prévoit.
   const [travauxOuverts, setTravauxOuverts] = useState((nombre(initial.valeurs.travaux) ?? 0) > 0);
 
@@ -92,7 +100,9 @@ export function FormulaireProjet({
         e.preventDefault();
         const trouvees = valider(valeurs);
         setErreurs(trouvees);
-        if (Object.keys(trouvees).length === 0) onCreer(versSaisie(valeurs, provenance, annonce));
+        if (Object.keys(trouvees).length === 0) {
+          onCreer(versSaisie(valeurs, provenance, annonce), { visiteFaite });
+        }
       }}
       className="flex flex-col gap-5"
     >
@@ -188,6 +198,21 @@ export function FormulaireProjet({
           />
         </div>
       </Carte>
+
+      <label className="flex min-h-[44px] w-fit cursor-pointer items-center gap-3 rounded-encart px-2 text-[15px] hover:bg-accent-fond">
+        <input
+          type="checkbox"
+          checked={visiteFaite}
+          onChange={(e) => {
+            setVisiteFaite(e.target.checked);
+          }}
+          className="h-5 w-5 accent-accent"
+        />
+        <span>
+          J'ai déjà visité ce bien{' '}
+          <span className="text-sm text-encre-3">(la liste de visite ne sera pas proposée)</span>
+        </span>
+      </label>
 
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
         <Bouton variante="primaire" type="submit">

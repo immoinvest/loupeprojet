@@ -1,6 +1,8 @@
 # 07 — Visite : une base de questions, des règles d'affichage, onglet masqué quand la visite est faite
 
-Statut : `idée` · Notée le 14/09/2026 · Dépend de : rien
+Statut : `livrée` (14/09/2026, branche `feat/visite-questions`) · Notée le 14/09/2026 · Dépend de : rien
+
+Livraison : discovery `../features/visite-questions-discovery.md`, specs `../specs/visite-questions-specs.md`, architecture `../architecture/visite-questions.md`. Les cinq questions ouvertes sont tranchées dans la discovery (base de 74 questions sourcées écrite par Claude, sept catégories, neuf questions à valeur, onglet masqué mais route ouverte avec compte rendu, points financiers dans le Rapport).
 
 ## La demande de Pierre
 

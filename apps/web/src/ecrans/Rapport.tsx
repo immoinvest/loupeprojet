@@ -24,6 +24,7 @@ import { CarteAutofinancement } from './rapport/CarteAutofinancement';
 import { CartePrix } from './rapport/CartePrix';
 import { CarteRendements } from './rapport/CarteRendements';
 import { Leviers } from './rapport/Leviers';
+import { CarteVigilance } from './rapport/Vigilance';
 
 const TITRE_AUTOFINANCEMENT = "Est-ce que ça s'autofinance ?";
 const TITRE_RENDEMENTS = 'Combien ça rapporte ?';
@@ -137,6 +138,7 @@ function Analyses({ r }: { r: ResultatsComplets }): JSX.Element {
         <CarteRendements r={r} />
       </div>
       <Leviers r={r} />
+      <CarteVigilance r={r} />
       <div className={DEUX_CARTES}>
         <CarteFiscalite r={r} />
         <CarteRevente r={r} />
@@ -157,6 +159,7 @@ function AnalysesACompleter({ r }: { r: Resultats }): JSX.Element {
         <CartePrix r={r} />
         <CarteACompleter titre={TITRE_RENDEMENTS} />
       </div>
+      <CarteVigilance r={r} />
       <div className={DEUX_CARTES}>
         <CarteACompleter titre={TITRE_FISCALITE} />
         <CarteACompleter titre={TITRE_REVENTE} />
