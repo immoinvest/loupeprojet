@@ -1,5 +1,5 @@
 import { useMemo, type JSX } from 'react';
-import { BrowserRouter, MemoryRouter, Navigate, useRoutes, type RouteObject } from 'react-router';
+import { BrowserRouter, MemoryRouter, useRoutes, type RouteObject } from 'react-router';
 
 import { creerSuiviInstallation, suiviIndisponible, type SuiviInstallation } from '@/application';
 import { clientHorsLigne, clientWorker, urlWorker, type ClientWorker } from '@/enrichissement';
@@ -16,6 +16,7 @@ import type { ClientGestion } from './gestion/types';
 import { ClientWorkerProvider } from './coque/ClientWorker';
 import { InstallationProvider } from './coque/Installation';
 import { ProjetLayout } from './coque/ProjetLayout';
+import { Accueil } from './ecrans/Accueil';
 import { Bientot } from './ecrans/Bientot';
 import { Comparer } from './ecrans/Comparer';
 import { Compte } from './ecrans/Compte';
@@ -47,7 +48,7 @@ export const routes: RouteObject[] = [
   {
     element: <AppLayout />,
     children: [
-      { index: true, element: <Navigate to="/projets" replace /> },
+      { index: true, element: <Accueil /> },
       { path: 'projets', element: <MesProjets /> },
       { path: 'projets/nouveau', element: <NouveauProjet /> },
       {
