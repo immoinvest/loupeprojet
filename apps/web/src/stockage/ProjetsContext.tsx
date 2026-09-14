@@ -5,6 +5,7 @@ import {
   creerProjet,
   ecrireProjets,
   lireProjets,
+  NOM_PROJET_EXEMPLE,
   type AdresseBien,
   type OptionsCreation,
   type ProjetEnregistre,
@@ -50,7 +51,7 @@ export interface ProjetsProviderProps {
 function chargerOuAmorcer(stockage: Storage): ProjetEnregistre[] {
   const existants = lireProjets(stockage);
   if (existants.length > 0) return existants;
-  const exemple = creerProjet({ nom: 'T3 · 65 m² · Marseille 5e', statut: 'visite' });
+  const exemple = creerProjet({ nom: NOM_PROJET_EXEMPLE, statut: 'visite' });
   ecrireProjets(stockage, [exemple]);
   return [exemple];
 }

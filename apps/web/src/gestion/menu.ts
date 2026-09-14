@@ -9,8 +9,6 @@ import {
 
 import type { EtatCompte } from '@/compte/CompteContext';
 
-export type Section = keyof PreferencesMenu;
-
 /** Mémoire locale des préférences : le bon menu dès le chargement suivant, avant la réponse de l'API. */
 export const CLE_MENU = 'deklic.menu.v1';
 
@@ -22,15 +20,24 @@ export function sectionsAffichees(
   return etatCompte === 'anonyme' ? PREFERENCES_PAR_DEFAUT : preferences;
 }
 
-/** Les préférences avec une section inversée, ou `null` si plus aucune section ne resterait affichée. */
-export function basculer(preferences: PreferencesMenu, section: Section): PreferencesMenu | null {
-  const suivantes = { ...preferences, [section]: !preferences[section] };
-  return suivantes.analyser || suivantes.gerer ? suivantes : null;
+/** Les trois menus possibles : au moins une section est toujours affichée, par construction. */
+export const CHOIX_MENU = ['les_deux', 'analyser', 'gerer'] as const;
+export type ChoixMenu = (typeof CHOIX_MENU)[number];
+
+const PREFERENCES_DU_CHOIX: Readonly<Record<ChoixMenu, PreferencesMenu>> = {
+  les_deux: { analyser: true, gerer: true },
+  analyser: { analyser: true, gerer: false },
+  gerer: { analyser: false, gerer: true },
+};
+
+export function preferencesDe(choix: ChoixMenu): PreferencesMenu {
+  return PREFERENCES_DU_CHOIX[choix];
 }
 
-/** Une section est figée quand c'est la seule affichée : on ne peut pas tout masquer. */
-export function estFigee(preferences: PreferencesMenu, section: Section): boolean {
-  return basculer(preferences, section) === null;
+/** Le choix correspondant aux préférences ; aucune section (impossible par le schéma) vaut les deux. */
+export function choixDe(preferences: PreferencesMenu): ChoixMenu {
+  if (preferences.analyser === preferences.gerer) return 'les_deux';
+  return preferences.analyser ? 'analyser' : 'gerer';
 }
 
 export function lirePreferencesLocales(stockage: Storage): PreferencesMenu | null {

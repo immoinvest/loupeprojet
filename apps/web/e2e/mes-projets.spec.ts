@@ -8,12 +8,12 @@ import {
   ouvrirNavigation,
 } from './aides';
 
-test('au premier lancement, la racine mène à « Mes projets » avec le projet d’exemple', async ({
+test('au premier lancement, la racine est l’accueil ; « Mes projets » montre le projet d’exemple', async ({
   page,
 }) => {
   await page.goto('/');
-  await expect(page).toHaveURL(/\/projets$/);
-  await expect(page.getByRole('heading', { level: 1, name: 'Mes projets' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'Bienvenue sur Deklic' })).toBeVisible();
+  await ouvrirMesProjets(page);
 
   const liste = page.getByRole('main');
   await expect(liste.getByRole('link', { name: NOM_EXEMPLE })).toBeVisible();

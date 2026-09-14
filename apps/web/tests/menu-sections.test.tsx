@@ -48,7 +48,12 @@ describe('menu à deux sections', () => {
       'href',
       '/projets/nouveau',
     );
-    expect(within(analyser).getByRole('link', { name: 'Comparer' })).toBeInTheDocument();
+    // Comparer est dans la page Tous mes projets, plus dans le menu.
+    expect(within(analyser).queryByRole('link', { name: 'Comparer' })).toBeNull();
+    expect(within(analyser).getByRole('link', { name: 'Tous mes projets · 1' })).toHaveAttribute(
+      'href',
+      '/projets',
+    );
     const gerer = section('Gérer');
     expect(within(gerer).getAllByRole('link')).toHaveLength(1);
     expect(within(gerer).getByRole('link', { name: 'Gérer mes biens loués' })).toHaveAttribute(
@@ -58,7 +63,7 @@ describe('menu à deux sections', () => {
     expect(within(barreLaterale()).queryByRole('button', { name: 'Nouveau projet' })).toBeNull();
   });
 
-  it('au-delà de 5 projets : les 5 plus récents puis « Tous mes projets · N »', async () => {
+  it('les 3 projets les plus récents puis « Tous mes projets · N »', async () => {
     const stockage = window.localStorage;
     ecrireProjets(
       stockage,
@@ -66,15 +71,15 @@ describe('menu à deux sections', () => {
     );
     render(<AppEnMemoire chemin="/comparer" stockage={stockage} compte={clientMemoire()} />);
     const analyser = await screen.findByRole('navigation', { name: 'Analyser' });
-    expect(within(analyser).queryByRole('link', { name: /Projet 5/ })).toBeInTheDocument();
-    expect(within(analyser).queryByRole('link', { name: /Projet 6/ })).toBeNull();
+    expect(within(analyser).queryByRole('link', { name: /Projet 3/ })).toBeInTheDocument();
+    expect(within(analyser).queryByRole('link', { name: /Projet 4/ })).toBeNull();
     expect(within(analyser).getByRole('link', { name: 'Tous mes projets · 7' })).toHaveAttribute(
       'href',
       '/projets',
     );
   });
 
-  it('connecté : Ajouter un bien, Accueil et le nombre de loyers en retard', async () => {
+  it('connecté : Ajouter un bien, Loyers du mois et le nombre de loyers en retard', async () => {
     render(
       <AppEnMemoire
         chemin="/projets"
@@ -87,9 +92,9 @@ describe('menu à deux sections', () => {
       'href',
       '/gerer/ajouter',
     );
-    const accueil = await within(gerer).findByRole('link', { name: /Accueil/ });
-    expect(accueil).toHaveAttribute('href', '/gerer');
-    expect(await within(accueil).findByLabelText('1 loyer en retard')).toHaveTextContent('1');
+    const loyers = await within(gerer).findByRole('link', { name: /Loyers du mois/ });
+    expect(loyers).toHaveAttribute('href', '/gerer');
+    expect(await within(loyers).findByLabelText('1 loyer en retard')).toHaveTextContent('1');
   });
 });
 
@@ -104,47 +109,49 @@ describe('Mon menu (page Mon compte)', () => {
     );
   }
 
-  it('masque Analyser : la section disparaît, Gérer devient figé, le logo mène à Gérer', async () => {
+  it('trois choix : Gérer seulement, Analyser seulement, puis les deux ; le logo reste sur l’accueil', async () => {
     const utilisateur = userEvent.setup();
     const gestion = clientGestionMemoire();
     monter(gestion);
-    const analyser = await screen.findByRole('switch', { name: /Analyser/ });
-    const gerer = screen.getByRole('switch', { name: /Gérer/ });
-    expect(analyser).toBeChecked();
-    expect(gerer).toBeChecked();
-    expect(gerer).toBeEnabled();
+    const lesDeux = await screen.findByRole('radio', { name: /Analyser et Gérer/ });
+    const gererSeul = screen.getByRole('radio', { name: /Gérer seulement/ });
+    const analyserSeul = screen.getByRole('radio', { name: /Analyser seulement/ });
+    expect(lesDeux).toBeChecked();
 
-    await utilisateur.click(analyser);
-    expect(analyser).not.toBeChecked();
-    expect(gerer).toBeDisabled();
+    await utilisateur.click(gererSeul);
+    expect(gererSeul).toBeChecked();
     expect(within(barreLaterale()).queryByRole('navigation', { name: 'Analyser' })).toBeNull();
-    expect(within(barreLaterale()).getAllByRole('link')[0]).toHaveAttribute('href', '/gerer');
+    expect(within(barreLaterale()).getAllByRole('link')[0]).toHaveAttribute('href', '/');
     expect(gestion.donnees().preferences).toEqual({ analyser: false, gerer: true });
 
-    await utilisateur.click(analyser);
-    expect(analyser).toBeChecked();
-    expect(gerer).toBeEnabled();
+    await utilisateur.click(analyserSeul);
+    expect(analyserSeul).toBeChecked();
+    expect(within(barreLaterale()).queryByRole('navigation', { name: 'Gérer' })).toBeNull();
+    expect(gestion.donnees().preferences).toEqual({ analyser: true, gerer: false });
+
+    await utilisateur.click(lesDeux);
     expect(section('Analyser')).toBeInTheDocument();
+    expect(section('Gérer')).toBeInTheDocument();
+    expect(gestion.donnees().preferences).toEqual({ analyser: true, gerer: true });
   });
 
-  it('un enregistrement refusé remet l’interrupteur et le dit', async () => {
+  it('un enregistrement refusé remet le choix précédent et le dit', async () => {
     const utilisateur = userEvent.setup();
     monter(clientGestionMemoire({ erreurs: { enregistrerPreferences: 'reseau' } }));
-    const gerer = await screen.findByRole('switch', { name: /Gérer/ });
-    await utilisateur.click(gerer);
+    await utilisateur.click(await screen.findByRole('radio', { name: /Analyser seulement/ }));
     expect(await screen.findByRole('alert')).toHaveTextContent(ERREURS_GESTION.reseau);
-    expect(gerer).toBeChecked();
+    expect(screen.getByRole('radio', { name: /Analyser et Gérer/ })).toBeChecked();
     expect(section('Gérer')).toBeInTheDocument();
   });
 
-  it('pendant le chargement puis en cas d’erreur, la carte le dit sans interrupteur', async () => {
+  it('pendant le chargement puis en cas d’erreur, la carte le dit sans choix', async () => {
     const enAttente: ClientGestion = {
       ...clientGestionMemoire(),
       etat: () => new Promise(() => undefined),
     };
     monter(enAttente);
     expect(await screen.findByText(TEXTES_MON_MENU.chargement)).toBeInTheDocument();
-    expect(screen.queryByRole('switch')).toBeNull();
+    expect(screen.queryByRole('radio')).toBeNull();
   });
 
   it('API indisponible : la carte le dit', async () => {

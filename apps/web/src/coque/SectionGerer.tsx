@@ -11,7 +11,7 @@ import { loyersEnRetard, TEXTES_MENU } from '@/textes/gerer';
 import { CLASSE_ETIQUETTE, classeLien, classeLienCreation } from './liens';
 
 /**
- * Section « Gérer » : ajouter un bien et l'accueil (avec les loyers en retard). Sans compte, une seule
+ * Section « Gérer » : ajouter un bien et les loyers du mois (avec les loyers en retard). Sans compte, une seule
  * ligne vers la page qui explique pourquoi il en faut un. Les pages Loyers, Biens, Locataires et Argent
  * y entreront avec leurs features.
  */
@@ -31,7 +31,7 @@ export function SectionGerer(): JSX.Element {
           </NavLink>
           <NavLink to="/gerer" end className={classeLien}>
             <House size={18} aria-hidden="true" />
-            <span className="flex-1">{TEXTES_MENU.accueil}</span>
+            <span className="flex-1">{TEXTES_MENU.loyersDuMois}</span>
             {retards > 0 && (
               <span
                 aria-label={loyersEnRetard(retards)}
