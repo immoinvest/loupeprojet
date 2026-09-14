@@ -1,3 +1,4 @@
+import { prixRetenu } from '../achat';
 import type { ResultatFinancement } from '../financement';
 import type { ResultatFiscalite } from '../fiscalite/types';
 import type { Regles } from '../regles/types';
@@ -30,13 +31,14 @@ export function calculerRevente(
   regles: Regles,
 ): ResultatRevente {
   const { achat, revente } = projet.hypotheses;
-  const valeur = valeurRevente(achat.prix, revente.evolutionAnnuelle, revente.annees);
+  const prix = prixRetenu(achat);
+  const valeur = valeurRevente(prix, revente.evolutionAnnuelle, revente.annees);
   const frais = fraisVente(valeur, revente);
   const plusValue = plusValueImposable(
     {
       valeur,
       fraisVente: frais.total,
-      prixAcquisition: achat.prix,
+      prixAcquisition: prix,
       fraisAcquisitionReels: financement.fraisAcquisition.total,
       travauxReels: achat.travaux,
       annees: revente.annees,

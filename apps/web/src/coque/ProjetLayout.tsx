@@ -14,10 +14,10 @@ import { Link, NavLink, Outlet, useLocation, useNavigate, useParams } from 'reac
 
 import { MARGES_LATERALES, Page, TitrePage } from '@/composants/mise-en-page';
 import { Bouton } from '@/composants/ui';
-import { euros } from '@/formatage/nombres';
 import { useGestion } from '@/gestion/GestionContext';
 import { useProjets } from '@/stockage/ProjetsContext';
 import { STATUTS, StatutProjetSchema, type ProjetEnregistre } from '@/stockage/projets';
+import { libellePrixEnTete } from '@/textes/achat';
 import { TEXTES_PRET } from '@/textes/gerer-pret';
 import { MODES } from '@/textes/regimes';
 
@@ -111,14 +111,14 @@ function useOngletActifEnVue(): RefObject<HTMLElement | null> {
  * une rangée de 48 px, volets dessous (44 px). À partir de 1 536 px : une seule rangée de 56 px.
  */
 function EnTete(): JSX.Element {
-  const { enregistre } = useProjetCourant();
+  const { enregistre, resultats } = useProjetCourant();
   const { changerStatut } = useProjets();
   const { sections } = useGestion();
   const naviguer = useNavigate();
   const bandeRef = useOngletActifEnVue();
+  const { location } = enregistre.projet.hypotheses;
   const enTeteRef = useRef<HTMLElement>(null);
   useMesuresEnTete(enTeteRef, bandeRef);
-  const { achat, location } = enregistre.projet.hypotheses;
 
   return (
     <header ref={enTeteRef} className={`${EN_TETE} ${MARGES_LATERALES}`}>
@@ -134,7 +134,7 @@ function EnTete(): JSX.Element {
           <span className="font-display text-[17px] font-bold text-encre">{enregistre.nom}</span>
         </span>
         <span className="shrink-0 font-display text-lg font-bold md:text-[15px] md:font-semibold md:text-encre-2">
-          {euros(achat.prix)} · {MODES[location.mode]}
+          {libellePrixEnTete(resultats.achat)} · {MODES[location.mode]}
         </span>
       </div>
       <div className="hidden 2xl:block 2xl:flex-1" />
