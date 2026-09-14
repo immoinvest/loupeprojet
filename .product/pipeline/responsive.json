@@ -121,6 +121,10 @@
           "hash": "857777d",
           "tests": 946,
           "fichiers_de_test": 135
+        },
+        {
+          "etape": "US-3d",
+          "hash": "8344d5a"
         }
       ],
       "notes": [

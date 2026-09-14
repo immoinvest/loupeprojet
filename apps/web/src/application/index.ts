@@ -6,3 +6,13 @@ export {
   type ResultatInstallation,
   type SuiviInstallation,
 } from './installation';
+export {
+  capacitesDuNavigateur,
+  donneesPartage,
+  estAnnulation,
+  modePartage,
+  type CapacitesPartage,
+  type DonneesPartage,
+  type FenetrePartage,
+  type ModePartage,
+} from './partage-natif';

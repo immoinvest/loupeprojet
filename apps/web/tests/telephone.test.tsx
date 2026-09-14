@@ -1,11 +1,113 @@
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import userEvent from '@testing-library/user-event';
+import { afterEach, describe, expect, it, vi, type Mock, type MockInstance } from 'vitest';
 
 import { AppEnMemoire } from '@/App';
 import { LONGUEUR_MAX_TEXTE_PARTAGE } from '@/annonces';
+import { creerProjet, ecrireProjets } from '@/stockage/projets';
 import { TEXTES_PARTAGE_RECU } from '@/textes/application';
+import { TEXTES_PARTAGE_PROJET } from '@/textes/partage';
 
 const LEBONCOIN = 'https://www.leboncoin.fr/ad/ventes_immobilieres/2214738851';
+
+afterEach(() => {
+  vi.restoreAllMocks();
+  Reflect.deleteProperty(window, 'matchMedia');
+  Reflect.deleteProperty(navigator, 'share');
+});
+
+/** Un écran tactile : `(pointer: coarse)` est vrai, les autres requêtes fausses. */
+function ecranTactile(): void {
+  Object.defineProperty(window, 'matchMedia', {
+    configurable: true,
+    writable: true,
+    value: (requete: string) => ({
+      matches: requete === '(pointer: coarse)',
+      addEventListener: () => undefined,
+      removeEventListener: () => undefined,
+    }),
+  });
+}
+
+/** `navigator.share` simulé, qui rend le résultat donné. */
+function feuilleDePartage(resultat: () => Promise<void>): Mock<() => Promise<void>> {
+  const share = vi.fn(resultat);
+  Object.defineProperty(navigator, 'share', { configurable: true, writable: true, value: share });
+  return share;
+}
+
+/** Un projet enregistré, puis son rapport ouvert ; rend l'utilisateur et l'espion du presse-papiers. */
+async function ouvrirProjet(): Promise<{
+  utilisateur: ReturnType<typeof userEvent.setup>;
+  writeText: MockInstance<(texte: string) => Promise<void>>;
+}> {
+  ecrireProjets(window.localStorage, [creerProjet({ nom: 'À partager', genererId: () => 'p1' })]);
+  const utilisateur = userEvent.setup();
+  const writeText = vi.spyOn(navigator.clipboard, 'writeText');
+  render(<AppEnMemoire chemin="/projets/p1" />);
+  await screen.findByRole('navigation', { name: 'Volets du rapport' });
+  return { utilisateur, writeText };
+}
+
+describe('Partager un projet depuis le téléphone', () => {
+  it('au doigt, ouvre la feuille de partage avec le nom, une phrase et le lien', async () => {
+    ecranTactile();
+    const share = feuilleDePartage(() => Promise.resolve());
+    const { utilisateur, writeText } = await ouvrirProjet();
+
+    await utilisateur.click(screen.getByRole('button', { name: TEXTES_PARTAGE_PROJET.partager }));
+    expect(share).toHaveBeenCalledWith({
+      title: 'À partager',
+      text: TEXTES_PARTAGE_PROJET.message('À partager'),
+      url: expect.stringContaining('/partage#p=') as string,
+    });
+    expect(
+      await screen.findByRole('button', { name: TEXTES_PARTAGE_PROJET.partage }),
+    ).toBeInTheDocument();
+    expect(screen.getByText(TEXTES_PARTAGE_PROJET.avertissement)).toBeInTheDocument();
+    expect(writeText).not.toHaveBeenCalled();
+  });
+
+  it('feuille fermée sans choisir : ni copie, ni message', async () => {
+    ecranTactile();
+    const share = feuilleDePartage(() => Promise.reject(new DOMException('fermée', 'AbortError')));
+    const { utilisateur, writeText } = await ouvrirProjet();
+
+    await utilisateur.click(screen.getByRole('button', { name: TEXTES_PARTAGE_PROJET.partager }));
+    expect(share).toHaveBeenCalledTimes(1);
+    expect(writeText).not.toHaveBeenCalled();
+    expect(
+      screen.getByRole('button', { name: TEXTES_PARTAGE_PROJET.partager }),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(TEXTES_PARTAGE_PROJET.avertissement)).toBeNull();
+  });
+
+  it('autre refus de la feuille de partage : le lien est copié', async () => {
+    ecranTactile();
+    feuilleDePartage(() => Promise.reject(new DOMException('refusé', 'NotAllowedError')));
+    const { utilisateur, writeText } = await ouvrirProjet();
+    writeText.mockResolvedValue(undefined);
+
+    await utilisateur.click(screen.getByRole('button', { name: TEXTES_PARTAGE_PROJET.partager }));
+    expect(
+      await screen.findByRole('button', { name: TEXTES_PARTAGE_PROJET.copie }),
+    ).toBeInTheDocument();
+    expect(writeText).toHaveBeenCalledWith(expect.stringContaining('/partage#p='));
+  });
+
+  it('à la souris, le lien est copié et l’avertissement s’affiche', async () => {
+    const share = feuilleDePartage(() => Promise.resolve());
+    const { utilisateur, writeText } = await ouvrirProjet();
+    writeText.mockResolvedValue(undefined);
+
+    await utilisateur.click(screen.getByRole('button', { name: TEXTES_PARTAGE_PROJET.partager }));
+    expect(
+      await screen.findByRole('button', { name: TEXTES_PARTAGE_PROJET.copie }),
+    ).toBeInTheDocument();
+    expect(screen.getByText(TEXTES_PARTAGE_PROJET.avertissement)).toBeInTheDocument();
+    expect(share).not.toHaveBeenCalled();
+  });
+});
 
 describe('Recevoir une annonce partagée', () => {
   it('le lien trouvé dans le texte pré-remplit Nouveau projet', async () => {
