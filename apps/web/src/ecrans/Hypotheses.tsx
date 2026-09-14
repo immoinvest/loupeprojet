@@ -93,7 +93,7 @@ export function Hypotheses(): JSX.Element {
               {g === GROUPE_LOCATION ? `${g.titre} — ${TYPES_LOCATION[mode]}` : g.titre}
             </h2>
             {g.sousTitre !== undefined && <p className="m-0 text-sm text-encre-2">{g.sousTitre}</p>}
-            {g === GROUPE_LOCATION && <SelecteurLocation key={enregistre.id} />}
+            {g === GROUPE_LOCATION && <SelecteurLocation />}
             <GrilleHypotheses key={enregistre.id} groupe={g} />
           </Carte>
         ),
