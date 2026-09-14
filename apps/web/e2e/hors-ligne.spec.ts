@@ -52,3 +52,18 @@ test('une annonce partagée reste sur l’appareil : la coque en cache la sert, 
   await expect(page.locator('textarea[name="texte"]')).toHaveValue(annonce);
   expect(envoyees.filter((adresse) => adresse.includes('texte='))).toEqual([]);
 });
+
+test('un fichier ouvert dans un onglet ne remplace pas l’application gardée hors ligne', async ({
+  page,
+  context,
+}) => {
+  await ouvrirMesProjets(page);
+  await attendreServiceWorker(page);
+  // Une icône ouverte directement : une navigation de même origine, mais pas une page.
+  await page.goto('/favicon.svg');
+
+  await context.setOffline(true);
+  await page.goto('/projets');
+  await expect(page.getByRole('heading', { level: 1, name: 'Mes projets' })).toBeVisible();
+  await context.setOffline(false);
+});

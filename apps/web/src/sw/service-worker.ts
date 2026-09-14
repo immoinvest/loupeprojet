@@ -6,6 +6,7 @@
 import {
   FICHIERS_FIXES,
   cachesPerimes,
+  estUnePage,
   fichiersDeLaCoque,
   nomDuCache,
   strategiePour,
@@ -79,7 +80,9 @@ const REPONDRE: Readonly<
   navigation: async (requete) => {
     try {
       const reponse = await fetch(requete);
-      await mettreEnCache(COQUE, reponse.clone());
+      if (estUnePage(reponse.headers.get('content-type'))) {
+        await mettreEnCache(COQUE, reponse.clone());
+      }
       return reponse;
     } catch {
       return depuisLeCache(COQUE);

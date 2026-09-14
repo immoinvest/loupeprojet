@@ -7,6 +7,7 @@ export {
   ACTION_PARTAGE,
   FICHIERS_FIXES,
   cachesPerimes,
+  estUnePage,
   fichiersDeLaCoque,
   nomDuCache,
   strategiePour,

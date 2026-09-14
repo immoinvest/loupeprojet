@@ -71,6 +71,14 @@ export function strategiePour(requete: RequeteInterceptee, origine: string): Str
   return FICHIERS_FIXES.includes(url.pathname) ? 'reseau-d-abord' : 'ignorer';
 }
 
+/**
+ * Seule une page HTML peut devenir la coque gardée hors ligne : un fichier ouvert directement dans un
+ * onglet (icône, manifeste) la remplacerait sinon, et Deklic s'ouvrirait sur ce fichier sans réseau.
+ */
+export function estUnePage(typeDeContenu: string | null): boolean {
+  return typeDeContenu?.split(';')[0]?.trim().toLowerCase() === 'text/html';
+}
+
 const ATTRIBUT_ASSET = /\b(?:src|href)="(\/assets\/[^"?#]+)"/g;
 
 /** Scripts et styles construits que la page référence (`/assets/…`), sans doublon. */

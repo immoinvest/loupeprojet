@@ -133,6 +133,10 @@
         {
           "etape": "US-9",
           "hash": "1938e93"
+        },
+        {
+          "etape": "QA : propriétés et lien vide",
+          "hash": "47cab96"
         }
       ],
       "notes": [

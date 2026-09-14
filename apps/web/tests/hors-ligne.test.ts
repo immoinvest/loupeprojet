@@ -6,6 +6,7 @@ import {
   URL_SERVICE_WORKER,
   cachesPerimes,
   enregistrerServiceWorker,
+  estUnePage,
   fichiersDeLaCoque,
   nomDuCache,
   strategiePour,
@@ -84,6 +85,18 @@ describe('strategiePour et les annonces partagées', () => {
       'navigation',
     );
     expect(strategiePour(requete(`${ACTION_PARTAGE}?texte=x`), ORIGINE)).toBe('ignorer');
+  });
+});
+
+describe('estUnePage', () => {
+  it('seule une page HTML peut devenir la coque gardée hors ligne', () => {
+    expect(estUnePage('text/html; charset=utf-8')).toBe(true);
+    expect(estUnePage(' TEXT/HTML ')).toBe(true);
+    expect(estUnePage('image/svg+xml')).toBe(false);
+    expect(estUnePage('application/manifest+json')).toBe(false);
+    expect(estUnePage('text/html-bis')).toBe(false);
+    expect(estUnePage('')).toBe(false);
+    expect(estUnePage(null)).toBe(false);
   });
 });
 
