@@ -90,7 +90,7 @@ export function brouillonDepuisProjet(enregistre: ProjetEnregistre, aujourdhui: 
       loyerHorsCharges,
       charges: enCentimes(chargesMensuelles(location)),
       // Bail mobilité (moyenne durée) : aucun dépôt de garantie ne peut être exigé (loi du 6 juillet
-      // 1989, art. 25-6).
+      // 1989, art. 25-17).
       depot: location.mode === 'moyenne_duree' ? 0 : depotParDefaut(type, loyerHorsCharges),
     },
   };

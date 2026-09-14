@@ -124,6 +124,7 @@ export function FormulaireProjet({
           <Champ cle="ges" libelle="GES" options={DPE} {...c} />
           <Champ cle="etat" libelle="État" options={ETATS} {...c} />
           <Champ cle="exterieur" libelle="Balcon ou terrasse" options={OUI_NON} {...c} />
+          <Champ cle="venduLoue" libelle="Vendu loué" options={OUI_NON} {...c} />
           <Champ cle="codePostal" libelle="Code postal" erreur={erreurs.codePostal} {...c} />
           <Champ cle="ville" libelle="Ville" erreur={erreurs.ville} {...c} />
         </div>
@@ -133,7 +134,7 @@ export function FormulaireProjet({
             aria-expanded={travauxOuverts}
             aria-controls="champ-travaux"
             onClick={basculerTravaux}
-            className="inline-flex min-h-[44px] items-center gap-2 self-start rounded-full border border-bordure bg-surface px-4 text-sm font-semibold text-encre-2 hover:bg-accent-fond"
+            className="inline-flex min-h-[44px] items-center gap-2 self-start rounded-full border border-bordure bg-surface px-4 text-sm font-semibold text-encre-2 survol-fond"
           >
             {travauxOuverts ? '− Retirer les travaux' : '+ Ajouter des travaux'}
           </button>
@@ -251,7 +252,7 @@ export function FormulaireProjet({
         </div>
       </Carte>
 
-      <label className="flex min-h-[44px] w-fit cursor-pointer items-center gap-3 rounded-encart px-2 text-[15px] hover:bg-accent-fond">
+      <label className="flex min-h-[44px] w-fit cursor-pointer items-center gap-3 rounded-encart px-2 text-[15px] survol-fond">
         <input
           type="checkbox"
           checked={visiteFaite}

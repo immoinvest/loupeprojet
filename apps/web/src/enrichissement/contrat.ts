@@ -27,6 +27,8 @@ export const ReponseExtractionSchema = z.object({
     taxeFonciere: z.number().nonnegative().nullable(),
     honorairesAgence: z.number().nonnegative().nullable(),
     meuble: z.boolean().nullable(),
+    /** Loyer mensuel du locataire en place ; absent des tests et des réponses d'un Worker qui l'ignorerait. */
+    loyerActuel: z.number().nonnegative().nullable().optional(),
     /** Absents des réponses mises en cache avant la version 2 du prompt. */
     etat: z.enum(['a_renover', 'a_rafraichir', 'bon_etat', 'renove']).nullable().optional(),
     exterieur: z.boolean().nullable().optional(),

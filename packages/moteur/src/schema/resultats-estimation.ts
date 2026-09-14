@@ -12,7 +12,7 @@ export const EstimationResultatSchema = z.strictObject({
   prixM2Marche: n,
   corrections: z.array(
     z.strictObject({
-      code: z.enum(['dpe', 'etage', 'exterieur', 'charges']),
+      code: z.enum(['dpe', 'etage', 'exterieur', 'occupation', 'charges']),
       taux: n,
       montant: n,
       ignoree: z.boolean(),

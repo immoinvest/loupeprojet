@@ -64,11 +64,150 @@ body {
   min-height: 100dvh;
 }
 
-a {
-  color: var(--color-accent);
+/*
+ * Éléments cliquables : curseur, transition et survol (guide : .product/design/design-guidelines.md).
+ * Tailwind v4 laisse aux boutons la flèche du navigateur : la main revient ici pour tout ce qui se
+ * clique, la flèche barrée pour ce qui est désactivé. En couche `base`, pour que les utilitaires
+ * d'un composant (`text-white` d'un lien habillé en bouton…) gardent le dernier mot.
+ */
+@layer base {
+  a[href],
+  button,
+  [role='button'],
+  summary,
+  select,
+  label:has(input:is([type='checkbox'], [type='radio'])),
+  input:is([type='checkbox'], [type='radio'], [type='range'], [type='file'], [type='submit']) {
+    cursor: pointer;
+    transition-property: color, background-color, border-color, text-decoration-color, box-shadow;
+    transition-duration: 150ms;
+    transition-timing-function: ease-out;
+  }
+
+  :disabled,
+  [aria-disabled='true'],
+  label:has(input:disabled) {
+    cursor: not-allowed;
+  }
+
+  a {
+    color: var(--color-accent);
+    text-underline-offset: 0.2em;
+  }
+
+  @media (hover: hover) {
+    a[href]:hover {
+      color: var(--color-accent-fonce);
+      text-decoration-thickness: 2px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      transition-duration: 0s !important;
+    }
+  }
 }
-a:hover {
-  color: var(--color-accent-fonce);
+
+/*
+ * Champs de saisie : la bordure fonce au survol, sauf en erreur, pendant la saisie ou désactivés.
+ * En couche `utilities` pour passer devant `border-bordure`.
+ */
+@layer utilities {
+  @media (hover: hover) {
+    :is(
+        input:not([type='checkbox'], [type='radio'], [type='range'], [type='hidden']),
+        select,
+        textarea
+      ):hover:not(:focus, :disabled, [readonly], [aria-invalid='true'], .border-probleme) {
+      border-color: var(--color-encre-4);
+    }
+  }
+}
+
+/*
+ * Recettes de survol : une par famille d'élément cliquable. Elles ne s'appliquent qu'aux appareils
+ * qui survolent (pas d'état collé au doigt) et jamais à un élément désactivé. Un élément déjà
+ * sélectionné (onglet actif, choix coché) ne reçoit pas de recette : il est déjà mis en avant.
+ */
+
+/* Bouton plein bleu (action principale) : le bleu fonce. */
+@utility survol-plein {
+  @media (hover: hover) {
+    &:hover:not(:disabled, [aria-disabled='true']) {
+      background-color: var(--color-accent-fonce);
+    }
+  }
+}
+
+/* Bouton plein rouge (action destructrice confirmée) : le rouge fonce. */
+@utility survol-danger-plein {
+  @media (hover: hover) {
+    &:hover:not(:disabled, [aria-disabled='true']) {
+      background-color: var(--color-probleme-texte);
+    }
+  }
+}
+
+/* Bouton à contour, puce, tuile, entrée de menu, bouton icône : fond bleuté, bordure bleue. */
+@utility survol-fond {
+  @media (hover: hover) {
+    &:hover:not(:disabled, [aria-disabled='true']) {
+      background-color: var(--color-accent-fond);
+      border-color: var(--color-accent-bordure);
+    }
+  }
+}
+
+/* Même famille, posée sur un fond déjà bleuté (encart, bouton teinté) : un cran plus soutenu. */
+@utility survol-fond-fort {
+  @media (hover: hover) {
+    &:hover:not(:disabled, [aria-disabled='true']) {
+      background-color: var(--color-accent-doux);
+      border-color: var(--color-accent-bordure);
+    }
+  }
+}
+
+/* Action destructrice discrète (supprimer, se déconnecter) : fond et texte rouges. */
+@utility survol-danger {
+  @media (hover: hover) {
+    &:hover:not(:disabled, [aria-disabled='true']) {
+      background-color: var(--color-probleme-fond);
+      color: var(--color-probleme-texte);
+    }
+  }
+}
+
+/* Lien ou bouton texte, titre cliquable : bleu foncé et souligné. */
+@utility survol-texte {
+  @media (hover: hover) {
+    &:hover:not(:disabled, [aria-disabled='true']) {
+      color: var(--color-accent-fonce);
+      text-decoration-line: underline;
+      text-decoration-thickness: 2px;
+      text-underline-offset: 0.2em;
+    }
+  }
+}
+
+/* Texte gris cliquable (volet inactif, fil d'Ariane, choix secondaire) : il passe à l'encre ; un volet montre son trait. */
+@utility survol-discret {
+  @media (hover: hover) {
+    &:hover:not(:disabled, [aria-disabled='true']) {
+      color: var(--color-encre);
+      border-color: var(--color-encre-4);
+    }
+  }
+}
+
+/* Pastille colorée cliquable (statut du projet) : un halo de sa propre couleur, qui garde la teinte du statut. */
+@utility survol-pastille {
+  @media (hover: hover) {
+    &:hover:not(:disabled, [aria-disabled='true']) {
+      box-shadow: 0 0 0 3px color-mix(in srgb, currentColor 18%, transparent);
+    }
+  }
 }
 
 :focus-visible {

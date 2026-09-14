@@ -7,6 +7,7 @@ import {
   tauxDpe,
   tauxEtage,
   tauxExterieur,
+  tauxOccupation,
 } from '../../src/estimation';
 import { projetExemple } from '../../src/exemples/t3-marseille';
 import { obtenirRegles } from '../../src/regles';
@@ -77,6 +78,12 @@ describe('corrections unitaires', () => {
     expect(tauxExterieur(bien({ exterieur: true }), regles)).toBe(0.088);
     expect(tauxExterieur(bien({ exterieur: false }), regles)).toBeNull();
     expect(tauxExterieur(bien({}), regles)).toBeNull();
+  });
+
+  it('vendu loué : décote seulement quand le locataire est en place', () => {
+    expect(tauxOccupation(bien({ venduLoue: true }), regles)).toBe(-0.1);
+    expect(tauxOccupation(bien({ venduLoue: false }), regles)).toBeNull();
+    expect(tauxOccupation(bien({}), regles)).toBeNull();
   });
 });
 
@@ -236,6 +243,34 @@ describe('estimerPrix — T3 Marseille', () => {
       actualiseAu: '2025-S1',
     });
     expect(e?.selonEtat.a_renover).toBe(196_560);
+  });
+
+  it('vendu loué : −10 % additionnés aux autres corrections, ignorable', () => {
+    const e = estimerPrix(projet({ venduLoue: true }), regles);
+    // 198 250 € × (1 − 0,9 % − 10 %) = 176 640,75 € ; charges +10 267,66 € (sous la borne de 15 %)
+    // → 186 908,41 € ; ±8 % ; prix retenu 155 000 € ÷ 186 908,41 € − 1 = −17,07 %.
+    expect(e?.corrections).toEqual([
+      { code: 'etage', taux: -0.009, montant: -1784, ignoree: false },
+      { code: 'occupation', taux: -0.1, montant: -19_825, ignoree: false },
+      { code: 'charges', taux: 0.0518, montant: 10_268, ignoree: false },
+    ]);
+    expect(e).toMatchObject({
+      centre: 186_908,
+      bas: 171_956,
+      haut: 201_861,
+      ecartPrix: -0.1707,
+    });
+    const ignoree = estimerPrix(
+      projet({ venduLoue: true }, { estimation: { correctionsIgnorees: ['occupation'] } }),
+      regles,
+    );
+    expect(ignoree?.corrections[1]).toEqual({
+      code: 'occupation',
+      taux: -0.1,
+      montant: -19_825,
+      ignoree: true,
+    });
+    expect(ignoree?.centre).toBe(estimerPrix(projet(), regles)?.centre);
   });
 
   it('sans ventes connues : pas d’estimation', () => {

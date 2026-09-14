@@ -79,7 +79,7 @@ describe('menu à deux sections', () => {
     );
   });
 
-  it('connecté : Ajouter un bien, Loyers du mois et le nombre de loyers en retard', async () => {
+  it('connecté : Ajouter un bien, Loyers du mois avec les retards, puis Tous les loyers', async () => {
     render(
       <AppEnMemoire
         chemin="/projets"
@@ -95,6 +95,11 @@ describe('menu à deux sections', () => {
     const loyers = await within(gerer).findByRole('link', { name: /Loyers du mois/ });
     expect(loyers).toHaveAttribute('href', '/gerer');
     expect(await within(loyers).findByLabelText('1 loyer en retard')).toHaveTextContent('1');
+    // La page Loyers, mois par mois, a son propre lien.
+    expect(within(gerer).getByRole('link', { name: 'Tous les loyers' })).toHaveAttribute(
+      'href',
+      '/gerer/loyers',
+    );
   });
 });
 

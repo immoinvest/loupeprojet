@@ -23,6 +23,8 @@ export function locataire(id: string, prenom: string, nom: string): Locataire {
 export interface OptionsLocation {
   readonly bienId?: string;
   readonly locataireId?: string;
+  readonly colocataireIds?: readonly string[];
+  readonly libelle?: string;
   readonly debut?: string;
   readonly fin?: string;
   readonly jourLoyer?: number;
@@ -36,6 +38,8 @@ export function location(id: string, options: OptionsLocation = {}): LocationGer
     id,
     bienId: options.bienId ?? 'bien-lices',
     locataireId: options.locataireId ?? 'locataire-julie',
+    colocataireIds: [...(options.colocataireIds ?? [])],
+    ...(options.libelle === undefined ? {} : { libelle: options.libelle }),
     type: 'meublee',
     debut: options.debut ?? '2025-10-01',
     jourLoyer: options.jourLoyer ?? 5,

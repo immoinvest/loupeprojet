@@ -28,12 +28,14 @@ export const TEXTES_GERER = {
   recu: 'Reçu',
   annuler: 'Annuler',
   tonLocataire: 'ton locataire',
+  sansLocataire: 'Sans locataire :',
 } as const;
 
 export const STATUTS_LOYER: Readonly<Record<StatutLoyer, string>> = {
   a_venir: 'À venir',
   attendu: 'Attendu',
   en_retard: 'En retard',
+  partiel: 'Partiel',
   recu: 'Reçu',
 };
 
@@ -41,6 +43,7 @@ export const TONS_LOYER: Readonly<Record<StatutLoyer, TonPastille>> = {
   a_venir: 'neutre',
   attendu: 'accent',
   en_retard: 'probleme',
+  partiel: 'surveiller',
   recu: 'bon',
 };
 
@@ -77,9 +80,4 @@ export function entreesAVenir(
 ): string {
   const liste = entrees.map((e) => `${e.nom} le ${e.date}`).join(' ; ');
   return `${entrees.length > 1 ? 'Entrées à venir' : 'Entrée à venir'} : ${liste}`;
-}
-
-/** « Sans locataire : Parking Prado » ; plusieurs biens séparés par des virgules. */
-export function biensVacants(noms: readonly string[]): string {
-  return `Sans locataire : ${noms.join(', ')}`;
 }

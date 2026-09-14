@@ -21,7 +21,7 @@ function Choix({
   return (
     <label
       className={`flex min-h-[52px] items-center gap-4 rounded-encart border px-3 py-2 has-focus-visible:outline-3 has-focus-visible:outline-offset-2 has-focus-visible:outline-accent ${
-        actif ? 'border-accent-bordure bg-accent-fond' : 'border-bordure hover:bg-accent-fond'
+        actif ? 'border-accent-bordure bg-accent-fond' : 'border-bordure survol-fond'
       } ${occupe ? 'cursor-wait' : 'cursor-pointer'}`}
     >
       <input

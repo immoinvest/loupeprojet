@@ -7,6 +7,7 @@ import {
   joursDansMois,
   JourSchema,
   periodeDe,
+  periodePrecedente,
   PeriodeSchema,
   periodeSuivante,
 } from '../src/dates';
@@ -66,6 +67,12 @@ describe('périodes', () => {
   it('periodeSuivante passe l’année', () => {
     expect(periodeSuivante('2026-01')).toBe('2026-02');
     expect(periodeSuivante('2026-12')).toBe('2027-01');
+  });
+
+  it('periodePrecedente repasse l’année et revient au point de départ', () => {
+    expect(periodePrecedente('2026-03')).toBe('2026-02');
+    expect(periodePrecedente('2027-01')).toBe('2026-12');
+    expect(periodePrecedente(periodeSuivante('2026-02'))).toBe('2026-02');
   });
 });
 

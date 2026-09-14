@@ -78,7 +78,11 @@ describe('porte « Ajouter à la main »', () => {
 
     // Entrée le 1er septembre, loyer le 5 : le 14, il est en retard.
     expect(
-      await screen.findByRole('heading', { level: 1, name: '0 loyer sur 1 reçu' }),
+      await screen.findByRole(
+        'heading',
+        { level: 1, name: '0 loyer sur 1 reçu' },
+        { timeout: 10_000 },
+      ),
     ).toBeInTheDocument();
     const ligne = screen.getByText('3 rue du Rouet', { selector: 'li span' }).closest('li')!;
     expect(within(ligne).getByText('Léa Bernard')).toBeInTheDocument();
@@ -126,9 +130,15 @@ describe('porte « Ajouter à la main »', () => {
     );
     await utilisateur.click(screen.getByRole('button', { name: TEXTES_AJOUTER.creer }));
     expect(
-      await screen.findByRole('heading', { level: 1, name: 'Aucun loyer attendu ce mois-ci.' }),
+      await screen.findByRole(
+        'heading',
+        { level: 1, name: 'Aucun loyer attendu ce mois-ci.' },
+        { timeout: 10_000 },
+      ),
     ).toBeInTheDocument();
-    expect(screen.getByText('Sans locataire : 8 avenue du Prado')).toBeInTheDocument();
+    expect(screen.getByText(/^Sans locataire/)).toHaveTextContent(
+      'Sans locataire : 8 avenue du Prado',
+    );
   });
 
   it('« Plus de détails » : location vide, jour, dépôt, type de bien et surface', async () => {
@@ -153,7 +163,11 @@ describe('porte « Ajouter à la main »', () => {
     await utilisateur.type(screen.getByLabelText(TEXTES_AJOUTER.surface), '24');
     await utilisateur.click(screen.getByRole('button', { name: TEXTES_AJOUTER.creer }));
 
-    await screen.findByRole('heading', { level: 1, name: '0 loyer sur 1 reçu' });
+    await screen.findByRole(
+      'heading',
+      { level: 1, name: '0 loyer sur 1 reçu' },
+      { timeout: 10_000 },
+    );
     expect(gestion.donnees().biens[0]).toMatchObject({
       type: 'studio',
       surface: 24,

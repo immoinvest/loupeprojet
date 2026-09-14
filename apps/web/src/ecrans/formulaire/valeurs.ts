@@ -36,6 +36,7 @@ export type Cle =
   | 'dpe'
   | 'etat'
   | 'exterieur'
+  | 'venduLoue'
   | 'codePostal'
   | 'ville'
   | 'chargesCoproMois'
@@ -77,6 +78,7 @@ const VIDE: Valeurs = {
   dpe: '',
   etat: '',
   exterieur: '',
+  venduLoue: '',
   codePostal: '',
   ville: '',
   chargesCoproMois: '',
@@ -136,6 +138,7 @@ export function valeursDepuisChamps(champs: ChampsExtraits): ValeursInitiales {
   poser('dpe', champs.dpe);
   poser('etat', champs.etat);
   poser('exterieur', champs.exterieur);
+  poser('venduLoue', champs.venduLoue);
   poser('codePostal', champs.codePostal);
   poser('ville', champs.ville);
   poser('chargesCoproMois', champs.chargesCoproMois);
@@ -263,6 +266,7 @@ export function versSaisie(
     dpe: v.dpe === '' ? undefined : (v.dpe as ClasseEnergie),
     etat: v.etat === '' ? undefined : (v.etat as EtatBien),
     exterieur: v.exterieur === '' ? undefined : v.exterieur === 'oui',
+    venduLoue: v.venduLoue === '' ? undefined : v.venduLoue === 'oui',
     codePostal: v.codePostal.trim(),
     ville: v.ville.trim(),
     chargesCoproMois: opt('chargesCoproMois'),

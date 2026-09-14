@@ -145,9 +145,12 @@ describe('sectionsMethode', () => {
     expect(taxeCommunale?.aConfirmer).toBe(false);
     expect(section('micro_foncier').constantes[0]?.chemin).toBeUndefined();
     expect(section('micro_foncier').constantes[0]?.aConfirmer).toBe(false);
-    // 3 constantes fiscales + 6 coefficients de l'estimation (DPE ×2, étage ×2, extérieur, charges)
-    // + 9 valeurs de départ des types de location (Excel « Projet 92K », Airbnb, choix Deklic).
-    expect(sections.flatMap((s) => s.constantes).filter((c) => c.aConfirmer).length).toBe(18);
+    // 3 constantes fiscales + 7 coefficients de l'estimation (DPE ×2, étage ×2, extérieur, vendu loué,
+    // charges) + 9 valeurs de départ des types de location (Excel « Projet 92K », Airbnb, choix Deklic).
+    expect(sections.flatMap((s) => s.constantes).filter((c) => c.aConfirmer).length).toBe(19);
+    expect(
+      section('estimation').constantes.find((c) => c.chemin === 'estimation.occupation'),
+    ).toMatchObject({ valeur: '−10 %', aConfirmer: true });
   });
 
   it('explique chaque type de location avec ses règles datées', () => {

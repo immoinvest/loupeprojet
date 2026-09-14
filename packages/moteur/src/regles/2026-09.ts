@@ -201,6 +201,11 @@ export const regles202609: Regles = {
     },
     // MeilleursAgents (mai 2020), onze plus grandes villes : balcon ou terrasse +8,8 %.
     exterieur: 0.088,
+    // DGFiP, fiche « L'évaluation des immeubles bâtis » (impots.gouv.fr) : une moins-value de taux
+    // variable affecte les immeubles occupés ; faute de ventes de biens occupés, abattement sur la valeur
+    // du bien libre (≤ 40 % pour une maison). Pratique des notaires : 10 à 20 % pour un bail en cours,
+    // moins sur les petites surfaces recherchées par les investisseurs. Bas de la fourchette (choix Deklic).
+    occupation: -0.1,
     // Observatoire des charges de copropriété ARC/UNARC, 2024 : 26 €/m²/an en moyenne en France.
     // L'écart est capitalisé au rendement locatif brut local, borné à ±15 % (choix Deklic).
     charges: { repereM2An: 26, borne: 0.15 },
@@ -251,6 +256,7 @@ export const regles202609: Regles = {
     'estimation.dpe',
     'estimation.etage',
     'estimation.exterieur',
+    'estimation.occupation',
     'estimation.charges',
     'exploitation.parType.colocation.energieMensuel',
     'exploitation.parType.colocation.internetMensuel',

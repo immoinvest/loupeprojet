@@ -8,6 +8,7 @@ import {
   periodeDe,
   type CreationLocation,
   type NouveauBien,
+  type NouveauLocataire,
   type NouvelleLocation,
   type TypeBien,
   type TypeLocation,
@@ -32,16 +33,16 @@ export interface SaisieMain {
   readonly surface: string;
 }
 
-export type ChampSaisie =
-  | 'adresse'
-  | 'loyer'
-  | 'charges'
-  | 'locataire'
-  | 'email'
-  | 'entree'
-  | 'jourLoyer'
-  | 'depot'
-  | 'surface';
+/** Les champs d'une location, partagés par « Ajouter à la main » et « Louer ». */
+export type ChampLocation = 'loyer' | 'charges' | 'entree' | 'jourLoyer' | 'depot';
+export type ChampLocataire = 'locataire' | 'email';
+export type ChampSaisie = 'adresse' | ChampLocataire | ChampLocation | 'surface';
+
+/** Ce qu'il faut lire d'une saisie pour écrire une location. */
+export type SaisieLocation = Pick<
+  SaisieMain,
+  'type' | 'loyer' | 'charges' | 'entree' | 'jourLoyer' | 'depot'
+>;
 
 export type ResultatSaisie =
   | { readonly ok: true; readonly creation: CreationLocation }
@@ -89,9 +90,9 @@ function nomDuBien(adresse: string): string {
   return adresse.split(',', 1).join('').trim().slice(0, LONGUEUR_NOM_BIEN);
 }
 
-function lireBien(s: SaisieMain, erreurs: ChampSaisie[]): NouveauBien {
+function lireBien(s: SaisieMain, signaler: (champ: 'adresse' | 'surface') => void): NouveauBien {
   const adresse = s.adresse.trim();
-  if (adresse === '') erreurs.push('adresse');
+  if (adresse === '') signaler('adresse');
   const bien: NouveauBien = {
     nom: nomDuBien(adresse),
     adresse,
@@ -100,53 +101,58 @@ function lireBien(s: SaisieMain, erreurs: ChampSaisie[]): NouveauBien {
   };
   if (s.surface.trim() === '') return bien;
   const surface = Number(s.surface.replace(',', '.'));
-  if (!(surface > 0 && surface <= SURFACE_MAX)) erreurs.push('surface');
+  if (!(surface > 0 && surface <= SURFACE_MAX)) signaler('surface');
   return { ...bien, surface };
 }
 
-function lireJourLoyer(texte: string, erreurs: ChampSaisie[]): number {
+function lireJourLoyer(texte: string, signaler: (champ: 'jourLoyer') => void): number {
   if (texte.trim() === '') return JOUR_LOYER_DEFAUT;
   const jour = Number(texte);
-  if (!Number.isInteger(jour) || jour < 1 || jour > JOUR_LOYER_MAX) erreurs.push('jourLoyer');
+  if (!Number.isInteger(jour) || jour < 1 || jour > JOUR_LOYER_MAX) signaler('jourLoyer');
   return jour;
 }
 
 /** Un montant facultatif : vide → valeur par défaut ; illisible → erreur sur le champ. */
-function lireMontant(
+function lireMontant<C extends ChampLocation>(
   texte: string,
   defaut: number,
-  champ: ChampSaisie,
-  erreurs: ChampSaisie[],
+  champ: C,
+  signaler: (champ: C) => void,
 ): number {
   if (texte.trim() === '') return defaut;
   const centimes = centimesDepuisTexte(texte);
-  if (centimes === null) erreurs.push(champ);
+  if (centimes === null) signaler(champ);
   return centimes ?? 0;
 }
 
-function lireLocation(s: SaisieMain, erreurs: ChampSaisie[]): NouvelleLocation {
+/** La location saisie ; chaque champ illisible est signalé, dans l'ordre de l'écran. */
+export function lireLocation(
+  s: SaisieLocation,
+  signaler: (champ: ChampLocation) => void,
+): NouvelleLocation {
   const loyer = centimesDepuisTexte(s.loyer);
-  if (loyer === null) erreurs.push('loyer');
+  if (loyer === null) signaler('loyer');
   const loyerHorsCharges = loyer ?? 0;
-  if (!JourSchema.safeParse(s.entree).success) erreurs.push('entree');
+  if (!JourSchema.safeParse(s.entree).success) signaler('entree');
   return {
     type: s.type,
     debut: s.entree,
-    jourLoyer: lireJourLoyer(s.jourLoyer, erreurs),
+    jourLoyer: lireJourLoyer(s.jourLoyer, signaler),
     loyerHorsCharges,
-    charges: lireMontant(s.charges, 0, 'charges', erreurs),
-    depot: lireMontant(s.depot, depotParDefaut(s.type, loyerHorsCharges), 'depot', erreurs),
+    charges: lireMontant(s.charges, 0, 'charges', signaler),
+    depot: lireMontant(s.depot, depotParDefaut(s.type, loyerHorsCharges), 'depot', signaler),
   };
 }
 
-function lireLocataire(
-  s: SaisieMain,
-  erreurs: ChampSaisie[],
-): { prenom: string; nom: string; email?: string } {
+/** Le locataire saisi : « Prénom Nom » obligatoire, e-mail facultatif mais valide. */
+export function lireLocataire(
+  s: Pick<SaisieMain, 'locataire' | 'email'>,
+  signaler: (champ: ChampLocataire) => void,
+): NouveauLocataire {
   const nom = decouperNom(s.locataire);
-  if (nom === null) erreurs.push('locataire');
+  if (nom === null) signaler('locataire');
   const email = s.email.trim();
-  if (email !== '' && !EmailSchema.safeParse(email).success) erreurs.push('email');
+  if (email !== '' && !EmailSchema.safeParse(email).success) signaler('email');
   const identite = nom ?? { prenom: '', nom: '' };
   return email === '' ? identite : { ...identite, email };
 }
@@ -157,10 +163,13 @@ function lireLocataire(
  */
 export function creationDepuisSaisie(s: SaisieMain): ResultatSaisie {
   const erreurs: ChampSaisie[] = [];
-  const bien = lireBien(s, erreurs);
+  const signaler = (champ: ChampSaisie): void => {
+    erreurs.push(champ);
+  };
+  const bien = lireBien(s, signaler);
   const vacant = s.locataire.trim() === '' && s.email.trim() === '';
-  const location = vacant ? null : lireLocation(s, erreurs);
-  const locataire = vacant ? null : lireLocataire(s, erreurs);
+  const location = vacant ? null : lireLocation(s, signaler);
+  const locataire = vacant ? null : lireLocataire(s, signaler);
   if (erreurs.length > 0) return { ok: false, erreurs };
   return { ok: true, creation: CreationLocationSchema.parse({ bien, locataire, location }) };
 }

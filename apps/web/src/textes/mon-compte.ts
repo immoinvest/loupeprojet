@@ -7,8 +7,6 @@ export const TEXTES_MON_COMPTE = {
   nom: 'Prénom ou nom affiché',
   enregistrer: 'Enregistrer',
   nomEnregistre: "C'est enregistré.",
-  connexion: 'Connexion',
-  methodeEmail: 'Code par e-mail',
   deconnecter: 'Se déconnecter',
   supprimer: 'Supprimer mon compte',
   explicationSuppression:

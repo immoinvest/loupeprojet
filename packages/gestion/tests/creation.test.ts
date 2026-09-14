@@ -20,11 +20,23 @@ const LOCATION: NonNullable<CreationLocation['location']> = {
 };
 
 describe('occupationDe', () => {
-  it('rend le locataire et la location d’un bien loué', () => {
+  it('rend le locataire et la location d’un bien loué, sans colocataire par défaut', () => {
     expect(occupationDe({ bien: BIEN, locataire: LOCATAIRE, location: LOCATION })).toEqual({
       locataire: LOCATAIRE,
       location: LOCATION,
+      colocataires: [],
     });
+  });
+
+  it('colocation : les colocataires suivent, dans l’ordre de saisie', () => {
+    const colocataires = [
+      { prenom: 'Léa', nom: 'Bernard' },
+      { prenom: 'Hugo', nom: 'Petit' },
+    ];
+    expect(
+      occupationDe({ bien: BIEN, locataire: LOCATAIRE, location: LOCATION, colocataires })
+        ?.colocataires,
+    ).toEqual(colocataires);
   });
 
   it('rend null pour un bien vacant, et pour une création incohérente', () => {
