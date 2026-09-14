@@ -50,7 +50,10 @@ export function Profil(): JSX.Element {
           {TEXTES_MON_COMPTE.gratuit} · {compteur}
         </span>
       </div>
-      <NavLink to="/connexion" className="text-sm font-bold whitespace-nowrap">
+      <NavLink
+        to="/connexion"
+        className="text-sm font-bold whitespace-nowrap pointer-coarse:inline-flex pointer-coarse:min-h-11 pointer-coarse:items-center"
+      >
         {TEXTES_MON_COMPTE.seConnecter}
       </NavLink>
     </div>

@@ -3,6 +3,7 @@ import { Navigate } from 'react-router';
 
 import { useCompte } from '@/compte/CompteContext';
 import type { CodeErreurCompte, FournisseurSocial, Resultat } from '@/compte/types';
+import { Page, TitrePage } from '@/composants/mise-en-page';
 import { Bouton, Carte, Ligne, Pastille, TitreCarte } from '@/composants/ui';
 import { ERREURS_COMPTE, initiales, nomAffiche, NOMS_FOURNISSEURS } from '@/textes/compte';
 import { TEXTES_MON_COMPTE as T } from '@/textes/mon-compte';
@@ -35,7 +36,7 @@ export function Compte(): JSX.Element {
   }, [connecte, client]);
 
   if (compte.etat === 'chargement') {
-    return <p className="m-0 p-10 text-encre-3">{T.chargement}</p>;
+    return <p className="m-0 px-4 py-8 text-encre-3 sm:p-10">{T.chargement}</p>;
   }
   if (compte.utilisateur === null) return <Navigate to={destination.current} replace />;
   const utilisateur = compte.utilisateur;
@@ -78,18 +79,16 @@ export function Compte(): JSX.Element {
   };
 
   return (
-    <div className="flex max-w-[760px] flex-col gap-6 p-10">
+    <Page espacement="large" className="max-w-[760px]">
       <div className="flex items-center gap-4">
         <div
           aria-hidden="true"
-          className="flex h-14 w-14 items-center justify-center rounded-full bg-accent-doux font-display text-xl font-bold text-accent"
+          className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-accent-doux font-display text-xl font-bold text-accent"
         >
           {initiales(utilisateur)}
         </div>
         <div className="flex min-w-0 flex-col gap-1">
-          <h1 className="m-0 font-display text-[34px] leading-tight font-bold tracking-tight">
-            {T.titre}
-          </h1>
+          <TitrePage>{T.titre}</TitrePage>
           <span className="truncate text-[15px] text-encre-3">{nomAffiche(utilisateur)}</span>
         </div>
       </div>
@@ -116,9 +115,9 @@ export function Compte(): JSX.Element {
             e.preventDefault();
             void enregistrer();
           }}
-          className="flex items-end gap-3"
+          className="flex flex-wrap items-end gap-3"
         >
-          <label className="flex flex-1 flex-col gap-1.5">
+          <label className="flex min-w-48 flex-1 flex-col gap-1.5">
             <span className="text-sm font-semibold text-encre-2">{T.nom}</span>
             <input
               name="nom"
@@ -210,6 +209,6 @@ export function Compte(): JSX.Element {
           )}
         </div>
       </Carte>
-    </div>
+    </Page>
   );
 }

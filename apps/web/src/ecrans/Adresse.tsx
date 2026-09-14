@@ -1,5 +1,6 @@
 import { useEffect, useState, type JSX } from 'react';
 
+import { Chapo, Page, TitrePage } from '@/composants/mise-en-page';
 import { Bouton, Carte, Pastille } from '@/composants/ui';
 import { useClientWorker } from '@/coque/ClientWorker';
 import { useProjetCourant } from '@/coque/ProjetLayout';
@@ -111,15 +112,15 @@ export function Adresse(): JSX.Element {
   };
 
   return (
-    <div className="flex flex-col gap-5 px-10 pt-8 pb-10">
+    <Page>
       <div className="flex flex-col gap-2">
-        <h1 className="m-0 max-w-[26ch] font-display text-[36px] leading-[1.1] font-bold tracking-tight">
+        <TitrePage taille="volet" className="max-w-[26ch]">
           Combien vaut ce bien, à l'adresse exacte ?
-        </h1>
-        <p className="m-0 max-w-[64ch] text-[17px] text-encre-2">
+        </TitrePage>
+        <Chapo>
           Les ventes réelles au plus près du bien, ramenées au prix d'aujourd'hui, puis corrigées
           selon son état et ses caractéristiques. Chaque chiffre montre sa source.
-        </p>
+        </Chapo>
       </div>
 
       <Carte>
@@ -130,7 +131,8 @@ export function Adresse(): JSX.Element {
             void chercher();
           }}
         >
-          <label className="flex min-w-[320px] flex-1 flex-col gap-2">
+          {/* Toute la largeur sur téléphone ; à partir de 640 px, le champ et le bouton côte à côte. */}
+          <label className="flex w-full min-w-0 flex-col gap-2 sm:w-auto sm:min-w-[320px] sm:flex-1">
             <span className="text-sm font-semibold text-encre-2">Adresse du bien</span>
             <input
               name="adresse"
@@ -203,6 +205,6 @@ export function Adresse(): JSX.Element {
           </p>
         </>
       )}
-    </div>
+    </Page>
   );
 }

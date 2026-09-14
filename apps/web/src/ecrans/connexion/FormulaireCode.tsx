@@ -49,14 +49,19 @@ export function FormulaireCode({
       <button type="submit" disabled={occupe || !codeComplet(code)} className={CLASSE_PRIMAIRE}>
         {TEXTES_CONNEXION.meConnecter}
       </button>
-      <div className="flex items-center justify-between gap-3 text-sm">
-        <button type="button" disabled={occupe} onClick={onRenvoyer} className={CLASSE_LIEN}>
+      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-sm">
+        <button
+          type="button"
+          disabled={occupe}
+          onClick={onRenvoyer}
+          className={`${CLASSE_LIEN} pointer-coarse:min-h-11`}
+        >
           {TEXTES_CONNEXION.renvoyer}
         </button>
         <button
           type="button"
           onClick={onChangerAdresse}
-          className="font-semibold text-encre-3 hover:text-encre"
+          className="font-semibold text-encre-3 hover:text-encre pointer-coarse:min-h-11"
         >
           {TEXTES_CONNEXION.changerAdresse}
         </button>

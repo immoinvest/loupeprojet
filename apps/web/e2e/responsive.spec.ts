@@ -17,13 +17,14 @@ import {
  */
 
 for (const format of FORMATS) {
-  test(`${format.nom} px : les 13 écrans tiennent dans la largeur`, async ({ browser }) => {
-    test.setTimeout(180_000);
+  test(`${format.nom} px : chaque écran tient dans la largeur`, async ({ browser }) => {
+    test.setTimeout(240_000);
     const contexte = await ouvrirContexte(browser, format);
     const page = await contexte.newPage();
     const donnees = await preparerDonnees(page);
 
     for (const ecran of ecransDeReference(donnees)) {
+      if (ecran.avant !== undefined) await ecran.avant(page);
       await page.goto(ecran.chemin);
       await expect(page.getByRole('heading', { level: 1 }).first()).toBeVisible();
       if (ecran.ouvrir !== undefined) await ecran.ouvrir(page);

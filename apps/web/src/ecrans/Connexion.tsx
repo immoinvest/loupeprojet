@@ -96,13 +96,17 @@ export function Connexion(): JSX.Element {
   const f = compte.fournisseurs;
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-fond px-4 py-10">
+    <main className="flex min-h-dvh items-center justify-center bg-fond py-10 pr-[max(1rem,env(safe-area-inset-right))] pl-[max(1rem,env(safe-area-inset-left))]">
       <div className="flex w-full max-w-[440px] flex-col gap-6">
-        <Link to="/projets" aria-label="Deklic : retour à mes projets" className="self-center">
+        <Link
+          to="/projets"
+          aria-label="Deklic : retour à mes projets"
+          className="self-center pointer-coarse:inline-flex pointer-coarse:min-h-11 pointer-coarse:items-center"
+        >
           <LogotypeDeklic hauteur={32} />
         </Link>
 
-        <section className="flex flex-col gap-5 rounded-carte border border-bordure bg-surface p-8 shadow-carte">
+        <section className="flex flex-col gap-5 rounded-carte border border-bordure bg-surface p-5 shadow-carte sm:p-8">
           <div className="flex flex-col gap-1.5 text-center">
             <h1 className="m-0 font-display text-[28px] leading-tight font-bold tracking-tight">
               {etape === 'code' ? TEXTES_CONNEXION.titreCode : TEXTES_CONNEXION.titre}
@@ -169,7 +173,10 @@ export function Connexion(): JSX.Element {
         </section>
 
         <div className="flex flex-col items-center gap-2 text-center">
-          <Link to="/projets" className="text-[15px] font-bold">
+          <Link
+            to="/projets"
+            className="text-[15px] font-bold pointer-coarse:inline-flex pointer-coarse:min-h-11 pointer-coarse:items-center"
+          >
             {TEXTES_CONNEXION.sansCompte}
           </Link>
           <p className="m-0 max-w-[40ch] text-xs text-encre-3">{TEXTES_CONNEXION.mentions}</p>

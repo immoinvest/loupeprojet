@@ -25,15 +25,18 @@ export function Page({
   children,
   espacement = 'normal',
   haut = 'normal',
+  className = '',
 }: {
   children: ReactNode;
   espacement?: keyof typeof ESPACEMENTS;
   /** `serre` quand une barre collante ouvre la page (Hypothèses). */
   haut?: keyof typeof HAUTS;
+  /** Largeur maximale de la page, par exemple `max-w-[760px]`. */
+  className?: string;
 }): JSX.Element {
   return (
     <div
-      className={`flex flex-col ${ESPACEMENTS[espacement]} ${MARGES_LATERALES} ${HAUTS[haut]} pb-8 lg:pb-10 print:pb-10`}
+      className={`flex flex-col ${ESPACEMENTS[espacement]} ${MARGES_LATERALES} ${HAUTS[haut]} pb-8 lg:pb-10 print:pb-10 ${className}`}
     >
       {children}
     </div>

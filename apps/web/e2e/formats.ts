@@ -46,6 +46,8 @@ export function ouvrirContexte(browser: Browser, format: Format): Promise<Browse
     hasTouch: format.tactile,
     locale: 'fr-FR',
     timezoneId: 'Europe/Paris',
+    // Mesures de mise en page : les requêtes simulées de l'API ne doivent pas passer par le cache.
+    serviceWorkers: 'block',
   });
 }
 
@@ -77,14 +79,42 @@ export async function preparerDonnees(page: Page): Promise<DonneesDeTest> {
   });
 }
 
+/** Tous les moyens de connexion proposés : la page Connexion montre chacun de ses boutons. */
+async function simulerFournisseurs(page: Page): Promise<void> {
+  await page.route('**/api/comptes/fournisseurs', (route) =>
+    route.fulfill({ json: { email: true, google: true, apple: true } }),
+  );
+}
+
+/** Une personne connectée, liée à Google : la page Mon compte s'affiche en entier. */
+async function simulerSession(page: Page): Promise<void> {
+  await page.route('**/api/auth/get-session', (route) =>
+    route.fulfill({
+      json: {
+        user: {
+          id: 'camille',
+          name: 'Camille Martin',
+          email: 'camille.martin@exemple.fr',
+          image: null,
+        },
+      },
+    }),
+  );
+  await page.route('**/api/auth/list-accounts', (route) =>
+    route.fulfill({ json: [{ providerId: 'google' }] }),
+  );
+}
+
 export interface Ecran {
   readonly nom: string;
   readonly chemin: string;
+  /** Préparation avant le chargement (réponses simulées de l'API des comptes). */
+  readonly avant?: (page: Page) => Promise<void>;
   /** Geste qui mène à l'écran une fois le chemin chargé. */
   readonly ouvrir?: (page: Page) => Promise<void>;
 }
 
-/** Les 13 écrans de référence de la spec. */
+/** Les écrans de référence ; la session simulée de « Mon compte » reste active : il vient en dernier. */
 export function ecransDeReference({ id, lienPartage }: DonneesDeTest): readonly Ecran[] {
   const projet = `/projets/${id}`;
   return [
@@ -101,6 +131,7 @@ export function ecransDeReference({ id, lienPartage }: DonneesDeTest): readonly 
       },
     },
     { nom: 'Rapport', chemin: projet },
+    { nom: 'Estimation', chemin: `${projet}/adresse` },
     { nom: 'Hypothèses', chemin: `${projet}/hypotheses` },
     { nom: 'Fiscalité', chemin: `${projet}/fiscalite` },
     { nom: 'Revente', chemin: `${projet}/revente` },
@@ -110,6 +141,8 @@ export function ecransDeReference({ id, lienPartage }: DonneesDeTest): readonly 
     { nom: 'Extension', chemin: '/extension' },
     { nom: 'Projet partagé', chemin: lienPartage },
     { nom: "Aperçu d'impression", chemin: `${projet}/imprimer` },
+    { nom: 'Connexion', chemin: '/connexion', avant: simulerFournisseurs },
+    { nom: 'Mon compte', chemin: '/compte', avant: simulerSession },
   ];
 }
 

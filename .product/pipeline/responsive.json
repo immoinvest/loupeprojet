@@ -96,6 +96,12 @@
           "etape": "US-6",
           "hash": "7858182",
           "e2e_hors_ligne": 3
+        },
+        {
+          "etape": "US-6 (API des comptes ignorée)",
+          "hash": "4db7fa6",
+          "tests": 900,
+          "fichiers_de_test": 126
         }
       ],
       "notes": [
