@@ -30,7 +30,7 @@ loupeprojet/
 ```
 src/
 ├── index.ts                 API publique
-├── calculer-projet.ts       calculerProjet(entree, { avecScenarios }) : Zod parse → règles → base → scénarios → meta
+├── calculer-projet.ts       calculerProjet(entree, { avecScenarios }) : Zod parse → règles → base complète (scénarios) ou partielle sans loyer (sections null, manques) → meta
 ├── calculer-base.ts         financement → fiscalité → revente → rendement → verdict (sans scénarios)
 ├── schema/                  bien, marche, hypotheses, projet (entrée) ; resultats (sortie, strictObject)
 ├── regles/                  types.ts, 2026-09.ts (toutes les constantes datées, aConfirmer, simplifications), index.ts

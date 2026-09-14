@@ -1,0 +1,65 @@
+{
+  "feature_slug": "hypotheses-optionnelles",
+  "title": "Hypothèses optionnelles : quatre chiffres suffisent, une analyse qui manque d'une donnée le dit et offre le champ",
+  "started_at": "2026-09-14T12:00:00Z",
+  "current_step": "push",
+  "scope": "packages/moteur/src/{schema/manques.ts,schema/hypotheses.ts,schema/projet.ts,schema/resultats.ts,calculer-base.ts,calculer-projet.ts,financement/effort.ts,verdict,estimation,cashflow,fiscalite,scenarios}, apps/web/src/{annonces/construire.ts,ecrans/formulaire,ecrans/FormulaireProjet.tsx,ecrans/projet/AnalyseIncomplete.tsx,ecrans/rapport/CarteACompleter.tsx,ecrans/{Rapport,Fiscalite,Revente,Hypotheses,MesProjets}.tsx,ecrans/adresse/Loyer.tsx,hypotheses,analyses,enrichissement/loyer.ts,textes/{manques,feux,verdict,methode-verdict}.ts}, apps/web/e2e, docs",
+  "branch": "feat/hypotheses-optionnelles",
+  "base": "master (9d38892), puis cinq fusions de origin/master le 14/09/2026 : PR #39 à #45 ; #51 et #52 ; #49 visite-questions ; #48 hypotheses-financement ; #46 location-types et #47",
+  "prealables": {
+    "fiche_01_hypotheses-financement": "non fusionnée au 14/09/2026 (worktree charming-margulis-6cbc94 à la tête de master, aucun commit, aucune PR)",
+    "fiche_04_achat-negociation": "non fusionnée au 14/09/2026 (worktree trusting-proskuriakova-d8c7d3 à la tête de master, aucun commit, aucune PR)",
+    "recommandation": "attendre leur fusion avant d'implémenter (mêmes fichiers : schéma des hypothèses, effort, feux, Vérifier, Rapport) ; question posée à Pierre au premier message",
+    "decision_pierre": "14/09/2026 : « Avancer quand même » ; TMI 30 % estimée, durée 25 ans, régime inchangé (recommandations retenues)"
+  },
+  "steps": {
+    "discovery": {
+      "status": "completed",
+      "output": ".product/features/hypotheses-optionnelles-discovery.md",
+      "note": "auto-validée avec revue critique : une seule donnée bloquante (le loyer), tranche à 30 % par défaut (les cinq feux n'en dépendent pas), loyer ANIL posé à la création, durée 25 ans, régime retenu inchangé"
+    },
+    "specs": {
+      "status": "completed",
+      "output": ".product/specs/hypotheses-optionnelles-specs.md",
+      "note": "7 stories (US-1 à US-7), toutes Must ; effort L ; matrice donnée absente → effet ; contrats des textes des manques"
+    },
+    "architecture": {
+      "status": "completed",
+      "output": ".product/architecture/hypotheses-optionnelles.md",
+      "note": "ADR-H1 à H5 : union discriminée complet/partiel, tranche par défaut, loyer de marché à la création, effort inconnu ≠ dépassé, défauts affichés dans Vérifier ; ordre en 7 étapes"
+    },
+    "implement": {
+      "status": "completed",
+      "stories_completed": 7,
+      "stories_total": 7,
+      "note": "US-1 à US-7 commitées ; US-4 livrée avec US-2"
+    },
+    "refactor": {
+      "status": "completed",
+      "note": "fusion de master : ResultatsCommuns porte achat ; cartes de la fiche 10 typées ResultatsComplets ; variantesRevente sur projetAHorizon ; helper rapportComplet dans tests/projets.ts"
+    },
+    "qa_tests": {
+      "status": "completed",
+      "note": "après fusion : moteur 275 tests, web 420 tests, couverture 100 % ; typecheck des 7 workspaces vert ; vérifié dans le navigateur (quatre champs, bandeau, 700 € → −261 €/mois)"
+    },
+    "security": {
+      "status": "completed",
+      "note": "aucune entrée nouvelle hors Zod ; le bandeau passe par appliquerSaisie et mettreAJour (validation Zod) ; aucun appel réseau nouveau ; aucun innerHTML"
+    },
+    "push": {
+      "status": "in_progress",
+      "pr": "https://github.com/immoinvest/loupeprojet/pull/54",
+      "note": "PR ouverte ; seconde fusion de master (visite-questions) résolue : vigilance banque et régime seulement, CarteVigilance aussi sous le bandeau ; moteur 305 tests 100 % ; web en cours de vérification ; auto-merge après formats e2e"
+    }
+  },
+  "decisions": {
+    "moteur": "loyerHc optionnel, tmi .default(0.3), revenusMensuels optionnel ; Resultats = ResultatsComplets | ResultatsPartiels (discriminant complet) + manques + raison des feux inconnus ; aucune exception pour un loyer absent",
+    "verifier": "prix, surface, code postal, ville obligatoires ; durée 25 ans, apport 0 €, tranche 30 % pré-remplis badge « estimé » ; loyer vide → loyers ANIL de la commune (provenance anil) sinon absent ; revenus facultatifs",
+    "ecrans": "bandeau AnalyseIncomplete (titre, phrase, champ en ligne, bouton « loyer de marché ») en tête du Rapport, de Fiscalité et de Revente ; cartes « À compléter » ; feux « loyer à indiquer » ; mode document : phrase seule",
+    "tranche": "Fiscalité : chapo « tranche supposée à 30 % » + encart avec le choix ; Rapport : mention sur la carte impôts ; rien ne change quand la tranche vient de l'utilisateur",
+    "hors_perimetre": "onglet Financement et feu effort par la couverture (fiche 01), négociation (04), régime « meilleur des quatre » (refusé), Worker, comptes"
+  },
+  "questions_pour_pierre": [
+    "(répondues le 14/09/2026 : avancer ; TMI 30 % par défaut ; 25 ans ; régime inchangé)"
+  ]
+}

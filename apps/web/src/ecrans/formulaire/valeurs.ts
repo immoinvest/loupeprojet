@@ -1,6 +1,19 @@
-import type { ClasseEnergie, EtatBien, ModeLocation, TypeBien } from '@loupe/moteur';
+import {
+  TMI_PAR_DEFAUT,
+  type ClasseEnergie,
+  type EtatBien,
+  type ModeLocation,
+  type TypeBien,
+} from '@loupe/moteur';
 
-import type { AnnonceResolue, ChampsExtraits, Provenance, SaisieProjet } from '@/annonces';
+import {
+  APPORT_DEFAUT,
+  DUREE_DEFAUT_ANNEES,
+  type AnnonceResolue,
+  type ChampsExtraits,
+  type Provenance,
+  type SaisieProjet,
+} from '@/annonces';
 
 export type Cle =
   | 'typeBien'
@@ -38,6 +51,7 @@ export interface ValeursInitiales {
   readonly provenance: ProvenanceValeurs;
 }
 
+/** Jamais de case vide : les défauts sourcés sont affichés, avec le badge « estimé ». */
 const VIDE: Valeurs = {
   typeBien: 'appartement',
   ges: '',
@@ -61,15 +75,21 @@ const VIDE: Valeurs = {
   travaux: '',
   mode: 'meuble',
   loyerHc: '',
-  apport: '',
-  dureeAnnees: '25',
-  tmi: '0.3',
+  apport: String(APPORT_DEFAUT),
+  dureeAnnees: String(DUREE_DEFAUT_ANNEES),
+  tmi: String(TMI_PAR_DEFAUT),
+};
+
+const PROVENANCE_DEFAUTS: ProvenanceValeurs = {
+  apport: 'estime',
+  dureeAnnees: 'estime',
+  tmi: 'estime',
 };
 
 /** Pré-remplit depuis l'extraction ; chaque champ trouvé porte la provenance « annonce ». */
 export function valeursDepuisChamps(champs: ChampsExtraits): ValeursInitiales {
   const valeurs: Record<Cle, string> = { ...VIDE };
-  const provenance: ProvenanceValeurs = {};
+  const provenance: ProvenanceValeurs = { ...PROVENANCE_DEFAUTS };
   const poser = (cle: Cle, v: number | string | boolean | undefined): void => {
     if (v === undefined) return;
     valeurs[cle] = typeof v === 'boolean' ? (v ? 'oui' : 'non') : String(v);
@@ -105,24 +125,45 @@ export function nombre(v: string): number | undefined {
   return Number.isFinite(n) ? n : undefined;
 }
 
+export const MESSAGES = {
+  prix: 'Indiquez le prix affiché.',
+  surface: 'Indiquez la surface.',
+  codePostal: 'Code postal à 5 chiffres.',
+  ville: 'Indiquez la ville.',
+  nombre: 'Nombre attendu.',
+  negatif: 'Un montant positif, ou rien.',
+  duree: 'Entre 1 et 30 ans.',
+} as const;
+
+/** Un champ facultatif : vide, rien à dire ; rempli, un nombre positif. */
+function controlerMontant(v: string): string | undefined {
+  if (v.trim() === '') return undefined;
+  const x = nombre(v);
+  if (x === undefined) return MESSAGES.nombre;
+  return x < 0 ? MESSAGES.negatif : undefined;
+}
+
+/** Seuls prix, surface, code postal et ville sont exigés ; le reste est contrôlé s'il est rempli. */
 export function valider(v: Valeurs): Erreurs {
   const erreurs: Erreurs = {};
   const prix = nombre(v.prix);
-  if (prix === undefined || prix <= 0) erreurs.prix = 'Indiquez le prix affiché.';
+  if (prix === undefined || prix <= 0) erreurs.prix = MESSAGES.prix;
   const surface = nombre(v.surface);
-  if (surface === undefined || surface <= 0) erreurs.surface = 'Indiquez la surface.';
-  if (!/^\d{5}$/.test(v.codePostal.trim())) erreurs.codePostal = 'Code postal à 5 chiffres.';
-  if (v.ville.trim() === '') erreurs.ville = 'Indiquez la ville.';
-  const loyer = nombre(v.loyerHc);
-  if (loyer === undefined || loyer < 0) erreurs.loyerHc = 'Indiquez le loyer visé, hors charges.';
-  const apport = nombre(v.apport);
-  if (apport === undefined || apport < 0) erreurs.apport = 'Indiquez votre apport (0 si aucun).';
-  const duree = nombre(v.dureeAnnees);
-  if (duree === undefined || duree < 1 || duree > 30) erreurs.dureeAnnees = 'Entre 1 et 30 ans.';
+  if (surface === undefined || surface <= 0) erreurs.surface = MESSAGES.surface;
+  if (!/^\d{5}$/.test(v.codePostal.trim())) erreurs.codePostal = MESSAGES.codePostal;
+  if (v.ville.trim() === '') erreurs.ville = MESSAGES.ville;
+  for (const cle of ['loyerHc', 'apport'] as const) {
+    const message = controlerMontant(v[cle]);
+    if (message !== undefined) erreurs[cle] = message;
+  }
+  if (v.dureeAnnees.trim() !== '') {
+    const duree = nombre(v.dureeAnnees);
+    if (duree === undefined || duree < 1 || duree > 30) erreurs.dureeAnnees = MESSAGES.duree;
+  }
   return erreurs;
 }
 
-/** Valeurs validées → saisie typée pour `construireProjet`. */
+/** Valeurs validées → saisie typée pour `construireProjet` ; un champ facultatif vide reste absent. */
 export function versSaisie(
   v: Valeurs,
   provenance: ProvenanceValeurs,
@@ -151,10 +192,10 @@ export function versSaisie(
     taxeFonciere: opt('taxeFonciere'),
     travaux: opt('travaux'),
     mode: v.mode as ModeLocation,
-    loyerHc: nombre(v.loyerHc) ?? 0,
-    apport: nombre(v.apport) ?? 0,
-    dureeAnnees: nombre(v.dureeAnnees) ?? 25,
-    tmi: Number(v.tmi) as SaisieProjet['tmi'],
+    loyerHc: opt('loyerHc'),
+    apport: opt('apport'),
+    dureeAnnees: opt('dureeAnnees'),
+    tmi: v.tmi === '' ? undefined : (Number(v.tmi) as SaisieProjet['tmi']),
     provenance,
     annonce: annonce ?? undefined,
   };

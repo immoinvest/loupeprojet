@@ -3,10 +3,24 @@ import { describe, expect, it } from 'vitest';
 import { chargesExploitation, estMeuble, totalCharges } from '../../src/cashflow/charges';
 import { recettesAnnuelles } from '../../src/cashflow/recettes';
 import { projetExemple } from '../../src/exemples/t3-marseille';
-import { LocationSchema, ProjetSchema, type Hypotheses, type Location } from '../../src/schema';
+import {
+  LocationSchema,
+  loyerConnu,
+  parserComplet,
+  type Hypotheses,
+  type LocationComplete,
+  type LocationEntree,
+} from '../../src/schema';
 
-const projet = ProjetSchema.parse(projetExemple);
+const projet = parserComplet(projetExemple);
 const location = projet.hypotheses.location;
+
+/** Une location validée dont le loyer est donné : recettes et charges n'existent qu'avec lui. */
+function complete(entree: LocationEntree): LocationComplete {
+  const l = LocationSchema.parse(entree);
+  if (!loyerConnu(l)) throw new Error('loyer attendu');
+  return l;
+}
 
 const par = (lignes: ReturnType<typeof chargesExploitation>): Record<string, number> =>
   Object.fromEntries(lignes.map((l) => [l.code, l.annuel]));
@@ -24,21 +38,21 @@ describe('recettesAnnuelles — nue et meublée', () => {
   });
 
   it('une location nue à 850 € : 10 200 € bruts', () => {
-    const nu = LocationSchema.parse({ mode: 'nu', loyerHc: 850 });
+    const nu = complete({ mode: 'nu', loyerHc: 850 });
     const r = recettesAnnuelles(nu);
     expect(r.mode).toBe('nu');
     expect(r.loyersBruts).toBe(10_200);
   });
 
   it('sans vacance, nets = bruts', () => {
-    const sansVacance = LocationSchema.parse({ mode: 'nu', loyerHc: 700, vacanceSemaines: 0 });
+    const sansVacance = complete({ mode: 'nu', loyerHc: 700, vacanceSemaines: 0 });
     expect(recettesAnnuelles(sansVacance).loyersNets).toBe(8_400);
   });
 });
 
 describe('recettesAnnuelles — colocation', () => {
   it('4 chambres à 460 € (Excel Projet 92K) : 22 080 € bruts, forfaits en recettes, vacance sur le tout', () => {
-    const coloc = LocationSchema.parse({
+    const coloc = complete({
       mode: 'colocation',
       chambres: 4,
       loyerChambre: 460,
@@ -56,7 +70,7 @@ describe('recettesAnnuelles — colocation', () => {
 });
 
 describe('recettesAnnuelles — courte durée (Excel Projet 92K)', () => {
-  const cd = LocationSchema.parse({
+  const cd = complete({
     mode: 'courte_duree',
     nuitee: 50,
     nuiteesParMois: 15,
@@ -88,7 +102,7 @@ describe('recettesAnnuelles — courte durée (Excel Projet 92K)', () => {
 });
 
 describe('recettesAnnuelles — moyenne durée', () => {
-  const md = LocationSchema.parse({
+  const md = complete({
     mode: 'moyenne_duree',
     loyerHc: 900,
     forfaitCharges: 120,
@@ -147,7 +161,7 @@ describe('chargesExploitation', () => {
   });
 
   it('en nu : ni comptable ni CFE ; la gestion suit les loyers nets', () => {
-    const nu: Location = {
+    const nu: LocationComplete = {
       mode: 'nu',
       loyerHc: 850,
       chargesLocataire: 0,

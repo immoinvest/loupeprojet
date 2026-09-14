@@ -254,7 +254,7 @@ describe('appliquerSaisie', () => {
     expect(retour.projet.provenance?.['location.loyerChambre']).toBeUndefined();
   });
 
-  it('refuse un type inconnu ; une location illisible repart d’un loyer nul', () => {
+  it('refuse un type inconnu ; une location sans loyer change de type sans en recevoir', () => {
     expect(appliquerSaisie(projetExemple, champ('hypotheses.location.mode'), 'saisonnier')).toEqual(
       {
         ok: false,
@@ -266,7 +266,46 @@ describe('appliquerSaisie', () => {
       hypotheses: { ...projetExemple.hypotheses, location: { mode: 'nu' } },
     } as unknown as ProjetEntree;
     const r = appliquerSaisie(cassee, champ('hypotheses.location.mode'), 'meuble');
-    expect(r.ok && r.projet.hypotheses.location).toMatchObject({ mode: 'meuble', loyerHc: 0 });
+    if (!r.ok) throw new Error('changement refusé');
+    expect(r.projet.hypotheses.location).toMatchObject({ mode: 'meuble', vacanceSemaines: 3 });
+    expect(r.projet.hypotheses.location).not.toHaveProperty('loyerHc');
+    // Un contenu illisible (pas d'objet) repart aussi sans loyer.
+    const illisible = {
+      ...projetExemple,
+      hypotheses: { ...projetExemple.hypotheses, location: 'illisible' },
+    } as unknown as ProjetEntree;
+    const r2 = appliquerSaisie(illisible, champ('hypotheses.location.mode'), 'nu');
+    expect(r2.ok && r2.projet.hypotheses.location).toEqual({
+      mode: 'nu',
+      chargesLocataire: 0,
+      vacanceSemaines: 3,
+      gestionTaux: 0,
+    });
+  });
+
+  it('le loyer accepte le vide : le projet reste valide, sans la valeur', () => {
+    const sansLoyer = appliquerSaisie(projetExemple, champ('hypotheses.location.loyerHc'), '');
+    if (!sansLoyer.ok) throw new Error('loyer vide refusé');
+    expect(sansLoyer.projet.hypotheses.location).not.toHaveProperty('loyerHc');
+    expect(ProjetSchema.safeParse(sansLoyer.projet).success).toBe(true);
+  });
+
+  it('changer de type sans loyer : la variante du nouveau type attend son loyer', () => {
+    const sansLoyer = appliquerSaisie(projetExemple, champ('hypotheses.location.loyerHc'), '');
+    if (!sansLoyer.ok) throw new Error('loyer vide refusé');
+    const cas = [
+      ['courte_duree', 'nuitee'],
+      ['colocation', 'loyerChambre'],
+      ['nu', 'loyerHc'],
+    ] as const;
+    for (const [mode, cle] of cas) {
+      const r = appliquerSaisie(sansLoyer.projet, champ('hypotheses.location.mode'), mode);
+      if (!r.ok) throw new Error('changement refusé');
+      expect(r.projet.hypotheses.location).toMatchObject({ mode });
+      expect(r.projet.hypotheses.location).not.toHaveProperty(cle);
+      expect(r.projet.provenance).not.toHaveProperty([`location.${cle}`]);
+      expect(ProjetSchema.safeParse(r.projet).success).toBe(true);
+    }
   });
 });
 

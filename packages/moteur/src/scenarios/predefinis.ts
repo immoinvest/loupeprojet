@@ -2,8 +2,13 @@ import { prixRetenu } from '../achat';
 import { defautsPourMode } from '../location/defauts';
 import { loyerMensuelHc, loyerMensuelReference } from '../location/equivalents';
 import type { Regles } from '../regles/types';
-import { regimesCompatibles, type Hypotheses, type Regime } from '../schema/hypotheses';
-import type { Projet } from '../schema/projet';
+import {
+  regimesCompatibles,
+  type HypothesesCompletes,
+  type ModeLocation,
+  type Regime,
+} from '../schema/hypotheses';
+import type { ProjetComplet } from '../schema/projet';
 import { avecPrix, prixCible } from './prix-cible';
 
 export type CodeScenario =
@@ -12,11 +17,11 @@ export type CodeScenario =
 export interface Variante {
   readonly code: CodeScenario;
   readonly parametres: Readonly<Record<string, number | string>>;
-  readonly projet: Projet;
+  readonly projet: ProjetComplet;
 }
 
 /** `null` quand le scénario n'a pas de sens pour ce projet (déjà en colocation, par exemple). */
-export type Transformation = (projet: Projet, regles: Regles) => Variante | null;
+export type Transformation = (projet: ProjetComplet, regles: Regles) => Variante | null;
 
 const REPLI_NEGOCIATION = 0.9;
 const DUREE_ALTERNATIVE_ANNEES = 20;
@@ -26,12 +31,12 @@ const VACANCE_DEUX_MOIS_SEMAINES = 8;
 const MOIS_VIDES_COURTE_DUREE = 2;
 const MOIS_PAR_AN = 12;
 
-function avecHypotheses(projet: Projet, patch: Partial<Hypotheses>): Projet {
+function avecHypotheses(projet: ProjetComplet, patch: Partial<HypothesesCompletes>): ProjetComplet {
   return { ...projet, hypotheses: { ...projet.hypotheses, ...patch } };
 }
 
 /** Le régime retenu s'il reste possible dans le nouveau type, sinon le réel meublé. */
-function regimePour(regime: Regime, mode: Hypotheses['location']['mode']): Regime {
+function regimePour(regime: Regime, mode: ModeLocation): Regime {
   return regimesCompatibles(mode).includes(regime) ? regime : 'lmnp_reel';
 }
 
@@ -39,7 +44,7 @@ function regimePour(regime: Regime, mode: Hypotheses['location']['mode']): Regim
  * Loyer meublé mensuel de référence du projet : en courte durée, le loyer de marché quand il est
  * connu (la nuitée ne dit rien d'un loyer mensuel) ; sinon l'équivalent du type.
  */
-function loyerMeubleReference(projet: Projet, regles: Regles): number {
+function loyerMeubleReference(projet: ProjetComplet, regles: Regles): number {
   const { location } = projet.hypotheses;
   const { loyerReferenceM2 } = projet.marche;
   if (location.mode === 'courte_duree' && loyerReferenceM2 !== undefined) {

@@ -17,17 +17,22 @@ export {
   type RaisonDpe,
 } from './dpe';
 export {
+  appliquerLoyerDeReference,
   appliquerLoyerReference,
   appliquerLoyerVise,
+  loyerDeReference,
   loyerParChambre,
   loyerPourBien,
   loyerVise,
+  loyerViseDepuisReference,
   type LoyerBien,
 } from './loyer';
 export { appliquerRisques, memesRisques, risquesDuProjet } from './risques';
 export {
   clientHorsLigne,
   clientWorker,
+  CONTRAT_ADRESSE,
+  CONTRAT_MARCHE,
   DELAI_ADRESSE_MS,
   DELAI_DONNEES_MS,
   DELAI_EXTRACTION_MS,
@@ -53,6 +58,7 @@ export {
   type ResultatGeocodage,
   type StatistiquesPrix,
   type TendanceAdresse,
+  type VenteCarte,
 } from './contrat';
 export {
   completerAvecIa,
@@ -69,3 +75,16 @@ export {
   type MarcheEnrichi,
   type MarcheEntree,
 } from './marche';
+export {
+  ATTRIBUTION_IGN,
+  classePrix,
+  donneesCarte,
+  RAYONS_CARTE_METRES,
+  repereCarte,
+  URL_TUILES_IGN,
+  ZOOM_MAX_IGN,
+  type ClassePrix,
+  type DonneesCarte,
+  type PointCarte,
+  type ReperePrixCarte,
+} from './carte';

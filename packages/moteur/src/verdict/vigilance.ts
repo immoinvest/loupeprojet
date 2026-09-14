@@ -2,6 +2,7 @@ import { estMeuble } from '../cashflow/charges';
 import type { ResultatFinancement } from '../financement';
 import type { ResultatFiscalite } from '../fiscalite/types';
 import { loyerMensuelHc } from '../location/equivalents';
+import { loyerConnu } from '../schema/hypotheses';
 import type { Projet } from '../schema/projet';
 
 /**
@@ -22,12 +23,8 @@ export interface PointVigilance {
   readonly parametres: Readonly<Record<string, number | string>>;
 }
 
-/** Points financiers à régler avant de faire une offre, par règles. */
-export function pointsDeVigilance(
-  projet: Projet,
-  financement: ResultatFinancement,
-  fiscalite: ResultatFiscalite,
-): PointVigilance[] {
+/** Les points de la banque : présents même sans loyer (un effort inconnu n'est pas dépassé). */
+function pointsFinancement(financement: ResultatFinancement): PointVigilance[] {
   const points: PointVigilance[] = [];
   if (financement.effort.depasseHcsf) {
     points.push({ code: 'EFFORT_HCSF_DEPASSE', parametres: { seuil: financement.effort.seuil } });
@@ -38,6 +35,12 @@ export function pointsDeVigilance(
       parametres: { dureeMax: financement.effort.dureeMaxAnnees },
     });
   }
+  return points;
+}
+
+/** Les points qui demandent le loyer et la fiscalité : absents d'un rapport partiel. */
+function pointsFiscaux(projet: Projet, fiscalite: ResultatFiscalite): PointVigilance[] {
+  const points: PointVigilance[] = [];
   const retenu = fiscalite.regimes[fiscalite.retenu];
   if (!retenu.eligible) {
     points.push({ code: 'PLAFOND_MICRO_DEPASSE', parametres: { regime: fiscalite.retenu } });
@@ -48,6 +51,7 @@ export function pointsDeVigilance(
   if (
     plafondLoyerMensuel !== undefined &&
     location.mode !== 'courte_duree' &&
+    loyerConnu(location) &&
     loyerMensuelHc(location) > plafondLoyerMensuel
   ) {
     points.push({ code: 'LOYER_AU_DESSUS_PLAFOND', parametres: { plafond: plafondLoyerMensuel } });
@@ -59,4 +63,19 @@ export function pointsDeVigilance(
     });
   }
   return points;
+}
+
+/**
+ * Points financiers à régler avant de faire une offre, par règles. Sans fiscalité (loyer absent),
+ * seulement ceux de la banque.
+ */
+export function pointsDeVigilance(
+  projet: Projet,
+  financement: ResultatFinancement,
+  fiscalite: ResultatFiscalite | null,
+): PointVigilance[] {
+  return [
+    ...pointsFinancement(financement),
+    ...(fiscalite === null ? [] : pointsFiscaux(projet, fiscalite)),
+  ];
 }

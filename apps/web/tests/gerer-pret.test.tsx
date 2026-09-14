@@ -1,4 +1,5 @@
 import { PREFERENCES_PAR_DEFAUT } from '@loupe/gestion';
+import { LocationSchema } from '@loupe/moteur';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -136,6 +137,33 @@ describe('porte « J’ai acheté ce bien »', () => {
     );
     expect(gestion.appels).not.toContain('creer');
     expect(lireProjets(window.localStorage)[0]?.statut).toBe('offre');
+  });
+
+  it('analyse sans loyer : « C’est parti » renvoie vers Hypothèses, « Pas encore loué » reste possible', async () => {
+    const utilisateur = userEvent.setup();
+    const base = creerProjet({ nom: 'T3 · 65 m² · Marseille 5e', statut: 'offre' });
+    const location = LocationSchema.parse({ mode: 'nu', chargesLocataire: 40 });
+    const hypotheses = { ...base.projet.hypotheses, location };
+    const p = { ...base, adresse: ADRESSE, projet: { ...base.projet, hypotheses } };
+    ecrireProjets(window.localStorage, [p]);
+    const gestion = clientGestionMemoire();
+    monter(`/gerer/pret/${p.id}`, gestion);
+
+    expect(await screen.findByText(TEXTES_PRET.loyerInconnu)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: TEXTES_PRET.ajouterLoyer })).toHaveAttribute(
+      'href',
+      `/projets/${p.id}/hypotheses`,
+    );
+    await utilisateur.type(screen.getByLabelText(TEXTES_PRET.locataire), 'Julie Martin');
+    await utilisateur.click(screen.getByRole('button', { name: TEXTES_PRET.cestParti }));
+    expect(screen.getByText(ERREURS_PRET.loyer, { exact: false })).toHaveFocus();
+    expect(gestion.appels).not.toContain('creer');
+
+    await utilisateur.click(screen.getByRole('button', { name: TEXTES_PRET.pasEncoreLoue }));
+    expect(
+      await screen.findByText('Sans locataire : T3 · 65 m² · Marseille 5e'),
+    ).toBeInTheDocument();
+    expect(gestion.donnees()).toMatchObject({ locataires: [], locations: [] });
   });
 
   it('une création refusée s’affiche et le projet reste en offre', async () => {

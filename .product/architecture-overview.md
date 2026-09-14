@@ -39,6 +39,6 @@ Application mobile (PWA, ADR-007) : le même site s'installe sur l'écran d'accu
 
 ## Flux de données d'une analyse
 
-Résoudre → Capturer → Extraire → Normaliser → Géocoder → Enrichir → Estimer → Vérifier → Calculer. Le moteur intervient uniquement à l'étape 9 et reçoit un `Projet` complet (schéma Zod) ; il rend des `Resultats` jamais persistés.
+Résoudre → Capturer → Extraire → Normaliser → Géocoder → Enrichir → Estimer → Vérifier → Calculer. Le moteur intervient uniquement à l'étape 9 et reçoit un `Projet` validé (schéma Zod) ; il rend des `Resultats` jamais persistés : complets, ou partiels quand le loyer visé manque (`complet: false`, sections qui en dépendent à `null`, `manques` et raison des feux inconnus ; voir `architecture/hypotheses-optionnelles.md`).
 
 Capturer (étapes 1 et 2) : l'extension ou le bouton-favori lit la page ouverte avec les règles de son portail (`@loupe/capture`), encode la capture dans `#capture=…` et ouvre `/projets/nouveau` ; le web décode, valide, pré-remplit Vérifier et efface le fragment. Le fragment n'est jamais envoyé au serveur ; voir `architecture/extension.md`. Lien collé dans Nouveau projet : la page demande à l'extension (script « pont », `window.postMessage`) de lire l'annonce dans un onglet du navigateur de l'utilisateur, puis l'IA complète les trous du texte ; voir `architecture/lecture-auto.md`.

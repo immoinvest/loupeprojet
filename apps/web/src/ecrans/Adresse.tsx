@@ -24,6 +24,7 @@ import { useProjets } from '@/stockage/ProjetsContext';
 import type { AdresseBien } from '@/stockage/projets';
 import { PHRASES_ADRESSE, phrasePrecision, phraseReference } from '@/textes/adresse';
 
+import { CarteQuartier } from './adresse/CarteQuartier';
 import { CarteConfiance } from './adresse/Confiance';
 import { CarteDpe } from './adresse/Dpe';
 import { CarteEstimation } from './adresse/Estimation';
@@ -266,6 +267,7 @@ export function Adresse(): JSX.Element {
             <CarteLoyer resultat={etat.donnees.marche} />
           </div>
           <CarteRisques resultat={etat.donnees.risques} />
+          <CarteQuartier analyse={analyse} adresse={etat.adresse} />
           {analyse.tendance != null && <Tendance tendance={analyse.tendance} />}
           <TableauGroupes analyse={analyse} />
           <TableauVentes analyse={analyse} />

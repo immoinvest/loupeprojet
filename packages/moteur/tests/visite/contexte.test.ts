@@ -231,7 +231,7 @@ describe('paramètres partagés', () => {
     expect(
       parametreEcartPrix({
         ...contexteExemple,
-        feux: [{ axe: 'prix', feu: 'inconnu', valeur: null }],
+        feux: [{ axe: 'prix', feu: 'inconnu', valeur: null, raison: null }],
       }),
     ).toEqual({ ecart: 0 });
   });

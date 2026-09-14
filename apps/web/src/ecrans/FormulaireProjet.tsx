@@ -49,6 +49,12 @@ const TMI = [
   { v: '0.45', l: '45 %' },
 ];
 
+/** Tout est facultatif dans cette carte : les défauts affichés portent le badge « estimé ». */
+export const INDICATIONS = {
+  vous: 'Tout ici est facultatif : ce qui est marqué « estimé » se change quand vous voulez.',
+  loyerHc: 'Vide : le loyer de marché de la commune, si on le connaît.',
+} as const;
+
 /** Ce que le formulaire dit du projet sans passer par le moteur. */
 export interface OptionsFormulaire {
   /** La personne a déjà visité le bien : l'onglet Visite n'a pas lieu d'être. */
@@ -141,6 +147,7 @@ export function FormulaireProjet({
 
       <Carte>
         <h2 className="m-0 font-display text-[22px] font-semibold">Vous</h2>
+        <p className="m-0 text-sm text-encre-2">{INDICATIONS.vous}</p>
         <div className={GRILLE}>
           <Champ cle="mode" libelle="Mode de location" options={MODES} aToi {...c} />
           <Champ
@@ -149,6 +156,7 @@ export function FormulaireProjet({
             unite="€/mois"
             aToi
             erreur={erreurs.loyerHc}
+            indication={INDICATIONS.loyerHc}
             {...c}
           />
           <Champ cle="apport" libelle="Apport" unite="€" aToi erreur={erreurs.apport} {...c} />

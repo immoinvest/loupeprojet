@@ -18,6 +18,9 @@ export const TEXTES_PRET = {
   surface: 'Surface',
   dpe: 'DPE',
   loyer: 'Loyer',
+  loyerInconnu: 'À indiquer dans ton analyse',
+  loyerManquant: 'Ton analyse n’a pas encore de loyer.',
+  ajouterLoyer: 'Ajouter le loyer dans Hypothèses',
   loyerAttendu: 'Loyer attendu',
   depot: 'Dépôt de garantie',
   entree: 'Entrée du locataire',
@@ -42,6 +45,7 @@ export function locationEnLettres(meuble: boolean, loyer: number, charges: numbe
 
 export const ERREURS_PRET: Readonly<Record<ChampPret, string>> = {
   adresse: 'Indique l’adresse du bien.',
+  loyer: 'Indique d’abord le loyer dans ton analyse, ou choisis « Pas encore loué ».',
   locataire: 'Indique le prénom et le nom, par exemple Julie Martin.',
   email: 'Cette adresse e-mail ne semble pas valide.',
 };

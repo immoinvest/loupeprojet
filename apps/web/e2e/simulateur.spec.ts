@@ -76,10 +76,13 @@ test('comparer deux offres, déplier une année, télécharger le CSV, rouvrir p
   expect(lignes[301]).toMatch(/^Totaux;;;(;\d+,\d{2}){6}$/);
   expect(lignes).toHaveLength(303);
 
-  // La dernière simulation est retrouvée après rechargement, et l'adresse porte le lien.
+  // L'adresse porte le lien : la simulation est enregistrée 300 ms après la dernière frappe,
+  // juste avant que l'adresse change. Sur la CI Linux, le parcours jusqu'ici prend moins de
+  // 300 ms (trace : 205 ms) ; recharger sans attendre retrouvait les défauts.
+  await expect.poll(() => page.url()).toMatch(/#s=/);
+  // La dernière simulation est retrouvée après rechargement.
   await page.reload();
   await expect(formulaire(page, 'LCL').getByLabel('Durée')).toHaveValue('25');
-  await expect.poll(() => page.url()).toMatch(/#s=/);
 
   // « Copier le lien » : copié, ou affiché à copier quand le presse-papiers refuse.
   await page.getByRole('button', { name: 'Copier le lien' }).click();

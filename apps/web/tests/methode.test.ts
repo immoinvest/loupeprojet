@@ -35,6 +35,7 @@ describe('defautsDuMoteur', () => {
       fraisAgenceTaux: 0.04,
       diagnostics: 500,
       honorairesChargeAcquereur: true,
+      tmi: 0.3,
       negociationTaux: 0,
       pno: 150,
       comptable: 420,
@@ -44,7 +45,10 @@ describe('defautsDuMoteur', () => {
       mobilierParM2: 75,
       coproParM2An: 25,
       taxeFonciereEnMoisDeLoyer: 1,
+      taxeFonciereParM2An: 14,
       surfaceParPiece: 20,
+      apport: 0,
+      dureeAnnees: 25,
     });
   });
 });
@@ -171,6 +175,9 @@ describe('sectionsMethode', () => {
       'élevée dès 80 · bonne dès 65 · moyenne dès 45 · faible dès 25 · très faible dès 0',
     );
     expect(v).toContain('±5 % · ±6,5 % · ±8 % · ±12 % · ±15 %');
+    expect(n(section('estimation').etapes[7] ?? '')).toContain(
+      'Fond de carte : Plan IGN (Géoplateforme)',
+    );
     expect(section('estimation').constantes.every((c) => c.source.length > 3)).toBe(true);
   });
 

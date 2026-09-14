@@ -7,7 +7,7 @@ import {
   type NouveauBien,
   type NouvelleLocation,
 } from '@loupe/gestion';
-import { estModeMeuble, loyerMensuelHc, type Location } from '@loupe/moteur';
+import { estModeMeuble, loyerConnu, loyerMensuelHc, type Location } from '@loupe/moteur';
 import { z } from 'zod';
 
 import type { ProjetEnregistre } from '@/stockage/projets';
@@ -18,9 +18,11 @@ import { decouperNom } from './saisie';
 export interface Brouillon {
   readonly bien: NouveauBien;
   readonly location: NouvelleLocation;
+  /** Faux si l'analyse n'a pas encore de loyer : le bien ne peut alors être créé que vacant. */
+  readonly loyerConnu: boolean;
 }
 
-export type ChampPret = 'adresse' | 'locataire' | 'email';
+export type ChampPret = 'adresse' | 'loyer' | 'locataire' | 'email';
 
 export type ResultatPret =
   | { readonly ok: true; readonly creation: CreationLocation }
@@ -66,9 +68,11 @@ export function brouillonDepuisProjet(enregistre: ProjetEnregistre, aujourdhui: 
   const { location } = hypotheses;
   const meuble = estModeMeuble(location.mode);
   const type = meuble ? 'meublee' : 'nue';
-  const loyerHorsCharges = enCentimes(loyerMensuelHc(location));
+  const connu = loyerConnu(location);
+  const loyerHorsCharges = connu ? enCentimes(loyerMensuelHc(location)) : 0;
   const codePostal = enregistre.adresse?.codePostal;
   return {
+    loyerConnu: connu,
     bien: {
       nom: enregistre.nom.slice(0, LONGUEUR_NOM_BIEN),
       adresse: enregistre.adresse?.libelle ?? '',
@@ -93,8 +97,9 @@ export function brouillonDepuisProjet(enregistre: ProjetEnregistre, aujourdhui: 
 }
 
 /**
- * La création à envoyer depuis « Prêt à gérer » : l'adresse est toujours exigée ; le locataire
- * seulement si le bien est loué (« C'est parti »), pas pour « Pas encore loué ».
+ * La création à envoyer depuis « Prêt à gérer » : l'adresse est toujours exigée ; le loyer de
+ * l'analyse et le locataire seulement si le bien est loué (« C'est parti »), pas pour « Pas encore
+ * loué ». Les erreurs suivent l'ordre de l'écran.
  */
 export function creationPret(
   brouillon: Brouillon,
@@ -110,6 +115,7 @@ export function creationPret(
       ? { ok: false, erreurs }
       : { ok: true, creation: { bien, locataire: null, location: null } };
   }
+  if (!brouillon.loyerConnu) erreurs.push('loyer');
   const nom = decouperNom(saisie.locataire);
   if (nom === null) erreurs.push('locataire');
   const email = saisie.email.trim();

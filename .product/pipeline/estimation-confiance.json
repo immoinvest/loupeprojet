@@ -2,7 +2,7 @@
   "feature_slug": "estimation-confiance",
   "title": "Estimation : note de confiance expliquée en tête d'onglet, repère visible sans adresse (PR 1) ; carte des ventes (PR 2)",
   "started_at": "2026-09-14T12:00:00Z",
-  "current_step": "pr1_livree_pr2_a_faire",
+  "current_step": "termine",
   "scope": "packages/moteur/src/{estimation,regles,schema/marche.ts,schema/resultats.ts}, data/src/{schemas/dvf.ts,sources/dvf/statistiques.ts}, apps/worker/src/{donnees/anciennete.ts,marche,adresse}, apps/web/src/{enrichissement,textes/confiance.ts,ecrans/Adresse.tsx,ecrans/adresse,ecrans/rapport/CartePrix.tsx,textes/methode-estimation.ts}, e2e",
   "branch": "feat/estimation-confiance",
   "base": "master (9d38892, PR #38 fusionnée)",
@@ -90,9 +90,25 @@
     "composantes": "localisation 35, dispersion 30, comparables 20, ancienneté 15 ; barèmes en paliers interpolés, règle datée dans regles/2026-09.ts",
     "anciennete": "mesurée par le Worker (dates du CSV, dateMediane de l'index DVF) et rangée en mois dans marche.dvf ; supposée 12 mois quand elle manque",
     "retrocompatibilite": "champs de marche.dvf optionnels ; précision déduite du rayon ; contrats web tolérants à l'ancien Worker",
-    "carte": "PR 2 séparée ; fond IGN Géoplateforme recommandé, décision de Pierre",
+    "carte": "fond Plan IGN de la Géoplateforme, choisi par Pierre le 14/09/2026 ; Leaflet 1.9.4 en dépendance npm chargé à la demande ; carte non imprimée, les tableaux la remplacent",
     "etat_pipeline": "session parallèle : état dans .product/pipeline/estimation-confiance.json, pipeline-state.json réservé à la session principale",
     "rue_distance": "décidé par Pierre le 14/09/2026 : les points d'une rue sont limités par la distance ; 30 points jusqu'à 150 m, au-delà les points du quartier pour l'étendue de la rue (rue de l'Olivier, 531 m : 12 points) ; branche fix/confiance-rue-distance",
     "autres_estimateurs": "décidé par Pierre le 14/09/2026 : aucun lien vers d'autres estimateurs"
+  },
+  "pr2": {
+    "branch": "feat/estimation-carte",
+    "base": "master (e9462ad, PR #47 fusionnée)",
+    "status": "completed",
+    "stories": [
+      "US-7 worker ventesCarte (contrat v6, Worker 0.8.0)",
+      "US-8 composant CarteVentes (Leaflet, tuiles IGN)"
+    ],
+    "verifications": "service WMTS IGN vérifié le 14/09/2026 : couche PLANIGNV2, tuile PNG sans clé, CORS ouvert",
+    "pr": "https://github.com/immoinvest/loupeprojet/pull/57",
+    "merge": "9964e76",
+    "deploiement": "Worker 0.8.0 déployé le 14/09/2026 (version 3ee97312-2169-426d-a251-bcc310139d1a) ; /health 0.8.0 et ventesCarte (300 ventes, plafond) vérifiés en production",
+    "correctif_cache": "PR https://github.com/immoinvest/loupeprojet/pull/60 : la réponse /marche/adresse sans ventesCarte restait dans le cache HTTP du navigateur (Cache-Control public, max-age=3600, même URL) ; CONTRAT_ADRESSE et CONTRAT_MARCHE ajoutés aux URL par le client web",
+    "verifications_locales": "e2e/carte.spec.ts vert sur ordinateur et téléphone ; spec des formats verte (écran Estimation avec la carte) ; build : Leaflet dans un fichier séparé chargé à la demande",
+    "alerte_depot": "dépôt privé sur l'offre gratuite : protection de master et rulesets indisponibles (HTTP 403), gh pr merge --auto fusionne immédiatement ; PR #57 fusionnée avant sa CI (verify ensuite vert) ; PR #60 fusionnée à la main après verify"
   }
 }

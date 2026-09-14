@@ -81,6 +81,23 @@ describe('brouillonDepuisProjet', () => {
     expect(b.location).toMatchObject(attendu);
   });
 
+  it('analyse sans loyer : loyer et dépôt à 0, « C’est parti » demande le loyer, « Pas encore loué » passe', () => {
+    const b = brouillonDepuisProjet(
+      projet({ mode: 'nu', chargesLocataire: 40 }, ADRESSE),
+      '2026-09-14',
+    );
+    expect(b.loyerConnu).toBe(false);
+    expect(b.location).toMatchObject({ loyerHorsCharges: 0, charges: 4_000, depot: 0 });
+    const saisie = { adresse: '', locataire: 'Julie Martin', email: '' };
+    expect(creationPret(b, saisie, true)).toEqual({ ok: false, erreurs: ['adresse', 'loyer'] });
+    expect(creationPret(b, { ...saisie, adresse: ADRESSE.libelle }, false)).toMatchObject({
+      ok: true,
+      creation: { locataire: null, location: null },
+    });
+    expect(ERREURS_PRET.loyer).toContain('Pas encore loué');
+    expect(brouillonDepuisProjet(projet(NU), '2026-09-14').loyerConnu).toBe(true);
+  });
+
   it('sans adresse enregistrée : adresse à remplir, pas de code postal ; décembre passe l’année', () => {
     const b = brouillonDepuisProjet(projet(NU), '2026-12-20');
     expect(b.bien.adresse).toBe('');

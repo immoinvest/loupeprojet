@@ -4,10 +4,10 @@ import { projetExemple } from '../../src/exemples/t3-marseille';
 import { calculerFinancement } from '../../src/financement';
 import { REGIMES, calculerFiscalite, locationPourRegime } from '../../src/fiscalite';
 import { obtenirRegles } from '../../src/regles';
-import { ProjetSchema, type ProjetEntree } from '../../src/schema';
+import { parserComplet, type ProjetEntree } from '../../src/schema';
 
 const regles = obtenirRegles('2026-09');
-const projet = ProjetSchema.parse(projetExemple);
+const projet = parserComplet(projetExemple);
 const financement = calculerFinancement(projet, regles);
 
 const avecLocation = (
@@ -40,14 +40,14 @@ describe('locationPourRegime', () => {
   });
 
   it('sans loyer nu saisi, le déduit de la prime meublé (15 %)', () => {
-    const sansNu = ProjetSchema.parse(avecLocation({ mode: 'meuble', loyerHc: 1_150 }));
+    const sansNu = parserComplet(avecLocation({ mode: 'meuble', loyerHc: 1_150 }));
     const nu = locationPourRegime(sansNu.hypotheses, 'nu_reel', regles);
     expect(nu.mode).toBe('nu');
     expect(nu.mode === 'nu' && nu.loyerHc).toBeCloseTo(1_000, 8);
   });
 
   it('en nu, les régimes meublés reçoivent une meublée au loyer majoré de la prime', () => {
-    const nu = ProjetSchema.parse(avecLocation({ mode: 'nu', loyerHc: 800 }, 'nu_reel'));
+    const nu = parserComplet(avecLocation({ mode: 'nu', loyerHc: 800 }, 'nu_reel'));
     const meuble = locationPourRegime(nu.hypotheses, 'micro_bic', regles);
     expect(meuble).toMatchObject({ mode: 'meuble', vacanceSemaines: 3, gestionTaux: 0 });
     expect(meuble.mode === 'meuble' && meuble.loyerHc).toBeCloseTo(920, 8);
@@ -55,7 +55,7 @@ describe('locationPourRegime', () => {
   });
 
   it('en courte durée : les régimes meublés gardent la courte durée ; les nus prennent le loyer de référence ÷ prime', () => {
-    const cd = ProjetSchema.parse(
+    const cd = parserComplet(
       avecLocation({ mode: 'courte_duree', nuitee: 80, nuiteesParMois: 15 }),
     );
     expect(locationPourRegime(cd.hypotheses, 'lmnp_reel', regles).mode).toBe('courte_duree');
@@ -71,7 +71,7 @@ describe('locationPourRegime', () => {
   });
 
   it('en colocation et moyenne durée : les régimes nus reprennent vacance et gestion du projet', () => {
-    const coloc = ProjetSchema.parse(
+    const coloc = parserComplet(
       avecLocation({
         mode: 'colocation',
         chambres: 4,
@@ -83,7 +83,7 @@ describe('locationPourRegime', () => {
     const nuColoc = locationPourRegime(coloc.hypotheses, 'micro_foncier', regles);
     expect(nuColoc).toMatchObject({ mode: 'nu', vacanceSemaines: 5, gestionTaux: 0.08 });
     expect(nuColoc.mode === 'nu' && nuColoc.loyerHc).toBeCloseTo((460 * 4) / 1.35 / 1.15, 8);
-    const md = ProjetSchema.parse(
+    const md = parserComplet(
       avecLocation({ mode: 'moyenne_duree', loyerHc: 900, vacanceSemaines: 6, gestionTaux: 0.05 }),
     );
     expect(locationPourRegime(md.hypotheses, 'nu_reel', regles)).toMatchObject({
@@ -121,7 +121,7 @@ describe('calculerFiscalite — T3 Marseille', () => {
   });
 
   it('ignore les régimes inéligibles pour désigner le meilleur', () => {
-    const gros = ProjetSchema.parse(
+    const gros = parserComplet(
       avecLocation({ mode: 'meuble', loyerHc: 7_500, loyerHcNu: 6_500, vacanceSemaines: 0 }),
     );
     const ff = calculerFiscalite(gros, calculerFinancement(gros, regles), regles);
@@ -133,7 +133,7 @@ describe('calculerFiscalite — T3 Marseille', () => {
 
   it('en colocation, seuls les régimes du meublé sont compatibles et proposés comme meilleurs', () => {
     // Loyer total faible : les régimes nus, à loyer plus bas, paieraient moins d'impôt.
-    const coloc = ProjetSchema.parse(
+    const coloc = parserComplet(
       avecLocation({ mode: 'colocation', chambres: 3, loyerChambre: 380 }, 'micro_bic'),
     );
     const ff = calculerFiscalite(coloc, calculerFinancement(coloc, regles), regles);

@@ -1,4 +1,4 @@
-import type { Resultats } from '@loupe/moteur';
+import type { ResultatsComplets } from '@loupe/moteur';
 
 /**
  * La cascade de l'autofinancement, en euros par mois : ce que le loyer laisse après le crédit,
@@ -27,7 +27,7 @@ export interface CascadeAutofinancement {
   readonly apresImpot: number;
 }
 
-export function cascadeAutofinancement(r: Resultats): CascadeAutofinancement {
+export function cascadeAutofinancement(r: ResultatsComplets): CascadeAutofinancement {
   const c = r.cashflow;
   const loyer = c.recettes.loyersBruts / 12;
   const credit = r.financement.mensualiteTotale;
@@ -50,7 +50,7 @@ export function cascadeAutofinancement(r: Resultats): CascadeAutofinancement {
  * Multiple sur apport : gain total sur la période ÷ mise de départ (l'indicateur de l'Excel de
  * Pierre). `null` sans mise de départ : le rapport n'aurait pas de sens.
  */
-export function multipleSurApport(r: Resultats): number | null {
+export function multipleSurApport(r: ResultatsComplets): number | null {
   const e = r.rendement.enrichissement;
   return e.miseDeDepart > 0 ? e.total / e.miseDeDepart : null;
 }

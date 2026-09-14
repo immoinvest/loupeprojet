@@ -2,6 +2,8 @@ import { z } from 'zod';
 
 import { CODES_CHARGES } from '../cashflow/charges';
 import { ModeLocationSchema, RegimeSchema } from './hypotheses';
+import { CodeManqueSchema, ManqueSchema } from './manques';
+import { EstimationResultatSchema } from './resultats-estimation';
 import { ProjetSchema, VersionReglesSchema } from './projet';
 
 /**
@@ -197,6 +199,7 @@ export const VerdictSchema = z.strictObject({
         axe: z.enum(['prix', 'rendement', 'cashflow', 'couverture', 'risques']),
         feu: FeuSchema,
         valeur: nOuNull,
+        raison: CodeManqueSchema.nullable(),
       }),
     )
     .length(5),
@@ -243,53 +246,10 @@ export const ScenariosSchema = z.strictObject({
   ),
 });
 
-const EtatSchema = z.enum(['a_renover', 'a_rafraichir', 'bon_etat', 'renove']);
+export { EstimationResultatSchema } from './resultats-estimation';
 
-export const EstimationResultatSchema = z.strictObject({
-  etat: EtatSchema,
-  etatSuppose: z.boolean(),
-  prixM2Marche: n,
-  corrections: z.array(
-    z.strictObject({
-      code: z.enum(['dpe', 'etage', 'exterieur', 'charges']),
-      taux: n,
-      montant: n,
-      ignoree: z.boolean(),
-    }),
-  ),
-  prixM2Estime: n,
-  centre: n,
-  bas: n,
-  haut: n,
-  selonEtat: z.strictObject({ a_renover: n, a_rafraichir: n, bon_etat: n, renove: n }),
-  confiance: z.strictObject({
-    note: n,
-    niveau: z.enum(['tres_faible', 'faible', 'moyenne', 'bonne', 'elevee']),
-    precision: z.enum(['immeuble', 'rue', 'quartier', 'commune']),
-    composantes: z.array(
-      z.strictObject({
-        code: z.enum(['localisation', 'comparables', 'dispersion', 'anciennete']),
-        valeur: nOuNull,
-        points: n,
-        maximum: n,
-        supposee: z.boolean(),
-      }),
-    ),
-  }),
-  marge: n,
-  charges: z
-    .strictObject({
-      repereAnnuel: n,
-      excedentAnnuel: n,
-      rendementLocal: n,
-      borneAtteinte: z.boolean(),
-    })
-    .nullable(),
-  actualiseAu: z.string().nullable(),
-  ecartPrix: n,
-});
-
-export const ResultatsSchema = z.strictObject({
+/** Ce que tout rapport porte, complet ou partiel. */
+const communs = {
   projet: ProjetSchema,
   achat: z.strictObject({
     prixAffiche: n,
@@ -298,17 +258,39 @@ export const ResultatsSchema = z.strictObject({
     negociationMontant: n,
   }),
   financement: FinancementSchema,
-  cashflow: CashflowSchema,
-  fiscalite: FiscaliteResultatSchema,
-  revente: ReventeResultatSchema,
-  rendement: RendementSchema,
   estimation: EstimationResultatSchema.nullable(),
   verdict: VerdictSchema,
-  scenarios: ScenariosSchema.nullable(),
+  manques: z.array(ManqueSchema),
   meta: z.strictObject({
     versionRegles: VersionReglesSchema,
     dateReference: z.string(),
     aConfirmer: z.array(z.string()),
     simplifications: z.array(z.string()),
   }),
+};
+
+export const ResultatsCompletsSchema = z.strictObject({
+  ...communs,
+  complet: z.literal(true),
+  cashflow: CashflowSchema,
+  fiscalite: FiscaliteResultatSchema,
+  revente: ReventeResultatSchema,
+  rendement: RendementSchema,
+  scenarios: ScenariosSchema.nullable(),
 });
+
+/** Sans loyer : les sections qui en dépendent sont nulles, ensemble ; `manques` dit pourquoi. */
+export const ResultatsPartielsSchema = z.strictObject({
+  ...communs,
+  complet: z.literal(false),
+  cashflow: z.null(),
+  fiscalite: z.null(),
+  revente: z.null(),
+  rendement: z.null(),
+  scenarios: z.null(),
+});
+
+export const ResultatsSchema = z.discriminatedUnion('complet', [
+  ResultatsCompletsSchema,
+  ResultatsPartielsSchema,
+]);

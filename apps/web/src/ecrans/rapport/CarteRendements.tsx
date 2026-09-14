@@ -1,4 +1,4 @@
-import type { Feu, Resultats } from '@loupe/moteur';
+import type { Feu, ResultatsComplets } from '@loupe/moteur';
 import type { JSX, ReactNode } from 'react';
 
 import { useModeDocument } from '@/composants/document';
@@ -44,7 +44,7 @@ function Rendement({
 }
 
 /** Brut, net et net-net côte à côte, chacun avec sa définition et sa formule chiffrée. */
-export function CarteRendements({ r }: { r: Resultats }): JSX.Element {
+export function CarteRendements({ r }: { r: ResultatsComplets }): JSX.Element {
   const { brut, net, netNet } = r.rendement.rendements;
   let feuNet: Feu = 'inconnu';
   for (const f of r.verdict.feux) {

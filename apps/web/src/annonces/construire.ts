@@ -1,23 +1,26 @@
 import {
+  TMI_PAR_DEFAUT,
   VERSION_REGLES_COURANTE,
-  defautsPourMode,
   estModeMeuble,
   obtenirRegles,
   type ClasseEnergie,
   type EtatBien,
-  type LocationEntree,
   type ModeLocation,
   type ProjetEntree,
   type TypeBien,
 } from '@loupe/moteur';
 
-import type { MarcheEnrichi } from '@/enrichissement';
+import type { MarcheEnrichi } from '@/enrichissement/marche';
 
+import { construireLocation, loyerRetenu } from './location-saisie';
 import type { AnnonceResolue } from './resoudre';
 
 export type Provenance = 'annonce' | 'estime' | 'utilisateur';
 
-/** Ce que l'écran Vérifier envoie : les valeurs et, pour chacune, d'où elle vient. */
+/**
+ * Ce que l'écran Vérifier envoie : les valeurs et, pour chacune, d'où elle vient.
+ * Quatre valeurs suffisent : prix, surface, code postal, ville. Le reste est estimé ou reste absent.
+ */
 export interface SaisieProjet {
   readonly typeBien?: TypeBien | undefined;
   readonly ges?: ClasseEnergie | undefined;
@@ -43,18 +46,19 @@ export interface SaisieProjet {
   readonly mode: ModeLocation;
   /**
    * Loyer mensuel hors charges visé pour le logement entier : loyer d'une nue, meublée ou moyenne
-   * durée ; loyer total d'une colocation ; loyer meublé de référence d'une courte durée.
+   * durée ; loyer total d'une colocation ; loyer meublé de référence d'une courte durée. Absent : le
+   * loyer de marché de la commune s'il est connu, sinon le rapport attend le loyer.
    */
-  readonly loyerHc: number;
+  readonly loyerHc?: number | undefined;
   /** Colocation : chambres louées (sinon celles du bien) et loyer par chambre (sinon loyer ÷ chambres). */
   readonly chambresLouees?: number | undefined;
   readonly loyerChambre?: number | undefined;
   /** Courte durée : nuitée et nuits par mois (sinon déduites du loyer et des règles). */
   readonly nuitee?: number | undefined;
   readonly nuiteesParMois?: number | undefined;
-  readonly apport: number;
-  readonly dureeAnnees: number;
-  readonly tmi: 0 | 0.11 | 0.3 | 0.41 | 0.45;
+  readonly apport?: number | undefined;
+  readonly dureeAnnees?: number | undefined;
+  readonly tmi?: 0 | 0.11 | 0.3 | 0.41 | 0.45 | undefined;
   readonly provenance: Readonly<Partial<Record<keyof SaisieProjet, Provenance>>>;
   readonly annonce?: AnnonceResolue | undefined;
 }
@@ -66,6 +70,12 @@ const CFE_DEFAUT = 180;
 const FRAIS_DOSSIER_DEFAUT = 850;
 const FRAIS_GARANTIE_DEFAUT = 1_500;
 const MOBILIER_PAR_M2 = 75;
+/** Sans apport indiqué : aucun (le plus fréquent pour un premier achat locatif financé à 110 %). */
+export const APPORT_DEFAUT = 0;
+/** Sans durée indiquée : la durée maximale HCSF, celle du meilleur cash-flow. */
+export const DUREE_DEFAUT_ANNEES = 25;
+/** Taxe foncière estimée quand ni elle ni le loyer ne sont connus : ordre de grandeur, par m² et par an. */
+export const TAXE_FONCIERE_PAR_M2_AN = 14;
 
 /** « 13005 » → « 13 », « 20000 » → « 2A », « 20200 » → « 2B », « 97400 » → « 974 ». */
 export function departementDuCodePostal(codePostal: string): string {
@@ -89,88 +99,10 @@ export function nomDuProjet(s: SaisieProjet): string {
   return `${type} · ${s.ville}`;
 }
 
-interface LocationConstruite {
-  readonly location: LocationEntree;
-  readonly charges: { readonly energieMensuel: number; readonly internetMensuel: number };
-  readonly provenance: Record<string, string>;
-}
-
 /**
- * La location du type choisi : ce que l'utilisateur a saisi, complété par les défauts du type
- * (badgés « estimé »). Le loyer saisi vaut pour le logement entier ; en colocation il se répartit
- * entre les chambres, en courte durée il sert de référence pour la nuitée.
- */
-function construireLocation(s: SaisieProjet): LocationConstruite {
-  const regles = obtenirRegles(VERSION_REGLES_COURANTE);
-  const { primeMeuble, primeColocation } = regles.exploitation;
-  const chambres = s.chambresLouees ?? s.chambres ?? Math.max(1, (s.pieces ?? 2) - 1);
-  const provenanceLoyer = s.provenance.loyerHc === 'estime' ? 'anil' : 'utilisateur';
-  const loyerMensuel =
-    s.mode === 'nu'
-      ? s.loyerHc * (1 + primeMeuble)
-      : s.mode === 'colocation'
-        ? s.loyerHc / (1 + primeColocation)
-        : s.loyerHc;
-  const defauts = defautsPourMode(s.mode, regles, { loyerMensuel, chambres });
-  const estimee = (cles: readonly string[]): Record<string, string> =>
-    Object.fromEntries(cles.map((c) => [`location.${c}`, 'estime']));
-  switch (defauts.location.mode) {
-    case 'nu':
-    case 'meuble':
-      return {
-        location: { mode: defauts.location.mode, loyerHc: s.loyerHc },
-        charges: defauts.charges,
-        provenance: { 'location.loyerHc': provenanceLoyer },
-      };
-    case 'moyenne_duree':
-      return {
-        location: { ...defauts.location, loyerHc: s.loyerHc },
-        charges: defauts.charges,
-        provenance: {
-          'location.loyerHc': provenanceLoyer,
-          ...estimee(['forfaitCharges', 'dureeSejourMois', 'vacanceSemaines']),
-        },
-      };
-    case 'colocation':
-      return {
-        location: {
-          ...defauts.location,
-          chambres,
-          loyerChambre: s.loyerChambre ?? Math.round(s.loyerHc / chambres),
-        },
-        charges: defauts.charges,
-        provenance: {
-          'location.chambres':
-            s.chambresLouees !== undefined || s.chambres !== undefined ? 'utilisateur' : 'estime',
-          'location.loyerChambre': s.loyerChambre === undefined ? provenanceLoyer : 'utilisateur',
-          ...estimee(['forfaitChargesChambre', 'vacanceSemaines']),
-        },
-      };
-    case 'courte_duree':
-      return {
-        location: {
-          ...defauts.location,
-          ...(s.nuitee === undefined ? {} : { nuitee: s.nuitee }),
-          ...(s.nuiteesParMois === undefined ? {} : { nuiteesParMois: s.nuiteesParMois }),
-        },
-        charges: defauts.charges,
-        provenance: {
-          'location.nuitee': s.nuitee === undefined ? 'estime' : 'utilisateur',
-          'location.nuiteesParMois': s.nuiteesParMois === undefined ? 'estime' : 'utilisateur',
-          ...estimee([
-            'dureeSejourNuits',
-            'menageFactureParSejour',
-            'menageCoutParSejour',
-            'plateformeTaux',
-          ]),
-        },
-      };
-  }
-}
-
-/**
- * Assemble un projet complet à partir de la saisie vérifiée, avec des défauts sourcés et, quand
- * le Worker a répondu, les données de marché de la commune.
+ * Assemble un projet à partir de la saisie vérifiée, avec des défauts sourcés et, quand le Worker a
+ * répondu, les données de marché de la commune. Sans loyer connu, le projet n'en porte pas : le
+ * rapport le demandera.
  */
 export function construireProjet(
   s: SaisieProjet,
@@ -179,19 +111,28 @@ export function construireProjet(
 ): ProjetEntree {
   const meuble = estModeMeuble(s.mode);
   const regime = meuble ? 'lmnp_reel' : 'nu_reel';
-  const taxeFonciere = s.taxeFonciere ?? s.loyerHc;
+  const loyer = loyerRetenu(s, enrichi);
+  const apport = s.apport ?? APPORT_DEFAUT;
+  const dureeAnnees = s.dureeAnnees ?? DUREE_DEFAUT_ANNEES;
+  const tmi = s.tmi ?? TMI_PAR_DEFAUT;
+  const taxeFonciere =
+    s.taxeFonciere ??
+    (loyer === null ? Math.round(s.surface * TAXE_FONCIERE_PAR_M2_AN) : loyer.valeur);
   const coproAnnuel =
     s.chargesCoproMois === undefined ? s.surface * COPRO_PAR_M2_AN : s.chargesCoproMois * 12;
-  const location = construireLocation(s);
+  /** Une valeur absente de la saisie est estimée ; présente, elle porte sa provenance ou vient de la personne. */
+  const provenanceDe = (cle: keyof SaisieProjet, valeur: unknown): Provenance =>
+    valeur === undefined ? 'estime' : (s.provenance[cle] ?? 'utilisateur');
+  const location = construireLocation(s, loyer);
   const provenance: Record<string, string> = {
     'achat.prix': s.provenance.prix ?? 'utilisateur',
     'bien.surface': s.provenance.surface ?? 'utilisateur',
     'location.mode': s.provenance.mode ?? 'utilisateur',
     ...location.provenance,
-    'pret.apport': 'utilisateur',
-    'pret.dureeAnnees': 'utilisateur',
+    'pret.apport': provenanceDe('apport', s.apport),
+    'pret.dureeAnnees': provenanceDe('dureeAnnees', s.dureeAnnees),
     'pret.tauxNominal': 'usure',
-    'fiscalite.tmi': 'utilisateur',
+    'fiscalite.tmi': provenanceDe('tmi', s.tmi),
     'charges.taxeFonciere':
       s.taxeFonciere === undefined ? 'estime' : (s.provenance.taxeFonciere ?? 'utilisateur'),
     'charges.coproAnnuel':
@@ -258,9 +199,9 @@ export function construireProjet(
         mobilier: meuble ? Math.round(s.surface * MOBILIER_PAR_M2) : 0,
       },
       pret: {
-        apport: s.apport,
-        tauxNominal: tauxPourDuree(s.dureeAnnees),
-        dureeAnnees: s.dureeAnnees,
+        apport,
+        tauxNominal: tauxPourDuree(dureeAnnees),
+        dureeAnnees,
         fraisDossier: FRAIS_DOSSIER_DEFAUT,
         fraisGarantie: FRAIS_GARANTIE_DEFAUT,
       },
@@ -274,7 +215,7 @@ export function construireProjet(
         energieMensuel: location.charges.energieMensuel,
         internetMensuel: location.charges.internetMensuel,
       },
-      fiscalite: { tmi: s.tmi, regime },
+      fiscalite: { tmi, regime },
     },
     provenance: { ...provenance, ...(enrichi === null ? {} : enrichi.provenance) },
   };

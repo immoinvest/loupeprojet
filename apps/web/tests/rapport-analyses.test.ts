@@ -1,13 +1,25 @@
-import { calculerProjet, projetExemple, type Resultats } from '@loupe/moteur';
+import {
+  calculerProjet,
+  projetExemple,
+  type ProjetEntree,
+  type ResultatsComplets,
+} from '@loupe/moteur';
 import { describe, expect, it } from 'vitest';
 
 import { cascadeAutofinancement, multipleSurApport } from '@/analyses/rapport';
 
 import { courteDuree, variante } from './projets';
 
+/** Ces projets ont tous un loyer : leur rapport est complet. */
+function calculer(projet: ProjetEntree): ResultatsComplets {
+  const r = calculerProjet(projet);
+  if (!r.complet) throw new Error('rapport partiel inattendu');
+  return r;
+}
+
 describe('cascade de l’autofinancement', () => {
   it('reproduit les chiffres du projet d’exemple, ligne par ligne', () => {
-    const c = cascadeAutofinancement(calculerProjet(projetExemple));
+    const c = cascadeAutofinancement(calculer(projetExemple));
     expect(c.loyer).toBe(980);
     expect(c.credit).toBeCloseTo(826.65, 2);
     expect(c.apresCredit).toBeCloseTo(153.35, 2);
@@ -22,7 +34,7 @@ describe('cascade de l’autofinancement', () => {
 
   it('somme exactement au cash-flow mensuel du moteur, en longue et en courte durée', () => {
     for (const projet of [projetExemple, courteDuree()]) {
-      const r = calculerProjet(projet);
+      const r = calculer(projet);
       const c = cascadeAutofinancement(r);
       expect(c.loyer + c.recuperees - c.credit - c.charges - c.vacance).toBeCloseTo(
         r.cashflow.mensuel,
@@ -37,7 +49,7 @@ describe('cascade de l’autofinancement', () => {
   });
 
   it('en courte durée : ménage facturé en recettes, ménage payé et conciergerie en charges, pas de vacance', () => {
-    const r = calculerProjet(courteDuree());
+    const r = calculer(courteDuree());
     const c = cascadeAutofinancement(r);
     expect(c.vacance).toBe(0);
     // 18,25 nuits × 12 ÷ 4 nuits = 54,75 séjours × 25 € facturés.
@@ -50,7 +62,7 @@ describe('cascade de l’autofinancement', () => {
   });
 
   it('un régime imposé retire l’impôt mensuel moyen sur la période', () => {
-    const r = calculerProjet(variante({ fiscalite: { tmi: 0.3, regime: 'micro_bic' } }));
+    const r = calculer(variante({ fiscalite: { tmi: 0.3, regime: 'micro_bic' } }));
     const c = cascadeAutofinancement(r);
     expect(r.fiscalite.regimes.micro_bic.impotTotal).toBeCloseTo(26_928.14, 2);
     // Sans comptable, les charges baissent de 420 € par an : −175 € avant impôt.
@@ -62,7 +74,7 @@ describe('cascade de l’autofinancement', () => {
 
 describe('multiple sur apport', () => {
   it('gain total ÷ mise de départ sur l’exemple', () => {
-    const r = calculerProjet(projetExemple);
+    const r = calculer(projetExemple);
     expect(r.rendement.enrichissement.miseDeDepart).toBe(19_337);
     expect(multipleSurApport(r)).toBeCloseTo(13_646.75 / 19_337, 4);
   });
@@ -70,7 +82,7 @@ describe('multiple sur apport', () => {
   it('sans mise de départ : null', () => {
     const sansMise = {
       rendement: { enrichissement: { miseDeDepart: 0, total: 5_000 } },
-    } as unknown as Resultats;
+    } as unknown as ResultatsComplets;
     expect(multipleSurApport(sansMise)).toBeNull();
   });
 });

@@ -144,8 +144,12 @@ export function PretAGerer(): JSX.Element {
           <div>
             <LigneReprise
               libelle={T.loyer}
-              valeur={locationEnLettres(bien.meuble, location.loyerHorsCharges, location.charges)}
-              analyse
+              valeur={
+                brouillon.loyerConnu
+                  ? locationEnLettres(bien.meuble, location.loyerHorsCharges, location.charges)
+                  : T.loyerInconnu
+              }
+              analyse={brouillon.loyerConnu}
             />
             <LigneReprise
               libelle={T.loyerAttendu}
@@ -159,6 +163,21 @@ export function PretAGerer(): JSX.Element {
               analyse={false}
             />
           </div>
+          {/* Toujours rendu sans loyer : « C'est parti » peut y porter le focus avec l'erreur. */}
+          {!brouillon.loyerConnu && (
+            <p
+              id={identifiant('loyer')}
+              tabIndex={-1}
+              className={`m-0 rounded-encart p-3 text-sm ${
+                erreur('loyer') === undefined
+                  ? 'bg-accent-fond text-encre-2'
+                  : 'bg-probleme-fond text-probleme-texte'
+              }`}
+            >
+              {erreur('loyer') ?? T.loyerManquant}{' '}
+              <Link to={`/projets/${enregistre.id}/hypotheses`}>{T.ajouterLoyer}</Link>
+            </p>
+          )}
         </Carte>
       </div>
 

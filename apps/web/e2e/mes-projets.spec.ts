@@ -42,6 +42,7 @@ test('un projet saisi à la main a son rapport, apparaît dans la liste et se su
     'Prix sans repère de marché. Le loyer ne couvre pas tout.',
   );
   await expect(page.getByText('120 000 € · meublé longue durée')).toBeVisible();
+  // Durée 25 ans et tranche 30 % par défaut (badge « estimé »).
   await expect(page.getByLabel('Cinq feux').getByText('Cash-flow −222 €/mois')).toBeVisible();
   await expect(
     page.getByLabel('Cinq feux').getByText('Prix vs ventes réelles : pas de données'),

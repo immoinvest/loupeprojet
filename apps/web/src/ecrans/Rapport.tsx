@@ -1,4 +1,4 @@
-import type { Resultats } from '@loupe/moteur';
+import type { Resultats, ResultatsComplets } from '@loupe/moteur';
 import type { JSX } from 'react';
 
 import { multipleSurApport } from '@/analyses/rapport';
@@ -14,20 +14,25 @@ import {
   explicationRevente,
 } from '@/textes/explications';
 import { libelleFeu } from '@/textes/feux';
+import { manquesBloquants, TEXTES_TRANCHE } from '@/textes/manques';
 import { REGIMES } from '@/textes/regimes';
 import { texteVerdict } from '@/textes/verdict';
 
+import { AnalyseIncomplete } from './projet/AnalyseIncomplete';
+import { CarteACompleter } from './rapport/CarteACompleter';
 import { CarteAutofinancement } from './rapport/CarteAutofinancement';
 import { CartePrix } from './rapport/CartePrix';
 import { CarteRendements } from './rapport/CarteRendements';
 import { Leviers } from './rapport/Leviers';
 import { CarteVigilance } from './rapport/Vigilance';
 
+const TITRE_AUTOFINANCEMENT = "Est-ce que ça s'autofinance ?";
+const TITRE_RENDEMENTS = 'Combien ça rapporte ?';
 const TITRE_FISCALITE = "Combien d'impôts ?";
 const TITRE_REVENTE = "Qu'est-ce qu'il vous restera ?";
 const TITRE_MULTIPLE = 'Multiple sur apport';
 
-function CarteFiscalite({ r }: { r: Resultats }): JSX.Element {
+function CarteFiscalite({ r }: { r: ResultatsComplets }): JSX.Element {
   const f = r.fiscalite;
   const retenu = f.regimes[f.retenu];
   const autres = Object.values(f.regimes)
@@ -51,6 +56,9 @@ function CarteFiscalite({ r }: { r: Resultats }): JSX.Element {
           ? ' : aucun impôt sur la période.'
           : ` : imposé à partir de l'année ${String(retenu.premiereAnneeImposable)}.`}
         {!retenu.eligible ? ' Plafond du régime dépassé.' : ''}
+        {r.projet.provenance['fiscalite.tmi'] === 'estime'
+          ? ` ${TEXTES_TRANCHE.mentionRapport} ${pourcentage(r.projet.hypotheses.fiscalite.tmi, 0)}.`
+          : ''}
       </p>
       <div className="flex flex-wrap gap-2">
         {autres.map((x) => (
@@ -64,7 +72,7 @@ function CarteFiscalite({ r }: { r: Resultats }): JSX.Element {
   );
 }
 
-function CarteRevente({ r }: { r: Resultats }): JSX.Element {
+function CarteRevente({ r }: { r: ResultatsComplets }): JSX.Element {
   const e = r.rendement.enrichissement;
   const annees = r.projet.hypotheses.revente.annees;
   const multiple = multipleSurApport(r);
@@ -120,9 +128,49 @@ function CarteRevente({ r }: { r: Resultats }): JSX.Element {
 /** Deux cartes côte à côte sur tablette, ordinateur et papier ; empilées sur téléphone. */
 const DEUX_CARTES = 'grid grid-cols-1 gap-5 md:grid-cols-2 print:grid-cols-2';
 
+/** Le rapport complet : l'autofinancement en carte principale, le prix et les rendements, les leviers, les impôts et la revente. */
+function Analyses({ r }: { r: ResultatsComplets }): JSX.Element {
+  return (
+    <>
+      <CarteAutofinancement r={r} />
+      <div className={DEUX_CARTES}>
+        <CartePrix r={r} />
+        <CarteRendements r={r} />
+      </div>
+      <Leviers r={r} />
+      <CarteVigilance r={r} />
+      <div className={DEUX_CARTES}>
+        <CarteFiscalite r={r} />
+        <CarteRevente r={r} />
+      </div>
+    </>
+  );
+}
+
+/** Sans loyer : le bandeau qui le demande, le prix tel quel, les autres questions « à compléter ». */
+function AnalysesACompleter({ r }: { r: Resultats }): JSX.Element {
+  return (
+    <>
+      {manquesBloquants(r.manques).map((m) => (
+        <AnalyseIncomplete key={m.code} manque={m} />
+      ))}
+      <CarteACompleter titre={TITRE_AUTOFINANCEMENT} />
+      <div className={DEUX_CARTES}>
+        <CartePrix r={r} />
+        <CarteACompleter titre={TITRE_RENDEMENTS} />
+      </div>
+      <CarteVigilance r={r} />
+      <div className={DEUX_CARTES}>
+        <CarteACompleter titre={TITRE_FISCALITE} />
+        <CarteACompleter titre={TITRE_REVENTE} />
+      </div>
+    </>
+  );
+}
+
 /**
- * Le Rapport : le verdict, les cinq feux, puis l'autofinancement en carte principale, le prix et
- * les rendements, les leviers, les impôts et la revente.
+ * Le Rapport : le verdict et les cinq feux, puis les analyses complètes ou, quand le loyer manque,
+ * ce qui se calcule sans lui et ce qui l'attend.
  */
 export function Rapport(): JSX.Element {
   const { resultats: r } = useProjetCourant();
@@ -142,17 +190,7 @@ export function Rapport(): JSX.Element {
           ))}
         </div>
       </div>
-      <CarteAutofinancement r={r} />
-      <div className={DEUX_CARTES}>
-        <CartePrix r={r} />
-        <CarteRendements r={r} />
-      </div>
-      <Leviers r={r} />
-      <CarteVigilance r={r} />
-      <div className={DEUX_CARTES}>
-        <CarteFiscalite r={r} />
-        <CarteRevente r={r} />
-      </div>
+      {r.complet ? <Analyses r={r} /> : <AnalysesACompleter r={r} />}
       <p className="m-0 text-xs text-encre-3">
         Règles fiscales {r.meta.versionRegles}. Outil d'aide à la décision, pas un conseil.
       </p>

@@ -83,8 +83,28 @@ Tests : `tests/confiance-textes.test.ts`, `tests/confiance-ecran.test.tsx` (US-4
 - **Rue limitée par la distance** (demande de Pierre, 14/09/2026) : règle `localisation.rue = { points: 30, jusquaMetres: 150 }` ; au-delà de 150 m, `pointsLocalisation` rend les points du cercle correspondant, jamais plus que ceux d'une rue. La raison affichée donne l'étendue de la rue.
 - **Aucun lien vers d'autres estimateurs** (décision de Pierre, 14/09/2026).
 
-## PR 2 — carte des ventes (esquisse)
+## PR 2 — carte des ventes
 
-- Worker : `ventesCarte` dans `/marche/adresse` (v5) : comparables à 300 m ou moins avec coordonnées, plafond 300.
-- Web : `leaflet` (+ `@types/leaflet`) en dépendance, composant `ecrans/adresse/CarteVentes.tsx` chargé par `React.lazy`, tuiles IGN Plan (`https://data.geopf.fr/wmts`, couche `GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2`, sans clé), légende par tiers (sous q1, entre, au-dessus de q3), cercles 100/200/300 m, marqueurs accessibles (titre = prix, surface, date), `print:hidden`, hauteur 280 px sur téléphone. Mention dans la Méthode (« les tuiles de carte sont chargées depuis l'IGN quand une adresse est analysée »).
-- Choix du fond : décision de Pierre (IGN recommandé).
+Décision de Pierre du 14/09/2026 : fond **Plan IGN** de la Géoplateforme. Vérifié le même jour sur le service réel : couche `GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2` publiée dans les capacités WMTS, tuile PNG sans clé, en-tête CORS ouvert.
+
+### Worker (0.8.0, contrat `/marche/adresse` v6)
+
+- `apps/worker/src/adresse/carte.ts` (nouveau) : `ventesSurCarte(situees, estComparable)` rend les ventes comparables géolocalisées à 300 m au plus (`RAYON_CARTE_METRES`), les plus proches d'abord, plafonnées à 300 (`MAX_VENTES_CARTE`). Champs : `lat`, `lon` (au millionième), `date`, `prix`, `surface`, `prixM2Corrige`, `distanceMetres`, `groupes`.
+- `apps/worker/src/adresse/analyse.ts` : chaque vente située porte `position` (`{ point, distance }` ou `null`) ; `AnalyseAdresse.ventesCarte`. Même règle de comparable que les ventes proches.
+- Pas de nouvel appel réseau : les coordonnées viennent des CSV DVF déjà publiés.
+
+### Web
+
+- `apps/web/src/enrichissement/carte.ts` (pur, couverture 100 %) : `URL_TUILES_IGN` (WMTS, `TILEMATRIXSET=PM`), `ATTRIBUTION_IGN`, `ZOOM_MAX_IGN` (19), `RAYONS_CARTE_METRES` ; `repereCarte(analyse)` (quartiles du repère, sinon du cercle de 300 m) ; `classePrix` (`bas` sous le premier quartile, `haut` au-dessus du troisième, `milieu` sinon) ; `donneesCarte(analyse)`, `null` sans vente géolocalisée ou avec un Worker d'avant la carte.
+- `apps/web/src/textes/carte.ts` : titre, phrase, légende, infobulle (« 3 621 €/m² · 58 m² · 210 000 € · 1 mars 2025 · à 40 m »), libellé pour lecteur d'écran, mention du fond IGN.
+- `apps/web/src/ecrans/adresse/CarteQuartier.tsx` : carte de l'onglet (titre, légende, mention IGN), `print:hidden` ; charge `CarteVentes` par `React.lazy`, donc Leaflet et son CSS ne pèsent que sur l'onglet Estimation.
+- `apps/web/src/ecrans/adresse/CarteVentes.tsx` : `L.map` sans molette ; au doigt (`pointer: coarse`), pas de glisser, la page défile et les boutons zooment ; tuiles IGN, trois cercles, une `circleMarker` par vente avec infobulle, le bien au centre ; cadrage sur le cercle de 300 m ; `role="img"` et libellé, les tableaux restent l'équivalent accessible.
+- `apps/web/src/index.css` : couleurs des pastilles lues dans les jetons (`--color-bon`, `--color-encre-4`, `--color-surveiller`, `--color-accent`) ; `.leaflet-container` isolé (`isolation: isolate`) pour rester sous l'en-tête collé ; boutons de zoom de 44 px au doigt.
+- Service worker : les tuiles viennent d'une autre origine, jamais interceptées (`strategiePour`).
+- Méthode : une étape « Carte des ventes » mentionne le fond IGN et ce qu’il voit.
+
+### Tests
+
+- Worker : liste de la carte (mêmes comparables, sans coordonnées exclues, au-delà de 300 m exclues, autre type exclu, plafond, tri), route. Couverture 100 %.
+- Web : `tests/carte-ventes.test.ts` (données et textes), `tests/carte-ventes-ecran.test.tsx` (carte simulée, jsdom ne dessine pas).
+- Playwright : `e2e/carte.spec.ts` avec la vraie bibliothèque : 24 pastilles, 3 cercles, le bien, tuiles IGN demandées puis interceptées (`simulerWorker` rend une tuile vide), infobulle, isolation, carte absente à l'impression ; la spec des formats attend la carte sur l'écran Estimation.
