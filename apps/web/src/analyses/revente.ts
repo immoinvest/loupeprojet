@@ -9,7 +9,22 @@ export interface VarianteRevente {
   readonly enrichissement: number;
 }
 
+/** Bornes de l'horizon de revente, alignées sur `ReventeSchema` du moteur (vérifié par test). */
+export const HORIZON_MIN = 1;
+export const HORIZON_MAX = 30;
+
 export const HORIZONS: readonly number[] = [5, 10, 15, 20];
+
+/** Le même projet revendu dans `annees` ans ; l'entrée n'est pas modifiée. */
+export function projetAHorizon(projet: ProjetEntree, annees: number): ProjetEntree {
+  return {
+    ...projet,
+    hypotheses: {
+      ...projet.hypotheses,
+      revente: { ...projet.hypotheses.revente, annees },
+    },
+  };
+}
 
 /** Le même projet revendu à différents horizons (sans scénarios : ~5 ms par horizon). */
 export function variantesRevente(
@@ -17,16 +32,7 @@ export function variantesRevente(
   horizons: readonly number[] = HORIZONS,
 ): VarianteRevente[] {
   return horizons.map((annees) => {
-    const r = calculerProjet(
-      {
-        ...projet,
-        hypotheses: {
-          ...projet.hypotheses,
-          revente: { ...projet.hypotheses.revente, annees },
-        },
-      },
-      { avecScenarios: false },
-    );
+    const r = calculerProjet(projetAHorizon(projet, annees), { avecScenarios: false });
     return {
       annees,
       valeur: r.revente.valeur,
