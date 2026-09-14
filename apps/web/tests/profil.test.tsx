@@ -89,7 +89,7 @@ describe('page Mon compte', () => {
   });
 
   it(
-    'affiche l’adresse, les méthodes liées ; renomme, puis se déconnecte',
+    'affiche l’adresse sans carte « Connexion » ; renomme, puis se déconnecte',
     { timeout: 60_000 },
     async () => {
       const utilisateur = userEvent.setup();
@@ -99,8 +99,8 @@ describe('page Mon compte', () => {
       // Sans nom, l'adresse sert aussi de nom affiché : on la cherche dans la ligne « Adresse e-mail ».
       const ligneEmail = screen.getByText('Adresse e-mail').parentElement!;
       expect(within(ligneEmail).getByText('camille@example.org')).toBeInTheDocument();
-      expect(await screen.findByText('Google')).toBeInTheDocument();
-      expect(screen.getByText('Code par e-mail')).toBeInTheDocument();
+      expect(screen.queryByRole('heading', { name: 'Connexion' })).not.toBeInTheDocument();
+      expect(screen.queryByText('Code par e-mail')).not.toBeInTheDocument();
 
       const enregistrer = screen.getByRole('button', { name: 'Enregistrer' });
       expect(enregistrer).toBeDisabled();
