@@ -49,4 +49,13 @@ describe('règles 2026-09', () => {
       expect(taux).toBeLessThan(regles.credit.tauxUsure);
     }
   });
+
+  it('porte les seuils datés de la liste de visite', () => {
+    expect(regles.visite.amianteAvantAnnee).toBe(1997);
+    expect(regles.visite.plombAvantAnnee).toBe(1949);
+    expect(regles.visite.plombAvantAnnee).toBeLessThan(regles.visite.amianteAvantAnnee);
+    expect(regles.visite.installationsAnciennesAns).toBe(15);
+    expect(regles.visite.etageSansAscenseur).toBe(3);
+    expect(regles.visite.chambreColocationM2).toBe(9);
+  });
 });

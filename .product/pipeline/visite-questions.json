@@ -1,0 +1,33 @@
+{
+  "feature_slug": "visite-questions",
+  "title": "Visite : base de questions sourcées, règles d'affichage, réponses conservées, onglet masqué quand la visite est faite",
+  "started_at": "2026-09-14T14:00:00Z",
+  "current_step": "specs",
+  "scope": "packages/moteur/src/visite (base, règles, questionsPourProjet), regles/2026-09.ts (seuils visite), verdict/vigilance.ts (points financiers seulement) ; apps/web/src/{stockage (ProjetEnregistre.visite), visite, textes/visite.ts, ecrans/Visite.tsx, ecrans/visite, ecrans/Rapport.tsx, ecrans/FormulaireProjet.tsx, ecrans/NouveauProjet.tsx, ecrans/Partage.tsx, ecrans/document/DocumentProjet.tsx, coque/ProjetLayout.tsx} ; e2e ; docs",
+  "branch": "feat/visite-questions",
+  "base": "master (b74bbc6)",
+  "baseline": {
+    "unit_tests_passed": 961,
+    "e2e_passed": 8,
+    "vigilance_exemple": 7
+  },
+  "steps": {
+    "discovery": {
+      "status": "completed",
+      "output": ".product/features/visite-questions-discovery.md"
+    },
+    "specs": { "status": "in_progress", "output": ".product/specs/visite-questions-specs.md" },
+    "architecture": { "status": "pending", "output": ".product/architecture/visite-questions.md" },
+    "implement": { "status": "pending", "stories_completed": 0, "stories_total": 0 },
+    "qa_tests": { "status": "pending" },
+    "security": { "status": "pending" },
+    "push": { "status": "pending" }
+  },
+  "decisions": {
+    "base": "environ 70 questions rédigées par Claude, chacune avec sa source ; texte gabarit dans le moteur, paramètres formatés par le web",
+    "categories": "documents, diagnostics, logement, immeuble, quartier, vendeur, exploitation",
+    "valeurs": "neuf questions écrivent une hypothèse par les descripteurs de l'onglet Hypothèses (appliquerSaisie, provenance utilisateur)",
+    "visite_faite": "onglet masqué, route ouverte (compte rendu + Rouvrir), volet imprimé seulement avec des réponses, partage avec les réponses",
+    "finances": "les cinq points financiers restent dans verdict.vigilance et passent dans le Rapport ; les neuf autres deviennent des questions"
+  }
+}
