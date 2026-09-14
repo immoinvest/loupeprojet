@@ -4,6 +4,7 @@ import {
   FinLocationSchema,
   IdentiteBailleurSchema,
   ModificationLocationSchema,
+  NouveauLocataireSchema,
   NouveauPaiementSchema,
   NouvelleOccupationSchema,
   PreferencesMenuSchema,
@@ -114,6 +115,14 @@ export function routeurGestion(
     if (corps === null) return reponseErreur(400, 'CHAMPS_INVALIDES');
     return c.json(
       await deps.gestion.terminerLocation(c.get('userId'), c.req.param('id'), corps.fin),
+    );
+  });
+
+  app.patch('/locataires/:id', async (c) => {
+    const locataire = await lireCorps(c, NouveauLocataireSchema);
+    if (locataire === null) return reponseErreur(400, 'CHAMPS_INVALIDES');
+    return c.json(
+      await deps.gestion.modifierLocataire(c.get('userId'), c.req.param('id'), locataire),
     );
   });
 

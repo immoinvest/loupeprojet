@@ -11,6 +11,7 @@ export const TEXTES_MENU = {
   loyersDuMois: 'Loyers du mois',
   /** La page Loyers, mois par mois (« Tous mes projets » a son pendant dans Analyser). */
   tousLesLoyers: 'Tous les loyers',
+  mesLocataires: 'Mes locataires',
   gererSansCompte: 'Gérer mes biens loués',
 } as const;
 

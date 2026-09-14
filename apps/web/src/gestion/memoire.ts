@@ -27,7 +27,11 @@ import {
 } from '@loupe/gestion';
 
 import { cleDuDocument, documentEnMemoire } from './memoire-documents';
-import { modifierEnMemoire, supprimerEnMemoire } from './memoire-modifications';
+import {
+  modifierEnMemoire,
+  modifierLocataireEnMemoire,
+  supprimerEnMemoire,
+} from './memoire-modifications';
 import type { ClientGestion, CodeErreurGestion, ResultatGestion } from './types';
 
 export type ActionGestion = keyof ClientGestion;
@@ -247,6 +251,12 @@ export function clientGestionMemoire(options: OptionsGestionMemoire = {}): Clien
         for (const document of avant) {
           if (!donnees.documents.includes(document)) complets.delete(document.id);
         }
+        return effet.resultat;
+      }),
+    modifierLocataire: (locataireId, locataire) =>
+      executer('modifierLocataire', () => {
+        const effet = modifierLocataireEnMemoire(donnees, locataireId, locataire);
+        donnees = effet.donnees;
         return effet.resultat;
       }),
   };

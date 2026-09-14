@@ -1,5 +1,5 @@
 import { jourLocal } from '@loupe/gestion';
-import { Building2, House, Plus, Receipt } from 'lucide-react';
+import { Building2, House, Plus, Receipt, Users } from 'lucide-react';
 import type { JSX } from 'react';
 import { NavLink } from 'react-router';
 
@@ -12,8 +12,8 @@ import { CLASSE_ETIQUETTE, classeLien, classeLienCreation } from './liens';
 
 /**
  * Section « Gérer » : ajouter un bien, les loyers du mois (avec les loyers en retard), tous les
- * loyers mois par mois, et tous les biens. Sans compte, une seule ligne vers la page qui explique
- * pourquoi il en faut un. Les pages Locataires et Argent y entreront avec leurs features.
+ * loyers mois par mois, tous les biens et tous les locataires. Sans compte, une seule ligne vers la
+ * page qui explique pourquoi il en faut un. La page Argent y entrera avec sa feature.
  */
 export function SectionGerer(): JSX.Element {
   const { etat } = useCompte();
@@ -51,6 +51,10 @@ export function SectionGerer(): JSX.Element {
             <span className="flex-1 truncate">
               {mesBiens(donnees === null ? null : donnees.biens.length)}
             </span>
+          </NavLink>
+          <NavLink to="/gerer/locataires" className={classeLien}>
+            <Users size={18} aria-hidden="true" />
+            {TEXTES_MENU.mesLocataires}
           </NavLink>
         </>
       ) : (

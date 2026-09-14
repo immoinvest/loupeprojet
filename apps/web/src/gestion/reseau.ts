@@ -3,6 +3,7 @@ import {
   DocumentCompletSchema,
   EtatGestionSchema,
   IdentiteBailleurSchema,
+  LocataireSchema,
   LocationGereeSchema,
   OccupationCreeeSchema,
   PaiementSchema,
@@ -119,5 +120,12 @@ export function clientGestionReseau(
       ),
     supprimerBien: (bienId) =>
       appeler('DELETE', `/biens/${encodeURIComponent(bienId)}`, undefined, z.undefined()),
+    modifierLocataire: (locataireId, locataire) =>
+      appeler(
+        'PATCH',
+        `/locataires/${encodeURIComponent(locataireId)}`,
+        locataire,
+        LocataireSchema,
+      ),
   };
 }

@@ -3,7 +3,9 @@ import {
   changementRefuse,
   chevauche,
   ModificationLocationSchema,
+  NouveauLocataireSchema,
   type EtatGestion,
+  type Locataire,
   type LocationGeree,
   type RefusChangement,
 } from '@loupe/gestion';
@@ -99,4 +101,24 @@ export function retirerBien(donnees: EtatGestion, bienId: string): EtatGestion {
 export function supprimerEnMemoire(donnees: EtatGestion, bienId: string): Effet<undefined> {
   if (!donnees.biens.some((b) => b.id === bienId)) return refus(donnees, 'introuvable');
   return { donnees: retirerBien(donnees, bienId), resultat: { ok: true, valeur: undefined } };
+}
+
+/** Nom et e-mail du locataire, comme l'API : identifiant et date de création gardés, e-mail absent retiré. */
+export function modifierLocataireEnMemoire(
+  donnees: EtatGestion,
+  locataireId: string,
+  locataire: unknown,
+): Effet<Locataire> {
+  const lu = NouveauLocataireSchema.safeParse(locataire);
+  if (!lu.success) return refus(donnees, 'invalide');
+  const existant = donnees.locataires.find((l) => l.id === locataireId);
+  if (existant === undefined) return refus(donnees, 'introuvable');
+  const modifie: Locataire = { id: existant.id, ...lu.data, creeLe: existant.creeLe };
+  return {
+    donnees: {
+      ...donnees,
+      locataires: donnees.locataires.map((l) => (l.id === locataireId ? modifie : l)),
+    },
+    resultat: { ok: true, valeur: modifie },
+  };
 }

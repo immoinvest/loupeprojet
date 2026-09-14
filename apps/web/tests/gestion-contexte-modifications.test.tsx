@@ -50,6 +50,21 @@ describe('GestionProvider : modifier et supprimer', () => {
     expect(contexte().donnees?.locations.map((l) => l.jourLoyer)).toEqual([10, 3]);
 
     await act(async () => {
+      const refuse = await contexte().modifierLocataire('locataire-antoine', {
+        prenom: '',
+        nom: 'Dupond',
+      });
+      expect(refuse.ok).toBe(false);
+      const corrige = await contexte().modifierLocataire('locataire-antoine', {
+        prenom: 'Antoine',
+        nom: 'Dupond',
+        email: 'antoine@exemple.fr',
+      });
+      expect(corrige.ok).toBe(true);
+    });
+    expect(contexte().donnees?.locataires.map((l) => l.nom)).toEqual(['Martin', 'Dupond']);
+
+    await act(async () => {
       expect((await contexte().supprimerBien('inconnu')).ok).toBe(false);
       expect((await contexte().supprimerBien('bien-lices')).ok).toBe(true);
     });

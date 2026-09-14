@@ -5,8 +5,10 @@ import type {
   DocumentComplet,
   EtatGestion,
   IdentiteBailleur,
+  Locataire,
   LocationGeree,
   ModificationLocation,
+  NouveauLocataire,
   NouveauPaiement,
   NouvelleOccupation,
   OccupationCreee,
@@ -64,4 +66,9 @@ export interface ClientGestion {
   ): Promise<ResultatGestion<LocationGeree>>;
   /** Supprime le bien, ses locations, paiements et documents, et ses locataires sans autre location. */
   supprimerBien(bienId: string): Promise<ResultatGestion>;
+  /** Nom et e-mail du locataire ; sans e-mail, il est retiré. Les documents émis ne changent pas. */
+  modifierLocataire(
+    locataireId: string,
+    locataire: NouveauLocataire,
+  ): Promise<ResultatGestion<Locataire>>;
 }

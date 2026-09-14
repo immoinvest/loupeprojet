@@ -174,6 +174,7 @@ export function depotD1(base: D1Database, options: OptionsDepot = {}): DepotGest
     louer: baux.louer,
     modifierLocation: modifications.modifierLocation,
     supprimerBien: modifications.supprimerBien,
+    modifierLocataire: modifications.modifierLocataire,
     exporter: async (userId) =>
       ExportGestionSchema.parse({
         ...(await etat(userId)),

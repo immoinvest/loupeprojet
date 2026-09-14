@@ -1,14 +1,16 @@
 import {
   changementRefuse,
   chevauche,
+  type Locataire,
   type LocationGeree,
   type ModificationLocation,
+  type NouveauLocataire,
 } from '@loupe/gestion';
 
 import { ErreurGestion } from './depot';
 import type { OutilsBaux } from './depot-baux';
 import { lignes, lireLocation } from './lecture';
-import { versPeriode } from './lignes';
+import { versLocataire, versPeriode } from './lignes';
 
 const SQL = {
   // Insertion conditionnelle (ADR-G15) : aucun paiement pour ce mois ni après, sinon rien n'est écrit.
@@ -20,6 +22,9 @@ const SQL = {
   autresLocationsDuBien:
     'select debut, fin, libelle from gestion_location where userId = ? and bienId = ? and id <> ?',
   bien: 'select id from gestion_bien where userId = ? and id = ?',
+  locataire: 'select * from gestion_locataire where userId = ? and id = ?',
+  modifierLocataire:
+    'update gestion_locataire set prenom = ?, nom = ?, email = ? where userId = ? and id = ?',
   // Les clés étrangères suppriment en cascade locations, changements, colocataires, paiements et documents.
   supprimerBien: 'delete from gestion_bien where userId = ? and id = ?',
   // Un locataire n'existe que par ses locations : sans aucune, il part avec le bien (minimisation, G1-9).
@@ -34,6 +39,11 @@ export interface DepotModifications {
     modification: ModificationLocation,
   ) => Promise<LocationGeree>;
   readonly supprimerBien: (userId: string, bienId: string) => Promise<void>;
+  readonly modifierLocataire: (
+    userId: string,
+    locataireId: string,
+    locataire: NouveauLocataire,
+  ) => Promise<Locataire>;
 }
 
 /** « Modifier » une location (montants à partir d'un mois, jour, dépôt, libellé) et supprimer un bien. */
@@ -109,6 +119,15 @@ export function depotModifications(outils: OutilsBaux): DepotModifications {
         lier(SQL.supprimerBien, userId, bienId),
         lier(SQL.supprimerLocatairesSansLocation, userId, userId, userId),
       ]);
+    },
+
+    modifierLocataire: async (userId, locataireId, locataire) => {
+      const [ligne] = await lignes(lier, SQL.locataire, userId, locataireId);
+      if (ligne === undefined) throw new ErreurGestion('INTROUVABLE');
+      const { prenom, nom, email } = locataire;
+      await lier(SQL.modifierLocataire, prenom, nom, email, userId, locataireId).run();
+      // Les quittances et reçus déjà émis gardent l'ancien nom : leur contenu est figé (ADR-G8).
+      return versLocataire({ ...ligne, prenom, nom, email: email ?? null });
     },
   };
 }

@@ -9,6 +9,7 @@ import type {
   Locataire,
   LocationGeree,
   ModificationLocation,
+  NouveauLocataire,
   NouveauPaiement,
   NouvelleOccupation,
   Paiement,
@@ -103,6 +104,12 @@ export interface DepotGestion {
   ): Promise<LocationGeree>;
   /** Le bien et tout ce qui en dépend (locations, paiements, documents, locataires sans autre location) ; lève INTROUVABLE. */
   supprimerBien(userId: string, bienId: string): Promise<void>;
+  /** Nom et e-mail corrigés (sans e-mail, il est retiré) ; lève INTROUVABLE. */
+  modifierLocataire(
+    userId: string,
+    locataireId: string,
+    locataire: NouveauLocataire,
+  ): Promise<Locataire>;
   /** Toutes les données de gestion du compte, documents complets compris. */
   exporter(userId: string): Promise<ExportGestion>;
 }

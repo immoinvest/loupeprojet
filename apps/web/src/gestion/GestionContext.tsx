@@ -7,8 +7,10 @@ import {
   type DocumentComplet,
   type EtatGestion,
   type IdentiteBailleur,
+  type Locataire,
   type LocationGeree,
   type ModificationLocation,
+  type NouveauLocataire,
   type NouveauPaiement,
   type NouvelleOccupation,
   type OccupationCreee,
@@ -62,6 +64,10 @@ export interface ContexteGestion {
   ) => Promise<ResultatGestion<LocationGeree>>;
   /** Supprime le bien ; l'état retire aussi ses locations, paiements, documents et locataires sans location. */
   readonly supprimerBien: (bienId: string) => Promise<ResultatGestion>;
+  readonly modifierLocataire: (
+    locataireId: string,
+    locataire: NouveauLocataire,
+  ) => Promise<ResultatGestion<Locataire>>;
 }
 
 const Contexte = createContext<ContexteGestion | null>(null);
@@ -224,6 +230,17 @@ export function GestionProvider({
       supprimerBien: async (bienId) => {
         const r = await client.supprimerBien(bienId);
         if (r.ok) fusionner((e) => retirerBien(e, bienId));
+        return r;
+      },
+      modifierLocataire: async (locataireId, locataire) => {
+        const r = await client.modifierLocataire(locataireId, locataire);
+        if (r.ok) {
+          const { valeur: modifie } = r;
+          fusionner((e) => ({
+            ...e,
+            locataires: e.locataires.map((l) => (l.id === modifie.id ? modifie : l)),
+          }));
+        }
         return r;
       },
     };

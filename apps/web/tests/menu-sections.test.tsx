@@ -105,6 +105,10 @@ describe('menu à deux sections', () => {
       'href',
       '/gerer/biens',
     );
+    expect(within(gerer).getByRole('link', { name: 'Mes locataires' })).toHaveAttribute(
+      'href',
+      '/gerer/locataires',
+    );
   });
 });
 

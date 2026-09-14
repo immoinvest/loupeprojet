@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { clientGestionReseau, type Recuperateur } from '@/gestion/reseau';
 
-import { LOCATION_JULIE } from './gestion-exemples';
+import { JULIE, LOCATION_JULIE } from './gestion-exemples';
 
 interface Appel {
   readonly url: string;
@@ -62,5 +62,17 @@ describe('clientGestionReseau : modifier une location, supprimer un bien', () =>
       ok: false,
       code: 'periode_payee',
     });
+  });
+
+  it('modifie un locataire par PATCH, identifiant encodé, et revalide le locataire rendu', async () => {
+    const { recuperer, appels } = serveur(() => json(200, JULIE));
+    const locataire = { prenom: 'Julie', nom: 'Martin' };
+    expect(await clientGestionReseau(recuperer).modifierLocataire('loc/j', locataire)).toEqual({
+      ok: true,
+      valeur: JULIE,
+    });
+    expect(appels.map((a) => [a.url, a.init?.method])).toEqual([
+      ['/api/gestion/locataires/loc%2Fj', 'PATCH'],
+    ]);
   });
 });
