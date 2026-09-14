@@ -43,6 +43,7 @@ export const TEXTES_MODIFIER = {
   aPartirDe: 'Nouveaux montants à partir de',
   loyer: 'Loyer hors charges',
   charges: 'Charges',
+  apl: 'APL versée par la CAF',
   jourLoyer: 'Jour du loyer',
   depot: 'Dépôt de garantie',
   libelle: 'Chambre (facultatif)',
@@ -55,6 +56,7 @@ export const TEXTES_MODIFIER = {
 export const ERREURS_MODIFIER: Readonly<Record<ChampModification, string>> = {
   loyer: 'Indique un loyer en euros, par exemple 650.',
   charges: 'Indique des charges en euros, ou laisse vide.',
+  apl: 'Une aide en euros par mois, au plus le loyer charges comprises.',
   jourLoyer: 'Indique un jour entre 1 et 28.',
   depot: 'Indique un dépôt en euros, par exemple 1300.',
   libelle: '40 caractères au plus.',

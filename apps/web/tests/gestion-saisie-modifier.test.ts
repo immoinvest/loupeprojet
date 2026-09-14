@@ -33,6 +33,7 @@ describe('saisieModification', () => {
       aPartirDe: '2026-10',
       loyer: '680,50',
       charges: '50',
+      apl: '',
       jourLoyer: '5',
       depot: '1300',
       libelle: 'Chambre 1',
@@ -146,6 +147,7 @@ describe('supprimer : confirmation et textes', () => {
     expect(Object.keys(ERREURS_MODIFIER)).toEqual([
       'loyer',
       'charges',
+      'apl',
       'jourLoyer',
       'depot',
       'libelle',

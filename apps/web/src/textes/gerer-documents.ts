@@ -22,6 +22,11 @@ export const TEXTES_DOCUMENT = {
   loyer: 'Loyer hors charges',
   charges: 'Charges',
   total: 'Total du terme',
+  /** Tiers payant (ADR-G16) : l'aide comprise dans le total, puis ce qui reste au locataire. */
+  apl: 'Dont aide au logement versée par la CAF',
+  partLocataire: 'Payé par le locataire',
+  /** Drapeau « à confirmer » (APL_QUITTANCE, règles de gestion) : visible à l'aperçu, jamais imprimé. */
+  aplAConfirmer: 'Mention de l’aide au logement : formulation à confirmer auprès de la CAF.',
   paiements: 'Paiements reçus',
   paiementAtteste: 'Paiement reçu',
   dejaRecu: 'Déjà reçu pour ce terme',

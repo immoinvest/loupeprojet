@@ -8,6 +8,7 @@ import {
 import { useState, type JSX } from 'react';
 
 import { Bouton, Carte, Ligne, TitreCarte } from '@/composants/ui';
+import { recoitApl } from '@/gestion/fiche';
 import { dateEnLettres, leJourDuMois, montant } from '@/gestion/format';
 import { useGestion } from '@/gestion/GestionContext';
 import type { ResultatGestion } from '@/gestion/types';
@@ -110,6 +111,7 @@ export function CarteLocation({
           aujourdhui={aujourdhui}
           occupe={occupe}
           erreur={erreur}
+          rappelCaf={recoitApl(location)}
           onEnregistrer={terminer}
           onFermer={fermer}
         />

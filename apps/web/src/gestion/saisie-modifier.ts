@@ -14,13 +14,15 @@ export interface SaisieModification {
   readonly aPartirDe: string;
   readonly loyer: string;
   readonly charges: string;
+  /** L'APL versée au bailleur à partir de ce mois ; vide : aucune. */
+  readonly apl: string;
   readonly jourLoyer: string;
   readonly depot: string;
   /** La chambre ; vide pour un bien loué en entier. */
   readonly libelle: string;
 }
 
-export type ChampModification = 'loyer' | 'charges' | 'jourLoyer' | 'depot' | 'libelle';
+export type ChampModification = 'loyer' | 'charges' | 'apl' | 'jourLoyer' | 'depot' | 'libelle';
 
 export type ResultatModification =
   /** `modification` vaut `null` quand rien n'a changé : rien à envoyer. */
@@ -38,7 +40,7 @@ export function texteDepuisCentimes(centimes: number): string {
 
 /**
  * Le formulaire prérempli : montants en vigueur au premier mois proposé (ceux de ce mois-ci s'il n'y
- * en a pas), jour du loyer, dépôt, libellé.
+ * en a pas), aide vide si elle vaut 0, jour du loyer, dépôt, libellé.
  */
 export function saisieModification(
   location: LocationGeree,
@@ -51,6 +53,7 @@ export function saisieModification(
     aPartirDe: premier ?? '',
     loyer: texteDepuisCentimes(montants.loyerHorsCharges),
     charges: texteDepuisCentimes(montants.charges),
+    apl: montants.apl === 0 ? '' : texteDepuisCentimes(montants.apl),
     jourLoyer: String(location.jourLoyer),
     depot: texteDepuisCentimes(location.depot),
     libelle: location.libelle ?? '',
@@ -59,7 +62,7 @@ export function saisieModification(
 
 /**
  * Ce qu'il faut envoyer : seulement ce qui a changé (aucun changement de loyer inutile), ou les champs
- * à corriger dans l'ordre de l'écran. Sans mois proposé, loyer et charges ne sont ni lus ni envoyés.
+ * à corriger dans l'ordre de l'écran. Sans mois proposé, loyer, charges et aide ne sont ni lus ni envoyés.
  */
 export function modificationDepuisSaisie(
   location: LocationGeree,
@@ -74,6 +77,9 @@ export function modificationDepuisSaisie(
   const enVigueur = s.aPartirDe === '' ? null : montantsDuMois(location, s.aPartirDe);
   const loyer = enVigueur === null ? 0 : lireMontant(s.loyer, 'loyer', null);
   const charges = enVigueur === null ? 0 : lireMontant(s.charges, 'charges', 0);
+  const apl = enVigueur === null ? 0 : lireMontant(s.apl, 'apl', 0);
+  // L'aide est comprise dans le loyer charges comprises (ADR-G16).
+  if (apl > loyer + charges) erreurs.push('apl');
   const jour = Number(s.jourLoyer);
   if (!Number.isInteger(jour) || jour < 1 || jour > JOUR_LOYER_MAX) erreurs.push('jourLoyer');
   const depot = lireMontant(s.depot, 'depot', null);
@@ -82,17 +88,13 @@ export function modificationDepuisSaisie(
   if (erreurs.length > 0) return { ok: false, erreurs };
 
   const montantsChanges =
-    enVigueur !== null && (enVigueur.loyerHorsCharges !== loyer || enVigueur.charges !== charges);
+    enVigueur !== null &&
+    (enVigueur.loyerHorsCharges !== loyer ||
+      enVigueur.charges !== charges ||
+      enVigueur.apl !== apl);
   const modification: ModificationLocation = {
     ...(montantsChanges
-      ? {
-          montants: {
-            aPartirDe: s.aPartirDe,
-            loyerHorsCharges: loyer,
-            charges,
-            apl: enVigueur.apl,
-          },
-        }
+      ? { montants: { aPartirDe: s.aPartirDe, loyerHorsCharges: loyer, charges, apl } }
       : {}),
     ...(jour === location.jourLoyer ? {} : { jourLoyer: jour }),
     ...(depot === location.depot ? {} : { depot }),

@@ -72,7 +72,7 @@ export function ModifierLocation({
       }}
     >
       {mois.length > 0 ? (
-        <div className="grid gap-3 sm:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-2">
           <div className="flex min-w-0 flex-col gap-1.5">
             <label htmlFor={id('aPartirDe')} className="text-sm font-semibold text-encre-2">
               {T.aPartirDe}
@@ -107,6 +107,15 @@ export function ModifierLocation({
             valeur={saisie.charges}
             onChange={changer('charges')}
             erreur={erreurDe('charges')}
+            unite="€"
+            inputMode="decimal"
+          />
+          <ChampGerer
+            id={id('apl')}
+            libelle={T.apl}
+            valeur={saisie.apl}
+            onChange={changer('apl')}
+            erreur={erreurDe('apl')}
             unite="€"
             inputMode="decimal"
           />
