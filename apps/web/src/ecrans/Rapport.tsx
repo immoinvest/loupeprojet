@@ -21,6 +21,7 @@ import { CarteAutofinancement } from './rapport/CarteAutofinancement';
 import { CartePrix } from './rapport/CartePrix';
 import { CarteRendements } from './rapport/CarteRendements';
 import { Leviers } from './rapport/Leviers';
+import { CarteVigilance } from './rapport/Vigilance';
 
 const TITRE_FISCALITE = "Combien d'impôts ?";
 const TITRE_REVENTE = "Qu'est-ce qu'il vous restera ?";
@@ -147,6 +148,7 @@ export function Rapport(): JSX.Element {
         <CarteRendements r={r} />
       </div>
       <Leviers r={r} />
+      <CarteVigilance r={r} />
       <div className={DEUX_CARTES}>
         <CarteFiscalite r={r} />
         <CarteRevente r={r} />

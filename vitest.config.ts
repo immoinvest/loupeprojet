@@ -17,7 +17,7 @@ export default defineConfig({
         'apps/worker/src/**': { lines: 100, functions: 100, branches: 100, statements: 100 },
         'apps/comptes/src/**': { lines: 100, functions: 100, branches: 100, statements: 100 },
         'data/src/**': { lines: 100, functions: 100, branches: 100, statements: 100 },
-        'apps/web/src/{stockage,formatage,textes,annonces,hypotheses,analyses,bookmarklet,enrichissement,compte,gestion,application,hors-ligne}/**':
+        'apps/web/src/{stockage,formatage,textes,annonces,hypotheses,analyses,bookmarklet,enrichissement,compte,gestion,application,hors-ligne,visite}/**':
           {
             lines: 100,
             functions: 100,

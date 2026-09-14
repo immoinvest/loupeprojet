@@ -137,7 +137,9 @@ test("impression : sur une page A4, le document garde la mise en page d'ordinate
     enTete: 'row',
     barre: 'none',
   });
-  expect(miseEnPage.grillesRapport).toEqual([2, 2]);
+  // Rapport, dans l'ordre du document : cascade et repères côte à côte (2), repères empilés (1),
+  // Prix et Rendements (2), brut · net · net-net (3), Impôts et Revente (2).
+  expect(miseEnPage.grillesRapport).toEqual([2, 1, 2, 3, 2]);
   expect(miseEnPage.grillesFiscalite[0]).toBe(2);
   expect(miseEnPage.grillesRevente.slice(0, 2)).toEqual([2, 2]);
   await contexte.close();
