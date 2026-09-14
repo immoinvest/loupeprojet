@@ -13,6 +13,7 @@ export type CodeErreurGestion =
   | 'invalide'
   | 'introuvable'
   | 'deja_recu'
+  | 'limite'
   | 'indisponible'
   | 'reseau'
   | 'inconnue';

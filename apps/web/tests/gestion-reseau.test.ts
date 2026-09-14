@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { clientGestionReseau, type Recuperateur } from '@/gestion/reseau';
+import { ERREURS_GESTION } from '@/textes/gerer';
 
 import { CREATION_LOUEE, ETAT_SEPTEMBRE, PAIEMENT_JULIE } from './gestion-exemples';
 
@@ -102,12 +103,18 @@ describe('clientGestionReseau', () => {
     [413, 'CORPS_TROP_GROS', 'invalide'],
     [404, 'INTROUVABLE', 'introuvable'],
     [409, 'PERIODE_DEJA_RECUE', 'deja_recu'],
+    [400, 'HORS_LOCATION', 'invalide'],
+    [409, 'LIMITE_ATTEINTE', 'limite'],
     [503, 'GESTION_INDISPONIBLE', 'indisponible'],
     [403, 'ORIGINE_INCONNUE', 'inconnue'],
     [500, 'ERREUR_INTERNE', 'indisponible'],
   ] as const)('HTTP %i %s → %s', async (statut, code, attendu) => {
     const { recuperer } = serveur(() => json(statut, { code }));
     expect(await clientGestionReseau(recuperer).etat()).toEqual({ ok: false, code: attendu });
+  });
+
+  it('la limite de biens a sa propre phrase, qui dit le nombre', () => {
+    expect(ERREURS_GESTION.limite).toBe('Ce compte a atteint le nombre maximal de biens (200).');
   });
 
   it('une réponse illisible : inconnue sous 500, indisponible au-delà', async () => {

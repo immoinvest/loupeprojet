@@ -41,6 +41,7 @@ export const ERREURS_GESTION: Readonly<Record<CodeErreurGestion, string>> = {
   invalide: 'Une information est incomplète ou invalide. Vérifiez les champs.',
   introuvable: 'Cet élément n’existe plus. Rechargez la page.',
   deja_recu: 'Ce loyer est déjà marqué reçu.',
+  limite: 'Ce compte a atteint le nombre maximal de biens (200).',
   indisponible: 'Gérer n’est pas disponible pour le moment. Réessayez dans quelques minutes.',
   reseau: 'Impossible de joindre Deklic. Vérifiez votre connexion internet.',
   inconnue: 'Quelque chose n’a pas marché. Réessayez.',

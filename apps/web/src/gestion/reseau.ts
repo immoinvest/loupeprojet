@@ -20,6 +20,8 @@ const CODES_SERVEUR: Readonly<Record<string, CodeErreurGestion>> = {
   CORPS_TROP_GROS: 'invalide',
   INTROUVABLE: 'introuvable',
   PERIODE_DEJA_RECUE: 'deja_recu',
+  HORS_LOCATION: 'invalide',
+  LIMITE_ATTEINTE: 'limite',
   GESTION_INDISPONIBLE: 'indisponible',
 };
 
