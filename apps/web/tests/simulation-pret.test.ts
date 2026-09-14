@@ -1,15 +1,21 @@
-import { arrondirCentime, calculerProjet, projetExemple, type ProjetEntree } from '@loupe/moteur';
+import {
+  SimulationPretSchema,
+  arrondirCentime,
+  calculerProjet,
+  obtenirRegles,
+  projetExemple,
+  simulerPret,
+  type ProjetEntree,
+} from '@loupe/moteur';
 import { describe, expect, it } from 'vitest';
 
+import { lienSimulateurPret, simulationDepuisResultats } from '@/analyses';
 import {
   CHEMIN_SIMULATEUR,
-  SimulationPretEntreeSchema,
   decoderSimulation,
   encoderSimulation,
-  lienSimulateurPret,
   lireFragmentSimulation,
-  simulationDepuisResultats,
-} from '@/analyses';
+} from '@/simulateur';
 import { decoderJson, encoderJson } from '@/stockage/base64url';
 
 const variante = (hypotheses: Partial<ProjetEntree['hypotheses']>): ProjetEntree => ({
@@ -42,7 +48,7 @@ describe('simulationDepuisResultats', () => {
         },
       ],
     });
-    expect(SimulationPretEntreeSchema.safeParse(simulationDepuisResultats(r)).success).toBe(true);
+    expect(SimulationPretSchema.safeParse(simulationDepuisResultats(r)).success).toBe(true);
   });
 
   it('omet les honoraires à la charge du vendeur, les travaux nuls ; émet les différés non nuls', () => {
@@ -68,16 +74,31 @@ describe('lien du simulateur', () => {
   const r = calculerProjet(projetExemple);
   const simulation = simulationDepuisResultats(r);
 
-  it('met la simulation encodée dans le fragment, et la relit à l’identique', () => {
+  it('met la simulation encodée dans le fragment ; le simulateur la relit, défauts complétés', () => {
     const lien = lienSimulateurPret(simulation);
     expect(lien.startsWith(`${CHEMIN_SIMULATEUR}#s=`)).toBe(true);
     const fragment = new URL(lien, 'https://deklic.test').hash;
     expect(lireFragmentSimulation(fragment)).toBe(encoderSimulation(simulation));
     expect(decoderSimulation(lireFragmentSimulation(fragment) ?? '')).toEqual({
       ok: true,
-      simulation,
+      simulation: SimulationPretSchema.parse(simulation),
     });
     expect(lireFragmentSimulation('#p=autre')).toBeNull();
+  });
+
+  it('ouvre, au centime, le prêt du rapport : mêmes mensualité, intérêts et coût total', () => {
+    const decodage = decoderSimulation(
+      lireFragmentSimulation(lienSimulateurPret(simulation).split('#')[1] ?? '') ?? '',
+    );
+    expect(decodage.ok).toBe(true);
+    if (!decodage.ok) return;
+    const [offre] = decodage.simulation.offres;
+    if (offre === undefined) throw new Error('offre attendue');
+    const resultat = simulerPret(decodage.simulation.projet, offre, obtenirRegles('2026-09'));
+    expect(resultat.montantEmprunte).toBeCloseTo(r.financement.montantEmprunte, 2);
+    expect(resultat.mensualiteTotale).toBeCloseTo(r.financement.mensualiteTotale, 2);
+    expect(resultat.totalInterets).toBeCloseTo(r.financement.totalInterets, 0);
+    expect(resultat.coutTotalCredit).toBeCloseTo(r.financement.coutTotalCredit, 0);
   });
 
   it('refuse proprement un fragment vide, abîmé ou hors contrat', () => {

@@ -27,15 +27,17 @@ import { NouveauProjet } from './ecrans/NouveauProjet';
 import { Partage } from './ecrans/Partage';
 import { Rapport } from './ecrans/Rapport';
 import { Revente } from './ecrans/Revente';
+import { SimulateurImprimer } from './ecrans/SimulateurImprimer';
+import { SimulateurPret } from './ecrans/SimulateurPret';
 import { Visite } from './ecrans/Visite';
 import { Adresse } from './ecrans/Adresse';
 import { ProjetsProvider } from './stockage/ProjetsContext';
-import { TEXTES_SIMULATEUR_BIENTOT } from './textes/financement';
 
 export const routes: RouteObject[] = [
   // Hors de la coque : la page de connexion classique, centrée, et le document imprimable.
   { path: 'connexion', element: <Connexion /> },
   { path: 'projets/:id/imprimer', element: <Imprimer /> },
+  { path: 'simulateur-pret/imprimer', element: <SimulateurImprimer /> },
   {
     element: <AppLayout />,
     children: [
@@ -58,18 +60,9 @@ export const routes: RouteObject[] = [
       { path: 'compte', element: <Compte /> },
       { path: 'partage', element: <Partage /> },
       { path: 'comparer', element: <Comparer /> },
+      { path: 'simulateur-pret', element: <SimulateurPret /> },
       { path: 'methode', element: <Methode /> },
       { path: 'extension', element: <Extension /> },
-      // En attendant le simulateur (fiche 08) : le lien « Simuler un prêt » mène ici, prêt dans le fragment.
-      {
-        path: 'simulateur-pret',
-        element: (
-          <Bientot
-            titre={TEXTES_SIMULATEUR_BIENTOT.titre}
-            phrase={TEXTES_SIMULATEUR_BIENTOT.phrase}
-          />
-        ),
-      },
       {
         path: '*',
         element: (

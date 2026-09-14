@@ -28,10 +28,20 @@ test('financement : la durée change la mensualité ; « Simuler un prêt » ouv
   await expect(page.getByLabel('Durée du prêt')).toHaveValue('20');
   await expect(cout).toContainText(/95[45]\s€/);
 
-  // Le lien porte le prêt dans son fragment et mène à la page du simulateur.
+  // Le lien porte le prêt dans son fragment et ouvre le simulateur avec ce prêt, en offre A seule.
   const lien = page.getByRole('link', { name: 'Simuler un prêt' });
   await expect(lien).toHaveAttribute('href', /^\/simulateur-pret#s=[A-Za-z0-9_-]+$/);
   await lien.click();
-  await expect(page.getByRole('heading', { level: 1, name: 'Simulateur de prêt' })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { level: 1, name: 'Comparer deux offres de prêt' }),
+  ).toBeVisible();
   expect(page.url()).toContain('/simulateur-pret#s=');
+  const offreA = page
+    .locator('section', {
+      has: page.getByRole('heading', { level: 2, name: 'Offre A', exact: true }),
+    })
+    .first();
+  await expect(offreA.getByLabel('Durée')).toHaveValue('20');
+  await expect(offreA.getByLabel('Taux nominal')).toHaveValue('3.35');
+  await expect(page.getByRole('button', { name: 'Ajouter une offre B' })).toBeVisible();
 });

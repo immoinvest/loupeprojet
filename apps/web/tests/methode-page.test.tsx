@@ -21,6 +21,8 @@ describe('Page Méthode', () => {
     expect(screen.getByRole('heading', { name: "Les frais d'acquisition" })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Meublé au réel (LMNP)' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Le verdict : cinq feux' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Le simulateur de prêt' })).toBeInTheDocument();
+    expect(screen.getByText(/Taux nominal proposé par défaut/)).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Les valeurs par défaut' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Ce que le moteur simplifie' })).toBeInTheDocument();
     // Le libellé exact (la liste des simplifications contient une phrase plus longue).
