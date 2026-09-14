@@ -18,7 +18,7 @@ import { STATUTS, type ProjetEnregistre } from '@/stockage/projets';
 import { useSynchro } from '@/stockage/synchro/SynchroContext';
 import { TEXTES_MON_COMPTE } from '@/textes/mon-compte';
 import { MODES } from '@/textes/regimes';
-import { ligneSauvegarde } from '@/textes/synchro';
+import { alerteSynchro } from '@/textes/synchro';
 
 type Filtre = 'tous' | 'en_cours' | 'ecartes';
 
@@ -134,15 +134,18 @@ export function MesProjets(): JSX.Element {
   const naviguer = useNavigate();
   const [filtre, setFiltre] = useState<Filtre>('tous');
   const visibles = projets.filter((p) => garder(p, filtre));
+  const alerte = alerteSynchro(statut);
 
   return (
     <Page espacement="large">
       <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-3">
         <div className="flex flex-col gap-1.5">
           <TitrePage>Mes projets</TitrePage>
-          <span role="status" className="text-[15px] text-encre-3">
-            {ligneSauvegarde(projets.length, statut)}
-          </span>
+          {alerte !== null && (
+            <span role="status" className="text-[15px] text-encre-3">
+              {alerte}
+            </span>
+          )}
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <div className="flex flex-wrap gap-2" role="group" aria-label="Filtrer">
@@ -200,16 +203,14 @@ export function MesProjets(): JSX.Element {
         </div>
       )}
 
-      <Carte className="border-accent-bordure bg-accent-fond sm:flex-row sm:items-center sm:gap-5">
-        <div className="flex flex-1 flex-col gap-1">
-          <span className="font-display text-[17px] font-bold">
-            {connecte ? TEXTES_MON_COMPTE.carteTitreConnecte : TEXTES_MON_COMPTE.carteTitre}
-          </span>
-          <span className="text-sm text-encre-2">
-            {connecte ? TEXTES_MON_COMPTE.carteTexteConnecte : TEXTES_MON_COMPTE.carteTexte}
-          </span>
-        </div>
-        {!connecte && (
+      {!connecte && (
+        <Carte className="border-accent-bordure bg-accent-fond sm:flex-row sm:items-center sm:gap-5">
+          <div className="flex flex-1 flex-col gap-1">
+            <span className="font-display text-[17px] font-bold">
+              {TEXTES_MON_COMPTE.carteTitre}
+            </span>
+            <span className="text-sm text-encre-2">{TEXTES_MON_COMPTE.carteTexte}</span>
+          </div>
           <Bouton
             variante="primaire"
             onClick={() => {
@@ -218,13 +219,8 @@ export function MesProjets(): JSX.Element {
           >
             {TEXTES_MON_COMPTE.creerCompte}
           </Bouton>
-        )}
-      </Carte>
-
-      <p className="m-0 text-xs text-encre-3">
-        Les cinq points reprennent les feux du rapport : prix · rendement · cash-flow · crédit ÷
-        loyer · risques.
-      </p>
+        </Carte>
+      )}
     </Page>
   );
 }

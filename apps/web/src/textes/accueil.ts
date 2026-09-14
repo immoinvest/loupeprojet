@@ -1,5 +1,3 @@
-import type { PreferencesMenu } from '@loupe/gestion';
-
 import type { ActionProjet } from '@/accueil';
 
 /** Nom accessible du logo : il mène à l'accueil. */
@@ -34,16 +32,6 @@ export const TEXTES_ACCUEIL = {
 export function titreAccueil(nom: string | null): string {
   const prenom = nom?.trim().split(/\s+/)[0] ?? '';
   return prenom === '' ? TEXTES_ACCUEIL.bienvenue : `Bonjour ${prenom}`;
-}
-
-/** La phrase sous le titre : ce que Deklic fait pour toi, selon les sections affichées. */
-export function chapoAccueil(sections: PreferencesMenu): string {
-  if (sections.analyser && sections.gerer) {
-    return 'Trouve un bien rentable, puis laisse Deklic t’aider à le gérer.';
-  }
-  return sections.analyser
-    ? 'Trouve le bien rentable, annonce après annonce.'
-    : 'Tes biens loués, tes loyers, sous contrôle.';
 }
 
 /** « projet à l'étude », « projets à l'étude » (le nombre est affiché à part, en grand). */

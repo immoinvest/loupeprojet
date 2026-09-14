@@ -22,9 +22,6 @@ export const TEXTES_MON_COMPTE = {
   carteTitre: 'Retrouvez vos projets sur tous vos appareils',
   carteTexte: 'Un compte par e-mail, Google ou Apple, sans mot de passe. Gratuit.',
   creerCompte: 'Créer mon compte',
-  carteTitreConnecte: 'Vos projets sur tous vos appareils',
-  carteTexteConnecte:
-    'Vos projets sont enregistrés sur votre compte : connectez-vous sur un autre appareil pour les retrouver.',
   projetsTitre: 'Mes projets',
   projetsTexte:
     'Enregistrés sur votre compte, ils vous suivent sur tous vos appareils. À la déconnexion, ils quittent cet appareil et vous attendent sur le compte.',

@@ -42,7 +42,7 @@ describe('profil dans la barre latérale et carte de Mes projets', () => {
     expect(lien).toHaveAttribute('href', '/compte');
     expect(within(lien).getByText('CD')).toBeInTheDocument();
     expect(within(lien).getByText('Mon compte · 1 projet')).toBeInTheDocument();
-    expect(screen.getByText(TEXTES_MON_COMPTE.carteTexteConnecte)).toBeInTheDocument();
+    expect(screen.queryByText(TEXTES_MON_COMPTE.carteTitre)).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Créer mon compte' })).not.toBeInTheDocument();
     expect(document.querySelector('img')).toBeNull();
   });

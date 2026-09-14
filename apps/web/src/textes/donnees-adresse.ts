@@ -45,7 +45,6 @@ export const PHRASES_DONNEES_ADRESSE = {
   risquesIndisponibles:
     'Géorisques ne répond pas pour le moment : les risques ne sont pas chargés.',
   risquesAucun: 'Aucun risque recensé à cette adresse.',
-  risquesAppliques: 'Les risques présents à l’adresse comptent dans le verdict.',
   loyerIndisponible: 'Pas de loyer de marché publié pour cette commune.',
   loyerApplique: 'Loyer visé du projet',
 } as const;

@@ -12,7 +12,7 @@ import {
   type SaisieProjet,
 } from '@/annonces';
 import { annonceLue } from '@/annonces/fiche';
-import { Chapo, Page, TitrePage } from '@/composants/mise-en-page';
+import { Page, TitrePage } from '@/composants/mise-en-page';
 import { Bouton, Carte, Pastille } from '@/composants/ui';
 import { useClientWorker } from '@/coque/ClientWorker';
 import { completerAvecIa, enrichirSaisie, lireAnnonce, type ModeLecture } from '@/enrichissement';
@@ -133,15 +133,9 @@ export function NouveauProjet(): JSX.Element {
 
   return (
     <Page espacement="large">
-      <div className="flex flex-col gap-2">
-        <TitrePage taille="accroche" className="max-w-[22ch]">
-          Colle le lien de l'annonce, on s'occupe du reste.
-        </TitrePage>
-        <Chapo>
-          Prix, surface, étage, DPE, charges : tout ce que l'annonce dit est lu pour vous. Vous
-          vérifiez cinq chiffres, et le rapport est prêt.
-        </Chapo>
-      </div>
+      <TitrePage taille="accroche" className="max-w-[22ch]">
+        Colle le lien de l'annonce, on s'occupe du reste.
+      </TitrePage>
 
       {!manuel && (
         <Carte>
@@ -203,8 +197,7 @@ export function NouveauProjet(): JSX.Element {
                   </>
                 ) : (
                   'Collez le texte de l’annonce pour compléter ce qui a été lu.'
-                )}{' '}
-                Le texte n'est pas conservé, seulement ce qu'on y lit.
+                )}
               </p>
             </div>
             <textarea

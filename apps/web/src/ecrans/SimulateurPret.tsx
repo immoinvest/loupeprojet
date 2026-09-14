@@ -2,7 +2,7 @@ import { VERSION_REGLES_COURANTE, obtenirRegles, type Regles } from '@loupe/mote
 import { useEffect, useMemo, useState, type JSX } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 
-import { Chapo, Page, TitrePage } from '@/composants/mise-en-page';
+import { Page, TitrePage } from '@/composants/mise-en-page';
 import { Bouton, Carte, Pastille, TitreCarte } from '@/composants/ui';
 import { versTexte, type Descripteur } from '@/hypotheses';
 import {
@@ -143,10 +143,7 @@ export function SimulateurPret(): JSX.Element {
 
   return (
     <Page>
-      <div className="flex flex-col gap-2">
-        <TitrePage>{T.page}</TitrePage>
-        <Chapo>{T.chapo}</Chapo>
-      </div>
+      <TitrePage>{T.page}</TitrePage>
 
       <div className="flex flex-wrap items-center gap-2">
         <Bouton variante="primaire" onClick={imprimer} disabled={simulation === null}>

@@ -3,11 +3,8 @@ import type { Feu, PhaseCredit } from '@loupe/moteur';
 /** Textes de l'onglet Financement. */
 export const TEXTES_FINANCEMENT = {
   titre: "Comment se finance l'achat ?",
-  chapo:
-    "Votre prêt et ce qu'il coûte, recalculés à chaque changement. Pour comparer deux offres de banque hors de ce projet, simulez un prêt.",
   pret: 'Votre prêt',
   simuler: 'Simuler un prêt',
-  simulateur: 'Le simulateur compare deux offres de banque, pré-remplies avec ce prêt.',
   cout: 'Ce que ça coûte',
   origine: "D'où vient l'argent",
   couverture: 'Le loyer porte-t-il le crédit ?',

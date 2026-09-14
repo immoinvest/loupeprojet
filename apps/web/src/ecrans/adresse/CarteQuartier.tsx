@@ -17,7 +17,7 @@ const PASTILLE: Readonly<Record<ClassePrix, string>> = {
 const HAUTEUR = 'h-[280px] sm:h-[380px]';
 
 /**
- * Les ventes comparables du quartier sur une carte, avec leur légende et la mention du fond IGN.
+ * Les ventes comparables du quartier sur une carte, avec leur légende (l'attribution IGN est sur la carte).
  * Absente sans vente géolocalisée ; jamais imprimée, les tableaux la remplacent sur papier.
  */
 export function CarteQuartier({
@@ -63,9 +63,6 @@ export function CarteQuartier({
           libelle={libelleAccessibleCarte(donnees.points.length)}
         />
       </Suspense>
-      <p className="m-0 text-xs text-encre-3">
-        {PHRASES_CARTE.cercles} {PHRASES_CARTE.fondDeCarte}
-      </p>
     </Carte>
   );
 }

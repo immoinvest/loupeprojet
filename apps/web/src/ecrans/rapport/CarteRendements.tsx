@@ -102,9 +102,6 @@ export function CarteRendements({ r }: { r: ResultatsComplets }): JSX.Element {
           ))}
         </div>
       )}
-      <p className="m-0 text-[15px] leading-relaxed text-encre-2">
-        Le brut est le chiffre des annonces ; le net, celui du feu ; le net-net, ce qui vous reste.
-      </p>
     </Carte>
   );
 }
