@@ -56,6 +56,7 @@ export {
   type ResultatGeocodage,
   type StatistiquesPrix,
   type TendanceAdresse,
+  type VenteCarte,
 } from './contrat';
 export {
   completerAvecIa,
@@ -72,3 +73,16 @@ export {
   type MarcheEnrichi,
   type MarcheEntree,
 } from './marche';
+export {
+  ATTRIBUTION_IGN,
+  classePrix,
+  donneesCarte,
+  RAYONS_CARTE_METRES,
+  repereCarte,
+  URL_TUILES_IGN,
+  ZOOM_MAX_IGN,
+  type ClassePrix,
+  type DonneesCarte,
+  type PointCarte,
+  type ReperePrixCarte,
+} from './carte';

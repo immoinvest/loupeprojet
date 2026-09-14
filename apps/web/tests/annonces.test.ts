@@ -325,6 +325,12 @@ describe('construireProjet', () => {
     // En location nue, le loyer de marché sans la prime meublé.
     const nu = ProjetSchema.parse(construireProjet({ ...minimale, mode: 'nu' }, 'p6', enrichi));
     expect(nu.hypotheses.location).toMatchObject({ loyerHc: 899 });
+    // En colocation, le loyer de marché meublé × 1,35 (prime colocation) : 1 034 × 1,35 = 1 396 € pour une chambre.
+    const coloc = ProjetSchema.parse(
+      construireProjet({ ...minimale, mode: 'colocation' }, 'p6b', enrichi),
+    );
+    expect(coloc.hypotheses.location).toMatchObject({ chambres: 1, loyerChambre: 1_396 });
+    expect(coloc.provenance['location.loyerChambre']).toBe('anil');
   });
 
   it('sans donnée de marché : pas de loyer, taxe foncière au m², rien d’inventé non plus pour les autres types', () => {

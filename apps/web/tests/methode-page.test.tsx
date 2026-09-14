@@ -12,7 +12,7 @@ describe('Page Méthode', () => {
     expect(screen.getByText(/Règles du 14 sept\. 2026 \(version 2026-09\)/)).toBeInTheDocument();
 
     const sommaire = screen.getByRole('navigation', { name: 'Sommaire' });
-    expect(within(sommaire).getAllByRole('link')).toHaveLength(14);
+    expect(within(sommaire).getAllByRole('link')).toHaveLength(15);
     expect(within(sommaire).getByRole('link', { name: 'Le crédit' })).toHaveAttribute(
       'href',
       '#credit',
@@ -21,6 +21,8 @@ describe('Page Méthode', () => {
     expect(screen.getByRole('heading', { name: "Les frais d'acquisition" })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Meublé au réel (LMNP)' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Le verdict : cinq feux' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Le simulateur de prêt' })).toBeInTheDocument();
+    expect(screen.getByText(/Taux nominal proposé par défaut/)).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Les valeurs par défaut' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Ce que le moteur simplifie' })).toBeInTheDocument();
     // Le libellé exact (la liste des simplifications contient une phrase plus longue).

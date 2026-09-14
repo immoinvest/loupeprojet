@@ -1,6 +1,7 @@
 /**
- * Encodage base64url d'un JSON UTF-8, pour les fragments d'URL (`/partage#p=…`,
- * `/simulateur-pret#s=…`). Un fragment n'est jamais envoyé au serveur.
+ * Encodage base64url d'un JSON UTF-8, pour les fragments d'URL : partage d'un projet
+ * (`/partage#p=…`) et simulateur de prêt (`/simulateur-pret#s=…`). Un fragment n'est jamais
+ * envoyé au serveur.
  */
 
 export function versBase64Url(octets: Uint8Array): string {
@@ -9,6 +10,7 @@ export function versBase64Url(octets: Uint8Array): string {
   return btoa(binaire).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
 
+/** Lève si le texte n'est pas du base64url. */
 export function depuisBase64Url(texte: string): Uint8Array {
   const base64 = texte.replace(/-/g, '+').replace(/_/g, '/');
   const complement = '='.repeat((4 - (base64.length % 4)) % 4);

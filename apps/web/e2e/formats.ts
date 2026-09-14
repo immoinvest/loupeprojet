@@ -198,6 +198,8 @@ export function ecransDeReference({
         await expect(
           page.getByRole('heading', { level: 2, name: 'Le DPE du logement' }),
         ).toBeVisible();
+        // La carte des ventes est mesurée avec ses boutons de zoom.
+        await expect(page.locator('.leaflet-container')).toBeVisible();
       },
     },
     // Le projet d'exemple n'a pas d'adresse : confiance et repère de commune, sans appel au Worker.
@@ -219,6 +221,8 @@ export function ecransDeReference({
     { nom: 'Comparer', chemin: '/comparer' },
     { nom: 'Méthode', chemin: '/methode' },
     { nom: 'Extension', chemin: '/extension' },
+    { nom: 'Simulateur de prêt', chemin: '/simulateur-pret' },
+    { nom: 'Simulation imprimée', chemin: '/simulateur-pret/imprimer' },
     { nom: 'Projet partagé', chemin: lienPartage },
     { nom: "Aperçu d'impression", chemin: `${projet}/imprimer` },
     { nom: 'Connexion', chemin: '/connexion', avant: simulerFournisseurs },

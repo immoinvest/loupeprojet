@@ -153,3 +153,16 @@ Ouverture de la page : `#s=` s'il existe (sinon stockage local, sinon `saisieDef
 - [x] Couverture : `packages/moteur` 100 % ; `apps/web/src/simulateur` ajouté aux seuils 100 % ; écrans testés par rendu
 - [x] Fichiers < 300 lignes ; fonctions à une responsabilité ; aucune fonction « et »
 - [x] Cas limites listés ci-dessus, chacun avec un test
+
+## Écarts entre le plan et l'implémentation (14/09/2026)
+
+- **Pas de drapeau `fraisNotaireManuels` dans la saisie.** Les frais sont « à toi » dès que le texte du champ diffère de l'estimation courante (`fraisNotaireManuels(projet, regles)` dérivé) ; un prix, des honoraires ou un département modifiés ré-estiment tant que ce n'est pas le cas. Rien à stocker : la mémoire locale garde la `SimulationPret` validée, pas les textes.
+- **Deux modules purs de plus** dans `apps/web/src/simulateur/` : `calcul.ts` (`calculer(saisie, regles) → Calcul` : conversion, deux `ResultatPret`, comparaison, noms affichés) et `etat.ts` (`etatInitial(hash, stockage, regles)` : fragment, sinon mémoire, sinon défauts, avec `lienIllisible` et `aEnregistrer`). Les écrans n'ont plus qu'à afficher.
+- **Nom d'offre** : le schéma accepte le vide (0 à 40 caractères, coupé de ses espaces) ; le web pose « Offre A » / « Offre B » à la conversion (`nomOffre`). `nomFichierCsv` rend « offre » quand le nom ne donne aucun caractère utile ; `csvAmortissement(resultat)` ne prend que le résultat.
+- **Messages en français sur toutes les bornes** de `pret/schema.ts` (« Au plus 30 ans. », « Au plus 36 mois. », « Prix positif attendu. »…) : ils s'affichent tels quels sous le champ. Le refine du différé passe avant la borne du champ : un différé de 300 mois sur 20 ans dit « Le différé doit être plus court que le prêt ».
+- **`eurosCentimes`** ajouté à `formatage/nombres.ts` : mensualités et assurance au centime (« 807,23 € ») ; les totaux restent à l'euro.
+- **Adresse tenue à jour** par `window.history.replaceState(window.history.state, '', '#s=…')` 300 ms après la dernière frappe, sans passer par le routeur (une navigation refermerait le tiroir et déplacerait le focus).
+- **Onglets des tableaux** : `aria-label` explicite sur « Voir les mois de l'année N » (le texte visible reste « Voir les mois »).
+- **Impression** : `SimulateurImprimer` recalcule depuis le fragment (défauts sans fragment) ; `DocumentSimulation` ajoute une carte « Les hypothèses » (projet, puis les offres en colonnes) avant les résultats.
+- **e2e** : `simulateur.spec.ts` (menu → saisie A et B → comparaison → année dépliée → CSV téléchargé et lu octet par octet → rechargement → lien rouvert dans un contexte neuf ; impression) et deux écrans dans `formats.ts` (18 au total).
+- **Téléchargement** : `telecharger.ts` libère l’adresse du Blob 10 secondes après le clic (précaution : une adresse révoquée avant la lecture peut annuler un téléchargement). Le parcours e2e a pourtant échoué par intermittence sur le PC Windows de développement : la trace montre le clic à 3 s et `download.path()` résolu vers 58 s, l’enregistrement du fichier étant lent (analyse antivirus probable). Le parcours a donc 120 s (`test.setTimeout`) ; le contenu du CSV était juste à chaque fois.

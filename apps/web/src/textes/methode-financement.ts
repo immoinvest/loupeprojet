@@ -178,3 +178,47 @@ export function sectionRendements(): SectionMethode {
     constantes: [],
   };
 }
+
+export function sectionSimulateur(regles: Regles, defauts: Defauts): SectionMethode {
+  const { tauxMoyens, tauxUsure, hcsf } = regles.credit;
+  return {
+    code: 'simulateur',
+    titre: 'Le simulateur de prêt',
+    resume:
+      "Deux offres côte à côte, avec les formules du crédit d'un projet ; tout reste dans votre navigateur.",
+    etapes: [
+      "Montant emprunté = prix + travaux + frais de notaire − apport. Les frais de dossier et de garantie s'ajoutent seulement s'ils sont « financés par le prêt » ; par défaut ils sont payés à la signature, comme dans une offre réelle.",
+      "Frais de notaire estimés par la formule des frais d'acquisition, sur le prix hors honoraires d'agence, au taux du département s'il est donné ; modifiables à la main.",
+      "Mensualité constante (formule PMT) sur le taux nominal ; assurance = capital emprunté × taux d'assurance ÷ 12, chaque mois, sur le capital initial (simplification : une assurance sur le capital restant dû coûterait moins).",
+      'Différé total : intérêts capitalisés, aucune mensualité ; différé partiel : intérêts seuls ; la mensualité de croisière est recalculée ensuite.',
+      "TAEG : le taux qui égalise le capital net des frais bancaires et toutes les mensualités, résolu numériquement, hors et avec assurance ; comparé au taux d'usure.",
+      'Coût total du crédit = intérêts + assurance + frais de dossier + garantie.',
+      `Taux d'endettement = mensualité assurance comprise ÷ revenus nets. Distinct de l'effort HCSF d'un projet, qui compte ${pct(hcsf.partLoyers)} des loyers attendus.`,
+      'Comparaison : pour chaque critère, la plus petite valeur est la meilleure (à 1 centime ou 0,001 point près) ; durée et montant emprunté restent informatifs.',
+    ],
+    constantes: [
+      {
+        libelle: 'Taux nominal proposé par défaut (20 ans)',
+        valeur: pct(tauxMoyens['20']),
+        source: 'Observatoire Crédit Logement / CSA, août 2026',
+        chemin: 'credit.tauxMoyens',
+      },
+      {
+        libelle: "Taux d'usure (prêts de 20 ans et plus)",
+        valeur: pct(tauxUsure),
+        source: 'Banque de France, 3e trimestre 2026',
+        chemin: 'credit.tauxUsure',
+      },
+      {
+        libelle: "Taux d'endettement signalé au-delà de",
+        valeur: pct(hcsf.seuilEffort),
+        source: 'Haut Conseil de stabilité financière, décision du 29 septembre 2021',
+      },
+      {
+        libelle: 'Assurance emprunteur par défaut',
+        valeur: `${pct(defauts.tauxAssurance)} du capital par an`,
+        source: 'Spec Deklic',
+      },
+    ],
+  };
+}

@@ -193,3 +193,51 @@ main:focus-visible {
     text-decoration: none;
   }
 }
+
+/* Carte des ventes (Leaflet, onglet Estimation). */
+.leaflet-container {
+  isolation: isolate;
+  z-index: 0;
+  font: inherit;
+}
+
+.carte-cercle {
+  stroke: var(--color-accent);
+  stroke-width: 1.5px;
+  stroke-dasharray: 5 5;
+  fill: none;
+}
+
+.carte-vente {
+  stroke: var(--color-surface);
+  stroke-width: 1.5px;
+  fill-opacity: 0.9;
+}
+
+.carte-vente-bas {
+  fill: var(--color-bon);
+}
+
+.carte-vente-milieu {
+  fill: var(--color-encre-4);
+}
+
+.carte-vente-haut {
+  fill: var(--color-surveiller);
+}
+
+.carte-bien {
+  fill: var(--color-accent);
+  fill-opacity: 1;
+  stroke: var(--color-surface);
+  stroke-width: 3px;
+}
+
+/* Au doigt : boutons de zoom de 44 px. */
+@media (pointer: coarse) {
+  .leaflet-bar a {
+    width: 44px !important;
+    height: 44px !important;
+    line-height: 44px !important;
+  }
+}
