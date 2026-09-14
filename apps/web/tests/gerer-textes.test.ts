@@ -6,6 +6,7 @@ import {
   avecMajuscule,
   biensVacants,
   de,
+  entreesAVenir,
   loyerRecu,
   marquerRecu,
   phraseDuMois,
@@ -32,6 +33,18 @@ describe('textes des écrans de Gérer', () => {
     expect(marquerRecu('Julie')).toBe('Marquer reçu le loyer de Julie');
   });
 
+  it('entrées à venir : une, puis plusieurs', () => {
+    expect(entreesAVenir([{ nom: 'T2 Lices', date: '1er octobre 2026' }])).toBe(
+      'Entrée à venir : T2 Lices le 1er octobre 2026',
+    );
+    expect(
+      entreesAVenir([
+        { nom: 'T2 Lices', date: '1er octobre 2026' },
+        { nom: 'Studio Baille', date: '15 novembre 2026' },
+      ]),
+    ).toBe('Entrées à venir : T2 Lices le 1er octobre 2026 ; Studio Baille le 15 novembre 2026');
+  });
+
   it('majuscule, biens vacants, statuts et tons', () => {
     expect(avecMajuscule('septembre 2026')).toBe('Septembre 2026');
     expect(biensVacants(['Parking Prado'])).toBe('Sans locataire : Parking Prado');
@@ -44,6 +57,12 @@ describe('textes des écrans de Gérer', () => {
 });
 
 describe('projetsAReprendre (porte « J’ai acheté un bien analysé »)', () => {
+  it('les projets déjà achetés ne sont plus proposés', () => {
+    const achete = creerProjet({ nom: 'Acheté', statut: 'achete' });
+    const offre = creerProjet({ nom: 'Offre', statut: 'offre' });
+    expect(projetsAReprendre([achete, offre]).map((p) => p.nom)).toEqual(['Offre']);
+  });
+
   it('offres d’abord, puis visites ; jamais les écartés ; trois au plus', () => {
     const projet = (nom: string, statut: StatutProjet): ReturnType<typeof creerProjet> =>
       creerProjet({ nom, statut });

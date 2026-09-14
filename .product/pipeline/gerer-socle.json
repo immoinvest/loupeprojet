@@ -26,14 +26,26 @@
     "architecture": { "status": "completed", "output": ".product/architecture/gerer-socle.md" },
     "implement": {
       "status": "in_progress",
-      "stories_completed": 2,
+      "stories_completed": 5,
       "stories_total": 6,
       "commits": [
         "fb84c35 docs",
         "d8387a7 US-1 paquet @loupe/gestion (60 tests, 100 %)",
-        "5a34ca3 US-2 API de gestion et migration 0002 (85 tests comptes, 100 %)"
+        "5a34ca3 US-2 API de gestion et migration 0002 (85 tests comptes, 100 %)",
+        "2751993 US-3 menu à deux sections et Mon menu (suite web complète : 333 tests verts, src/gestion 100 %)",
+        "bb8fa1f US-4 accueil de Gérer, loyers du mois, Reçu puis Annuler (13 tests, textes 100 %)",
+        "4995011 US-5 Ajouter à la main (29 tests dont le parcours à 2 clics, saisie 100 %)",
+        "b04d620 fix(security) bornes de l'API : 200 biens par compte, loyer reçu seulement dans la location (89 tests comptes, 100 %)"
       ],
-      "en_cours": "US-3 menu à deux sections et Mon menu : 45 tests ciblés verts, suite web complète en cours"
+      "en_cours": "US-6 J'ai acheté ce bien : 39 tests sur 40 au premier contrôle ; test corrigé, revérification avec la traduction web des codes HORS_LOCATION et LIMITE_ATTEINTE",
+      "incidents": [
+        "suites qui ne démarrent pas (Timeout calling fetch) sous la charge de 58 processus Node : relance avec --maxWorkers=1",
+        "accord de « loyer » corrigé (suit le nombre reçu), élision « d’Antoine » ajoutée",
+        "FormEvent obsolète dans React 19 : preventDefault dans le gestionnaire, comme Mon compte",
+        "relecture US-6 : un bien dont le locataire entre le mois suivant était annoncé « Sans locataire » ; corrigé (Entrée à venir)",
+        "test du bouton masqué : vérifiait avant la lecture des préférences du compte (première visite) ; attend désormais la disparition",
+        "audit de sécurité : aucune borne sur les écritures (quota D1 partagé) ; 200 biens par compte et période de paiement dans la location"
+      ]
     },
     "qa_tests": { "status": "pending" },
     "security": { "status": "pending" },

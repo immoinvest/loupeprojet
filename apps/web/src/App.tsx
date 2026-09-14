@@ -24,6 +24,7 @@ import { Extension } from './ecrans/Extension';
 import { Fiscalite } from './ecrans/Fiscalite';
 import { AjouterMain } from './ecrans/gerer/AjouterMain';
 import { Gerer } from './ecrans/gerer/Gerer';
+import { PretAGerer } from './ecrans/gerer/PretAGerer';
 import { Hypotheses } from './ecrans/Hypotheses';
 import { Imprimer } from './ecrans/Imprimer';
 import { MesProjets } from './ecrans/MesProjets';
@@ -60,6 +61,7 @@ export const routes: RouteObject[] = [
       },
       { path: 'gerer', element: <Gerer /> },
       { path: 'gerer/ajouter', element: <AjouterMain /> },
+      { path: 'gerer/pret/:id', element: <PretAGerer /> },
       { path: 'compte', element: <Compte /> },
       { path: 'partage', element: <Partage /> },
       { path: 'comparer', element: <Comparer /> },

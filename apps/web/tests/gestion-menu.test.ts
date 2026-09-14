@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { leJour, moisEnLettres, montant } from '@/gestion/format';
+import { dateEnLettres, leJour, leJourDuMois, moisEnLettres, montant } from '@/gestion/format';
 import {
   basculer,
   CLE_MENU,
@@ -76,6 +76,10 @@ describe('format des montants et des dates', () => {
     expect(leJour('2026-10-01')).toBe('le 1er');
     expect(leJour('2026-10-05')).toBe('le 5');
     expect(leJour('2026-10-28')).toBe('le 28');
+    expect(leJourDuMois(1)).toBe('le 1er');
+    expect(leJourDuMois(15)).toBe('le 15');
+    expect(dateEnLettres('2026-10-01')).toBe('1er octobre 2026');
+    expect(dateEnLettres('2027-01-12')).toBe('12 janvier 2027');
   });
 });
 

@@ -1,7 +1,15 @@
 import { ProjetSchema, projetExemple, type ProjetEntree } from '@loupe/moteur';
 import { z } from 'zod';
 
-export const StatutProjetSchema = z.enum(['analyse', 'visite', 'offre', 'ecarte', 'scenario']);
+export const StatutProjetSchema = z.enum([
+  'analyse',
+  'visite',
+  'offre',
+  'ecarte',
+  'scenario',
+  // Posé par la porte « J'ai acheté ce bien » de Gérer.
+  'achete',
+]);
 export type StatutProjet = z.infer<typeof StatutProjetSchema>;
 
 export const STATUTS: Readonly<Record<StatutProjet, string>> = {
@@ -10,6 +18,7 @@ export const STATUTS: Readonly<Record<StatutProjet, string>> = {
   offre: 'Offre faite',
   ecarte: 'Écarté',
   scenario: 'Scénario',
+  achete: 'Acheté',
 };
 
 /** Adresse exacte du bien, précisée par l'utilisateur (agence, diagnostics) : sert à l'analyse DVF à l'adresse. */

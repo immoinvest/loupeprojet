@@ -14,8 +14,10 @@ import { Link, NavLink, Outlet, useLocation, useNavigate, useParams } from 'reac
 import { MARGES_LATERALES, Page, TitrePage } from '@/composants/mise-en-page';
 import { Bouton } from '@/composants/ui';
 import { euros } from '@/formatage/nombres';
+import { useGestion } from '@/gestion/GestionContext';
 import { useProjets } from '@/stockage/ProjetsContext';
 import { STATUTS, StatutProjetSchema, type ProjetEnregistre } from '@/stockage/projets';
+import { TEXTES_PRET } from '@/textes/gerer-pret';
 import { MODES } from '@/textes/regimes';
 
 import { BoutonPartager } from './BoutonPartager';
@@ -101,6 +103,7 @@ function useOngletActifEnVue(): RefObject<HTMLElement | null> {
 function EnTete(): JSX.Element {
   const { enregistre } = useProjetCourant();
   const { changerStatut } = useProjets();
+  const { sections } = useGestion();
   const naviguer = useNavigate();
   const bandeRef = useOngletActifEnVue();
   const { achat, location } = enregistre.projet.hypotheses;
@@ -157,6 +160,17 @@ function EnTete(): JSX.Element {
           PDF
         </Bouton>
         <BoutonPartager enregistre={enregistre} />
+        {/* Lien croisé vers Gérer : masqué si la section l'est, ou si le bien est déjà acheté. */}
+        {sections.gerer && enregistre.statut !== 'achete' && (
+          <Bouton
+            variante="primaire"
+            onClick={() => {
+              void naviguer(`/gerer/pret/${enregistre.id}`);
+            }}
+          >
+            {TEXTES_PRET.jaiAchete}
+          </Bouton>
+        )}
       </div>
     </header>
   );

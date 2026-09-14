@@ -71,6 +71,14 @@ export function marquerRecu(prenom: string): string {
   return `Marquer reçu le loyer ${de(prenom)}`;
 }
 
+/** « Entrée à venir : T2 Lices le 1er octobre 2026 » ; plusieurs entrées séparées par des points-virgules. */
+export function entreesAVenir(
+  entrees: readonly { readonly nom: string; readonly date: string }[],
+): string {
+  const liste = entrees.map((e) => `${e.nom} le ${e.date}`).join(' ; ');
+  return `${entrees.length > 1 ? 'Entrées à venir' : 'Entrée à venir'} : ${liste}`;
+}
+
 /** « Sans locataire : Parking Prado » ; plusieurs biens séparés par des virgules. */
 export function biensVacants(noms: readonly string[]): string {
   return `Sans locataire : ${noms.join(', ')}`;

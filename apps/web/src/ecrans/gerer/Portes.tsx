@@ -8,13 +8,14 @@ import { useProjets } from '@/stockage/ProjetsContext';
 import { STATUTS, type ProjetEnregistre, type StatutProjet } from '@/stockage/projets';
 import { TEXTES_GERER as T } from '@/textes/gerer-ecrans';
 
-/** Au plus trois projets proposés, les offres faites d'abord ; les projets écartés ne le sont pas. */
+/** Au plus trois projets proposés, les offres faites d'abord ; ni les écartés, ni les déjà achetés. */
 const PROJETS_PROPOSES = 3;
 const ORDRE: Readonly<Partial<Record<StatutProjet, number>>> = { offre: 0, visite: 1 };
+const EXCLUS: ReadonlySet<StatutProjet> = new Set(['ecarte', 'achete']);
 
 export function projetsAReprendre(projets: readonly ProjetEnregistre[]): ProjetEnregistre[] {
   return projets
-    .filter((p) => p.statut !== 'ecarte')
+    .filter((p) => !EXCLUS.has(p.statut))
     .sort((a, b) => (ORDRE[a.statut] ?? 2) - (ORDRE[b.statut] ?? 2))
     .slice(0, PROJETS_PROPOSES);
 }

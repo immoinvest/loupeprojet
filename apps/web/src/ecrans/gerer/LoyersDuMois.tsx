@@ -10,12 +10,13 @@ import { Link } from 'react-router';
 
 import { Page, TitrePage } from '@/composants/mise-en-page';
 import { Bouton, Carte, Pastille, TitreCarte } from '@/composants/ui';
-import { leJour, moisEnLettres, montant } from '@/gestion/format';
+import { dateEnLettres, leJour, moisEnLettres, montant } from '@/gestion/format';
 import { useGestion } from '@/gestion/GestionContext';
 import { ERREURS_GESTION } from '@/textes/gerer';
 import {
   avecMajuscule,
   biensVacants,
+  entreesAVenir,
   loyerRecu,
   marquerRecu,
   phraseDuMois,
@@ -84,8 +85,16 @@ export function LoyersDuMois({ donnees }: { donnees: EtatGestion }): JSX.Element
   const aujourdhui = jourLocal(new Date());
   const periode = periodeDe(aujourdhui);
   const resume = resumeDuMois(donnees, periode, aujourdhui);
-  const loues = new Set(resume.lignes.map((l) => l.location.bienId));
+  // Un bien est vacant sans location en cours ni à venir ; une entrée le mois prochain n'est pas une vacance.
+  const enCours = donnees.locations.filter((l) => l.fin === undefined || l.fin >= aujourdhui);
+  const loues = new Set(enCours.map((l) => l.bienId));
   const vacants = donnees.biens.filter((b) => !loues.has(b.id)).map((b) => b.nom);
+  const aVenir = enCours
+    .filter((l) => periodeDe(l.debut) > periode)
+    .map((l) => ({
+      nom: donnees.biens.find((b) => b.id === l.bienId)?.nom ?? '',
+      date: dateEnLettres(l.debut),
+    }));
   const part = resume.montantDu === 0 ? 0 : (resume.montantRecu / resume.montantDu) * 100;
 
   useEffect(() => {
@@ -196,6 +205,7 @@ export function LoyersDuMois({ donnees }: { donnees: EtatGestion }): JSX.Element
           </ul>
         </Carte>
       )}
+      {aVenir.length > 0 && <p className="m-0 text-sm text-encre-3">{entreesAVenir(aVenir)}</p>}
       {vacants.length > 0 && <p className="m-0 text-sm text-encre-3">{biensVacants(vacants)}</p>}
     </Page>
   );
