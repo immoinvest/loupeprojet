@@ -4,7 +4,11 @@ Format : `- [ ] slug — titre — date — scope`
 
 ## En cours
 
-- [ ] marche-complet — DPE du logement retrouvé dans la base ADEME (proposé, appliqué d'un clic), risques de l'adresse d'après Géorisques (appliqués au verdict, lien du rapport), loyer de marché ANIL ramené au bien (loyer de référence, loyer visé d'un clic, « Estimer le loyer » au formulaire Vérifier), ventes des communes et arrondissements voisins dans les cercles, actualisation par l'onglet Estimation ; sans modèle de langage — 2026-09-14 — `apps/worker/src/{services/dpe.ts,services/risques.ts,adresse/voisines.ts}`, `apps/web/src/{enrichissement/dpe.ts,enrichissement/risques.ts,enrichissement/loyer.ts,ecrans/adresse,ecrans/formulaire/EstimerLoyer.tsx}` — PR à ouvrir
+Rien en cours dans la session principale.
+
+## Livrées récemment
+
+- [x] marche-complet — DPE du logement retrouvé dans la base ADEME (proposé, appliqué d'un clic), risques de l'adresse d'après Géorisques (appliqués au verdict, lien du rapport), loyer de marché ANIL ramené au bien (loyer de référence, loyer visé d'un clic, « Estimer le loyer » au formulaire Vérifier), ventes des communes et arrondissements voisins dans les cercles, actualisation par l'onglet Estimation ; sans modèle de langage — 2026-09-14 — `apps/worker/src/{services/dpe.ts,services/risques.ts,adresse/voisines.ts}`, `apps/web/src/{enrichissement/dpe.ts,enrichissement/risques.ts,enrichissement/loyer.ts,ecrans/adresse,ecrans/formulaire/EstimerLoyer.tsx}` — PR #30 ; étage des DPE lu dans le complément d'adresse — PR #32 (Worker 0.6.0 déployé et vérifié en production)
 
 ## À venir
 
