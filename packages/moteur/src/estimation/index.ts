@@ -5,8 +5,10 @@ import type { Bien, EtatBien } from '../schema/bien';
 import type { CodeCorrection } from '../schema/estimation';
 import type { Dvf } from '../schema/marche';
 import type { Projet } from '../schema/projet';
+import { confianceEstimation, type ConfianceEstimation } from './confiance';
 
 export type { NiveauConfiance } from '../regles/types';
+export * from './confiance';
 
 export const ETATS: readonly EtatBien[] = ['a_renover', 'a_rafraichir', 'bon_etat', 'renove'];
 
@@ -41,7 +43,8 @@ export interface EstimationPrix {
   readonly haut: number;
   /** Le même bien, corrections comprises, selon chacun des quatre états. */
   readonly selonEtat: Readonly<Record<EtatBien, number>>;
-  readonly confiance: NiveauConfiance;
+  readonly confiance: ConfianceEstimation;
+  /** Demi-largeur de la fourchette, selon le niveau de confiance. */
   readonly marge: number;
   readonly charges: ChargesComparees | null;
   readonly actualiseAu: string | null;
@@ -75,14 +78,6 @@ export function tauxEtage(bien: Bien, regles: Regles): number | null {
 
 export function tauxExterieur(bien: Bien, regles: Regles): number | null {
   return bien.exterieur === true ? regles.estimation.exterieur : null;
-}
-
-export function niveauConfiance(dvf: Dvf, regles: Regles): NiveauConfiance {
-  const c = regles.estimation.confiance;
-  const rayon = dvf.rayonMetres ?? Number.POSITIVE_INFINITY;
-  if (rayon <= c.eleveeRayonMetres && dvf.nombreVentes >= c.eleveeVentes) return 'elevee';
-  if (rayon <= c.moyenneRayonMetres && dvf.nombreVentes >= c.moyenneVentes) return 'moyenne';
-  return 'faible';
 }
 
 interface EffetCharges extends ChargesComparees {
@@ -167,8 +162,8 @@ export function estimerPrix(projet: Projet, regles: Regles): EstimationPrix | nu
     prixSelonPosition(dvf, regles.estimation.positionsEtat[e]) * bien.surface * (1 + sommeTaux) +
     montantCharges;
   const centre = valeur(etat);
-  const confiance = niveauConfiance(dvf, regles);
-  const marge = regles.estimation.marges[confiance];
+  const confiance = confianceEstimation(dvf, regles);
+  const marge = regles.estimation.marges[confiance.niveau];
   return {
     etat,
     etatSuppose: bien.etat === undefined,

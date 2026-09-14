@@ -191,6 +191,7 @@ describe('Onglet Adresse', () => {
         q3M2: 3750,
         nombreVentes: 6,
         rayonMetres: 90,
+        precision: 'rue',
       });
       expect(enregistre?.projet.provenance['marche.dvf.rayonMetres']).toBe('dvf');
       expect(enregistre?.adresse?.numero).toBe(144);

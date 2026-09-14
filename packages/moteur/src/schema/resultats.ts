@@ -262,7 +262,20 @@ export const EstimationResultatSchema = z.strictObject({
   bas: n,
   haut: n,
   selonEtat: z.strictObject({ a_renover: n, a_rafraichir: n, bon_etat: n, renove: n }),
-  confiance: z.enum(['elevee', 'moyenne', 'faible']),
+  confiance: z.strictObject({
+    note: n,
+    niveau: z.enum(['tres_faible', 'faible', 'moyenne', 'bonne', 'elevee']),
+    precision: z.enum(['immeuble', 'rue', 'quartier', 'commune']),
+    composantes: z.array(
+      z.strictObject({
+        code: z.enum(['localisation', 'comparables', 'dispersion', 'anciennete']),
+        valeur: nOuNull,
+        points: n,
+        maximum: n,
+        supposee: z.boolean(),
+      }),
+    ),
+  }),
   marge: n,
   charges: z
     .strictObject({

@@ -8,6 +8,12 @@ export const RisqueSchema = z.object({
 });
 export type Risque = z.infer<typeof RisqueSchema>;
 
+/** D'où viennent les ventes du repère : même immeuble, même rue, quartier (cercle), commune ou arrondissement. */
+export const PrecisionDvfSchema = z.enum(['immeuble', 'rue', 'quartier', 'commune']);
+export type PrecisionDvf = z.infer<typeof PrecisionDvfSchema>;
+
+const DATE_ISO = /^\d{4}-\d{2}-\d{2}$/;
+
 export const DvfSchema = z.object({
   medianM2: z.number().positive(),
   q1M2: z.number().positive().optional(),
@@ -19,6 +25,16 @@ export const DvfSchema = z.object({
     .string()
     .regex(/^\d{4}-S[12]$/)
     .optional(),
+  /** Absente : déduite du rayon (quartier quand il est connu, commune sinon). */
+  precision: PrecisionDvfSchema.optional(),
+  /** Mois écoulés depuis la vente médiane au moment où le repère a été lu ; absente : supposée par les règles. */
+  ancienneteMedianeMois: z.number().int().nonnegative().optional(),
+  /** Dates de la première et de la dernière vente du repère. */
+  periode: z
+    .object({ debut: z.string().regex(DATE_ISO), fin: z.string().regex(DATE_ISO) })
+    .optional(),
+  /** Nom de la commune ou de l'arrondissement d'un repère de commune. */
+  lieu: z.string().min(1).max(120).optional(),
 });
 export type Dvf = z.infer<typeof DvfSchema>;
 

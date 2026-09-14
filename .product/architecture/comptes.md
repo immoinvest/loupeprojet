@@ -91,7 +91,7 @@ src/textes/compte.ts         phrases des erreurs, noms des fournisseurs, initial
 src/textes/connexion.ts      textes de la page de connexion ; src/textes/mon-compte.ts : profil, Mon compte, carte de Mes projets
 src/ecrans/Connexion.tsx     page hors coque ; connexion/ : BoutonsFournisseurs, FormulaireEmail, FormulaireCode, styles
 src/ecrans/Compte.tsx        profil (nom), méthodes liées, déconnexion, suppression confirmée, reconnexion si session ancienne
-src/coque/Profil.tsx         bas de la barre latérale : « Sans compte · Se connecter » ou initiales, nom, « Mon compte »
+src/coque/Profil.tsx         bas de la barre latérale : « Sans compte » + bouton « Se connecter » (icône), ou initiales, nom, « Mon compte » + bouton icône « Se déconnecter » toujours visible ; la page Mon compte a aussi « Se déconnecter » en haut à droite
 src/composants/IconesFournisseurs.tsx   « G » de Google, pomme d'Apple
 vite.config.ts               proxy /api → 8787 ; plugin workerDesComptes (opt-in DEKLIC_COMPTES=1)
 dist/_routes.json            include ["/api/*"], écrit par le plugin avec _worker.js (rien sans DEKLIC_COMPTES=1)

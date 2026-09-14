@@ -9,7 +9,10 @@ import {
   millesimesDvfCandidats,
   resoudreCommune,
 } from '../src/marche';
+import { cleCache } from '../src/proxy/cache';
 import { banc } from './aide';
+
+const MAINTENANT = Date.parse('2026-09-13T10:00:00Z');
 
 const source = (nom: string): { nom: string; url: string; licence: string } => ({
   nom,
@@ -133,6 +136,8 @@ describe('GET /marche', () => {
         fenetre: { debut: '2024-01-01', fin: '2025-12-31' },
         millesime: '2025',
         codeInsee: '13205',
+        dateMediane: null,
+        ancienneteMedianeMois: 20,
       },
       loyer: {
         loyerM2: 15.03,
@@ -158,6 +163,32 @@ describe('GET /marche', () => {
     const bis = await requete('/marche?pieces=3&type=appartement&codePostal=13005&codeInsee=13055');
     expect(bis.headers.get('x-loupe-cache')).toBe('HIT');
     expect(donnees.lectures).toHaveLength(lectures);
+  });
+
+  it('index publié avec la date médiane : ancienneté depuis cette date, clé de cache v2', async () => {
+    const donnees = lecteurMemoire({
+      ...PUBLIES,
+      'dvf/2025/index/13.json': {
+        ...DVF_2025_13,
+        communes: {
+          '13205': {
+            appartement: {
+              ventes: 1823,
+              medianeM2: 3423,
+              q1M2: 2833,
+              q3M2: 4135,
+              dateMediane: '2025-06-30',
+            },
+          },
+        },
+      },
+    });
+    const { requete, deps } = banc({ donnees });
+    const corps = await (await requete('/marche?codeInsee=13205')).json<Reponse>();
+    // Du 30 juin 2025 au 13 septembre 2026 : 14 mois civils entiers.
+    expect(corps.dvf).toMatchObject({ dateMediane: '2025-06-30', ancienneteMedianeMois: 14 });
+    const cle = await cleCache('marche', { version: 2, codeInsee: '13205', type: 'appartement' });
+    expect(await deps.cache.lire(cle)).not.toBeNull();
   });
 
   it('suit dvf/courant.json quand il existe', async () => {
@@ -274,23 +305,33 @@ describe('assemblage et petites fonctions', () => {
     expect(indicateurPour('appartement', undefined)).toBe('appartement');
     expect(indicateurPour('appartement', 2)).toBe('appartementT1T2');
     expect(indicateurPour('appartement', 5)).toBe('appartementT3Plus');
-    const r = assemblerMarche({ codeInsee: '13205', type: 'appartement', pieces: 2 }, '13', {
-      communes: null,
-      dvf: null,
-      loyers: LOYERS_2025_13,
-      zonage: null,
-    });
+    const r = assemblerMarche(
+      { codeInsee: '13205', type: 'appartement', pieces: 2 },
+      '13',
+      {
+        communes: null,
+        dvf: null,
+        loyers: LOYERS_2025_13,
+        zonage: null,
+      },
+      MAINTENANT,
+    );
     expect(r.loyer).toMatchObject({ indicateur: 'appartement', loyerM2: 16.25 });
     expect(r.sources).toEqual([LOYERS_2025_13.source]);
   });
 
   it('une commune absente de l’index DVF : pas de ventes, la zone vient de la commune parente', () => {
-    const r = assemblerMarche({ codeInsee: '13206', type: 'appartement' }, '13', {
-      communes: COMMUNES_13,
-      dvf: DVF_2025_13,
-      loyers: null,
-      zonage: ZONAGE_13,
-    });
+    const r = assemblerMarche(
+      { codeInsee: '13206', type: 'appartement' },
+      '13',
+      {
+        communes: COMMUNES_13,
+        dvf: DVF_2025_13,
+        loyers: null,
+        zonage: ZONAGE_13,
+      },
+      MAINTENANT,
+    );
     expect(r).toMatchObject({
       codeInsee: '13206',
       commune: 'Marseille 6e Arrondissement',

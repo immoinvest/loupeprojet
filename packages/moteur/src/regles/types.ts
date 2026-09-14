@@ -28,8 +28,26 @@ export interface ComposantAmortissement {
   readonly dureeAnnees: number;
 }
 
-/** Précision de l'estimation du prix selon le nombre et la proximité des ventes comparables. */
-export type NiveauConfiance = 'elevee' | 'moyenne' | 'faible';
+/** Niveau de confiance de l'estimation du prix, lu sur une note de 0 à 100. */
+export type NiveauConfiance = 'tres_faible' | 'faible' | 'moyenne' | 'bonne' | 'elevee';
+
+/** Un point d'un barème : `points` à cette `valeur`, interpolés linéairement entre deux paliers. */
+export interface Palier {
+  readonly valeur: number;
+  readonly points: number;
+}
+
+/** Points d'une localisation « quartier » selon le rayon du repère ; `null` = au-delà du dernier rayon. */
+export interface PalierRayon {
+  readonly jusquaMetres: number | null;
+  readonly points: number;
+}
+
+/** Note minimale (incluse) d'un niveau de confiance. */
+export interface SeuilNiveau {
+  readonly des: number;
+  readonly niveau: NiveauConfiance;
+}
 
 export interface EffetEtage {
   /** Rez-de-chaussée (ou en dessous), par rapport au 2e étage. */
@@ -212,13 +230,27 @@ export interface Regles {
       /** Effet maximal des charges sur le prix, en proportion. */
       readonly borne: number;
     };
+    /** Note de confiance sur 100 : quatre composantes, chacune avec son barème (le maximum d'un barème = ses points les plus hauts). */
     readonly confiance: {
-      readonly eleveeVentes: number;
-      readonly eleveeRayonMetres: number;
-      readonly moyenneVentes: number;
-      readonly moyenneRayonMetres: number;
+      readonly localisation: {
+        readonly immeuble: number;
+        readonly rue: number;
+        /** Par rayon croissant, le dernier avec `jusquaMetres: null`. */
+        readonly quartier: readonly PalierRayon[];
+        readonly commune: number;
+      };
+      /** Nombre de ventes comparables → points (paliers croissants). */
+      readonly comparables: readonly Palier[];
+      /** Écart interquartile ÷ médiane → points (paliers croissants en valeur, décroissants en points). */
+      readonly dispersion: readonly Palier[];
+      /** Ancienneté médiane des ventes en mois → points. */
+      readonly anciennete: readonly Palier[];
+      /** Ancienneté retenue quand elle est inconnue (milieu de la fenêtre de deux ans des ventes publiées). */
+      readonly ancienneteSupposeeMois: number;
+      /** Par note décroissante, le dernier à 0. */
+      readonly niveaux: readonly SeuilNiveau[];
     };
-    /** Demi-largeur de la fourchette d'estimation selon la confiance. */
+    /** Demi-largeur de la fourchette d'estimation selon le niveau de confiance. */
     readonly marges: Readonly<Record<NiveauConfiance, number>>;
   };
 

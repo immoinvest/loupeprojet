@@ -3,6 +3,7 @@ import type { BlankEnv } from 'hono/types';
 import { z } from 'zod';
 
 import type { Dependances } from '../dependances';
+import { moisEntre } from '../donnees/anciennete';
 import { lireTexte, nouvellePasse, type Passe } from '../donnees/passe';
 import { reponseErreur } from '../erreurs';
 import { ecrireCache, lireCache, repondre } from '../http';
@@ -27,7 +28,7 @@ export const TTL_ADRESSE_SECONDES = 24 * 3600;
 /** Le parcellaire change rarement : 30 jours. */
 export const TTL_CADASTRE_SECONDES = 30 * 24 * 3600;
 /** À incrémenter quand le contrat de réponse change : les réponses en cache en dépendent. */
-const VERSION_CONTRAT = 3;
+const VERSION_CONTRAT = 4;
 
 export const SOURCE_DVF = {
   nom: 'Demandes de valeurs foncières géolocalisées (Etalab, à partir des données DGFiP)',
@@ -187,6 +188,7 @@ export function creerAnalyseAdresse(deps: Dependances): Handler<BlankEnv, '/marc
       },
       actualiser,
     );
+    const maintenant = deps.maintenant();
     const texte = JSON.stringify({
       codeInsee: p.codeInsee,
       millesime: commune?.millesime ?? null,
@@ -194,11 +196,19 @@ export function creerAnalyseAdresse(deps: Dependances): Handler<BlankEnv, '/marc
       parcellesVoisines: voisinage?.voisines ?? [],
       cadastre: voisinage === null ? 'indisponible' : 'ok',
       ...analyse,
+      // Ancienneté mesurée à la date de la réponse (cache de 24 h : au mois près).
+      reference:
+        analyse.reference === null
+          ? null
+          : {
+              ...analyse.reference,
+              ancienneteMedianeMois: moisEntre(analyse.reference.dateMediane, maintenant),
+            },
       ventesCommune: commune?.ventes.length ?? 0,
       communesVoisines: voisines.map((v) => ({ codeInsee: v.codeInsee, ventes: v.ventes.length })),
       tendance: actualisations.get(p.codeInsee)?.resume ?? null,
       sources: commune === null ? [] : [SOURCE_DVF],
-      obtenuLe: new Date(deps.maintenant()).toISOString(),
+      obtenuLe: new Date(maintenant).toISOString(),
     });
     if (!passe.panne && voisinage !== null && autour.complet) {
       await ecrireCache(deps, cle, texte, TTL_ADRESSE_SECONDES);
