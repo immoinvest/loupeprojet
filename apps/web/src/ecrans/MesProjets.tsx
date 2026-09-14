@@ -1,4 +1,4 @@
-import { calculerProjet } from '@loupe/moteur';
+import { calculerProjet, prixRetenu } from '@loupe/moteur';
 import { Trash2 } from 'lucide-react';
 import { useMemo, useState, type JSX } from 'react';
 import { Link, useNavigate } from 'react-router';
@@ -76,8 +76,8 @@ function CarteProjet({
           {p.nom}
         </Link>
         <span className="text-[13px] text-encre-3">
-          {euros(p.projet.hypotheses.achat.prix)} · {MODES[p.projet.hypotheses.location.mode]} ·{' '}
-          {dateCourte(p.modifieLe)}
+          {euros(prixRetenu(p.projet.hypotheses.achat))} ·{' '}
+          {MODES[p.projet.hypotheses.location.mode]} · {dateCourte(p.modifieLe)}
         </span>
         <span className="self-start">
           <Pastille

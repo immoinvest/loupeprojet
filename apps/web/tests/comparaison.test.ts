@@ -38,6 +38,7 @@ describe('comparerProjets', () => {
     expect(c).toBeDefined();
     expect(c!.id).toBe('exemple');
     expect(c!.valeurs.prix).toBe(155_000);
+    expect(c!.valeurs.negociation).toBe(0);
     expect(c!.valeurs.prixM2).toBeCloseTo(155_000 / 65, 6);
     // Écart au prix au m² estimé du bien (3 181 €/m²), plus à la seule médiane.
     expect(c!.valeurs.ecartMarche).toBeCloseTo(155_000 / 65 / 3181 - 1, 6);
@@ -69,6 +70,7 @@ describe('comparerProjets', () => {
       }),
     );
     expect(formats.prix).toBe('155 000 €');
+    expect(formats.negociation).toBe('aucune');
     expect(formats.prixM2).toBe('2 385 €/m²');
     expect(formats.ecartMarche).toBe('−25 %');
     expect(formats.cashflow).toBe('−210 €/mois');
@@ -172,5 +174,29 @@ describe('selectionInitiale', () => {
     expect(selectionInitiale([ecarte, ...actifs.slice(0, 2)])).toEqual(['a', 'b']);
     expect(selectionInitiale([ecarte, actifs[0]!])).toEqual(['x', 'a']);
     expect(selectionInitiale([])).toEqual([]);
+  });
+});
+
+describe('négociation du prix', () => {
+  it('ajoute « Négociation » et calcule le prix au m² sur le prix retenu', () => {
+    const negocie = projet('negocie', {
+      achat: { ...projetExemple.hypotheses.achat, negociationTaux: 0.05 },
+    });
+    const [c] = comparerProjets([negocie]);
+    expect(INDICATEURS).toHaveLength(15);
+    expect(INDICATEURS.map((i) => i.code).slice(0, 3)).toEqual(['prix', 'negociation', 'prixM2']);
+    expect(c!.valeurs.prix).toBe(155_000);
+    expect(c!.valeurs.negociation).toBe(0.05);
+    expect(c!.valeurs.prixM2).toBeCloseTo(147_250 / 65, 6);
+    expect(n(indicateurParCode('negociation').formater(0.05))).toBe('−5 %');
+    // La plus forte négociation d'abord ; aucune valeur mise en avant.
+    const [premiere] = trierColonnes(comparerProjets([exemple, negocie]), {
+      code: 'negociation',
+      inverse: false,
+    });
+    expect(premiere?.id).toBe('negocie');
+    expect(
+      meilleureValeur(comparerProjets([exemple, negocie]), indicateurParCode('negociation')),
+    ).toBeNull();
   });
 });

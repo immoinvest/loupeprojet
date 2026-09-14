@@ -17,6 +17,8 @@ export interface Defauts {
   readonly fraisAgenceTaux: number;
   readonly diagnostics: number;
   readonly honorairesChargeAcquereur: boolean;
+  /** Négociation du prix affiché, en proportion (0 : prix affiché retenu tel quel). */
+  readonly negociationTaux: number;
   readonly pno: number;
   readonly comptable: number;
   readonly cfe: number;
@@ -76,6 +78,7 @@ export function defautsDuMoteur(): Defauts {
     fraisAgenceTaux: schema.revente.fraisAgenceTaux,
     diagnostics: schema.revente.diagnostics,
     honorairesChargeAcquereur: schema.achat.honorairesChargeAcquereur,
+    negociationTaux: schema.achat.negociationTaux,
     pno: charges.pno,
     comptable: charges.comptable,
     cfe: charges.cfe,

@@ -43,7 +43,7 @@
     "push": {
       "status": "completed",
       "pr": "https://github.com/immoinvest/loupeprojet/pull/43",
-      "note": "auto-merge armé ; master fusionné deux fois (coque-fixe #39, puis revente-curseur #40, déconnexion #41, estimation-confiance #42 : docs et CartePrix, les deux côtés gardés) ; suite complète 1 061 tests, 1 058 verts et 3 tests de l'extension au-delà de 5 s sous charge (hors périmètre, relancés seuls) ; e2e Rapport 6/6 sur ordinateur, téléphone et tablette avant la seconde fusion, rejoué par le job e2e de la CI"
+      "note": "PR #43 fusionnée le 14/09/2026 à 11:50Z par auto-merge (verify vert) après deux fusions de master ; le job e2e (non requis) est tombé sur master : e2e/responsive.spec.ts « impression A4 » attendait deux grilles dans le Rapport imprimé, la disposition A en a cinq ([2, 1, 2, 3, 2]). Correctif : branche fix/rapport-impression-grilles (attente mise à jour, test relancé en local : vert)."
     }
   },
   "decisions": {
@@ -53,6 +53,7 @@
     "liens": "LienOnglet séparé de l'icône, en bas de carte, nul en mode document",
     "explications": "EXPLICATIONS fixes conservées pour la page Méthode ; fonctions chiffrées (r) => string ajoutées ; Pourquoi supprimé",
     "disposition": "A : autofinancement pleine largeur, puis Prix et Rendements, Leviers, Impôts et Revente",
-    "impression": "les explications des trois rendements passent sous les chiffres en pleine largeur (trois colonnes étroites illisibles)"
+    "impression": "les explications des trois rendements passent sous les chiffres en pleine largeur (trois colonnes étroites illisibles)",
+    "lecon": "toute modification des grilles d'un volet imprimable passe par npx playwright test --project=formats avant la PR ; après fusion, vérifier aussi le job e2e"
   }
 }

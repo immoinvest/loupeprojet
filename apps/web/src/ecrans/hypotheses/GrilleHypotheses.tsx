@@ -22,16 +22,25 @@ function badgePour(projet: ProjetEntree, d: Descripteur): BadgeProvenance | null
   return d.aToi === true ? (BADGES.utilisateur ?? null) : null;
 }
 
-function champsVisibles(groupe: Groupe, projet: ProjetEntree): readonly Descripteur[] {
+export function champsVisibles(groupe: Groupe, projet: ProjetEntree): readonly Descripteur[] {
   return groupe.champs.filter((d) => d.visibleSi === undefined || d.visibleSi(projet));
 }
 
+export interface SaisieHypotheses {
+  readonly projet: ProjetEntree;
+  /** Applique un texte saisi : conversion, validation Zod, enregistrement, message d'erreur. */
+  readonly changer: (d: Descripteur, texte: string) => void;
+  /** Le champ éditable d'un descripteur, avec sa valeur, son erreur et son badge. */
+  readonly rendre: (d: Descripteur) => JSX.Element;
+}
+
 /**
- * La grille éditable d'un groupe d'hypothèses : chaque saisie passe par `appliquerSaisie`,
- * puis par `mettreAJour` (validation Zod) ; une valeur refusée affiche son message et la
- * dernière valeur valide reste en vigueur.
+ * La saisie d'hypothèses du projet courant : chaque saisie passe par `appliquerSaisie`, puis par
+ * `mettreAJour` (validation Zod) ; une valeur refusée affiche son message et la dernière valeur
+ * valide reste en vigueur. Partagée par les grilles de Hypothèses et Financement et par la carte
+ * « L'achat ».
  */
-export function GrilleHypotheses({ groupe }: { groupe: Groupe }): JSX.Element {
+export function useSaisieHypotheses(): SaisieHypotheses {
   const { enregistre } = useProjetCourant();
   const { mettreAJour } = useProjets();
   const projet: ProjetEntree = enregistre.projet;
@@ -55,20 +64,28 @@ export function GrilleHypotheses({ groupe }: { groupe: Groupe }): JSX.Element {
     setErreurs((prev) => Object.fromEntries(Object.entries(prev).filter(([k]) => k !== d.chemin)));
   };
 
+  const rendre = (d: Descripteur): JSX.Element => (
+    <ChampHypothese
+      key={d.chemin}
+      descripteur={d}
+      texte={textes[d.chemin] ?? versTexte(valeurActuelle(projet, d), d.type)}
+      erreur={erreurs[d.chemin]}
+      badge={badgePour(projet, d)}
+      onChange={(t) => {
+        changer(d, t);
+      }}
+    />
+  );
+
+  return { projet, changer, rendre };
+}
+
+/** La grille éditable d'un groupe d'hypothèses. */
+export function GrilleHypotheses({ groupe }: { groupe: Groupe }): JSX.Element {
+  const { projet, rendre } = useSaisieHypotheses();
   return (
     <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
-      {champsVisibles(groupe, projet).map((d) => (
-        <ChampHypothese
-          key={d.chemin}
-          descripteur={d}
-          texte={textes[d.chemin] ?? versTexte(valeurActuelle(projet, d), d.type)}
-          erreur={erreurs[d.chemin]}
-          badge={badgePour(projet, d)}
-          onChange={(t) => {
-            changer(d, t);
-          }}
-        />
-      ))}
+      {champsVisibles(groupe, projet).map(rendre)}
     </div>
   );
 }

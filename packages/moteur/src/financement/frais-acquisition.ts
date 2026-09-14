@@ -1,3 +1,4 @@
+import { prixRetenu } from '../achat';
 import type { Regles } from '../regles/types';
 import type { Hypotheses } from '../schema/hypotheses';
 
@@ -16,9 +17,10 @@ export interface DetailFraisAcquisition {
 
 type Achat = Hypotheses['achat'];
 
-/** Les honoraires payés par l'acquéreur ne supportent ni droits ni émoluments. */
+/** Assiette : le prix retenu (négocié), moins les honoraires payés par l'acquéreur, qui ne supportent ni droits ni émoluments. */
 export function baseFraisAcquisition(achat: Achat): number {
-  return achat.honorairesChargeAcquereur ? achat.prix - achat.honorairesAgence : achat.prix;
+  const prix = prixRetenu(achat);
+  return achat.honorairesChargeAcquereur ? prix - achat.honorairesAgence : prix;
 }
 
 export function tauxDmto(achat: Achat, departement: string, regles: Regles): number {

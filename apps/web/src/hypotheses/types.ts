@@ -18,6 +18,8 @@ export interface Descripteur {
   /** Valeur que l'utilisateur seul connaît (badge « à toi » par défaut). */
   readonly aToi?: boolean;
   readonly visibleSi?: (projet: ProjetEntree) => boolean;
+  /** Phrase d'aide sous le champ (ce que la valeur change, d'où vient le seuil). */
+  readonly aide?: string;
 }
 
 export interface Groupe {

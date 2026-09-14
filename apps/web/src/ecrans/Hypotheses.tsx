@@ -4,9 +4,10 @@ import { Page, TitrePage } from '@/composants/mise-en-page';
 import { Carte, Pastille } from '@/composants/ui';
 import { useProjetCourant } from '@/coque/ProjetLayout';
 import { eurosParMois, pourcentage } from '@/formatage/nombres';
-import { GROUPES } from '@/hypotheses';
+import { GROUPES, GROUPE_ACHAT } from '@/hypotheses';
 
-import { GrilleHypotheses } from './hypotheses/GrilleHypotheses';
+import { CarteAchat } from './hypotheses/CarteAchat';
+import { GrilleHypotheses, useSaisieHypotheses } from './hypotheses/GrilleHypotheses';
 
 function Synthese(): JSX.Element {
   const { resultats: r } = useProjetCourant();
@@ -37,6 +38,13 @@ function Synthese(): JSX.Element {
   );
 }
 
+/** « L'achat » : la carte de la négociation, branchée sur la même saisie que les grilles. */
+function CarteAchatEditable(): JSX.Element {
+  const { resultats } = useProjetCourant();
+  const { projet, rendre, changer } = useSaisieHypotheses();
+  return <CarteAchat projet={projet} resultats={resultats} rendre={rendre} changer={changer} />;
+}
+
 export function Hypotheses(): JSX.Element {
   const { enregistre } = useProjetCourant();
 
@@ -58,13 +66,17 @@ export function Hypotheses(): JSX.Element {
           Chaque valeur dit d'où elle vient. Le prêt se règle dans Financement.
         </span>
       </div>
-      {GROUPES.map((g) => (
-        <Carte key={g.titre}>
-          <h2 className="m-0 font-display text-[22px] font-semibold">{g.titre}</h2>
-          {g.sousTitre !== undefined && <p className="m-0 text-sm text-encre-2">{g.sousTitre}</p>}
-          <GrilleHypotheses key={enregistre.id} groupe={g} />
-        </Carte>
-      ))}
+      {GROUPES.map((g) =>
+        g === GROUPE_ACHAT ? (
+          <CarteAchatEditable key={`${enregistre.id}-${g.titre}`} />
+        ) : (
+          <Carte key={g.titre}>
+            <h2 className="m-0 font-display text-[22px] font-semibold">{g.titre}</h2>
+            {g.sousTitre !== undefined && <p className="m-0 text-sm text-encre-2">{g.sousTitre}</p>}
+            <GrilleHypotheses key={enregistre.id} groupe={g} />
+          </Carte>
+        ),
+      )}
     </Page>
   );
 }

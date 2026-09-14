@@ -20,9 +20,10 @@ export function sectionAcquisition(regles: Regles): SectionMethode {
     code: 'acquisition',
     titre: "Les frais d'acquisition",
     resume:
-      "Calculés par la formule réelle sur le prix hors honoraires d'agence, pas au forfait de 8 %.",
+      "Calculés par la formule réelle sur le prix retenu (négocié) hors honoraires d'agence, pas au forfait de 8 %.",
     etapes: [
-      "Base = prix affiché − honoraires d'agence quand ils sont à votre charge.",
+      "Prix retenu = prix affiché × (1 − négociation), arrondi à l'euro ; sans négociation, le prix affiché tel quel. Les honoraires d'agence restent en euros.",
+      "Base = prix retenu − honoraires d'agence quand ils sont à votre charge.",
       `Droits = base × (${pct(a.dmtoDefaut)} de droits départementaux × (1 + ${pct(a.fraisAssiette)} de frais d'assiette) + ${pct(a.taxeCommunale)} de taxe communale).`,
       `Émoluments du notaire par tranches cumulées : ${tranches} ; plus la TVA à ${pct(a.tva)}.`,
       `Contribution de sécurité immobilière ${pct(a.contributionSecuriteImmobiliere)} et débours ${pct(a.debours)} de la base.`,
@@ -83,7 +84,7 @@ export function sectionCredit(regles: Regles): SectionMethode {
     resume:
       'Mensualité constante, coût complet du crédit, et la part du loyer que prend le crédit.',
     etapes: [
-      "Emprunt = prix + travaux + frais d'acquisition + frais de dossier + garantie − apport. Le mobilier n'est pas financé : mise de départ = apport + mobilier.",
+      "Emprunt = prix retenu + travaux + frais d'acquisition + frais de dossier + garantie − apport. Le mobilier n'est pas financé : mise de départ = apport + mobilier.",
       "Mensualité constante (formule PMT) sur le taux nominal ; assurance = capital emprunté × taux d'assurance ÷ 12, chaque mois.",
       'Différé total : intérêts capitalisés, aucune mensualité ; différé partiel : intérêts seuls. La mensualité de croisière est recalculée après le différé.',
       "TAEG : le taux qui égalise le capital net des frais et toutes les mensualités, résolu numériquement, avec et sans assurance ; comparé au taux d'usure.",
@@ -168,7 +169,7 @@ export function sectionRendements(): SectionMethode {
     code: 'rendement',
     titre: 'Les rendements',
     resume:
-      "Trois lectures du même bien, toutes sur le coût complet : prix + travaux + frais d'acquisition.",
+      "Trois lectures du même bien, toutes sur le coût complet : prix retenu + travaux + frais d'acquisition.",
     etapes: [
       'Brut = loyers annuels hors charges ÷ coût complet.',
       'Net = (loyers nets de vacance − charges pleines) ÷ coût complet.',
