@@ -12,6 +12,8 @@ export interface Service {
   readonly ttlSecondes: number;
   readonly delaiMs: number;
   lireParametres(brut: Readonly<Record<string, string>>): LectureParametres;
+  /** La réponse de ces paramètres (déjà lus) se garde-t-elle en cache ? */
+  enCache(parametres: Readonly<Record<string, unknown>>): boolean;
   /** Transforme la réponse amont en réponse Loupe ; lève ErreurAmontInvalide si elle ne correspond pas. */
   normaliser(amont: unknown): unknown;
 }
@@ -25,11 +27,16 @@ export function definirService<P extends Record<string, unknown>, A>(definition:
   readonly urlAmont: (parametres: P) => URL;
   readonly reponseAmont: z.ZodType<A>;
   readonly normaliser: (amont: A) => unknown;
+  /** Défaut : toute réponse se garde. Une recherche frappe par frappe n'a pas à remplir le cache. */
+  readonly enCache?: (parametres: P) => boolean;
 }): Service {
+  const enCache = definition.enCache;
   return {
     nom: definition.nom,
     ttlSecondes: definition.ttlSecondes,
     delaiMs: definition.delaiMs,
+    // Les paramètres reçus ici sont ceux que `lireParametres` a validés pour ce service.
+    enCache: (parametres) => enCache === undefined || enCache(parametres as P),
     lireParametres(brut) {
       const lecture = definition.parametres.safeParse(brut);
       if (!lecture.success) {

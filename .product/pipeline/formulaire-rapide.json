@@ -1,0 +1,28 @@
+{
+  "feature_slug": "formulaire-rapide",
+  "title": "Formulaire Vérifier rapide et infobulles des termes (fiches de backlog 13 et 20)",
+  "started_at": "2026-09-15T00:30:00Z",
+  "current_step": "implement",
+  "scope": "apps/web (formulaire Vérifier, composants/saisie, verifier/, glossaire, ChampHypothese, client communes), apps/worker/src/services/communes.ts ; aucun changement du moteur",
+  "branch": "feat/formulaire-rapide",
+  "base": "origin/master e6f70f60 (PR #78)",
+  "steps": {
+    "discovery": {
+      "status": "completed",
+      "output": ".product/features/formulaire-rapide-discovery.md"
+    },
+    "specs": {
+      "status": "completed",
+      "output": ".product/specs/formulaire-rapide-specs.md",
+      "stories_count": 8
+    },
+    "architecture": {
+      "status": "completed",
+      "output": ".product/architecture/formulaire-rapide.md"
+    },
+    "implement": { "status": "in_progress", "stories_completed": 0, "stories_total": 8 },
+    "qa_tests": { "status": "pending" },
+    "security": { "status": "pending" },
+    "push": { "status": "pending" }
+  }
+}
