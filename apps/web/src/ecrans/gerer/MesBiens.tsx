@@ -1,12 +1,13 @@
 import { jourLocal, type EtatGestion } from '@loupe/gestion';
 import type { JSX } from 'react';
-import { Link } from 'react-router';
+import { Link, useLocation } from 'react-router';
 
 import { Page, TitrePage } from '@/composants/mise-en-page';
 import { Carte, Pastille } from '@/composants/ui';
-import { resumeDesBiens, type ResumeDuBien } from '@/gestion/biens';
+import { nomSupprime, resumeDesBiens, type ResumeDuBien } from '@/gestion/biens';
 import { useGestion } from '@/gestion/GestionContext';
 import {
+  bienSupprime,
   loyerParMois,
   nombreDeBiens,
   occupantsDuBien,
@@ -59,6 +60,8 @@ function LigneDuBien({ resume }: { readonly resume: ResumeDuBien }): JSX.Element
 
 function ListeDesBiens({ donnees }: { readonly donnees: EtatGestion }): JSX.Element {
   const resumes = resumeDesBiens(donnees, jourLocal(new Date()));
+  // Après « Supprimer ce bien », la fiche revient ici avec le nom du bien supprimé.
+  const supprime = nomSupprime(useLocation().state);
   return (
     <Page espacement="large" className="max-w-[900px]">
       <div className="flex flex-wrap items-end justify-between gap-3">
@@ -73,6 +76,11 @@ function ListeDesBiens({ donnees }: { readonly donnees: EtatGestion }): JSX.Elem
           {T.ajouter}
         </Link>
       </div>
+      {supprime !== null && (
+        <p role="status" className="m-0 rounded-encart bg-bon-fond p-3 text-sm text-bon-texte">
+          {bienSupprime(supprime)}
+        </p>
+      )}
       <Carte>
         <ul aria-label={T.titre} className="m-0 flex list-none flex-col p-0">
           {resumes.map((resume) => (

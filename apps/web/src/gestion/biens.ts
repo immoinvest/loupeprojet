@@ -55,3 +55,9 @@ export function resumeDesBiens(donnees: Donnees, aujourdhui: string): ResumeDuBi
     })
     .sort((a, b) => a.bien.nom.localeCompare(b.bien.nom, 'fr', { numeric: true }));
 }
+
+/** Le nom du bien supprimé que « Supprimer ce bien » passe à la navigation, ou `null`. */
+export function nomSupprime(etat: unknown): string | null {
+  if (typeof etat !== 'object' || etat === null || !('supprime' in etat)) return null;
+  return typeof etat.supprime === 'string' ? etat.supprime : null;
+}

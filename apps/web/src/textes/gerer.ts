@@ -70,6 +70,7 @@ export const ERREURS_GESTION: Readonly<Record<CodeErreurGestion, string>> = {
   loyer_non_regle: 'Ce loyer n’est pas encore entièrement reçu : pas de quittance pour l’instant.',
   loyer_regle: 'Ce paiement solde le mois : c’est la quittance qui l’atteste.',
   bien_occupe: 'Ce bien (ou cette chambre) est déjà loué à ces dates.',
+  periode_payee: 'Ce mois a déjà reçu un paiement : choisissez un mois suivant.',
   fin_avant_entree: 'La sortie ne peut pas précéder l’entrée.',
   paiements_apres_sortie:
     'Des loyers sont déjà reçus pour des mois après cette sortie : annulez-les d’abord.',
