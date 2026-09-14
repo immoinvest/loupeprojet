@@ -174,3 +174,12 @@ export interface FeuVerdict {
 - `hcsf` devenant `null` avec un loyer absent : `Comparer` et `Hypothèses` savent déjà afficher « — » ; `texteVerdict` omet déjà la phrase d'effort.
 - Les tests web qui saisissent apport et revenus (nouveau projet, capture, enrichi, auto, marché complet, app) sont relus : ils gardent le loyer, retirent ce qui n'a plus de champ obligatoire, et fixent les valeurs attendues recalculées.
 - Fiche 01 : si `revenusMensuels` est déjà optionnel sur `master` au moment d'implémenter, US-1 ne le touche pas et US-2 reprend sa version de `feuEffort` (couverture) en y ajoutant `raison`.
+
+## Notes d'implémentation (écarts avec le plan)
+
+- **US-4 livrée dans le commit de US-2** : dès que `Resultats` devient une union, les écrans ne compilent plus sans leur contrôle `r.complet` ; bandeau, cartes « À compléter », feux « loyer à indiquer » et « — » de Mes projets, Comparer et Hypothèses sont donc arrivés avec le moteur.
+- **Bandeau : champ + bouton « Appliquer »** (ou Entrée) plutôt qu'un enregistrement à chaque frappe : sinon le premier chiffre tapé (« 9 ») complète le projet, le bandeau disparaît et la saisie s'interrompt.
+- **Taxe foncière sans loyer** : 14 € par m² et par an (`TAXE_FONCIERE_PAR_M2_AN`), estimée ; avec un loyer, un mois de loyer comme avant.
+- **Courte durée sans loyer** : nuitée de départ 60 € (`NUITEE_DEFAUT`), à la création comme dans Hypothèses.
+- **Parcours e2e** : le projet de Lyon (apport 0 € par défaut, sans revenus) passe de −222 à −273 €/mois et affiche « Effort bancaire : revenus à indiquer » ; `incomplet.spec.ts` couvre la création sans loyer, Fiscalité bloquée et la saisie dans le bandeau.
+- **Fiches 01 et 04** : implémentée avant leur fusion, sur décision de Pierre. À la fusion : `revenusMensuels` est optionnel des deux côtés ; la couverture en repli du feu effort (fiche 01) doit garder `raison` quand ni revenus ni loyer ne sont connus ; `prixRetenu` (fiche 04) remplace `achat.prix` dans `calculerPartiel` aussi.
