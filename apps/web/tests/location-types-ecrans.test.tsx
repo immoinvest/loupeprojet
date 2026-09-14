@@ -10,6 +10,7 @@ async function remplirBien(utilisateur: ReturnType<typeof userEvent.setup>): Pro
   await utilisateur.type(screen.getByLabelText(/^Surface/), '60');
   await utilisateur.type(screen.getByLabelText(/Code postal/), '13002');
   await utilisateur.type(screen.getByLabelText(/^Ville/), 'Marseille');
+  await utilisateur.clear(screen.getByLabelText(/^Apport/));
   await utilisateur.type(screen.getByLabelText(/^Apport/), '10000');
 }
 

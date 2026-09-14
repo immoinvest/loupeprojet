@@ -39,6 +39,7 @@ describe('Nouveau projet — depuis un lien', () => {
       expect(screen.getAllByText('annonce').length).toBeGreaterThan(5);
 
       await utilisateur.type(screen.getByLabelText(/Loyer visé/), '980');
+      await utilisateur.clear(screen.getByLabelText(/^Apport/));
       await utilisateur.type(screen.getByLabelText(/^Apport/), '15000');
       await utilisateur.click(screen.getByRole('button', { name: /Créer le projet/ }));
 
@@ -75,6 +76,7 @@ describe('Nouveau projet — depuis un lien', () => {
       await utilisateur.type(screen.getByLabelText(/Code postal/), '69003');
       await utilisateur.type(screen.getByLabelText(/^Ville/), 'Lyon');
       await utilisateur.type(screen.getByLabelText(/Loyer visé/), '700');
+      await utilisateur.clear(screen.getByLabelText(/^Apport/));
       await utilisateur.type(screen.getByLabelText(/^Apport/), '10000');
       const deja = screen.getByRole('checkbox', { name: /J'ai déjà visité ce bien/ });
       expect(deja).not.toBeChecked();
@@ -150,7 +152,9 @@ describe('Nouveau projet — à la main', () => {
 
       // Les défauts sont affichés, avec le badge « estimé » ; le loyer et les revenus restent vides.
       expect(screen.getByLabelText(/Durée du prêt/)).toHaveValue('25');
-      expect(screen.getByLabelText(/^Apport/)).toHaveValue('0');
+      // L'apport attend le bien : 10 % du coût total, dès que prix, surface et code postal sont lisibles.
+      expect(screen.getByLabelText(/^Apport/)).toHaveValue('');
+      expect(screen.getByText(/^Par défaut, 10\s%\sdu coût total/)).toBeInTheDocument();
       expect(screen.getByLabelText(/Tranche/)).toHaveValue('0.3');
       expect(screen.getByLabelText(/Loyer visé/)).toHaveValue('');
       expect(screen.getAllByText('estimé')).toHaveLength(3);
@@ -159,6 +163,10 @@ describe('Nouveau projet — à la main', () => {
       await utilisateur.type(screen.getByLabelText(/Surface/), '40');
       await utilisateur.type(screen.getByLabelText(/Code postal/), '69003');
       await utilisateur.type(screen.getByLabelText(/^Ville/), 'Lyon');
+      const apportAffiche = Number(screen.getByLabelText<HTMLInputElement>(/^Apport/).value);
+      expect(apportAffiche).toBeGreaterThan(12_000);
+      expect(apportAffiche % 100).toBe(0);
+      expect(screen.getByText(/^Soit 10\s%\sdu coût total du projet/)).toBeInTheDocument();
       await utilisateur.click(screen.getByRole('button', { name: /Créer le projet/ }));
 
       await screen.findByRole(
@@ -168,7 +176,12 @@ describe('Nouveau projet — à la main', () => {
       );
       const p = lireProjets(window.localStorage)[0]?.projet;
       expect(p?.hypotheses.location).not.toHaveProperty('loyerHc');
-      expect(p?.hypotheses.pret).toMatchObject({ apport: 0, dureeAnnees: 25, tauxNominal: 0.0335 });
+      // Le projet reçoit l'apport que montrait le formulaire.
+      expect(p?.hypotheses.pret).toMatchObject({
+        apport: apportAffiche,
+        dureeAnnees: 25,
+        tauxNominal: 0.0335,
+      });
       expect(p?.hypotheses.fiscalite.tmi).toBe(0.3);
       expect(p?.hypotheses.revenusMensuels).toBeUndefined();
       expect(p?.hypotheses.charges.taxeFonciere).toBe(560);
@@ -192,6 +205,7 @@ describe('Nouveau projet — à la main', () => {
     await utilisateur.type(duree, '31');
     expect(screen.getAllByText('estimé')).toHaveLength(2);
     await utilisateur.type(screen.getByLabelText(/Loyer visé/), '-5');
+    await utilisateur.clear(screen.getByLabelText(/^Apport/));
     await utilisateur.type(screen.getByLabelText(/^Apport/), 'abc');
     await utilisateur.click(screen.getByRole('button', { name: /Créer le projet/ }));
     expect(screen.getByText('Entre 1 et 30 ans.')).toBeInTheDocument();
@@ -224,6 +238,7 @@ describe('Nouveau projet — à la main', () => {
       await utilisateur.selectOptions(screen.getByLabelText(/Ascenseur/), 'oui');
       await utilisateur.selectOptions(screen.getByLabelText(/^DPE/), 'E');
       await utilisateur.type(screen.getByLabelText(/Loyer visé/), '520');
+      await utilisateur.clear(screen.getByLabelText(/^Apport/));
       await utilisateur.type(screen.getByLabelText(/^Apport/), '0');
       await utilisateur.clear(screen.getByLabelText(/Durée du prêt/));
       await utilisateur.type(screen.getByLabelText(/Durée du prêt/), '20');

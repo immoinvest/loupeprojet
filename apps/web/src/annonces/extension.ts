@@ -48,7 +48,11 @@ function dialoguer(
     }, delaiMs);
     function terminer(reponse: MessageExtension | null): void {
       clearTimeout(minuterie);
-      fenetre.removeEventListener('message', ecouter);
+      try {
+        fenetre.removeEventListener('message', ecouter);
+      } catch {
+        // La page a été fermée pendant l'attente (onglet refermé, fin d'un test) : plus rien à retirer.
+      }
       resoudre(reponse);
     }
     fenetre.addEventListener('message', ecouter);

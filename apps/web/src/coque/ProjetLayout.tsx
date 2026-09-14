@@ -13,10 +13,10 @@ import {
 import { Link, NavLink, Outlet, useLocation, useNavigate, useParams } from 'react-router';
 
 import { MARGES_LATERALES, Page, TitrePage } from '@/composants/mise-en-page';
-import { Bouton } from '@/composants/ui';
+import { Bouton, LienBouton } from '@/composants/ui';
 import { useGestion } from '@/gestion/GestionContext';
 import { useProjets } from '@/stockage/ProjetsContext';
-import { STATUTS, StatutProjetSchema, type ProjetEnregistre } from '@/stockage/projets';
+import type { ProjetEnregistre } from '@/stockage/projets';
 import { libellePrixEnTete } from '@/textes/achat';
 import { TEXTES_PRET } from '@/textes/gerer-pret';
 import { MODES } from '@/textes/regimes';
@@ -25,6 +25,7 @@ import { visiteDe } from '@/visite';
 import { BoutonPartager } from './BoutonPartager';
 import { defilementPourVoir } from './defilement';
 import { useMesuresEnTete } from './entete';
+import { SelecteurStatut } from './SelecteurStatut';
 
 export interface ContexteProjet {
   readonly enregistre: ProjetEnregistre;
@@ -116,8 +117,11 @@ function useOngletActifEnVue(): RefObject<HTMLElement | null> {
 function EnTete(): JSX.Element {
   const { enregistre, resultats } = useProjetCourant();
   const { changerStatut } = useProjets();
-  const { sections } = useGestion();
+  const { sections, statut: statutGestion, donnees } = useGestion();
   const naviguer = useNavigate();
+  // Gérer affiché et aucun bien du compte ne vient encore de ce projet.
+  const peutGerer =
+    sections.gerer && !(donnees?.biens.some((b) => b.projetId === enregistre.id) ?? false);
   const bandeRef = useOngletActifEnVue();
   const { location } = enregistre.projet.hypotheses;
   const enTeteRef = useRef<HTMLElement>(null);
@@ -152,22 +156,26 @@ function EnTete(): JSX.Element {
       </nav>
       <div className="hidden 2xl:block 2xl:flex-1" />
       <div className="flex min-h-11 flex-wrap items-center gap-2 pb-2 md:h-12 md:flex-nowrap md:justify-end md:pb-0 2xl:h-14">
-        <label className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-bordure bg-surface px-3.5 text-sm font-semibold text-encre-2">
-          <span className="sr-only">Statut du projet</span>
-          <select
-            value={enregistre.statut}
-            onChange={(e) => {
-              changerStatut(enregistre.id, StatutProjetSchema.parse(e.target.value));
-            }}
-            className="bg-transparent font-semibold outline-none pointer-coarse:text-base"
-          >
-            {StatutProjetSchema.options.map((s) => (
-              <option key={s} value={s}>
-                {STATUTS[s]}
-              </option>
-            ))}
-          </select>
-        </label>
+        <SelecteurStatut
+          statut={enregistre.statut}
+          onChange={(statut) => {
+            changerStatut(enregistre.id, statut);
+            // « Acheté » ouvre la porte de Gérer (deux gestes), si le compte est lu et peut gérer ce bien.
+            if (statut === 'achete' && peutGerer && statutGestion === 'pret') {
+              void naviguer(`/gerer/pret/${enregistre.id}`);
+            }
+          }}
+        />
+        {/*
+         * Bien acheté mais pas encore géré (sans compte, ou porte quittée) : un lien discret vers
+         * Gérer. De 768 à 1 279 px, icône seule, libellé lu par les lecteurs d'écran.
+         */}
+        {enregistre.statut === 'achete' && peutGerer && (
+          <LienBouton to={`/gerer/pret/${enregistre.id}`}>
+            <KeyRound size={18} className="shrink-0" aria-hidden="true" />
+            <span className="md:max-xl:sr-only">{TEXTES_PRET.gererCeBien}</span>
+          </LienBouton>
+        )}
         <Bouton
           onClick={() => {
             void naviguer(`/projets/${enregistre.id}/imprimer`, { state: { imprimer: true } });
@@ -176,23 +184,6 @@ function EnTete(): JSX.Element {
           PDF
         </Bouton>
         <BoutonPartager enregistre={enregistre} />
-        {/*
-         * Lien croisé vers Gérer : masqué si la section l'est, ou si le bien est déjà acheté.
-         * De 768 à 1 279 px, les actions tiennent sur la rangée du nom : icône seule, libellé lu
-         * par les lecteurs d'écran et en infobulle, pour ne pas écraser le nom du projet.
-         */}
-        {sections.gerer && enregistre.statut !== 'achete' && (
-          <Bouton
-            variante="primaire"
-            title={TEXTES_PRET.jaiAchete}
-            onClick={() => {
-              void naviguer(`/gerer/pret/${enregistre.id}`);
-            }}
-          >
-            <KeyRound size={18} className="shrink-0" aria-hidden="true" />
-            <span className="md:max-xl:sr-only">{TEXTES_PRET.jaiAchete}</span>
-          </Bouton>
-        )}
       </div>
     </header>
   );

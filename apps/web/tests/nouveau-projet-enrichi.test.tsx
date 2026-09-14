@@ -98,7 +98,9 @@ describe('Nouveau projet — avec le Worker', () => {
       expect(projet?.hypotheses.location).toMatchObject({ loyerHc: 1_034 });
       expect(projet?.provenance['location.loyerHc']).toBe('anil');
       expect(projet?.hypotheses.charges.taxeFonciere).toBe(980);
-      expect(projet?.hypotheses.pret.apport).toBe(0);
+      // Sans apport saisi : 10 % du coût total, arrondi à la centaine.
+      expect(projet?.hypotheses.pret.apport).toBeGreaterThan(15_500);
+      expect((projet?.hypotheses.pret.apport ?? 1) % 100).toBe(0);
       expect(projet?.hypotheses.revenusMensuels).toBeUndefined();
     },
   );

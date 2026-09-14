@@ -177,27 +177,21 @@ export function NouveauProjet(): JSX.Element {
         </Carte>
       )}
 
+      {/* Une annonce lue (extension, favori ou Deklic) n'a plus besoin de son texte collé. */}
       {!manuel &&
         !lectureEnCours &&
+        importee === null &&
         (etape === 'texte' || etape === 'verifier' || url.trim() !== '') && (
           <Carte>
             <div className="flex flex-col gap-1">
-              <h2 className="m-0 font-display text-[22px] font-semibold">
-                {importee === null ? "Le texte de l'annonce" : 'Il manque quelque chose ?'}
-              </h2>
+              <h2 className="m-0 font-display text-[22px] font-semibold">Le texte de l'annonce</h2>
               <p className="m-0 text-sm text-encre-2">
-                {importee === null ? (
-                  <>
-                    Avec l'
-                    <Link to="/extension" className="font-bold text-accent">
-                      extension Deklic
-                    </Link>
-                    , coller le lien suffit. Sinon : sur l'annonce, tout sélectionner (Ctrl+A),
-                    copier (Ctrl+C), et coller ici.
-                  </>
-                ) : (
-                  'Collez le texte de l’annonce pour compléter ce qui a été lu.'
-                )}
+                Avec l'
+                <Link to="/extension" className="font-bold text-accent">
+                  extension Deklic
+                </Link>
+                , coller le lien suffit. Sinon : sur l'annonce, tout sélectionner (Ctrl+A), copier
+                (Ctrl+C), et coller ici.
               </p>
             </div>
             <textarea
