@@ -8,22 +8,24 @@ Identité de marque du produit, décidée le 13 septembre 2026 (ADR-005 : `.prod
 
 ## Les fichiers
 
-| Fichier                                | Usage                                                                                             |
-| -------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| `logo/deklic-logotype.svg`             | Logo principal : icône + mot, couleurs. Barre latérale, en-têtes, documents, présentations.       |
-| `logo/deklic-logotype-mono.svg`        | Même logo en une couleur (encre). Impression noir et blanc, filigranes, tampons.                  |
-| `logo/deklic-logotype-blanc.svg`       | Même logo en blanc. Sur fond bleu, photo sombre, vidéo.                                           |
-| `logo/deklic-icone.svg`                | Icône seule (maison + éclats), fond transparent. Favicon, avatars, puces.                         |
-| `logo/deklic-icone-mono.svg`           | Icône en une couleur (encre).                                                                     |
-| `logo/deklic-icone-blanc.svg`          | Icône en blanc.                                                                                   |
-| `logo/deklic-icone-app.svg`            | Icône d'app : maison blanche et éclats orange sur carré bleu arrondi. Source des PNG ci-dessous.  |
-| `logo/deklic-mot.svg`                  | Le mot seul, en tracés (pas de police à installer). Quand l'icône est déjà présente ailleurs.     |
-| `logo/deklic-mot-mono.svg`             | Le mot seul, en une couleur.                                                                      |
-| `favicon/favicon.svg`                  | Favicon vectoriel (copie de l'icône). Copié dans `apps/web/public/`.                              |
-| `favicon/icon-192.png`, `icon-512.png` | Icônes du manifeste web (écran d'accueil Android, PWA). Copiées dans `apps/web/public/`.          |
-| `favicon/apple-touch-icon.png`         | Icône iOS 180 × 180, fond opaque. Copiée dans `apps/web/public/`.                                 |
-| `partage/og-image.png`                 | Image de partage 1200 × 630 (liens sur les réseaux, messageries). Copiée dans `apps/web/public/`. |
-| `couleurs.json`                        | La palette en un fichier lisible par un script.                                                   |
+| Fichier                                                  | Usage                                                                                                                                                           |
+| -------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `logo/deklic-logotype.svg`                               | Logo principal : icône + mot, couleurs. Barre latérale, en-têtes, documents, présentations.                                                                     |
+| `logo/deklic-logotype-mono.svg`                          | Même logo en une couleur (encre). Impression noir et blanc, filigranes, tampons.                                                                                |
+| `logo/deklic-logotype-blanc.svg`                         | Même logo en blanc. Sur fond bleu, photo sombre, vidéo.                                                                                                         |
+| `logo/deklic-icone.svg`                                  | Icône seule (maison + éclats), fond transparent. Favicon, avatars, puces.                                                                                       |
+| `logo/deklic-icone-mono.svg`                             | Icône en une couleur (encre).                                                                                                                                   |
+| `logo/deklic-icone-blanc.svg`                            | Icône en blanc.                                                                                                                                                 |
+| `logo/deklic-icone-app.svg`                              | Icône d'app : maison blanche et éclats orange sur carré bleu arrondi. Source des PNG ci-dessous.                                                                |
+| `logo/deklic-icone-maskable.svg`                         | Icône adaptative : carré bleu plein, maison et éclats dans la zone sûre de 80 % (Android découpe un cercle, une goutte ou un carré). Source des PNG `maskable`. |
+| `logo/deklic-mot.svg`                                    | Le mot seul, en tracés (pas de police à installer). Quand l'icône est déjà présente ailleurs.                                                                   |
+| `logo/deklic-mot-mono.svg`                               | Le mot seul, en une couleur.                                                                                                                                    |
+| `favicon/favicon.svg`                                    | Favicon vectoriel (copie de l'icône). Copié dans `apps/web/public/`.                                                                                            |
+| `favicon/icon-192.png`, `icon-512.png`                   | Icônes du manifeste web (écran d'accueil Android, PWA). Copiées dans `apps/web/public/`.                                                                        |
+| `favicon/icon-maskable-192.png`, `icon-maskable-512.png` | Icônes adaptatives du manifeste (Android). Copiées dans `apps/web/public/`.                                                                                     |
+| `favicon/apple-touch-icon.png`                           | Icône iOS 180 × 180, fond opaque. Copiée dans `apps/web/public/`.                                                                                               |
+| `partage/og-image.png`                                   | Image de partage 1200 × 630 (liens sur les réseaux, messageries). Copiée dans `apps/web/public/`.                                                               |
+| `couleurs.json`                                          | La palette en un fichier lisible par un script.                                                                                                                 |
 
 Le mot est converti en **tracés** à partir de la police Sora Bold (licence SIL Open Font License, Google Fonts), interlettrage −5 %. Il n'y a donc aucune police à charger pour afficher le logo, et il s'affiche pareil partout.
 
@@ -69,4 +71,4 @@ Au 13 septembre 2026 : `deklic.fr` est pris ; `deklic.io`, `deklic.ai`, `mondekl
 
 ## Refaire les fichiers
 
-Les SVG sont générés par des scripts Node (fontkit, Sora Bold) qui ont servi le 13 septembre 2026 ; les PNG sont des captures d'Edge sans fenêtre des SVG. Pour modifier le logo : éditer les SVG de `logo/` à la main (ils sont courts et lisibles), puis régénérer les PNG et le composant `apps/web/src/marque/Logo.tsx`, qui reprend les mêmes tracés.
+Les SVG sont générés par des scripts Node (fontkit, Sora Bold) qui ont servi le 13 septembre 2026 ; les PNG sont des captures d'Edge sans fenêtre des SVG. Pour modifier le logo : éditer les SVG de `logo/` à la main (ils sont courts et lisibles), puis régénérer les PNG et le composant `apps/web/src/marque/Logo.tsx`, qui reprend les mêmes tracés. L'icône adaptative reprend l'icône d'app sur un fond plein, son contenu réduit à 74 % ; ses PNG ont été rendus le 14 septembre 2026 par Chromium sans fenêtre (Playwright).

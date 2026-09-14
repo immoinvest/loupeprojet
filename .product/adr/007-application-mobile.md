@@ -38,3 +38,9 @@ Trois voies existent pour « une application mobile » :
 - **Application native** : second code, second moteur, contraire à l'architecture « tout dans le navigateur ».
 - **Emballage de boutique maintenant** : coût et comptes à la charge de Pierre, revue incertaine chez Apple. Reste possible plus tard au-dessus de la PWA (une Trusted Web Activity réutilise le manifeste et le service worker) : **décision de Pierre**.
 - **`vite-plugin-pwa` (Workbox)** : dépendance lourde pour quatre règles de cache ; un service worker court, typé et testé suffit.
+
+## Amendement du 14/09/2026 (implémentation et audit)
+
+- **Annonce partagée** : la navigation `/projets/nouveau?…` est servie par la coque en cache (stratégie `coque-d-abord`), le réseau seulement sans elle : le texte partagé ne part pas au serveur. En réseau d'abord, il partait dans l'adresse demandée à Cloudflare Pages.
+- **API des comptes** (`/api/*`, arrivée avec la feature `comptes`) : jamais interceptée par le service worker, pas même une navigation de retour de Google ou d'Apple.
+- **Coque** : seule une réponse HTML peut devenir la page gardée hors ligne ; une icône ou le manifeste ouverts dans un onglet la remplaçaient (relevé par l'audit de sécurité, corrigé).

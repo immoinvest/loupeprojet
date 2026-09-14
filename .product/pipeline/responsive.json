@@ -2,7 +2,7 @@
   "feature_slug": "responsive",
   "title": "Responsive et application mobile : Deklic utilisable de 320 à 1 920 px, installable, hors ligne, cible de partage",
   "started_at": "2026-09-13T22:00:00Z",
-  "current_step": "implement",
+  "current_step": "push",
   "scope": "apps/web (coque, écrans, composants, index.css, index.html, manifeste, icônes, service worker), marque/ (icône adaptative), e2e Playwright, job CI e2e, docs",
   "branch": "feat/responsive",
   "base": "master (73c46dd)",
@@ -30,7 +30,7 @@
       "adr": ".product/adr/007-application-mobile.md"
     },
     "implement": {
-      "status": "in_progress",
+      "status": "completed",
       "stories_completed": 11,
       "stories_total": 11,
       "commits": [
@@ -137,6 +137,10 @@
         {
           "etape": "QA : propriétés et lien vide",
           "hash": "47cab96"
+        },
+        {
+          "etape": "sécurité : coque HTML seulement",
+          "hash": "5cbb16c"
         }
       ],
       "notes": [
@@ -150,20 +154,66 @@
       ]
     },
     "refactor": {
-      "status": "pending"
+      "status": "completed",
+      "details": "Rapport découpé (e2fb7bf) ; pastilles du lien extraites de NouveauProjet (643fb87) avant US-7 ; aucun fichier source modifié au-delà de 300 lignes ; textes du partage d'un projet regroupés dans textes/partage.ts"
     },
     "qa_tests": {
-      "status": "pending"
+      "status": "completed",
+      "tests": 961,
+      "fichiers_de_test": 138,
+      "e2e": 54,
+      "duree_e2e_locale_s": 129,
+      "details": [
+        "Scénarios Gherkin des US-1 à US-10 relus contre les tests ; ajouts : texte partagé démesuré (écran), SeLoger reconnu, ordre des cartes Extension (Playwright)",
+        "Tests de propriétés sans dépendance (tirages mulberry32 à graine fixe) : 500 partages reçus, 500 requêtes du service worker",
+        "Spec des formats : 16 écrans × 9 formats, onglet Estimation rempli par un Worker simulé",
+        "Défaut trouvé par les propriétés et corrigé : « http:// » sans adresse pris pour le lien partagé (estUneAdresse)"
+      ]
     },
     "security": {
-      "status": "pending"
+      "status": "completed",
+      "score_avant": 97,
+      "score": 100,
+      "grade": "A",
+      "constats": [
+        "FAIBLE (corrigé) : une navigation de même origine vers un fichier remplaçait la coque hors ligne → estUnePage"
+      ],
+      "recommandations_hors_perimetre": [
+        "En-têtes de sécurité (_headers : CSP, Referrer-Policy, Permissions-Policy)",
+        "npm audit sur les dépendances existantes",
+        "Projet Playwright WebKit pour Safari iPhone"
+      ]
     },
     "push": {
-      "status": "pending"
+      "status": "completed",
+      "branch": "feat/responsive"
     }
   },
   "decisions": {
     "application_mobile": "PWA installable (spec : pas d'app native en v1) ; applications de boutique hors périmètre, décision de Pierre",
     "etat_pipeline": "session parallèle : état dans .product/pipeline/responsive.json, pipeline-state.json réservé à la session principale"
+  },
+  "post_mortem": {
+    "blockers_encountered": [
+      "Deux fusions de master pendant la feature (comptes, estimation, marché complet) : écrans à adapter (US-3c, US-3d), /api/* à laisser passer par le service worker",
+      "vite preview de Playwright tombé sous charge pendant la spec des formats ; tests d’écran Vitest à 30 s dépassés sous charge",
+      "Outil Bash : échappements décodés dans les paramètres (séquences Unicode), grande commande heredoc refusée par le shell"
+    ],
+    "retries": {
+      "US-6": "Vary: Origin rendait le cache introuvable hors ligne → lectures avec ignoreVary",
+      "US-3c": "Cible « Se connecter » du profil à 20 px sur tablette 1 024 → pointer-coarse:min-h-11",
+      "fix API": "Trois tests Vitest en délai dépassé sous charge, verts seuls puis en relance complète",
+      "QA": "Un test de propriétés a trouvé « http:// » pris pour le lien partagé → estUneAdresse et test de non-régression"
+    },
+    "patterns_discovered": [
+      "Décisions du service worker en fonctions pures (strategiePour, estUnePage), colle courte prouvée par Playwright",
+      "Preuve négative réseau : écouter request.serviceWorker() avec un témoin positif pour ne jamais passer à vide",
+      "Spec des formats : cible effective (label englobant), liens au fil d’une phrase exemptés, Worker et comptes simulés par page.route"
+    ],
+    "improvements_for_next_time": [
+      "Fusionner master avant chaque story qui touche un écran partagé",
+      "Écrire les brouillons avec des scripts à ancres vérifiées plutôt que des remplacements à la main",
+      "Ajouter chaque nouvel écran à ecransDeReference dès sa création"
+    ]
   }
 }

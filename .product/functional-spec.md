@@ -131,7 +131,7 @@ Page de l'annonce (structuré) · texte (LLM) · Géoplateforme (géocodage) · 
 ## Roadmap
 
 - **v1 (8–10 sem.)** : extension + bookmarklet (LBC, SeLoger, Bien'ici, PAP, Logic-Immo) ; pipeline complet ; texte collé et saisie manuelle ; 5 volets, verdict, scénarios ; sauvegarde locale, PDF, partage ; test réel Marseille/Lyon/Aix.
-- **v1.5 (+4)** : compte (livré : code e-mail, Google, Apple), sync ; comparaison 2–5 projets, statuts ; Safari iOS, partage mobile ; portails supplémentaires.
+- **v1.5 (+4)** : compte (livré : code e-mail, Google, Apple), sync ; comparaison 2–5 projets, statuts ; Safari iOS, partage mobile (livré en avance : application installable et hors ligne, « Partager → Deklic » sur Android, partage natif d'un projet ; iPhone : installation par Safari, sans cible de partage) ; portails supplémentaires.
 - **v2 (+6)** : historique de prix (extension), loyers infra-communaux, registre copro, DPE PDF, photos → travaux (option).
 - **v3** : suivi après achat, liasse LMNP, monétisation (affiliation, export premium).
 - **Pas en v1** : recherche/alertes d'annonces, chat IA, SCI IS, carte au-delà des DVF, app native.

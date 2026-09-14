@@ -27,34 +27,42 @@ apps/web/src/
 │   ├── BarreApp.tsx                  barre d'app sous 1 024 px : bouton « Ouvrir le menu » (aria-expanded, aria-controls), logo
 │   ├── menu.ts                       useMenu() : ouvert, ouvrir, fermer, boutonRef ; Échap, page figée, fermeture à la navigation et au passage en grand écran
 │   ├── BoutonPartager.tsx            extrait de ProjetLayout : partage natif sur écran tactile, copie sinon, avertissement écrit
+│   ├── defilement.ts                 defilementPourVoir : l'onglet actif ramené en vue dans la bande
 │   └── Installation.tsx              InstallationProvider + useInstallation() (useSyncExternalStore sur le suivi)
 ├── application/
 │   ├── installation.ts               creerSuiviInstallation(fenetre) : beforeinstallprompt, appinstalled, display-mode standalone ; suiviIndisponible
 │   ├── partage-natif.ts              capacitesDuNavigateur, modePartage, donneesPartage, estAnnulation
 │   └── index.ts
-├── annonces/partage-recu.ts          lirePartageRecu(search) : lien d'annonce cherché dans lien, texte, titre ; texte tronqué à 10 000 caractères
+├── annonces/partage-recu.ts          lirePartageRecu(search) : lien d'annonce cherché dans lien, texte, titre ; texte tronqué à 10 000 caractères ; annoncePartagee pour le premier rendu
 ├── hors-ligne/
-│   ├── strategie.ts                  strategiePour, fichiersDeLaCoque, nomDuCache, cachesPerimes, FICHIERS_FIXES
+│   ├── strategie.ts                  strategiePour, fichiersDeLaCoque, nomDuCache, cachesPerimes, FICHIERS_FIXES, ACTION_PARTAGE, estUnePage
 │   ├── enregistrer.ts                enregistrerServiceWorker(environnement) : production seulement, après le chargement
 │   └── index.ts
 ├── sw/service-worker.ts              colle du service worker (install, activate, fetch) autour de hors-ligne/strategie ; hors couverture unitaire, prouvé par Playwright
-├── textes/application.ts             menu, installation, partage, carte « Sur téléphone et tablette »
-└── ecrans/extension/CarteTelephone.tsx  carte « Sur téléphone et tablette » de la page Extension
+├── textes/application.ts             installation, partage reçu, carte « Sur téléphone et tablette » (partage d'un projet : textes/partage.ts)
+├── ecrans/extension/CarteTelephone.tsx  carte « Sur téléphone et tablette » de la page Extension
+└── ecrans/nouveau-projet/PastillesLien.tsx  pastilles du lien (portail, provenance, partage reçu), extraites de NouveauProjet
 apps/web/vite.hors-ligne.config.ts    build IIFE de src/sw/service-worker.ts vers dist/sw.js ; version = empreinte SHA-256 de dist/index.html
 apps/web/public/icon-maskable-192.png, icon-maskable-512.png
 marque/logo/deklic-icone-maskable.svg  source de l'icône adaptative (fond plein, maison et éclats dans la zone sûre de 80 %)
 marque/favicon/icon-maskable-192.png, icon-maskable-512.png
 apps/web/e2e/
 ├── formats.ts                        FORMATS (9), écrans de référence, mesurer(page) avec la règle de cible effective
-├── responsive.spec.ts                13 écrans × 9 formats : débordement, cibles, champs, menu
-├── hors-ligne.spec.ts                ouverture sans réseau après une visite
-└── telephone.spec.ts                 partage reçu, partage d'un projet (repli copie), menu au doigt
+├── reponses-worker.ts                réponses simulées du Worker : onglet Estimation rempli
+├── responsive.spec.ts                16 écrans × 9 formats : débordement, cibles, champs, menu, onglet actif, impression A4
+├── hors-ligne.spec.ts                ouverture sans réseau après une visite, annonce partagée servie par la coque, fichier ouvert dans un onglet
+└── telephone.spec.ts                 partage reçu, lien de partage à copier à la main, ordre des cartes de la page Extension
 apps/web/tests/
 ├── menu.test.tsx                     tiroir : ouvrir, Échap, voile, navigation, focus, inert
-├── application.test.ts               suivi d'installation, décision de partage
-├── partage-recu.test.ts              lecture des paramètres de partage
+├── application.test.ts               suivi d'installation
+├── partage-natif.test.ts             décision de partage natif, annulation
+├── installation.test.tsx             bouton « Installer l'application » du profil
+├── manifeste.test.ts                 icônes, raccourcis, cible de partage
+├── defilement.test.ts                onglet actif ramené en vue
+├── partage-recu.test.ts              lecture des paramètres de partage, premier rendu de Nouveau projet
 ├── hors-ligne.test.ts                stratégie de cache, fichiers de la coque, caches périmés, enregistrement
-└── telephone.test.tsx                partage natif (navigator.share simulé), partage reçu dans Nouveau projet, carte Extension
+├── telephone.test.tsx                partage natif (navigator.share simulé), partage reçu dans Nouveau projet, carte Extension
+└── tirage.ts, *.proprietes.test.ts   tests de propriétés à graine fixe : partage reçu, stratégie du cache
 .product/adr/007-application-mobile.md
 ```
 
@@ -66,6 +74,8 @@ apps/web/src/coque/Sidebar.tsx        tiroir fixe sous lg (translate, invisible 
 apps/web/src/coque/ProjetLayout.tsx   en-tête : rangée nom + actions qui passe à la ligne, onglets en bande défilante (onglet actif ramené en vue), une rangée à xl
 apps/web/src/composants/ui.tsx        TitreCarte qui passe à la ligne, GrosChiffre à l'échelle, Ligne dont la valeur ne se coupe pas, « Pourquoi ? » à 44 px au doigt
 apps/web/src/ecrans/*.tsx             MesProjets, NouveauProjet, FormulaireProjet, formulaire/Champ, Rapport, Hypotheses, hypotheses/ChampHypothese, Fiscalite, Revente, Visite, Comparer, Methode, Extension, Partage, Imprimer, document/DocumentProjet, Bientot
+apps/web/src/ecrans/Adresse.tsx, adresse/*.tsx, Compte.tsx, Connexion.tsx, connexion/FormulaireCode.tsx, coque/Profil.tsx, formulaire/EstimerLoyer.tsx   écrans arrivés avec master (US-3c, US-3d)
+apps/web/src/textes/partage.ts        textes du partage d'un projet (US-8)
 apps/web/src/index.css                utilitaire defilement-discret, marges de sécurité latérales, min-h-dvh
 apps/web/index.html                   viewport-fit=cover, apple-mobile-web-app-title
 apps/web/public/manifest.webmanifest  id, scope, start_url, icônes maskable, raccourcis, share_target, catégories
@@ -81,7 +91,7 @@ apps/web/e2e/aides.ts, mes-projets.spec.ts   ouverture du menu quand la barre la
 docs : README, CLAUDE.md, registre, technical-spec, architecture-overview, functional-spec, marque/README
 ```
 
-Taille : aucun fichier prévu au-delà de 300 lignes ; `ProjetLayout` perd le partage (extrait) avant de gagner l'en-tête responsive.
+Taille : aucun fichier prévu au-delà de 300 lignes ; `ProjetLayout` perd le partage (extrait) avant de gagner l'en-tête responsive ; `NouveauProjet` perd ses pastilles du lien (`nouveau-projet/PastillesLien.tsx`) avant de recevoir le partage.
 
 ## 3. Patterns
 
@@ -90,7 +100,7 @@ Taille : aucun fichier prévu au-delà de 300 lignes ; `ProjetLayout` perd le pa
 - **Tactile par le pointeur** : `pointer-coarse:` pour les cibles de 44 px et les champs en 16 px (vérifié : l'émulation tactile de Playwright active `(pointer: coarse)`) ; l'ordinateur à la souris garde ses tailles.
 - **Contexte + hook + défaut sûr** pour l'installation (comme `ClientWorker`) : `App` branche le vrai suivi, `AppEnMemoire` un suivi indisponible.
 - **Store externe** (`useSyncExternalStore`) pour l'état d'installation, alimenté par des événements du navigateur.
-- **Strategy** pour le cache : `strategiePour(requete) → 'navigation' | 'cache-d-abord' | 'reseau-d-abord' | 'ignorer'`, un gestionnaire par stratégie dans le service worker.
+- **Strategy** pour le cache : `strategiePour(requete) → 'navigation' | 'coque-d-abord' | 'cache-d-abord' | 'reseau-d-abord' | 'ignorer'`, un gestionnaire par stratégie dans le service worker.
 - **Fonctions pures aux frontières** (`lirePartageRecu`, `modePartage`, `fichiersDeLaCoque`, `cachesPerimes`) : toute décision testable sans navigateur ; les fichiers de colle (service worker, effets React) restent courts.
 - **Injection des capacités du navigateur** (`fenetre`, `conteneur`, `navigator`) plutôt que des accès globaux, pour tester sans jsdom spécial.
 
@@ -122,19 +132,21 @@ main.tsx → enregistrerServiceWorker({ production, conteneur, quandCharge }) �
 sw.js install  → cache deklic-<empreinte> ← '/', fichiersDeLaCoque(html de '/'), FICHIERS_FIXES ; skipWaiting
 sw.js activate → supprime cachesPerimes(noms) ; clients.claim
 sw.js fetch    → strategiePour(requete, origine)
-                  navigation     : réseau (et mise à jour de '/' en cache) → sinon '/' en cache
+                  navigation     : réseau (et mise à jour de '/' en cache si la réponse est une page HTML) → sinon '/' en cache
+                  coque-d-abord  : annonce partagée (/projets/nouveau?…) → '/' en cache, réseau seulement sans lui
                   cache-d-abord  : cache → sinon réseau (et mise en cache)
                   reseau-d-abord : réseau (et mise en cache) → sinon cache
-                  ignorer        : pas de respondWith
+                  ignorer        : autre origine, hors GET, /api/*, /sw.js, /capture.js : pas de respondWith
 ```
 
 ### Partage reçu
 
 ```
 Android « Partager → Deklic » → GET /projets/nouveau?titre=…&texte=…&lien=… (share_target)
-  → NouveauProjet : lireFragmentCapture(hash) prioritaire ; sinon lirePartageRecu(search)
+  → service worker : coque d'abord, le texte partagé ne part pas au réseau
+  → NouveauProjet : lireFragmentCapture(hash) prioritaire ; sinon annoncePartagee → lirePartageRecu(search)
   → url : premier lien reconnu par resoudreAnnonce (lien, texte, titre), sinon premier lien ; texte partagé sans lien → zone de texte
-  → pastille « reçue par partage » ; adresse nettoyée (replace) ; rien n'est stocké
+  → pastille « reçue par partage » (PastillesLien) ; adresse nettoyée (replace) ; rien n'est stocké
 ```
 
 ### Partage d'un projet
@@ -152,24 +164,26 @@ BoutonPartager → capacitesDuNavigateur(window) → modePartage
 - **ADR-R2 : mise en page par CSS, avec équivalents `print:`.** Le papier A4 mesure environ 700 px de large : sans équivalent, `md:grid-cols-2` imprimerait une colonne. Les volets imprimables (Rapport, Fiscalité, Revente, Visite, document) portent `print:` sur chaque changement à `md`, `lg` ou `xl`. Contrôle : export PDF avant et après, comparé à l'œil ; tests d'impression.
 - **ADR-R3 : tailles tactiles par `pointer-coarse:`.** Cibles de 44 px et champs en 16 px sur écran tactile, y compris la tablette en paysage ; l'ordinateur garde ses tailles actuelles. Écarté : `max-lg:` (tablette paysage oubliée, ordinateur étroit modifié pour rien).
 - **ADR-R4 : service worker écrit à la main, construit après l'application.** Build IIFE sans import (script classique, compatible partout) ; version = empreinte de `dist/index.html`, donc changée seulement quand les fichiers de l'application changent. Écarté : `vite-plugin-pwa` (dépendance lourde), version horodatée (réinstallation à chaque déploiement même sans changement).
-- **ADR-R5 : partage reçu en GET vers Nouveau projet.** Aucune donnée n'atteint un serveur ; la route existe déjà et nettoie l'adresse après lecture. Écarté : POST (demande un service worker qui intercepte le formulaire, pour des fichiers dont on n'a pas l'usage).
+- **ADR-R5 : partage reçu en GET vers Nouveau projet.** Aucune donnée n'atteint un serveur : la navigation de partage est servie par la coque en cache (`coque-d-abord`, ajouté en implémentation, car en réseau d'abord le texte partait dans l'adresse demandée au serveur) ; la route existe déjà et nettoie l'adresse après lecture. Écarté : POST (demande un service worker qui intercepte le formulaire, pour des fichiers dont on n'a pas l'usage).
 - **ADR-R6 : partage natif sur écran tactile seulement.** Sur ordinateur, la feuille de partage de Windows est moins utile qu'un lien copié, et les tests existants restent valables. L'avertissement devient un texte visible après le partage ou la copie.
-- **ADR-R7 : preuve en deux étages.** Les 8 parcours tournent sur trois appareils ; une spec « formats » mesure les 13 écrans sur 9 formats dans une seule exécution par format. Écarté : les parcours sur 9 formats (72 tests, trop long pour le job CI).
+- **ADR-R7 : preuve en deux étages.** Les parcours tournent sur trois appareils ; une spec « formats » mesure les 16 écrans sur 9 formats (Worker et comptes simulés) dans une seule exécution par format. Écarté : les parcours sur 9 formats (72 tests, trop long pour le job CI).
 - **ADR-R8 : l'état d'installation n'est jamais stocké.** Il est relu à chaque ouverture depuis le navigateur (événements, `display-mode`).
 
 ## 6. Cas limites
 
-| Module                         | Cas                                                                                                                                                                                             |
-| ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `useMenu`                      | ouverture puis passage en grand écran ; lien vers la page déjà affichée (même chemin, nouvelle `key`) ; démontage tiroir ouvert (page débloquée) ; `matchMedia` absent (jsdom)                  |
-| `lirePartageRecu`              | aucun paramètre ; paramètres vides ; lien seul, texte seul, titre seul ; lien suivi de ponctuation ; plusieurs liens dont un seul d'annonce ; URL invalide ; 20 000 caractères ; `%` mal encodé |
-| `creerSuiviInstallation`       | fenêtre absente ; `matchMedia` absent ; déjà standalone ; `navigator.standalone` (iPhone) ; invite refusée ; invite déjà consommée ; `appinstalled` sans invite                                 |
-| `modePartage`, `estAnnulation` | tactile sans `navigator.share` ; souris avec `navigator.share` ; erreur non `DOMException` ; `AbortError` sous forme d'objet nommé                                                              |
-| `strategiePour`                | autre origine ; POST ; `/capture.js` ; `/sw.js` ; navigation vers une route profonde ; `/assets/…` ; icône ; chemin inconnu ; URL relative invalide                                             |
-| `fichiersDeLaCoque`            | HTML sans assets ; doublons ; attributs `src` et `href` ; chemins absolus hors `/assets/` ignorés                                                                                               |
-| `cachesPerimes`                | aucun cache ; caches d'autres applications (préfixe différent) conservés ; cache courant conservé                                                                                               |
-| `enregistrerServiceWorker`     | développement ; conteneur absent ; enregistrement rejeté (l'application continue)                                                                                                               |
-| Mise en page                   | nom de projet très long ; 5 projets dans Comparer à 320 px ; montants à 7 chiffres ; volet Visite ouvert directement (onglet hors de la bande) ; mode document sur téléphone                    |
+| Module                         | Cas                                                                                                                                                                                                                                                               |
+| ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `useMenu`                      | ouverture puis passage en grand écran ; lien vers la page déjà affichée (même chemin, nouvelle `key`) ; démontage tiroir ouvert (page débloquée) ; `matchMedia` absent (jsdom)                                                                                    |
+| `lirePartageRecu`              | aucun paramètre ; paramètres vides ; lien seul, texte seul, titre seul ; lien suivi de ponctuation ; plusieurs liens dont un seul d'annonce ; URL invalide ; 20 000 caractères ; `%` mal encodé ; « http:// » sans adresse ; 500 partages tirés au hasard         |
+| `creerSuiviInstallation`       | fenêtre absente ; `matchMedia` absent ; déjà standalone ; `navigator.standalone` (iPhone) ; invite refusée ; invite déjà consommée ; `appinstalled` sans invite                                                                                                   |
+| `modePartage`, `estAnnulation` | tactile sans `navigator.share` ; souris avec `navigator.share` ; erreur non `DOMException` ; `AbortError` sous forme d'objet nommé                                                                                                                                |
+| `strategiePour`                | autre origine ; POST ; `/capture.js` ; `/sw.js` ; navigation vers une route profonde ; `/assets/…` ; icône ; chemin inconnu ; URL relative invalide ; `/api/*` même en navigation ; navigation de partage avec ou sans paramètres ; 500 requêtes tirées au hasard |
+| `fichiersDeLaCoque`            | HTML sans assets ; doublons ; attributs `src` et `href` ; chemins absolus hors `/assets/` ignorés                                                                                                                                                                 |
+| `cachesPerimes`                | aucun cache ; caches d'autres applications (préfixe différent) conservés ; cache courant conservé                                                                                                                                                                 |
+| `estUnePage`                   | type absent ou vide ; majuscules et espaces ; paramètres (`charset`) ; `text/html-bis`                                                                                                                                                                            |
+| `annoncePartagee`              | capture reçue en même temps ; site non reconnu ; rien de partagé                                                                                                                                                                                                  |
+| `enregistrerServiceWorker`     | développement ; conteneur absent ; enregistrement rejeté (l'application continue)                                                                                                                                                                                 |
+| Mise en page                   | nom de projet très long ; 5 projets dans Comparer à 320 px ; montants à 7 chiffres ; volet Visite ouvert directement (onglet hors de la bande) ; mode document sur téléphone                                                                                      |
 
 ## 7. Retirer le service worker en urgence
 
@@ -191,6 +205,8 @@ Remplacer le contenu de `src/sw/service-worker.ts` par un gestionnaire `activate
 12. US-9 : `CarteTelephone`, textes, tests
 13. Refactor, QA, audit de sécurité, docs, PR
 
+Écarts au plan : deux fusions de master ont ajouté US-3c (Estimation, Compte, Connexion, profil ; le service worker laisse passer `/api/*`) et US-3d (onglet Estimation rempli, « Estimer le loyer » sur toute la largeur) ; un refactor de Nouveau projet (pastilles du lien) a précédé US-7 ; l'audit de sécurité a ajouté `estUnePage`.
+
 ## 9. Checklist pré-implémentation
 
 - [x] Pas de conflit avec l'existant (aucune PR ouverte, DOM de navigation inchangé)
@@ -207,3 +223,7 @@ Remplacer le contenu de `src/sw/service-worker.ts` par un gestionnaire `activate
 - **Point faible : `inert` sur `main` avec un tiroir resté ouvert en passant en grand écran.** Parade : fermeture par `matchMedia` et test dédié.
 - **Point faible : service worker et tests Playwright.** Chaque test a un contexte neuf, donc un service worker neuf ; le test hors ligne attend `navigator.serviceWorker.ready` avant de couper le réseau.
 - **Changement suite à la revue** : `BoutonPartager` est extrait dès US-2 (sans changement de comportement) pour que US-8 ne touche qu'un petit fichier, et `ProjetLayout` reste sous 300 lignes.
+- **Trouvé en implémentation : le partage reçu partait au serveur.** En réseau d'abord, la navigation `/projets/nouveau?texte=…` emportait le texte de l'annonce vers Cloudflare Pages. Parade : stratégie `coque-d-abord`, prouvée par un parcours qui écoute les requêtes du service worker, avec un témoin qui, lui, passe par le réseau.
+- **Trouvé à l'audit : la coque pouvait être remplacée par un fichier.** Une icône ouverte dans un onglet devenait la page gardée hors ligne. Parade : `estUnePage`, testé, et un parcours qui ouvre `/favicon.svg` avant de couper le réseau.
+- **Trouvé par les tests de propriétés : un « http:// » vide devenait le lien partagé.** Un texte partagé contenant « http://?; » donnait « http:// » une fois la ponctuation retirée. Parade : seules les adresses que le navigateur sait lire sont retenues (`estUneAdresse`), avec un test de non-régression.
+- **Machine chargée : `vite preview` est tombé pendant la spec des formats** au premier passage (connexions refusées) ; relancée seule, elle est verte. En CI, les reprises couvrent ce cas.

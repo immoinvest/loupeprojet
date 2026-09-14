@@ -36,7 +36,7 @@ Base de tests : 8 parcours Playwright verts (bureau), 636 tests unitaires verts 
 1. Chaque écran se lit et s'utilise de 320 à 1 920 px : aucune barre de défilement horizontale de page, chiffres et titres lisibles, toutes les actions atteignables au pouce.
 2. Deklic s'installe comme une application sur Android, iPhone et ordinateur, s'ouvre en plein écran depuis l'écran d'accueil, et fonctionne sans réseau (projets, calculs, rapport, impression).
 3. Depuis un téléphone, une annonce partagée depuis l'app d'un portail ouvre « Nouveau projet » avec le lien reconnu ; un projet se partage par la feuille de partage du téléphone.
-4. La preuve est automatique : 13 écrans × 9 formats contrôlés, et les parcours existants rejoués sur téléphone, tablette et ordinateur, en CI.
+4. La preuve est automatique : 16 écrans × 9 formats contrôlés, et les parcours existants rejoués sur téléphone, tablette et ordinateur, en CI.
 
 ## Outputs
 
@@ -94,7 +94,7 @@ Tout ce qui précède.
 
 ## Definition of Done
 
-- [ ] 0 px de débordement horizontal sur les 13 écrans × 9 formats
+- [x] 0 px de débordement horizontal sur les 16 écrans × 9 formats
 - [ ] Cibles tactiles ≥ 44 px et champs ≥ 16 px sur les formats tactiles (écarts assumés listés)
 - [ ] Les 8 parcours existants verts sur téléphone, tablette et ordinateur
 - [ ] Manifeste complet (`id`, `scope`, icônes `any` et `maskable`, raccourcis, `share_target`) et entrée « Installer l'application »

@@ -166,7 +166,7 @@ Priorité : P0 · Effort : S
 
 ```gherkin
 Scénario: cibles tactiles
-  Étant donné un format tactile et l'un des 13 écrans
+  Étant donné un format tactile et l'un des 16 écrans
   Alors chaque bouton, lien de navigation, onglet, liste, champ, résumé « Pourquoi ? » et case à cocher offre une cible effective d'au moins 44 × 44 px
   Sauf les liens au fil d'une phrase
 
@@ -385,7 +385,7 @@ Scénario: parcours sur trois appareils
   Alors les 8 parcours existants passent sur les trois
   Et les aides de test ouvrent le menu quand la barre latérale est cachée
 
-Scénario: 13 écrans × 9 formats
+Scénario: 16 écrans × 9 formats
   Étant donné la spec « responsive »
   Alors chaque écran de référence a 0 px de débordement horizontal sur chacun des 9 formats
   Et sur les formats tactiles, les cibles effectives font au moins 44 px et les champs au moins 16 px
@@ -415,19 +415,21 @@ Aucun changement : aucune donnée nouvelle n'est stockée (ni l'état d'installa
 
 ## Priorisation MoSCoW
 
-| Story | Titre                                  | Priorité    | Effort | Dépendances  |
-| ----- | -------------------------------------- | ----------- | ------ | ------------ |
-| US-1  | Navigation par menu sous 1 024 px      | Must (P0)   | M      | -            |
-| US-2  | En-tête de projet adaptatif            | Must (P0)   | S      | US-1         |
-| US-3a | Liste, création, rapport               | Must (P0)   | M      | US-1         |
-| US-3b | Volets, comparaison, pages d'aide      | Must (P0)   | L      | US-1         |
-| US-4  | Confort tactile                        | Must (P0)   | S      | US-3a, US-3b |
-| US-10 | Parcours et formats contrôlés en CI    | Must (P0)   | M      | US-1 à US-4  |
-| US-5  | Application installable                | Should (P1) | M      | US-1         |
-| US-6  | Application hors ligne                 | Should (P1) | M      | US-5         |
-| US-7  | Recevoir une annonce partagée          | Should (P1) | S      | US-5         |
-| US-8  | Partager un projet depuis le téléphone | Should (P1) | S      | US-2         |
-| US-9  | Page Extension pour téléphone          | Could (P2)  | S      | US-5, US-7   |
+| Story | Titre                                            | Priorité    | Effort | Dépendances  |
+| ----- | ------------------------------------------------ | ----------- | ------ | ------------ |
+| US-1  | Navigation par menu sous 1 024 px                | Must (P0)   | M      | -            |
+| US-2  | En-tête de projet adaptatif                      | Must (P0)   | S      | US-1         |
+| US-3a | Liste, création, rapport                         | Must (P0)   | M      | US-1         |
+| US-3b | Volets, comparaison, pages d'aide                | Must (P0)   | L      | US-1         |
+| US-3c | Estimation, Compte, Connexion (fusion de master) | Must (P0)   | S      | US-3a        |
+| US-3d | Onglet Estimation rempli, « Estimer le loyer »   | Must (P0)   | XS     | US-3c        |
+| US-4  | Confort tactile                                  | Must (P0)   | S      | US-3a, US-3b |
+| US-10 | Parcours et formats contrôlés en CI              | Must (P0)   | M      | US-1 à US-4  |
+| US-5  | Application installable                          | Should (P1) | M      | US-1         |
+| US-6  | Application hors ligne                           | Should (P1) | M      | US-5         |
+| US-7  | Recevoir une annonce partagée                    | Should (P1) | S      | US-5         |
+| US-8  | Partager un projet depuis le téléphone           | Should (P1) | S      | US-2         |
+| US-9  | Page Extension pour téléphone                    | Could (P2)  | S      | US-5, US-7   |
 
 Ordre d'implémentation : US-1 → US-2 → US-3a → US-3b → US-4 → US-10 → US-5 → US-6 → US-7 → US-8 → US-9. Effort total estimé : XL.
 
