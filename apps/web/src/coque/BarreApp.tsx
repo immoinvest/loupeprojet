@@ -25,11 +25,15 @@ export function BarreApp({ menu }: { menu: Menu }): JSX.Element {
         aria-label="Ouvrir le menu"
         aria-expanded={menu.ouvert}
         aria-controls={ID_NAVIGATION}
-        className="flex h-11 w-11 items-center justify-center rounded-full text-encre-2 hover:bg-accent-fond"
+        className="flex h-11 w-11 items-center justify-center rounded-full text-encre-2 survol-fond"
       >
         <IconeMenu size={22} aria-hidden="true" />
       </button>
-      <NavLink to="/" aria-label={TEXTES_LOGO} className="flex min-h-11 items-center px-1">
+      <NavLink
+        to="/"
+        aria-label={TEXTES_LOGO}
+        className="flex min-h-11 items-center rounded-encart px-1 survol-fond"
+      >
         <LogotypeDeklic hauteur={24} />
       </NavLink>
     </header>

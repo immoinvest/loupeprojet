@@ -103,9 +103,7 @@ export function BandeauHorizons({
               onChoix(v.annees);
             }}
             className={`flex min-h-11 flex-col gap-0.5 rounded-encart border px-3 py-2.5 text-left ${
-              actif
-                ? 'border-accent bg-accent-fond'
-                : 'border-bordure bg-surface hover:bg-accent-fond'
+              actif ? 'border-accent bg-accent-fond' : 'border-bordure bg-surface survol-fond'
             }`}
           >
             <span className="text-xs font-bold tracking-wide text-encre-3 uppercase">

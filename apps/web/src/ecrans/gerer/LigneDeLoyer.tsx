@@ -39,7 +39,7 @@ export function LigneDeLoyer({ ligne, aujourdhui, actions }: PropsLigne): JSX.El
       <span className="flex min-w-0 flex-col">
         <Link
           to={`/gerer/biens/${ligne.location.bienId}`}
-          className="flex min-w-0 items-center text-encre no-underline hover:underline pointer-coarse:min-h-11"
+          className="flex min-w-0 items-center text-encre no-underline survol-texte pointer-coarse:min-h-11"
         >
           <span className="block truncate font-bold">
             {bienEtChambre(ligne.bien?.nom ?? '', ligne.location.libelle)}

@@ -5,13 +5,13 @@
 
 export const classeLien = ({ isActive }: { isActive: boolean }): string =>
   `flex min-h-[44px] items-center gap-2.5 rounded-encart px-3 py-2.5 text-sm font-semibold ${
-    isActive ? 'bg-accent-doux text-encre' : 'text-encre-2 hover:bg-accent-fond'
+    isActive ? 'bg-accent-doux text-encre' : 'text-encre-2 survol-fond'
   }`;
 
 /** L'action de création en tête d'une section : même forme qu'un lien, couleur d'accent. */
 export const classeLienCreation = ({ isActive }: { isActive: boolean }): string =>
   `flex min-h-[44px] items-center gap-2.5 rounded-encart px-3 py-2.5 text-sm font-bold ${
-    isActive ? 'bg-accent-doux text-accent' : 'text-accent hover:bg-accent-fond'
+    isActive ? 'bg-accent-doux text-accent' : 'text-accent survol-fond'
   }`;
 
 export const CLASSE_ETIQUETTE =

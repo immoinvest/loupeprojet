@@ -36,7 +36,7 @@ function Note({
         onClick={() => {
           setOuverte(true);
         }}
-        className="self-start text-sm font-bold text-accent pointer-coarse:min-h-11"
+        className="self-start text-sm font-bold text-accent survol-texte pointer-coarse:min-h-11"
       >
         Ajouter une note
       </button>

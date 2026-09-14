@@ -16,7 +16,7 @@ export function MesDonneesGestion(): JSX.Element {
       <div>
         <a
           href={CHEMIN_EXPORT}
-          className="inline-flex min-h-[44px] items-center justify-center rounded-full border border-bordure bg-surface px-4 text-sm font-semibold text-encre-2 no-underline hover:bg-accent-fond"
+          className="inline-flex min-h-[44px] items-center justify-center rounded-full border border-bordure bg-surface px-4 text-sm font-semibold text-encre-2 no-underline survol-fond"
         >
           {T.exporter}
         </a>

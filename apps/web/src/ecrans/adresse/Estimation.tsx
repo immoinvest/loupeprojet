@@ -90,7 +90,7 @@ export function CarteEstimation(): JSX.Element {
                 choisirEtat(etat);
               }}
               className={`flex min-h-[64px] flex-col items-start justify-center rounded-encart border px-3 py-2 text-left ${
-                choisi ? 'border-accent bg-surface' : 'border-bordure bg-surface/60'
+                choisi ? 'border-accent bg-surface' : 'border-bordure bg-surface/60 survol-fond'
               }`}
             >
               <span className="text-sm font-semibold text-encre-2">{LIBELLES_ETATS[etat]}</span>
@@ -125,7 +125,7 @@ export function CarteEstimation(): JSX.Element {
                   <td className={CELLULE}>{pourcentageSigne(c.taux, 1)}</td>
                   <td className={CELLULE}>{euros(c.montant)}</td>
                   <td className={CELLULE}>
-                    <label className="inline-flex items-center gap-2 text-sm pointer-coarse:min-h-11">
+                    <label className="-mx-1.5 inline-flex items-center gap-2 rounded-encart px-1.5 text-sm survol-fond pointer-coarse:min-h-11">
                       <input
                         type="checkbox"
                         checked={!c.ignoree}

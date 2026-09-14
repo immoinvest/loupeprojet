@@ -101,7 +101,9 @@ export function AjouterMain(): JSX.Element {
                 <label
                   key={type}
                   className={`flex min-h-11 cursor-pointer items-center rounded-full px-5 text-sm font-bold has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-accent ${
-                    saisie.type === type ? 'bg-surface text-encre shadow-carte' : 'text-encre-3'
+                    saisie.type === type
+                      ? 'bg-surface text-encre shadow-carte'
+                      : 'text-encre-3 survol-discret'
                   }`}
                 >
                   <input
@@ -146,7 +148,7 @@ export function AjouterMain(): JSX.Element {
           </div>
 
           <details className="rounded-encart border border-bordure-douce p-3">
-            <summary className="flex min-h-11 cursor-pointer items-center font-bold text-accent">
+            <summary className="flex min-h-11 cursor-pointer items-center self-start font-bold text-accent survol-texte">
               {T.plusDeDetails}
             </summary>
             <div className="grid gap-4 pt-3 sm:grid-cols-2">
@@ -202,7 +204,7 @@ export function AjouterMain(): JSX.Element {
             <button
               type="submit"
               disabled={occupe}
-              className="inline-flex min-h-[48px] items-center justify-center rounded-full bg-accent px-8 text-[15px] font-semibold text-white hover:bg-accent-fonce disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex min-h-[48px] items-center justify-center rounded-full bg-accent px-8 text-[15px] font-semibold text-white survol-plein disabled:cursor-not-allowed disabled:opacity-50"
             >
               {T.creer}
             </button>
