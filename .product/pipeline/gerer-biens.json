@@ -2,7 +2,7 @@
   "feature_slug": "gerer-biens",
   "title": "Mes biens et vie de la location (G1c) : pages Biens et Locataires, modifier une location, supprimer un bien, APL versée au bailleur",
   "started_at": "2026-09-14T21:10:00Z",
-  "current_step": "qa_tests",
+  "current_step": "push",
   "scope": "packages/gestion, apps/comptes (src/gestion, migration 0005), apps/web (gestion/, ecrans/gerer, menu Gérer)",
   "branch": "feat/gerer-biens",
   "worktree": "C:\\Users\\errei\\Claude\\loupe-gestion",
@@ -51,7 +51,7 @@
       "status": "completed",
       "fusion": "15fdeb13 fusion de master (PR #65 vendu-loue, #77 alleger-textes, #78 lien-sans-texte) sans conflit ; controles rapides verts (lint, format, typecheck, 280 tests web de Gerer, du menu et du compte)",
       "verification": "comme la CI : 262 fichiers et 2 119 tests avec les seuils de couverture, build de tous les espaces (15/09/2026, 1 h 40) ; puis correctif de securite 3acd00f3 reteste (124 tests gestion, 142 comptes, 258 web, 100 %) : 2 122 tests",
-      "formats": "spec des formats Playwright en local (port 5299) : 36 ecrans sur 9 formats, 4 de plus (Mes biens, Mes locataires, Modifier une location, Supprimer un bien) ; resultat a reporter"
+      "formats": "spec des formats Playwright en local (port 5299) : 36 ecrans sur 9 formats, 4 de plus (Mes biens, Mes locataires, Modifier une location, Supprimer un bien) ; premier passage : cible tactile de moins de 44 px sur Supprimer un bien (lien Exporter mes donnees d abord, telephone et tablette), corrigee par pointer-coarse:min-h-11 (997a3d7f) ; second passage vert (12 tests, 1,5 min)"
     },
     "security": {
       "status": "completed",
