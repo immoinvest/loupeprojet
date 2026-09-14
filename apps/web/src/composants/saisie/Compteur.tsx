@@ -9,6 +9,8 @@ export interface PropsCompteur extends BornesCompteur {
   /** Id de la saisie : le libellé du champ la nomme par `htmlFor`. */
   readonly id: string;
   readonly nom?: string | undefined;
+  /** Nom accessible de la saisie quand aucun `<label>` ne la nomme. */
+  readonly libelle?: string | undefined;
   /** `''` : inconnu. */
   readonly valeur: string;
   readonly onChange: (valeur: string) => void;
@@ -31,6 +33,7 @@ const CLASSE_BOUTON =
 export function Compteur({
   id,
   nom,
+  libelle,
   valeur,
   onChange,
   nomMoins,
@@ -68,6 +71,7 @@ export function Compteur({
       <input
         id={id}
         name={nom}
+        aria-label={libelle}
         value={valeur}
         inputMode="numeric"
         autoComplete="off"

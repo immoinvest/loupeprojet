@@ -5,6 +5,15 @@ import { describe, expect, it } from 'vitest';
 import { AppEnMemoire } from '@/App';
 import { lireProjets } from '@/stockage/projets';
 
+import {
+  ESTIMES,
+  PRECISER,
+  ouvrirGroupe,
+  radioDans,
+  saisirApport,
+  saisirCommune,
+} from './aides-verifier';
+
 describe('Nouveau projet — depuis un lien', () => {
   it(
     'lecture impossible : « Saisir à la main » ouvre le formulaire et garde le lien comme source',
@@ -34,8 +43,7 @@ describe('Nouveau projet — depuis un lien', () => {
 
       await utilisateur.type(screen.getByLabelText(/Prix affiché/), '155000');
       await utilisateur.type(screen.getByLabelText(/^Surface/), '65');
-      await utilisateur.type(screen.getByLabelText(/Code postal/), '13005');
-      await utilisateur.type(screen.getByLabelText(/^Ville/), 'Marseille 5e');
+      await saisirCommune(utilisateur, '13005 Marseille 5e');
       await utilisateur.type(screen.getByLabelText(/Loyer visé/), '980');
       await utilisateur.click(screen.getByRole('button', { name: /Créer le projet/ }));
 
@@ -66,12 +74,10 @@ describe('Nouveau projet — depuis un lien', () => {
 
       await utilisateur.type(screen.getByLabelText(/Prix affiché/), '120000');
       await utilisateur.type(screen.getByLabelText(/^Surface/), '40');
-      await utilisateur.type(screen.getByLabelText(/Code postal/), '69003');
-      await utilisateur.type(screen.getByLabelText(/^Ville/), 'Lyon');
+      await saisirCommune(utilisateur, '69003 Lyon');
       await utilisateur.type(screen.getByLabelText(/Loyer visé/), '700');
-      await utilisateur.clear(screen.getByLabelText(/^Apport/));
-      await utilisateur.type(screen.getByLabelText(/^Apport/), '10000');
-      const deja = screen.getByRole('checkbox', { name: /J'ai déjà visité ce bien/ });
+      await saisirApport(utilisateur, '10000');
+      const deja = screen.getByRole('switch', { name: /J'ai déjà visité ce bien/ });
       expect(deja).not.toBeChecked();
       await utilisateur.click(deja);
       expect(deja).toBeChecked();
@@ -119,8 +125,9 @@ describe('Nouveau projet — à la main', () => {
     await utilisateur.click(screen.getByRole('button', { name: /Créer le projet/ }));
     expect(screen.getByText('Indiquez le prix affiché.')).toBeInTheDocument();
     expect(screen.getByText('Indiquez la surface.')).toBeInTheDocument();
-    expect(screen.getByText('Code postal à 5 chiffres.')).toBeInTheDocument();
-    expect(screen.getByText('Indiquez la ville.')).toBeInTheDocument();
+    expect(screen.getByText(/Code postal à 5 chiffres\./)).toHaveTextContent(/Indiquez la ville\./);
+    // Le premier champ en erreur prend le focus.
+    expect(screen.getByLabelText(/Prix affiché/)).toHaveFocus();
     // Loyer, apport, durée, tranche et revenus sont facultatifs : aucun message pour eux.
     for (const message of [
       'Nombre attendu.',
@@ -141,20 +148,26 @@ describe('Nouveau projet — à la main', () => {
       await screen.findByRole('heading', { name: /Colle le lien/ });
       await utilisateur.click(screen.getByRole('button', { name: /je saisis à la main/ }));
 
-      // Les défauts sont affichés, avec le badge « estimé » ; le loyer et les revenus restent vides.
-      expect(screen.getByLabelText(/Durée du prêt/)).toHaveValue('25');
+      // Les défauts sont repliés dans « Estimé pour vous », avec le badge « estimé » ; le loyer reste vide.
+      expect(screen.getByRole('button', { name: ESTIMES })).toHaveTextContent(
+        /apport, 25 ans, tranche 30\s%/,
+      );
+      await ouvrirGroupe(utilisateur, ESTIMES);
+      expect(radioDans('Durée du prêt', '25 ans')).toBeChecked();
       // L'apport attend le bien : 10 % du coût total, dès que prix, surface et code postal sont lisibles.
       expect(screen.getByLabelText(/^Apport/)).toHaveValue('');
+      expect(radioDans('Part du coût total', '10 %')).toBeChecked();
       expect(screen.getByText(/^Par défaut, 10\s%\sdu coût total/)).toBeInTheDocument();
-      expect(screen.getByLabelText(/Tranche/)).toHaveValue('0.3');
+      expect(radioDans("Tranche d'imposition", '30 %')).toBeChecked();
       expect(screen.getByLabelText(/Loyer visé/)).toHaveValue('');
       expect(screen.getAllByText('estimé')).toHaveLength(3);
 
       await utilisateur.type(screen.getByLabelText(/Prix affiché/), '120000');
       await utilisateur.type(screen.getByLabelText(/Surface/), '40');
-      await utilisateur.type(screen.getByLabelText(/Code postal/), '69003');
-      await utilisateur.type(screen.getByLabelText(/^Ville/), 'Lyon');
-      const apportAffiche = Number(screen.getByLabelText<HTMLInputElement>(/^Apport/).value);
+      await saisirCommune(utilisateur, '69003 Lyon');
+      const apportAffiche = Number(
+        screen.getByLabelText<HTMLInputElement>(/^Apport/).value.replace(/\s/g, ''),
+      );
       expect(apportAffiche).toBeGreaterThan(12_000);
       expect(apportAffiche % 100).toBe(0);
       expect(screen.getByText(/^Soit 10\s%\sdu coût total du projet/)).toBeInTheDocument();
@@ -186,34 +199,49 @@ describe('Nouveau projet — à la main', () => {
     },
   );
 
-  it('un champ facultatif mal rempli est signalé ; modifié, il devient « à toi »', async () => {
-    const utilisateur = userEvent.setup();
-    render(<AppEnMemoire chemin="/projets/nouveau" />);
-    await screen.findByRole('heading', { name: /Colle le lien/ });
-    await utilisateur.click(screen.getByRole('button', { name: /je saisis à la main/ }));
-    const duree = screen.getByLabelText(/Durée du prêt/);
-    await utilisateur.clear(duree);
-    await utilisateur.type(duree, '31');
-    expect(screen.getAllByText('estimé')).toHaveLength(2);
-    await utilisateur.type(screen.getByLabelText(/Loyer visé/), '-5');
-    await utilisateur.clear(screen.getByLabelText(/^Apport/));
-    await utilisateur.type(screen.getByLabelText(/^Apport/), 'abc');
-    await utilisateur.click(screen.getByRole('button', { name: /Créer le projet/ }));
-    expect(screen.getByText('Entre 1 et 30 ans.')).toBeInTheDocument();
-    expect(screen.getByText('Un montant positif, ou rien.')).toBeInTheDocument();
-    expect(screen.getByText('Nombre attendu.')).toBeInTheDocument();
-    expect(lireProjets(window.localStorage)).toHaveLength(1);
-    // Vidé, un champ facultatif revient au défaut sans erreur.
-    await utilisateur.clear(duree);
-    await utilisateur.clear(screen.getByLabelText(/Loyer visé/));
-    await utilisateur.clear(screen.getByLabelText(/^Apport/));
-    await utilisateur.click(screen.getByRole('button', { name: /Créer le projet/ }));
-    expect(screen.queryByText('Entre 1 et 30 ans.')).not.toBeInTheDocument();
-    expect(screen.queryByText('Nombre attendu.')).not.toBeInTheDocument();
-  });
+  it(
+    'une durée hors bornes est signalée dans son groupe rouvert ; les montants ne prennent que des chiffres',
+    { timeout: 30_000 },
+    async () => {
+      const utilisateur = userEvent.setup();
+      render(<AppEnMemoire chemin="/projets/nouveau" />);
+      await screen.findByRole('heading', { name: /Colle le lien/ });
+      await utilisateur.click(screen.getByRole('button', { name: /je saisis à la main/ }));
+      await ouvrirGroupe(utilisateur, ESTIMES);
+      await utilisateur.click(radioDans('Durée du prêt', 'Autre'));
+      const annees = screen.getByLabelText("Nombre d'années");
+      expect(annees).toHaveValue('25');
+      await utilisateur.clear(annees);
+      await utilisateur.type(annees, '31');
+      expect(screen.getAllByText('estimé')).toHaveLength(2);
+
+      await utilisateur.type(screen.getByLabelText(/Loyer visé/), '-5');
+      expect(screen.getByLabelText(/Loyer visé/)).toHaveValue('5');
+      await utilisateur.clear(screen.getByLabelText(/^Apport/));
+      await utilisateur.type(screen.getByLabelText(/^Apport/), 'abc');
+      expect(screen.getByLabelText(/^Apport/)).toHaveValue('');
+
+      // Groupe replié : l'erreur le rouvre et y place le focus (après les champs exigés remplis).
+      await utilisateur.type(screen.getByLabelText(/Prix affiché/), '120000');
+      await utilisateur.type(screen.getByLabelText(/^Surface/), '40');
+      await saisirCommune(utilisateur, '69003 Lyon');
+      await utilisateur.click(screen.getByRole('button', { name: ESTIMES }));
+      expect(screen.queryByLabelText("Nombre d'années")).not.toBeInTheDocument();
+      await utilisateur.click(screen.getByRole('button', { name: /Créer le projet/ }));
+      expect(screen.getByText('Entre 1 et 30 ans.')).toBeInTheDocument();
+      expect(screen.getByLabelText("Nombre d'années")).toHaveFocus();
+      expect(lireProjets(window.localStorage)).toHaveLength(1);
+
+      // Vidée, la durée revient au défaut sans erreur.
+      await utilisateur.clear(screen.getByLabelText("Nombre d'années"));
+      await utilisateur.clear(screen.getByLabelText(/Loyer visé/));
+      await utilisateur.click(screen.getByRole('button', { name: /Créer le projet/ }));
+      expect(screen.queryByText('Entre 1 et 30 ans.')).not.toBeInTheDocument();
+    },
+  );
 
   it(
-    'accepte les décimales à la française et les choix (nu, TMI, ascenseur, DPE)',
+    'accepte les décimales à la française et les choix (nu, tranche, ascenseur, DPE, durée, apport)',
     { timeout: 30_000 },
     async () => {
       const utilisateur = userEvent.setup();
@@ -222,17 +250,17 @@ describe('Nouveau projet — à la main', () => {
       await utilisateur.click(screen.getByRole('button', { name: /je saisis à la main/ }));
       await utilisateur.type(screen.getByLabelText(/Prix affiché/), '98 500');
       await utilisateur.type(screen.getByLabelText(/Surface/), '32,5');
-      await utilisateur.type(screen.getByLabelText(/Code postal/), '20000');
-      await utilisateur.type(screen.getByLabelText(/^Ville/), 'Ajaccio');
+      await saisirCommune(utilisateur, '20000 Ajaccio');
       await utilisateur.click(screen.getByRole('radio', { name: 'Nue' }));
-      await utilisateur.selectOptions(screen.getByLabelText(/Tranche/), '0.11');
-      await utilisateur.selectOptions(screen.getByLabelText(/Ascenseur/), 'oui');
-      await utilisateur.selectOptions(screen.getByLabelText(/^DPE/), 'E');
       await utilisateur.type(screen.getByLabelText(/Loyer visé/), '520');
-      await utilisateur.clear(screen.getByLabelText(/^Apport/));
-      await utilisateur.type(screen.getByLabelText(/^Apport/), '0');
-      await utilisateur.clear(screen.getByLabelText(/Durée du prêt/));
-      await utilisateur.type(screen.getByLabelText(/Durée du prêt/), '20');
+
+      await ouvrirGroupe(utilisateur, ESTIMES);
+      await utilisateur.click(radioDans("Tranche d'imposition", '11 %'));
+      await utilisateur.click(radioDans('Durée du prêt', '20 ans'));
+      await utilisateur.click(radioDans('Part du coût total', '0 %'));
+      await ouvrirGroupe(utilisateur, PRECISER);
+      await utilisateur.click(radioDans('Ascenseur', 'Oui'));
+      await utilisateur.click(radioDans('DPE', 'E'));
       await utilisateur.click(screen.getByRole('button', { name: /Créer le projet/ }));
       await screen.findByRole(
         'heading',
@@ -246,7 +274,7 @@ describe('Nouveau projet — à la main', () => {
       expect(p?.bien.dpe).toBe('E');
       expect(p?.hypotheses.fiscalite.tmi).toBe(0.11);
       expect(p?.hypotheses.fiscalite.regime).toBe('nu_reel');
-      expect(p?.hypotheses.pret.tauxNominal).toBe(0.0327);
+      expect(p?.hypotheses.pret).toMatchObject({ tauxNominal: 0.0327, dureeAnnees: 20, apport: 0 });
       expect(p?.source).toBeUndefined();
     },
   );

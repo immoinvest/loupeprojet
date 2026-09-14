@@ -5,6 +5,8 @@ import { describe, expect, it } from 'vitest';
 import { AppEnMemoire } from '@/App';
 import { CLE_STOCKAGE, lireProjets } from '@/stockage/projets';
 
+import { saisirApport, saisirCommune } from './aides-verifier';
+
 const n = (s: string | null): string => (s ?? '').replace(/\s/g, ' ');
 
 async function ouvrirExemple(): Promise<string> {
@@ -47,11 +49,9 @@ describe('Mes projets', () => {
     await utilisateur.click(screen.getByRole('button', { name: /je saisis à la main/ }));
     await utilisateur.type(screen.getByLabelText(/Prix affiché/), '120000');
     await utilisateur.type(screen.getByLabelText(/Surface/), '40');
-    await utilisateur.type(screen.getByLabelText(/Code postal/), '69003');
-    await utilisateur.type(screen.getByLabelText(/^Ville/), 'Lyon');
+    await saisirCommune(utilisateur, '69003 Lyon');
     await utilisateur.type(screen.getByLabelText(/Loyer visé/), '700');
-    await utilisateur.clear(screen.getByLabelText(/^Apport/));
-    await utilisateur.type(screen.getByLabelText(/^Apport/), '10000');
+    await saisirApport(utilisateur, '10000');
     await utilisateur.click(screen.getByRole('button', { name: /Créer le projet/ }));
     expect(
       await screen.findByRole(

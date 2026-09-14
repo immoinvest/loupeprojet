@@ -6,6 +6,8 @@ import { AppEnMemoire } from '@/App';
 import { clientHorsLigne, type ClientWorker, type Resultat } from '@/enrichissement';
 import { lireProjets } from '@/stockage/projets';
 
+import { LUS, ouvrirGroupe } from './aides-verifier';
+
 const ANNONCE = `Appartement T3 de 65 m² à Marseille 5e (13005), quartier Baille.
 Au 3e étage sans ascenseur d'un immeuble construit en 1962. Prix : 155 000 €. DPE : D.`;
 
@@ -66,7 +68,8 @@ describe('Nouveau projet — avec le Worker', () => {
       await screen.findByRole('heading', { name: /Vérifiez, corrigez/ });
 
       // « Marseille » et 150 € de charges : les valeurs du modèle, pas celles des règles.
-      expect(screen.getByLabelText(/^Ville/)).toHaveValue('Marseille');
+      await ouvrirGroupe(utilisateur, LUS);
+      expect(screen.getByRole('combobox', { name: 'Commune' })).toHaveValue('13005 Marseille');
       expect(screen.getByLabelText(/Charges de copropriété/)).toHaveValue('150');
       expect(screen.getByLabelText(/Taxe foncière/)).toHaveValue('980');
 

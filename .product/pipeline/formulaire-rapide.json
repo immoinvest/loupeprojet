@@ -20,7 +20,12 @@
       "status": "completed",
       "output": ".product/architecture/formulaire-rapide.md"
     },
-    "implement": { "status": "in_progress", "stories_completed": 0, "stories_total": 8 },
+    "implement": {
+      "status": "in_progress",
+      "stories_completed": 5,
+      "stories_total": 8,
+      "note": "US-1 Worker communes, US-2 client, US-3 commandes, US-4 Combobox et Commune, US-5 glossaire commités ; US-6 à US-8 (formulaire, strict minimum, tests) en cours"
+    },
     "qa_tests": { "status": "pending" },
     "security": { "status": "pending" },
     "push": { "status": "pending" }

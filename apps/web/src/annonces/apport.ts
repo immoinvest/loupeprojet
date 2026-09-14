@@ -16,9 +16,14 @@ export function coutTotalDuProjet(projet: ProjetEntree): number | null {
   }).coutTotalProjet;
 }
 
+/** Une part du coût total (0,2 pour 20 %), arrondie à la centaine d'euros. */
+export function apportPourPart(coutTotal: number, part: number): number {
+  return Math.round((coutTotal * part) / ARRONDI_APPORT) * ARRONDI_APPORT;
+}
+
 /** L'apport par défaut d'un coût total : 10 %, arrondi à la centaine d'euros. */
 export function apportParDefaut(coutTotal: number): number {
-  return Math.round((coutTotal * PART_APPORT_DEFAUT) / ARRONDI_APPORT) * ARRONDI_APPORT;
+  return apportPourPart(coutTotal, PART_APPORT_DEFAUT);
 }
 
 /** Part de l'apport dans le coût total ; `null` sans coût total positif. */
