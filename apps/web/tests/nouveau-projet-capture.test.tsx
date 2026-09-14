@@ -59,6 +59,7 @@ describe('Nouveau projet — depuis l’extension', () => {
       expect(screen.getByLabelText(/honoraires d'agence/)).toHaveValue('7000');
 
       await utilisateur.type(screen.getByLabelText(/Loyer visé/), '980');
+      await utilisateur.clear(screen.getByLabelText(/^Apport/));
       await utilisateur.type(screen.getByLabelText(/^Apport/), '15000');
       await utilisateur.click(screen.getByRole('button', { name: /Créer le projet/ }));
 

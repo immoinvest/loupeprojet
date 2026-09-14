@@ -8,6 +8,7 @@ import { TYPES_LOCATION } from '@/textes/regimes';
 import { Champ } from './formulaire/Champ';
 import { EstimerLoyer, type CleLoyerEstime } from './formulaire/EstimerLoyer';
 import {
+  apercuApport,
   nombre,
   valider,
   versSaisie,
@@ -86,6 +87,7 @@ export function FormulaireProjet({
     setProvenance((prev) => ({ ...prev, [cle]: 'estime' }));
   };
   const mode = valeurs.mode as ModeLocation;
+  const apport = apercuApport(valeurs, provenance);
   const changerMode = (m: ModeLocation): void => {
     changer('mode', m);
     // En colocation, les chambres du bien sont une bonne première valeur des chambres louées.
@@ -224,7 +226,16 @@ export function FormulaireProjet({
         <h2 className="m-0 font-display text-[22px] font-semibold">Vous</h2>
         <p className="m-0 text-sm text-encre-2">{INDICATIONS.vous}</p>
         <div className={GRILLE}>
-          <Champ cle="apport" libelle="Apport" unite="€" aToi erreur={erreurs.apport} {...c} />
+          <Champ
+            cle="apport"
+            libelle="Apport"
+            unite="€"
+            aToi
+            erreur={erreurs.apport}
+            indication={apport.indication}
+            {...c}
+            valeurs={{ ...valeurs, apport: apport.texte }}
+          />
           <Champ
             cle="dureeAnnees"
             libelle="Durée du prêt"

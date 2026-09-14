@@ -314,6 +314,7 @@ describe('Formulaire Vérifier : estimer le loyer', () => {
       { codeInsee: '13055', codePostal: '13005', type: 'maison', pieces: 3 },
     ]);
 
+    await u.clear(champ(container, 'apport'));
     await u.type(champ(container, 'apport'), '10000');
     await u.click(screen.getByRole('button', { name: /Créer le projet/ }));
     const saisie = onCreer.mock.calls[0]?.[0];

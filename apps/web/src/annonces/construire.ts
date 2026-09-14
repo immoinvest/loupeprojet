@@ -12,6 +12,7 @@ import {
 
 import type { MarcheEnrichi } from '@/enrichissement/marche';
 
+import { apportParDefaut, coutTotalDuProjet } from './apport';
 import { construireLocation, loyerRetenu } from './location-saisie';
 import type { AnnonceResolue } from './resoudre';
 
@@ -70,8 +71,6 @@ const CFE_DEFAUT = 180;
 const FRAIS_DOSSIER_DEFAUT = 850;
 const FRAIS_GARANTIE_DEFAUT = 1_500;
 const MOBILIER_PAR_M2 = 75;
-/** Sans apport indiqué : aucun (le plus fréquent pour un premier achat locatif financé à 110 %). */
-export const APPORT_DEFAUT = 0;
 /** Sans durée indiquée : la durée maximale HCSF, celle du meilleur cash-flow. */
 export const DUREE_DEFAUT_ANNEES = 25;
 /** Taxe foncière estimée quand ni elle ni le loyer ne sont connus : ordre de grandeur, par m² et par an. */
@@ -102,17 +101,29 @@ export function nomDuProjet(s: SaisieProjet): string {
 /**
  * Assemble un projet à partir de la saisie vérifiée, avec des défauts sourcés et, quand le Worker a
  * répondu, les données de marché de la commune. Sans loyer connu, le projet n'en porte pas : le
- * rapport le demandera.
+ * rapport le demandera. Sans apport indiqué : 10 % du coût total, qui ne dépend pas de l'apport.
  */
 export function construireProjet(
   s: SaisieProjet,
   id: string,
   enrichi: MarcheEnrichi | null = null,
 ): ProjetEntree {
+  const projet = assembler(s, id, enrichi, s.apport ?? 0);
+  if (s.apport !== undefined) return projet;
+  const apport = apportParDefaut(coutTotalDuProjet(projet) ?? 0);
+  const { hypotheses } = projet;
+  return { ...projet, hypotheses: { ...hypotheses, pret: { ...hypotheses.pret, apport } } };
+}
+
+function assembler(
+  s: SaisieProjet,
+  id: string,
+  enrichi: MarcheEnrichi | null,
+  apport: number,
+): ProjetEntree {
   const meuble = estModeMeuble(s.mode);
   const regime = meuble ? 'lmnp_reel' : 'nu_reel';
   const loyer = loyerRetenu(s, enrichi);
-  const apport = s.apport ?? APPORT_DEFAUT;
   const dureeAnnees = s.dureeAnnees ?? DUREE_DEFAUT_ANNEES;
   const tmi = s.tmi ?? TMI_PAR_DEFAUT;
   const taxeFonciere =
