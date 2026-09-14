@@ -1,5 +1,5 @@
+export { PART_APPORT_DEFAUT, apportParDefaut, coutTotalDuProjet, partDuCoutTotal } from './apport';
 export {
-  APPORT_DEFAUT,
   DUREE_DEFAUT_ANNEES,
   TAXE_FONCIERE_PAR_M2_AN,
   construireProjet,

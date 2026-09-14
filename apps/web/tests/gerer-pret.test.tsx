@@ -1,6 +1,6 @@
 import { PREFERENCES_PAR_DEFAUT } from '@loupe/gestion';
 import { LocationSchema } from '@loupe/moteur';
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -64,8 +64,8 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
-describe('porte « J’ai acheté ce bien »', () => {
-  it('deux clics depuis le projet : le bien, la location et l’instantané de l’analyse ; projet « Acheté »', async () => {
+describe('porte ouverte par le statut « Acheté »', () => {
+  it('deux gestes depuis le projet : le bien, la location et l’instantané de l’analyse ; projet « Acheté »', async () => {
     const utilisateur = userEvent.setup();
     let clics = 0;
     const cliquer = async (element: HTMLElement): Promise<void> => {
@@ -74,9 +74,24 @@ describe('porte « J’ai acheté ce bien »', () => {
     };
     const id = enregistrerProjet();
     const gestion = clientGestionMemoire();
-    monter(`/projets/${id}`, gestion);
+    const { unmount } = render(
+      <AppEnMemoire
+        chemin={`/projets/${id}`}
+        compte={clientMemoire({ utilisateur: CAMILLE })}
+        gestion={gestion}
+      />,
+    );
 
-    await cliquer(await screen.findByRole('button', { name: TEXTES_PRET.jaiAchete }));
+    // Le compte est lu : sans quoi le statut ne saurait pas encore qu'il peut ouvrir Gérer.
+    await waitFor(
+      () => {
+        expect(gestion.appels).toContain('etat');
+      },
+      { timeout: 5_000 },
+    );
+    await act(() => new Promise((fin) => setTimeout(fin, 0)));
+    clics += 1;
+    await utilisateur.selectOptions(await screen.findByLabelText('Statut du projet'), 'achete');
     expect(
       await screen.findByRole('heading', { level: 1, name: TEXTES_PRET.titre }),
     ).toBeInTheDocument();
@@ -113,6 +128,18 @@ describe('porte « J’ai acheté ce bien »', () => {
       expect.objectContaining({ debut: '2026-10-01', jourLoyer: 5 }),
     ]);
     expect(lireProjets(window.localStorage)[0]?.statut).toBe('achete');
+
+    // De retour sur le projet : le bien est géré, plus de lien vers la porte.
+    unmount();
+    monter(`/projets/${id}`, gestion);
+    expect(await screen.findByRole('button', { name: 'PDF' })).toBeInTheDocument();
+    // Le compte se relit à la remontée : sous charge, plus d'une seconde.
+    await waitFor(
+      () => {
+        expect(screen.queryByRole('link', { name: TEXTES_PRET.gererCeBien })).toBeNull();
+      },
+      { timeout: 5_000 },
+    );
   });
 
   it('« Pas encore loué » : un bien vacant, en deux clics aussi', async () => {
@@ -200,8 +227,16 @@ describe('porte « J’ai acheté ce bien »', () => {
     ).toBeInTheDocument();
   });
 
-  it('le bouton du projet disparaît dès que les préférences du compte masquent Gérer', async () => {
+  it('l’en-tête ne propose plus « J’ai acheté ce bien » : Partager est l’action principale', async () => {
     const id = enregistrerProjet();
+    monter(`/projets/${id}`, clientGestionMemoire());
+    expect(await screen.findByRole('button', { name: 'Partager' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /acheté ce bien/ })).toBeNull();
+    expect(screen.queryByRole('link', { name: TEXTES_PRET.gererCeBien })).toBeNull();
+  });
+
+  it('le lien « Gérer ce bien » disparaît dès que les préférences du compte masquent Gérer', async () => {
+    const id = enregistrerProjet('achete');
     monter(
       `/projets/${id}`,
       clientGestionMemoire({
@@ -209,20 +244,38 @@ describe('porte « J’ai acheté ce bien »', () => {
       }),
     );
     expect(await screen.findByRole('button', { name: 'PDF' })).toBeInTheDocument();
-    // Avant la lecture du compte (première visite, rien en mémoire locale), les deux sections sont
-    // affichées ; le bouton disparaît quand les préférences arrivent. S'il ne disparaît jamais, échec.
-    await waitFor(() => {
-      expect(screen.queryByRole('button', { name: TEXTES_PRET.jaiAchete })).toBeNull();
-    });
+    // Avant la lecture du compte, les deux sections sont affichées ; le lien disparaît quand les
+    // préférences arrivent. S'il ne disparaît jamais, échec.
+    await waitFor(
+      () => {
+        expect(screen.queryByRole('link', { name: TEXTES_PRET.gererCeBien })).toBeNull();
+      },
+      { timeout: 5_000 },
+    );
   });
 
-  it('un projet déjà acheté ne propose plus le bouton', async () => {
+  it('sans compte, « Acheté » reste sur le projet et propose le lien vers Gérer', async () => {
+    const utilisateur = userEvent.setup();
+    const id = enregistrerProjet();
+    monter(`/projets/${id}`, clientGestionMemoire(), clientMemoire());
+    await utilisateur.selectOptions(await screen.findByLabelText('Statut du projet'), 'achete');
+    expect(lireProjets(window.localStorage)[0]?.statut).toBe('achete');
+    expect(screen.getByRole('button', { name: 'PDF' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: TEXTES_PRET.gererCeBien })).toHaveAttribute(
+      'href',
+      `/gerer/pret/${id}`,
+    );
+  });
+
+  it('un projet acheté, compte prêt, sans bien géré : le lien mène à la porte', async () => {
     const id = enregistrerProjet('achete');
     monter(
       `/projets/${id}`,
       clientGestionMemoire({ etat: { ...ETAT_GESTION_VIDE, preferences: PREFERENCES_PAR_DEFAUT } }),
     );
-    expect(await screen.findByRole('button', { name: 'PDF' })).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: TEXTES_PRET.jaiAchete })).toBeNull();
+    expect(await screen.findByRole('link', { name: TEXTES_PRET.gererCeBien })).toHaveAttribute(
+      'href',
+      `/gerer/pret/${id}`,
+    );
   });
 });

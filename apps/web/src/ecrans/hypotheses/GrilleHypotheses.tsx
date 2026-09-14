@@ -72,6 +72,7 @@ export function useSaisieHypotheses(): SaisieHypotheses {
       texte={textes[d.chemin] ?? versTexte(valeurActuelle(projet, d), d.type)}
       erreur={erreurs[d.chemin]}
       badge={badgePour(projet, d)}
+      aide={d.aideSelon?.(projet) ?? d.aide}
       onChange={(t) => {
         changer(d, t);
       }}

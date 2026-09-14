@@ -6,7 +6,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { AppEnMemoire } from '@/App';
 import { decoderPartage, encoderPartage, lienPartage, lireFragment } from '@/stockage/partage';
 import { creerProjet, ecrireProjets, lireProjets, type ProjetEnregistre } from '@/stockage/projets';
-import { AVERTISSEMENT_PARTAGE, RAISONS_PARTAGE } from '@/textes/partage';
+import { AVERTISSEMENT_PARTAGE, RAISONS_PARTAGE, TEXTES_PARTAGE_PROJET } from '@/textes/partage';
 
 const DATE = '2026-09-13T10:00:00.000Z';
 
@@ -253,6 +253,26 @@ describe('Bouton Partager', () => {
     await utilisateur.click(screen.getByRole('button', { name: 'Partager' }));
     const champ = await screen.findByLabelText<HTMLInputElement>('Lien de partage');
     expect(champ.value).toContain('/partage#p=');
-    expect(screen.getByRole('button', { name: 'Partager' })).toBeInTheDocument();
+    expect(await screen.findByRole('status')).toHaveTextContent(TEXTES_PARTAGE_PROJET.copieRefusee);
+    expect(screen.getByRole('button', { name: 'Copier le lien' })).toBeInTheDocument();
+  });
+
+  it('la boîte se referme par Échap, rend le focus au bouton, et par le bouton Fermer', async () => {
+    const id = amorcer();
+    const utilisateur = userEvent.setup();
+    render(<AppEnMemoire chemin={`/projets/${id}`} />);
+    await screen.findByRole('heading', { name: /Le prix est bon/ });
+    const bouton = screen.getByRole('button', { name: 'Partager' });
+
+    await utilisateur.click(bouton);
+    expect(bouton).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByLabelText('Lien de partage')).toHaveFocus();
+    await utilisateur.keyboard('{Escape}');
+    expect(screen.queryByRole('dialog')).toBeNull();
+    expect(bouton).toHaveFocus();
+
+    await utilisateur.click(bouton);
+    await utilisateur.click(screen.getByRole('button', { name: 'Fermer' }));
+    expect(screen.queryByRole('dialog')).toBeNull();
   });
 });
