@@ -174,7 +174,7 @@ export function explicationFiscalite(r: Resultats): string {
     retenu.impotTotal === 0
       ? `Sur ${n} ans, le ${regime(r)} ne coûte aucun impôt.`
       : `Sur ${n} ans, le ${regime(r)} coûte ${euros(retenu.impotTotal)} d'impôt.`;
-  return `${total} ${explicationRegime(retenu, r.projet.hypotheses.revente.annees)} ${autres.length === 1 ? "L'autre régime possible est le" : `Le moins cher des ${autres.length === 3 ? 'trois' : String(autres.length)} autres régimes est le`} ${enMinuscule(REGIMES[moinsCher.regime])} (${euros(moinsCher.impotTotal)}) ; l'onglet Fiscalité les compare année par année.`;
+  return `${total} ${explicationRegime(retenu, r.projet.hypotheses.revente.annees)} ${autres.length === 1 ? "L'autre régime possible est le" : 'Le moins cher des trois autres régimes est le'} ${enMinuscule(REGIMES[moinsCher.regime])} (${euros(moinsCher.impotTotal)}) ; l'onglet Fiscalité les compare année par année.`;
 }
 
 export function explicationRevente(r: Resultats): string {
