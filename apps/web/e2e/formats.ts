@@ -229,7 +229,6 @@ export function ecransDeReference({
       },
     },
     { nom: 'Comparer', chemin: '/comparer' },
-    { nom: 'Méthode', chemin: '/methode' },
     { nom: 'Extension', chemin: '/extension' },
     { nom: 'Simulateur de prêt', chemin: '/simulateur-pret' },
     { nom: 'Simulation imprimée', chemin: '/simulateur-pret/imprimer' },

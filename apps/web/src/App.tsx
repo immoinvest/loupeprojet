@@ -29,7 +29,6 @@ import { PretAGerer } from './ecrans/gerer/PretAGerer';
 import { Hypotheses } from './ecrans/Hypotheses';
 import { Imprimer } from './ecrans/Imprimer';
 import { MesProjets } from './ecrans/MesProjets';
-import { Methode } from './ecrans/Methode';
 import { NouveauProjet } from './ecrans/NouveauProjet';
 import { Partage } from './ecrans/Partage';
 import { Rapport } from './ecrans/Rapport';
@@ -71,7 +70,6 @@ export const routes: RouteObject[] = [
       { path: 'partage', element: <Partage /> },
       { path: 'comparer', element: <Comparer /> },
       { path: 'simulateur-pret', element: <SimulateurPret /> },
-      { path: 'methode', element: <Methode /> },
       { path: 'extension', element: <Extension /> },
       {
         path: '*',
