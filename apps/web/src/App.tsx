@@ -1,10 +1,12 @@
 import type { JSX } from 'react';
 import { BrowserRouter, MemoryRouter, Navigate, useRoutes, type RouteObject } from 'react-router';
 
+import { creerSuiviInstallation, suiviIndisponible, type SuiviInstallation } from '@/application';
 import { clientHorsLigne, clientWorker, urlWorker, type ClientWorker } from '@/enrichissement';
 
 import { AppLayout } from './coque/AppLayout';
 import { ClientWorkerProvider } from './coque/ClientWorker';
+import { InstallationProvider } from './coque/Installation';
 import { ProjetLayout } from './coque/ProjetLayout';
 import { Bientot } from './ecrans/Bientot';
 import { Comparer } from './ecrans/Comparer';
@@ -67,34 +69,43 @@ const CLIENT_WORKER = clientWorker(urlWorker(import.meta.env.VITE_WORKER_URL), (
   fetch(url, init),
 );
 
+/** Invite d'installation et mode application, écoutés dès le chargement, avant le premier rendu. */
+const SUIVI_INSTALLATION = creerSuiviInstallation(window);
+
 export function App(): JSX.Element {
   return (
     <ProjetsProvider>
       <ClientWorkerProvider client={CLIENT_WORKER}>
-        <BrowserRouter>
-          <Racine />
-        </BrowserRouter>
+        <InstallationProvider suivi={SUIVI_INSTALLATION}>
+          <BrowserRouter>
+            <Racine />
+          </BrowserRouter>
+        </InstallationProvider>
       </ClientWorkerProvider>
     </ProjetsProvider>
   );
 }
 
-/** Pour les tests : même arbre de routes, en mémoire, hors ligne sauf client fourni. */
+/** Pour les tests : même arbre de routes, en mémoire, hors ligne et sans installation, sauf fournis. */
 export function AppEnMemoire({
   chemin = '/',
   stockage,
   client = clientHorsLigne,
+  installation = suiviIndisponible,
 }: {
   chemin?: string;
   stockage?: Storage;
   client?: ClientWorker;
+  installation?: SuiviInstallation;
 }): JSX.Element {
   return (
     <ProjetsProvider stockage={stockage}>
       <ClientWorkerProvider client={client}>
-        <MemoryRouter initialEntries={[chemin]}>
-          <Racine />
-        </MemoryRouter>
+        <InstallationProvider suivi={installation}>
+          <MemoryRouter initialEntries={[chemin]}>
+            <Racine />
+          </MemoryRouter>
+        </InstallationProvider>
       </ClientWorkerProvider>
     </ProjetsProvider>
   );

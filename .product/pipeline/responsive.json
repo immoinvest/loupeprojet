@@ -41,7 +41,9 @@
         { "etape": "refactor Rapport (300 lignes)", "hash": "e2fb7bf" },
         { "etape": "US-3a", "hash": "61b4539", "tests": 645, "fichiers_de_test": 91 },
         { "etape": "US-3b", "hash": "2619e1f", "tests": 645, "fichiers_de_test": 91 },
-        { "etape": "US-4", "hash": "097ab49", "tests": 645, "fichiers_de_test": 91 }
+        { "etape": "US-4", "hash": "097ab49", "tests": 645, "fichiers_de_test": 91 },
+        { "etape": "US-4 (cibles restantes)", "hash": "7cac872" },
+        { "etape": "US-10", "hash": "e0b3a4c", "e2e": 36, "duree_e2e_locale_s": 72 }
       ],
       "notes": [
         "Audit temporaire déplacé dans le scratchpad ; il devient e2e/formats.ts et responsive.spec.ts en US-10",

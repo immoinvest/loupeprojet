@@ -15,7 +15,7 @@ export default defineConfig({
         'apps/extension/src/**': { lines: 100, functions: 100, branches: 100, statements: 100 },
         'apps/worker/src/**': { lines: 100, functions: 100, branches: 100, statements: 100 },
         'data/src/**': { lines: 100, functions: 100, branches: 100, statements: 100 },
-        'apps/web/src/{stockage,formatage,textes,annonces,hypotheses,analyses,bookmarklet,enrichissement}/**':
+        'apps/web/src/{stockage,formatage,textes,annonces,hypotheses,analyses,bookmarklet,enrichissement,application}/**':
           {
             lines: 100,
             functions: 100,

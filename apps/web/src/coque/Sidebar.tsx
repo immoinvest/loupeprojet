@@ -1,5 +1,5 @@
 import { calculerProjet } from '@loupe/moteur';
-import { Columns2, Info, Plus, Puzzle, Settings, X } from 'lucide-react';
+import { Columns2, Download, Info, Plus, Puzzle, Settings, X } from 'lucide-react';
 import { useEffect, useRef, type JSX } from 'react';
 import { NavLink, useNavigate } from 'react-router';
 
@@ -7,6 +7,9 @@ import { Point } from '@/composants/ui';
 import { LogotypeDeklic } from '@/marque/Logo';
 import { useProjets } from '@/stockage/ProjetsContext';
 import type { ProjetEnregistre } from '@/stockage/projets';
+import { TEXTES_INSTALLATION } from '@/textes/application';
+
+import { useInstallation } from './Installation';
 
 /** Identifiant de la navigation principale, visé par le bouton de menu (`aria-controls`). */
 export const ID_NAVIGATION = 'navigation-principale';
@@ -42,6 +45,7 @@ export function Sidebar({
 }): JSX.Element {
   const { projets } = useProjets();
   const naviguer = useNavigate();
+  const installation = useInstallation();
   const fermerRef = useRef<HTMLButtonElement>(null);
 
   // À l'ouverture du tiroir, le focus entre dedans.
@@ -114,17 +118,32 @@ export function Sidebar({
 
       <div className="flex-1" />
 
-      <div className="flex items-center gap-3 border-t border-bordure px-2.5 pt-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent-doux font-display text-[15px] font-bold text-accent">
-          ?
+      <div className="flex flex-col gap-3 border-t border-bordure pt-3">
+        {/* Seulement quand le navigateur propose l'installation (Chrome, Edge, Android). */}
+        {installation.etat === 'disponible' && (
+          <button
+            type="button"
+            onClick={() => {
+              void installation.installer();
+            }}
+            className="flex min-h-[44px] items-center justify-center gap-2 rounded-encart border border-accent-bordure bg-accent-fond px-3.5 text-[15px] font-semibold text-accent hover:bg-accent-doux"
+          >
+            <Download size={18} aria-hidden="true" />
+            {TEXTES_INSTALLATION.bouton}
+          </button>
+        )}
+        <div className="flex items-center gap-3 px-2.5">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent-doux font-display text-[15px] font-bold text-accent">
+            ?
+          </div>
+          <div className="flex flex-1 flex-col">
+            <span className="text-[15px] font-bold">Sans compte</span>
+            <span className="text-xs text-encre-3">
+              Gratuit · {projets.length} {projets.length > 1 ? 'projets' : 'projet'}
+            </span>
+          </div>
+          <Settings size={18} className="text-encre-3" aria-hidden="true" />
         </div>
-        <div className="flex flex-1 flex-col">
-          <span className="text-[15px] font-bold">Sans compte</span>
-          <span className="text-xs text-encre-3">
-            Gratuit · {projets.length} {projets.length > 1 ? 'projets' : 'projet'}
-          </span>
-        </div>
-        <Settings size={18} className="text-encre-3" aria-hidden="true" />
       </div>
     </aside>
   );
