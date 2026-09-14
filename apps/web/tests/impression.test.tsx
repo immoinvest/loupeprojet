@@ -84,6 +84,49 @@ describe('Impression', () => {
     ).toBeInTheDocument();
   });
 
+  it('visite faite avec des réponses : le quatrième volet devient le compte rendu, en lecture', async () => {
+    const p = creerProjet({
+      nom: 'T3 · 65 m² · Marseille 5e',
+      genererId: () => 'visite',
+      visite: {
+        faite: true,
+        date: '2026-09-14T10:00:00.000Z',
+        reponses: { DOC_TAXE_FONCIERE: { etat: 'probleme', note: 'avis 2025 : 1 320 €' } },
+      },
+    });
+    ecrireProjets(window.localStorage, [p]);
+    render(<AppEnMemoire chemin={`/projets/${p.id}/imprimer`} />);
+    await screen.findByText(/dossier d'analyse locative/);
+    expect(
+      screen.getByRole('heading', { level: 1, name: 'Compte rendu de visite' }),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/4 · Compte rendu de visite ·/)).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Préparer la visite' })).not.toBeInTheDocument();
+    expect(document.querySelectorAll('.document-volet')).toHaveLength(3);
+    expect(screen.getByText('avis 2025 : 1 320 €')).toBeInTheDocument();
+    expect(screen.queryAllByRole('radio')).toHaveLength(0);
+    expect(screen.queryByRole('button', { name: 'Rouvrir la visite' })).not.toBeInTheDocument();
+    // Le Rapport imprimé dit l'état de la visite en texte, sans lien.
+    expect(screen.getByText(/Visite faite le 14 sept\. 2026 · 1 problème/)).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /Visite faite/ })).not.toBeInTheDocument();
+  });
+
+  it('visite faite sans réponse : le dossier n’a que trois volets', async () => {
+    const p = creerProjet({
+      nom: 'T3 · 65 m² · Marseille 5e',
+      genererId: () => 'sans-visite',
+      visite: { faite: true, date: '2026-09-14T10:00:00.000Z', reponses: {} },
+    });
+    ecrireProjets(window.localStorage, [p]);
+    render(<AppEnMemoire chemin={`/projets/${p.id}/imprimer`} />);
+    await screen.findByText(/dossier d'analyse locative/);
+    expect(document.querySelectorAll('.document-volet')).toHaveLength(2);
+    expect(
+      screen.queryByRole('heading', { name: 'Compte rendu de visite' }),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Préparer la visite' })).not.toBeInTheDocument();
+  });
+
   it('un identifiant inconnu donne « Projet introuvable »', async () => {
     render(<AppEnMemoire chemin="/projets/inconnu/imprimer" />);
     expect(await screen.findByRole('heading', { name: 'Projet introuvable' })).toBeInTheDocument();

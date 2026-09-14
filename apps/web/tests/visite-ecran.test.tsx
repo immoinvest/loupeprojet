@@ -195,3 +195,53 @@ describe('Écran Visite', () => {
     expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
   });
 });
+
+describe('Rapport : carte « Avant de faire une offre »', () => {
+  it('liste les points financiers et mène à la visite, puis au compte rendu', async () => {
+    const id = amorcer();
+    const utilisateur = userEvent.setup();
+    render(<AppEnMemoire chemin={`/projets/${id}`} />);
+    await screen.findByRole('heading', { level: 1, name: /Le prix est bon/ });
+    expect(
+      screen.getByRole('heading', { level: 2, name: 'Avant de faire une offre' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Prélèvements sociaux du meublé à 18,6 % : taux à confirmer/),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/Demander les trois derniers PV/)).not.toBeInTheDocument();
+
+    const lien = screen.getByRole('link', { name: `Préparer la visite : ${String(N)} questions` });
+    await utilisateur.click(lien);
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Préparer la visite' }),
+    ).toBeInTheDocument();
+    await utilisateur.click(screen.getAllByRole('radio', { name: 'Problème' })[0]!);
+    await utilisateur.click(screen.getByRole('button', { name: 'Marquer la visite comme faite' }));
+    await screen.findByRole('heading', { level: 1, name: /Le prix est bon/ });
+    expect(
+      screen.getByRole('link', { name: /Visite faite le .* · 1 problème/ }),
+    ).toBeInTheDocument();
+  });
+
+  it('dit qu’il n’y a rien à régler quand le projet n’a aucun point financier', async () => {
+    const p = creerProjet({
+      nom: 'Nu',
+      genererId: () => 'nu',
+      source: {
+        ...projetExemple,
+        hypotheses: {
+          ...projetExemple.hypotheses,
+          location: { mode: 'nu', loyerHc: 850 },
+          fiscalite: { tmi: 0.3, regime: 'nu_reel' },
+        },
+      },
+    });
+    ecrireProjets(window.localStorage, [p]);
+    render(<AppEnMemoire chemin={`/projets/${p.id}`} />);
+    await screen.findByRole('heading', { level: 2, name: 'Avant de faire une offre' });
+    expect(screen.getByText(/Rien à régler côté banque ni fiscalité/)).toBeInTheDocument();
+    expect(
+      screen.getByRole('link', { name: /Préparer la visite : \d+ questions/ }),
+    ).toBeInTheDocument();
+  });
+});

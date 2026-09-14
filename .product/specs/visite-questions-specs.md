@@ -205,7 +205,8 @@ Scénario: Rapport
   Étant donné une visite faite avec 2 problèmes
   Alors le lien dit « Visite faite le 14 sept. 2026 · 2 problèmes »
   Étant donné un projet sans point financier
-  Alors la carte n'est pas affichée
+  Alors la carte dit « Rien à régler côté banque ni fiscalité » et garde le lien vers la visite
+  Et dans le dossier imprimé ou partagé, l'état de la visite est un texte, pas un lien
 
 Scénario: Vérifier
   Étant donné le formulaire de création à la main

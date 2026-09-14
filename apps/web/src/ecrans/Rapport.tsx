@@ -12,6 +12,7 @@ import { reponseCourte, texteVerdict } from '@/textes/verdict';
 
 import { CartePrix } from './rapport/CartePrix';
 import { Leviers } from './rapport/Leviers';
+import { CarteVigilance } from './rapport/Vigilance';
 
 function CarteCashflow({ r }: { r: Resultats }): JSX.Element {
   const c = r.cashflow;
@@ -149,6 +150,7 @@ export function Rapport(): JSX.Element {
         <CarteCashflow r={r} />
       </div>
       <Leviers r={r} />
+      <CarteVigilance r={r} />
       <div className="grid grid-cols-1 gap-5 md:grid-cols-2 print:grid-cols-2">
         <CarteFiscalite r={r} />
         <CarteRevente r={r} />

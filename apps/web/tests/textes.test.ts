@@ -16,12 +16,7 @@ import {
   explicationRegime,
 } from '@/textes/regimes';
 import { reponseCourte, texteVerdict } from '@/textes/verdict';
-import {
-  CATEGORIES,
-  ORDRE_CATEGORIES,
-  categorieVigilance,
-  phraseVigilance,
-} from '@/textes/vigilance';
+import { phraseVigilance } from '@/textes/vigilance';
 import {
   CATEGORIES_VISITE,
   ETATS_REPONSE,
@@ -76,54 +71,24 @@ describe('vigilance', () => {
     parametres: PointVigilance['parametres'] = {},
   ): PointVigilance => ({ code, parametres });
 
-  it('a une phrase pour chaque code', () => {
+  it('a une phrase pour chaque code financier', () => {
     const codes: PointVigilance['code'][] = [
-      'PV_AG_ET_CARNET',
-      'CONFIRMER_CHARGES_COPRO',
-      'COPRO_EN_PROCEDURE',
-      'VERIFIER_DPE',
-      'RENOVATION_ENERGETIQUE_OBLIGATOIRE',
-      'EXPLIQUER_PRIX_SOUS_MARCHE',
-      'CONFIRMER_TAXE_FONCIERE',
-      'RISQUE_NATUREL',
-      'SANS_ASCENSEUR_ETAGE_ELEVE',
       'EFFORT_HCSF_DEPASSE',
       'DUREE_PRET_HORS_HCSF',
       'PLAFOND_MICRO_DEPASSE',
       'LOYER_AU_DESSUS_PLAFOND',
       'PS_BIC_A_CONFIRMER',
     ];
-    const parametres = {
-      lots: 24,
-      annee: 1962,
-      dpe: 'D',
-      ecart: -0.22,
-      type: 'inondation',
-      etage: 3,
-      seuil: 0.35,
-      dureeMax: 25,
-      plafond: 900,
-      taux: 0.186,
-    };
+    const parametres = { seuil: 0.35, dureeMax: 25, plafond: 900, taux: 0.186 };
     for (const code of codes) {
       expect(phraseVigilance(p(code, parametres)).length).toBeGreaterThan(10);
     }
   });
 
   it('insère les paramètres', () => {
-    expect(phraseVigilance(p('PV_AG_ET_CARNET', { lots: 24, annee: 1962 }))).toContain(
-      '(24 lots, 1962)',
-    );
-    expect(phraseVigilance(p('PV_AG_ET_CARNET', { lots: 0, annee: 0 }))).not.toContain('(');
-    expect(phraseVigilance(p('PV_AG_ET_CARNET', { lots: 12, annee: 0 }))).toContain('(12 lots)');
-    expect(n(phraseVigilance(p('EXPLIQUER_PRIX_SOUS_MARCHE', { ecart: -0.22 })))).toContain(
-      '−22 %',
-    );
-    expect(
-      phraseVigilance(p('RENOVATION_ENERGETIQUE_OBLIGATOIRE', { dpe: 'G', annee: 2025 })),
-    ).toContain('2025');
     expect(n(phraseVigilance(p('LOYER_AU_DESSUS_PLAFOND', { plafond: 900 })))).toContain('900 €');
-    expect(phraseVigilance(p('VERIFIER_DPE'))).toContain('DPE ');
+    expect(phraseVigilance(p('DUREE_PRET_HORS_HCSF', { dureeMax: 25 }))).toContain('25 ans');
+    expect(n(phraseVigilance(p('PS_BIC_A_CONFIRMER', { taux: 0.186 })))).toContain('18,6 %');
     expect(phraseVigilance(p('EFFORT_HCSF_DEPASSE', { seuil: 'x' }))).toContain('0 %');
   });
 });
@@ -170,34 +135,6 @@ describe('régimes : explications et ordre', () => {
       variante({ location: { mode: 'meuble_lld', loyerHc: 8_000, vacanceSemaines: 0 } }),
     );
     expect(explicationRegime(gros.fiscalite.regimes.micro_bic, dix)).toContain('inaccessible');
-  });
-});
-
-describe('catégories de vigilance', () => {
-  it('chaque code a une catégorie, et chaque catégorie un libellé', () => {
-    const codes = [
-      'PV_AG_ET_CARNET',
-      'CONFIRMER_CHARGES_COPRO',
-      'COPRO_EN_PROCEDURE',
-      'VERIFIER_DPE',
-      'RENOVATION_ENERGETIQUE_OBLIGATOIRE',
-      'EXPLIQUER_PRIX_SOUS_MARCHE',
-      'CONFIRMER_TAXE_FONCIERE',
-      'RISQUE_NATUREL',
-      'SANS_ASCENSEUR_ETAGE_ELEVE',
-      'EFFORT_HCSF_DEPASSE',
-      'DUREE_PRET_HORS_HCSF',
-      'PLAFOND_MICRO_DEPASSE',
-      'LOYER_AU_DESSUS_PLAFOND',
-      'PS_BIC_A_CONFIRMER',
-    ] as const;
-    for (const code of codes) {
-      expect(ORDRE_CATEGORIES).toContain(categorieVigilance(code));
-    }
-    expect(categorieVigilance('PV_AG_ET_CARNET')).toBe('documents');
-    expect(categorieVigilance('VERIFIER_DPE')).toBe('sur_place');
-    expect(categorieVigilance('EFFORT_HCSF_DEPASSE')).toBe('finances');
-    expect(Object.keys(CATEGORIES)).toHaveLength(3);
   });
 });
 
