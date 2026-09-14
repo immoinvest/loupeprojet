@@ -3,12 +3,16 @@ import type { z } from 'zod';
 import {
   ErreurWorkerSchema,
   ReponseAdresseSchema,
+  ReponseDpeSchema,
   ReponseExtractionSchema,
   ReponseGeocodageSchema,
   ReponseMarcheSchema,
+  ReponseRisquesSchema,
   type ChampsIa,
+  type DpeAdresse,
   type ReponseAdresse,
   type ReponseMarche,
+  type ReponseRisques,
   type ResultatGeocodage,
 } from './contrat';
 
@@ -32,12 +36,19 @@ export interface ParametresAdresse {
   readonly surface: number;
 }
 
+export interface Position {
+  readonly lat: number;
+  readonly lon: number;
+}
+
 /** Ce que l'application demande au Worker. Chaque échec devient un code : l'écran décide quoi en faire. */
 export interface ClientWorker {
   extraire(texte: string): Promise<Resultat<ChampsIa>>;
   geocoder(recherche: string, codePostal?: string): Promise<Resultat<ResultatGeocodage | null>>;
   marche(parametres: ParametresMarche): Promise<Resultat<ReponseMarche>>;
   analyserAdresse(parametres: ParametresAdresse): Promise<Resultat<ReponseAdresse>>;
+  dpe(position: Position): Promise<Resultat<readonly DpeAdresse[]>>;
+  risques(position: Position): Promise<Resultat<ReponseRisques>>;
 }
 
 export type Fetch = (url: string, init: RequestInit) => Promise<Response>;
@@ -87,6 +98,9 @@ async function appeler<T>(
     ? { ok: true, valeur: lecture.data }
     : { ok: false, code: 'REPONSE_INVALIDE' };
 }
+
+const position = (p: Position): string =>
+  new URLSearchParams({ lat: String(p.lat), lon: String(p.lon) }).toString();
 
 export function clientWorker(base: string, fetcher: Fetch): ClientWorker {
   return {
@@ -149,6 +163,26 @@ export function clientWorker(base: string, fetcher: Fetch): ClientWorker {
         DELAI_ADRESSE_MS,
       );
     },
+    async dpe(p) {
+      const r = await appeler(
+        fetcher,
+        `${base}/proxy/dpe?${position(p)}`,
+        { method: 'GET' },
+        ReponseDpeSchema,
+        DELAI_DONNEES_MS,
+      );
+      return r.ok ? { ok: true, valeur: r.valeur.donnees.dpe } : r;
+    },
+    async risques(p) {
+      const r = await appeler(
+        fetcher,
+        `${base}/proxy/risques?${position(p)}`,
+        { method: 'GET' },
+        ReponseRisquesSchema,
+        DELAI_DONNEES_MS,
+      );
+      return r.ok ? { ok: true, valeur: r.valeur.donnees } : r;
+    },
   };
 }
 
@@ -160,4 +194,6 @@ export const clientHorsLigne: ClientWorker = {
   geocoder: () => horsLigne(),
   marche: () => horsLigne(),
   analyserAdresse: () => horsLigne(),
+  dpe: () => horsLigne(),
+  risques: () => horsLigne(),
 };

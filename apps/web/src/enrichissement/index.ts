@@ -6,6 +6,24 @@ export {
   type VoieBan,
 } from './adresse';
 export {
+  appliquerDpe,
+  classerDpe,
+  cleBanAdresse,
+  dpeSuggere,
+  TOLERANCE_SURFACE_DPE,
+  type BienPourDpe,
+  type DpePropose,
+  type RaisonDpe,
+} from './dpe';
+export {
+  appliquerLoyerReference,
+  appliquerLoyerVise,
+  loyerPourBien,
+  loyerVise,
+  type LoyerBien,
+} from './loyer';
+export { appliquerRisques, memesRisques, risquesDuProjet } from './risques';
+export {
   clientHorsLigne,
   clientWorker,
   DELAI_ADRESSE_MS,
@@ -15,6 +33,7 @@ export {
   urlWorker,
   type ClientWorker,
   type Fetch,
+  type Position,
   type ParametresAdresse,
   type ParametresMarche,
   type Resultat,
@@ -22,6 +41,10 @@ export {
 export {
   type ChampsIa,
   type CodeGroupe,
+  type DpeAdresse,
+  type NiveauRisqueAdresse,
+  type ReponseRisques,
+  type RisqueAdresse,
   type ReferenceAdresse,
   type ReponseAdresse,
   type ReponseMarche,
