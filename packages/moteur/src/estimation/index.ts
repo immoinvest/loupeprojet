@@ -1,6 +1,6 @@
 import { arrondirEuro, arrondirTaux } from '../commun/arrondi';
 import { loyerMensuelHc } from '../location/equivalents';
-import type { NiveauConfiance, Regles } from '../regles/types';
+import type { Regles } from '../regles/types';
 import type { Bien, EtatBien } from '../schema/bien';
 import type { CodeCorrection } from '../schema/estimation';
 import type { Dvf } from '../schema/marche';
