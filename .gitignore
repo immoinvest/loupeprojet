@@ -16,6 +16,9 @@ test-results/
 # Bouton-favori généré par le build du web (apps/web/vite.bookmarklet.config.ts)
 apps/web/public/capture.js
 
+# Modèle Excel de Pierre (source des fiches de backlog, jamais versionné)
+*.xlsx
+
 # Outils
 .turbo/
 *.tsbuildinfo

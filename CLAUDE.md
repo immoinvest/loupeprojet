@@ -37,6 +37,7 @@ L'utilisateur principal du repo pratique le **vibe coding** et ne relit pas le c
 | `marque/README.md`                        | Identité de marque Deklic : fichiers, couleurs, typographies, règles d'usage (ADR-005)     |
 | `.product/features-registry.md`           | Fonctionnalités livrées / en cours                                                         |
 | `.product/pipeline-state.json`            | État du pipeline de la feature en cours                                                    |
+| `.product/backlog/`                       | Idées de Pierre à spécifier avant implémentation (fiches numérotées, questions ouvertes)   |
 
 ## Statut du repo
 
