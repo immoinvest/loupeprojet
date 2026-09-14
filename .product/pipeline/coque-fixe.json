@@ -2,8 +2,8 @@
   "feature_slug": "coque-fixe",
   "title": "Coque fixe : menu et en-tête fixes, seul le contenu défile (fiche de backlog 11)",
   "started_at": "2026-09-14T14:00:00Z",
-  "current_step": "implement",
-  "scope": "apps/web/src/coque/{AppLayout,BarreApp,Sidebar,ProjetLayout}.tsx, coque/{entete,contenu}.ts, ecrans/Hypotheses.tsx (synthèse), index.css, tests/coque-fixe.test.tsx, e2e/{coque.spec.ts,formats.ts}, docs",
+  "current_step": "push",
+  "scope": "apps/web/src/coque/{AppLayout,BarreApp,Sidebar,Profil,ProjetLayout}.tsx, coque/{entete,contenu}.ts, ecrans/Hypotheses.tsx (synthèse), index.css, tests/coque-fixe.test.tsx, e2e/{coque.spec.ts,formats.ts}, docs",
   "branch": "feat/coque-fixe",
   "base": "master (9d38892, après responsive #36, backlog #37, gestion-locative-menu #38)",
   "baseline": {
@@ -25,18 +25,43 @@
       "output": ".product/architecture/coque-fixe.md"
     },
     "implement": {
-      "status": "in_progress",
-      "stories_completed": 0,
+      "status": "completed",
+      "stories_completed": 4,
       "stories_total": 4,
-      "commits": [],
-      "notes": []
+      "commits": [
+        { "etape": "docs", "hash": "bbecd85" },
+        { "etape": "US-1", "hash": "ce6c2e8", "tests": 3 },
+        { "etape": "US-2", "hash": "ff01c7c", "tests": 10 },
+        { "etape": "US-3", "hash": "43762ba", "e2e": 6 },
+        { "etape": "US-4", "hash": "(docs communes)" }
+      ],
+      "notes": [
+        "US-1 vérifiée dans le navigateur à 1 280 px (menu de 224 px, 30 projets : la liste défile dans le menu, profil à 784 px sur 800, fenêtre à 0) et à 375 px (tiroir : profil en bas, focus dans le tiroir, page figée)",
+        "À 224 px, « Comment c'est calculé » et le nom du projet d'exemple étaient tronqués en 15 px : liens du menu passés en 14 px ; le profil anonyme (« Sans compte » / « Gratuit · N projets » / « Se connecter ») passe sur trois lignes pour tenir dans la colonne",
+        "US-2 vérifiée : 1 280 px en-tête de 93 px (48 + 44 + trait) collé, synthèse à 93 ; 1 920 px une rangée de 57 px ; 768 px en-tête entier collé ; 375 px top calculé −142 px, seule la bande (57 → 101 px, sous la barre d'app) reste, synthèse à 102, fil d'Ariane hors écran, fenêtre à 0",
+        "Piège d'outillage : ResizeObserver ne se déclenche qu'au rendu d'une image ; l'onglet caché de l'aperçu n'en produisait pas, d'où des variables lues vides avant une capture d'écran. Sans conséquence pour un vrai navigateur",
+        "jsdom : Element.scrollTop est modifiable, Element.scrollTo et ResizeObserver absents → scrollTop = 0 dans le hook, observateur simulé dans les tests"
+      ]
     },
-    "qa_tests": { "status": "pending" },
-    "security": { "status": "pending" },
-    "push": { "status": "pending" }
+    "refactor": {
+      "status": "completed",
+      "note": "mesures de l'en-tête dans coque/entete.ts (fonctions pures + hook), retour en haut dans coque/contenu.ts ; ProjetLayout reste sous 300 lignes"
+    },
+    "qa_tests": {
+      "status": "completed",
+      "note": "10 tests de composants et de fonctions (coque, retour en haut, zones du menu, en-tête collé avec ResizeObserver simulé, synthèse, déconnexion, lireDecalage, hauteurCollee, enPixels) ; e2e coque.spec.ts : 6 tests verts (3 appareils × 2) ; suite Playwright complète relancée avant la PR"
+    },
+    "security": {
+      "status": "completed",
+      "note": "aucune donnée nouvelle, aucun appel réseau, aucun innerHTML ; seules des classes CSS et deux variables CSS numériques (px arrondis) sont écrites dans le DOM"
+    },
+    "push": {
+      "status": "in_progress",
+      "branch": "feat/coque-fixe"
+    }
   },
   "decisions": {
-    "largeur_menu": "224 px (--largeur-menu: 14rem), marges intérieures resserrées, libellés inchangés",
+    "largeur_menu": "224 px (--largeur-menu: 14rem), marges intérieures resserrées, liens en 14 px, libellés inchangés",
     "surimpression": "sous 1 024 px seulement, déjà livrée par responsive (tiroir) ; pas de mode icônes seules",
     "en_tete": "collé et compact : 48 + 44 px de 768 à 1 535 px, 56 px au-delà ; sur téléphone seule la bande des volets reste collée (top négatif mesuré)",
     "titres": "titre-verdict et H1 restent dans le contenu qui défile",
