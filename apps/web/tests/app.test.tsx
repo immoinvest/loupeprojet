@@ -84,7 +84,7 @@ describe('Rapport', () => {
     ).toBeInTheDocument();
     const feux = screen.getAllByLabelText('Cinq feux').at(-1);
     expect(feux).toBeDefined();
-    expect(within(feux!).getAllByText(/Prix|Rendement|Cash-flow|Effort|Risques/)).toHaveLength(5);
+    expect(within(feux!).getAllByText(/Prix|Rendement|Cash-flow|Crédit|Risques/)).toHaveLength(5);
 
     expect(screen.getByRole('heading', { name: "Est-ce que c'est cher ?" })).toBeInTheDocument();
     // « Non. » deux fois : ce n'est pas cher, et ça ne s'autofinance pas (−210 €/mois).

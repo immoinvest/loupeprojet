@@ -6,7 +6,7 @@ import type { ResultatRendement } from '../rendement';
 import type { Projet } from '../schema/projet';
 import {
   feuCashflow,
-  feuEffort,
+  feuCouverture,
   feuPrix,
   feuRendement,
   feuRisques,
@@ -23,7 +23,7 @@ export interface SyntheseVerdict {
 }
 
 export interface ResultatVerdict {
-  /** Toujours cinq, dans l'ordre : prix, rendement, cash-flow, effort, risques. */
+  /** Toujours cinq, dans l'ordre : prix, rendement, cash-flow, couverture, risques. */
   readonly feux: readonly FeuVerdict[];
   readonly synthese: SyntheseVerdict;
   readonly vigilance: readonly PointVigilance[];
@@ -52,7 +52,7 @@ export function calculerVerdict(
     prix,
     feuRendement(rendement.rendements.net, regles),
     feuCashflow(retenu.cashflow.mensuel, regles),
-    feuEffort(financement.effort, regles),
+    feuCouverture(retenu.cashflow.tauxCouverture, regles),
     feuRisques(projet.bien, projet.marche),
   ];
   return {
@@ -69,7 +69,7 @@ export function calculerVerdict(
 
 export {
   feuCashflow,
-  feuEffort,
+  feuCouverture,
   feuPrix,
   feuRendement,
   feuRisques,

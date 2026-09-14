@@ -78,9 +78,9 @@ describe('Comparer', () => {
       'aria-sort',
       'ascending',
     );
-    // L'effort se trie dans l'autre sens (plus bas = mieux).
-    await utilisateur.click(screen.getByRole('button', { name: 'Effort bancaire' }));
-    expect(screen.getByRole('rowheader', { name: /Effort bancaire/ })).toHaveAttribute(
+    // La couverture se trie dans l'autre sens (plus bas = mieux).
+    await utilisateur.click(screen.getByRole('button', { name: 'Crédit ÷ loyer' }));
+    expect(screen.getByRole('rowheader', { name: /Crédit ÷ loyer/ })).toHaveAttribute(
       'aria-sort',
       'ascending',
     );

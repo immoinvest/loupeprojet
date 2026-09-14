@@ -217,8 +217,8 @@ export function MesProjets(): JSX.Element {
       </Carte>
 
       <p className="m-0 text-xs text-encre-3">
-        Les cinq points reprennent les feux du rapport : prix · rendement · cash-flow · effort ·
-        risques.
+        Les cinq points reprennent les feux du rapport : prix · rendement · cash-flow · crédit ÷
+        loyer · risques.
       </p>
     </Page>
   );

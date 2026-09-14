@@ -66,7 +66,6 @@ export const projetExemple: ProjetEntree = {
       evolutionAnnuelle: 0.015,
       fraisAgenceTaux: 0.04,
     },
-    revenusMensuels: 2_600,
   },
   provenance: {
     'achat.prix': 'annonce',

@@ -44,7 +44,7 @@ describe('comparerProjets', () => {
     expect(c!.valeurs.loyer).toBe(980);
     expect(c!.valeurs.cashflow).toBeCloseTo(r.cashflow.mensuel, 6);
     expect(c!.valeurs.net).toBeCloseTo(r.rendement.rendements.net, 6);
-    expect(c!.valeurs.effort).toBeCloseTo(r.financement.effort.hcsf ?? 0, 6);
+    expect(c!.valeurs.couverture).toBeCloseTo(r.cashflow.tauxCouverture ?? 0, 6);
     expect(c!.valeurs.impot).toBe(r.fiscalite.regimes.lmnp_reel.impotTotal);
     expect(c!.valeurs.horizon).toBe(10);
     expect(c!.valeurs.cashNet).toBeCloseTo(r.revente.cashNetVendeur, 6);
@@ -55,7 +55,7 @@ describe('comparerProjets', () => {
       prix: 'bon',
       rendement: 'surveiller',
       cashflow: 'probleme',
-      effort: 'bon',
+      couverture: 'surveiller',
       risques: 'bon',
     });
   });
@@ -72,18 +72,16 @@ describe('comparerProjets', () => {
     expect(formats.prixM2).toBe('2 385 €/m²');
     expect(formats.ecartMarche).toBe('−25 %');
     expect(formats.cashflow).toBe('−210 €/mois');
-    expect(formats.effort).toBe('25 %');
+    expect(formats.couverture).toBe('84 %');
     expect(formats.horizon).toBe('10 ans');
     expect(formats.risques).toBe('aucun');
     expect(n(indicateurParCode('impot').detail!(c!.resultats))).toBe('Meublé au réel · 10 ans');
     expect(INDICATEURS.filter((i) => i.detail === undefined).length).toBe(INDICATEURS.length - 1);
   });
 
-  it('les indicateurs sans repère de marché ou sans revenus rendent null', () => {
-    const [c] = comparerProjets([
-      projet('sans', { revenusMensuels: 0, location: { mode: 'nu', loyerHc: 0 } }),
-    ]);
-    expect(c!.valeurs.effort).toBeNull();
+  it('les indicateurs sans repère de marché ou sans loyer rendent null', () => {
+    const [c] = comparerProjets([projet('sans', { location: { mode: 'nu', loyerHc: 0 } })]);
+    expect(c!.valeurs.couverture).toBeNull();
     expect(c!.valeurs.loyer).toBe(0);
   });
 });
@@ -137,8 +135,8 @@ describe('trierColonnes', () => {
   it('dit si la ligne triée est décroissante (pour aria-sort)', () => {
     expect(triDecroissant({ code: 'cashflow', inverse: false })).toBe(true);
     expect(triDecroissant({ code: 'cashflow', inverse: true })).toBe(false);
-    expect(triDecroissant({ code: 'effort', inverse: false })).toBe(false);
-    expect(triDecroissant({ code: 'effort', inverse: true })).toBe(true);
+    expect(triDecroissant({ code: 'couverture', inverse: false })).toBe(false);
+    expect(triDecroissant({ code: 'couverture', inverse: true })).toBe(true);
   });
 });
 

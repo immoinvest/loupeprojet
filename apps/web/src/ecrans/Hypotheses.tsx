@@ -36,14 +36,15 @@ function badgePour(projet: ProjetEntree, d: Descripteur): BadgeProvenance | null
 function Synthese(): JSX.Element {
   const { resultats: r } = useProjetCourant();
   const cf = r.cashflow.mensuel;
+  const couverture = r.verdict.feux.find((f) => f.axe === 'couverture');
   const kpis = [
     { l: 'Cash-flow', v: eurosParMois(cf), ton: cf >= 0 ? 'text-bon' : 'text-probleme' },
     { l: 'Rendement net', v: pourcentage(r.rendement.rendements.net), ton: '' },
     { l: 'TRI', v: r.rendement.tri === null ? '—' : pourcentage(r.rendement.tri), ton: '' },
     {
-      l: 'Effort bancaire',
-      v: r.financement.effort.hcsf === null ? '—' : pourcentage(r.financement.effort.hcsf, 0),
-      ton: r.financement.effort.depasseHcsf ? 'text-probleme' : '',
+      l: 'Crédit ÷ loyer',
+      v: couverture?.valeur == null ? '—' : pourcentage(couverture.valeur, 0),
+      ton: couverture?.feu === 'probleme' ? 'text-probleme' : '',
     },
   ];
   return (
