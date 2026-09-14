@@ -139,6 +139,36 @@ describe('resumeDuMois', () => {
     expect(lignes[0]?.locataire).toBeUndefined();
   });
 
+  it('colocation et chambres : colocataires retrouvés dans l’ordre ; le bien entier, puis ses chambres', () => {
+    const etat: EtatGestion = {
+      ...ETAT,
+      paiements: [],
+      locations: [
+        location('chambre-10', {
+          bienId: 'bien-rouet',
+          locataireId: 'locataire-hugo',
+          libelle: 'Chambre 10',
+        }),
+        location('chambre-2', {
+          bienId: 'bien-rouet',
+          locataireId: 'locataire-lea',
+          libelle: 'Chambre 2',
+        }),
+        location('coloc', {
+          bienId: 'bien-rouet',
+          locataireId: 'locataire-julie',
+          colocataireIds: ['locataire-antoine', 'disparu', 'locataire-lea'],
+        }),
+      ],
+    };
+    const lignes = resumeDuMois(etat, '2026-09', AUJOURDHUI).lignes;
+    expect(lignes.map((l) => l.location.id)).toEqual(['coloc', 'chambre-2', 'chambre-10']);
+    expect(lignes[0]?.locataire?.prenom).toBe('Julie');
+    // Un colocataire introuvable (données incohérentes) est ignoré.
+    expect(lignes[0]?.colocataires.map((l) => l.prenom)).toEqual(['Antoine', 'Léa']);
+    expect(lignes[1]?.colocataires).toEqual([]);
+  });
+
   it('un trop-perçu ne gonfle pas le mois', () => {
     const etat: EtatGestion = {
       ...ETAT,

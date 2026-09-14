@@ -27,9 +27,11 @@ const SQL = {
   documentParId: 'select * from gestion_document where userId = ? and id = ?',
   documentsComplets: 'select * from gestion_document where userId = ? order by emisLe, id',
   paiementDuCompte: 'select locationId from gestion_paiement where userId = ? and id = ?',
-  // Une seule lecture : la location du compte avec son bien et son locataire (clés étrangères).
+  // Une seule lecture : la location du compte avec son bien et son locataire en titre (clés étrangères).
   occupation:
-    'select l.id, l.debut, l.fin, l.jourLoyer, l.loyerHorsCharges, l.charges, b.nom as bienNom, b.adresse as bienAdresse, t.prenom, t.nom as locataireNom from gestion_location l join gestion_bien b on b.id = l.bienId join gestion_locataire t on t.id = l.locataireId where l.userId = ? and l.id = ?',
+    'select l.id, l.libelle, l.debut, l.fin, l.jourLoyer, l.loyerHorsCharges, l.charges, b.nom as bienNom, b.adresse as bienAdresse, t.prenom, t.nom as locataireNom from gestion_location l join gestion_bien b on b.id = l.bienId join gestion_locataire t on t.id = l.locataireId where l.userId = ? and l.id = ?',
+  colocataires:
+    'select t.prenom, t.nom from gestion_colocataire c join gestion_locataire t on t.id = c.locataireId where c.userId = ? and c.locationId = ? order by c.ordre',
   paiementsDeLaLocation: 'select * from gestion_paiement where userId = ? and locationId = ?',
   insererDocument:
     'insert into gestion_document (id, userId, cle, type, numero, locationId, periode, paiementId, contenu, emisLe) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) on conflict (userId, cle) do nothing',
@@ -59,17 +61,22 @@ async function entreesDe(
   const { lier, maintenant } = outils;
   const [occupation] = await lignes(lier, SQL.occupation, userId, locationId);
   if (occupation === undefined) throw new ErreurGestion('INTROUVABLE');
-  const [bailleur, paiements] = await Promise.all([
+  const [bailleur, paiements, colocataires] = await Promise.all([
     lignes(lier, SQL.bailleur, userId),
     lignes(lier, SQL.paiementsDeLaLocation, userId, locationId),
+    lignes(lier, SQL.colocataires, userId, locationId),
   ]);
-  const { fin } = occupation;
+  const { fin, libelle } = occupation;
   return {
     bailleur: versBailleur(bailleur[0]),
     bien: { nom: String(occupation.bienNom), adresse: String(occupation.bienAdresse) },
-    locataire: { prenom: String(occupation.prenom), nom: String(occupation.locataireNom) },
+    locataires: [
+      { prenom: String(occupation.prenom), nom: String(occupation.locataireNom) },
+      ...colocataires.map((c) => ({ prenom: String(c.prenom), nom: String(c.nom) })),
+    ],
     location: {
       id: String(occupation.id),
+      ...(typeof libelle === 'string' ? { libelle } : {}),
       debut: String(occupation.debut),
       ...(typeof fin === 'string' ? { fin } : {}),
       jourLoyer: Number(occupation.jourLoyer),

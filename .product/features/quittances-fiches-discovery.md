@@ -69,7 +69,7 @@ Le modèle de quittance de l'ANIL ajoute l'usage de la mention « la présente q
 
 ### OUT (features suivantes)
 
-- Colocation (bail unique à plusieurs, location par chambre), APL versée au bailleur, suppression d'un bien, pages Biens et Locataires en liste, modification d'une location (loyer, jour) → **G1c**.
+- APL versée au bailleur, suppression d'un bien, pages Biens et Locataires en liste, modification d'une location (loyer, jour) → **G1c**. (La colocation n'est plus hors périmètre : voir « Décision de Pierre » plus bas.)
 - Envoi par e-mail, accord du locataire, « Loyer reçu ? », relances → G2.
 - Révision IRL, dépôt de garantie restitué, préavis → G4. Banque → G3 (repoussée par Pierre).
 - Parcours Playwright contre l'API réelle : toujours hors CI (le job `e2e` sert le site statique) ; preuve par tests de rendu et spec des formats avec réponses simulées, comme G1a.
@@ -106,3 +106,15 @@ Le modèle de quittance de l'ANIL ajoute l'usage de la mention « la présente q
 - **Pas de modification du loyer en G1b** : la règle « les documents émis ne changent pas » est garantie par le stockage figé ; la modification elle-même, avec le recalcul des loyers futurs, arrive avec la révision (G4) et G1c.
 - **PDF par impression** : cohérent avec le reste de l'application et gratuit ; G2 devra produire le PDF côté serveur pour la pièce jointe (à trancher à son architecture).
 - **Règles légales** : vérifiées sur Légifrance le jour même (articles 21 et 25-17), et non plus citées de mémoire ; l'erreur de citation de G1a est corrigée.
+
+## Décision de Pierre (14/09/2026, pendant l'implémentation) : plusieurs locataires par bien
+
+« Prends en compte qu'il peut y avoir plusieurs locataires pour un bien, par exemple de la colocation, location à la chambre, ces choses-là. »
+
+Conséquences, intégrées à G1b (story US-8, P0) :
+
+1. **Colocation à bail unique** : une location, un loyer, **plusieurs locataires** ; la quittance ou le reçu porte le nom de chacun, quel que soit celui qui a payé.
+2. **Location à la chambre** : **plusieurs locations en même temps sur le même bien**, chacune avec un **libellé** (« Chambre 2 »), son loyer, ses loyers dus et ses documents.
+3. **Garde-fou conservé** : deux locations du même bien qui se chevauchent sont refusées seulement si elles portent le **même libellé** (ou aucun des deux) ; un T2 loué en entier reste protégé d'une double location par erreur.
+4. **Revue du travail déjà fait** : la règle « aucun chevauchement sur un bien » de la story US-3 (commit en cours) devient « aucun chevauchement pour un même libellé » ; la migration `0003`, pas encore en production, reçoit la table des colocataires et la colonne du libellé.
+5. **Reste hors G1b** : le partage du loyer entre colocataires (qui doit combien) et la solidarité ; la porte « J'ai acheté ce bien » d'un projet en colocation crée toujours un bail unique au loyer total, les chambres s'ajoutent ensuite une par une.

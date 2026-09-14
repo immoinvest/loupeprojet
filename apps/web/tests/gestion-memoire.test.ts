@@ -36,6 +36,23 @@ describe('clientGestionMemoire', () => {
     expect(client.donnees().locations).toHaveLength(1);
   });
 
+  it('colocation : le locataire en titre, puis les colocataires rattachés à la location', async () => {
+    const client = clientGestionMemoire();
+    const r = await client.creer({
+      ...CREATION_LOUEE,
+      colocataires: [{ prenom: 'Hugo', nom: 'Petit' }],
+    });
+    expect(r).toMatchObject({
+      ok: true,
+      valeur: {
+        locataire: { id: 'locataire-2', prenom: 'Léa' },
+        colocataires: [{ id: 'locataire-3', prenom: 'Hugo' }],
+        location: { id: 'location-4', locataireId: 'locataire-2', colocataireIds: ['locataire-3'] },
+      },
+    });
+    expect(client.donnees().locataires.map((l) => l.prenom)).toEqual(['Léa', 'Hugo']);
+  });
+
   it('refuse une création invalide sans rien garder', async () => {
     const client = clientGestionMemoire();
     const r = await client.creer({ ...CREATION_LOUEE, location: null });

@@ -151,3 +151,15 @@ Le contenu stocke des **codes de mention** (`pour_acquit`, `annule_recus`) et de
 - **Pas de clé étrangère document → paiement** : un document doit survivre à la lecture de ses paiements ; l'annulation bloquée suffit à garder la cohérence.
 - **Insertion conditionnelle vérifiée sur la D1 simulée (`node:sqlite`)** : même moteur SQLite que D1 ; un test lance deux paiements concurrents.
 - **La ligne de loyer devient un composant partagé** : l'accueil et la page Loyers affichent la même chose ; sans cela, « En partie » et « Quittance » seraient codés deux fois.
+
+## ADR-G13 : plusieurs locataires par bien (décision de Pierre du 14/09/2026, story US-8)
+
+| Question | Décision | Pourquoi | Écarté |
+| --- | --- | --- | --- |
+| Colocation à bail unique | `locataireId` reste le premier locataire ; les autres vivent dans `gestion_colocataire (locationId, locataireId, userId, ordre)` et remontent en `colocataireIds` | Additif : G1a (accueil, porte « J'ai acheté ce bien ») continue de lire `locataireId` sans changement | Remplacer `locataireId` par un tableau (réécriture de G1a) |
+| Location à la chambre | Plusieurs locations simultanées sur un bien, distinguées par `libelle` (« Chambre 2 ») | Chaque chambre a ses loyers et ses documents : c'est le modèle de loyer dû par location déjà en place | Une table « chambres » (plus lourd, sans besoin exprimé : nombre de chambres, surfaces) |
+| Chevauchement | Refusé seulement entre locations du même bien **et du même libellé** (absence de libellé comprise) | Garde-fou du bien loué en entier conservé | Aucun contrôle (double location par erreur) |
+| Documents | `contenu.locataires` (tableau, au moins un) et `logement.libelle` | La quittance d'une colocation nomme tous les colocataires | Une quittance par colocataire (le paiement est commun) |
+| Migration | Complétée dans `0003` (pas encore appliquée en production) | Une seule migration de G1b à appliquer pour Pierre | Une migration `0004` de plus |
+
+Fichiers touchés en plus : `packages/gestion/src/{schemas,baux,contenus,documents,creation,mois}.ts`, `apps/comptes/{migrations/0003_gestion_documents.sql,src/gestion/{depot-d1,depot-baux,depot-documents,lignes}.ts}`, `apps/web` (saisie « + Ajouter un colocataire » et « Chambre », affichage des noms et du libellé). Borne : 10 colocataires par location.

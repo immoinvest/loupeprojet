@@ -68,8 +68,24 @@ export function versLocataire(ligne: Ligne): Locataire {
   return LocataireSchema.parse(sansNulls(ligne));
 }
 
-export function versLocation(ligne: Ligne): LocationGeree {
-  return LocationGereeSchema.parse(sansNulls(ligne));
+/** La location et ses colocataires, lus à part dans gestion_colocataire (ADR-G13). */
+export function versLocation(ligne: Ligne, colocataireIds: readonly string[]): LocationGeree {
+  return LocationGereeSchema.parse({ ...sansNulls(ligne), colocataireIds });
+}
+
+/** Les colocataires de chaque location, dans l'ordre du bail (lignes triées par location puis ordre). */
+export function colocatairesParLocation(
+  lignes: readonly Ligne[],
+): ReadonlyMap<string, readonly string[]> {
+  const parLocation = new Map<string, string[]>();
+  for (const ligne of lignes) {
+    const locationId = String(ligne.locationId);
+    parLocation.set(locationId, [
+      ...(parLocation.get(locationId) ?? []),
+      String(ligne.locataireId),
+    ]);
+  }
+  return parLocation;
 }
 
 export function versPaiement(ligne: Ligne): Paiement {

@@ -37,7 +37,7 @@ export type CodeErreurGestion =
   | 'FIN_AVANT_ENTREE'
   /** Des loyers sont déjà reçus pour des mois après la sortie demandée. */
   | 'PAIEMENTS_APRES_SORTIE'
-  /** La nouvelle location chevauche une location du bien. */
+  /** La nouvelle location chevauche une location du bien au même libellé. */
   | 'BIEN_OCCUPE';
 
 /** Un document rendu par l'émission : `nouveau` est faux s'il existait déjà (même clé). */
@@ -46,10 +46,11 @@ export interface Emission {
   readonly nouveau: boolean;
 }
 
-/** Le locataire et la location créés en louant un bien vacant. */
+/** Le locataire, ses colocataires et la location créés en louant un bien. */
 export interface OccupationCreee {
   readonly locataire: Locataire;
   readonly location: LocationGeree;
+  readonly colocataires: readonly Locataire[];
 }
 
 export class ErreurGestion extends Error {

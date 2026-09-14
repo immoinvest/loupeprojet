@@ -16,7 +16,7 @@ Définition d'un clic (reprise de l'épic) : les boutons qui font avancer compte
 | US-6 | Fiche bien : location en cours, 12 derniers mois, fin de location | P1       | M      |
 | US-7 | Louer un bien vacant                                              | P1       | S      |
 
-MoSCoW : **Must** US-1 à US-5 · **Should** US-6, US-7 · **Won't (G1c)** colocation, APL, modifier une location, supprimer un bien, pages Biens et Locataires en liste.
+MoSCoW : **Must** US-1 à US-5 · **Should** US-6, US-7 · **Won't (G1c)** APL, modifier une location, supprimer un bien, pages Biens et Locataires en liste. **Must (ajoutée)** US-8 plusieurs locataires par bien (colocation à bail unique, location à la chambre), à la demande de Pierre.
 
 ---
 
@@ -274,3 +274,46 @@ Toutes les routes sous `/api/gestion`, session exigée, `Origin` exigé pour les
 - **Annulation bloquée après émission** : plus simple et plus sûr qu'un document « annulé » ; l'annulation reste possible pendant les 10 secondes du bandeau, avant toute quittance.
 - **PERIODE_DEJA_RECUE disparaît** au profit de MONTANT_DEPASSE : le client web de G1a traduit déjà les codes inconnus en message générique ; le nouveau code a sa phrase.
 - **P1 découplées** : US-6 et US-7 n'ont aucune dépendance entrante ; si la session s'allonge, elles partent en G1c sans toucher au reste.
+
+---
+
+### US-8 : Plusieurs locataires pour un bien (P0, ajoutée le 14/09/2026 à la demande de Pierre)
+
+En tant que bailleur en colocation ou en location à la chambre, je veux gérer plusieurs locataires pour un même bien, pour que chacun ait les bons documents.
+
+Remplace la ligne « Won't (G1c) : colocation » de la priorisation ; US-3 (« louer un bien vacant ») et US-7 s'y appuient.
+
+```gherkin
+Scénario : colocation à bail unique
+  Quand je crée une location avec Julie Martin et Léa Bernard (« + Ajouter un colocataire »)
+  Alors une seule location est créée, un seul loyer est dû chaque mois
+  Et GET /etat rend la location avec ses deux locataires (le premier saisi, puis les colocataires)
+  Et la quittance du mois porte « Julie Martin et Léa Bernard », quel que soit le payeur
+
+Scénario : location à la chambre
+  Étant donné le bien « Coloc Rouet » loué « Chambre 1 » à Hugo Petit
+  Quand je loue « Chambre 2 » à Léa Bernard aux mêmes dates                          # 2 clics
+  Alors deux locations coexistent sur le bien, chacune avec son loyer, ses paiements et ses documents
+  Et la page Loyers affiche une ligne par chambre : « Coloc Rouet · Chambre 2 »
+  Et le logement de la quittance de Léa est « Coloc Rouet — Chambre 2 »
+
+Scénario : garde-fou
+  Étant donné une location du bien sans libellé (bien loué en entier)
+  Quand j'ajoute une location sans libellé qui chevauche ses dates
+  Alors la réponse est 409 BIEN_OCCUPE
+  Et deux locations au même libellé qui se chevauchent sont refusées de même
+  Et deux libellés différents aux mêmes dates sont acceptés
+
+Scénario : bornes
+  Alors une location a au plus 10 colocataires en plus du premier locataire ; un libellé fait au plus 40 caractères
+```
+
+Contrats et données (compléments) :
+
+| Élément | Changement |
+| --- | --- |
+| `NouvelleLocation` | + `libelle` facultatif (1 à 40 caractères) |
+| `CreationLocation`, `NouvelleOccupation` | + `colocataires: NouveauLocataire[]` (0 à 10, défaut vide) |
+| `LocationGeree` | + `libelle` facultatif, + `colocataireIds: string[]` |
+| `ContenuDocument` | `locataire` devient `locataires` (au moins un) ; `logement.libelle` facultatif |
+| Migration `0003` | + colonne `gestion_location.libelle` ; + table `gestion_colocataire (locationId, locataireId, userId, ordre)` en cascade |

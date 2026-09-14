@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 import { JourSchema, PeriodeSchema } from './dates';
-import { MONTANT_MAX_CENTIMES } from './regles';
+import { COLOCATAIRES_MAX, MONTANT_MAX_CENTIMES } from './regles';
 
 /*
  * Quittances et reçus (loi n° 89-462 du 6 juillet 1989, art. 21) : la quittance porte le détail
@@ -35,8 +35,13 @@ export const ContenuDocumentSchema = z.object({
   /** Jour d'émission. */
   emisLe: JourSchema,
   bailleur: IdentiteBailleurSchema,
-  locataire: z.object({ prenom: texte(80), nom: texte(80) }),
-  logement: z.object({ nom: texte(80), adresse: texte(200) }),
+  /** Tous les locataires du bail, le locataire en titre d'abord : la quittance d'une colocation les nomme tous. */
+  locataires: z
+    .array(z.object({ prenom: texte(80), nom: texte(80) }))
+    .min(1)
+    .max(1 + COLOCATAIRES_MAX),
+  /** Le bien, et la chambre louée s'il y en a une. */
+  logement: z.object({ nom: texte(80), adresse: texte(200), libelle: texte(40).optional() }),
   periode: PeriodeSchema,
   /** Jours couverts par le terme (au prorata d'une entrée ou d'une sortie). */
   debut: JourSchema,

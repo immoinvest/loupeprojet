@@ -50,6 +50,7 @@ export const LOCATION_JULIE: LocationGeree = {
   id: 'location-julie',
   bienId: 'bien-lices',
   locataireId: 'locataire-julie',
+  colocataireIds: [],
   type: 'meublee',
   debut: '2025-10-01',
   jourLoyer: 5,

@@ -10,15 +10,15 @@ import {
   periodeDe,
   type BienGere,
   type EtatGestion,
-  type Locataire,
-  type LocationGeree,
   type Paiement,
 } from '@loupe/gestion';
 
 import { ErreurGestion, type DepotGestion } from './depot';
 import { depotBaux } from './depot-baux';
 import { depotDocuments } from './depot-documents';
+import { ecrireOccupation } from './ecritures';
 import {
+  colocatairesParLocation,
   valeurSql,
   versBien,
   versDocument,
@@ -68,6 +68,8 @@ const SQL = {
     'select id, type, numero, locationId, periode, paiementId, emisLe from gestion_document where userId = ? order by emisLe, id',
   locataires: 'select * from gestion_locataire where userId = ? order by creeLe, id',
   locations: 'select * from gestion_location where userId = ? order by debut, id',
+  colocataires:
+    'select locationId, locataireId from gestion_colocataire where userId = ? order by locationId, ordre',
   // Plusieurs paiements par mois depuis G1b : l'ordre chronologique, stable.
   paiements: 'select * from gestion_paiement where userId = ? order by periode, date, creeLe, id',
   preferences: 'select * from gestion_preference where userId = ?',
@@ -79,10 +81,6 @@ const SQL = {
   nombreDeBiens: 'select count(*) as n from gestion_bien where userId = ?',
   insererBien:
     'insert into gestion_bien (id, userId, nom, adresse, codePostal, ville, type, surface, meuble, projetId, projet, creeLe, modifieLe) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-  insererLocataire:
-    'insert into gestion_locataire (id, userId, prenom, nom, email, creeLe) values (?, ?, ?, ?, ?, ?)',
-  insererLocation:
-    'insert into gestion_location (id, userId, bienId, locataireId, type, debut, fin, jourLoyer, loyerHorsCharges, charges, depot, creeLe) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
   // Insertion conditionnelle (ADR-G11) : atomique, la somme du mois ne dépasse jamais le dû.
   insererPaiement:
     'insert into gestion_paiement (id, userId, locationId, periode, montant, date, source, creeLe) select ?, ?, ?, ?, ?, ?, ?, ? where (select coalesce(sum(montant), 0) from gestion_paiement where userId = ? and locationId = ? and periode = ?) + ? <= ?',
@@ -108,28 +106,6 @@ function insererBien(lier: Lier, userId: string, b: BienGere): D1PreparedStateme
     projet,
     b.creeLe,
     b.modifieLe,
-  );
-}
-
-function insererLocataire(lier: Lier, userId: string, l: Locataire): D1PreparedStatement {
-  return lier(SQL.insererLocataire, l.id, userId, l.prenom, l.nom, l.email, l.creeLe);
-}
-
-function insererLocation(lier: Lier, userId: string, l: LocationGeree): D1PreparedStatement {
-  return lier(
-    SQL.insererLocation,
-    l.id,
-    userId,
-    l.bienId,
-    l.locataireId,
-    l.type,
-    l.debut,
-    l.fin,
-    l.jourLoyer,
-    l.loyerHorsCharges,
-    l.charges,
-    l.depot,
-    l.creeLe,
   );
 }
 
@@ -166,20 +142,22 @@ export function depotD1(base: D1Database, options: OptionsDepot = {}): DepotGest
   const baux = depotBaux({ ...outils, ensemble: (instructions) => base.batch(instructions) });
 
   const etat = async (userId: string): Promise<EtatGestion> => {
-    const [biens, locataires, locations, paiements, emis, bailleur, preferences] =
+    const [biens, locataires, locations, colocations, paiements, emis, bailleur, preferences] =
       await Promise.all([
         lire(SQL.biens, userId),
         lire(SQL.locataires, userId),
         lire(SQL.locations, userId),
+        lire(SQL.colocataires, userId),
         lire(SQL.paiements, userId),
         lire(SQL.documents, userId),
         documents.bailleur(userId),
         lire(SQL.preferences, userId),
       ]);
+    const colocataires = colocatairesParLocation(colocations);
     return {
       biens: biens.map(versBien),
       locataires: locataires.map(versLocataire),
-      locations: locations.map(versLocation),
+      locations: locations.map((l) => versLocation(l, colocataires.get(String(l.id)) ?? [])),
       paiements: paiements.map(versPaiement),
       bailleur,
       documents: emis.map(versDocument),
@@ -212,26 +190,13 @@ export function depotD1(base: D1Database, options: OptionsDepot = {}): DepotGest
         creeLe: horodatage,
         modifieLe: horodatage,
       };
-      const instructions = [insererBien(lier, userId, bien)];
-      let locataire: Locataire | null = null;
-      let location: LocationGeree | null = null;
       const occupation = occupationDe(creation);
-      if (occupation !== null) {
-        locataire = { id: genererId(), ...occupation.locataire, creeLe: horodatage };
-        location = {
-          id: genererId(),
-          bienId: bien.id,
-          locataireId: locataire.id,
-          ...occupation.location,
-          creeLe: horodatage,
-        };
-        instructions.push(
-          insererLocataire(lier, userId, locataire),
-          insererLocation(lier, userId, location),
-        );
-      }
-      await base.batch(instructions);
-      return CreationReponseSchema.parse({ bien, locataire, location });
+      const { instructions, ...occupee } =
+        occupation === null
+          ? { locataire: null, location: null, colocataires: [], instructions: [] }
+          : ecrireOccupation({ lier, userId, bienId: bien.id, horodatage, genererId }, occupation);
+      await base.batch([insererBien(lier, userId, bien), ...instructions]);
+      return CreationReponseSchema.parse({ bien, ...occupee });
     },
 
     async payer(userId, nouveau) {

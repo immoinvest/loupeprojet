@@ -190,6 +190,7 @@ describe('migration 0003 : paiements partiels, bailleur, documents', () => {
       'account',
       'gestion_bailleur',
       'gestion_bien',
+      'gestion_colocataire',
       'gestion_document',
       'gestion_locataire',
       'gestion_location',
@@ -202,6 +203,7 @@ describe('migration 0003 : paiements partiels, bailleur, documents', () => {
     expect(noms(base, 'index')).toEqual([
       'account_userId_idx',
       'gestion_bien_userId_idx',
+      'gestion_colocataire_userId_idx',
       'gestion_document_userId_idx',
       'gestion_locataire_userId_idx',
       'gestion_location_bienId_idx',
@@ -231,5 +233,26 @@ describe('migration 0003 : paiements partiels, bailleur, documents', () => {
     expect(base.prepare('select count(*) as n from gestion_document').get()).toEqual({ n: 0 });
     expect(base.prepare('select count(*) as n from gestion_bailleur').get()).toEqual({ n: 0 });
     expect(base.prepare('select count(*) as n from gestion_paiement').get()).toEqual({ n: 0 });
+  });
+
+  it('plusieurs locataires : un libellé par location, des colocataires uniques, supprimés avec la location', () => {
+    const base = baseDeG1a();
+    appliquerMigrations(base);
+    base.prepare('update gestion_location set libelle = ? where id = ?').run('Chambre 2', 'l1');
+    expect(base.prepare('select libelle from gestion_location where id = ?').get('l1')).toEqual({
+      libelle: 'Chambre 2',
+    });
+    base.prepare(SQL.locataire).run('t2', 'u1', 'Léa', 'Bernard', H);
+    const colocataire = base.prepare(
+      'insert into gestion_colocataire (locationId, locataireId, userId, ordre) values (?, ?, ?, ?)',
+    );
+    colocataire.run('l1', 't2', 'u1', 1);
+    expect(() => colocataire.run('l1', 't2', 'u1', 2)).toThrow(/UNIQUE constraint failed/);
+    expect(() => colocataire.run('inconnue', 't2', 'u1', 1)).toThrow(
+      /FOREIGN KEY constraint failed/,
+    );
+
+    base.prepare('delete from gestion_location where id = ?').run('l1');
+    expect(base.prepare('select count(*) as n from gestion_colocataire').get()).toEqual({ n: 0 });
   });
 });

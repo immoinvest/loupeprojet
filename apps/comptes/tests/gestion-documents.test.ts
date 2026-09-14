@@ -93,6 +93,34 @@ describe('identité du bailleur', () => {
   });
 });
 
+describe('plusieurs locataires (ADR-G13)', () => {
+  it('la quittance d’une chambre en colocation nomme tous les locataires et la chambre', async () => {
+    const b = bancD1(HORLOGE);
+    await connecter(b, CAMILLE);
+    const r = await b.requete('/api/gestion/locations', {
+      corps: {
+        ...CREATION,
+        location: { ...CREATION.location, libelle: 'Chambre 2' },
+        colocataires: [{ prenom: 'Léa', nom: 'Bernard' }],
+      },
+    });
+    expect(r.status).toBe(201);
+    const locationId = (await lire<CreationReponse>(r)).location?.id ?? '';
+    await bailleur(b);
+    await payer(b, locationId, 70_000, '2026-10-05');
+
+    const q = await emettre(b, { type: 'quittance', locationId, periode: '2026-10' });
+    expect(q.status).toBe(201);
+    expect((await lire<DocumentComplet>(q)).contenu).toMatchObject({
+      locataires: [
+        { prenom: 'Julie', nom: 'Martin' },
+        { prenom: 'Léa', nom: 'Bernard' },
+      ],
+      logement: { nom: 'T2 Lices', adresse: '12 rue des Lices', libelle: 'Chambre 2' },
+    });
+  });
+});
+
 describe('quittances', () => {
   it('mois payé : 201, puis 200 avec le même document ; l’état le liste sans son contenu', async () => {
     const { b, locationId } = await pret();
@@ -110,7 +138,7 @@ describe('quittances', () => {
       contenu: {
         emisLe: '2026-11-02',
         bailleur: BAILLEUR,
-        locataire: { prenom: 'Julie', nom: 'Martin' },
+        locataires: [{ prenom: 'Julie', nom: 'Martin' }],
         logement: { nom: 'T2 Lices', adresse: '12 rue des Lices' },
         loyerHorsCharges: 65_000,
         charges: 5_000,

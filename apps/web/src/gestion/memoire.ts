@@ -8,6 +8,7 @@ import {
   type EtatGestion,
   type Locataire,
   type LocationGeree,
+  type NouveauLocataire,
   type Paiement,
 } from '@loupe/gestion';
 
@@ -77,12 +78,20 @@ export function clientGestionMemoire(options: OptionsGestionMemoire = {}): Clien
         const occupation = occupationDe(lu.data);
         let locataire: Locataire | null = null;
         let location: LocationGeree | null = null;
+        let colocataires: Locataire[] = [];
         if (occupation !== null) {
-          locataire = { id: identifiant('locataire'), ...occupation.locataire, creeLe: maintenant };
+          const enregistrer = (l: NouveauLocataire): Locataire => ({
+            id: identifiant('locataire'),
+            ...l,
+            creeLe: maintenant,
+          });
+          locataire = enregistrer(occupation.locataire);
+          colocataires = occupation.colocataires.map(enregistrer);
           location = {
             id: identifiant('location'),
             bienId: bien.id,
             locataireId: locataire.id,
+            colocataireIds: colocataires.map((c) => c.id),
             ...occupation.location,
             creeLe: maintenant,
           };
@@ -90,10 +99,14 @@ export function clientGestionMemoire(options: OptionsGestionMemoire = {}): Clien
         donnees = {
           ...donnees,
           biens: [...donnees.biens, bien],
-          locataires: locataire === null ? donnees.locataires : [...donnees.locataires, locataire],
+          locataires: [
+            ...donnees.locataires,
+            ...(locataire === null ? [] : [locataire]),
+            ...colocataires,
+          ],
           locations: location === null ? donnees.locations : [...donnees.locations, location],
         };
-        return { ok: true, valeur: { bien, locataire, location } };
+        return { ok: true, valeur: { bien, locataire, location, colocataires } };
       }),
     payer: (nouveau) =>
       executer('payer', () => {

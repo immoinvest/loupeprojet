@@ -19,7 +19,7 @@ function entrees(
   return {
     bailleur: BAILLEUR,
     bien: bien('bien-lices', 'T2 Lices'),
-    locataire: locataire('locataire-julie', 'Julie', 'Martin'),
+    locataires: [locataire('locataire-julie', 'Julie', 'Martin')],
     location: location('l1', { debut: '2026-10-01' }),
     paiements,
     emisLe: '2026-11-02',
@@ -43,7 +43,7 @@ describe('contenuQuittance', () => {
       numero: 'Q-202610-L1',
       emisLe: '2026-11-02',
       bailleur: BAILLEUR,
-      locataire: { prenom: 'Julie', nom: 'Martin' },
+      locataires: [{ prenom: 'Julie', nom: 'Martin' }],
       logement: { nom: 'T2 Lices', adresse: 'T2 Lices, Marseille' },
       periode: '2026-10',
       debut: '2026-10-01',
@@ -169,5 +169,41 @@ describe('contenuRecu', () => {
       ok: false,
       refus: 'HORS_LOCATION',
     });
+  });
+});
+
+describe('plusieurs locataires (ADR-G13)', () => {
+  it('colocation : la quittance nomme tous les locataires du bail, dans l’ordre, quel que soit le payeur', () => {
+    const e = entrees([paiement('p1', 'l1', '2026-10', 70_000)], {
+      locataires: [
+        locataire('locataire-julie', 'Julie', 'Martin'),
+        locataire('locataire-lea', 'Léa', 'Bernard'),
+      ],
+    });
+    expect(contenu(contenuQuittance(e, '2026-10')).locataires).toEqual([
+      { prenom: 'Julie', nom: 'Martin' },
+      { prenom: 'Léa', nom: 'Bernard' },
+    ]);
+  });
+
+  it('location à la chambre : le logement porte la chambre, sur le reçu comme sur la quittance', () => {
+    const e = entrees(
+      [
+        paiement('p1', 'l1', '2026-10', 30_000, '2026-10-06'),
+        paiement('p2', 'l1', '2026-10', 40_000, '2026-10-20'),
+      ],
+      { location: location('l1', { debut: '2026-10-01', libelle: 'Chambre 2' }) },
+    );
+    const logement = { nom: 'T2 Lices', adresse: 'T2 Lices, Marseille', libelle: 'Chambre 2' };
+    expect(contenu(contenuRecu(e, 'p1')).logement).toEqual(logement);
+    expect(contenu(contenuQuittance(e, '2026-10')).logement).toEqual(logement);
+  });
+
+  it('un contenu sans locataire n’est pas un document valide', () => {
+    const resultat = contenuQuittance(
+      entrees([paiement('p1', 'l1', '2026-10', 70_000)], { locataires: [] }),
+      '2026-10',
+    );
+    expect(() => contenu(resultat)).toThrow();
   });
 });

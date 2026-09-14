@@ -181,3 +181,71 @@ describe('louer un bien vacant', () => {
     expect(compter(b.sqlite, 'gestion_location')).toBe(LIMITE_LOCATIONS_PAR_BIEN);
   });
 });
+
+describe('plusieurs locataires (ADR-G13)', () => {
+  const LEA = { prenom: 'Léa', nom: 'Bernard' };
+  const HUGO = { prenom: 'Hugo', nom: 'Petit' };
+
+  it('colocation à bail unique : une location, ses colocataires dans l’ordre, gardés à la sortie', async () => {
+    const b = await connecte();
+    const cree = await creer(b, { ...LOUEE, colocataires: [LEA, HUGO] });
+    expect(cree.colocataires.map((c) => c.prenom)).toEqual(['Léa', 'Hugo']);
+    expect(cree.location?.colocataireIds).toEqual(cree.colocataires.map((c) => c.id));
+    expect(compter(b.sqlite, 'gestion_location')).toBe(1);
+
+    const lu = await etat(b);
+    expect(lu.locations).toEqual([cree.location]);
+    expect(lu.locataires.map((l) => l.prenom).sort()).toEqual(['Hugo', 'Julie', 'Léa']);
+
+    const r = await terminer(b, cree.location?.id ?? '', '2027-03-14');
+    expect(r.status).toBe(200);
+    expect(await lire<LocationGeree>(r)).toMatchObject({
+      fin: '2027-03-14',
+      colocataireIds: cree.location?.colocataireIds,
+    });
+  });
+
+  it('location à la chambre : deux chambres aux mêmes dates, jamais deux fois la même', async () => {
+    const b = await connecte();
+    const { bien } = await creer(b, VACANT);
+    const chambre = (libelle: string, debut = OCCUPATION.location.debut): object => ({
+      ...OCCUPATION,
+      location: { ...OCCUPATION.location, debut, libelle },
+    });
+    expect((await louer(b, bien.id, chambre('Chambre 1'))).status).toBe(201);
+    const deux = await louer(b, bien.id, {
+      ...chambre('Chambre 2'),
+      locataire: HUGO,
+      colocataires: [LEA],
+    });
+    expect(deux.status).toBe(201);
+    expect(await deux.json()).toMatchObject({
+      locataire: { prenom: 'Hugo' },
+      colocataires: [{ prenom: 'Léa' }],
+      location: { libelle: 'Chambre 2' },
+    });
+
+    const memeChambre = await louer(b, bien.id, chambre('chambre 2', '2027-06-01'));
+    expect(memeChambre.status).toBe(409);
+    expect(await memeChambre.json()).toEqual({ code: 'BIEN_OCCUPE' });
+    // Sans libellé, le bien loué en entier : seules les locations sans libellé le bloquent.
+    expect((await louer(b, bien.id)).status).toBe(201);
+    expect((await louer(b, bien.id)).status).toBe(409);
+    expect(compter(b.sqlite, 'gestion_location')).toBe(3);
+    expect(compter(b.sqlite, 'gestion_colocataire')).toBe(1);
+  });
+
+  it('plus de dix colocataires ou un libellé trop long : 400, rien n’est écrit', async () => {
+    const b = await connecte();
+    const onze = Array.from({ length: 11 }, () => LEA);
+    const cree = await b.requete('/api/gestion/locations', {
+      corps: { ...LOUEE, colocataires: onze },
+    });
+    expect(cree.status).toBe(400);
+    const { bien } = await creer(b, VACANT);
+    expect((await louer(b, bien.id, { ...OCCUPATION, colocataires: onze })).status).toBe(400);
+    const longue = { ...OCCUPATION, location: { ...OCCUPATION.location, libelle: 'x'.repeat(41) } };
+    expect((await louer(b, bien.id, longue)).status).toBe(400);
+    expect(compter(b.sqlite, 'gestion_locataire')).toBe(0);
+  });
+});

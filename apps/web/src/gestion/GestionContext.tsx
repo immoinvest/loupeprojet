@@ -105,11 +105,15 @@ export function GestionProvider({
       creer: async (creation) => {
         const r = await client.creer(creation);
         if (r.ok) {
-          const { bien, locataire, location } = r.valeur;
+          const { bien, locataire, location, colocataires } = r.valeur;
           fusionner((e) => ({
             ...e,
             biens: [...e.biens, bien],
-            locataires: locataire === null ? e.locataires : [...e.locataires, locataire],
+            locataires: [
+              ...e.locataires,
+              ...(locataire === null ? [] : [locataire]),
+              ...colocataires,
+            ],
             locations: location === null ? e.locations : [...e.locations, location],
           }));
         }

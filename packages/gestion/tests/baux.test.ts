@@ -43,6 +43,22 @@ describe('chevauche', () => {
     expect(chevauche(future, { debut: '2026-01-01', fin: '2027-01-01' })).toBe(true);
     expect(chevauche(future, { debut: '2026-01-01' })).toBe(true);
   });
+
+  it('location à la chambre : deux chambres aux mêmes dates ne se chevauchent pas ; la même chambre, si', () => {
+    const chambre1 = [{ debut: '2026-09-01', libelle: 'Chambre 1' }];
+    expect(chevauche(chambre1, { debut: '2026-09-01', libelle: 'Chambre 2' })).toBe(false);
+    expect(chevauche(chambre1, { debut: '2026-10-01', libelle: 'chambre 1' })).toBe(true);
+  });
+
+  it('sans libellé, seules les autres locations sans libellé comptent (ADR-G13)', () => {
+    expect(
+      chevauche([{ debut: '2026-09-01', libelle: 'Chambre 1' }], { debut: '2026-10-01' }),
+    ).toBe(false);
+    expect(
+      chevauche([{ debut: '2026-09-01' }], { debut: '2026-10-01', libelle: 'Chambre 1' }),
+    ).toBe(false);
+    expect(chevauche([{ debut: '2026-09-01' }], { debut: '2026-10-01' })).toBe(true);
+  });
 });
 
 describe('schémas des baux', () => {
@@ -70,5 +86,26 @@ describe('schémas des baux', () => {
         location: { ...occupation.location, fin: '2026-10-31' },
       }).success,
     ).toBe(false);
+  });
+
+  it('colocation : dix colocataires au plus, chacun avec prénom et nom', () => {
+    const occupation = {
+      locataire: { prenom: 'Léa', nom: 'Bernard' },
+      location: {
+        libelle: 'Chambre 2',
+        type: 'meublee',
+        debut: '2026-11-01',
+        jourLoyer: 5,
+        loyerHorsCharges: 49_000,
+        charges: 4_000,
+        depot: 98_000,
+      },
+    };
+    const hugo = { prenom: 'Hugo', nom: 'Petit' };
+    const avec = (colocataires: object[]): boolean =>
+      NouvelleOccupationSchema.safeParse({ ...occupation, colocataires }).success;
+    expect(avec(Array.from({ length: 10 }, () => hugo))).toBe(true);
+    expect(avec(Array.from({ length: 11 }, () => hugo))).toBe(false);
+    expect(avec([{ prenom: 'Hugo', nom: ' ' }])).toBe(false);
   });
 });

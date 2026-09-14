@@ -16,7 +16,14 @@ export async function simulerGestion(page: Page): Promise<void> {
     creeLe,
     modifieLe: creeLe,
   };
-  const location = { type: 'meublee', debut: '2025-10-01', jourLoyer: 5, charges: 5_000, creeLe };
+  const location = {
+    type: 'meublee',
+    debut: '2025-10-01',
+    jourLoyer: 5,
+    charges: 5_000,
+    colocataireIds: [],
+    creeLe,
+  };
   await page.route('**/api/gestion/etat', (route) =>
     route.fulfill({
       json: {

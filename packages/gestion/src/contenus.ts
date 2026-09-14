@@ -11,10 +11,11 @@ import type { BienGere, Locataire, LocationGeree, Paiement } from './schemas';
 export interface EntreesDocument {
   readonly bailleur: IdentiteBailleur | null;
   readonly bien: Pick<BienGere, 'nom' | 'adresse'>;
-  readonly locataire: Pick<Locataire, 'prenom' | 'nom'>;
+  /** Le locataire en titre puis les colocataires, dans l'ordre du bail. */
+  readonly locataires: readonly Pick<Locataire, 'prenom' | 'nom'>[];
   readonly location: Pick<
     LocationGeree,
-    'id' | 'debut' | 'fin' | 'jourLoyer' | 'loyerHorsCharges' | 'charges'
+    'id' | 'libelle' | 'debut' | 'fin' | 'jourLoyer' | 'loyerHorsCharges' | 'charges'
   >;
   /** Les paiements de la location (ceux des autres locations sont ignorés). */
   readonly paiements: readonly Paiement[];
@@ -54,7 +55,7 @@ function socle(
   ContenuDocument,
   | 'emisLe'
   | 'bailleur'
-  | 'locataire'
+  | 'locataires'
   | 'logement'
   | 'periode'
   | 'debut'
@@ -66,8 +67,12 @@ function socle(
   return {
     emisLe: e.emisLe,
     bailleur: { nom: e.bailleur.nom, adresse: e.bailleur.adresse },
-    locataire: { prenom: e.locataire.prenom, nom: e.locataire.nom },
-    logement: { nom: e.bien.nom, adresse: e.bien.adresse },
+    locataires: e.locataires.map((l) => ({ prenom: l.prenom, nom: l.nom })),
+    logement: {
+      nom: e.bien.nom,
+      adresse: e.bien.adresse,
+      ...(e.location.libelle === undefined ? {} : { libelle: e.location.libelle }),
+    },
     periode: du.periode,
     debut: du.debut,
     fin: du.fin,

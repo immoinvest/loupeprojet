@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 import { JourSchema, periodeDe } from './dates';
 import {
+  ColocatairesSchema,
   NouveauLocataireSchema,
   NouvelleLocationSchema,
   type LocationGeree,
@@ -11,10 +12,11 @@ import {
 /** La date de sortie d'un locataire. */
 export const FinLocationSchema = z.object({ fin: JourSchema });
 
-/** Louer un bien vacant : le locataire et la location, sans la partie bien. */
+/** Louer un bien (vacant, ou une autre chambre) : le locataire, ses colocataires et la location. */
 export const NouvelleOccupationSchema = z.object({
   locataire: NouveauLocataireSchema,
   location: NouvelleLocationSchema,
+  colocataires: ColocatairesSchema.optional(),
 });
 
 export type FinLocation = z.infer<typeof FinLocationSchema>;
@@ -42,10 +44,22 @@ export function refusFin(
 interface Periode {
   readonly debut: string;
   readonly fin?: string | undefined;
+  readonly libelle?: string | undefined;
 }
 
-/** La nouvelle location chevauche-t-elle l'une de celles du bien ? (bornes comprises) */
+/** « Chambre 2 » et « chambre 2 » désignent la même chambre ; sans libellé, le bien entier. */
+function memeLibelle(a: Periode, b: Periode): boolean {
+  return (a.libelle ?? '').toLocaleLowerCase('fr') === (b.libelle ?? '').toLocaleLowerCase('fr');
+}
+
+/**
+ * La nouvelle location chevauche-t-elle une location du bien au même libellé ? (bornes comprises)
+ * Deux chambres différentes se louent aux mêmes dates (ADR-G13).
+ */
 export function chevauche(existantes: readonly Periode[], nouvelle: Periode): boolean {
   const finNouvelle = nouvelle.fin ?? SANS_FIN;
-  return existantes.some((l) => l.debut <= finNouvelle && nouvelle.debut <= (l.fin ?? SANS_FIN));
+  return existantes.some(
+    (l) =>
+      memeLibelle(l, nouvelle) && l.debut <= finNouvelle && nouvelle.debut <= (l.fin ?? SANS_FIN),
+  );
 }

@@ -2,7 +2,13 @@ import { z } from 'zod';
 
 import { JourSchema, PeriodeSchema } from './dates';
 import { DocumentCompletSchema, DocumentSchema, IdentiteBailleurSchema } from './documents';
-import { JOUR_LOYER_MAX, MONTANT_MAX_CENTIMES, TYPES_BIEN, TYPES_LOCATION } from './regles';
+import {
+  COLOCATAIRES_MAX,
+  JOUR_LOYER_MAX,
+  MONTANT_MAX_CENTIMES,
+  TYPES_BIEN,
+  TYPES_LOCATION,
+} from './regles';
 
 /*
  * Les objets de la gestion locative. Montants en centimes entiers (ADR-G2), dates en jours civils.
@@ -55,7 +61,12 @@ export const LocataireSchema = z.object({
   creeLe: HorodatageSchema,
 });
 
+/** Colocation à bail unique : les autres locataires du bail, dans l'ordre de saisie (ADR-G13). */
+export const ColocatairesSchema = z.array(NouveauLocataireSchema).max(COLOCATAIRES_MAX);
+
 const champsLocation = {
+  /** Location à la chambre : ce qui distingue les locations simultanées d'un bien (« Chambre 2 »). */
+  libelle: texte(40).optional(),
   type: TypeLocationSchema,
   /** Entrée du locataire. */
   debut: JourSchema,
@@ -81,7 +92,10 @@ export const LocationGereeSchema = z
   .object({
     id: IdentifiantSchema,
     bienId: IdentifiantSchema,
+    /** Le locataire en titre, saisi en premier. */
     locataireId: IdentifiantSchema,
+    /** Les colocataires du même bail, dans l'ordre ; vide hors colocation. */
+    colocataireIds: z.array(IdentifiantSchema).max(COLOCATAIRES_MAX),
     ...champsLocation,
     creeLe: HorodatageSchema,
   })
@@ -120,16 +134,23 @@ export const CreationLocationSchema = z
     bien: NouveauBienSchema,
     locataire: NouveauLocataireSchema.nullable(),
     location: NouvelleLocationSchema.nullable(),
+    /** Absent ou vide hors colocation. */
+    colocataires: ColocatairesSchema.optional(),
   })
   .refine((c) => (c.locataire === null) === (c.location === null), {
     message: 'Un locataire va avec une location',
     path: ['location'],
+  })
+  .refine((c) => c.location !== null || (c.colocataires ?? []).length === 0, {
+    message: 'Des colocataires vont avec une location',
+    path: ['colocataires'],
   });
 
 export const CreationReponseSchema = z.object({
   bien: BienGereSchema,
   locataire: LocataireSchema.nullable(),
   location: LocationGereeSchema.nullable(),
+  colocataires: z.array(LocataireSchema),
 });
 
 export const EtatGestionSchema = z.object({

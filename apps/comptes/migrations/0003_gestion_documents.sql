@@ -21,3 +21,11 @@ create table "gestion_bailleur" ("userId" text not null primary key references "
 create table "gestion_document" ("id" text not null primary key, "userId" text not null references "user" ("id") on delete cascade, "cle" text not null, "type" text not null, "numero" text not null, "locationId" text not null references "gestion_location" ("id") on delete cascade, "periode" text not null, "paiementId" text, "contenu" text not null, "emisLe" text not null, unique ("userId", "cle"));
 
 create index "gestion_document_userId_idx" on "gestion_document" ("userId");
+
+-- Plusieurs locataires pour un bien (décision de Pierre du 14/09/2026, ADR-G13) : les colocataires d'un
+-- bail unique, et un libellé pour distinguer les locations simultanées d'un bien (« Chambre 2 »).
+create table "gestion_colocataire" ("locationId" text not null references "gestion_location" ("id") on delete cascade, "locataireId" text not null references "gestion_locataire" ("id") on delete cascade, "userId" text not null references "user" ("id") on delete cascade, "ordre" integer not null, primary key ("locationId", "locataireId"));
+
+create index "gestion_colocataire_userId_idx" on "gestion_colocataire" ("userId");
+
+alter table "gestion_location" add column "libelle" text;

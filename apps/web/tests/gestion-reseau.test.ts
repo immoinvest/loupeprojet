@@ -48,6 +48,7 @@ describe('clientGestionReseau', () => {
       bien: { ...ETAT_SEPTEMBRE.biens[0], id: 'b9' },
       locataire: null,
       location: null,
+      colocataires: [],
     };
     const creation = serveur(() => json(201, reponse));
     expect(await clientGestionReseau(creation.recuperer).creer(CREATION_LOUEE)).toEqual({
