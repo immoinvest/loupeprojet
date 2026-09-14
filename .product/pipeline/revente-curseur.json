@@ -1,0 +1,36 @@
+{
+  "feature_slug": "revente-curseur",
+  "title": "Revente : un curseur d'horizon de 1 à 30 ans (fiche de backlog 06)",
+  "started_at": "2026-09-14T14:00:00Z",
+  "current_step": "implement",
+  "scope": "apps/web/src/composants/Curseur.tsx, index.css, analyses/{revente,plus-value}.ts, ecrans/Revente.tsx, ecrans/revente/Horizon.tsx, tests, e2e/onglets.spec.ts ; aucun changement du moteur",
+  "branch": "feat/revente-curseur",
+  "base": "master (9d38892, après la PR #38 gestion-locative-menu)",
+  "steps": {
+    "discovery": {
+      "status": "completed",
+      "output": ".product/features/revente-curseur-discovery.md"
+    },
+    "specs": {
+      "status": "completed",
+      "output": ".product/specs/revente-curseur-specs.md"
+    },
+    "architecture": {
+      "status": "completed",
+      "output": ".product/architecture/revente-curseur.md"
+    },
+    "implement": { "status": "in_progress", "stories_completed": 0, "stories_total": 4 },
+    "refactor": { "status": "pending" },
+    "qa_tests": { "status": "pending" },
+    "security": { "status": "pending" },
+    "push": { "status": "pending" }
+  },
+  "decisions": {
+    "bornes": "curseur de 1 à 30 ans (zéro impossible dans le moteur et sans sens), bornes alignées sur ReventeSchema et vérifiées par test",
+    "reperes": "graduations 5, 10, 15, 20, 25, 30 ; seuils 22 ans (plus d'impôt sur le revenu) et 30 ans (plus de prélèvements sociaux) déduits des règles, marqués sur la piste et expliqués en légende",
+    "taux": "taux global d'imposition de la plus-value de l'année choisie (IR et PS après abattements, hors surtaxe) calculé depuis obtenirRegles(projet.versionRegles), jamais recopié",
+    "ecriture": "état local pendant le glissement, recalcul sans scénarios, écriture par appliquerSaisie au relâchement ou 150 ms après le dernier mouvement",
+    "cartes": "les quatre cartes 5/10/15/20 restent en bandeau compact sous le curseur (raccourcis et trajectoire) ; pas de graphique en v1",
+    "composant": "Curseur générique dans composants/Curseur.tsx (min, max, pas, libellé, formatage, repères, seuils, aria-valuetext, clavier) prévu pour la fiche 04 (négociation) ; texte seul en mode document"
+  }
+}
