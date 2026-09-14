@@ -119,24 +119,9 @@ describe('calculerVerdict — T3 Marseille', () => {
     expect(verdict.synthese).toEqual({ bons: 2, surveiller: 2, problemes: 1, inconnus: 0 });
   });
 
-  it('liste les points de vigilance attendus, sans phrase rédigée', () => {
-    const c = codes(verdict);
-    expect(c).toEqual(
-      expect.arrayContaining([
-        'PV_AG_ET_CARNET',
-        'CONFIRMER_CHARGES_COPRO',
-        'VERIFIER_DPE',
-        'SANS_ASCENSEUR_ETAGE_ELEVE',
-        'EXPLIQUER_PRIX_SOUS_MARCHE',
-        'CONFIRMER_TAXE_FONCIERE',
-        'PS_BIC_A_CONFIRMER',
-      ]),
-    );
-    expect(c).not.toContain('COPRO_EN_PROCEDURE');
-    expect(c).not.toContain('RENOVATION_ENERGETIQUE_OBLIGATOIRE');
-    expect(c).not.toContain('EFFORT_HCSF_DEPASSE');
-    const pv = verdict.vigilance.find((p) => p.code === 'PV_AG_ET_CARNET');
-    expect(pv?.parametres).toEqual({ lots: 24, annee: 1962 });
+  it('ne liste que les points financiers, sans phrase rédigée : ici les PS du meublé à confirmer', () => {
+    expect(codes(verdict)).toEqual(['PS_BIC_A_CONFIRMER']);
+    expect(verdict.vigilance[0]?.parametres).toEqual({ taux: 0.186 });
     for (const p of verdict.vigilance) {
       expect(p.code).toMatch(/^[A-Z_]+$/);
     }
@@ -155,7 +140,7 @@ describe('calculerVerdict — variantes', () => {
     hypotheses: { ...projetExemple.hypotheses, ...hypotheses },
   });
 
-  it('DPE G, copro en procédure, risque fort : problème et codes dédiés', () => {
+  it('DPE G, copro en procédure, risque fort : problème aux feux, mais ces signaux ne sont plus des points (ils sont dans la liste de visite)', () => {
     const { verdict } = verdictDe(
       variante(
         { dpe: 'G', copro: { lots: 12, procedure: true } },
@@ -164,36 +149,7 @@ describe('calculerVerdict — variantes', () => {
     );
     expect(verdict.feux[4]?.feu).toBe('probleme');
     expect(verdict.feux[0]?.feu).toBe('inconnu');
-    const c = codes(verdict);
-    expect(c).toContain('COPRO_EN_PROCEDURE');
-    expect(c).toContain('RISQUE_NATUREL');
-    expect(c).not.toContain('EXPLIQUER_PRIX_SOUS_MARCHE');
-    const reno = verdict.vigilance.find((p) => p.code === 'RENOVATION_ENERGETIQUE_OBLIGATOIRE');
-    expect(reno?.parametres).toEqual({ dpe: 'G', annee: 2025 });
-  });
-
-  it('sans copro, sans DPE, sans étage : moins de points ; lots et année inconnus tolérés', () => {
-    const { verdict } = verdictDe(
-      variante({ copro: undefined, dpe: undefined, etage: undefined, annee: undefined }),
-    );
-    const c = codes(verdict);
-    expect(c).not.toContain('PV_AG_ET_CARNET');
-    expect(c).not.toContain('VERIFIER_DPE');
-    expect(c).not.toContain('SANS_ASCENSEUR_ETAGE_ELEVE');
-    const { verdict: sansLots } = verdictDe(variante({ copro: {}, annee: undefined }));
-    expect(sansLots.vigilance.find((p) => p.code === 'PV_AG_ET_CARNET')?.parametres).toEqual({
-      lots: 0,
-      annee: 0,
-    });
-  });
-
-  it('étage élevé avec ascenseur ou étage bas : pas de signal', () => {
-    expect(codes(verdictDe(variante({ ascenseur: true })).verdict)).not.toContain(
-      'SANS_ASCENSEUR_ETAGE_ELEVE',
-    );
-    expect(codes(verdictDe(variante({ etage: 1 })).verdict)).not.toContain(
-      'SANS_ASCENSEUR_ETAGE_ELEVE',
-    );
+    expect(codes(verdict)).toEqual(['PS_BIC_A_CONFIRMER']);
   });
 
   it('revenus trop faibles (projet ancien) et prêt trop long : effort HCSF et durée signalés', () => {

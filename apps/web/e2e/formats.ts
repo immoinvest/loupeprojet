@@ -57,13 +57,15 @@ export interface DonneesDeTest {
   readonly id: string;
   /** La copie du projet d'exemple, avec une adresse. */
   readonly idAvecAdresse: string;
+  /** La copie dont la visite est faite, avec des réponses : son onglet est un compte rendu. */
+  readonly idVisiteFaite: string;
   readonly lienPartage: string;
 }
 
 /**
- * Ouvre Deklic (le projet d'exemple est créé au premier lancement), ajoute une copie pour que
- * Comparer ait deux projets (la copie a une adresse, pour l'onglet Estimation), et fabrique le lien
- * de partage du projet d'exemple.
+ * Ouvre Deklic (le projet d'exemple est créé au premier lancement), ajoute deux copies (l'une avec
+ * une adresse pour l'onglet Estimation, l'autre avec une visite faite pour le compte rendu ; Comparer
+ * a ainsi plusieurs projets), et fabrique le lien de partage du projet d'exemple.
  */
 export async function preparerDonnees(page: Page): Promise<DonneesDeTest> {
   await page.goto('/projets');
@@ -74,13 +76,32 @@ export async function preparerDonnees(page: Page): Promise<DonneesDeTest> {
     const exemple = projets[0];
     if (exemple === undefined) throw new Error("Le projet d'exemple est absent.");
     const copie = { ...exemple, id: 'copie-formats', nom: 'Copie · T3 · Marseille', adresse };
-    localStorage.setItem(cle, JSON.stringify([exemple, copie]));
+    const visitee = {
+      ...exemple,
+      id: 'visite-faite',
+      nom: 'Visité · T3 · Marseille',
+      visite: {
+        faite: true,
+        date: '2026-09-14T10:00:00.000Z',
+        reponses: {
+          DOC_TITRE_PLAN: { etat: 'ok' },
+          DOC_TAXE_FONCIERE: { etat: 'probleme', note: 'Avis 2025 : 1 320 €, en hausse.' },
+          LOG_BRUIT: { etat: 'sans_objet' },
+        },
+      },
+    };
+    localStorage.setItem(cle, JSON.stringify([exemple, copie, visitee]));
     // Même encodage que stockage/partage.ts : base64url du JSON UTF-8 du projet enregistré.
     const octets = new TextEncoder().encode(JSON.stringify(exemple));
     let binaire = '';
     for (const octet of octets) binaire += String.fromCharCode(octet);
     const encode = btoa(binaire).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-    return { id: exemple.id, idAvecAdresse: copie.id, lienPartage: `/partage#p=${encode}` };
+    return {
+      id: exemple.id,
+      idAvecAdresse: copie.id,
+      idVisiteFaite: visitee.id,
+      lienPartage: `/partage#p=${encode}`,
+    };
   }, ADRESSE_SIMULEE);
 }
 
@@ -123,6 +144,7 @@ export interface Ecran {
 export function ecransDeReference({
   id,
   idAvecAdresse,
+  idVisiteFaite,
   lienPartage,
 }: DonneesDeTest): readonly Ecran[] {
   const projet = `/projets/${id}`;
@@ -158,6 +180,15 @@ export function ecransDeReference({
     { nom: 'Fiscalité', chemin: `${projet}/fiscalite` },
     { nom: 'Revente', chemin: `${projet}/revente` },
     { nom: 'Visite', chemin: `${projet}/visite` },
+    {
+      nom: 'Visite faite (compte rendu)',
+      chemin: `/projets/${idVisiteFaite}/visite`,
+      ouvrir: async (page) => {
+        await expect(
+          page.getByRole('heading', { level: 1, name: 'Compte rendu de visite' }),
+        ).toBeVisible();
+      },
+    },
     { nom: 'Comparer', chemin: '/comparer' },
     { nom: 'Méthode', chemin: '/methode' },
     { nom: 'Extension', chemin: '/extension' },

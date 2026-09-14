@@ -120,6 +120,19 @@ export const regles202609: Regles = {
     couverture: { bonJusqua: 0.7, surveillerJusqua: 1 },
   },
 
+  visite: {
+    // Diagnostic amiante : permis de construire avant le 1er juillet 1997 (art. L1334-13 du Code de la santé publique).
+    amianteAvantAnnee: 1997,
+    // Constat de risque d'exposition au plomb : construction avant le 1er janvier 1949 (art. L1334-5).
+    plombAvantAnnee: 1949,
+    // Diagnostics électricité et gaz : installations de plus de 15 ans (art. L134-7 et L134-6 du CCH).
+    installationsAnciennesAns: 15,
+    // Choix Deklic, aligné sur les coefficients d'étage de l'estimation.
+    etageSansAscenseur: 3,
+    // Décence : 9 m² de surface habitable pour la pièce principale (décret 2002-120, art. 4), appliqué à chaque chambre.
+    chambreColocationM2: 9,
+  },
+
   estimation: {
     // DVF ne dit rien de l'état : un bien à rénover se vend dans le bas des ventes comparables,
     // un bien rénové dans le haut (choix Deklic).

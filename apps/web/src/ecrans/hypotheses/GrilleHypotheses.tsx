@@ -5,7 +5,6 @@ import { Ligne } from '@/composants/ui';
 import { useProjetCourant } from '@/coque/ProjetLayout';
 import {
   appliquerSaisie,
-  cleProvenance,
   texteLisible,
   valeurActuelle,
   versTexte,
@@ -14,13 +13,8 @@ import {
 } from '@/hypotheses';
 import { useProjets } from '@/stockage/ProjetsContext';
 
-import { BADGES, ChampHypothese, badgeDeSource, type BadgeProvenance } from './ChampHypothese';
-
-function badgePour(projet: ProjetEntree, d: Descripteur): BadgeProvenance | null {
-  const badge = badgeDeSource(projet.provenance?.[cleProvenance(d.chemin)]);
-  if (badge !== null) return badge;
-  return d.aToi === true ? (BADGES.utilisateur ?? null) : null;
-}
+import { badgePour } from './badges';
+import { ChampHypothese } from './ChampHypothese';
 
 export function champsVisibles(groupe: Groupe, projet: ProjetEntree): readonly Descripteur[] {
   return groupe.champs.filter((d) => d.visibleSi === undefined || d.visibleSi(projet));
