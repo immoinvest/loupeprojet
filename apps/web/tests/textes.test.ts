@@ -90,6 +90,10 @@ describe('vigilance', () => {
     expect(phraseVigilance(p('DUREE_PRET_HORS_HCSF', { dureeMax: 25 }))).toContain('25 ans');
     expect(n(phraseVigilance(p('PS_BIC_A_CONFIRMER', { taux: 0.186 })))).toContain('18,6 %');
     expect(phraseVigilance(p('EFFORT_HCSF_DEPASSE', { seuil: 'x' }))).toContain('0 %');
+    // Paramètre absent : la phrase reste lisible, sans valeur (repli sur une chaîne vide).
+    expect(phraseVigilance(p('DUREE_PRET_HORS_HCSF'))).toBe(
+      'Prêt plus long que le maximum bancaire de  ans.',
+    );
   });
 });
 
