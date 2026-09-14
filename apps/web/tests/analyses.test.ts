@@ -42,7 +42,7 @@ describe('projetAHorizon', () => {
     expect(variante.hypotheses.achat).toBe(projetExemple.hypotheses.achat);
     expect(variante.bien).toBe(projetExemple.bien);
     expect(projetExemple.hypotheses.revente?.annees).toBe(10);
-    expect(calculerProjet(variante).revente.annees).toBe(17);
+    expect(calculerProjet(variante).revente!.annees).toBe(17);
   });
 });
 
@@ -51,7 +51,7 @@ describe('variantesRevente', () => {
     const v = variantesRevente(projetExemple);
     expect(v.map((x) => x.annees)).toEqual([...HORIZONS]);
     expect(v[1]?.cashNetVendeur).toBeCloseTo(
-      calculerProjet(projetExemple).revente.cashNetVendeur,
+      calculerProjet(projetExemple).revente!.cashNetVendeur,
       6,
     );
     expect(v[3]!.valeur).toBeGreaterThan(v[0]!.valeur);
@@ -66,6 +66,17 @@ describe('variantesRevente', () => {
   it('accepte des horizons sur mesure', () => {
     const v = variantesRevente(projetExemple, [3, 25]);
     expect(v.map((x) => x.annees)).toEqual([3, 25]);
+  });
+
+  it('ne rend rien pour un projet sans loyer : aucune revente calculable', () => {
+    const location = Object.fromEntries(
+      Object.entries(projetExemple.hypotheses.location).filter(([k]) => k !== 'loyerHc'),
+    );
+    const sansLoyer = {
+      ...projetExemple,
+      hypotheses: { ...projetExemple.hypotheses, location },
+    } as typeof projetExemple;
+    expect(variantesRevente(sansLoyer)).toEqual([]);
   });
 });
 

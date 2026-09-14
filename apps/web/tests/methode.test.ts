@@ -35,6 +35,7 @@ describe('defautsDuMoteur', () => {
       fraisAgenceTaux: 0.04,
       diagnostics: 500,
       honorairesChargeAcquereur: true,
+      tmi: 0.3,
       negociationTaux: 0,
       pno: 150,
       comptable: 420,
@@ -44,7 +45,10 @@ describe('defautsDuMoteur', () => {
       mobilierParM2: 75,
       coproParM2An: 25,
       taxeFonciereEnMoisDeLoyer: 1,
+      taxeFonciereParM2An: 14,
       surfaceParPiece: 20,
+      apport: 0,
+      dureeAnnees: 25,
     });
   });
 });

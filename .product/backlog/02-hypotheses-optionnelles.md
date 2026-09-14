@@ -1,6 +1,6 @@
 # 02 — Hypothèses optionnelles : moins de friction, analyses qui disent ce qui leur manque
 
-Statut : `idée` · Notée le 14/09/2026 · Dépend de : 01 (revenus), 04 (travaux) — à spécifier après elles, ou en les absorbant
+Statut : `livrée` (14/09/2026, branche `feat/hypotheses-optionnelles` ; discovery `../features/hypotheses-optionnelles-discovery.md`, specs `../specs/hypotheses-optionnelles-specs.md`, architecture `../architecture/hypotheses-optionnelles.md`, 14/09/2026) · Notée le 14/09/2026 · Dépend de : 01 (revenus), 04 (travaux) : implémentée avant leur fusion, sur décision de Pierre
 
 ## La demande de Pierre
 

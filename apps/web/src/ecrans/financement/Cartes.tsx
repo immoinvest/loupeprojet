@@ -94,7 +94,8 @@ export function CarteCouverture({ r }: { r: Resultats }): JSX.Element {
   const feu = r.verdict.feux.find((x) => x.axe === 'couverture');
   const etat = feu?.feu ?? 'inconnu';
   const valeur = feu?.valeur ?? null;
-  const loyer = r.cashflow.recettes.loyersBruts / 12;
+  // Sans loyer (rapport partiel), les lignes qui partent du loyer attendent.
+  const loyer = r.complet ? r.cashflow.recettes.loyersBruts / 12 : null;
   const ton =
     etat === 'bon'
       ? 'bon'
@@ -116,14 +117,16 @@ export function CarteCouverture({ r }: { r: Resultats }): JSX.Element {
       </GrosChiffre>
       <p className="m-0 text-[15px] leading-relaxed text-encre-2">{phraseCouverture(etat)}</p>
       <div>
-        <Ligne libelle="Loyer hors charges" valeur={euros(loyer)} />
+        {loyer !== null && <Ligne libelle="Loyer hors charges" valeur={euros(loyer)} />}
         <Ligne libelle="Crédit et assurance" valeur={eurosSignes(-f.mensualiteTotale)} />
-        <Ligne
-          libelle="Reste pour les charges et pour vous"
-          valeur={eurosSignes(loyer - f.mensualiteTotale)}
-          fort
-          tonValeur={loyer - f.mensualiteTotale >= 0 ? 'text-bon' : 'text-probleme'}
-        />
+        {loyer !== null && (
+          <Ligne
+            libelle="Reste pour les charges et pour vous"
+            valeur={eurosSignes(loyer - f.mensualiteTotale)}
+            fort
+            tonValeur={loyer - f.mensualiteTotale >= 0 ? 'text-bon' : 'text-probleme'}
+          />
+        )}
         {f.effort.hcsf !== null && (
           <Ligne
             libelle={

@@ -1,6 +1,7 @@
 import { prixRetenu } from '../achat';
 import { arrondirEuro, arrondirTaux } from '../commun/arrondi';
 import { loyerMensuelHc } from '../location/equivalents';
+import { loyerConnu } from '../schema/hypotheses';
 import type { Regles } from '../regles/types';
 import type { Bien, EtatBien } from '../schema/bien';
 import type { CodeCorrection } from '../schema/estimation';
@@ -98,11 +99,14 @@ export function effetCharges(
   const { coproAnnuel } = projet.hypotheses.charges;
   if (coproAnnuel === 0 || projet.provenance['charges.coproAnnuel'] === 'estime') return null;
   const { loyerReferenceM2 } = projet.marche;
+  const { location } = projet.hypotheses;
   const rendementLocal =
-    loyerReferenceM2 === undefined
-      ? (loyerMensuelHc(projet.hypotheses.location) * 12) / prixRetenu(projet.hypotheses.achat)
-      : (loyerReferenceM2 * 12) / dvf.medianM2;
-  if (rendementLocal <= 0) return null;
+    loyerReferenceM2 !== undefined
+      ? (loyerReferenceM2 * 12) / dvf.medianM2
+      : loyerConnu(location)
+        ? (loyerMensuelHc(location) * 12) / prixRetenu(projet.hypotheses.achat)
+        : null;
+  if (rendementLocal === null || rendementLocal <= 0) return null;
   const repereAnnuel = regles.estimation.charges.repereM2An * projet.bien.surface;
   const excedentAnnuel = coproAnnuel - repereAnnuel;
   const brut = -excedentAnnuel / rendementLocal;

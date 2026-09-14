@@ -38,13 +38,14 @@ describe('Vérifier — le type de location en tête de la carte « La location 
       expect(screen.getByLabelText(/Chambres louées/)).toHaveValue('3');
 
       await remplirBien(utilisateur);
+      const loyerChambre = screen.getByLabelText(/Loyer par chambre/);
+      await utilisateur.type(loyerChambre, '-5');
       await utilisateur.click(screen.getByRole('button', { name: /Créer le projet/ }));
-      expect(
-        screen.getByText('Indiquez le loyer d’une chambre, hors charges.'),
-      ).toBeInTheDocument();
+      expect(screen.getByText('Un montant positif, ou rien.')).toBeInTheDocument();
       expect(onCreer).not.toHaveBeenCalled();
 
-      await utilisateur.type(screen.getByLabelText(/Loyer par chambre/), '450');
+      await utilisateur.clear(loyerChambre);
+      await utilisateur.type(loyerChambre, '450');
       await utilisateur.click(screen.getByRole('button', { name: /Créer le projet/ }));
       expect(onCreer).toHaveBeenCalledTimes(1);
       expect(onCreer.mock.calls[0]?.[0]).toMatchObject({

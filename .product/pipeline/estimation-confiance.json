@@ -2,7 +2,7 @@
   "feature_slug": "estimation-confiance",
   "title": "Estimation : note de confiance expliquée en tête d'onglet, repère visible sans adresse (PR 1) ; carte des ventes (PR 2)",
   "started_at": "2026-09-14T12:00:00Z",
-  "current_step": "pr2_en_cours",
+  "current_step": "termine",
   "scope": "packages/moteur/src/{estimation,regles,schema/marche.ts,schema/resultats.ts}, data/src/{schemas/dvf.ts,sources/dvf/statistiques.ts}, apps/worker/src/{donnees/anciennete.ts,marche,adresse}, apps/web/src/{enrichissement,textes/confiance.ts,ecrans/Adresse.tsx,ecrans/adresse,ecrans/rapport/CartePrix.tsx,textes/methode-estimation.ts}, e2e",
   "branch": "feat/estimation-confiance",
   "base": "master (9d38892, PR #38 fusionnée)",
@@ -98,11 +98,17 @@
   "pr2": {
     "branch": "feat/estimation-carte",
     "base": "master (e9462ad, PR #47 fusionnée)",
-    "status": "in_progress",
+    "status": "completed",
     "stories": [
       "US-7 worker ventesCarte (contrat v6, Worker 0.8.0)",
       "US-8 composant CarteVentes (Leaflet, tuiles IGN)"
     ],
-    "verifications": "service WMTS IGN vérifié le 14/09/2026 : couche PLANIGNV2, tuile PNG sans clé, CORS ouvert"
+    "verifications": "service WMTS IGN vérifié le 14/09/2026 : couche PLANIGNV2, tuile PNG sans clé, CORS ouvert",
+    "pr": "https://github.com/immoinvest/loupeprojet/pull/57",
+    "merge": "9964e76",
+    "deploiement": "Worker 0.8.0 déployé le 14/09/2026 (version 3ee97312-2169-426d-a251-bcc310139d1a) ; /health 0.8.0 et ventesCarte (300 ventes, plafond) vérifiés en production",
+    "correctif_cache": "PR https://github.com/immoinvest/loupeprojet/pull/60 : la réponse /marche/adresse sans ventesCarte restait dans le cache HTTP du navigateur (Cache-Control public, max-age=3600, même URL) ; CONTRAT_ADRESSE et CONTRAT_MARCHE ajoutés aux URL par le client web",
+    "verifications_locales": "e2e/carte.spec.ts vert sur ordinateur et téléphone ; spec des formats verte (écran Estimation avec la carte) ; build : Leaflet dans un fichier séparé chargé à la demande",
+    "alerte_depot": "dépôt privé sur l'offre gratuite : protection de master et rulesets indisponibles (HTTP 403), gh pr merge --auto fusionne immédiatement ; PR #57 fusionnée avant sa CI (verify ensuite vert) ; PR #60 fusionnée à la main après verify"
   }
 }

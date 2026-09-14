@@ -52,7 +52,7 @@ describe('migrerProjet', () => {
       gestionTaux: 0.07,
     });
     const projet = ProjetSchema.parse(migre);
-    expect(calculerProjet(projet).cashflow.recettes.loyersBruts).toBe(11_760);
+    expect(calculerProjet(projet).cashflow?.recettes.loyersBruts).toBe(11_760);
   });
 
   it('la courte durée : occupation → nuitées par mois, ménage par nuit → coût par séjour', () => {

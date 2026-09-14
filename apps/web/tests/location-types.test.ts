@@ -250,19 +250,23 @@ describe('formulaire Vérifier : champs et saisie par type', () => {
     apport: '10000',
   };
 
-  it('valide les champs de loyer du type choisi', () => {
-    expect(valider({ ...base, mode: 'meuble' })).toEqual({
-      loyerHc: 'Indiquez le loyer visé, hors charges.',
+  it('valide les champs de loyer du type choisi : vides permis, mal remplis signalés', () => {
+    expect(valider({ ...base, mode: 'meuble' })).toEqual({});
+    expect(valider({ ...base, mode: 'meuble', loyerHc: 'abc' })).toEqual({
+      loyerHc: 'Nombre attendu.',
     });
-    expect(valider({ ...base, mode: 'colocation', chambresLouees: '0', loyerChambre: '' })).toEqual(
-      {
-        chambresLouees: 'Indiquez le nombre de chambres louées (1 à 20).',
-        loyerChambre: 'Indiquez le loyer d’une chambre, hors charges.',
-      },
+    expect(
+      valider({ ...base, mode: 'colocation', chambresLouees: '0', loyerChambre: '-5' }),
+    ).toEqual({
+      chambresLouees: 'Entre 1 et 20 chambres, ou rien.',
+      loyerChambre: 'Un montant positif, ou rien.',
+    });
+    expect(valider({ ...base, mode: 'colocation', chambresLouees: '', loyerChambre: '' })).toEqual(
+      {},
     );
     expect(valider({ ...base, mode: 'courte_duree', nuitee: '0', nuiteesParMois: '32' })).toEqual({
-      nuitee: 'Indiquez le prix d’une nuit.',
-      nuiteesParMois: 'Entre 0 et 31 nuits par mois.',
+      nuitee: 'Un prix positif, ou rien.',
+      nuiteesParMois: 'Entre 0 et 31 nuits, ou rien.',
     });
     expect(
       valider({ ...base, mode: 'courte_duree', nuitee: '70', nuiteesParMois: '16', loyerHc: '' }),
@@ -297,9 +301,13 @@ describe('formulaire Vérifier : champs et saisie par type', () => {
     const md = versSaisie({ ...base, mode: 'moyenne_duree', loyerHc: '900' }, {}, null);
     expect(md).toMatchObject({ mode: 'moyenne_duree', loyerHc: 900 });
     const vide = versSaisie({ ...base, mode: 'colocation' }, {}, null);
-    expect(vide.loyerHc).toBe(0);
-    expect(versSaisie({ ...base, mode: 'courte_duree' }, {}, null).loyerHc).toBe(0);
-    expect(versSaisie({ ...base, mode: 'nu' }, {}, null).loyerHc).toBe(0);
+    // Rien de saisi : pas de loyer, construireProjet prend le loyer de marché s'il le connaît.
+    expect(vide.loyerHc).toBeUndefined();
+    expect(
+      versSaisie({ ...base, mode: 'colocation', chambresLouees: '3' }, {}, null).loyerHc,
+    ).toBeUndefined();
+    expect(versSaisie({ ...base, mode: 'courte_duree' }, {}, null).loyerHc).toBeUndefined();
+    expect(versSaisie({ ...base, mode: 'nu' }, {}, null).loyerHc).toBeUndefined();
   });
 });
 

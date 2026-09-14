@@ -6,7 +6,13 @@ import { calculerFiscalite } from '../../src/fiscalite';
 import { obtenirRegles } from '../../src/regles';
 import { calculerRendement } from '../../src/rendement';
 import { calculerRevente } from '../../src/revente';
-import { MarcheSchema, ProjetSchema, type Projet, type ProjetEntree } from '../../src/schema';
+import {
+  MarcheSchema,
+  ProjetSchema,
+  parserComplet,
+  type Projet,
+  type ProjetEntree,
+} from '../../src/schema';
 import {
   calculerVerdict,
   feuCashflow,
@@ -14,13 +20,14 @@ import {
   feuPrix,
   feuRendement,
   feuRisques,
+  pointsDeVigilance,
   type ResultatVerdict,
 } from '../../src/verdict';
 
 const regles = obtenirRegles('2026-09');
 
 function verdictDe(entree: ProjetEntree): { projet: Projet; verdict: ResultatVerdict } {
-  const projet = ProjetSchema.parse(entree);
+  const projet = parserComplet(entree);
   const financement = calculerFinancement(projet, regles);
   const fiscalite = calculerFiscalite(projet, financement, regles);
   const revente = calculerRevente(projet, financement, fiscalite, regles);
@@ -44,6 +51,7 @@ describe('feux unitaires', () => {
       axe: 'prix',
       feu: 'inconnu',
       valeur: null,
+      raison: null,
     });
   });
 
@@ -67,7 +75,7 @@ describe('feux unitaires', () => {
 
   it('couverture : bon jusqu’à 70 % du loyer, à surveiller jusqu’à 100 %, problème au-dessus, inconnu sans loyer', () => {
     const bon = feuCouverture(0.65, regles);
-    expect(bon).toEqual({ axe: 'couverture', feu: 'bon', valeur: 0.65 });
+    expect(bon).toEqual({ axe: 'couverture', feu: 'bon', valeur: 0.65, raison: null });
     expect(feuCouverture(0.7, regles).feu).toBe('bon');
     expect(feuCouverture(0.84, regles).feu).toBe('surveiller');
     expect(feuCouverture(1, regles).feu).toBe('surveiller');
@@ -76,17 +84,50 @@ describe('feux unitaires', () => {
       axe: 'couverture',
       feu: 'inconnu',
       valeur: null,
+      raison: null,
     });
+  });
+
+  it('un feu inconnu porte la donnée qui manque ; un feu connu ne porte aucune raison', () => {
+    expect(feuCouverture(null, regles, 'LOYER_ABSENT')).toEqual({
+      axe: 'couverture',
+      feu: 'inconnu',
+      valeur: null,
+      raison: 'LOYER_ABSENT',
+    });
+    expect(feuCouverture(0.84, regles, 'LOYER_ABSENT').raison).toBeNull();
+    expect(feuRendement(null, regles, 'LOYER_ABSENT')).toEqual({
+      axe: 'rendement',
+      feu: 'inconnu',
+      valeur: null,
+      raison: 'LOYER_ABSENT',
+    });
+    expect(feuRendement(null, regles).raison).toBeNull();
+    expect(feuRendement(0.06, regles, 'LOYER_ABSENT').raison).toBeNull();
+    expect(feuCashflow(null, regles, 'LOYER_ABSENT')).toEqual({
+      axe: 'cashflow',
+      feu: 'inconnu',
+      valeur: null,
+      raison: 'LOYER_ABSENT',
+    });
+    expect(feuCashflow(null, regles).raison).toBeNull();
+    expect(feuCashflow(12, regles, 'LOYER_ABSENT').raison).toBeNull();
   });
 
   it('risques : DPE F/G bloquant ; E, procédure ou risque fort à surveiller ; sinon bon', () => {
     const bien = ProjetSchema.parse(projetExemple).bien;
-    expect(feuRisques(bien, marche)).toEqual({ axe: 'risques', feu: 'bon', valeur: 0 });
+    expect(feuRisques(bien, marche)).toEqual({
+      axe: 'risques',
+      feu: 'bon',
+      valeur: 0,
+      raison: null,
+    });
     expect(feuRisques({ ...bien, dpe: 'G' }, marche).feu).toBe('probleme');
     expect(feuRisques({ ...bien, dpe: 'E' }, marche)).toEqual({
       axe: 'risques',
       feu: 'surveiller',
       valeur: 1,
+      raison: null,
     });
     expect(feuRisques({ ...bien, copro: { procedure: true } }, marche).feu).toBe('surveiller');
     const inondable = MarcheSchema.parse({ risques: [{ type: 'inondation', niveau: 'fort' }] });
@@ -152,6 +193,54 @@ describe('calculerVerdict — variantes', () => {
     expect(codes(verdict)).toEqual(['PS_BIC_A_CONFIRMER']);
   });
 
+  it('les manques fournis par l’appelant priment sur la lecture du projet', () => {
+    const projet = parserComplet(projetExemple);
+    const financement = calculerFinancement(projet, regles);
+    const force = calculerVerdict(projet, financement, null, null, regles, { manques: [] });
+    expect(force.feux.map((f) => f.feu)).toEqual(['bon', 'inconnu', 'inconnu', 'inconnu', 'bon']);
+    expect(force.feux.every((f) => f.raison === null)).toBe(true);
+  });
+
+  it('sans fiscalité ni rendement (loyer absent) : trois feux inconnus, points fiscaux absents', () => {
+    const projet = ProjetSchema.parse({
+      ...projetExemple,
+      marche: { ...projetExemple.marche, plafondLoyerMensuel: 900 },
+    });
+    const financement = calculerFinancement(projet, regles);
+    const manques = [{ code: 'LOYER_ABSENT' as const, champ: 'hypotheses.location.loyerHc' }];
+    const verdict = calculerVerdict(projet, financement, null, null, regles, { manques });
+    expect(verdict.feux.map((f) => f.feu)).toEqual(['bon', 'inconnu', 'inconnu', 'inconnu', 'bon']);
+    expect(verdict.feux.map((f) => f.raison)).toEqual([
+      null,
+      'LOYER_ABSENT',
+      'LOYER_ABSENT',
+      'LOYER_ABSENT',
+      null,
+    ]);
+    // Sans fiscalité, seuls les points de la banque peuvent rester : ici aucun.
+    expect(codes(verdict)).toEqual([]);
+  });
+
+  it('loyer encadré : le point n’est posé que si le loyer est connu et au-dessus du plafond', () => {
+    const plafonne = { ...projetExemple.marche, plafondLoyerMensuel: 900 };
+    const complet = parserComplet({ ...projetExemple, marche: plafonne });
+    const financement = calculerFinancement(complet, regles);
+    const fiscalite = calculerFiscalite(complet, financement, regles);
+    const avecLoyer = pointsDeVigilance(complet, financement, fiscalite);
+    expect(avecLoyer.map((p) => p.code)).toContain('LOYER_AU_DESSUS_PLAFOND');
+    // Même fiscalité, projet sans loyer : le plafond ne peut pas être comparé.
+    const location = Object.fromEntries(
+      Object.entries(complet.hypotheses.location).filter(([k]) => k !== 'loyerHc'),
+    );
+    const sansLoyer = ProjetSchema.parse({
+      ...complet,
+      hypotheses: { ...complet.hypotheses, location },
+    });
+    const codesSansLoyer = pointsDeVigilance(sansLoyer, financement, fiscalite).map((p) => p.code);
+    expect(codesSansLoyer).not.toContain('LOYER_AU_DESSUS_PLAFOND');
+    expect(codesSansLoyer).toContain('PS_BIC_A_CONFIRMER');
+  });
+
   it('revenus trop faibles (projet ancien) et prêt trop long : effort HCSF et durée signalés', () => {
     const { verdict } = verdictDe(
       variante({}, undefined, {
@@ -188,7 +277,12 @@ describe('calculerVerdict — variantes', () => {
         fiscalite: { tmi: 0.3, regime: 'nu_reel' },
       }),
     ).verdict;
-    expect(sansLoyer.feux[3]).toEqual({ axe: 'couverture', feu: 'inconnu', valeur: null });
+    expect(sansLoyer.feux[3]).toEqual({
+      axe: 'couverture',
+      feu: 'inconnu',
+      valeur: null,
+      raison: null,
+    });
     expect(sansLoyer.synthese.inconnus).toBeGreaterThanOrEqual(1);
   });
 

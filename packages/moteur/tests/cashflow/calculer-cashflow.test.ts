@@ -4,22 +4,25 @@ import { calculerCashflow } from '../../src/cashflow';
 import { projetExemple } from '../../src/exemples/t3-marseille';
 import { calculerFinancement } from '../../src/financement';
 import { obtenirRegles } from '../../src/regles';
-import { ProjetSchema, type Location, type ProjetEntree } from '../../src/schema';
+import {
+  parserComplet,
+  type LocationComplete,
+  type ProjetComplet,
+  type ProjetEntree,
+} from '../../src/schema';
 
 const regles = obtenirRegles('2026-09');
-const projet = ProjetSchema.parse(projetExemple);
+const projet = parserComplet(projetExemple);
 const financement = calculerFinancement(projet, regles);
 
-const variante = (
-  hypotheses: Partial<ProjetEntree['hypotheses']>,
-): ReturnType<typeof ProjetSchema.parse> =>
-  ProjetSchema.parse({
+const variante = (hypotheses: Partial<ProjetEntree['hypotheses']>): ProjetComplet =>
+  parserComplet({
     ...projetExemple,
     hypotheses: { ...projetExemple.hypotheses, ...hypotheses },
   });
 
 /** La location meublée de l'exemple avec un autre loyer (point mort, surcharges). */
-const meubleA = (loyerHc: number, gestionTaux = 0): Location => ({
+const meubleA = (loyerHc: number, gestionTaux = 0): LocationComplete => ({
   mode: 'meuble',
   loyerHc,
   chargesLocataire: 60,

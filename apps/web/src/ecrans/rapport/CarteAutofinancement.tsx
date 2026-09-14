@@ -1,4 +1,4 @@
-import { loyerMensuelHc, vacanceSemaines, type Resultats } from '@loupe/moteur';
+import { loyerMensuelHc, vacanceSemaines, type ResultatsComplets } from '@loupe/moteur';
 import type { JSX, ReactNode } from 'react';
 
 import { cascadeAutofinancement } from '@/analyses/rapport';
@@ -58,7 +58,7 @@ function libelleSousTotal(texte: string): JSX.Element {
 
 const tonSelonSigne = (valeur: number): string => (valeur < 0 ? 'text-probleme' : 'text-bon');
 
-function Cascade({ r }: { r: Resultats }): JSX.Element {
+function Cascade({ r }: { r: ResultatsComplets }): JSX.Element {
   const c = cascadeAutofinancement(r);
   const { location } = r.projet.hypotheses;
   const annees = String(r.projet.hypotheses.revente.annees);
@@ -112,7 +112,7 @@ function Cascade({ r }: { r: Resultats }): JSX.Element {
   );
 }
 
-function Reperes({ r }: { r: Resultats }): JSX.Element {
+function Reperes({ r }: { r: ResultatsComplets }): JSX.Element {
   const c = r.cashflow;
   // Loyer mensuel équivalent : total des chambres en colocation, nuitées × nuitée en courte durée.
   const loyerHc = loyerMensuelHc(r.projet.hypotheses.location);
@@ -158,7 +158,7 @@ function Reperes({ r }: { r: Resultats }): JSX.Element {
 }
 
 /** La carte principale du Rapport : la cascade du loyer au reste après impôt, et ses repères. */
-export function CarteAutofinancement({ r }: { r: Resultats }): JSX.Element {
+export function CarteAutofinancement({ r }: { r: ResultatsComplets }): JSX.Element {
   const cf = r.cashflow.mensuel;
   const ton = cf >= 0 ? 'bon' : cf >= -100 ? 'surveiller' : 'probleme';
   const reponse = cf >= 0 ? 'oui' : cf >= -100 ? 'presque' : 'non';

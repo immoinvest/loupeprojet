@@ -5,11 +5,11 @@ import { loyerMensuelReference } from '../location/equivalents';
 import type { Regles } from '../regles/types';
 import {
   regimesCompatibles,
-  type Hypotheses,
-  type Location,
+  type HypothesesCompletes,
+  type LocationComplete,
   type Regime,
 } from '../schema/hypotheses';
-import type { Projet } from '../schema/projet';
+import type { ProjetComplet } from '../schema/projet';
 import { projeterLmnpReel } from './lmnp-reel';
 import { projeterMicroBic } from './micro-bic';
 import { projeterMicroFoncier } from './micro-foncier';
@@ -32,10 +32,10 @@ const PROJECTEURS: Readonly<Record<Regime, (ctx: ContexteFiscal) => ResultatRegi
  * et la gestion du projet quand le type les porte.
  */
 export function locationPourRegime(
-  hypotheses: Hypotheses,
+  hypotheses: HypothesesCompletes,
   regime: Regime,
   regles: Regles,
-): Location {
+): LocationComplete {
   const { location } = hypotheses;
   const prime = 1 + regles.exploitation.primeMeuble;
   if (estMeuble(regime)) {
@@ -71,7 +71,7 @@ export function locationPourRegime(
 
 /** Cash-flow avant impôt d'un régime, avec le loyer et les charges de sa location. */
 export function cashflowDuRegime(
-  projet: Projet,
+  projet: ProjetComplet,
   financement: ResultatFinancement,
   regime: Regime,
   regles: Regles,
@@ -90,7 +90,7 @@ function meilleurSelon(
 }
 
 export function calculerFiscalite(
-  projet: Projet,
+  projet: ProjetComplet,
   financement: ResultatFinancement,
   regles: Regles,
 ): ResultatFiscalite {
