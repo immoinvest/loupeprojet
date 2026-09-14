@@ -98,8 +98,27 @@ export function sectionDefauts(defauts: Defauts): SectionMethode {
     titre: 'Les valeurs par défaut',
     resume:
       'Jamais de case vide : quand une donnée manque, une valeur sourcée la remplace, avec son badge. Toutes se changent dans Hypothèses.',
-    etapes: [],
+    etapes: [
+      'Quatre chiffres suffisent pour créer un projet : prix, surface, code postal, ville. Apport, durée du prêt et tranche d’imposition reçoivent un défaut marqué « estimé » ; le loyer visé vient des loyers de marché de la commune quand on les connaît.',
+      'Sans loyer connu et sans donnée de marché, le rapport le dit et attend : cash-flow, impôts, revente, rendement et scénarios ne sont pas calculés (prix, financement, estimation et risques le sont). Sans revenus, seul le feu « effort » attend.',
+    ],
     constantes: [
+      {
+        libelle: 'Apport et durée du prêt',
+        valeur: `${euros(d.apport)} · ${String(d.dureeAnnees)} ans, au taux du mois de cette durée`,
+        source: 'Durée maximale HCSF, celle du meilleur cash-flow ; formulaire Vérifier',
+      },
+      {
+        libelle: "Tranche d'imposition supposée",
+        valeur: pct(d.tmi),
+        source:
+          'Tranche atteinte dès 29 316 € de revenu imposable par part (barème 2026), la plus fréquente d’un ménage qui emprunte pour investir ; les cinq feux n’en dépendent pas',
+      },
+      {
+        libelle: 'Loyer visé inconnu',
+        valeur: 'loyer de marché de la commune, moins 8 % de charges, plus la prime meublé',
+        source: 'ANIL, carte des loyers ; sinon le rapport attend le loyer',
+      },
       {
         libelle: 'Vacance locative',
         valeur: `${String(d.vacanceSemaines)} semaines par an`,
@@ -124,8 +143,9 @@ export function sectionDefauts(defauts: Defauts): SectionMethode {
       },
       {
         libelle: 'Taxe foncière inconnue',
-        valeur: `${nombre(d.taxeFonciereEnMoisDeLoyer)} mois de loyer`,
-        source: 'Spec Deklic (0,8 à 1,2 mois de loyer)',
+        valeur: `${nombre(d.taxeFonciereEnMoisDeLoyer)} mois de loyer ; sans loyer, ${euros(d.taxeFonciereParM2An)} par m² et par an`,
+        source:
+          'Spec Deklic (0,8 à 1,2 mois de loyer) ; ordre de grandeur par m² pour un appartement',
       },
       {
         libelle: 'Charges de copropriété inconnues',

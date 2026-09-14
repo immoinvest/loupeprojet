@@ -210,4 +210,98 @@ describe('construireProjet', () => {
     expect(tauxPourDuree(20)).toBe(0.0327);
     expect(tauxPourDuree(25)).toBe(0.0335);
   });
+
+  const minimale: SaisieProjet = {
+    prix: 155_000,
+    surface: 65,
+    codePostal: '13005',
+    ville: 'Marseille',
+    mode: 'meuble_lld',
+    provenance: {},
+  };
+  const enrichi = {
+    marche: { loyerReferenceM2: 13.83 },
+    provenance: { 'marche.loyerReferenceM2': 'anil' },
+    codeInsee: '13205',
+  };
+
+  it('saisie minimale avec les loyers de la commune : loyer ANIL, défauts « estimé », pas de revenus', () => {
+    const projet = ProjetSchema.parse(construireProjet(minimale, 'p5', enrichi));
+    // 13,83 €/m² × 65 m² × 1,15 (meublé) = 1 034 € ; taxe foncière = un mois de ce loyer.
+    expect(projet.hypotheses.location.loyerHc).toBe(1_034);
+    expect(projet.hypotheses.charges.taxeFonciere).toBe(1_034);
+    expect(projet.hypotheses.pret).toMatchObject({
+      apport: 0,
+      dureeAnnees: 25,
+      tauxNominal: 0.0335,
+    });
+    expect(projet.hypotheses.fiscalite.tmi).toBe(0.3);
+    expect(projet.hypotheses.revenusMensuels).toBeUndefined();
+    expect(projet.provenance).toMatchObject({
+      'location.loyerHc': 'anil',
+      'pret.apport': 'estime',
+      'pret.dureeAnnees': 'estime',
+      'fiscalite.tmi': 'estime',
+      'charges.taxeFonciere': 'estime',
+      'marche.loyerReferenceM2': 'anil',
+    });
+    expect(projet.provenance).not.toHaveProperty('revenusMensuels');
+    expect(calculerProjet(projet).complet).toBe(true);
+    // En location nue, le loyer de marché sans la prime meublé.
+    const nu = ProjetSchema.parse(construireProjet({ ...minimale, mode: 'nu' }, 'p6', enrichi));
+    expect(nu.hypotheses.location.loyerHc).toBe(899);
+  });
+
+  it('sans donnée de marché : pas de loyer, taxe foncière au m², nuitée de départ en courte durée', () => {
+    const projet = ProjetSchema.parse(construireProjet(minimale, 'p7'));
+    expect(projet.hypotheses.location.loyerHc).toBeUndefined();
+    expect(projet.provenance).not.toHaveProperty('location.loyerHc');
+    expect(projet.hypotheses.charges.taxeFonciere).toBe(65 * 14);
+    expect(calculerProjet(projet).complet).toBe(false);
+    const cd = ProjetSchema.parse(construireProjet({ ...minimale, mode: 'courte_duree' }, 'p8'));
+    expect(cd.hypotheses.location.courteDuree).toMatchObject({ nuitee: 60, tauxOccupation: 0.6 });
+  });
+
+  it('un loyer saisi prime sur le loyer de marché ; chaque valeur donnée porte sa provenance', () => {
+    const saisi = ProjetSchema.parse(
+      construireProjet({ ...minimale, loyerHc: 700 }, 'p9', enrichi),
+    );
+    expect(saisi.hypotheses.location.loyerHc).toBe(700);
+    expect(saisi.provenance['location.loyerHc']).toBe('utilisateur');
+    expect(saisi.hypotheses.charges.taxeFonciere).toBe(700);
+    // « Estimer le loyer » du formulaire : provenance « estime » dans la saisie, « anil » dans le projet.
+    const estime = construireProjet(
+      { ...minimale, loyerHc: 1_034, provenance: { loyerHc: 'estime' } },
+      'p10',
+    );
+    expect(estime.provenance?.['location.loyerHc']).toBe('anil');
+    const complet = construireProjet(
+      { ...minimale, apport: 10_000, dureeAnnees: 20, tmi: 0.11, revenusMensuels: 2_400 },
+      'p11',
+    );
+    expect(complet.provenance).toMatchObject({
+      'pret.apport': 'utilisateur',
+      'pret.dureeAnnees': 'utilisateur',
+      'fiscalite.tmi': 'utilisateur',
+      revenusMensuels: 'utilisateur',
+    });
+    expect(complet.hypotheses.pret.tauxNominal).toBe(0.0327);
+    expect(complet.hypotheses.revenusMensuels).toBe(2_400);
+    // Défauts pré-remplis par le formulaire : leur provenance « estime » est conservée.
+    const prerempli = construireProjet(
+      {
+        ...minimale,
+        apport: 0,
+        dureeAnnees: 25,
+        tmi: 0.3,
+        provenance: { apport: 'estime', dureeAnnees: 'estime', tmi: 'estime' },
+      },
+      'p12',
+    );
+    expect(prerempli.provenance).toMatchObject({
+      'pret.apport': 'estime',
+      'pret.dureeAnnees': 'estime',
+      'fiscalite.tmi': 'estime',
+    });
+  });
 });

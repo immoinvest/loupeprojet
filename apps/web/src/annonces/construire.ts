@@ -1,4 +1,5 @@
 import {
+  TMI_PAR_DEFAUT,
   VERSION_REGLES_COURANTE,
   obtenirRegles,
   type ClasseEnergie,
@@ -8,13 +9,18 @@ import {
   type TypeBien,
 } from '@loupe/moteur';
 
-import type { MarcheEnrichi } from '@/enrichissement';
+import { loyerViseDepuisReference } from '@/enrichissement/loyer';
+import type { MarcheEnrichi } from '@/enrichissement/marche';
+import { NUITEE_DEFAUT } from '@/hypotheses/appliquer';
 
 import type { AnnonceResolue } from './resoudre';
 
 export type Provenance = 'annonce' | 'estime' | 'utilisateur';
 
-/** Ce que l'écran Vérifier envoie : les valeurs et, pour chacune, d'où elle vient. */
+/**
+ * Ce que l'écran Vérifier envoie : les valeurs et, pour chacune, d'où elle vient.
+ * Quatre valeurs suffisent : prix, surface, code postal, ville. Le reste est estimé ou reste absent.
+ */
 export interface SaisieProjet {
   readonly typeBien?: TypeBien | undefined;
   readonly ges?: ClasseEnergie | undefined;
@@ -37,11 +43,12 @@ export interface SaisieProjet {
   readonly taxeFonciere?: number | undefined;
   readonly travaux?: number | undefined;
   readonly mode: ModeLocation;
-  readonly loyerHc: number;
-  readonly apport: number;
-  readonly dureeAnnees: number;
-  readonly tmi: 0 | 0.11 | 0.3 | 0.41 | 0.45;
-  readonly revenusMensuels: number;
+  /** Absent : le loyer de marché de la commune s'il est connu, sinon le rapport attend le loyer. */
+  readonly loyerHc?: number | undefined;
+  readonly apport?: number | undefined;
+  readonly dureeAnnees?: number | undefined;
+  readonly tmi?: 0 | 0.11 | 0.3 | 0.41 | 0.45 | undefined;
+  readonly revenusMensuels?: number | undefined;
   readonly provenance: Readonly<Partial<Record<keyof SaisieProjet, Provenance>>>;
   readonly annonce?: AnnonceResolue | undefined;
 }
@@ -53,6 +60,12 @@ const CFE_DEFAUT = 180;
 const FRAIS_DOSSIER_DEFAUT = 850;
 const FRAIS_GARANTIE_DEFAUT = 1_500;
 const MOBILIER_PAR_M2 = 75;
+/** Sans apport indiqué : aucun (le plus fréquent pour un premier achat locatif financé à 110 %). */
+export const APPORT_DEFAUT = 0;
+/** Sans durée indiquée : la durée maximale HCSF, celle du meilleur cash-flow. */
+export const DUREE_DEFAUT_ANNEES = 25;
+/** Taxe foncière estimée quand ni elle ni le loyer ne sont connus : ordre de grandeur, par m² et par an. */
+export const TAXE_FONCIERE_PAR_M2_AN = 14;
 
 /** « 13005 » → « 13 », « 20000 » → « 2A », « 20200 » → « 2B », « 97400 » → « 974 ». */
 export function departementDuCodePostal(codePostal: string): string {
@@ -76,9 +89,35 @@ export function nomDuProjet(s: SaisieProjet): string {
   return `${type} · ${s.ville}`;
 }
 
+interface LoyerRetenu {
+  readonly valeur: number;
+  readonly provenance: string;
+}
+
 /**
- * Assemble un projet complet à partir de la saisie vérifiée, avec des défauts sourcés et, quand
- * le Worker a répondu, les données de marché de la commune.
+ * Le loyer visé : celui de la saisie (« Estimer le loyer » l'a pris dans les loyers ANIL, sinon il
+ * vient de la personne), à défaut le loyer de marché de la commune ramené au bien, sinon rien.
+ */
+function loyerRetenu(s: SaisieProjet, enrichi: MarcheEnrichi | null): LoyerRetenu | null {
+  if (s.loyerHc !== undefined) {
+    return {
+      valeur: s.loyerHc,
+      provenance: s.provenance.loyerHc === 'estime' ? 'anil' : 'utilisateur',
+    };
+  }
+  const reference = enrichi?.marche.loyerReferenceM2;
+  if (reference === undefined) return null;
+  const prime = obtenirRegles(VERSION_REGLES_COURANTE).exploitation.primeMeuble;
+  return {
+    valeur: loyerViseDepuisReference(reference, s.surface, s.mode, prime),
+    provenance: 'anil',
+  };
+}
+
+/**
+ * Assemble un projet à partir de la saisie vérifiée, avec des défauts sourcés et, quand le Worker a
+ * répondu, les données de marché de la commune. Sans loyer connu, le projet n'en porte pas : le
+ * rapport le demandera.
  */
 export function construireProjet(
   s: SaisieProjet,
@@ -87,18 +126,25 @@ export function construireProjet(
 ): ProjetEntree {
   const meuble = s.mode !== 'nu';
   const regime = meuble ? 'lmnp_reel' : 'nu_reel';
-  const taxeFonciere = s.taxeFonciere ?? s.loyerHc;
+  const loyer = loyerRetenu(s, enrichi);
+  const apport = s.apport ?? APPORT_DEFAUT;
+  const dureeAnnees = s.dureeAnnees ?? DUREE_DEFAUT_ANNEES;
+  const tmi = s.tmi ?? TMI_PAR_DEFAUT;
+  const taxeFonciere =
+    s.taxeFonciere ??
+    (loyer === null ? Math.round(s.surface * TAXE_FONCIERE_PAR_M2_AN) : loyer.valeur);
   const coproAnnuel =
     s.chargesCoproMois === undefined ? s.surface * COPRO_PAR_M2_AN : s.chargesCoproMois * 12;
+  /** Une valeur absente de la saisie est estimée ; présente, elle porte sa provenance ou vient de la personne. */
+  const provenanceDe = (cle: keyof SaisieProjet, valeur: unknown): Provenance =>
+    valeur === undefined ? 'estime' : (s.provenance[cle] ?? 'utilisateur');
   const provenance: Record<string, string> = {
     'achat.prix': s.provenance.prix ?? 'utilisateur',
     'bien.surface': s.provenance.surface ?? 'utilisateur',
-    // Loyer proposé par « Estimer le loyer » : il vient des loyers de marché ANIL.
-    'location.loyerHc': s.provenance.loyerHc === 'estime' ? 'anil' : 'utilisateur',
-    'pret.apport': 'utilisateur',
-    'pret.dureeAnnees': 'utilisateur',
+    'pret.apport': provenanceDe('apport', s.apport),
+    'pret.dureeAnnees': provenanceDe('dureeAnnees', s.dureeAnnees),
     'pret.tauxNominal': 'usure',
-    'fiscalite.tmi': 'utilisateur',
+    'fiscalite.tmi': provenanceDe('tmi', s.tmi),
     'charges.taxeFonciere':
       s.taxeFonciere === undefined ? 'estime' : (s.provenance.taxeFonciere ?? 'utilisateur'),
     'charges.coproAnnuel':
@@ -110,6 +156,10 @@ export function construireProjet(
     'charges.cfe': 'estime',
     'achat.mobilier': 'estime',
   };
+  if (loyer !== null) provenance['location.loyerHc'] = loyer.provenance;
+  if (s.revenusMensuels !== undefined) {
+    provenance.revenusMensuels = s.provenance.revenusMensuels ?? 'utilisateur';
+  }
   if (s.dpe !== undefined) provenance['bien.dpe'] = s.provenance.dpe ?? 'utilisateur';
   if (s.typeBien !== undefined) provenance['bien.type'] = s.provenance.typeBien ?? 'utilisateur';
   if (s.ges !== undefined) provenance['bien.ges'] = s.provenance.ges ?? 'utilisateur';
@@ -132,6 +182,7 @@ export function construireProjet(
             ...(s.coproEnProcedure === undefined ? {} : { procedure: s.coproEnProcedure }),
           },
         };
+  const nuitee = loyer === null ? NUITEE_DEFAUT : Math.round((loyer.valeur / 30) * 2);
 
   return {
     id,
@@ -163,18 +214,16 @@ export function construireProjet(
         mobilier: meuble ? Math.round(s.surface * MOBILIER_PAR_M2) : 0,
       },
       pret: {
-        apport: s.apport,
-        tauxNominal: tauxPourDuree(s.dureeAnnees),
-        dureeAnnees: s.dureeAnnees,
+        apport,
+        tauxNominal: tauxPourDuree(dureeAnnees),
+        dureeAnnees,
         fraisDossier: FRAIS_DOSSIER_DEFAUT,
         fraisGarantie: FRAIS_GARANTIE_DEFAUT,
       },
       location: {
         mode: s.mode,
-        loyerHc: s.loyerHc,
-        ...(s.mode === 'courte_duree'
-          ? { courteDuree: { nuitee: Math.round((s.loyerHc / 30) * 2), tauxOccupation: 0.6 } }
-          : {}),
+        ...(loyer === null ? {} : { loyerHc: loyer.valeur }),
+        ...(s.mode === 'courte_duree' ? { courteDuree: { nuitee, tauxOccupation: 0.6 } } : {}),
       },
       charges: {
         taxeFonciere,
@@ -183,8 +232,8 @@ export function construireProjet(
         comptable: meuble ? COMPTABLE_DEFAUT : 0,
         cfe: meuble ? CFE_DEFAUT : 0,
       },
-      fiscalite: { tmi: s.tmi, regime },
-      revenusMensuels: s.revenusMensuels,
+      fiscalite: { tmi, regime },
+      ...(s.revenusMensuels === undefined ? {} : { revenusMensuels: s.revenusMensuels }),
     },
     provenance: { ...provenance, ...(enrichi === null ? {} : enrichi.provenance) },
   };

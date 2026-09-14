@@ -9,8 +9,8 @@ export type Application =
   | { readonly ok: false; readonly erreur: string };
 
 const OCCUPATION_DEFAUT = 0.6;
-/** Nuitée de départ quand le projet n'a pas de loyer dont la déduire. */
-const NUITEE_DEFAUT = 60;
+/** Nuitée de départ en courte durée quand le projet n'a pas de loyer dont la déduire. */
+export const NUITEE_DEFAUT = 60;
 
 /** Un passage en courte durée sans nuitée connue reçoit des valeurs de départ plausibles. */
 function preparerCourteDuree(projet: ProjetEntree): ProjetEntree {

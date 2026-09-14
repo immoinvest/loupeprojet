@@ -30,9 +30,9 @@
     },
     "implement": {
       "status": "in_progress",
-      "stories_completed": 2,
+      "stories_completed": 3,
       "stories_total": 7,
-      "note": "US-1 et US-2 commitées (US-2 porte aussi les écrans « à compléter », le bandeau et les feux « loyer à indiquer » : le web ne compile pas sans eux)"
+      "note": "US-1 à US-3 commitées ; e2e (aides, incomplet.spec, mes-projets, formats) écrits, à commiter avec US-6"
     },
     "refactor": {
       "status": "pending"
