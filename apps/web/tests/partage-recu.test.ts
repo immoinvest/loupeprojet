@@ -62,6 +62,17 @@ describe('lirePartageRecu (annonce partagée vers Deklic)', () => {
     });
   });
 
+  it('un « http:// » sans adresse derrière n’est pas un lien : ce qui a été partagé reste à lire', () => {
+    expect(lirePartageRecu(recherche({ lien: 'http://?' }))).toEqual({
+      statut: 'recu',
+      texte: 'http://?',
+    });
+    expect(lirePartageRecu(recherche({ texte: 'Vu sur https://: à suivre' }))).toEqual({
+      statut: 'recu',
+      texte: 'Vu sur https://: à suivre',
+    });
+  });
+
   it('tronque un texte démesuré et supporte un encodage abîmé', () => {
     const recu = lirePartageRecu(recherche({ texte: 'a'.repeat(50_000) }));
     expect(recu).toEqual({ statut: 'recu', texte: 'a'.repeat(LONGUEUR_MAX_TEXTE_PARTAGE) });

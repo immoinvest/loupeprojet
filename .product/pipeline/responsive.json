@@ -31,7 +31,7 @@
     },
     "implement": {
       "status": "in_progress",
-      "stories_completed": 10,
+      "stories_completed": 11,
       "stories_total": 11,
       "commits": [
         {
@@ -129,6 +129,10 @@
         {
           "etape": "US-8",
           "hash": "aa6834f"
+        },
+        {
+          "etape": "US-9",
+          "hash": "1938e93"
         }
       ],
       "notes": [

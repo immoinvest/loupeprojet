@@ -39,10 +39,20 @@ function sansPonctuationFinale(lien: string): string {
   return lien.slice(0, fin);
 }
 
+/** Une adresse que le navigateur sait lire : « https:// » seul, ou suivi de ponctuation, n'en est pas une. */
+function estUneAdresse(lien: string): boolean {
+  try {
+    new URL(lien);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 function liensDans(texte: string): string[] {
   return Array.from(texte.matchAll(LIEN), (correspondance) =>
     sansPonctuationFinale(correspondance[0]),
-  );
+  ).filter(estUneAdresse);
 }
 
 /**
