@@ -9,7 +9,7 @@ import {
   type ProjetEntree,
 } from '@loupe/moteur';
 
-import { ecrireChemin, lireChemin } from './chemins';
+import { ecrireChemin } from './chemins';
 import { depuisTexte, type Conversion } from './conversion';
 import { cleProvenance, type Descripteur } from './descripteurs';
 import { CHEMIN_MODE } from './groupes-location';
@@ -74,14 +74,6 @@ function changerDeType(projet: ProjetEntree, mode: ModeLocation): ProjetEntree {
   };
 }
 
-/** La première valeur de marché saisie crée le bloc DVF avec un nombre de ventes à 0. */
-function preparerDvf(projet: ProjetEntree, chemin: string): ProjetEntree {
-  if (!chemin.startsWith('marche.dvf.') || lireChemin(projet, 'marche.dvf') !== undefined) {
-    return projet;
-  }
-  return ecrireChemin(projet, 'marche.dvf', { medianM2: 1, nombreVentes: 0 });
-}
-
 /**
  * Applique une saisie texte à un projet : conversion, contrôle « obligatoire »,
  * préparations, écriture immuable et provenance « utilisateur ».
@@ -102,8 +94,7 @@ export function appliquerSaisie(
     if (mode.data === projet.hypotheses.location.mode) return { ok: true, projet };
     return { ok: true, projet: changerDeType(projet, mode.data) };
   }
-  const prepare = preparerDvf(projet, descripteur.chemin);
-  const suivant = ecrireChemin(prepare, descripteur.chemin, conversion.valeur);
+  const suivant = ecrireChemin(projet, descripteur.chemin, conversion.valeur);
   // Les clés de provenance contiennent des points (« pret.tauxNominal ») : écriture directe, pas par chemin.
   return {
     ok: true,

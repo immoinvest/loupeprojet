@@ -164,7 +164,10 @@ export const regles202609: Regles = {
     prix: { bonJusqua: -0.05, surveillerJusqua: 0.05 },
     rendementNet: { bonDes: 0.055, surveillerDes: 0.04 },
     cashflowMensuel: { bonDes: 0, surveillerDes: -100 },
-    effort: { bonJusqua: 0.33, surveillerJusqua: 0.35 },
+    // Choix Deklic, aligné sur le HCSF : la banque compte 70 % des loyers comme revenu (le reste
+    // absorbe charges et vacance). Mensualité ≤ 70 % du loyer : le loyer porte le crédit dans la
+    // lecture de la banque ; ≤ 100 % : le loyer couvre encore la mensualité ; au-delà : problème.
+    couverture: { bonJusqua: 0.7, surveillerJusqua: 1 },
   },
 
   visite: {

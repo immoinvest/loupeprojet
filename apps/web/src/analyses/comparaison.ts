@@ -22,7 +22,7 @@ export type CodeIndicateur =
   | 'cashflow'
   | 'brut'
   | 'net'
-  | 'effort'
+  | 'couverture'
   | 'impot'
   | 'horizon'
   | 'cashNet'
@@ -125,12 +125,12 @@ export const INDICATEURS: readonly Indicateur[] = [
     formater: (v) => pourcentage(v),
   },
   {
-    code: 'effort',
-    libelle: 'Effort bancaire',
+    code: 'couverture',
+    libelle: 'Crédit ÷ loyer',
     sens: 'bas',
     meilleur: true,
-    axe: 'effort',
-    extraire: (r) => r.financement.effort.hcsf,
+    axe: 'couverture',
+    extraire: (r) => valeursDesFeux(r).couverture,
     formater: (v) => pourcentage(v, 0),
   },
   {

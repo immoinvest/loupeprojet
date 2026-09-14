@@ -39,6 +39,14 @@ export const GROUPE_LOCATION: Groupe = {
       aToi: true,
       visibleSi: pour('nu', 'meuble', 'moyenne_duree'),
     },
+    // L'encadrement des loyers n'est dans aucun référentiel : à saisir, à côté du loyer visé (jamais en courte durée).
+    {
+      chemin: 'marche.plafondLoyerMensuel',
+      libelle: "Plafond d'encadrement",
+      type: 'euros',
+      unite: '€/mois',
+      visibleSi: pour('nu', 'meuble', 'colocation', 'moyenne_duree'),
+    },
     {
       chemin: 'hypotheses.location.loyerHcNu',
       libelle: 'Loyer si loué nu',

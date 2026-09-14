@@ -44,14 +44,6 @@ export const GROUPE_FINANCEMENT: Groupe = {
       type: 'entier',
       unite: 'mois',
     },
-    {
-      chemin: 'hypotheses.revenusMensuels',
-      libelle: 'Vos revenus nets',
-      type: 'euros',
-      unite: '€/mois',
-      obligatoire: true,
-      aToi: true,
-    },
   ],
 };
 

@@ -35,29 +35,6 @@ export const GROUPE_BIEN: Groupe = {
   ],
 };
 
-export const GROUPE_MARCHE: Groupe = {
-  titre: 'Le marché',
-  sousTitre:
-    "Ventes réelles autour du bien (DVF). Bientôt rempli automatiquement ; d'ici là, saisissez ce que vous savez.",
-  champs: [
-    {
-      chemin: 'marche.dvf.medianM2',
-      libelle: 'Prix médian des ventes',
-      type: 'euros',
-      unite: '€/m²',
-    },
-    { chemin: 'marche.dvf.q1M2', libelle: 'Premier quart', type: 'euros', unite: '€/m²' },
-    { chemin: 'marche.dvf.q3M2', libelle: 'Troisième quart', type: 'euros', unite: '€/m²' },
-    { chemin: 'marche.dvf.nombreVentes', libelle: 'Nombre de ventes', type: 'entier' },
-    {
-      chemin: 'marche.plafondLoyerMensuel',
-      libelle: "Plafond d'encadrement",
-      type: 'euros',
-      unite: '€/mois',
-    },
-  ],
-};
-
 /** La rénovation énergétique ne joue qu'en location nue (déficit foncier) et avec des travaux. */
 const locationNueAvecTravaux = (p: ProjetEntree): boolean =>
   p.hypotheses.location.mode === 'nu' && (p.hypotheses.achat.travaux ?? 0) > 0;

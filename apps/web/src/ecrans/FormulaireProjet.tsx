@@ -226,14 +226,6 @@ export function FormulaireProjet({
             {...c}
           />
           <Champ cle="tmi" libelle="Tranche d'imposition" options={TMI} aToi {...c} />
-          <Champ
-            cle="revenusMensuels"
-            libelle="Vos revenus nets"
-            unite="€/mois"
-            aToi
-            erreur={erreurs.revenusMensuels}
-            {...c}
-          />
         </div>
       </Carte>
 

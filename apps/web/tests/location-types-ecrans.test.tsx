@@ -11,7 +11,6 @@ async function remplirBien(utilisateur: ReturnType<typeof userEvent.setup>): Pro
   await utilisateur.type(screen.getByLabelText(/Code postal/), '13002');
   await utilisateur.type(screen.getByLabelText(/^Ville/), 'Marseille');
   await utilisateur.type(screen.getByLabelText(/^Apport/), '10000');
-  await utilisateur.type(screen.getByLabelText(/Vos revenus/), '2400');
 }
 
 describe('Vérifier — le type de location en tête de la carte « La location »', () => {

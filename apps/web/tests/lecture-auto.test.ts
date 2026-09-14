@@ -123,7 +123,6 @@ const SAISIE: SaisieProjet = {
   apport: 15_000,
   dureeAnnees: 25,
   tmi: 0.3,
-  revenusMensuels: 2_600,
   provenance: { typeBien: 'annonce', ges: 'annonce', lotsCopro: 'annonce' },
 };
 

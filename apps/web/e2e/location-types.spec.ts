@@ -46,7 +46,6 @@ test('vérifier : créer une courte durée à la main, nuitée et nuits par mois
   await page.getByLabel('Prix de la nuitée, hors ménage').fill('70');
   await page.getByLabel('Nuits louées par mois').fill('16');
   await page.getByLabel('Apport').fill('10000');
-  await page.getByLabel('Vos revenus nets').fill('2400');
   await page.getByRole('button', { name: 'Créer le projet et voir le rapport' }).click();
 
   await expect(

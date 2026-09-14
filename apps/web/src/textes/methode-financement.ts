@@ -81,13 +81,15 @@ export function sectionCredit(regles: Regles): SectionMethode {
   return {
     code: 'credit',
     titre: 'Le crédit',
-    resume: 'Mensualité constante, coût complet du crédit, effort tel que la banque le calcule.',
+    resume:
+      'Mensualité constante, coût complet du crédit, et la part du loyer que prend le crédit.',
     etapes: [
       "Emprunt = prix retenu + travaux + frais d'acquisition + frais de dossier + garantie − apport. Le mobilier n'est pas financé : mise de départ = apport + mobilier.",
       "Mensualité constante (formule PMT) sur le taux nominal ; assurance = capital emprunté × taux d'assurance ÷ 12, chaque mois.",
       'Différé total : intérêts capitalisés, aucune mensualité ; différé partiel : intérêts seuls. La mensualité de croisière est recalculée après le différé.',
       "TAEG : le taux qui égalise le capital net des frais et toutes les mensualités, résolu numériquement, avec et sans assurance ; comparé au taux d'usure.",
-      `Taux d'effort HCSF = mensualité assurance comprise ÷ (revenus nets + ${pct(hcsf.partLoyers)} des loyers). Seuil ${pct(hcsf.seuilEffort)} ; durée ${dureeMax}.`,
+      'Crédit ÷ loyer = mensualité assurance comprise ÷ loyer hors charges : dit si le loyer porte le crédit sans connaître vos revenus.',
+      `Deklic ne demande pas vos revenus : la banque calculera votre taux d'effort avec ${pct(hcsf.partLoyers)} des loyers, seuil ${pct(hcsf.seuilEffort)} ; durée maximale ${dureeMax}.`,
       `Indemnité de remboursement anticipé = ${indemnite}.`,
     ],
     constantes: [

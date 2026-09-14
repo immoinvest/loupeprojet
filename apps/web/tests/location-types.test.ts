@@ -200,7 +200,6 @@ describe('lecture et construction : cas limites', () => {
       apport: 15_000,
       dureeAnnees: 25,
       tmi: 0.3,
-      revenusMensuels: 2_600,
       provenance: { mode: 'annonce' },
     };
     expect(construireProjet(saisie, 'p').provenance?.['location.mode']).toBe('annonce');
@@ -249,7 +248,6 @@ describe('formulaire Vérifier : champs et saisie par type', () => {
     codePostal: '13002',
     ville: 'Marseille',
     apport: '10000',
-    revenusMensuels: '2400',
   };
 
   it('valide les champs de loyer du type choisi', () => {

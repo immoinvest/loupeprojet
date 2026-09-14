@@ -39,8 +39,7 @@ export type Cle =
   | 'nuiteesParMois'
   | 'apport'
   | 'dureeAnnees'
-  | 'tmi'
-  | 'revenusMensuels';
+  | 'tmi';
 
 export type Valeurs = Readonly<Record<Cle, string>>;
 export type ProvenanceValeurs = Partial<Record<Cle, Provenance>>;
@@ -81,7 +80,6 @@ const VIDE: Valeurs = {
   apport: '',
   dureeAnnees: '25',
   tmi: '0.3',
-  revenusMensuels: '',
 };
 
 /** Les champs de loyer demandés par chaque type d'exploitation. */
@@ -173,10 +171,6 @@ export function valider(v: Valeurs): Erreurs {
   validerLoyer(v, erreurs);
   const apport = nombre(v.apport);
   if (apport === undefined || apport < 0) erreurs.apport = 'Indiquez votre apport (0 si aucun).';
-  const revenus = nombre(v.revenusMensuels);
-  if (revenus === undefined || revenus < 0) {
-    erreurs.revenusMensuels = 'Indiquez vos revenus nets mensuels.';
-  }
   const duree = nombre(v.dureeAnnees);
   if (duree === undefined || duree < 1 || duree > 30) erreurs.dureeAnnees = 'Entre 1 et 30 ans.';
   return erreurs;
@@ -240,7 +234,6 @@ export function versSaisie(
     apport: nombre(v.apport) ?? 0,
     dureeAnnees: nombre(v.dureeAnnees) ?? 25,
     tmi: Number(v.tmi) as SaisieProjet['tmi'],
-    revenusMensuels: nombre(v.revenusMensuels) ?? 0,
     provenance,
     annonce: annonce ?? undefined,
   };
