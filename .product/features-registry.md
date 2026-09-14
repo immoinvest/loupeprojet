@@ -30,7 +30,7 @@ Idées à spécifier avant implémentation : `.product/backlog/` (11 fiches not�
 
 - [ ] simulateur-pret — **spécifiée, prête à implémenter** (discovery, specs 8 stories, architecture, `pipeline/simulateur-pret.json`) : page `/simulateur-pret` hors projet, deux offres de banque côte à côte, comparaison critère par critère, tableaux d'amortissement par année et par mois, CSV téléchargeable, impression, lien `#s=` — 2026-09-14 — `packages/moteur/src/pret`, `apps/web/src/{simulateur,ecrans/SimulateurPret.tsx,ecrans/simulateur}`
 
-- [ ] estimation-confiance, PR 2 (carte géographique des ventes) — **spécifiée** (épopée E3 de `specs/estimation-confiance-specs.md`, esquisse dans `architecture/estimation-confiance.md`) : Leaflet en dépendance, tuiles IGN Géoplateforme (fond de carte à trancher par Pierre), contrat `/marche/adresse` v5 avec les coordonnées des ventes (déjà présentes dans les CSV DVF), cercles 100/200/300 m, points colorés par prix au m², carte masquée à l'impression — 2026-09-14
+- [ ] estimation-confiance, PR 2 (carte géographique des ventes) — **en cours**, branche `feat/estimation-carte` : fond Plan IGN (Géoplateforme, choisi par Pierre le 14/09/2026), Leaflet chargé à la demande, `/marche/adresse` contrat v6 avec `ventesCarte` (ventes comparables géolocalisées à 300 m au plus, 300 au maximum), pastilles classées par rapport aux quartiles du repère, cercles 100/200/300 m, infobulle, carte non imprimée, Worker 0.8.0 — 2026-09-14
 
 ## Livrées (mergées sur `master`)
 
