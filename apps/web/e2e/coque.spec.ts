@@ -85,6 +85,58 @@ test('menu et en-tête restent en vue quand le contenu défile ; changer de vole
   expect(await defilementDeLaFenetre(page)).toBe(0);
 });
 
+/** Largeur sous laquelle la liste du statut devient une feuille qui monte du bas (point `sm`). */
+const LARGEUR_FEUILLE = 640;
+
+test('statut du projet : liste aux couleurs de Deklic, feuille du bas sur téléphone, clavier', async ({
+  page,
+}) => {
+  await ouvrirExemple(page);
+  const bouton = page.getByRole('button', { name: /Statut du projet/ });
+  await bouton.scrollIntoViewIfNeeded();
+  await bouton.click();
+  const liste = page.getByRole('listbox', { name: 'Statut du projet' });
+  await expect(liste).toBeVisible();
+  await expect(liste).toBeFocused();
+  // Le parcours d'achat, puis Scénario et Écarté à part.
+  await expect(liste.getByRole('option')).toHaveText([
+    'En analyse',
+    'Visite prévue',
+    'Offre faite',
+    'Acheté',
+    /^Scénario/,
+    /^Écarté/,
+  ]);
+  await expect(liste.getByRole('option', { selected: true })).toHaveText('Visite prévue');
+
+  const [boite, boiteBouton] = await Promise.all([liste.boundingBox(), bouton.boundingBox()]);
+  if (boite === null || boiteBouton === null) throw new Error('liste ou bouton sans boîte');
+  const { width: largeur, height: hauteur } = page.viewportSize() ?? { width: 0, height: 0 };
+  if (largeur < LARGEUR_FEUILLE) {
+    // Feuille du bas : toute la largeur, collée au bas de l'écran, options de 48 px.
+    expect(boite.width).toBeGreaterThanOrEqual(largeur - 1);
+    expect(boite.y + boite.height).toBeGreaterThanOrEqual(hauteur - 1);
+    const option = await liste.getByRole('option', { name: 'Acheté' }).boundingBox();
+    expect(option?.height).toBeGreaterThanOrEqual(48);
+  } else {
+    expect(boite.y).toBeGreaterThanOrEqual(boiteBouton.y + boiteBouton.height);
+  }
+
+  // Au clavier : flèche bas puis Entrée choisit « Offre faite » et rend le focus au bouton.
+  await page.keyboard.press('ArrowDown');
+  await page.keyboard.press('Enter');
+  await expect(liste).toHaveCount(0);
+  await expect(bouton).toBeFocused();
+  await expect(bouton).toHaveText('Offre faite');
+
+  // Échap referme sans rien changer.
+  await page.keyboard.press('Enter');
+  await expect(liste).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(liste).toHaveCount(0);
+  await expect(bouton).toHaveText('Offre faite');
+});
+
 test('formulaire Vérifier : les choix réservés aux lecteurs d’écran ne font pas défiler la fenêtre', async ({
   page,
 }) => {
