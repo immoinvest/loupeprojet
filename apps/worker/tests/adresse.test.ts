@@ -669,6 +669,8 @@ describe('GET /marche/adresse', () => {
     ]);
 
     expect((await requete(REQUETE)).headers.get('x-loupe-cache')).toBe('HIT');
+    // La version du contrat ajoutée par le client web ne crée pas une autre analyse.
+    expect((await requete(`${REQUETE}&contrat=6`)).headers.get('x-loupe-cache')).toBe('HIT');
     // Autre surface : nouvelle analyse, mais le cadastre du même point vient du cache.
     const autre = await requete(REQUETE.replace('surface=60', 'surface=45'));
     expect(autre.headers.get('x-loupe-cache')).toBe('MISS');

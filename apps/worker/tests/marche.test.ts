@@ -161,6 +161,12 @@ describe('GET /marche', () => {
 
     const lectures = donnees.lectures.length;
     const bis = await requete('/marche?pieces=3&type=appartement&codePostal=13005&codeInsee=13055');
+    // La version du contrat ajoutée par le client web ne change pas la clé du cache serveur.
+    const avecContrat = await requete(
+      '/marche?codeInsee=13055&codePostal=13005&type=appartement&pieces=3&contrat=2',
+    );
+    expect(avecContrat.status).toBe(200);
+    expect(avecContrat.headers.get('x-loupe-cache')).toBe('HIT');
     expect(bis.headers.get('x-loupe-cache')).toBe('HIT');
     expect(donnees.lectures).toHaveLength(lectures);
   });
