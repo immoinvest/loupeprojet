@@ -20,6 +20,11 @@ export const AdresseBienSchema = z.object({
   codeInsee: z.string().regex(/^(\d{5}|2[AB]\d{3})$/),
   codeVoie: z.string().nullable(),
   numero: z.number().int().nonnegative().nullable(),
+  /** Code postal de l'adresse géocodée : désigne l'arrondissement pour le loyer de marché. */
+  codePostal: z
+    .string()
+    .regex(/^\d{5}$/)
+    .optional(),
 });
 export type AdresseBien = z.infer<typeof AdresseBienSchema>;
 

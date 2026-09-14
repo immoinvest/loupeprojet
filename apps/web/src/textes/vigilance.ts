@@ -2,6 +2,8 @@ import type { CodeVigilance, PointVigilance } from '@loupe/moteur';
 
 import { euros, pourcentage, pourcentageSigne } from '@/formatage/nombres';
 
+import { libelleRisque } from './donnees-adresse';
+
 export type CategorieVigilance = 'documents' | 'sur_place' | 'finances';
 
 export const CATEGORIES: Readonly<Record<CategorieVigilance, string>> = {
@@ -70,7 +72,7 @@ export function phraseVigilance(point: PointVigilance): string {
     case 'CONFIRMER_TAXE_FONCIERE':
       return "Demander l'avis de taxe foncière au vendeur.";
     case 'RISQUE_NATUREL':
-      return `Zone à risque ${String(param(point, 'type'))} : consulter l'état des risques.`;
+      return `Zone à risque ${libelleRisque(String(param(point, 'type')))} : consulter l'état des risques.`;
     case 'SANS_ASCENSEUR_ETAGE_ELEVE':
       return `${String(param(point, 'etage'))}e étage sans ascenseur : vérifier la cage d'escalier et penser à la relocation.`;
     case 'EFFORT_HCSF_DEPASSE':

@@ -105,8 +105,8 @@ export interface AnalyseAdresse {
   readonly ventesProches: readonly VenteProche[];
 }
 
-/** Coefficient d'actualisation d'une vente selon sa date ; 1 quand la tendance est inconnue. */
-export type Actualiser = (date: string) => number;
+/** Coefficient d'actualisation d'une vente (selon sa date et sa commune) ; 1 quand la tendance est inconnue. */
+export type Actualiser = (vente: VenteDvf) => number;
 
 const SANS_ACTUALISATION: Actualiser = () => 1;
 
@@ -216,7 +216,7 @@ export function analyserAdresse(
       vente.lat === null || vente.lon === null
         ? null
         : distanceMetres(bien.point, { lat: vente.lat, lon: vente.lon });
-    const coefficient = actualiser(vente.date);
+    const coefficient = actualiser(vente);
     return {
       vente,
       distance,

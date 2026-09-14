@@ -176,6 +176,7 @@ describe('Onglet Adresse', () => {
         codeInsee: '13205',
         codeVoie: '6659',
         numero: 144,
+        codePostal: '13005',
       });
       expect(screen.getByRole('rowheader', { name: 'En face' })).toBeInTheDocument();
       expect(screen.getByText('144 RUE DE L OLIVIER')).toBeInTheDocument();
