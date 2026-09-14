@@ -46,7 +46,6 @@ export function defautsDuMoteur(): Defauts {
       pret: { tauxNominal: 0.03, dureeAnnees: 20 },
       location: { mode: 'meuble_lld', loyerHc: LOYER_TEMOIN },
       fiscalite: { tmi: 0.3, regime: 'lmnp_reel' },
-      revenusMensuels: 2_400,
     },
   }).hypotheses;
   // Les défauts du formulaire Vérifier : une saisie minimale, complétée par construireProjet.
@@ -62,7 +61,6 @@ export function defautsDuMoteur(): Defauts {
         apport: 10_000,
         dureeAnnees: 20,
         tmi: 0.3,
-        revenusMensuels: 2_400,
         provenance: {},
       },
       'defauts',

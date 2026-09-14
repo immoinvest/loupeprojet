@@ -8,7 +8,7 @@ export interface Option {
 }
 
 export interface Descripteur {
-  /** Chemin dans le projet : « hypotheses.pret.tauxNominal », « bien.surface », « marche.dvf.medianM2 ». */
+  /** Chemin dans le projet : « hypotheses.pret.tauxNominal », « bien.surface », « marche.plafondLoyerMensuel ». */
   readonly chemin: string;
   readonly libelle: string;
   readonly type: TypeChamp;

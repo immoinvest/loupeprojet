@@ -9,15 +9,15 @@ export const RAISONS_PARTAGE = {
 
 export type RaisonPartage = keyof typeof RAISONS_PARTAGE;
 
-/** Infobulle du bouton Partager : le lien porte tout le projet, données personnelles comprises. */
+/** Infobulle du bouton Partager : le lien porte tout le projet, apport et tranche d'imposition compris. */
 export const AVERTISSEMENT_PARTAGE =
-  "Copie un lien qui contient tout le projet, revenus et apport compris. Il n'est jamais envoyé à nos serveurs : ne le donnez qu'à des personnes de confiance.";
+  "Copie un lien qui contient tout le projet, apport et tranche d'imposition compris. Il n'est jamais envoyé à nos serveurs : ne le donnez qu'à des personnes de confiance.";
 
 /** Partager un projet : feuille de partage au doigt, lien copié à la souris. */
 export const TEXTES_PARTAGE_PROJET = {
   partager: 'Partager',
   copie: 'Lien copié',
   partage: 'Lien partagé',
-  avertissement: 'Il contient tout le projet, revenus et apport compris.',
+  avertissement: "Il contient tout le projet, apport et tranche d'imposition compris.",
   message: (nom: string): string => `Mon projet « ${nom} » sur Deklic.`,
 } as const;

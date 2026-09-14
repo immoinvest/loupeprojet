@@ -1,5 +1,5 @@
 import { calculerProjet, projetExemple } from '@loupe/moteur';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 
@@ -68,11 +68,22 @@ describe('carte « L’achat » : négociation', () => {
     expect(screen.queryByRole('button', { name: 'Viser le prix estimé' })).toBeNull();
     expect(screen.getByText(/déjà sous le prix estimé/)).toBeInTheDocument();
 
-    // Un marché à 2 000 €/m² : le bien vaut moins que son prix affiché.
+    // Un marché à 2 000 €/m² : le bien vaut moins que son prix affiché. Le repère DVF ne se saisit
+    // plus dans Hypothèses (il vient de l'onglet Estimation) : on l'écrit dans le projet enregistré.
+    cleanup();
+    const marche = projetExemple.marche ?? { risques: [] };
+    ecrireProjets(window.localStorage, [
+      creerProjet({
+        source: {
+          ...projetExemple,
+          marche: { ...marche, dvf: { ...marche.dvf!, medianM2: 2_000 } },
+        },
+        genererId: () => 'marche-bas',
+      }),
+    ]);
+    render(<AppEnMemoire chemin="/projets/marche-bas/hypotheses" />);
+    await screen.findAllByRole('heading', { name: 'Vos hypothèses' });
     const utilisateur = userEvent.setup();
-    const mediane = screen.getByRole('textbox', { name: /^Prix médian des ventes/ });
-    await utilisateur.clear(mediane);
-    await utilisateur.type(mediane, '2000');
     expect(screen.queryByText(/déjà sous le prix estimé/)).toBeNull();
     expect(screen.getByText(/^Prix estimé /)).toBeInTheDocument();
     await utilisateur.click(screen.getByRole('button', { name: 'Viser le prix estimé' }));
