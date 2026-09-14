@@ -60,6 +60,9 @@ describe('libellés de la confiance', () => {
     expect(raisonComposante(composante('localisation', null), avecPrecision('rue'))).toBe(
       'Ventes de la même rue.',
     );
+    expect(n(raisonComposante(composante('localisation', 531), avecPrecision('rue')))).toBe(
+      'Ventes de la même rue, à 531 m au plus.',
+    );
     expect(n(raisonComposante(composante('localisation', 500), avecPrecision('quartier')))).toBe(
       'Ventes du quartier, à 500 m au plus.',
     );

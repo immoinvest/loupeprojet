@@ -80,6 +80,9 @@ Tests : `tests/confiance-textes.test.ts`, `tests/confiance-ecran.test.tsx` (US-4
 - **Barèmes en paliers interpolés** plutôt qu'en marches : pas d'effet de seuil entre 9 et 10 ventes, et une règle qui s'écrit en une ligne dans la Méthode.
 - **Cinq niveaux** : Pierre demande une confiance « basse » sans adresse et « haute » avec beaucoup de ventes proches ; trois niveaux ne séparaient pas « repère de commune dispersé » de « repère de commune homogène ».
 
+- **Rue limitée par la distance** (demande de Pierre, 14/09/2026) : règle `localisation.rue = { points: 30, jusquaMetres: 150 }` ; au-delà de 150 m, `pointsLocalisation` rend les points du cercle correspondant, jamais plus que ceux d'une rue. La raison affichée donne l'étendue de la rue.
+- **Aucun lien vers d'autres estimateurs** (décision de Pierre, 14/09/2026).
+
 ## PR 2 — carte des ventes (esquisse)
 
 - Worker : `ventesCarte` dans `/marche/adresse` (v5) : comparables à 300 m ou moins avec coordonnées, plafond 300.
