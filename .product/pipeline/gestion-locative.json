@@ -4,9 +4,9 @@
   "started_at": "2026-09-14T00:00:00Z",
   "current_step": "specs_pretes",
   "scope": "documentation seule : .product/features/gestion-locative-discovery.md, .product/specs/gestion-locative-specs.md, .product/design/gestion-locative-ux.md, .product/design/gestion-locative-maquettes.html",
-  "branch": "docs/gestion-locative",
-  "base": "master (c0a0f0a)",
-  "consigne": "Pierre, 14/09/2026 : « ne développe rien, prépare les spécifications, UX, fonctionnalités » ; « en deux clics, tout doit être prêt et fonctionner »",
+  "branch": "docs/gestion-locative (PR #35, fusionnée) puis docs/gestion-locative-menu (menu à deux sections, revue critique)",
+  "base": "master (faab79c, après responsive #36)",
+  "consigne": "Pierre, 14/09/2026 : « ne développe rien, prépare les spécifications, UX, fonctionnalités » ; « en deux clics, tout doit être prêt et fonctionner » ; « deux sections du menu, pas un sélecteur ; dans Mon compte, une option pour masquer l'une ou l'autre »",
   "steps": {
     "discovery": {
       "status": "completed",
@@ -25,9 +25,23 @@
         ".product/design/gestion-locative-maquettes.html"
       ]
     },
+    "revue_critique": {
+      "status": "completed",
+      "output": ".product/features/gestion-locative-discovery.md#revue-critique-seconde-passe-14092026",
+      "corrections": 9,
+      "propositions_a_trancher": [
+        "A découper G1",
+        "B bailleur par bien",
+        "C notifications",
+        "D import Rentila",
+        "E encadrement des loyers",
+        "F attestation CAF",
+        "G quota e-mails"
+      ]
+    },
     "architecture": {
       "status": "pending",
-      "note": "à faire au début de la session de chaque feature"
+      "note": "à faire au début de la session de chaque feature ; recommandation d'hébergement écrite dans les specs (§7)"
     },
     "implement": { "status": "not_requested" },
     "qa_tests": { "status": "not_requested" },
@@ -35,14 +49,15 @@
     "push": { "status": "pending", "note": "PR de documentation" }
   },
   "decisions_pierre": {
+    "menu": "DÉCIDÉ le 14/09/2026 : deux sections Analyser et Gérer dans un seul menu ; option « Mon menu » dans Mon compte pour masquer l'une ou l'autre ; le sélecteur proposé est écarté",
     "banque": "fournisseur et budget (aucune offre gratuite : GoCardless fermé depuis juillet 2025 ; Enable Banking, Powens, Bridge sur devis) — recommandation : devis maintenant, G1 et G2 sans banque",
     "offre": "Gérer gratuit sans banque, synchronisation bancaire payante — recommandation",
-    "menu": "sélecteur Analyser · Gérer — recommandation",
-    "import_rentila": "à tester sur les exports de Pierre"
+    "import_rentila": "à tester sur les exports de Pierre (proposition D de la revue critique)"
   },
   "auto_revue": [
     "Rentila exploré jusqu'aux formulaires ; import bancaire et déclarations décrits d'après l'aide en ligne (onglet figé)",
     "règles légales à vérifier sur Légifrance à l'architecture (drapeau à confirmer)",
-    "compte obligatoire pour Gérer : écart limité à cet espace, à confirmer par Pierre"
+    "compte obligatoire pour Gérer : écart limité à cet espace, à confirmer par Pierre",
+    "seconde passe : sélecteur remplacé par deux sections (décision de Pierre), barre d'onglets mobile retirée (contredisait l'ADR-R1 de responsive), compte de clics corrigé sur les portes 1 et banque, définition du clic écrite, e2e avec API, export avant suppression, hébergement recommandé"
   ]
 }
