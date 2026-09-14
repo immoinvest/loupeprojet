@@ -232,6 +232,39 @@ describe('ProjetsProvider / useProjets', () => {
     expect(result.current.trouver(a.id)?.visite?.faite).toBe(true);
   });
 
+  it('mettreAJour avec un identifiant inconnu valide le projet et ne touche à rien', () => {
+    const stockage = stockageMemoire();
+    const a = creerProjet({ nom: 'A' });
+    ecrireProjets(stockage, [a]);
+    const enveloppe = ({ children }: { children: ReactNode }): ReactNode => (
+      <ProjetsProvider stockage={stockage}>{children}</ProjetsProvider>
+    );
+    const { result } = renderHook(() => useProjets(), { wrapper: enveloppe });
+    const avant = lireProjets(stockage);
+
+    let retour: ReturnType<typeof result.current.mettreAJour> | undefined;
+    act(() => {
+      retour = result.current.mettreAJour('inconnu', a.projet, {
+        visite: { faite: true, reponses: {} },
+      });
+    });
+    expect(retour).toEqual({ ok: true });
+    expect(result.current.trouver('inconnu')).toBeUndefined();
+    expect(result.current.trouver(a.id)?.visite).toBeUndefined();
+    expect(lireProjets(stockage).map((p) => p.id)).toEqual(avant.map((p) => p.id));
+
+    act(() => {
+      retour = result.current.mettreAJour('inconnu', {
+        ...a.projet,
+        hypotheses: {
+          ...a.projet.hypotheses,
+          pret: { ...a.projet.hypotheses.pret, dureeAnnees: 0 },
+        },
+      });
+    });
+    expect(retour?.ok).toBe(false);
+  });
+
   it('réutilise une liste déjà présente sans la réamorcer', () => {
     const stockage = stockageMemoire();
     ecrireProjets(stockage, [creerProjet({ nom: 'Existant' }), creerProjet({ nom: 'Autre' })]);

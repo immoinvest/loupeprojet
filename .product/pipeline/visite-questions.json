@@ -53,6 +53,22 @@
         {
           "etape": "seconde fusion de master (déconnexion #41, estimation-confiance #42, #44) ; badges de provenance unifiés dans ChampHypothese, badgePour partagé",
           "hash": "809961c"
+        },
+        {
+          "etape": "troisième fusion de master (rapport-cashflow #43) : carte « Avant de faire une offre » placée après les leviers dans le nouveau Rapport",
+          "hash": "25d7f07"
+        },
+        {
+          "etape": "quatrième fusion de master (achat-negociation #45, même adresse DVF #50, grilles d'impression #51) : case « déjà visité » et travaux repliables réunis dans Vérifier",
+          "hash": "d5e549e"
+        },
+        {
+          "etape": "correction du test Playwright de négociation (espaces insécables), remplacée ensuite par celle de master (#52)",
+          "hash": "ae65bf9"
+        },
+        {
+          "etape": "cinquième fusion de master (#52) : version de master gardée pour le test de négociation",
+          "hash": "90ceed9"
         }
       ]
     },
