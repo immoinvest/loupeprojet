@@ -22,6 +22,8 @@ export interface Descripteur {
   readonly optionVisibleSi?: (valeur: string, projet: ProjetEntree) => boolean;
   /** Phrase d'aide sous le champ (ce que la valeur change, d'où vient le seuil). */
   readonly aide?: string;
+  /** Phrase d'aide composée avec le projet (« soit 10 % du coût total ») ; l'emporte sur `aide`. */
+  readonly aideSelon?: (projet: ProjetEntree) => string;
 }
 
 export interface Groupe {
