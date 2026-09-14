@@ -33,8 +33,9 @@
       "note": "aucune donnée nouvelle, aucun appel réseau ; la valeur du curseur passe par appliquerSaisie puis par le schéma Zod du moteur avant enregistrement ; aucun innerHTML"
     },
     "push": {
-      "status": "in_progress",
-      "note": "docs communes, suite complète et couverture, fusion de master, PR en auto-merge"
+      "status": "completed",
+      "pr": "https://github.com/immoinvest/loupeprojet/pull/40",
+      "note": "auto-merge armé ; master à jour au moment de la PR ; lint, typecheck et 980 tests verts en local (139 fichiers), couverture 100 % sur analyses/ ; e2e Revente vert sur ordinateur et téléphone"
     }
   },
   "decisions": {
