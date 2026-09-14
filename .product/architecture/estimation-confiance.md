@@ -101,6 +101,7 @@ Décision de Pierre du 14/09/2026 : fond **Plan IGN** de la Géoplateforme. Vér
 - `apps/web/src/ecrans/adresse/CarteVentes.tsx` : `L.map` sans molette ; au doigt (`pointer: coarse`), pas de glisser, la page défile et les boutons zooment ; tuiles IGN, trois cercles, une `circleMarker` par vente avec infobulle, le bien au centre ; cadrage sur le cercle de 300 m ; `role="img"` et libellé, les tableaux restent l'équivalent accessible.
 - `apps/web/src/index.css` : couleurs des pastilles lues dans les jetons (`--color-bon`, `--color-encre-4`, `--color-surveiller`, `--color-accent`) ; `.leaflet-container` isolé (`isolation: isolate`) pour rester sous l'en-tête collé ; boutons de zoom de 44 px au doigt.
 - Service worker : les tuiles viennent d'une autre origine, jamais interceptées (`strategiePour`).
+- Cadrage (correctif du 14/09/2026, constaté en production) : `zoomSnap: 0.25`. Au niveau entier inférieur choisi par `fitBounds`, le cercle de 300 m n'occupait que 45 % de la hauteur de la carte. Les carreaux gris vus pendant le diagnostic venaient de la lenteur du service IGN (une tuile en 27,5 s, aucune erreur), pas du cadre, mesuré correctement dès le démarrage : fond neutre `--color-bordure-douce` pendant le chargement. La spec Playwright vérifie que le cercle de 300 m couvre plus de 70 % du plus petit côté de la carte.
 - Méthode : une étape « Carte des ventes » mentionne le fond IGN et ce qu’il voit.
 
 ### Tests

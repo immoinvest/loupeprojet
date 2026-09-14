@@ -49,6 +49,16 @@ test('la carte des ventes : tuiles IGN, une pastille par vente, infobulle, pas d
     .evaluate((el) => getComputedStyle(el).isolation);
   expect(isolation).toBe('isolate');
 
+  // Cadrage : le cercle de 300 m remplit la carte (au zoom entier inférieur, il n'en couvrait que 45 %).
+  const cadrage = await carte.locator('.leaflet-container').evaluate((el) => {
+    const cercles = [...el.querySelectorAll('path.carte-cercle')].map(
+      (p) => p.getBoundingClientRect().width,
+    );
+    return { plusGrand: Math.max(...cercles), cote: Math.min(el.clientWidth, el.clientHeight) };
+  });
+  expect(cadrage.plusGrand / cadrage.cote).toBeGreaterThan(0.7);
+  expect(cadrage.plusGrand).toBeLessThanOrEqual(cadrage.cote);
+
   await page.emulateMedia({ media: 'print' });
   await expect(carte).toBeHidden();
   await expect(
