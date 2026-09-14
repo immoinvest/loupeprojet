@@ -1,13 +1,19 @@
 import { describe, expect, it } from 'vitest';
 import { ZodError } from 'zod';
 
-import { calculerProjet } from '../../src/calculer-projet';
+import { calculerProjet, type Resultats, type ResultatsComplets } from '../../src/calculer-projet';
 import { projetExemple } from '../../src/exemples/t3-marseille';
 import { ResultatsSchema } from '../../src/schema/resultats';
 import type { ProjetEntree } from '../../src/schema';
 
+/** Le projet d'exemple est complet : ses sections sont toutes calculées. */
+function complet(r: Resultats): ResultatsComplets {
+  if (!r.complet) throw new Error('rapport partiel inattendu');
+  return r;
+}
+
 describe('calculerProjet — T3 Marseille', () => {
-  const resultats = calculerProjet(projetExemple);
+  const resultats = complet(calculerProjet(projetExemple));
 
   it('rend un rapport complet que le schéma de sortie accepte tel quel', () => {
     expect(() => ResultatsSchema.parse(resultats)).not.toThrow();
@@ -29,6 +35,12 @@ describe('calculerProjet — T3 Marseille', () => {
     expect(resultats.estimation).toMatchObject({ centre: 206_733, prixM2Estime: 3181 });
     expect(resultats.verdict.feux[0]?.valeur).toBeCloseTo(155_000 / 65 / 3181 - 1, 6);
     expect(resultats.meta.aConfirmer).toContain('estimation.dpe');
+  });
+
+  it('ne manque de rien : les revenus ne sont pas demandés, aucun feu n’attend une donnée', () => {
+    expect(resultats.manques).toEqual([]);
+    expect(resultats.financement.effort.hcsf).toBeNull();
+    expect(resultats.verdict.feux.every((f) => f.raison === null)).toBe(true);
   });
 
   it('porte la version des règles et les drapeaux à afficher', () => {
@@ -67,7 +79,7 @@ describe('calculerProjet — pureté et robustesse', () => {
       bien: { type: 'appartement', surface: 40, pieces: 2, departement: '69' },
       hypotheses: { achat, pret, location, fiscalite },
     };
-    const r = calculerProjet(minimal);
+    const r = complet(calculerProjet(minimal));
     expect(r.verdict.feux[0]?.feu).toBe('inconnu');
     expect(r.revente.annees).toBe(10);
     expect(() => ResultatsSchema.parse(r)).not.toThrow();
@@ -117,7 +129,7 @@ describe('calculerProjet — négociation du prix', () => {
       achat: { ...projetExemple.hypotheses.achat, negociationTaux },
     },
   });
-  const reference = calculerProjet(projetExemple);
+  const reference = complet(calculerProjet(projetExemple));
 
   it('à négociation nulle explicite, le rapport est strictement identique à la référence', () => {
     expect(calculerProjet(avecNegociation(0))).toEqual(reference);
@@ -130,7 +142,7 @@ describe('calculerProjet — négociation du prix', () => {
   });
 
   it('négocié à 5 % : tout est calculé sur 147 250 € (vérifié module par module)', () => {
-    const r = calculerProjet(avecNegociation(0.05));
+    const r = complet(calculerProjet(avecNegociation(0.05)));
     expect(() => ResultatsSchema.parse(r)).not.toThrow();
     expect(r.achat).toEqual({
       prixAffiche: 155_000,

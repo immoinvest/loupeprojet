@@ -1,7 +1,7 @@
 import type { ResultatFinancement } from '../financement';
 import { tauxProportionnel, vacanceSemaines } from '../location/equivalents';
-import type { Location, Regime } from '../schema/hypotheses';
-import type { Projet } from '../schema/projet';
+import type { Location, LocationComplete, Regime } from '../schema/hypotheses';
+import type { ProjetComplet } from '../schema/projet';
 import {
   CODES_PROPORTIONNELS,
   chargesExploitation,
@@ -39,7 +39,7 @@ export interface ResultatCashflow {
 export interface OptionsCashflow {
   readonly regime?: Regime;
   /** Location à projeter à la place de celle du projet (régime d'un autre type, scénarios). */
-  readonly location?: Location;
+  readonly location?: LocationComplete;
 }
 
 const SEMAINES_PAR_AN = 52;
@@ -68,7 +68,7 @@ function creditDeAnnee(financement: ResultatFinancement, annee: number): number 
 }
 
 export function calculerCashflow(
-  projet: Projet,
+  projet: ProjetComplet,
   financement: ResultatFinancement,
   options: OptionsCashflow = {},
 ): ResultatCashflow {

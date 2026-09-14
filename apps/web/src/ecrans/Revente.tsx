@@ -8,8 +8,12 @@ import { useProjetCourant } from '@/coque/ProjetLayout';
 import { euros, eurosSignes, pourcentage } from '@/formatage/nombres';
 import { appliquerSaisie, descripteurParChemin } from '@/hypotheses';
 import { useProjets } from '@/stockage/ProjetsContext';
+import { manquesBloquants } from '@/textes/manques';
 
+import { AnalyseIncomplete } from './projet/AnalyseIncomplete';
 import { BandeauHorizons, CarteHorizon } from './revente/Horizon';
+
+const TITRE = "Qu'est-ce qu'il vous restera ?";
 
 /** Sans relâchement reçu, l'horizon est enregistré après ce délai sans mouvement. */
 export const DELAI_ENREGISTREMENT_MS = 150;
@@ -58,6 +62,20 @@ export function Revente(): JSX.Element {
     };
   }, [brouillon, enregistrer]);
 
+  if (!r.complet) {
+    return (
+      <Page>
+        <div className="flex flex-col gap-2">
+          <TitrePage taille="volet">{TITRE}</TitrePage>
+          <Chapo>La revente et l'enrichissement se calculent à partir du loyer visé.</Chapo>
+        </div>
+        {manquesBloquants(r.manques).map((m) => (
+          <AnalyseIncomplete key={m.code} manque={m} />
+        ))}
+      </Page>
+    );
+  }
+
   const rv = r.revente;
   const pv = rv.plusValue;
   const e = r.rendement.enrichissement;
@@ -65,7 +83,7 @@ export function Revente(): JSX.Element {
   return (
     <Page>
       <div className="flex flex-col gap-2">
-        <TitrePage taille="volet">Qu'est-ce qu'il vous restera ?</TitrePage>
+        <TitrePage taille="volet">{TITRE}</TitrePage>
         <Chapo>
           Revente estimée à {pourcentage(r.projet.hypotheses.revente.evolutionAnnuelle)} par an,
           crédit remboursé, agence et impôt payés. Déplacez le curseur : tout suit.

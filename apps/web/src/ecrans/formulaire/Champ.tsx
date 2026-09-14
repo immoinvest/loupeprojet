@@ -14,12 +14,17 @@ export interface ChampProps {
   readonly unite?: string | undefined;
   readonly options?: readonly { v: string; l: string }[] | undefined;
   readonly aToi?: boolean | undefined;
+  /** Phrase courte sous le champ : « Facultatif. Vide : le loyer de marché de la commune. » */
+  readonly indication?: string | undefined;
 }
 
 const CLASSE_SAISIE =
   'min-h-[44px] w-full min-w-0 rounded-encart border bg-surface px-3 text-[15px] font-semibold pointer-coarse:text-base';
 
-/** Un champ du formulaire Vérifier : libellé, badge de provenance, saisie ou liste, erreur. */
+/**
+ * Un champ du formulaire Vérifier : libellé, badge de provenance (« annonce », « estimé » pour un
+ * défaut affiché, « à toi » pour une valeur que la personne seule connaît), saisie ou liste, erreur.
+ */
 export function Champ({
   cle,
   libelle,
@@ -30,6 +35,7 @@ export function Champ({
   unite,
   options,
   aToi = false,
+  indication,
 }: ChampProps): JSX.Element {
   const bordure = erreur === undefined ? 'border-bordure' : 'border-probleme';
   let badge: ReactNode = null;
@@ -37,6 +43,12 @@ export function Champ({
     badge = (
       <Pastille ton="neutre" compacte>
         annonce
+      </Pastille>
+    );
+  } else if (provenance[cle] === 'estime') {
+    badge = (
+      <Pastille ton="surveiller" compacte>
+        estimé
       </Pastille>
     );
   } else if (aToi) {
@@ -84,6 +96,9 @@ export function Champ({
         </select>
       )}
       {erreur !== undefined && <span className="text-xs text-probleme">{erreur}</span>}
+      {erreur === undefined && indication !== undefined && (
+        <span className="text-xs text-encre-3">{indication}</span>
+      )}
     </label>
   );
 }

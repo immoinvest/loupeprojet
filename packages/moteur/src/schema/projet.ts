@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 import { BienSchema } from './bien';
 import { ReglagesEstimationSchema } from './estimation';
-import { HypothesesSchema } from './hypotheses';
+import { HypothesesSchema, loyerConnu, type HypothesesCompletes } from './hypotheses';
 import { MarcheSchema } from './marche';
 
 export const VersionReglesSchema = z.enum(['2026-09']);
@@ -32,3 +32,17 @@ export const ProjetSchema = z.object({
 });
 export type Projet = z.infer<typeof ProjetSchema>;
 export type ProjetEntree = z.input<typeof ProjetSchema>;
+
+/** Projet dont le loyer visé est connu : le rapport peut être calculé en entier. */
+export type ProjetComplet = Projet & { readonly hypotheses: HypothesesCompletes };
+
+export function estComplet(projet: Projet): projet is ProjetComplet {
+  return loyerConnu(projet.hypotheses.location);
+}
+
+/** Valide une entrée et exige le loyer : pour ce qui ne sait calculer qu'un projet complet. */
+export function parserComplet(entree: ProjetEntree): ProjetComplet {
+  const projet = ProjetSchema.parse(entree);
+  if (!estComplet(projet)) throw new Error('Projet incomplet : le loyer visé manque.');
+  return projet;
+}

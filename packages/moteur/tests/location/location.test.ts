@@ -9,27 +9,40 @@ import {
   vacanceSemaines,
 } from '../../src/location';
 import { obtenirRegles } from '../../src/regles';
-import { LocationSchema, MODES_LOCATION } from '../../src/schema';
+import {
+  LocationSchema,
+  MODES_LOCATION,
+  loyerConnu,
+  type LocationComplete,
+  type LocationEntree,
+} from '../../src/schema';
 
 const regles = obtenirRegles('2026-09');
 
-const nu = LocationSchema.parse({ mode: 'nu', loyerHc: 800, gestionTaux: 0.07 });
-const meuble = LocationSchema.parse({ mode: 'meuble', loyerHc: 980 });
-const coloc = LocationSchema.parse({
+/** Une location validée dont le loyer est donné : les équivalents n'existent qu'avec lui. */
+function complete(entree: LocationEntree): LocationComplete {
+  const l = LocationSchema.parse(entree);
+  if (!loyerConnu(l)) throw new Error('loyer attendu');
+  return l;
+}
+
+const nu = complete({ mode: 'nu', loyerHc: 800, gestionTaux: 0.07 });
+const meuble = complete({ mode: 'meuble', loyerHc: 980 });
+const coloc = complete({
   mode: 'colocation',
   chambres: 4,
   loyerChambre: 460,
   vacanceSemaines: 5,
   gestionTaux: 0.08,
 });
-const cd = LocationSchema.parse({
+const cd = complete({
   mode: 'courte_duree',
   nuitee: 80,
   nuiteesParMois: 15,
   conciergerieTaux: 0.2,
   plateformeTaux: 0.03,
 });
-const md = LocationSchema.parse({
+const md = complete({
   mode: 'moyenne_duree',
   loyerHc: 900,
   vacanceSemaines: 6,

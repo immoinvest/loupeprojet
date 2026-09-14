@@ -51,10 +51,14 @@ export function carte(page: Page, titre: string): Locator {
 export const NOM_LYON = '40 m² · Lyon';
 
 /**
- * Depuis la liste, crée un projet à la main (Lyon, 120 000 €, 40 m², loyer 700 €)
- * et attend son rapport : il n'a pas de ventes réelles, donc « Prix sans repère de marché ».
+ * Depuis la liste, crée un projet à la main avec le strict minimum (Lyon, 120 000 €, 40 m²),
+ * plus le loyer et l'apport s'ils sont donnés. Le Worker n'est pas joignable depuis les tests : pas de ventes
+ * réelles ni de loyer de marché, donc « Prix sans repère de marché ».
  */
-export async function creerProjetManuel(page: Page): Promise<void> {
+export async function creerProjetMinimal(
+  page: Page,
+  saisie: { readonly loyer?: string; readonly apport?: string } = {},
+): Promise<void> {
   await ouvrirMesProjets(page);
   await page.getByRole('main').getByRole('button', { name: 'Nouveau projet' }).click();
   await expect(page.getByRole('heading', { level: 1, name: /Colle le lien/ })).toBeVisible();
@@ -64,13 +68,20 @@ export async function creerProjetManuel(page: Page): Promise<void> {
   await page.getByLabel('Surface').fill('40');
   await page.getByLabel('Code postal').fill('69003');
   await page.getByLabel('Ville').fill('Lyon');
-  await page.getByLabel('Loyer visé, hors charges').fill('700');
-  await page.getByLabel('Apport').fill('10000');
+  if (saisie.loyer !== undefined) {
+    await page.getByLabel('Loyer visé, hors charges').fill(saisie.loyer);
+  }
+  if (saisie.apport !== undefined) await page.getByLabel('Apport').fill(saisie.apport);
   await page.getByRole('button', { name: 'Créer le projet et voir le rapport' }).click();
 
   await expect(
     page.getByRole('heading', { level: 1, name: /Prix sans repère de marché\./ }),
   ).toBeVisible();
+}
+
+/** Le projet de Lyon, loyer 700 € et apport 10 000 € : durée et tranche gardent leurs défauts. */
+export async function creerProjetManuel(page: Page): Promise<void> {
+  await creerProjetMinimal(page, { loyer: '700', apport: '10000' });
 }
 
 /** Attend que le service worker, installé après le chargement, prenne la main sur la page. */

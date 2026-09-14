@@ -43,14 +43,14 @@ describe('comparerProjets', () => {
     // Écart au prix au m² estimé du bien (3 181 €/m²), plus à la seule médiane.
     expect(c!.valeurs.ecartMarche).toBeCloseTo(155_000 / 65 / 3181 - 1, 6);
     expect(c!.valeurs.loyer).toBe(980);
-    expect(c!.valeurs.cashflow).toBeCloseTo(r.cashflow.mensuel, 6);
-    expect(c!.valeurs.net).toBeCloseTo(r.rendement.rendements.net, 6);
-    expect(c!.valeurs.couverture).toBeCloseTo(r.cashflow.tauxCouverture ?? 0, 6);
-    expect(c!.valeurs.impot).toBe(r.fiscalite.regimes.lmnp_reel.impotTotal);
+    expect(c!.valeurs.cashflow).toBeCloseTo(r.cashflow!.mensuel, 6);
+    expect(c!.valeurs.net).toBeCloseTo(r.rendement!.rendements.net, 6);
+    expect(c!.valeurs.couverture).toBeCloseTo(r.cashflow!.tauxCouverture ?? 0, 6);
+    expect(c!.valeurs.impot).toBe(r.fiscalite!.regimes.lmnp_reel.impotTotal);
     expect(c!.valeurs.horizon).toBe(10);
-    expect(c!.valeurs.cashNet).toBeCloseTo(r.revente.cashNetVendeur, 6);
-    expect(c!.valeurs.tri).toBeCloseTo(r.rendement.tri ?? 0, 6);
-    expect(c!.valeurs.enrichissement).toBeCloseTo(r.rendement.enrichissement.total, 6);
+    expect(c!.valeurs.cashNet).toBeCloseTo(r.revente!.cashNetVendeur, 6);
+    expect(c!.valeurs.tri).toBeCloseTo(r.rendement!.tri ?? 0, 6);
+    expect(c!.valeurs.enrichissement).toBeCloseTo(r.rendement!.enrichissement.total, 6);
     expect(c!.valeurs.risques).toBe(0);
     expect(c!.feux).toEqual({
       prix: 'bon',
@@ -174,6 +174,42 @@ describe('selectionInitiale', () => {
     expect(selectionInitiale([ecarte, ...actifs.slice(0, 2)])).toEqual(['a', 'b']);
     expect(selectionInitiale([ecarte, actifs[0]!])).toEqual(['x', 'a']);
     expect(selectionInitiale([])).toEqual([]);
+  });
+});
+
+describe('projet sans loyer', () => {
+  const location = Object.fromEntries(
+    Object.entries(projetExemple.hypotheses.location).filter(([k]) => k !== 'loyerHc'),
+  ) as ProjetEntree['hypotheses']['location'];
+  const sansLoyer = projet('sans-loyer', { location });
+
+  it('les indicateurs qui dépendent du loyer sont absents, les autres restent', () => {
+    const [c] = comparerProjets([sansLoyer]);
+    expect(c?.valeurs).toMatchObject({
+      prix: 155_000,
+      loyer: null,
+      cashflow: null,
+      brut: null,
+      net: null,
+      couverture: null,
+      impot: null,
+      horizon: 10,
+      cashNet: null,
+      tri: null,
+      enrichissement: null,
+      risques: 0,
+    });
+    expect(c?.feux.cashflow).toBe('inconnu');
+    expect(c?.feux.couverture).toBe('inconnu');
+    expect(indicateurParCode('impot').detail?.(c!.resultats)).toBe('Meublé au réel · 10 ans');
+  });
+
+  it('se trie en dernier sur ces lignes', () => {
+    const colonnes = comparerProjets([sansLoyer, exemple]);
+    expect(trierColonnes(colonnes, { code: 'cashflow', inverse: false }).map((c) => c.id)).toEqual([
+      'exemple',
+      'sans-loyer',
+    ]);
   });
 });
 

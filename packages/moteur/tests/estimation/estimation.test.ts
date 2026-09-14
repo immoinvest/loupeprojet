@@ -16,6 +16,7 @@ import {
   type Bien,
   type Projet,
   type ProjetEntree,
+  loyerConnu,
 } from '../../src/schema';
 
 const regles = obtenirRegles('2026-09');
@@ -105,6 +106,22 @@ describe('effetCharges', () => {
       },
     );
     expect(effetCharges(sansLoyer, DVF, regles, 200_000)).toBeNull();
+    // Loyer visé absent (rapport partiel) et pas de loyer de référence : aucun rendement local.
+    const location = Object.fromEntries(
+      Object.entries(projetExemple.hypotheses.location).filter(([k]) => k !== 'loyerHc'),
+    ) as ProjetEntree['hypotheses']['location'];
+    const loyerInconnu = projet(
+      {},
+      { marche: { dvf: DVF }, hypotheses: { ...projetExemple.hypotheses, location } },
+    );
+    expect(loyerConnu(loyerInconnu.hypotheses.location)).toBe(false);
+    expect(effetCharges(loyerInconnu, DVF, regles, 200_000)).toBeNull();
+    // Avec le loyer de référence ANIL, le loyer visé n'est pas nécessaire.
+    const anilSeul = projet({}, { hypotheses: { ...projetExemple.hypotheses, location } });
+    expect(effetCharges(anilSeul, DVF, regles, 200_000)?.montant).toBeCloseTo(
+      610 / ((15.1 * 12) / 3050),
+      6,
+    );
   });
 
   it('charges très élevées : effet borné à 15 % ; charges nulles ou estimées : rien', () => {

@@ -17,11 +17,14 @@ export {
   type RaisonDpe,
 } from './dpe';
 export {
+  appliquerLoyerDeReference,
   appliquerLoyerReference,
   appliquerLoyerVise,
+  loyerDeReference,
   loyerParChambre,
   loyerPourBien,
   loyerVise,
+  loyerViseDepuisReference,
   type LoyerBien,
 } from './loyer';
 export { appliquerRisques, memesRisques, risquesDuProjet } from './risques';

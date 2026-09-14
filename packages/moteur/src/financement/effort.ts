@@ -2,21 +2,22 @@ import type { Regles } from '../regles/types';
 
 export interface ParametresEffort {
   readonly mensualiteTotale: number;
-  /** `null` quand les revenus ne sont pas connus : aucun taux d'effort n'est calculé. */
+  /** `null` quand le ménage n'a pas indiqué ses revenus. */
   readonly revenusMensuels: number | null;
-  readonly loyerMensuel: number;
+  /** `null` quand le loyer n'est pas connu (rapport partiel). */
+  readonly loyerMensuel: number | null;
   readonly dureeAnnees: number;
   readonly travaux: number;
   readonly prix: number;
 }
 
 export interface TauxEffort {
-  /** Lecture HCSF : loyers comptés à 70 % dans les revenus. `null` sans revenu ni loyer. */
+  /** Lecture HCSF : loyers comptés à 70 % dans les revenus. `null` sans revenus ou sans loyer. */
   readonly hcsf: number | null;
-  /** Lecture prudente : sans les loyers. */
+  /** Lecture prudente : sans les loyers. `null` sans revenus. */
   readonly sansLoyers: number | null;
   readonly seuil: number;
-  /** Vrai seulement quand l'effort est connu et dépasse le seuil : sans revenus, rien n'est signalé. */
+  /** Faux tant que l'effort est inconnu : un effort inconnu n'est pas un effort dépassé. */
   readonly depasseHcsf: boolean;
   readonly dureeMaxAnnees: number;
   readonly depasseDuree: boolean;
@@ -24,15 +25,18 @@ export interface TauxEffort {
 
 export function tauxEffort(params: ParametresEffort, regles: Regles): TauxEffort {
   const { hcsf: r } = regles.credit;
-  const ratio = (denominateur: number): number | null =>
-    denominateur > 0 ? params.mensualiteTotale / denominateur : null;
-  const revenus = params.revenusMensuels;
-  const hcsf = revenus === null ? null : ratio(revenus + r.partLoyers * params.loyerMensuel);
+  const { revenusMensuels, loyerMensuel } = params;
+  const ratio = (denominateur: number | null): number | null =>
+    denominateur !== null && denominateur > 0 ? params.mensualiteTotale / denominateur : null;
+  const hcsf =
+    revenusMensuels === null || loyerMensuel === null
+      ? null
+      : ratio(revenusMensuels + r.partLoyers * loyerMensuel);
   const travauxLourds = params.travaux >= r.seuilTravauxPourDureeMax * params.prix;
   const dureeMaxAnnees = travauxLourds ? r.dureeMaxTravauxAnnees : r.dureeMaxAnnees;
   return {
     hcsf,
-    sansLoyers: revenus === null ? null : ratio(revenus),
+    sansLoyers: ratio(revenusMensuels),
     seuil: r.seuilEffort,
     depasseHcsf: hcsf !== null && hcsf > r.seuilEffort,
     dureeMaxAnnees,

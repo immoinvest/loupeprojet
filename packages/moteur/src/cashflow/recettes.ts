@@ -1,4 +1,7 @@
-import type { Location, ModeLocation } from '../schema/hypotheses';
+import type { LocationComplete, ModeLocation } from '../schema/hypotheses';
+
+/** Le loyer est un nombre : un projet sans loyer n'a pas de recettes calculables. */
+type Location = LocationComplete;
 
 export interface Recettes {
   readonly mode: ModeLocation;

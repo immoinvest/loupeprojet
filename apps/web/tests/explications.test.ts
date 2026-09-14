@@ -1,4 +1,4 @@
-import { calculerProjet, projetExemple, type Resultats } from '@loupe/moteur';
+import { projetExemple, type ResultatsComplets } from '@loupe/moteur';
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -14,20 +14,20 @@ import {
   explicationRevente,
 } from '@/textes/explications';
 
-import { courteDuree, variante } from './projets';
+import { courteDuree, rapportComplet, variante } from './projets';
 
 /** Les montants portent des espaces insécables : on les ramène à des espaces simples. */
 const n = (s: string): string => s.replace(/\s/g, ' ');
 
-const exemple = calculerProjet(projetExemple);
+const exemple = rapportComplet(projetExemple);
 /** Loyer 1 600 € sans vacance : cash-flow positif, loyer au-dessus du point mort. */
-const confortable = calculerProjet(
+const confortable = rapportComplet(
   variante({ location: { mode: 'meuble', loyerHc: 1_600, vacanceSemaines: 0 } }),
 );
-const microBic = calculerProjet(variante({ fiscalite: { tmi: 0.3, regime: 'micro_bic' } }));
-const nuitees = calculerProjet(courteDuree());
+const microBic = rapportComplet(variante({ fiscalite: { tmi: 0.3, regime: 'micro_bic' } }));
+const nuitees = rapportComplet(courteDuree());
 /** Une colocation : seuls les deux régimes du meublé sont possibles. */
-const coloc = calculerProjet(
+const coloc = rapportComplet(
   variante({ location: { mode: 'colocation', chambres: 3, loyerChambre: 450 } }),
 );
 
@@ -66,7 +66,7 @@ describe('prix', () => {
   });
 
   it('sans ventes réelles, dit qu’il n’y a pas de repère', () => {
-    const t = n(explicationPrix(calculerProjet(variante({}, { risques: [] }))));
+    const t = n(explicationPrix(rapportComplet(variante({}, { risques: [] }))));
     expect(t).toContain("n'a pas encore de repère");
     expect(t).toContain('155 000 €');
     expect(t).toContain('2 385 €/m²');
@@ -107,13 +107,13 @@ describe('repères', () => {
     expect(t).toContain('(827 €), représente 84 % du loyer (980 €)');
     expect(t).toContain('Sous 100 %');
 
-    const cher = calculerProjet(variante({ location: { mode: 'meuble', loyerHc: 700 } }));
+    const cher = rapportComplet(variante({ location: { mode: 'meuble', loyerHc: 700 } }));
     expect(n(explicationCouverture(cher))).toContain('118 %');
     expect(explicationCouverture(cher)).toContain('Au-dessus de 100 %');
 
     // Courte durée : le loyer mensuel équivalent vaut nuitée × nuits par mois (80 € × 18,25).
     expect(n(explicationCouverture(nuitees))).toContain('du loyer (1 460 €)');
-    const sansLoyer = calculerProjet(variante({ location: { mode: 'nu', loyerHc: 0 } }));
+    const sansLoyer = rapportComplet(variante({ location: { mode: 'nu', loyerHc: 0 } }));
     expect(explicationCouverture(sansLoyer)).toContain('Sans loyer');
   });
 
@@ -195,14 +195,14 @@ describe('impôts et revente', () => {
     const perte = {
       rendement: { enrichissement: { miseDeDepart: 10_000, total: -5_000 } },
       projet: { hypotheses: { revente: { annees: 10 } } },
-    } as unknown as Resultats;
+    } as unknown as ResultatsComplets;
     const p = n(explicationMultiple(perte));
     expect(p).toContain('= × −0,5.');
     expect(p).toContain('en perd 0,5');
 
     const sansMise = {
       rendement: { enrichissement: { miseDeDepart: 0, total: 5_000 } },
-    } as unknown as Resultats;
+    } as unknown as ResultatsComplets;
     expect(explicationMultiple(sansMise)).toContain('Sans mise de départ');
   });
 });

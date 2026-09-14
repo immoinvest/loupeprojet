@@ -1,4 +1,4 @@
-import { loyerMensuelHc, obtenirRegles } from '@loupe/moteur';
+import { loyerConnu, loyerMensuelHc, obtenirRegles } from '@loupe/moteur';
 import type { JSX } from 'react';
 
 import { Bouton, Carte, Pastille } from '@/composants/ui';
@@ -34,6 +34,8 @@ export function CarteLoyer({ resultat }: { resultat: Resultat<ReponseMarche> }):
   const vise = loyerVise(loyer, projet.hypotheses.location.mode);
   const sources = resultat.ok ? resultat.valeur.sources : [];
   const mention = sources.find((s) => s.mention !== undefined)?.mention;
+  const { location } = projet.hypotheses;
+  const loyerActuel = loyerConnu(location) ? loyerMensuelHc(location) : undefined;
 
   return (
     <Carte>
@@ -42,9 +44,9 @@ export function CarteLoyer({ resultat }: { resultat: Resultat<ReponseMarche> }):
       <div className="flex flex-wrap items-center gap-3">
         <span className="text-[15px] text-encre-2">
           Loyer visé du projet :{' '}
-          <strong>{euros(loyerMensuelHc(projet.hypotheses.location))}</strong>
+          <strong>{loyerActuel === undefined ? 'non renseigné' : euros(loyerActuel)}</strong>
         </span>
-        {loyerMensuelHc(projet.hypotheses.location) === vise ? (
+        {loyerActuel === vise ? (
           <Pastille ton="bon" compacte>
             {PHRASES_DONNEES_ADRESSE.loyerApplique}
           </Pastille>

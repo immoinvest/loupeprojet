@@ -59,8 +59,8 @@ const vacanceSemaines = (defaut: number): z.ZodDefault<z.ZodNumber> =>
 
 export const LocationNueSchema = z.object({
   mode: z.literal('nu'),
-  /** Loyer mensuel hors charges. */
-  loyerHc: montant(),
+  /** Loyer mensuel hors charges ; absent, le rapport l'attend (voir `manques`). */
+  loyerHc: montant().optional(),
   /** Charges refacturées au locataire, par mois (information ; neutres dans le calcul). */
   chargesLocataire: montant().default(0),
   vacanceSemaines: vacanceSemaines(3),
@@ -69,8 +69,8 @@ export const LocationNueSchema = z.object({
 
 export const LocationMeubleeSchema = z.object({
   mode: z.literal('meuble'),
-  /** Loyer mensuel hors charges en meublé. */
-  loyerHc: montant(),
+  /** Loyer mensuel hors charges en meublé ; absent, le rapport l'attend. */
+  loyerHc: montant().optional(),
   /** Loyer mensuel hors charges si le bien était loué nu (défaut : déduit de la prime meublé). */
   loyerHcNu: montant().optional(),
   chargesLocataire: montant().default(0),
@@ -82,8 +82,8 @@ export const LocationColocationSchema = z.object({
   mode: z.literal('colocation'),
   /** Chambres louées (pas forcément toutes les chambres du bien). */
   chambres: z.number().int().min(1).max(20),
-  /** Loyer mensuel hors charges d'une chambre (loyer unique pour toutes). */
-  loyerChambre: montant(),
+  /** Loyer mensuel hors charges d'une chambre (loyer unique pour toutes) ; absent, le rapport l'attend. */
+  loyerChambre: montant().optional(),
   /** Forfait de charges comprises facturé par chambre et par mois (eau, énergie, internet). */
   forfaitChargesChambre: montant().default(0),
   /** Vacance par chambre : la rotation des colocataires vide chaque chambre à son tour. */
@@ -93,8 +93,8 @@ export const LocationColocationSchema = z.object({
 
 export const LocationCourteDureeSchema = z.object({
   mode: z.literal('courte_duree'),
-  /** Prix d'une nuit hors frais de ménage. */
-  nuitee: z.number().positive(),
+  /** Prix d'une nuit hors frais de ménage ; absent, le rapport l'attend. */
+  nuitee: z.number().positive().optional(),
   /** Nuits louées par mois en moyenne sur l'année (30 = complet). */
   nuiteesParMois: z.number().min(0).max(31),
   /** Durée moyenne d'un séjour, en nuits : donne le nombre de séjours, donc de ménages. */
@@ -113,8 +113,8 @@ export const LocationCourteDureeSchema = z.object({
 
 export const LocationMoyenneDureeSchema = z.object({
   mode: z.literal('moyenne_duree'),
-  /** Loyer mensuel hors charges. */
-  loyerHc: montant(),
+  /** Loyer mensuel hors charges ; absent, le rapport l'attend. */
+  loyerHc: montant().optional(),
   /** Forfait de charges mensuel (le bail mobilité impose le forfait). */
   forfaitCharges: montant().default(0),
   /** Durée moyenne d'un séjour, en mois (bail mobilité : 1 à 10). */
@@ -188,8 +188,15 @@ export const TmiSchema = z.union([
   z.literal(0.45),
 ]);
 
+/**
+ * Tranche marginale supposée quand elle n'est pas saisie : 30 %, atteinte dès 29 316 € de revenu
+ * imposable par part (barème 2026), la plus fréquente d'un ménage qui emprunte pour investir.
+ * Les cinq feux du verdict n'en dépendent pas ; l'interface la présente comme « supposée ».
+ */
+export const TMI_PAR_DEFAUT = 0.3;
+
 export const FiscaliteSchema = z.object({
-  tmi: TmiSchema,
+  tmi: TmiSchema.default(TMI_PAR_DEFAUT),
   psBic: taux(0.3).default(0.186),
   psFoncier: taux(0.3).default(0.172),
   regime: RegimeSchema,
@@ -222,3 +229,38 @@ export const HypothesesSchema = z
   });
 export type Hypotheses = z.infer<typeof HypothesesSchema>;
 export type HypothesesEntree = z.input<typeof HypothesesSchema>;
+
+/**
+ * Le champ qui porte le loyer de chaque type : loyer mensuel, loyer par chambre, nuitée. Absent, le
+ * rapport est partiel (voir `manques`) : aucune valeur n'est inventée.
+ */
+export const CHAMP_LOYER_PAR_MODE = {
+  nu: 'loyerHc',
+  meuble: 'loyerHc',
+  colocation: 'loyerChambre',
+  courte_duree: 'nuitee',
+  moyenne_duree: 'loyerHc',
+} as const satisfies Readonly<Record<ModeLocation, string>>;
+
+/** Location dont le loyer est connu : ce qu'exigent recettes, cash-flow, fiscalité et scénarios. */
+export type LocationComplete =
+  | (LocationNue & { readonly loyerHc: number })
+  | (LocationMeublee & { readonly loyerHc: number })
+  | (LocationColocation & { readonly loyerChambre: number })
+  | (LocationCourteDuree & { readonly nuitee: number })
+  | (LocationMoyenneDuree & { readonly loyerHc: number });
+export type HypothesesCompletes = Hypotheses & { readonly location: LocationComplete };
+
+/** Le loyer du type est-il connu ? */
+export function loyerConnu(location: Location): location is LocationComplete {
+  switch (location.mode) {
+    case 'colocation':
+      return location.loyerChambre !== undefined;
+    case 'courte_duree':
+      return location.nuitee !== undefined;
+    case 'nu':
+    case 'meuble':
+    case 'moyenne_duree':
+      return location.loyerHc !== undefined;
+  }
+}

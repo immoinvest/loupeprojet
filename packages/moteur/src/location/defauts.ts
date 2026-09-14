@@ -1,5 +1,5 @@
 import type { Regles } from '../regles/types';
-import type { Location, ModeLocation } from '../schema/hypotheses';
+import type { LocationComplete, ModeLocation } from '../schema/hypotheses';
 import { JOURS_PAR_MOIS } from './equivalents';
 
 export interface ContexteDefauts {
@@ -16,7 +16,7 @@ export interface ChargesProprietaire {
 }
 
 export interface DefautsLocation {
-  readonly location: Location;
+  readonly location: LocationComplete;
   readonly charges: ChargesProprietaire;
 }
 

@@ -7,7 +7,7 @@ import { calculerFiscalite } from '../../src/fiscalite';
 import { obtenirRegles } from '../../src/regles';
 import { calculerRendement, enrichissement, rendements, tri } from '../../src/rendement';
 import { calculerRevente } from '../../src/revente';
-import { ProjetSchema, type ProjetEntree } from '../../src/schema';
+import { parserComplet, type ProjetEntree } from '../../src/schema';
 
 const regles = obtenirRegles('2026-09');
 
@@ -75,7 +75,7 @@ describe('enrichissement', () => {
 });
 
 describe('calculerRendement — T3 Marseille', () => {
-  const projet = ProjetSchema.parse(projetExemple);
+  const projet = parserComplet(projetExemple);
   const financement = calculerFinancement(projet, regles);
   const fiscalite = calculerFiscalite(projet, financement, regles);
   const revente = calculerRevente(projet, financement, fiscalite, regles);
@@ -117,7 +117,7 @@ describe('calculerRendement — T3 Marseille', () => {
         pret: { ...projetExemple.hypotheses.pret, apport: 500_000 },
       },
     };
-    const p = ProjetSchema.parse(cash);
+    const p = parserComplet(cash);
     const f = calculerFinancement(p, regles);
     const fisc = calculerFiscalite(p, f, regles);
     const rr = calculerRendement(p, f, fisc, calculerRevente(p, f, fisc, regles));

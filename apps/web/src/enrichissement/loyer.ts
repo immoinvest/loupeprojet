@@ -36,6 +36,17 @@ export function loyerVise(loyer: LoyerBien, mode: ModeLocation): number {
   return mode === 'nu' ? loyer.nuMensuel : loyer.meubleMensuel;
 }
 
+/** Loyer visé déduit du loyer de référence hors charges (€/m² par mois) : nu en location nue, meublé sinon. */
+export function loyerViseDepuisReference(
+  referenceM2: number,
+  surface: number,
+  mode: ModeLocation,
+  primeMeuble: number,
+): number {
+  const nu = referenceM2 * surface;
+  return Math.round(mode === 'nu' ? nu : nu * (1 + primeMeuble));
+}
+
 /** En colocation, le loyer meublé du logement majoré de la prime colocation, réparti entre les chambres. */
 export function loyerParChambre(
   loyer: LoyerBien,
@@ -43,6 +54,41 @@ export function loyerParChambre(
   primeColocation: number,
 ): number {
   return Math.round((loyer.meubleMensuel * (1 + primeColocation)) / Math.max(1, chambres));
+}
+
+/**
+ * Le loyer de marché d'un projet (référence ANIL de la commune, posée à la création), dans l'unité du
+ * champ qui manque : loyer mensuel en nue, meublée et moyenne durée, loyer par chambre en colocation.
+ * `null` sans référence, et en courte durée (une nuitée ne se déduit pas d'un loyer de marché).
+ */
+export function loyerDeReference(projet: Projet): number | null {
+  const reference = projet.marche.loyerReferenceM2;
+  const { location } = projet.hypotheses;
+  if (reference === undefined || location.mode === 'courte_duree') return null;
+  const { primeMeuble, primeColocation } = obtenirRegles(projet.versionRegles).exploitation;
+  if (location.mode === 'colocation') {
+    const meuble = reference * projet.bien.surface * (1 + primeMeuble);
+    return Math.round((meuble * (1 + primeColocation)) / Math.max(1, location.chambres));
+  }
+  return loyerViseDepuisReference(reference, projet.bien.surface, location.mode, primeMeuble);
+}
+
+/** Un loyer de marché devient le loyer du projet (le champ du type), provenance « anil ». */
+export function appliquerLoyerDeReference(projet: Projet, loyer: number): Projet {
+  const { location } = projet.hypotheses;
+  if (location.mode === 'courte_duree') return projet;
+  const colocation = location.mode === 'colocation';
+  return {
+    ...projet,
+    hypotheses: {
+      ...projet.hypotheses,
+      location: colocation ? { ...location, loyerChambre: loyer } : { ...location, loyerHc: loyer },
+    },
+    provenance: {
+      ...projet.provenance,
+      [colocation ? 'location.loyerChambre' : 'location.loyerHc']: 'anil',
+    },
+  };
 }
 
 /** Loyer de référence du marché dans le projet, provenance « anil ». */
