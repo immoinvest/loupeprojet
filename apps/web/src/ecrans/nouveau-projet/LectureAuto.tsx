@@ -3,8 +3,9 @@ import { Link } from 'react-router';
 
 import { Bouton, Carte } from '@/composants/ui';
 import { texteEchecLecture } from '@/textes/lecture-auto';
-import { NOMS_PORTAILS, texteEchecServeur } from '@/textes/lecture-serveur';
+import { texteEchecServeur } from '@/textes/lecture-serveur';
 
+import { AttenteLecture } from './AttenteLecture';
 import type { EtatExtension, EtatLecture } from './useLectureAutomatique';
 
 export {
@@ -48,19 +49,7 @@ export function EtatLectureAuto({
     );
   }
   if (lecture?.statut === 'en-cours') {
-    return (
-      <Carte>
-        <p role="status" className="m-0 text-[15px] font-semibold">
-          Deklic lit l'annonce {NOMS_PORTAILS[lecture.portail]}…
-        </p>
-        <p className="m-0 text-sm text-encre-2">
-          De quelques secondes à une minute selon le portail.
-        </p>
-        <div>
-          <Bouton onClick={annuler}>Annuler et coller le texte</Bouton>
-        </div>
-      </Carte>
-    );
+    return <AttenteLecture portail={lecture.portail} debut={lecture.debut} annuler={annuler} />;
   }
   if (lecture?.statut === 'echec') {
     return (
