@@ -45,7 +45,15 @@
           "hash": "6a1b735"
         },
         { "etape": "fusion de master (coque-fixe #39, revente-curseur #40)", "hash": "7b7f92b" },
-        { "etape": "correctif : pastille du compte rendu à sa largeur", "hash": "a377b0c" }
+        { "etape": "correctif : pastille du compte rendu à sa largeur", "hash": "a377b0c" },
+        {
+          "etape": "correctif Comparer : libellés sr-only des feux contenus par le tableau défilant",
+          "hash": "f3032d7"
+        },
+        {
+          "etape": "seconde fusion de master (déconnexion #41, estimation-confiance #42, #44) ; badges de provenance unifiés dans ChampHypothese, badgePour partagé",
+          "hash": "809961c"
+        }
       ]
     },
     "qa_tests": {
