@@ -80,7 +80,7 @@ export function LoyersDuMois({ donnees }: { donnees: EtatGestion }): JSX.Element
             action={
               <Link
                 to="/gerer/loyers"
-                className="text-sm font-semibold text-accent hover:text-accent-fonce"
+                className="inline-flex items-center text-sm font-semibold text-accent hover:text-accent-fonce pointer-coarse:min-h-11"
               >
                 {TEXTES_LOYERS.voirTous}
               </Link>
