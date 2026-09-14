@@ -46,6 +46,31 @@ describe('profil dans la barre latérale et carte de Mes projets', () => {
     expect(screen.queryByRole('button', { name: 'Créer mon compte' })).not.toBeInTheDocument();
     expect(document.querySelector('img')).toBeNull();
   });
+
+  it('connecté : « Se déconnecter » est visible à côté du nom et ramène à « Sans compte »', async () => {
+    const utilisateur = userEvent.setup();
+    const compte = clientMemoire({ utilisateur: CAMILLE });
+    render(<AppEnMemoire chemin="/projets" compte={compte} />);
+    await screen.findByRole('link', { name: /Camille Durand/ });
+    const sortir = within(barreLaterale()).getByRole('button', { name: 'Se déconnecter' });
+    expect(sortir).toHaveAttribute('title', 'Se déconnecter');
+
+    await utilisateur.click(sortir);
+    expect(await within(barreLaterale()).findByText('Sans compte')).toBeInTheDocument();
+    expect(within(barreLaterale()).getByRole('link', { name: 'Se connecter' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Mes projets' })).toBeInTheDocument();
+    expect(await compte.session()).toBeNull();
+  });
+
+  it('se déconnecter depuis le menu sur la page Mon compte ramène à Mes projets', async () => {
+    const utilisateur = userEvent.setup();
+    render(<AppEnMemoire chemin="/compte" compte={clientMemoire({ utilisateur: CAMILLE })} />);
+    await screen.findByRole('heading', { name: 'Mon compte' });
+    await utilisateur.click(
+      within(barreLaterale()).getByRole('button', { name: 'Se déconnecter' }),
+    );
+    expect(await screen.findByRole('heading', { name: 'Mes projets' })).toBeInTheDocument();
+  });
 });
 
 describe('page Mon compte', () => {
@@ -85,7 +110,10 @@ describe('page Mon compte', () => {
       expect(await screen.findByRole('status')).toHaveTextContent("C'est enregistré.");
       expect(within(barreLaterale()).getByText('Camille')).toBeInTheDocument();
 
-      await utilisateur.click(screen.getByRole('button', { name: 'Me déconnecter' }));
+      // Le bouton de la page est dans l'en-tête, avant les cartes.
+      await utilisateur.click(
+        within(screen.getByRole('main')).getByRole('button', { name: 'Se déconnecter' }),
+      );
       expect(await screen.findByRole('heading', { name: 'Mes projets' })).toBeInTheDocument();
       expect(within(barreLaterale()).getByText('Sans compte')).toBeInTheDocument();
     },
