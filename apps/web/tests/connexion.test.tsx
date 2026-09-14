@@ -31,8 +31,9 @@ describe('page de connexion', () => {
     expect(screen.getByText('ou')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Continuer sans compte' })).toHaveAttribute(
       'href',
-      '/projets',
+      '/',
     );
+    expect(screen.getByRole('link', { name: 'Deklic : accueil' })).toHaveAttribute('href', '/');
     expect(screen.getByRole('img', { name: 'Deklic' })).toBeInTheDocument();
     // Pas de barre latérale sur cette page.
     expect(screen.queryByRole('navigation', { name: 'Mes projets' })).not.toBeInTheDocument();

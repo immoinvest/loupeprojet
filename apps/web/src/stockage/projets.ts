@@ -1,6 +1,7 @@
 import { ProjetSchema, projetExemple, type ProjetEntree } from '@loupe/moteur';
 import {
   migrerEnregistre,
+  NOM_EXEMPLE,
   ProjetEnregistreSchema,
   type AdresseBien,
   type ProjetEnregistre,
@@ -42,6 +43,9 @@ export const STATUTS: Readonly<Record<StatutProjet, string>> = {
 const ListeSchema = z.array(ProjetEnregistreSchema);
 
 export const CLE_STOCKAGE = 'loupe.projets.v1';
+
+/** Nom du projet d'exemple amorcé au premier lancement (défini avec les schémas partagés). */
+export const NOM_PROJET_EXEMPLE = NOM_EXEMPLE;
 
 /** Lit la liste ; un contenu absent ou invalide donne une liste vide (jamais d'exception). */
 export function lireProjets(stockage: Storage): ProjetEnregistre[] {

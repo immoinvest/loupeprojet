@@ -62,14 +62,16 @@ describe('profil dans la barre latérale et carte de Mes projets', () => {
     expect(await compte.session()).toBeNull();
   });
 
-  it('se déconnecter depuis le menu sur la page Mon compte ramène à Mes projets', async () => {
+  it('se déconnecter depuis le menu sur la page Mon compte ramène à l’accueil', async () => {
     const utilisateur = userEvent.setup();
     render(<AppEnMemoire chemin="/compte" compte={clientMemoire({ utilisateur: CAMILLE })} />);
     await screen.findByRole('heading', { name: 'Mon compte' });
     await utilisateur.click(
       within(barreLaterale()).getByRole('button', { name: 'Se déconnecter' }),
     );
-    expect(await screen.findByRole('heading', { name: 'Mes projets' })).toBeInTheDocument();
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Bienvenue sur Deklic' }),
+    ).toBeInTheDocument();
   });
 });
 
@@ -114,7 +116,9 @@ describe('page Mon compte', () => {
       await utilisateur.click(
         within(screen.getByRole('main')).getByRole('button', { name: 'Se déconnecter' }),
       );
-      expect(await screen.findByRole('heading', { name: 'Mes projets' })).toBeInTheDocument();
+      expect(
+        await screen.findByRole('heading', { level: 1, name: 'Bienvenue sur Deklic' }),
+      ).toBeInTheDocument();
       expect(within(barreLaterale()).getByText('Sans compte')).toBeInTheDocument();
     },
   );
@@ -145,7 +149,9 @@ describe('page Mon compte', () => {
 
     await utilisateur.click(screen.getByRole('button', { name: 'Supprimer mon compte' }));
     await utilisateur.click(screen.getByRole('button', { name: 'Oui, supprimer mon compte' }));
-    expect(await screen.findByRole('heading', { name: 'Mes projets' })).toBeInTheDocument();
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Bienvenue sur Deklic' }),
+    ).toBeInTheDocument();
     expect(await compte.session()).toBeNull();
   });
 

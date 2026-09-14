@@ -211,6 +211,7 @@ export function ecransDeReference({
         ).toBeVisible();
       },
     },
+    { nom: 'Accueil', chemin: '/' },
     { nom: 'Mes projets', chemin: '/projets' },
     { nom: 'Nouveau projet', chemin: '/projets/nouveau' },
     {

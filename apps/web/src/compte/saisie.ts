@@ -20,7 +20,7 @@ export function codeComplet(code: string): boolean {
  * Où revenir après la connexion : un chemin interne uniquement. Une URL externe, un chemin qui
  * commence par // ou /\ (interprété comme un autre site) ou la page de connexion elle-même donnent le défaut.
  */
-export function cheminDeRetour(parametre: string | null, defaut = '/projets'): string {
+export function cheminDeRetour(parametre: string | null, defaut = '/'): string {
   if (!parametre?.startsWith('/')) return defaut;
   if (parametre.startsWith('//') || parametre.startsWith('/\\')) return defaut;
   if (parametre === '/connexion' || parametre.startsWith('/connexion?')) return defaut;

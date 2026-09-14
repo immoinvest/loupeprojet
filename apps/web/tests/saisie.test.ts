@@ -36,14 +36,14 @@ describe('saisie du compte', () => {
   });
 
   it('ne revient après connexion qu’à un chemin interne', () => {
-    expect(cheminDeRetour(null)).toBe('/projets');
+    expect(cheminDeRetour(null)).toBe('/');
     expect(cheminDeRetour('/compte')).toBe('/compte');
     expect(cheminDeRetour('/projets/abc?onglet=fiscalite')).toBe('/projets/abc?onglet=fiscalite');
-    expect(cheminDeRetour('https://pirate.example')).toBe('/projets');
-    expect(cheminDeRetour('//pirate.example')).toBe('/projets');
-    expect(cheminDeRetour('/\\pirate.example')).toBe('/projets');
-    expect(cheminDeRetour('/connexion')).toBe('/projets');
-    expect(cheminDeRetour('/connexion?retour=/compte')).toBe('/projets');
+    expect(cheminDeRetour('https://pirate.example')).toBe('/');
+    expect(cheminDeRetour('//pirate.example')).toBe('/');
+    expect(cheminDeRetour('/\\pirate.example')).toBe('/');
+    expect(cheminDeRetour('/connexion')).toBe('/');
+    expect(cheminDeRetour('/connexion?retour=/compte')).toBe('/');
     expect(cheminDeRetour('compte', '/compte')).toBe('/compte');
   });
 });

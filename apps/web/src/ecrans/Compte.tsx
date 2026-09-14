@@ -33,7 +33,7 @@ export function Compte(): JSX.Element {
   const [confirmation, setConfirmation] = useState(false);
   const [sessionAncienne, setSessionAncienne] = useState(false);
   const [occupe, setOccupe] = useState(false);
-  // Où aller quand la session disparaît : la connexion par défaut, Mes projets après une sortie voulue.
+  // Où aller quand la session disparaît : la connexion par défaut, l'accueil après une sortie voulue.
   const destination = useRef(ALLER_A_LA_CONNEXION);
 
   const connecte = compte.etat === 'connecte';
@@ -75,7 +75,7 @@ export function Compte(): JSX.Element {
   };
 
   const supprimer = async (): Promise<void> => {
-    destination.current = '/projets';
+    destination.current = '/';
     setOccupe(true);
     const r = await compte.supprimer();
     if (signaler(r, null)) {
@@ -102,7 +102,7 @@ export function Compte(): JSX.Element {
         <Bouton
           disabled={occupe}
           onClick={() => {
-            void sortir('/projets');
+            void sortir('/');
           }}
         >
           <LogOut size={18} aria-hidden="true" />
