@@ -132,8 +132,10 @@ export function depotD1(base: D1Database, options: OptionsDepot = {}): DepotGest
     (await lier(sql, userId).all<Ligne>()).results;
   const outils = { lier, maintenant, genererId };
   const documents = depotDocuments(outils);
-  const baux = depotBaux({ ...outils, ensemble: (instructions) => base.batch(instructions) });
-  const modifications = depotModifications(outils);
+  const ensemble = (instructions: D1PreparedStatement[]): Promise<unknown> =>
+    base.batch(instructions);
+  const baux = depotBaux({ ...outils, ensemble });
+  const modifications = depotModifications({ ...outils, ensemble });
 
   const etat = async (userId: string): Promise<EtatGestion> => {
     const [biens, locataires, locations, colocations, changes, paiements, emis, bailleur, prefs] =
@@ -171,6 +173,7 @@ export function depotD1(base: D1Database, options: OptionsDepot = {}): DepotGest
     terminerLocation: baux.terminerLocation,
     louer: baux.louer,
     modifierLocation: modifications.modifierLocation,
+    supprimerBien: modifications.supprimerBien,
     exporter: async (userId) =>
       ExportGestionSchema.parse({
         ...(await etat(userId)),

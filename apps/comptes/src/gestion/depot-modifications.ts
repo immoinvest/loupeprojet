@@ -6,7 +6,7 @@ import {
 } from '@loupe/gestion';
 
 import { ErreurGestion } from './depot';
-import type { Outils } from './depot-documents';
+import type { OutilsBaux } from './depot-baux';
 import { lignes, lireLocation } from './lecture';
 import { versPeriode } from './lignes';
 
@@ -19,6 +19,12 @@ const SQL = {
     'update gestion_location set jourLoyer = ?, depot = ?, libelle = ? where userId = ? and id = ?',
   autresLocationsDuBien:
     'select debut, fin, libelle from gestion_location where userId = ? and bienId = ? and id <> ?',
+  bien: 'select id from gestion_bien where userId = ? and id = ?',
+  // Les clés étrangères suppriment en cascade locations, changements, colocataires, paiements et documents.
+  supprimerBien: 'delete from gestion_bien where userId = ? and id = ?',
+  // Un locataire n'existe que par ses locations : sans aucune, il part avec le bien (minimisation, G1-9).
+  supprimerLocatairesSansLocation:
+    'delete from gestion_locataire where userId = ? and id not in (select locataireId from gestion_location where userId = ?) and id not in (select locataireId from gestion_colocataire where userId = ?)',
 } as const;
 
 export interface DepotModifications {
@@ -27,11 +33,12 @@ export interface DepotModifications {
     locationId: string,
     modification: ModificationLocation,
   ) => Promise<LocationGeree>;
+  readonly supprimerBien: (userId: string, bienId: string) => Promise<void>;
 }
 
-/** « Modifier » une location : montants à partir d'un mois, jour du loyer, dépôt, libellé. */
-export function depotModifications(outils: Outils): DepotModifications {
-  const { lier, maintenant } = outils;
+/** « Modifier » une location (montants à partir d'un mois, jour, dépôt, libellé) et supprimer un bien. */
+export function depotModifications(outils: OutilsBaux): DepotModifications {
+  const { lier, maintenant, ensemble } = outils;
 
   /** Un libellé ne doit pas faire chevaucher une autre location du bien au même libellé (ADR-G13). */
   const verifierLibelle = async (
@@ -92,6 +99,16 @@ export function depotModifications(outils: Outils): DepotModifications {
         ).run();
       }
       return lireLocation(lier, userId, locationId);
+    },
+
+    supprimerBien: async (userId, bienId) => {
+      const [bien] = await lignes(lier, SQL.bien, userId, bienId);
+      if (bien === undefined) throw new ErreurGestion('INTROUVABLE');
+      // Un lot D1 (ADR-G17) : tout ou rien.
+      await ensemble([
+        lier(SQL.supprimerBien, userId, bienId),
+        lier(SQL.supprimerLocatairesSansLocation, userId, userId, userId),
+      ]);
     },
   };
 }

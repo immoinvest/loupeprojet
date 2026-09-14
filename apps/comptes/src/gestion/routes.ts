@@ -117,6 +117,11 @@ export function routeurGestion(
     );
   });
 
+  app.delete('/biens/:id', async (c) => {
+    await deps.gestion.supprimerBien(c.get('userId'), c.req.param('id'));
+    return c.body(null, 204);
+  });
+
   app.post('/biens/:id/locations', async (c) => {
     const occupation = await lireCorps(c, NouvelleOccupationSchema);
     if (occupation === null) return reponseErreur(400, 'CHAMPS_INVALIDES');

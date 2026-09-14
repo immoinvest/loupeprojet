@@ -227,3 +227,81 @@ describe('documents figés et APL', () => {
     expect(novembre.contenu).not.toHaveProperty('apl');
   });
 });
+
+describe('supprimer un bien', () => {
+  const BAILLEUR = { nom: 'Pierre Georgel', adresse: '3 rue Paradis, 13006 Marseille' };
+  const PARKING: CreationLocation = {
+    bien: { nom: 'Parking Prado', adresse: '8 avenue du Prado', type: 'parking', meuble: false },
+    locataire: null,
+    location: null,
+  };
+
+  it('204 : le bien, ses locations, changements, colocataires, paiements et documents disparaissent ; ses locataires sans autre location aussi', async () => {
+    const b = await connecte();
+    expect(
+      (await b.requete('/api/gestion/bailleur', { method: 'PUT', corps: BAILLEUR })).status,
+    ).toBe(200);
+    const lices = await creer(b, { ...louee(), colocataires: [{ prenom: 'Léa', nom: 'Bernard' }] });
+    const id = lices.location?.id ?? '';
+    expect((await modifier(b, id, montants('2027-01', 68_000))).status).toBe(200);
+    expect((await payer(b, id, '2026-10', 70_000)).status).toBe(201);
+    const quittance = await b.requete('/api/gestion/documents', {
+      corps: { type: 'quittance', locationId: id, periode: '2026-10' },
+    });
+    expect(quittance.status).toBe(201);
+
+    // Julie loue aussi le parking (écrit directement : l'API crée un locataire par location).
+    const prado = await creer(b, PARKING);
+    const compte = b.sqlite
+      .prepare('select userId from gestion_bien where id = ?')
+      .get(prado.bien.id);
+    b.sqlite
+      .prepare(
+        'insert into gestion_location (id, userId, bienId, locataireId, type, debut, jourLoyer, loyerHorsCharges, charges, depot, creeLe) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      )
+      .run(
+        'l-prado',
+        String(compte?.userId),
+        prado.bien.id,
+        lices.locataire?.id ?? '',
+        'nue',
+        '2026-11-01',
+        5,
+        8_000,
+        0,
+        8_000,
+        '2026-11-01T08:00:00.000Z',
+      );
+
+    const r = await b.requete(`/api/gestion/biens/${lices.bien.id}`, { method: 'DELETE' });
+    expect(r.status).toBe(204);
+    const apres = await etat(b);
+    expect(apres.biens.map((bien) => bien.nom)).toEqual(['Parking Prado']);
+    expect(apres.locations.map((l) => l.id)).toEqual(['l-prado']);
+    expect(apres.locataires.map((l) => l.prenom)).toEqual(['Julie']);
+    expect(apres.paiements).toEqual([]);
+    expect(apres.documents).toEqual([]);
+    for (const table of [
+      'gestion_changement',
+      'gestion_colocataire',
+      'gestion_paiement',
+      'gestion_document',
+    ]) {
+      expect(compter(b.sqlite, table)).toBe(0);
+    }
+  });
+
+  it('bien d’un autre compte ou inconnu : 404, rien n’est supprimé', async () => {
+    const b = await connecte();
+    const lices = await creer(b);
+    const autre = bancD1({ ...HORLOGE, sqlite: b.sqlite });
+    await connecter(autre, 'antoine.dupont@example.org');
+    expect(
+      (await autre.requete(`/api/gestion/biens/${lices.bien.id}`, { method: 'DELETE' })).status,
+    ).toBe(404);
+    expect((await b.requete('/api/gestion/biens/inconnu', { method: 'DELETE' })).status).toBe(404);
+    expect(compter(b.sqlite, 'gestion_bien')).toBe(1);
+    expect(compter(b.sqlite, 'gestion_locataire')).toBe(1);
+    expect(compter(b.sqlite, 'gestion_location')).toBe(1);
+  });
+});

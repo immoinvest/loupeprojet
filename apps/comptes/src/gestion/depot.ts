@@ -101,6 +101,8 @@ export interface DepotGestion {
     locationId: string,
     modification: ModificationLocation,
   ): Promise<LocationGeree>;
+  /** Le bien et tout ce qui en dépend (locations, paiements, documents, locataires sans autre location) ; lève INTROUVABLE. */
+  supprimerBien(userId: string, bienId: string): Promise<void>;
   /** Toutes les données de gestion du compte, documents complets compris. */
   exporter(userId: string): Promise<ExportGestion>;
 }
