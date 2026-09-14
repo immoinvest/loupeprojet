@@ -1,0 +1,14 @@
+export {
+  URL_SERVICE_WORKER,
+  enregistrerServiceWorker,
+  type EnvironnementHorsLigne,
+} from './enregistrer';
+export {
+  FICHIERS_FIXES,
+  cachesPerimes,
+  fichiersDeLaCoque,
+  nomDuCache,
+  strategiePour,
+  type RequeteInterceptee,
+  type Strategie,
+} from './strategie';

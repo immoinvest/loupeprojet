@@ -28,6 +28,7 @@ export default defineConfig({
         'src/bookmarklet/**',
         'src/enrichissement/**',
         'src/application/**',
+        'src/hors-ligne/**',
       ],
       thresholds: { lines: 100, functions: 100, branches: 100, statements: 100 },
     },

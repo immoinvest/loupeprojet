@@ -15,6 +15,7 @@
     "e2e",
     "vite.config.ts",
     "vite.bookmarklet.config.ts",
+    "vite.hors-ligne.config.ts",
     "vitest.config.ts",
     "playwright.config.ts"
   ]
