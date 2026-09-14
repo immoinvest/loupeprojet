@@ -17,6 +17,7 @@ export * from './cashflow';
 export * from './commun';
 export * from './estimation';
 export * from './financement';
+export * from './pret';
 export * from './fiscalite';
 export * from './regles';
 export * from './rendement';
