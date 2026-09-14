@@ -1,7 +1,9 @@
-import { ProjetSchema, projetExemple } from '@loupe/moteur';
+import { ProjetSchema, projetExemple, type ProjetEntree } from '@loupe/moteur';
 import { describe, expect, it } from 'vitest';
 
+import { construireProjet, type SaisieProjet } from '@/annonces';
 import { appliquerLoyerVise, loyerParChambre, loyerPourBien } from '@/enrichissement';
+import { appliquerSaisie, descripteurParChemin } from '@/hypotheses';
 import { decoderPartage, encoderPartage } from '@/stockage/partage';
 import {
   CLE_STOCKAGE,
@@ -146,5 +148,70 @@ describe('phrases de vigilance par type', () => {
         parametres: { chambres: 3, surfaceParChambre: 22, surfaceMinimale: 9, volumeMinimal: 20 },
       }),
     ).toContain('9 m² et 20 m³');
+  });
+});
+
+describe('changer de type sur un projet minimal', () => {
+  const mode = descripteurParChemin('hypotheses.location.mode');
+  const { achat, pret, location, fiscalite, revente, revenusMensuels } = projetExemple.hypotheses;
+  const hypotheses: ProjetEntree['hypotheses'] = {
+    achat,
+    pret,
+    location,
+    fiscalite,
+    revenusMensuels,
+    ...(revente === undefined ? {} : { revente }),
+  };
+
+  it('sans charges, sans provenance, sans chambres : chambres = pièces − 1, abonnements des règles', () => {
+    const minimal: ProjetEntree = {
+      id: projetExemple.id,
+      versionRegles: projetExemple.versionRegles,
+      bien: { type: 'appartement', surface: 65, pieces: 3, departement: '13' },
+      hypotheses,
+    };
+    const r = appliquerSaisie(minimal, mode, 'colocation');
+    if (!r.ok) throw new Error(r.erreur);
+    expect(r.projet.hypotheses.location).toMatchObject({ mode: 'colocation', chambres: 2 });
+    expect(r.projet.hypotheses.charges).toEqual({ energieMensuel: 190, internetMensuel: 30 });
+    expect(r.projet.provenance).toMatchObject({ 'charges.energieMensuel': 'estime' });
+    expect(ProjetSchema.safeParse(r.projet).success).toBe(true);
+  });
+
+  it('un abonnement « à toi » sans montant enregistré reste à 0', () => {
+    const aToi: ProjetEntree = {
+      ...projetExemple,
+      hypotheses,
+      provenance: { 'charges.internetMensuel': 'utilisateur' },
+    };
+    const r = appliquerSaisie(aToi, mode, 'courte_duree');
+    if (!r.ok) throw new Error(r.erreur);
+    expect(r.projet.hypotheses.charges).toEqual({ energieMensuel: 190, internetMensuel: 0 });
+    expect(r.projet.provenance).toMatchObject({ 'charges.internetMensuel': 'utilisateur' });
+  });
+});
+
+describe('lecture et construction : cas limites', () => {
+  it('une liste enregistrée qui n’est pas un tableau donne une liste vide', () => {
+    const s = stockage();
+    s.setItem(CLE_STOCKAGE, JSON.stringify({ projets: [ANCIEN_MEUBLE] }));
+    expect(lireProjets(s)).toEqual([]);
+  });
+
+  it('le type lu dans l’annonce garde sa provenance « annonce »', () => {
+    const saisie: SaisieProjet = {
+      prix: 155_000,
+      surface: 65,
+      codePostal: '13005',
+      ville: 'Marseille',
+      mode: 'colocation',
+      loyerHc: 1_840,
+      apport: 15_000,
+      dureeAnnees: 25,
+      tmi: 0.3,
+      revenusMensuels: 2_600,
+      provenance: { mode: 'annonce' },
+    };
+    expect(construireProjet(saisie, 'p').provenance?.['location.mode']).toBe('annonce');
   });
 });

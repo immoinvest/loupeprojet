@@ -2,10 +2,10 @@
   "feature_slug": "location-types",
   "title": "Location : cinq types d'exploitation (nue, meublée, colocation, courte durée, moyenne durée), champs et défauts par type",
   "started_at": "2026-09-14T09:00:00Z",
-  "current_step": "implement",
+  "current_step": "push",
   "scope": "packages/moteur (schema/hypotheses, schema/migration, regles, cashflow, fiscalite, scenarios, verdict/vigilance, location/defauts), apps/web (hypotheses, ecrans/FormulaireProjet, annonces/construire, enrichissement/loyer, textes, rapport/Leviers, Comparer, stockage), apps/worker/src/extraction (prompt v3)",
   "branch": "feat/location-types",
-  "base": "master (9d38892, docs/gestion-locative-menu fusionné)",
+  "base": "master (9d38892), puis fusion de master (coque-fixe, f2a2f1a)",
   "backlog": ".product/backlog/05-location-types-exploitation.md",
   "steps": {
     "discovery": {
@@ -22,17 +22,20 @@
     },
     "implement": {
       "status": "in_progress",
-      "stories_completed": 0,
-      "stories_total": 13
+      "stories_completed": 8,
+      "stories_total": 13,
+      "note": "PR 1 : US-1 à US-8 (moteur + web minimum) ; PR 2 : US-9 à US-13 (écrans)"
     },
     "qa_tests": {
-      "status": "pending"
+      "status": "in_progress",
+      "note": "moteur : 263 tests, couverture 100 % ; web : tests adaptés + location-types.test.ts (migration, loyer par type, phrases)"
     },
     "security": {
-      "status": "pending"
+      "status": "completed",
+      "note": "aucun réseau nouveau ; migration pure sans eval ; règles sourcées, valeurs sans source marquées à confirmer"
     },
     "push": {
-      "status": "pending",
+      "status": "in_progress",
       "prs": []
     }
   },
