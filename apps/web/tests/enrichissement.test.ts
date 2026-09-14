@@ -160,8 +160,8 @@ describe('client du Worker', () => {
     ).toEqual({ ok: true, valeur: MARCHE });
     await client.marche({ codeInsee: '13205', codePostal: '13005', type: 'appartement' });
     expect(f.appels.map((a) => a.url)).toEqual([
-      'https://worker.test/marche?codeInsee=13205&codePostal=13005&type=appartement&pieces=3',
-      'https://worker.test/marche?codeInsee=13205&codePostal=13005&type=appartement',
+      'https://worker.test/marche?codeInsee=13205&codePostal=13005&type=appartement&pieces=3&contrat=2',
+      'https://worker.test/marche?codeInsee=13205&codePostal=13005&type=appartement&contrat=2',
     ]);
   });
 

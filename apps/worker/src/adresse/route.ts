@@ -28,6 +28,7 @@ export const TTL_ADRESSE_SECONDES = 24 * 3600;
 /** Le parcellaire change rarement : 30 jours. */
 export const TTL_CADASTRE_SECONDES = 30 * 24 * 3600;
 /** À incrémenter quand le contrat de réponse change : les réponses en cache en dépendent. */
+// Monter aussi `CONTRAT_ADRESSE` dans apps/web/src/enrichissement/client.ts (cache HTTP du navigateur).
 const VERSION_CONTRAT = 6;
 
 export const SOURCE_DVF = {

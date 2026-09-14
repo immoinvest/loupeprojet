@@ -163,8 +163,8 @@ describe('client : analyse d’adresse', () => {
     await client.analyserAdresse({ ...parametres, numero: null, codeVoie: null });
     await client.geocoder('144 rue de l’Olivier 13005 Marseille');
     expect(f.urls).toEqual([
-      'https://worker.test/marche/adresse?codeInsee=13205&lat=43.294813&lon=5.393807&type=appartement&surface=65&numero=144&codeVoie=6659',
-      'https://worker.test/marche/adresse?codeInsee=13205&lat=43.294813&lon=5.393807&type=appartement&surface=65',
+      'https://worker.test/marche/adresse?codeInsee=13205&lat=43.294813&lon=5.393807&type=appartement&surface=65&numero=144&codeVoie=6659&contrat=6',
+      'https://worker.test/marche/adresse?codeInsee=13205&lat=43.294813&lon=5.393807&type=appartement&surface=65&contrat=6',
       'https://worker.test/proxy/geocodage?q=144+rue+de+l%E2%80%99Olivier+13005+Marseille&limit=1',
     ]);
     expect(
