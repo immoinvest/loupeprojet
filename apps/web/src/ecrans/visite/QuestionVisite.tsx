@@ -83,7 +83,7 @@ export const QuestionVisite = memo(function QuestionVisite({
   const texte = texteQuestion(question);
   const descripteur = descripteurDeValeur(question);
   return (
-    <li className="flex flex-col gap-2 border-b border-bordure-douce py-3 last:border-b-0">
+    <li className="flex flex-col items-start gap-2 border-b border-bordure-douce py-3 last:border-b-0">
       <div className="flex gap-3">
         {aCocherSurPapier && (
           <span
