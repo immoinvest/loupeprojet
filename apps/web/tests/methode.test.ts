@@ -67,6 +67,7 @@ describe('sectionsMethode', () => {
       'acquisition',
       'credit',
       'cashflow',
+      'location',
       'rendement',
       'micro_bic',
       'lmnp_reel',
@@ -135,8 +136,26 @@ describe('sectionsMethode', () => {
     expect(taxeCommunale?.aConfirmer).toBe(false);
     expect(section('micro_foncier').constantes[0]?.chemin).toBeUndefined();
     expect(section('micro_foncier').constantes[0]?.aConfirmer).toBe(false);
-    // 3 constantes fiscales + 6 coefficients de l'estimation (DPE ×2, étage ×2, extérieur, charges).
-    expect(sections.flatMap((s) => s.constantes).filter((c) => c.aConfirmer).length).toBe(9);
+    // 3 constantes fiscales + 6 coefficients de l'estimation (DPE ×2, étage ×2, extérieur, charges)
+    // + 9 valeurs de départ des types de location (Excel « Projet 92K », Airbnb, choix Deklic).
+    expect(sections.flatMap((s) => s.constantes).filter((c) => c.aConfirmer).length).toBe(18);
+  });
+
+  it('explique chaque type de location avec ses règles datées', () => {
+    const etapes = n(section('location').etapes.join(' | '));
+    expect(etapes).toContain('Location nue : loyer × 12 − vacance (3 semaines par défaut)');
+    expect(etapes).toContain('vacance de 4 semaines par chambre');
+    expect(etapes).toContain("Micro-BIC à 30 % d'abattement et 15 000 € de plafond");
+    expect(etapes).toContain('bail mobilité, 1 à 10 mois');
+    const v = valeurs('location');
+    expect(v).toContain('+35 %');
+    expect(v).toContain('9 m² · 20 m³');
+    expect(v).toContain('190 € par mois');
+    expect(v).toContain('E pour une nouvelle autorisation · D pour tous dès 2034');
+    const plateforme = section('location').constantes.find(
+      (c) => c.chemin === 'exploitation.parType.courte_duree.plateformeTaux',
+    );
+    expect(plateforme).toMatchObject({ valeur: '3 %', aConfirmer: true });
   });
 
   it('expose les coefficients de l’estimation et leur source, lus dans les règles', () => {

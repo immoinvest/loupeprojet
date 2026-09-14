@@ -114,6 +114,9 @@ export function Fiscalite(): JSX.Element {
   const retenu = f.regimes[f.retenu];
   const meuble = f.retenu === 'micro_bic' || f.retenu === 'lmnp_reel';
   const psAConfirmer = meuble && r.meta.aConfirmer.includes('fiscalite.prelevementsSociaux.bic');
+  // Seuls les régimes qui ont un sens pour ce type de location : les deux du meublé en colocation,
+  // courte et moyenne durée ; les quatre en location nue ou meublée.
+  const affiches = ORDRE_REGIMES.filter((regime) => f.compatibles.includes(regime));
 
   const retenir = (regime: Regime): void => {
     const application = appliquerSaisie(
@@ -129,9 +132,11 @@ export function Fiscalite(): JSX.Element {
       <div className="flex flex-col gap-2">
         <TitrePage taille="volet">Combien d'impôts, selon le régime ?</TitrePage>
         <Chapo>
-          Les quatre régimes avec votre tranche à{' '}
-          {pourcentage(r.projet.hypotheses.fiscalite.tmi, 0)}, projetés sur {annees} ans. Le régime
-          retenu alimente le rapport ; changez-le ici.
+          {affiches.length === 4
+            ? 'Les quatre régimes'
+            : `Les deux régimes du meublé (${MODES[r.projet.hypotheses.location.mode]})`}{' '}
+          avec votre tranche à {pourcentage(r.projet.hypotheses.fiscalite.tmi, 0)}, projetés sur{' '}
+          {annees} ans. Le régime retenu alimente le rapport ; changez-le ici.
         </Chapo>
       </div>
 
@@ -139,7 +144,7 @@ export function Fiscalite(): JSX.Element {
       <div
         className={`grid grid-cols-1 gap-4 sm:grid-cols-2 ${document ? 'print:grid-cols-2' : 'xl:grid-cols-4'}`}
       >
-        {ORDRE_REGIMES.map((regime) => (
+        {affiches.map((regime) => (
           <CarteRegime
             key={regime}
             r={f.regimes[regime]}

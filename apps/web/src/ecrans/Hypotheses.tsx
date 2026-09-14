@@ -1,4 +1,4 @@
-import type { ProjetEntree } from '@loupe/moteur';
+import type { ModeLocation, ProjetEntree } from '@loupe/moteur';
 import { useState, type JSX } from 'react';
 
 import { Page, TitrePage } from '@/composants/mise-en-page';
@@ -13,8 +13,11 @@ import {
   versTexte,
   type Descripteur,
 } from '@/hypotheses';
+import { CHEMIN_MODE } from '@/hypotheses/groupes-location';
 import { useProjets } from '@/stockage/ProjetsContext';
+import { TYPES_LOCATION } from '@/textes/regimes';
 
+import { SelecteurMode } from './hypotheses/SelecteurMode';
 import {
   BADGES,
   badgeDeSource,
@@ -100,23 +103,38 @@ export function Hypotheses(): JSX.Element {
       </div>
       {GROUPES.map((g) => {
         const visibles = g.champs.filter((d) => d.visibleSi === undefined || d.visibleSi(projet));
+        // Le type d'exploitation est la première question de sa carte, en boutons, et son titre le répète.
+        const champMode = visibles.find((d) => d.chemin === CHEMIN_MODE);
+        const mode: ModeLocation = projet.hypotheses.location.mode;
+        const titre = champMode === undefined ? g.titre : `${g.titre} — ${TYPES_LOCATION[mode]}`;
         return (
           <Carte key={g.titre}>
-            <h2 className="m-0 font-display text-[22px] font-semibold">{g.titre}</h2>
+            <h2 className="m-0 font-display text-[22px] font-semibold">{titre}</h2>
             {g.sousTitre !== undefined && <p className="m-0 text-sm text-encre-2">{g.sousTitre}</p>}
+            {champMode !== undefined && (
+              <SelecteurMode
+                nom="type-location-hypotheses"
+                valeur={mode}
+                onChange={(m) => {
+                  changer(champMode, m);
+                }}
+              />
+            )}
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
-              {visibles.map((d) => (
-                <ChampHypothese
-                  key={d.chemin}
-                  descripteur={d}
-                  texte={textes[d.chemin] ?? versTexte(valeurActuelle(projet, d), d.type)}
-                  erreur={erreurs[d.chemin]}
-                  badge={badgePour(projet, d)}
-                  onChange={(t) => {
-                    changer(d, t);
-                  }}
-                />
-              ))}
+              {visibles
+                .filter((d) => d !== champMode)
+                .map((d) => (
+                  <ChampHypothese
+                    key={d.chemin}
+                    descripteur={d}
+                    texte={textes[d.chemin] ?? versTexte(valeurActuelle(projet, d), d.type)}
+                    erreur={erreurs[d.chemin]}
+                    badge={badgePour(projet, d)}
+                    onChange={(t) => {
+                      changer(d, t);
+                    }}
+                  />
+                ))}
             </div>
           </Carte>
         );

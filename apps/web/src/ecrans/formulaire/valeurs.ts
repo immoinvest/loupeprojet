@@ -1,4 +1,12 @@
-import type { ClasseEnergie, EtatBien, ModeLocation, TypeBien } from '@loupe/moteur';
+import {
+  JOURS_PAR_MOIS,
+  VERSION_REGLES_COURANTE,
+  obtenirRegles,
+  type ClasseEnergie,
+  type EtatBien,
+  type ModeLocation,
+  type TypeBien,
+} from '@loupe/moteur';
 
 import type { AnnonceResolue, ChampsExtraits, Provenance, SaisieProjet } from '@/annonces';
 
@@ -25,6 +33,10 @@ export type Cle =
   | 'travaux'
   | 'mode'
   | 'loyerHc'
+  | 'chambresLouees'
+  | 'loyerChambre'
+  | 'nuitee'
+  | 'nuiteesParMois'
   | 'apport'
   | 'dureeAnnees'
   | 'tmi'
@@ -62,13 +74,29 @@ const VIDE: Valeurs = {
   travaux: '',
   mode: 'meuble',
   loyerHc: '',
+  chambresLouees: '',
+  loyerChambre: '',
+  nuitee: '',
+  nuiteesParMois: '',
   apport: '',
   dureeAnnees: '25',
   tmi: '0.3',
   revenusMensuels: '',
 };
 
-/** Pré-remplit depuis l'extraction ; chaque champ trouvé porte la provenance « annonce ». */
+/** Les champs de loyer demandés par chaque type d'exploitation. */
+export const CHAMPS_LOYER: Readonly<Record<ModeLocation, readonly Cle[]>> = {
+  nu: ['loyerHc'],
+  meuble: ['loyerHc'],
+  moyenne_duree: ['loyerHc'],
+  colocation: ['chambresLouees', 'loyerChambre'],
+  courte_duree: ['nuitee', 'nuiteesParMois'],
+};
+
+/**
+ * Pré-remplit depuis l'extraction ; chaque champ trouvé porte la provenance « annonce ».
+ * Le type de location lu (ou « meublé » quand seule la mention existe) choisit le type du formulaire.
+ */
 export function valeursDepuisChamps(champs: ChampsExtraits): ValeursInitiales {
   const valeurs: Record<Cle, string> = { ...VIDE };
   const provenance: ProvenanceValeurs = {};
@@ -96,6 +124,7 @@ export function valeursDepuisChamps(champs: ChampsExtraits): ValeursInitiales {
   poser('ville', champs.ville);
   poser('chargesCoproMois', champs.chargesCoproMois);
   poser('taxeFonciere', champs.taxeFonciere);
+  poser('mode', champs.mode ?? (champs.meuble === true ? 'meuble' : undefined));
   return { valeurs, provenance };
 }
 
@@ -107,6 +136,32 @@ export function nombre(v: string): number | undefined {
   return Number.isFinite(n) ? n : undefined;
 }
 
+const MESSAGES_LOYER: Readonly<
+  Record<'loyerHc' | 'chambresLouees' | 'loyerChambre' | 'nuitee' | 'nuiteesParMois', string>
+> = {
+  loyerHc: 'Indiquez le loyer visé, hors charges.',
+  chambresLouees: 'Indiquez le nombre de chambres louées (1 à 20).',
+  loyerChambre: 'Indiquez le loyer d’une chambre, hors charges.',
+  nuitee: 'Indiquez le prix d’une nuit.',
+  nuiteesParMois: 'Entre 0 et 31 nuits par mois.',
+};
+
+/** Les champs de loyer du type choisi, chacun avec ses bornes. */
+function validerLoyer(v: Valeurs, erreurs: Erreurs): void {
+  const mode = v.mode as ModeLocation;
+  const bornes: Readonly<Record<keyof typeof MESSAGES_LOYER, (n: number) => boolean>> = {
+    loyerHc: (n) => n >= 0,
+    chambresLouees: (n) => Number.isInteger(n) && n >= 1 && n <= 20,
+    loyerChambre: (n) => n >= 0,
+    nuitee: (n) => n > 0,
+    nuiteesParMois: (n) => n >= 0 && n <= 31,
+  };
+  for (const cle of CHAMPS_LOYER[mode] as readonly (keyof typeof MESSAGES_LOYER)[]) {
+    const n = nombre(v[cle]);
+    if (n === undefined || !bornes[cle](n)) erreurs[cle] = MESSAGES_LOYER[cle];
+  }
+}
+
 export function valider(v: Valeurs): Erreurs {
   const erreurs: Erreurs = {};
   const prix = nombre(v.prix);
@@ -115,8 +170,7 @@ export function valider(v: Valeurs): Erreurs {
   if (surface === undefined || surface <= 0) erreurs.surface = 'Indiquez la surface.';
   if (!/^\d{5}$/.test(v.codePostal.trim())) erreurs.codePostal = 'Code postal à 5 chiffres.';
   if (v.ville.trim() === '') erreurs.ville = 'Indiquez la ville.';
-  const loyer = nombre(v.loyerHc);
-  if (loyer === undefined || loyer < 0) erreurs.loyerHc = 'Indiquez le loyer visé, hors charges.';
+  validerLoyer(v, erreurs);
   const apport = nombre(v.apport);
   if (apport === undefined || apport < 0) erreurs.apport = 'Indiquez votre apport (0 si aucun).';
   const revenus = nombre(v.revenusMensuels);
@@ -128,6 +182,26 @@ export function valider(v: Valeurs): Erreurs {
   return erreurs;
 }
 
+/**
+ * Le loyer mensuel du logement entier, pivot de `construireProjet` (taxe foncière estimée, défauts) :
+ * chambres × loyer par chambre en colocation ; en courte durée, le loyer meublé que la nuitée suppose.
+ */
+function loyerDuLogement(v: Valeurs): number {
+  switch (v.mode as ModeLocation) {
+    case 'colocation':
+      return (nombre(v.chambresLouees) ?? 0) * (nombre(v.loyerChambre) ?? 0);
+    case 'courte_duree': {
+      const { nuiteeEnLoyersJournaliers } =
+        obtenirRegles(VERSION_REGLES_COURANTE).exploitation.parType.courte_duree;
+      return Math.round(((nombre(v.nuitee) ?? 0) * JOURS_PAR_MOIS) / nuiteeEnLoyersJournaliers);
+    }
+    case 'nu':
+    case 'meuble':
+    case 'moyenne_duree':
+      return nombre(v.loyerHc) ?? 0;
+  }
+}
+
 /** Valeurs validées → saisie typée pour `construireProjet`. */
 export function versSaisie(
   v: Valeurs,
@@ -135,6 +209,7 @@ export function versSaisie(
   annonce: AnnonceResolue | null,
 ): SaisieProjet {
   const opt = (cle: Cle): number | undefined => nombre(v[cle]);
+  const mode = v.mode as ModeLocation;
   return {
     typeBien: v.typeBien as TypeBien,
     ges: v.ges === '' ? undefined : (v.ges as ClasseEnergie),
@@ -156,8 +231,12 @@ export function versSaisie(
     chargesCoproMois: opt('chargesCoproMois'),
     taxeFonciere: opt('taxeFonciere'),
     travaux: opt('travaux'),
-    mode: v.mode as ModeLocation,
-    loyerHc: nombre(v.loyerHc) ?? 0,
+    mode,
+    loyerHc: loyerDuLogement(v),
+    chambresLouees: mode === 'colocation' ? opt('chambresLouees') : undefined,
+    loyerChambre: mode === 'colocation' ? opt('loyerChambre') : undefined,
+    nuitee: mode === 'courte_duree' ? opt('nuitee') : undefined,
+    nuiteesParMois: mode === 'courte_duree' ? opt('nuiteesParMois') : undefined,
     apport: nombre(v.apport) ?? 0,
     dureeAnnees: nombre(v.dureeAnnees) ?? 25,
     tmi: Number(v.tmi) as SaisieProjet['tmi'],

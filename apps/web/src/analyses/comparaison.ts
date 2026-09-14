@@ -10,7 +10,7 @@ import {
 } from '@/formatage/nombres';
 import type { ProjetEnregistre, StatutProjet } from '@/stockage/projets';
 import { libelleRisques } from '@/textes/feux';
-import { REGIMES } from '@/textes/regimes';
+import { MODES, REGIMES } from '@/textes/regimes';
 
 export type CodeIndicateur =
   | 'prix'
@@ -85,6 +85,8 @@ export const INDICATEURS: readonly Indicateur[] = [
     meilleur: false,
     extraire: (r) => r.cashflow.recettes.loyersBruts / 12,
     formater: euros,
+    // Un loyer de colocation ou de courte durée ne se lit qu'avec son type.
+    detail: (r) => MODES[r.projet.hypotheses.location.mode],
   },
   {
     code: 'cashflow',

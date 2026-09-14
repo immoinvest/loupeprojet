@@ -76,7 +76,8 @@ describe('comparerProjets', () => {
     expect(formats.horizon).toBe('10 ans');
     expect(formats.risques).toBe('aucun');
     expect(n(indicateurParCode('impot').detail!(c!.resultats))).toBe('Meublé au réel · 10 ans');
-    expect(INDICATEURS.filter((i) => i.detail === undefined).length).toBe(INDICATEURS.length - 1);
+    expect(indicateurParCode('loyer').detail!(c!.resultats)).toBe('meublé longue durée');
+    expect(INDICATEURS.filter((i) => i.detail === undefined).length).toBe(INDICATEURS.length - 2);
   });
 
   it('les indicateurs sans repère de marché ou sans revenus rendent null', () => {

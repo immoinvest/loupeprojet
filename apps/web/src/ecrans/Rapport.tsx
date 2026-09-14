@@ -60,14 +60,20 @@ function CarteCashflow({ r }: { r: Resultats }): JSX.Element {
 function CarteFiscalite({ r }: { r: Resultats }): JSX.Element {
   const f = r.fiscalite;
   const retenu = f.regimes[f.retenu];
+  // Les régimes nus ne sont pas proposés pour une colocation, une courte ou une moyenne durée.
   const autres = Object.values(f.regimes)
-    .filter((x) => x.regime !== f.retenu)
+    .filter((x) => x.regime !== f.retenu && f.compatibles.includes(x.regime))
     .sort((a, b) => a.impotTotal - b.impotTotal);
   const annees = r.projet.hypotheses.revente.annees;
   return (
     <Carte>
       <TitreCarte
-        action={<Pourquoi texte={EXPLICATIONS.fiscalite} libelle="Comparer les 4 régimes" />}
+        action={
+          <Pourquoi
+            texte={EXPLICATIONS.fiscalite}
+            libelle={`Comparer les ${String(f.compatibles.length)} régimes`}
+          />
+        }
       >
         Combien d'impôts ?
       </TitreCarte>
