@@ -190,6 +190,9 @@ describe('sectionsMethode', () => {
       'élevée dès 80 · bonne dès 65 · moyenne dès 45 · faible dès 25 · très faible dès 0',
     );
     expect(v).toContain('±5 % · ±6,5 % · ±8 % · ±12 % · ±15 %');
+    expect(n(section('estimation').etapes[7] ?? '')).toContain(
+      'Fond de carte : Plan IGN (Géoplateforme)',
+    );
     expect(section('estimation').constantes.every((c) => c.source.length > 3)).toBe(true);
   });
 

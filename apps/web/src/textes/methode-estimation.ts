@@ -61,6 +61,7 @@ export function sectionEstimation(regles: Regles): SectionMethode {
       `Charges : l'écart des charges de copropriété au repère de ${nombre(e.charges.repereM2An)} € par m² et par an est un coût permanent, capitalisé au rendement locatif brut local (loyer de référence ÷ prix médian), borné à ${pct(e.charges.borne)} du prix. Charges estimées par défaut : ignorées.`,
       `Confiance : une note sur 100, somme de quatre composantes lues sur le repère de prix : localisation (${String(maximum([...c.localisation.quartier, { points: c.localisation.immeuble }]))} points au plus), dispersion des prix (${String(maximum(c.dispersion))}), nombre de ventes comparables (${String(maximum(c.comparables))}) et ancienneté des ventes (${String(maximum(c.anciennete))}). Chaque barème est interpolé entre ses paliers ; une ancienneté inconnue est supposée à ${String(c.ancienneteSupposeeMois)} mois.`,
       `Fourchette : ${ORDRE_NIVEAUX.map((niveau) => `±${pct(e.marges[niveau])} si la confiance est ${niveauCourt(niveau)}`).join(', ')}.`,
+      'Carte des ventes (onglet Estimation, avec une adresse) : les ventes comparables géolocalisées à 300 m au plus, colorées selon leur prix au m² sous le premier quart, entre les quarts ou au-dessus du troisième quart du repère. Fond de carte : Plan IGN (Géoplateforme) ; les tuiles sont chargées depuis le site de l’IGN, qui voit la zone affichée. La carte n’est pas imprimée : les tableaux la remplacent.',
     ],
     constantes: [
       {
