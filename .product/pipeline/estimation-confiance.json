@@ -1,0 +1,45 @@
+{
+  "feature_slug": "estimation-confiance",
+  "title": "Estimation : note de confiance expliquée en tête d'onglet, repère visible sans adresse (PR 1) ; carte des ventes (PR 2)",
+  "started_at": "2026-09-14T12:00:00Z",
+  "current_step": "implement",
+  "scope": "packages/moteur/src/{estimation,regles,schema/marche.ts,schema/resultats.ts}, data/src/{schemas/dvf.ts,sources/dvf/statistiques.ts}, apps/worker/src/{donnees/anciennete.ts,marche,adresse}, apps/web/src/{enrichissement,textes/confiance.ts,ecrans/Adresse.tsx,ecrans/adresse,ecrans/rapport/CartePrix.tsx,textes/methode-estimation.ts}, e2e",
+  "branch": "feat/estimation-confiance",
+  "base": "master (9d38892, PR #38 fusionnée)",
+  "backlog": ".product/backlog/09-estimation-carte-confiance.md",
+  "steps": {
+    "discovery": {
+      "status": "completed",
+      "output": ".product/features/estimation-confiance-discovery.md",
+      "note": "Les CSV DVF portent déjà lat et lon par vente : la carte (PR 2) n'exige aucune republication"
+    },
+    "specs": {
+      "status": "completed",
+      "output": ".product/specs/estimation-confiance-specs.md",
+      "stories_count": 6,
+      "stories_pr2": 2
+    },
+    "architecture": {
+      "status": "completed",
+      "output": ".product/architecture/estimation-confiance.md"
+    },
+    "implement": {
+      "status": "in_progress",
+      "stories_completed": 0,
+      "stories_total": 6,
+      "commits": []
+    },
+    "refactor": { "status": "pending" },
+    "qa_tests": { "status": "pending" },
+    "security": { "status": "pending" },
+    "push": { "status": "pending" }
+  },
+  "decisions": {
+    "indice": "note 0-100 en mots avec quatre composantes chiffrées (recommandation, à confirmer par Pierre) ; cinq niveaux ; marge de la fourchette selon le niveau",
+    "composantes": "localisation 35, dispersion 30, comparables 20, ancienneté 15 ; barèmes en paliers interpolés, règle datée dans regles/2026-09.ts",
+    "anciennete": "mesurée par le Worker (dates du CSV, dateMediane de l'index DVF) et rangée en mois dans marche.dvf ; supposée 12 mois quand elle manque",
+    "retrocompatibilite": "champs de marche.dvf optionnels ; précision déduite du rayon ; contrats web tolérants à l'ancien Worker",
+    "carte": "PR 2 séparée ; fond IGN Géoplateforme recommandé, décision de Pierre",
+    "etat_pipeline": "session parallèle : état dans .product/pipeline/estimation-confiance.json, pipeline-state.json réservé à la session principale"
+  }
+}
