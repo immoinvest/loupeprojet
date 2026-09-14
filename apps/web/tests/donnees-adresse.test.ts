@@ -184,7 +184,7 @@ describe('loyer de marché', () => {
       hautMensuel: 1136,
     });
     expect(loyerVise(loyer, 'nu')).toBe(897);
-    expect(loyerVise(loyer, 'meuble_lld')).toBe(1032);
+    expect(loyerVise(loyer, 'meuble')).toBe(1032);
     expect(loyerVise(loyer, 'courte_duree')).toBe(1032);
     expect(n(phraseLoyer(loyer))).toBe(
       '897 € par mois hors charges en location nue, 1 032 € en meublé ; fourchette des annonces : 718 € à 1 136 €.',
@@ -196,7 +196,7 @@ describe('loyer de marché', () => {
     expect(reference.marche.loyerReferenceM2).toBe(13.8);
     expect(reference.provenance['marche.loyerReferenceM2']).toBe('anil');
     const vise = appliquerLoyerVise(projet, loyer);
-    expect(vise.hypotheses.location.loyerHc).toBe(1032);
+    expect(vise.hypotheses.location).toMatchObject({ loyerHc: 1032 });
     expect(vise.provenance['location.loyerHc']).toBe('anil');
   });
 });

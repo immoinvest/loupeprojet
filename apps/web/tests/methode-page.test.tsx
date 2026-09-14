@@ -9,7 +9,7 @@ describe('Page Méthode', () => {
     expect(
       await screen.findByRole('heading', { name: "Comment c'est calculé" }),
     ).toBeInTheDocument();
-    expect(screen.getByText(/Règles du 13 sept\. 2026 \(version 2026-09\)/)).toBeInTheDocument();
+    expect(screen.getByText(/Règles du 14 sept\. 2026 \(version 2026-09\)/)).toBeInTheDocument();
 
     const sommaire = screen.getByRole('navigation', { name: 'Sommaire' });
     expect(within(sommaire).getAllByRole('link')).toHaveLength(14);

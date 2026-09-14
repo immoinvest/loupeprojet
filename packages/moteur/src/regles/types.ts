@@ -1,4 +1,5 @@
 import type { ClasseEnergie, EtatBien, TypeBien } from '../schema/bien';
+import type { ModeLocation } from '../schema/hypotheses';
 
 /**
  * Toutes les constantes datées du moteur (barèmes, taux, seuils).
@@ -56,6 +57,46 @@ export interface EffetEtage {
   readonly hauts: number;
 }
 
+/** Défauts communs aux locations à loyer mensuel. */
+export interface DefautsLoyerMensuel {
+  readonly vacanceSemaines: number;
+  readonly gestionTaux: number;
+}
+
+/** Charges d'abonnement payées par le propriétaire quand les charges sont comprises. */
+export interface DefautsChargesProprietaire {
+  readonly energieMensuel: number;
+  readonly internetMensuel: number;
+}
+
+export interface DefautsCourteDuree extends DefautsChargesProprietaire {
+  readonly nuiteesParMois: number;
+  readonly dureeSejourNuits: number;
+  /** Ménage par séjour, facturé au voyageur et payé au prestataire. */
+  readonly menageParSejour: number;
+  readonly plateformeTaux: number;
+  readonly conciergerieTaux: number;
+  /** Nuitée de départ = loyer mensuel meublé ÷ 30 × ce coefficient. */
+  readonly nuiteeEnLoyersJournaliers: number;
+}
+
+export interface DefautsMoyenneDuree extends DefautsLoyerMensuel, DefautsChargesProprietaire {
+  readonly dureeSejourMois: number;
+  readonly menageParSejour: number;
+  readonly plateformeTaux: number;
+}
+
+/** Défauts par type d'exploitation, une entrée par `ModeLocation`. */
+export type DefautsParType = {
+  readonly [M in ModeLocation]: M extends 'colocation'
+    ? DefautsLoyerMensuel & DefautsChargesProprietaire
+    : M extends 'courte_duree'
+      ? DefautsCourteDuree
+      : M extends 'moyenne_duree'
+        ? DefautsMoyenneDuree
+        : DefautsLoyerMensuel;
+};
+
 export interface Regles {
   readonly version: VersionRegles;
   readonly dateReference: string;
@@ -94,10 +135,33 @@ export interface Regles {
   readonly exploitation: {
     /** Écart de loyer meublé / nu utilisé pour déduire le loyer nu par défaut. */
     readonly primeMeuble: number;
-    /** Supplément de loyer total attendu en colocation par rapport à une location classique. */
+    /** Supplément de loyer total attendu en colocation par rapport à une location meublée classique. */
     readonly primeColocation: number;
-    readonly vacanceSemainesColocation: number;
     readonly interdictionLocationDpe: Readonly<Record<'G' | 'F' | 'E', number>>;
+    /** Valeurs de départ propres à chaque type d'exploitation (badgées « estimé » dans l'app). */
+    readonly parType: DefautsParType;
+    /** Décence d'une chambre louée par bail individuel en colocation. */
+    readonly colocation: {
+      readonly surfaceMinChambreM2: number;
+      readonly volumeMinChambreM3: number;
+    };
+    /** Réglementation des meublés de tourisme (courte durée). */
+    readonly meubleTourisme: {
+      /** Classe DPE minimale pour une nouvelle autorisation de changement d'usage. */
+      readonly dpeMinNouvelleAutorisation: ClasseEnergie;
+      /** Classe DPE minimale de tous les meublés de tourisme à partir de `dpeMinTousDes`. */
+      readonly dpeMinTous: ClasseEnergie;
+      readonly dpeMinTousDes: number;
+      /** Jours de location par an d'une résidence principale (les communes peuvent abaisser). */
+      readonly joursMaxResidencePrincipale: number;
+      /** Départements où l'autorisation de changement d'usage est obligatoire de plein droit. */
+      readonly departementsChangementUsage: readonly string[];
+    };
+    /** Bail mobilité (moyenne durée). */
+    readonly bailMobilite: {
+      readonly dureeMinMois: number;
+      readonly dureeMaxMois: number;
+    };
   };
 
   readonly fiscalite: {

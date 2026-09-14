@@ -56,6 +56,8 @@ export interface ContexteFiscal {
 
 export interface ResultatFiscalite {
   readonly regimes: Readonly<Record<Regime, ResultatRegime>>;
+  /** Régimes qui ont un sens pour le type de location du projet ; les autres sont projetés mais pas proposés. */
+  readonly compatibles: readonly Regime[];
   /** Régime choisi dans les hypothèses : alimente revente, TRI et verdict. */
   readonly retenu: Regime;
   /** Régime éligible au meilleur cash-flow cumulé après impôt. */

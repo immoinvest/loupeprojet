@@ -100,7 +100,7 @@ describe('effetCharges', () => {
         marche: { dvf: DVF },
         hypotheses: {
           ...projetExemple.hypotheses,
-          location: { ...projetExemple.hypotheses.location, loyerHc: 0 },
+          location: { mode: 'meuble', loyerHc: 0 },
         },
       },
     );
