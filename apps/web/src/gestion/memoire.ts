@@ -1,10 +1,17 @@
 import {
+  cleDocument,
   CreationLocationSchema,
+  DemandeDocumentSchema,
+  DocumentSchema,
+  IdentiteBailleurSchema,
+  loyerDuMois,
+  montantAcceptable,
   NouveauPaiementSchema,
   occupationDe,
   PREFERENCES_PAR_DEFAUT,
   PreferencesMenuSchema,
   type BienGere,
+  type DocumentComplet,
   type EtatGestion,
   type Locataire,
   type LocationGeree,
@@ -12,15 +19,18 @@ import {
   type Paiement,
 } from '@loupe/gestion';
 
+import { cleDuDocument, documentEnMemoire } from './memoire-documents';
 import type { ClientGestion, CodeErreurGestion, ResultatGestion } from './types';
 
 export type ActionGestion = keyof ClientGestion;
 
 export interface OptionsGestionMemoire {
   readonly etat?: EtatGestion;
+  /** Le contenu des documents de `etat.documents` (sans lui, un document listé reste introuvable). */
+  readonly documents?: readonly DocumentComplet[];
   /** Force une erreur sur une action, pour vérifier son affichage. */
   readonly erreurs?: Partial<Record<ActionGestion, CodeErreurGestion>>;
-  /** Horodatage des créations. */
+  /** Horodatage des créations ; son jour borne la date des paiements. */
   readonly maintenant?: string;
 }
 
@@ -47,10 +57,16 @@ const INTROUVABLE = { ok: false, code: 'introuvable' } as const;
 /** Un client de gestion sans réseau, qui applique les mêmes règles que l'API : tests et aperçu. */
 export function clientGestionMemoire(options: OptionsGestionMemoire = {}): ClientGestionMemoire {
   let donnees = options.etat ?? ETAT_GESTION_VIDE;
+  const complets = new Map((options.documents ?? []).map((d) => [d.id, d]));
   const maintenant = options.maintenant ?? '2026-09-14T09:00:00.000Z';
+  const aujourdhui = maintenant.slice(0, 10);
   const appels: ActionGestion[] = [];
   let compteur = 0;
   const identifiant = (prefixe: string): string => `${prefixe}-${String((compteur += 1))}`;
+  const lireDocument = (id: string): ResultatGestion<DocumentComplet> => {
+    const complet = complets.get(id);
+    return complet === undefined ? INTROUVABLE : { ok: true, valeur: complet };
+  };
 
   function executer<T>(
     action: ActionGestion,
@@ -112,10 +128,13 @@ export function clientGestionMemoire(options: OptionsGestionMemoire = {}): Clien
       executer('payer', () => {
         const lu = NouveauPaiementSchema.safeParse(nouveau);
         if (!lu.success) return INVALIDE;
-        const { locationId, periode } = lu.data;
-        if (!donnees.locations.some((l) => l.id === locationId)) return INTROUVABLE;
-        if (donnees.paiements.some((p) => p.locationId === locationId && p.periode === periode)) {
-          return { ok: false, code: 'deja_recu' };
+        const location = donnees.locations.find((l) => l.id === lu.data.locationId);
+        if (location === undefined) return INTROUVABLE;
+        const du = loyerDuMois(location, lu.data.periode);
+        if (du === null) return INVALIDE;
+        if (lu.data.date > aujourdhui) return { ok: false, code: 'date_invalide' };
+        if (!montantAcceptable(du, donnees.paiements, lu.data.montant)) {
+          return { ok: false, code: 'montant_depasse' };
         }
         const paiement: Paiement = {
           id: identifiant('paiement'),
@@ -128,7 +147,19 @@ export function clientGestionMemoire(options: OptionsGestionMemoire = {}): Clien
       }),
     annulerPaiement: (id) =>
       executer('annulerPaiement', () => {
-        if (!donnees.paiements.some((p) => p.id === id)) return INTROUVABLE;
+        const paiement = donnees.paiements.find((p) => p.id === id);
+        if (paiement === undefined) return INTROUVABLE;
+        const cles = [
+          cleDocument({ type: 'recu', paiementId: id }),
+          cleDocument({
+            type: 'quittance',
+            locationId: paiement.locationId,
+            periode: paiement.periode,
+          }),
+        ];
+        if (donnees.documents.some((d) => cles.includes(cleDuDocument(d)))) {
+          return { ok: false, code: 'document_emis' };
+        }
         donnees = { ...donnees, paiements: donnees.paiements.filter((p) => p.id !== id) };
         return { ok: true, valeur: undefined };
       }),
@@ -139,5 +170,30 @@ export function clientGestionMemoire(options: OptionsGestionMemoire = {}): Clien
         donnees = { ...donnees, preferences: lu.data };
         return { ok: true, valeur: lu.data };
       }),
+    enregistrerBailleur: (identite) =>
+      executer('enregistrerBailleur', () => {
+        const lu = IdentiteBailleurSchema.safeParse(identite);
+        if (!lu.success) return INVALIDE;
+        donnees = { ...donnees, bailleur: lu.data };
+        return { ok: true, valeur: lu.data };
+      }),
+    emettreDocument: (demande) =>
+      executer('emettreDocument', () => {
+        const lu = DemandeDocumentSchema.safeParse(demande);
+        if (!lu.success) return INVALIDE;
+        const cle = cleDocument(lu.data);
+        const existant = donnees.documents.find((d) => cleDuDocument(d) === cle);
+        if (existant !== undefined) return lireDocument(existant.id);
+        const emis = documentEnMemoire(donnees, lu.data, identifiant('document'), maintenant);
+        if (emis.ok) {
+          complets.set(emis.valeur.id, emis.valeur);
+          donnees = {
+            ...donnees,
+            documents: [...donnees.documents, DocumentSchema.parse(emis.valeur)],
+          };
+        }
+        return emis;
+      }),
+    document: (id) => executer('document', () => lireDocument(id)),
   };
 }

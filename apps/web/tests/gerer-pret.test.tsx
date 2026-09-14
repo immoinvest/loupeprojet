@@ -85,8 +85,13 @@ describe('porte « J’ai acheté ce bien »', () => {
     await utilisateur.type(screen.getByLabelText(TEXTES_PRET.locataire), 'Julie Martin');
     await cliquer(screen.getByRole('button', { name: TEXTES_PRET.cestParti }));
 
+    // Création, navigation puis rendu de l'accueil : plus d'une seconde quand toute la suite tourne.
     expect(
-      await screen.findByRole('heading', { level: 1, name: 'Aucun loyer attendu ce mois-ci.' }),
+      await screen.findByRole(
+        'heading',
+        { level: 1, name: 'Aucun loyer attendu ce mois-ci.' },
+        { timeout: 10_000 },
+      ),
     ).toBeInTheDocument();
     expect(clics).toBe(2);
     // Le locataire entre le mois prochain : ce n'est pas un bien vacant.

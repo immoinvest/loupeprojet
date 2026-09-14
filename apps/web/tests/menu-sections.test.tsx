@@ -74,7 +74,7 @@ describe('menu à deux sections', () => {
     );
   });
 
-  it('connecté : Ajouter un bien, Accueil et le nombre de loyers en retard', async () => {
+  it('connecté : Ajouter un bien, Accueil, et Loyers avec le nombre de loyers en retard', async () => {
     render(
       <AppEnMemoire
         chemin="/projets"
@@ -87,9 +87,13 @@ describe('menu à deux sections', () => {
       'href',
       '/gerer/ajouter',
     );
-    const accueil = await within(gerer).findByRole('link', { name: /Accueil/ });
-    expect(accueil).toHaveAttribute('href', '/gerer');
-    expect(await within(accueil).findByLabelText('1 loyer en retard')).toHaveTextContent('1');
+    expect(await within(gerer).findByRole('link', { name: 'Accueil' })).toHaveAttribute(
+      'href',
+      '/gerer',
+    );
+    const loyers = within(gerer).getByRole('link', { name: /^Loyers/ });
+    expect(loyers).toHaveAttribute('href', '/gerer/loyers');
+    expect(await within(loyers).findByLabelText('1 loyer en retard')).toHaveTextContent('1');
   });
 });
 

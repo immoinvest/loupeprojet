@@ -12,6 +12,8 @@ import {
 
 export const HORODATAGE = '2026-09-01T08:00:00.000Z';
 
+export const BAILLEUR = { nom: 'Pierre Georgel', adresse: '3 rue Paradis, 13006 Marseille' };
+
 export const BIEN_LICES: BienGere = {
   id: 'bien-lices',
   nom: 'T2 Lices',

@@ -8,6 +8,7 @@ export const TEXTES_MENU = {
   comparer: 'Comparer',
   ajouterBien: 'Ajouter un bien',
   accueil: 'Accueil',
+  loyers: 'Loyers',
   gererSansCompte: 'Gérer mes biens loués',
 } as const;
 
@@ -40,7 +41,16 @@ export const ERREURS_GESTION: Readonly<Record<CodeErreurGestion, string>> = {
   non_connecte: 'Votre session a expiré. Reconnectez-vous.',
   invalide: 'Une information est incomplète ou invalide. Vérifiez les champs.',
   introuvable: 'Cet élément n’existe plus. Rechargez la page.',
-  deja_recu: 'Ce loyer est déjà marqué reçu.',
+  montant_depasse: 'Ce montant dépasse ce qui reste dû pour ce mois.',
+  date_invalide: 'La date du paiement ne peut pas être dans le futur.',
+  document_emis: 'Une quittance ou un reçu atteste ce paiement : il ne peut plus être annulé.',
+  bailleur_manquant: 'Indiquez d’abord votre nom et votre adresse de bailleur.',
+  loyer_non_regle: 'Ce loyer n’est pas encore entièrement reçu : pas de quittance pour l’instant.',
+  loyer_regle: 'Ce paiement solde le mois : c’est la quittance qui l’atteste.',
+  bien_occupe: 'Ce bien (ou cette chambre) est déjà loué à ces dates.',
+  fin_avant_entree: 'La sortie ne peut pas précéder l’entrée.',
+  paiements_apres_sortie:
+    'Des loyers sont déjà reçus pour des mois après cette sortie : annulez-les d’abord.',
   limite: 'Ce compte a atteint le nombre maximal de biens (200).',
   indisponible: 'Gérer n’est pas disponible pour le moment. Réessayez dans quelques minutes.',
   reseau: 'Impossible de joindre Deklic. Vérifiez votre connexion internet.',

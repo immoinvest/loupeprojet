@@ -13,6 +13,24 @@ import {
   STATUTS_LOYER,
   TONS_LOYER,
 } from '@/textes/gerer-ecrans';
+import { bienEtChambre, nomsDesLocataires, paiementEnregistre } from '@/textes/gerer-loyers';
+
+describe('textes des lignes de loyer', () => {
+  it('tous les locataires du bail : aucun, un, deux, trois', () => {
+    expect(nomsDesLocataires([])).toBe('');
+    expect(nomsDesLocataires(['Julie Martin'])).toBe('Julie Martin');
+    expect(nomsDesLocataires(['Julie Martin', 'Léa Bernard'])).toBe('Julie Martin et Léa Bernard');
+    expect(nomsDesLocataires(['Julie Martin', 'Léa Bernard', 'Hugo Petit'])).toBe(
+      'Julie Martin, Léa Bernard et Hugo Petit',
+    );
+  });
+
+  it('le bien et sa chambre ; le paiement enregistré', () => {
+    expect(bienEtChambre('Coloc Rouet', 'Chambre 2')).toBe('Coloc Rouet · Chambre 2');
+    expect(bienEtChambre('T2 Lices', undefined)).toBe('T2 Lices');
+    expect(paiementEnregistre(30_000).replace(/\s/g, ' ')).toBe('Paiement de 300 € enregistré.');
+  });
+});
 
 describe('textes des écrans de Gérer', () => {
   it('phraseDuMois : aucun, un seul, tous, une partie', () => {

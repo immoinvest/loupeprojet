@@ -10,7 +10,7 @@ import { clientGestionMemoire } from '@/gestion/memoire';
 import { CLE_MENU } from '@/gestion/menu';
 import type { ClientGestion } from '@/gestion/types';
 
-import { CREATION_LOUEE, CREATION_VACANTE, ETAT_SEPTEMBRE } from './gestion-exemples';
+import { BAILLEUR, CREATION_LOUEE, CREATION_VACANTE, ETAT_SEPTEMBRE } from './gestion-exemples';
 
 const CAMILLE: Utilisateur = {
   id: 'u1',
@@ -123,6 +123,35 @@ describe('GestionProvider', () => {
       expect((await contexte().annulerPaiement('inconnu')).ok).toBe(false);
     });
     expect(contexte().donnees?.paiements.map((p) => p.id)).toEqual(['paiement-julie']);
+  });
+
+  it('identité du bailleur et documents : l’état suit ; un document déjà listé ne se répète pas', async () => {
+    monter({ gestion: clientGestionMemoire({ etat: ETAT_SEPTEMBRE }) });
+    await statut('pret');
+    const demande = {
+      type: 'quittance',
+      locationId: 'location-julie',
+      periode: '2026-09',
+    } as const;
+
+    await act(async () => {
+      expect(await contexte().emettreDocument(demande)).toEqual({
+        ok: false,
+        code: 'bailleur_manquant',
+      });
+      expect((await contexte().enregistrerBailleur({ nom: '', adresse: '' })).ok).toBe(false);
+      expect((await contexte().enregistrerBailleur(BAILLEUR)).ok).toBe(true);
+    });
+    expect(contexte().donnees).toMatchObject({ bailleur: BAILLEUR, documents: [] });
+
+    let id = '';
+    await act(async () => {
+      const r = await contexte().emettreDocument(demande);
+      id = r.ok ? r.valeur.id : '';
+      expect((await contexte().emettreDocument(demande)).ok).toBe(true);
+    });
+    expect(contexte().donnees?.documents.map((d) => d.id)).toEqual([id]);
+    expect(await contexte().document(id)).toMatchObject({ ok: true, valeur: { id } });
   });
 
   it('erreur de lecture : statut erreur ; une action réussie n’invente pas de données ; recharger relit', async () => {

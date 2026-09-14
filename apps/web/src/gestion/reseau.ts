@@ -1,6 +1,8 @@
 import {
   CreationReponseSchema,
+  DocumentCompletSchema,
   EtatGestionSchema,
+  IdentiteBailleurSchema,
   PaiementSchema,
   PreferencesMenuSchema,
 } from '@loupe/gestion';
@@ -19,8 +21,16 @@ const CODES_SERVEUR: Readonly<Record<string, CodeErreurGestion>> = {
   CHAMPS_INVALIDES: 'invalide',
   CORPS_TROP_GROS: 'invalide',
   INTROUVABLE: 'introuvable',
-  PERIODE_DEJA_RECUE: 'deja_recu',
   HORS_LOCATION: 'invalide',
+  MONTANT_DEPASSE: 'montant_depasse',
+  DATE_INVALIDE: 'date_invalide',
+  DOCUMENT_EMIS: 'document_emis',
+  BAILLEUR_MANQUANT: 'bailleur_manquant',
+  LOYER_NON_REGLE: 'loyer_non_regle',
+  LOYER_REGLE: 'loyer_regle',
+  BIEN_OCCUPE: 'bien_occupe',
+  FIN_AVANT_ENTREE: 'fin_avant_entree',
+  PAIEMENTS_APRES_SORTIE: 'paiements_apres_sortie',
   LIMITE_ATTEINTE: 'limite',
   GESTION_INDISPONIBLE: 'indisponible',
 };
@@ -74,5 +84,11 @@ export function clientGestionReseau(
       appeler('DELETE', `/paiements/${encodeURIComponent(id)}`, undefined, z.undefined()),
     enregistrerPreferences: (preferences) =>
       appeler('PUT', '/preferences', preferences, PreferencesMenuSchema),
+    enregistrerBailleur: (identite) =>
+      appeler('PUT', '/bailleur', identite, IdentiteBailleurSchema),
+    // 201 pour un document émis, 200 pour un document qui existait : même corps.
+    emettreDocument: (demande) => appeler('POST', '/documents', demande, DocumentCompletSchema),
+    document: (id) =>
+      appeler('GET', `/documents/${encodeURIComponent(id)}`, undefined, DocumentCompletSchema),
   };
 }

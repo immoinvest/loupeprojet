@@ -1,8 +1,12 @@
 import {
+  DocumentSchema,
   PREFERENCES_PAR_DEFAUT,
   type CreationLocation,
   type CreationReponse,
+  type DemandeDocument,
+  type DocumentComplet,
   type EtatGestion,
+  type IdentiteBailleur,
   type NouveauPaiement,
   type Paiement,
   type PreferencesMenu,
@@ -33,6 +37,12 @@ export interface ContexteGestion {
   readonly changerPreferences: (
     preferences: PreferencesMenu,
   ) => Promise<ResultatGestion<PreferencesMenu>>;
+  readonly enregistrerBailleur: (
+    identite: IdentiteBailleur,
+  ) => Promise<ResultatGestion<IdentiteBailleur>>;
+  /** Émet (ou retrouve) le document ; l'état liste ensuite le document, sans son contenu. */
+  readonly emettreDocument: (demande: DemandeDocument) => Promise<ResultatGestion<DocumentComplet>>;
+  readonly document: (id: string) => Promise<ResultatGestion<DocumentComplet>>;
 }
 
 const Contexte = createContext<ContexteGestion | null>(null);
@@ -141,6 +151,27 @@ export function GestionProvider({
         if (!r.ok) appliquerPreferences(avant);
         return r;
       },
+      enregistrerBailleur: async (identite) => {
+        const r = await client.enregistrerBailleur(identite);
+        if (r.ok) {
+          const { valeur: bailleur } = r;
+          fusionner((e) => ({ ...e, bailleur }));
+        }
+        return r;
+      },
+      emettreDocument: async (demande) => {
+        const r = await client.emettreDocument(demande);
+        if (r.ok) {
+          const liste = DocumentSchema.parse(r.valeur);
+          fusionner((e) =>
+            e.documents.some((d) => d.id === liste.id)
+              ? e
+              : { ...e, documents: [...e.documents, liste] },
+          );
+        }
+        return r;
+      },
+      document: (id) => client.document(id),
     };
   }, [client, etatCompte, chargement, donnees, erreur, preferences, store]);
 

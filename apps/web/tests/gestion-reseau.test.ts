@@ -1,9 +1,10 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import { clientGestionMemoire } from '@/gestion/memoire';
 import { clientGestionReseau, type Recuperateur } from '@/gestion/reseau';
 import { ERREURS_GESTION } from '@/textes/gerer';
 
-import { CREATION_LOUEE, ETAT_SEPTEMBRE, PAIEMENT_JULIE } from './gestion-exemples';
+import { BAILLEUR, CREATION_LOUEE, ETAT_SEPTEMBRE, PAIEMENT_JULIE } from './gestion-exemples';
 
 interface Appel {
   readonly url: string;
@@ -98,13 +99,68 @@ describe('clientGestionReseau', () => {
     });
   });
 
+  it('identité du bailleur par PUT, documents par POST puis GET, identifiant encodé', async () => {
+    const bailleur = serveur(() => json(200, BAILLEUR));
+    expect(await clientGestionReseau(bailleur.recuperer).enregistrerBailleur(BAILLEUR)).toEqual({
+      ok: true,
+      valeur: BAILLEUR,
+    });
+    expect(bailleur.appels[0]).toEqual({
+      url: '/api/gestion/bailleur',
+      init: {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(BAILLEUR),
+      },
+    });
+
+    const demande = {
+      type: 'quittance',
+      locationId: 'location-julie',
+      periode: '2026-09',
+    } as const;
+    const emise = await clientGestionMemoire({
+      etat: { ...ETAT_SEPTEMBRE, bailleur: BAILLEUR },
+    }).emettreDocument(demande);
+    if (!emise.ok) throw new Error(emise.code);
+    const quittance = emise.valeur;
+
+    const emission = serveur(() => json(201, quittance));
+    expect(await clientGestionReseau(emission.recuperer).emettreDocument(demande)).toEqual({
+      ok: true,
+      valeur: quittance,
+    });
+    expect(emission.appels[0]?.url).toBe('/api/gestion/documents');
+    expect(emission.appels[0]?.init?.body).toBe(JSON.stringify(demande));
+
+    const lecture = serveur(() => json(200, quittance));
+    expect(await clientGestionReseau(lecture.recuperer).document('d/1')).toEqual({
+      ok: true,
+      valeur: quittance,
+    });
+    expect(lecture.appels[0]).toEqual({
+      url: '/api/gestion/documents/d%2F1',
+      init: { method: 'GET' },
+    });
+  });
+
   it.each([
     [401, 'NON_CONNECTE', 'non_connecte'],
     [400, 'CHAMPS_INVALIDES', 'invalide'],
     [413, 'CORPS_TROP_GROS', 'invalide'],
     [404, 'INTROUVABLE', 'introuvable'],
-    [409, 'PERIODE_DEJA_RECUE', 'deja_recu'],
     [400, 'HORS_LOCATION', 'invalide'],
+    [409, 'MONTANT_DEPASSE', 'montant_depasse'],
+    [400, 'DATE_INVALIDE', 'date_invalide'],
+    [409, 'DOCUMENT_EMIS', 'document_emis'],
+    [409, 'BAILLEUR_MANQUANT', 'bailleur_manquant'],
+    [409, 'LOYER_NON_REGLE', 'loyer_non_regle'],
+    [409, 'LOYER_REGLE', 'loyer_regle'],
+    [409, 'BIEN_OCCUPE', 'bien_occupe'],
+    [400, 'FIN_AVANT_ENTREE', 'fin_avant_entree'],
+    [409, 'PAIEMENTS_APRES_SORTIE', 'paiements_apres_sortie'],
+    // Le code de G1a a disparu du serveur : il n'est plus reconnu.
+    [409, 'PERIODE_DEJA_RECUE', 'inconnue'],
     [409, 'LIMITE_ATTEINTE', 'limite'],
     [503, 'GESTION_INDISPONIBLE', 'indisponible'],
     [403, 'ORIGINE_INCONNUE', 'inconnue'],

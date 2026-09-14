@@ -1,8 +1,18 @@
+import type { EtatGestion } from '@loupe/gestion';
 import { describe, expect, it } from 'vitest';
 
 import { clientGestionMemoire, ETAT_GESTION_VIDE } from '@/gestion/memoire';
 
-import { CREATION_LOUEE, CREATION_VACANTE, ETAT_SEPTEMBRE } from './gestion-exemples';
+import {
+  BAILLEUR,
+  CREATION_LOUEE,
+  CREATION_VACANTE,
+  ETAT_SEPTEMBRE,
+  HORODATAGE,
+  LOCATION_ANTOINE,
+  LOCATION_JULIE,
+  PAIEMENT_JULIE,
+} from './gestion-exemples';
 
 const PAIEMENT = {
   locationId: 'location-antoine',
@@ -10,6 +20,13 @@ const PAIEMENT = {
   montant: 43_000,
   date: '2026-09-14',
 };
+const INVALIDE = { ok: false, code: 'invalide' };
+const INTROUVABLE = { ok: false, code: 'introuvable' };
+const QUITTANCE_JULIE = {
+  type: 'quittance',
+  locationId: 'location-julie',
+  periode: '2026-09',
+} as const;
 
 describe('clientGestionMemoire', () => {
   it('part vide par défaut et rend son état', async () => {
@@ -60,19 +77,19 @@ describe('clientGestionMemoire', () => {
     expect(client.donnees().biens).toEqual([]);
   });
 
-  it('paie : invalide, location inconnue, déjà reçu, autre mois accepté', async () => {
+  it('paie : invalide, location inconnue, hors location, date future, montant de trop, puis accepté', async () => {
     const client = clientGestionMemoire({ etat: ETAT_SEPTEMBRE });
-    expect(await client.payer({ ...PAIEMENT, montant: 0 })).toEqual({
+    expect(await client.payer({ ...PAIEMENT, montant: 0 })).toEqual(INVALIDE);
+    expect(await client.payer({ ...PAIEMENT, locationId: 'inconnue' })).toEqual(INTROUVABLE);
+    // Antoine est entré le 1er octobre 2025 : rien n'est dû en septembre 2025.
+    expect(await client.payer({ ...PAIEMENT, periode: '2025-09' })).toEqual(INVALIDE);
+    expect(await client.payer({ ...PAIEMENT, date: '2026-09-15' })).toEqual({
       ok: false,
-      code: 'invalide',
-    });
-    expect(await client.payer({ ...PAIEMENT, locationId: 'inconnue' })).toEqual({
-      ok: false,
-      code: 'introuvable',
+      code: 'date_invalide',
     });
     expect(await client.payer({ ...PAIEMENT, locationId: 'location-julie' })).toEqual({
       ok: false,
-      code: 'deja_recu',
+      code: 'montant_depasse',
     });
     const octobre = await client.payer({
       ...PAIEMENT,
@@ -106,6 +123,140 @@ describe('clientGestionMemoire', () => {
       ok: false,
       code: 'invalide',
     });
+  });
+
+  it('identité du bailleur : invalide refusée, puis enregistrée', async () => {
+    const client = clientGestionMemoire({ etat: ETAT_SEPTEMBRE });
+    expect(await client.emettreDocument(QUITTANCE_JULIE)).toEqual({
+      ok: false,
+      code: 'bailleur_manquant',
+    });
+    expect(await client.enregistrerBailleur({ nom: ' ', adresse: 'x' })).toEqual(INVALIDE);
+    expect(await client.enregistrerBailleur(BAILLEUR)).toEqual({ ok: true, valeur: BAILLEUR });
+    expect(client.donnees().bailleur).toEqual(BAILLEUR);
+  });
+
+  it('quittance émise une fois : même document ensuite, listée sans contenu, relue par son id', async () => {
+    const client = clientGestionMemoire({ etat: { ...ETAT_SEPTEMBRE, bailleur: BAILLEUR } });
+    const r = await client.emettreDocument(QUITTANCE_JULIE);
+    if (!r.ok) throw new Error(r.code);
+    expect(r.valeur).toMatchObject({
+      id: 'document-1',
+      type: 'quittance',
+      locationId: 'location-julie',
+      periode: '2026-09',
+      emisLe: '2026-09-14T09:00:00.000Z',
+      contenu: {
+        emisLe: '2026-09-14',
+        locataires: [{ prenom: 'Julie', nom: 'Martin' }],
+        total: 70_000,
+        mentions: ['pour_acquit'],
+      },
+    });
+    expect(await client.emettreDocument(QUITTANCE_JULIE)).toEqual(r);
+    expect(client.donnees().documents).toEqual([
+      {
+        id: 'document-1',
+        type: 'quittance',
+        numero: r.valeur.numero,
+        locationId: 'location-julie',
+        periode: '2026-09',
+        emisLe: '2026-09-14T09:00:00.000Z',
+      },
+    ]);
+    expect(await client.document('document-1')).toEqual(r);
+    expect(await client.document('inconnu')).toEqual(INTROUVABLE);
+    // Le paiement attesté ne s'annule plus.
+    expect(await client.annulerPaiement('paiement-julie')).toEqual({
+      ok: false,
+      code: 'document_emis',
+    });
+  });
+
+  it('reçu d’une chambre en colocation ; refus : mois non soldé, paiement qui solde, demandes fausses', async () => {
+    const coloc: EtatGestion = {
+      ...ETAT_SEPTEMBRE,
+      bailleur: BAILLEUR,
+      locataires: [
+        ...ETAT_SEPTEMBRE.locataires,
+        { id: 'locataire-lea', prenom: 'Léa', nom: 'Bernard', creeLe: HORODATAGE },
+      ],
+      locations: [
+        LOCATION_JULIE,
+        { ...LOCATION_ANTOINE, libelle: 'Chambre 2', colocataireIds: ['locataire-lea'] },
+      ],
+      paiements: [
+        PAIEMENT_JULIE,
+        {
+          ...PAIEMENT,
+          id: 'partiel',
+          montant: 20_000,
+          date: '2026-09-04',
+          source: 'manuel',
+          creeLe: HORODATAGE,
+        },
+      ],
+    };
+    const client = clientGestionMemoire({ etat: coloc });
+    expect(await client.emettreDocument({ type: 'recu', paiementId: 'partiel' })).toMatchObject({
+      ok: true,
+      valeur: {
+        type: 'recu',
+        paiementId: 'partiel',
+        locationId: 'location-antoine',
+        contenu: {
+          locataires: [
+            { prenom: 'Antoine', nom: 'Dupont' },
+            { prenom: 'Léa', nom: 'Bernard' },
+          ],
+          logement: { nom: 'Studio Baille', libelle: 'Chambre 2' },
+          montantRecu: 20_000,
+          resteDu: 23_000,
+        },
+      },
+    });
+    expect(await client.annulerPaiement('partiel')).toEqual({ ok: false, code: 'document_emis' });
+
+    const quittanceAntoine = {
+      type: 'quittance',
+      locationId: 'location-antoine',
+      periode: '2026-09',
+    } as const;
+    expect(await client.emettreDocument(quittanceAntoine)).toEqual({
+      ok: false,
+      code: 'loyer_non_regle',
+    });
+    expect(await client.emettreDocument({ type: 'recu', paiementId: 'paiement-julie' })).toEqual({
+      ok: false,
+      code: 'loyer_regle',
+    });
+    expect(await client.emettreDocument({ type: 'recu', paiementId: 'inconnu' })).toEqual(
+      INTROUVABLE,
+    );
+    expect(await client.emettreDocument({ ...QUITTANCE_JULIE, locationId: 'inconnue' })).toEqual(
+      INTROUVABLE,
+    );
+    // Hors location (Julie est entrée en octobre 2025) et demande illisible.
+    expect(await client.emettreDocument({ ...QUITTANCE_JULIE, periode: '2025-09' })).toEqual(
+      INVALIDE,
+    );
+    expect(await client.emettreDocument({ type: 'recu', paiementId: '' })).toEqual(INVALIDE);
+  });
+
+  it('un bien disparu : document introuvable ; un document listé ne se relit qu’avec son contenu', async () => {
+    const orphelin = clientGestionMemoire({
+      etat: { ...ETAT_SEPTEMBRE, bailleur: BAILLEUR, biens: [] },
+    });
+    expect(await orphelin.emettreDocument(QUITTANCE_JULIE)).toEqual(INTROUVABLE);
+
+    const premier = clientGestionMemoire({ etat: { ...ETAT_SEPTEMBRE, bailleur: BAILLEUR } });
+    const r = await premier.emettreDocument(QUITTANCE_JULIE);
+    if (!r.ok) throw new Error(r.code);
+    const sansContenu = clientGestionMemoire({ etat: premier.donnees() });
+    expect(await sansContenu.emettreDocument(QUITTANCE_JULIE)).toEqual(INTROUVABLE);
+    const avecContenu = clientGestionMemoire({ etat: premier.donnees(), documents: [r.valeur] });
+    expect(await avecContenu.emettreDocument(QUITTANCE_JULIE)).toEqual(r);
+    expect(await avecContenu.document(r.valeur.id)).toEqual(r);
   });
 
   it('une erreur forcée remplace le résultat et l’appel est compté', async () => {

@@ -25,6 +25,7 @@ import { Financement } from './ecrans/Financement';
 import { Fiscalite } from './ecrans/Fiscalite';
 import { AjouterMain } from './ecrans/gerer/AjouterMain';
 import { Gerer } from './ecrans/gerer/Gerer';
+import { Loyers } from './ecrans/gerer/Loyers';
 import { PretAGerer } from './ecrans/gerer/PretAGerer';
 import { Hypotheses } from './ecrans/Hypotheses';
 import { Imprimer } from './ecrans/Imprimer';
@@ -66,6 +67,7 @@ export const routes: RouteObject[] = [
       },
       { path: 'gerer', element: <Gerer /> },
       { path: 'gerer/ajouter', element: <AjouterMain /> },
+      { path: 'gerer/loyers', element: <Loyers /> },
       { path: 'gerer/pret/:id', element: <PretAGerer /> },
       { path: 'compte', element: <Compte /> },
       { path: 'partage', element: <Partage /> },
