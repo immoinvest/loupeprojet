@@ -2,7 +2,7 @@
   "feature_slug": "estimation-confiance",
   "title": "Estimation : note de confiance expliquée en tête d'onglet, repère visible sans adresse (PR 1) ; carte des ventes (PR 2)",
   "started_at": "2026-09-14T12:00:00Z",
-  "current_step": "implement",
+  "current_step": "pr1_livree_pr2_a_faire",
   "scope": "packages/moteur/src/{estimation,regles,schema/marche.ts,schema/resultats.ts}, data/src/{schemas/dvf.ts,sources/dvf/statistiques.ts}, apps/worker/src/{donnees/anciennete.ts,marche,adresse}, apps/web/src/{enrichissement,textes/confiance.ts,ecrans/Adresse.tsx,ecrans/adresse,ecrans/rapport/CartePrix.tsx,textes/methode-estimation.ts}, e2e",
   "branch": "feat/estimation-confiance",
   "base": "master (9d38892, PR #38 fusionnée)",
@@ -66,7 +66,14 @@
     "push": {
       "status": "completed",
       "pr": "https://github.com/immoinvest/loupeprojet/pull/42",
-      "note": "auto-merge armé ; master fusionné une fois (coque-fixe, PR #39) : trois conflits de docs résolus ; après la fusion : déployer le Worker 0.7.0 et relancer l'Action Référentiels (DVF, 13)"
+      "merge": "fbd6361",
+      "note": "fusionnée par auto-merge le 14/09/2026 ; master fusionné deux fois dans la branche (coque-fixe #39, puis revente-curseur #40 et déconnexion #41), conflits de docs seulement ; 1 022 tests au décompte final"
+    },
+    "deploiement": {
+      "status": "completed",
+      "worker": "0.7.0 déployé le 14/09/2026 (version c2e2b4d0-8e37-4688-bd26-9d9e98891c19) ; /health, /marche v2 et /marche/adresse v4 vérifiés en production",
+      "referentiels": "Action Référentiels DVF 13 relancée (run 34836113637, succès) ; l'index publié porte dateMediane (vérifié : maisons de Marseille 5e, 2025-02-13, 19 mois) ; les réponses /marche déjà en cache gardent dateMediane null jusqu'à 24 h",
+      "pages": "le build de production Cloudflare Pages du commit fbd6361 a échoué alors que son contenu est identique au dernier commit de la branche (preview verte), que rien n'a changé dans les comptes ni la configuration de build depuis le déploiement réussi précédent (d3ff28e) et que le build passe en local avec et sans DEKLIC_COMPTES=1 : échec ponctuel côté Cloudflare, journal visible seulement dans le tableau de bord ; relancé par la fusion de cette mise à jour"
     }
   },
   "decisions": {
@@ -75,6 +82,7 @@
     "anciennete": "mesurée par le Worker (dates du CSV, dateMediane de l'index DVF) et rangée en mois dans marche.dvf ; supposée 12 mois quand elle manque",
     "retrocompatibilite": "champs de marche.dvf optionnels ; précision déduite du rayon ; contrats web tolérants à l'ancien Worker",
     "carte": "PR 2 séparée ; fond IGN Géoplateforme recommandé, décision de Pierre",
-    "etat_pipeline": "session parallèle : état dans .product/pipeline/estimation-confiance.json, pipeline-state.json réservé à la session principale"
+    "etat_pipeline": "session parallèle : état dans .product/pipeline/estimation-confiance.json, pipeline-state.json réservé à la session principale",
+    "point_ouvert_rue": "constaté en production : le repère « même côté de la rue » du 144 rue de l'Olivier s'étend sur 531 m et reçoit 30 points de localisation, plus qu'un cercle de 300 m (18) ; à trancher avec Pierre (plafonner les points d'une rue par son étendue, par exemple)"
   }
 }
