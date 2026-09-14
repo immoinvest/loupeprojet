@@ -32,12 +32,12 @@ npm run lint          # eslint . --max-warnings=0
 npm run format:check  # prettier --check .
 npm run typecheck     # tsc --noEmit dans chaque workspace
 npm run test          # vitest run
-npm run test:coverage # vitest run --coverage (seuil 100 % sur packages/moteur, packages/capture, apps/worker, apps/comptes, apps/extension, data et les modules de logique d'apps/web)
+npm run test:coverage # vitest run --coverage (seuil 100 % sur packages/moteur, packages/capture, packages/gestion, apps/worker, apps/comptes, apps/extension, data et les modules de logique d'apps/web)
 npm run test:e2e      # vite build puis playwright test : parcours complets dans Chromium (apps/web/e2e)
 npm run build         # build de chaque workspace
 ```
 
-Node 22 ou plus. La CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) exécute ces six commandes sur chaque pull request (1 100 tests au 14/09/2026 : 252 pour le moteur, 389 pour le web, 111 pour le Worker, 144 pour les référentiels, 145 pour la capture et l'extension, 59 pour les comptes ; dont 14 pour la note de confiance du moteur, 11 pour ses cartes et textes, et 35 pour le Rapport expliqué : icône ⓘ, cascade de l'autofinancement, rendements, liens vers les onglets ; 39 pour la négociation du prix). Une PR est fusionnée automatiquement dès que le check `verify` est vert (`gh pr merge <n> --auto --merge`) ; `master` refuse tout merge sans ce check. Un second job `e2e` joue les parcours Playwright dans Chromium sur ordinateur, téléphone et tablette, puis mesure 21 écrans sur 9 formats ; il n'est pas encore requis pour fusionner.
+Node 22 ou plus. La CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) exécute ces six commandes sur chaque pull request (1 303 tests au 14/09/2026 : 252 pour le moteur, 497 pour le web, 114 pour le Worker, 144 pour les référentiels, 145 pour la capture et l'extension, 89 pour les comptes, 62 pour la gestion locative ; dont 14 pour la note de confiance du moteur, 11 pour ses cartes et textes, 35 pour le Rapport expliqué : icône ⓘ, cascade de l'autofinancement, rendements, liens vers les onglets ; 39 pour la négociation du prix). Une PR est fusionnée automatiquement dès que le check `verify` est vert (`gh pr merge <n> --auto --merge`) ; `master` refuse tout merge sans ce check. Un second job `e2e` joue les parcours Playwright dans Chromium sur ordinateur, téléphone et tablette, puis mesure 21 écrans sur 9 formats ; il n'est pas encore requis pour fusionner.
 
 ## Le moteur (`@loupe/moteur`)
 

@@ -2,7 +2,7 @@
   "feature_slug": "gerer-socle",
   "title": "Gérer, le socle (G1a) : menu à deux sections et « Mon menu », API et données de gestion, paquet de calcul des loyers, portes « J'ai acheté ce bien » et « Ajouter à la main » en deux clics, loyers du mois",
   "started_at": "2026-09-14T09:10:00Z",
-  "current_step": "implement",
+  "current_step": "push",
   "scope": "packages/gestion, apps/comptes (src/gestion, migration 0002), apps/web (gestion/, coque, ecrans/gerer, Compte, ProjetLayout)",
   "branch": "feat/gerer-socle",
   "worktree": "C:\\Users\\errei\\Claude\\loupe-gestion",
@@ -17,15 +17,21 @@
     "last_commit": "9d38892"
   },
   "steps": {
-    "discovery": { "status": "completed", "output": ".product/features/gerer-socle-discovery.md" },
+    "discovery": {
+      "status": "completed",
+      "output": ".product/features/gerer-socle-discovery.md"
+    },
     "specs": {
       "status": "completed",
       "output": ".product/specs/gerer-socle-specs.md",
       "stories_count": 6
     },
-    "architecture": { "status": "completed", "output": ".product/architecture/gerer-socle.md" },
+    "architecture": {
+      "status": "completed",
+      "output": ".product/architecture/gerer-socle.md"
+    },
     "implement": {
-      "status": "in_progress",
+      "status": "completed",
       "stories_completed": 6,
       "stories_total": 6,
       "commits": [
@@ -37,9 +43,13 @@
         "4995011 US-5 Ajouter à la main (29 tests dont le parcours à 2 clics, saisie 100 %)",
         "b04d620 fix(security) bornes de l'API : 200 biens par compte, loyer reçu seulement dans la location (89 tests comptes, 100 %)",
         "92eac0f US-6 J'ai acheté ce bien (40 tests, depuis-projet et textes 100 %)",
-        "66fcaa3 fix(security) web : traduction de HORS_LOCATION et LIMITE_ATTEINTE"
+        "66fcaa3 fix(security) web : traduction de HORS_LOCATION et LIMITE_ATTEINTE",
+        "5bf8560 écrans de Gérer dans la spec des formats",
+        "7e1f522 fusion de master (coque fixe)",
+        "1a24ad5 fix(web) « J’ai acheté ce bien » en icône de 768 à 1 279 px",
+        "a35af28 docs communes",
+        "21ba83c fusion de master (rapport-cashflow, achat-negociation)"
       ],
-      "en_cours": "écrans de Gérer dans la spec e2e des formats (sans compte, loyers du mois, ajouter, prêt) ; puis fusion de master (coque fixe : menu en trois zones, en-tête collé, déconnexion visible)",
       "incidents": [
         "suites qui ne démarrent pas (Timeout calling fetch) sous la charge de 58 processus Node : relance avec --maxWorkers=1",
         "accord de « loyer » corrigé (suit le nombre reçu), élision « d’Antoine » ajoutée",
@@ -53,7 +63,23 @@
         "suite ciblée d'abord en échec par délai (682 s pour 81 tests, 43 processus Node, 2,4 Go libres) : verte à la relance avec --testTimeout=30000"
       ]
     },
-    "qa_tests": { "status": "pending" },
+    "qa_tests": {
+      "status": "completed",
+      "tests": 1303,
+      "fichiers": 172,
+      "par_projet": {
+        "web": 497,
+        "moteur": 252,
+        "data": 144,
+        "worker": 114,
+        "comptes": 89,
+        "capture": 83,
+        "extension": 62,
+        "gestion": 62
+      },
+      "gates": "lint, format:check, typecheck, test:coverage (seuils 100 %), build : verts",
+      "e2e": "12 parcours ciblés verts (formats 320, 768, 1 024, 1 440 px avec les écrans de Gérer ; coque sur ordinateur, téléphone, tablette ; menu)"
+    },
     "security": {
       "status": "completed",
       "score": 97,
@@ -61,7 +87,9 @@
       "corrige": "écritures sans borne (b04d620, 66fcaa3)",
       "ouvert": "export des données de gestion, prévu en G1b"
     },
-    "push": { "status": "pending" }
+    "push": {
+      "status": "in_progress"
+    }
   },
   "auto_revue": {
     "discovery": "G1a avant la banque : la banque rapproche des virements de loyers attendus qui n'existent pas encore ; proposition A (découpage de G1) acceptée",
