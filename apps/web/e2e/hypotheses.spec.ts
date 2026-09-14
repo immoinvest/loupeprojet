@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-import { ouvrirExemple, ouvrirVolet } from './aides';
+import { carte, ouvrirExemple, ouvrirVolet } from './aides';
 
 test('changer le loyer recalcule le cash-flow ; une valeur invalide est refusée', async ({
   page,
@@ -31,4 +31,27 @@ test('changer le loyer recalcule le cash-flow ; une valeur invalide est refusée
   // Le rapport suit : le loyer couvre désormais tout.
   await ouvrirVolet(page, 'Rapport', 'Le prix est bon. Le loyer couvre tout.');
   await expect(page.getByLabel('Cinq feux').getByText('Cash-flow +91 €/mois')).toBeVisible();
+});
+
+test('négocier le prix : le curseur règle le prix retenu, l’en-tête et le rapport suivent', async ({
+  page,
+}) => {
+  await ouvrirExemple(page);
+  await ouvrirVolet(page, 'Hypothèses', 'Vos hypothèses');
+
+  const curseur = page.getByRole('slider', { name: 'Négociation' });
+  await expect(curseur).toHaveValue('0');
+  await expect(page.getByText(/^Prix retenu/)).toHaveText(/155 000 €/);
+  await curseur.fill('5');
+  await expect(page.getByRole('textbox', { name: /^Négociation/ })).toHaveValue('5');
+  await expect(page.getByText(/^Prix retenu/)).toHaveText(/147 250 €.*−7 750 €.*−5 %/);
+  await expect(page.getByText(/147 250 €.*négocié −5 %/).first()).toBeVisible();
+
+  // Le prix retenu est enregistré : il survit au rechargement et le rapport le dit.
+  await page.reload();
+  await expect(page.getByRole('slider', { name: 'Négociation' })).toHaveValue('5');
+  await ouvrirVolet(page, 'Rapport', /Le prix est bon\./);
+  await expect(carte(page, "Est-ce que c'est cher ?")).toContainText(
+    /Prix affiché 155 000 €.*retenu 147 250 €.*−5 %/,
+  );
 });

@@ -22,6 +22,8 @@ export function fraisNotaireEstimes(
       travaux: 0,
       travauxRenovationEnergetique: false,
       mobilier: 0,
+      // Le prix saisi dans le simulateur est déjà celui de l'offre : aucune négociation à retirer.
+      negociationTaux: 0,
     },
     departement ?? '',
     regles,

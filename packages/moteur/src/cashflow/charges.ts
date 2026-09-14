@@ -1,3 +1,4 @@
+import { prixRetenu } from '../achat';
 import type { Hypotheses, Regime } from '../schema/hypotheses';
 
 export type CodeCharge =
@@ -29,7 +30,7 @@ export function chargesExploitation(
     { code: 'comptable', annuel: regime === 'lmnp_reel' ? charges.comptable : 0 },
     { code: 'cfe', annuel: estMeuble(regime) ? charges.cfe : 0 },
     { code: 'gestion', annuel: location.gestionTaux * loyersNets },
-    { code: 'entretien', annuel: charges.entretienTaux * achat.prix },
+    { code: 'entretien', annuel: charges.entretienTaux * prixRetenu(achat) },
   ];
 }
 

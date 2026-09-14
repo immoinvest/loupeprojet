@@ -26,7 +26,7 @@ Concurrents : Horiz.io (8–20 €/mois, complet, saisie manuelle), Lybox (9–4
 2. **Lire** — données structurées de la page, puis LLM (JSON strict) pour les champs manquants, repli regex. 0 ou 1 appel, ~2 s.
 3. **Enrichir** — géocodage puis en parallèle : DVF 500 m, DPE ADEME, loyers ANIL, taux TF (REI), Géorisques, zonage ABC, population. Zéro LLM.
 4. **Vérifier** — un écran, quatre blocs (bien, financement, location, fiscalité), badges `annonce` / `donnée publique` / `estimé` / `à toi`. Cinq confirmations max : loyer visé, apport, durée, TMI, mode de location.
-5. **Le rapport** — verdict + cinq feux, puis Financement, Cash-flow, Fiscalité (4 régimes), Revente, Rendement & TRI. Tout modifiable en place, recalcul instantané.
+5. **Le rapport** — verdict + cinq feux, puis l'autofinancement en carte principale (cascade loyer → après le crédit → après les charges → après l'impôt, part du loyer prise par le crédit, effort d'épargne ou excédent, loyer d'équilibre), le prix vs ventes réelles, les rendements brut · net · net-net, les leviers, la fiscalité (4 régimes) et la revente (multiple sur apport). Chaque titre et chaque repère porte une icône ⓘ qui ouvre une bulle chiffrée ; un lien « Voir … → » mène à l'onglet qui détaille (Estimation, Fiscalité, Revente). Tout modifiable dans Hypothèses, recalcul instantané.
 6. **Garder** — sauvegarde locale, PDF via impression, lien de partage (projet encodé dans l'URL), compte optionnel par Google, Apple ou code à 6 chiffres reçu par e-mail (livré le 13/09/2026, ADR-006 ; synchronisation des projets à venir). Livré le 13/09/2026 (feature `garder`) : dossier imprimable `/projets/:id/imprimer`, lien `/partage#p=…` en lecture seule avec « Ajouter à mes projets », comparaison de 2 à 5 projets sans compte (`/comparer`, avancée de la v1.5) et page « Comment c'est calculé » (`/methode`).
 7. **Simulateur de prêt** — livré le 14/09/2026 (feature `simulateur-pret`, fiche de backlog 08) : outil indépendant des projets (`/simulateur-pret`, rubrique « Outils »). Le projet financé (prix, honoraires, travaux, frais de notaire estimés par la formule des frais d'acquisition et modifiables, département, revenus facultatifs) et une ou deux offres (banque, apport, taux nominal, durée, assurance, frais de dossier et de garantie payés à la signature ou financés, différés). Pour chaque offre : montant emprunté, mensualité hors et avec assurance, TAEG hors et avec assurance (résolus numériquement, frais compris), totaux, coût total du crédit, échéancier par phase, alerte au-dessus du taux d'usure, taux d'endettement (mensualité ÷ revenus, distinct de l'effort HCSF). Comparaison sur neuf critères (la plus petite valeur est la meilleure ; durée et montant informatifs) avec une phrase de synthèse ; tableaux d'amortissement par année, chaque année dépliable en douze mois ; CSV mensuel par offre ; impression ; lien `#s=` (fragment validé par Zod, jamais envoyé au serveur) ; dernière simulation retrouvée. Mêmes formules que le rapport d'un projet (test de cohérence au centime).
 
@@ -48,7 +48,8 @@ Concurrents : Horiz.io (8–20 €/mois, complet, saisie manuelle), Lybox (9–4
 
 ### Financement
 
-- **Frais d'acquisition calculés** (base = prix hors honoraires d'agence) : DMTO 4,50 % ou 5 % selon département (jusqu'au 31/03/2028) + taxe communale 1,20 % + frais d'assiette 2,37 % du DMTO ; émoluments notaire par tranches 3,870 % / 1,596 % / 1,064 % / 0,799 % HT + TVA 20 % ; contribution de sécurité immobilière 0,10 % ; débours ~0,4 %. Ancien : 7 à 8,5 %.
+- **Prix retenu** : prix affiché × (1 − négociation), arrondi à l'euro (curseur 0 à −15 % par 0,5 % dans Hypothèses, jusqu'à 30 % au clavier ; défaut 0 : prix affiché tel quel) ; honoraires d'agence inchangés en euros ; tout le rapport (notaire, prêt, rendements, revente, estimation, feu prix, scénarios) se calcule sur le prix retenu. « Viser le prix estimé » règle le curseur sur le centre de l'estimation.
+- **Frais d'acquisition calculés** (base = prix retenu hors honoraires d'agence) : DMTO 4,50 % ou 5 % selon département (jusqu'au 31/03/2028) + taxe communale 1,20 % + frais d'assiette 2,37 % du DMTO ; émoluments notaire par tranches 3,870 % / 1,596 % / 1,064 % / 0,799 % HT + TVA 20 % ; contribution de sécurité immobilière 0,10 % ; débours ~0,4 %. Ancien : 7 à 8,5 %.
 - **Mensualité** PMT, tableau d'amortissement complet ; assurance en % du capital initial (0,10–0,35 %).
 - **TAEG** par résolution du taux interne, frais de dossier + garantie inclus.
 - **Taux d'effort HCSF** : mensualité assurance comprise ÷ (revenus + 70 % des loyers). Seuil 35 %, 25 ans (27 si travaux ≥ 10 %). Afficher « ta banque calculera probablement… » et « au pire… ».
@@ -84,7 +85,7 @@ Projection année par année sur la durée de détention avec stocks de déficit
 - **TRI réel** sur flux annuels (apport + mobilier en année 0, cash-flows après impôt, cash net de revente en N).
 - Enrichissement = capital remboursé + plus-value nette + cash-flows cumulés − apport.
 - **Verdict cinq feux** (bon / à surveiller / problème) : prix vs DVF, rendement net, cash-flow, effort HCSF, risques (DPE F/G, copro en procédure, zone à risque). Pas de note globale.
-- **Scénarios** : négocier (prix cible pour cash-flow 0, net 6 %, brut 8 %), colocation, durée, taux +0,5 pt, nu, vacance.
+- **Scénarios** : négocier (prix cible pour cash-flow 0, net 6 %, brut 8 % ; à défaut −10 % du prix retenu), colocation, durée, taux +0,5 pt, nu, vacance.
 
 ## Cas de référence : « Ton Excel → Loupe » (projet 92K, prix 155 000 €)
 

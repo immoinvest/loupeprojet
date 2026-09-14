@@ -35,6 +35,7 @@ describe('defautsDuMoteur', () => {
       fraisAgenceTaux: 0.04,
       diagnostics: 500,
       honorairesChargeAcquereur: true,
+      negociationTaux: 0,
       pno: 150,
       comptable: 420,
       cfe: 180,
@@ -93,7 +94,7 @@ describe('sectionsMethode', () => {
   });
 
   it('formate les constantes depuis les règles, jamais recopiées', () => {
-    expect(n(section('acquisition').etapes[1] ?? '')).toContain(
+    expect(n(section('acquisition').etapes[2] ?? '')).toContain(
       '5 % de droits départementaux × (1 + 2,37 %',
     );
     expect(valeurs('acquisition')).toContain(

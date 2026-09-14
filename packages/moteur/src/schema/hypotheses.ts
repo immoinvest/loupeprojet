@@ -3,6 +3,9 @@ import { z } from 'zod';
 const taux = (max: number): z.ZodNumber => z.number().min(0).max(max);
 const montant = (): z.ZodNumber => z.number().nonnegative();
 
+/** Remise maximale acceptée sur le prix affiché (30 %). */
+export const NEGOCIATION_MAX = 0.3;
+
 export const AchatSchema = z.object({
   /** Prix affiché, honoraires d'agence inclus s'ils sont à la charge de l'acquéreur. */
   prix: z.number().positive(),
@@ -11,6 +14,8 @@ export const AchatSchema = z.object({
   travaux: montant().default(0),
   travauxRenovationEnergetique: z.boolean().default(false),
   mobilier: montant().default(0),
+  /** Remise obtenue ou visée sur le prix affiché, en proportion (0,05 = −5 %) ; les honoraires en euros ne bougent pas. */
+  negociationTaux: taux(NEGOCIATION_MAX).default(0),
   /** Taux DMTO imposé (sinon déduit du département). */
   dmtoTaux: taux(0.1).optional(),
 });
