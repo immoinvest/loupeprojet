@@ -24,10 +24,30 @@
       "output": ".product/architecture/estimation-confiance.md"
     },
     "implement": {
-      "status": "in_progress",
-      "stories_completed": 0,
+      "status": "completed",
+      "stories_completed": 6,
       "stories_total": 6,
-      "commits": []
+      "commits": [
+        { "etape": "docs", "hash": "c5dc1c3" },
+        {
+          "etape": "US-1 moteur (+ web et Méthode adaptés)",
+          "hash": "220eb4b",
+          "tests_moteur": 233
+        },
+        {
+          "etape": "US-2 data + worker",
+          "hash": "2f4c887",
+          "tests_worker": 111,
+          "tests_data": 144
+        },
+        { "etape": "US-3 web enrichissement", "hash": "2402e49" },
+        { "etape": "US-4, US-5, US-6 écrans", "hash": "451a386" }
+      ],
+      "notes": [
+        "Le projet d'exemple (rayon 500 m, 31 ventes, sans ancienneté) note 62, moyenne : sa fourchette ±8 % ne change pas",
+        "interpolerPaliers réécrite sans branche inatteignable pour tenir la couverture à 100 %",
+        "DvfMarche du Worker redéfinit dateMediane en string | null (Omit du schéma tolérant)"
+      ]
     },
     "refactor": { "status": "pending" },
     "qa_tests": { "status": "pending" },
