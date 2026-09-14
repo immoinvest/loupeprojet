@@ -3,59 +3,17 @@ import type { JSX } from 'react';
 
 import { Chapo, Page, TitrePage } from '@/composants/mise-en-page';
 import { Carte, GrosChiffre, Ligne, Pastille, Pourquoi, TitreCarte } from '@/composants/ui';
-import { euros, eurosSignes, nombre, pourcentage } from '@/formatage/nombres';
+import { euros, eurosSignes, pourcentage } from '@/formatage/nombres';
 import { useProjetCourant } from '@/coque/ProjetLayout';
 import { EXPLICATIONS } from '@/textes/explications';
 import { libelleFeu } from '@/textes/feux';
 import { REGIMES } from '@/textes/regimes';
-import { reponseCourte, texteVerdict } from '@/textes/verdict';
+import { texteVerdict } from '@/textes/verdict';
 
+import { CarteAutofinancement } from './rapport/CarteAutofinancement';
 import { CartePrix } from './rapport/CartePrix';
+import { CarteRendements } from './rapport/CarteRendements';
 import { Leviers } from './rapport/Leviers';
-
-function CarteCashflow({ r }: { r: Resultats }): JSX.Element {
-  const c = r.cashflow;
-  const ton = c.mensuel >= 0 ? 'bon' : c.mensuel >= -100 ? 'surveiller' : 'probleme';
-  const reponse = c.mensuel >= 0 ? 'oui' : c.mensuel >= -100 ? 'presque' : 'non';
-  return (
-    <Carte>
-      <TitreCarte action={<Pourquoi texte={EXPLICATIONS.cashflow} />}>
-        Est-ce que ça s'autofinance ?
-      </TitreCarte>
-      <GrosChiffre ton={ton}>{reponseCourte(reponse)}</GrosChiffre>
-      <div>
-        <Ligne
-          libelle="Loyer"
-          valeur={eurosSignes(c.recettes.loyersBruts / 12)}
-          tonValeur="font-bold text-bon"
-        />
-        <Ligne
-          libelle="Crédit et assurance"
-          valeur={eurosSignes(-r.financement.mensualiteTotale)}
-        />
-        <Ligne
-          libelle="Charges, impôts locaux, entretien"
-          valeur={eurosSignes(-c.chargesAnnuelles / 12)}
-        />
-        <Ligne
-          libelle={`${nombre(r.projet.hypotheses.location.vacanceSemaines)} semaines vides par an`}
-          valeur={eurosSignes(-c.recettes.vacance / 12)}
-        />
-        <Ligne
-          libelle="Reste chaque mois"
-          valeur={eurosSignes(c.mensuel)}
-          fort
-          tonValeur={c.mensuel < 0 ? 'text-probleme' : 'text-bon'}
-        />
-      </div>
-      {c.pointMort !== null && (
-        <p className="m-0 text-[15px] text-encre-2">
-          À l'équilibre avec un loyer de <strong>{euros(c.pointMort)}</strong>.
-        </p>
-      )}
-    </Carte>
-  );
-}
 
 function CarteFiscalite({ r }: { r: Resultats }): JSX.Element {
   const f = r.fiscalite;
@@ -126,6 +84,13 @@ function CarteRevente({ r }: { r: Resultats }): JSX.Element {
   );
 }
 
+/** Deux cartes côte à côte sur tablette, ordinateur et papier ; empilées sur téléphone. */
+const DEUX_CARTES = 'grid grid-cols-1 gap-5 md:grid-cols-2 print:grid-cols-2';
+
+/**
+ * Le Rapport : le verdict, les cinq feux, puis l'autofinancement en carte principale, le prix et
+ * les rendements, les leviers, les impôts et la revente.
+ */
 export function Rapport(): JSX.Element {
   const { resultats: r } = useProjetCourant();
   const verdict = texteVerdict(r);
@@ -144,12 +109,13 @@ export function Rapport(): JSX.Element {
           ))}
         </div>
       </div>
-      <div className="grid grid-cols-1 gap-5 md:grid-cols-2 print:grid-cols-2">
+      <CarteAutofinancement r={r} />
+      <div className={DEUX_CARTES}>
         <CartePrix r={r} />
-        <CarteCashflow r={r} />
+        <CarteRendements r={r} />
       </div>
       <Leviers r={r} />
-      <div className="grid grid-cols-1 gap-5 md:grid-cols-2 print:grid-cols-2">
+      <div className={DEUX_CARTES}>
         <CarteFiscalite r={r} />
         <CarteRevente r={r} />
       </div>
