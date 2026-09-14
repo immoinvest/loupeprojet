@@ -50,9 +50,10 @@ async function creer(b: Banc, creation: CreationLocation): Promise<string> {
   return cree.location?.id ?? '';
 }
 
+/** Un paiement de 1 € : ces tests portent sur les bornes de période, pas sur le montant dû. */
 function payer(b: Banc, locationId: string, periode: string): Promise<Response> {
   return b.requete('/api/gestion/paiements', {
-    corps: { locationId, periode, montant: 70_000, date: '2026-09-14' },
+    corps: { locationId, periode, montant: 100, date: '2026-09-14' },
   });
 }
 

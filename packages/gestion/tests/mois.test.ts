@@ -53,6 +53,8 @@ const ETAT: EtatGestion = {
     paiement('p-hugo', 'hugo', '2026-09', 49_000, '2026-09-02'),
     paiement('p-julie-aout', 'julie', '2026-08', 70_000),
   ],
+  bailleur: null,
+  documents: [],
   preferences: PREFERENCES_PAR_DEFAUT,
 };
 
@@ -95,6 +97,32 @@ describe('resumeDuMois', () => {
     ]);
   });
 
+  it('un loyer partiel se range entre les retards et les attendus, avec son reste dû', () => {
+    const etat: EtatGestion = {
+      ...ETAT,
+      locations: [...ETAT.locations, location('retard', { bienId: 'bien-lices', jourLoyer: 2 })],
+      paiements: [
+        ...ETAT.paiements,
+        paiement('p-antoine', 'antoine', '2026-09', 20_000, '2026-09-04'),
+      ],
+    };
+    const resume = resumeDuMois(etat, '2026-09', AUJOURDHUI);
+    expect(resume.lignes.map((l) => `${l.location.id} ${l.statut}`)).toEqual([
+      'retard en_retard',
+      'antoine partiel',
+      'lea recu',
+      'hugo recu',
+      'julie recu',
+    ]);
+    expect(resume.lignes[1]?.resteDu).toBe(23_000);
+    expect(resume).toMatchObject({
+      nombreRecus: 3,
+      nombreEnRetard: 1,
+      montantRecu: 188_000,
+      montantDu: 281_000,
+    });
+  });
+
   it('à date due égale, le bien départage ; un bien inconnu passe en premier', () => {
     const etat: EtatGestion = {
       ...ETAT,
@@ -109,6 +137,36 @@ describe('resumeDuMois', () => {
     expect(lignes.map((l) => l.location.id)).toEqual(['orphelin', 'z', 'a']);
     expect(lignes[0]?.bien).toBeUndefined();
     expect(lignes[0]?.locataire).toBeUndefined();
+  });
+
+  it('colocation et chambres : colocataires retrouvés dans l’ordre ; le bien entier, puis ses chambres', () => {
+    const etat: EtatGestion = {
+      ...ETAT,
+      paiements: [],
+      locations: [
+        location('chambre-10', {
+          bienId: 'bien-rouet',
+          locataireId: 'locataire-hugo',
+          libelle: 'Chambre 10',
+        }),
+        location('chambre-2', {
+          bienId: 'bien-rouet',
+          locataireId: 'locataire-lea',
+          libelle: 'Chambre 2',
+        }),
+        location('coloc', {
+          bienId: 'bien-rouet',
+          locataireId: 'locataire-julie',
+          colocataireIds: ['locataire-antoine', 'disparu', 'locataire-lea'],
+        }),
+      ],
+    };
+    const lignes = resumeDuMois(etat, '2026-09', AUJOURDHUI).lignes;
+    expect(lignes.map((l) => l.location.id)).toEqual(['coloc', 'chambre-2', 'chambre-10']);
+    expect(lignes[0]?.locataire?.prenom).toBe('Julie');
+    // Un colocataire introuvable (données incohérentes) est ignoré.
+    expect(lignes[0]?.colocataires.map((l) => l.prenom)).toEqual(['Antoine', 'Léa']);
+    expect(lignes[1]?.colocataires).toEqual([]);
   });
 
   it('un trop-perçu ne gonfle pas le mois', () => {

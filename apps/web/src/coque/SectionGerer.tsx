@@ -1,5 +1,5 @@
 import { jourLocal } from '@loupe/gestion';
-import { Building2, House, Plus } from 'lucide-react';
+import { Building2, House, Plus, Receipt } from 'lucide-react';
 import type { JSX } from 'react';
 import { NavLink } from 'react-router';
 
@@ -11,9 +11,9 @@ import { loyersEnRetard, TEXTES_MENU } from '@/textes/gerer';
 import { CLASSE_ETIQUETTE, classeLien, classeLienCreation } from './liens';
 
 /**
- * Section « Gérer » : ajouter un bien et les loyers du mois (avec les loyers en retard). Sans compte, une seule
- * ligne vers la page qui explique pourquoi il en faut un. Les pages Loyers, Biens, Locataires et Argent
- * y entreront avec leurs features.
+ * Section « Gérer » : ajouter un bien, les loyers du mois (avec les loyers en retard) et tous les
+ * loyers, mois par mois. Sans compte, une seule ligne vers la page qui explique pourquoi il en faut un.
+ * Les pages Biens, Locataires et Argent y entreront avec leurs features.
  */
 export function SectionGerer(): JSX.Element {
   const { etat } = useCompte();
@@ -40,6 +40,10 @@ export function SectionGerer(): JSX.Element {
                 {retards}
               </span>
             )}
+          </NavLink>
+          <NavLink to="/gerer/loyers" className={classeLien}>
+            <Receipt size={18} aria-hidden="true" />
+            {TEXTES_MENU.tousLesLoyers}
           </NavLink>
         </>
       ) : (

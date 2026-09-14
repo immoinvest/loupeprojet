@@ -19,6 +19,9 @@ export const JOUR_LOYER_MAX = 28;
 /** Jours après la date due au bout desquels un loyer non reçu est « en retard ». */
 export const DELAI_RETARD_JOURS = 5;
 
+/** Colocataires d'une location en plus du locataire en titre (borne de saisie et contre l'abus). */
+export const COLOCATAIRES_MAX = 10;
+
 /** Plafond de tout montant saisi : 100 000 €, en centimes. */
 export const MONTANT_MAX_CENTIMES = 10_000_000;
 

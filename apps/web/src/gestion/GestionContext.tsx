@@ -1,9 +1,16 @@
 import {
+  DocumentSchema,
   PREFERENCES_PAR_DEFAUT,
   type CreationLocation,
   type CreationReponse,
+  type DemandeDocument,
+  type DocumentComplet,
   type EtatGestion,
+  type IdentiteBailleur,
+  type LocationGeree,
   type NouveauPaiement,
+  type NouvelleOccupation,
+  type OccupationCreee,
   type Paiement,
   type PreferencesMenu,
 } from '@loupe/gestion';
@@ -33,6 +40,20 @@ export interface ContexteGestion {
   readonly changerPreferences: (
     preferences: PreferencesMenu,
   ) => Promise<ResultatGestion<PreferencesMenu>>;
+  readonly enregistrerBailleur: (
+    identite: IdentiteBailleur,
+  ) => Promise<ResultatGestion<IdentiteBailleur>>;
+  /** Émet (ou retrouve) le document ; l'état liste ensuite le document, sans son contenu. */
+  readonly emettreDocument: (demande: DemandeDocument) => Promise<ResultatGestion<DocumentComplet>>;
+  readonly document: (id: string) => Promise<ResultatGestion<DocumentComplet>>;
+  readonly terminerLocation: (
+    locationId: string,
+    fin: string,
+  ) => Promise<ResultatGestion<LocationGeree>>;
+  readonly louer: (
+    bienId: string,
+    occupation: NouvelleOccupation,
+  ) => Promise<ResultatGestion<OccupationCreee>>;
 }
 
 const Contexte = createContext<ContexteGestion | null>(null);
@@ -105,11 +126,15 @@ export function GestionProvider({
       creer: async (creation) => {
         const r = await client.creer(creation);
         if (r.ok) {
-          const { bien, locataire, location } = r.valeur;
+          const { bien, locataire, location, colocataires } = r.valeur;
           fusionner((e) => ({
             ...e,
             biens: [...e.biens, bien],
-            locataires: locataire === null ? e.locataires : [...e.locataires, locataire],
+            locataires: [
+              ...e.locataires,
+              ...(locataire === null ? [] : [locataire]),
+              ...colocataires,
+            ],
             locations: location === null ? e.locations : [...e.locations, location],
           }));
         }
@@ -135,6 +160,50 @@ export function GestionProvider({
         appliquerPreferences(suivantes);
         const r = await client.enregistrerPreferences(suivantes);
         if (!r.ok) appliquerPreferences(avant);
+        return r;
+      },
+      enregistrerBailleur: async (identite) => {
+        const r = await client.enregistrerBailleur(identite);
+        if (r.ok) {
+          const { valeur: bailleur } = r;
+          fusionner((e) => ({ ...e, bailleur }));
+        }
+        return r;
+      },
+      emettreDocument: async (demande) => {
+        const r = await client.emettreDocument(demande);
+        if (r.ok) {
+          const liste = DocumentSchema.parse(r.valeur);
+          fusionner((e) =>
+            e.documents.some((d) => d.id === liste.id)
+              ? e
+              : { ...e, documents: [...e.documents, liste] },
+          );
+        }
+        return r;
+      },
+      document: (id) => client.document(id),
+      terminerLocation: async (locationId, fin) => {
+        const r = await client.terminerLocation(locationId, fin);
+        if (r.ok) {
+          const { valeur: terminee } = r;
+          fusionner((e) => ({
+            ...e,
+            locations: e.locations.map((l) => (l.id === terminee.id ? terminee : l)),
+          }));
+        }
+        return r;
+      },
+      louer: async (bienId, occupation) => {
+        const r = await client.louer(bienId, occupation);
+        if (r.ok) {
+          const { locataire, location, colocataires } = r.valeur;
+          fusionner((e) => ({
+            ...e,
+            locataires: [...e.locataires, locataire, ...colocataires],
+            locations: [...e.locations, location],
+          }));
+        }
         return r;
       },
     };

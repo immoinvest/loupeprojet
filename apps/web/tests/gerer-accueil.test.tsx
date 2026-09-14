@@ -114,9 +114,23 @@ describe('Gérer : les loyers du mois', () => {
     expect(within(baille).getByText('En retard')).toBeInTheDocument();
     expect(within(baille).getByText('Antoine Dupont')).toBeInTheDocument();
     expect(within(baille).getByText('le 3')).toBeInTheDocument();
+    expect(
+      within(baille)
+        .getAllByRole('button')
+        .map((b) => b.textContent),
+    ).toEqual(['En partie', 'Reçu']);
+    // Un loyer reçu propose sa quittance, et rien d'autre.
     const lices = ligne('T2 Lices');
     expect(within(lices).getByText('Reçu')).toBeInTheDocument();
-    expect(within(lices).queryByRole('button')).toBeNull();
+    expect(
+      within(lices)
+        .getAllByRole('button')
+        .map((b) => b.textContent),
+    ).toEqual(['Quittance']);
+    expect(screen.getByRole('link', { name: 'Voir tous les loyers' })).toHaveAttribute(
+      'href',
+      '/gerer/loyers',
+    );
   });
 
   it('« Reçu » en un clic, puis « Annuler » ramène le loyer en retard', async () => {
@@ -187,7 +201,11 @@ describe('Gérer : les loyers du mois', () => {
     expect(
       await screen.findByRole('heading', { level: 1, name: 'Aucun loyer attendu ce mois-ci.' }),
     ).toBeInTheDocument();
-    expect(screen.getByText('Sans locataire : Parking Prado')).toBeInTheDocument();
+    expect(screen.getByText(/^Sans locataire/)).toHaveTextContent('Sans locataire : Parking Prado');
+    expect(screen.getByRole('link', { name: 'Parking Prado' })).toHaveAttribute(
+      'href',
+      '/gerer/biens/parking?louer=1',
+    );
     expect(screen.queryByRole('img', { name: /reçus sur/ })).toBeNull();
   });
 });
