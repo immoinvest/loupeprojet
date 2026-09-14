@@ -1,3 +1,4 @@
+import { milieuDePeriode, moisEntre } from '../donnees/anciennete';
 import type {
   Communes,
   IndexDvf,
@@ -25,12 +26,16 @@ export interface FichiersMarche {
   readonly zonage: Zonage | null;
 }
 
-export interface DvfMarche extends Statistiques {
+export interface DvfMarche extends Omit<Statistiques, 'dateMediane'> {
   readonly type: TypeLogement;
   readonly fenetre: { readonly debut: string; readonly fin: string };
   readonly millesime: string;
   /** Code INSEE dont viennent les ventes : l'arrondissement quand il existe, sinon la commune. */
   readonly codeInsee: string;
+  /** Date de la vente médiane ; `null` quand l'index publié ne la porte pas. */
+  readonly dateMediane: string | null;
+  /** Mois écoulés à la date de la réponse depuis la vente médiane (sinon depuis le milieu de la fenêtre). */
+  readonly ancienneteMedianeMois: number | null;
 }
 
 export interface LoyerMarche extends Indicateur {
@@ -102,12 +107,25 @@ export function indicateurPour(type: TypeLogement, pieces: number | undefined): 
   return pieces <= 2 ? 'appartementT1T2' : 'appartementT3Plus';
 }
 
-function dvfPour(dvf: IndexDvf, codes: readonly string[], type: TypeLogement): DvfMarche | null {
+function dvfPour(
+  dvf: IndexDvf,
+  codes: readonly string[],
+  type: TypeLogement,
+  maintenant: number,
+): DvfMarche | null {
   return chercher(codes, (code) => {
     const stats = dvf.communes[code]?.[type];
-    return stats === undefined
-      ? undefined
-      : { ...stats, type, fenetre: dvf.fenetre, millesime: dvf.millesime, codeInsee: code };
+    if (stats === undefined) return undefined;
+    const dateMediane = stats.dateMediane ?? null;
+    return {
+      ...stats,
+      type,
+      fenetre: dvf.fenetre,
+      millesime: dvf.millesime,
+      codeInsee: code,
+      dateMediane,
+      ancienneteMedianeMois: moisEntre(dateMediane ?? milieuDePeriode(dvf.fenetre), maintenant),
+    };
   });
 }
 
@@ -137,15 +155,18 @@ function loyerPour(
   });
 }
 
-/** Assemble la réponse /marche à partir des fichiers lus ; pure, sans réseau. */
+/** Assemble la réponse /marche à partir des fichiers lus, à l'instant `maintenant` (ancienneté) ; pure, sans réseau. */
 export function assemblerMarche(
   parametres: ParametresMarche,
   departement: string,
   fichiers: FichiersMarche,
+  maintenant: number,
 ): ReponseMarche {
   const commune = resoudreCommune(fichiers.communes, parametres.codeInsee, parametres.codePostal);
   const codes = commune.parente === null ? [commune.code] : [commune.code, commune.parente];
-  const [dvf, sourceDvf] = depuis(fichiers.dvf, (f) => dvfPour(f, codes, parametres.type));
+  const [dvf, sourceDvf] = depuis(fichiers.dvf, (f) =>
+    dvfPour(f, codes, parametres.type, maintenant),
+  );
   const [loyer, sourceLoyer] = depuis(fichiers.loyers, (f) =>
     loyerPour(f, codes, parametres.type, parametres.pieces),
   );

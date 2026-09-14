@@ -24,7 +24,7 @@ import { millesimesDvfAEssayer } from './millesime';
 /** Les référentiels changent au mieux une fois par mois : une réponse vaut 24 heures. */
 export const TTL_MARCHE_SECONDES = 24 * 3600;
 /** À incrémenter quand le contrat de réponse change : les réponses en cache en dépendent. */
-const VERSION_CONTRAT = 1;
+const VERSION_CONTRAT = 2;
 
 export const ParametresMarcheSchema = z.object({
   codeInsee: z.string().regex(/^(\d{5}|2[AB]\d{3})$/),
@@ -79,7 +79,12 @@ export function creerMarche(deps: Dependances): Handler<BlankEnv, '/marche'> {
       lireLoyers(passe, departement),
       lireJsonValide(passe, `zonage/${departement}.json`, ZonageSchema),
     ]);
-    const reponse = assemblerMarche(parametres, departement, { communes, dvf, loyers, zonage });
+    const reponse = assemblerMarche(
+      parametres,
+      departement,
+      { communes, dvf, loyers, zonage },
+      deps.maintenant(),
+    );
     const texte = JSON.stringify({
       ...reponse,
       obtenuLe: new Date(deps.maintenant()).toISOString(),

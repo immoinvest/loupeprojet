@@ -51,6 +51,8 @@ export const StatistiquesTypeSchema = z.object({
   medianeM2: z.number().positive(),
   q1M2: z.number().positive(),
   q3M2: z.number().positive(),
+  /** Date de la vente médiane (ancienneté du repère) ; absente des index publiés avant le 14/09/2026. */
+  dateMediane: z.iso.date().optional(),
 });
 export type StatistiquesType = z.infer<typeof StatistiquesTypeSchema>;
 
