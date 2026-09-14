@@ -22,7 +22,8 @@ export type CodeErreur =
   | 'FIN_AVANT_ENTREE'
   | 'PAIEMENTS_APRES_SORTIE'
   | 'BIEN_OCCUPE'
-  | 'GESTION_INDISPONIBLE';
+  | 'GESTION_INDISPONIBLE'
+  | 'PROJETS_INDISPONIBLE';
 
 /** Réponse JSON d'erreur, indépendante du contexte Hono (utilisable dans notFound, onError et index). */
 export function reponseErreur(statut: ContentfulStatusCode, code: CodeErreur): Response {

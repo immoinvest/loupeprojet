@@ -1,19 +1,21 @@
+import type { ChoixMenu } from '@/gestion/menu';
 import type { CodeErreurGestion } from '@/gestion/types';
 
-/** Textes du menu à deux sections (barre latérale). */
+/** Textes du menu (barre latérale) : l'accueil, puis les sections Analyser et Gérer. */
 export const TEXTES_MENU = {
+  accueil: 'Accueil',
   analyser: 'Analyser',
   gerer: 'Gérer',
   nouveauProjet: 'Nouveau projet',
-  comparer: 'Comparer',
   ajouterBien: 'Ajouter un bien',
-  accueil: 'Accueil',
-  loyers: 'Loyers',
+  loyersDuMois: 'Loyers du mois',
+  /** La page Loyers, mois par mois (« Tous mes projets » a son pendant dans Analyser). */
+  tousLesLoyers: 'Tous les loyers',
   gererSansCompte: 'Gérer mes biens loués',
 } as const;
 
-/** Au-delà de ce nombre, les projets les plus anciens passent derrière « Tous mes projets ». */
-export const PROJETS_DANS_LE_MENU = 5;
+/** Les projets les plus récents montrés dans le menu ; tous les autres sont derrière « Tous mes projets ». */
+export const PROJETS_DANS_LE_MENU = 3;
 
 export function tousMesProjets(nombre: number): string {
   return `Tous mes projets · ${String(nombre)}`;
@@ -27,14 +29,21 @@ export function loyersEnRetard(nombre: number): string {
 /** Carte « Mon menu » de la page Mon compte (vouvoiement, comme le reste de la page). */
 export const TEXTES_MON_MENU = {
   titre: 'Mon menu',
-  phrase: 'Choisissez ce que Deklic vous montre.',
-  analyser: 'Analyser',
-  analyserDetail: 'Des projets à étudier avant d’acheter.',
-  gerer: 'Gérer',
-  gererDetail: 'Vos biens loués, vos loyers, vos quittances.',
-  auMoinsUne: 'Au moins une section reste affichée. Le réglage vous suit sur tous vos appareils.',
+  phrase: 'Choisissez ce que Deklic vous montre, dans le menu et sur l’accueil.',
+  partout: 'Le réglage vous suit sur tous vos appareils.',
   chargement: 'Chargement de votre menu…',
 } as const;
+
+export const TEXTES_CHOIX_MENU: Readonly<
+  Record<ChoixMenu, { readonly libelle: string; readonly detail: string }>
+> = {
+  les_deux: {
+    libelle: 'Analyser et Gérer',
+    detail: 'Étudier des projets avant d’acheter, et suivre vos biens loués.',
+  },
+  analyser: { libelle: 'Analyser seulement', detail: 'Des projets à étudier avant d’acheter.' },
+  gerer: { libelle: 'Gérer seulement', detail: 'Vos biens loués, vos loyers, vos quittances.' },
+};
 
 /** Carte « Mes données de gestion » de la page Mon compte (vouvoiement). */
 export const TEXTES_EXPORT = {

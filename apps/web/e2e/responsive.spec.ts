@@ -61,8 +61,10 @@ test('menu : tiroir sous 1 024 px, barre latérale au-delà', async ({ browser }
       await expect(navigation, format.nom).toBeHidden();
       await bouton.click();
       await expect(bouton, format.nom).toHaveAttribute('aria-expanded', 'true');
-      await navigation.getByRole('link', { name: 'Comparer' }).click();
-      await expect(page.getByRole('heading', { level: 1, name: 'Comparer' })).toBeVisible();
+      await page.getByRole('navigation', { name: 'Accueil' }).getByRole('link').click();
+      await expect(
+        page.getByRole('heading', { level: 1, name: 'Bienvenue sur Deklic' }),
+      ).toBeVisible();
       await expect(navigation, format.nom).toBeHidden();
       await expect(bouton, format.nom).toHaveAttribute('aria-expanded', 'false');
     }

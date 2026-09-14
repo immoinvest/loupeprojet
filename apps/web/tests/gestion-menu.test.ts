@@ -2,11 +2,12 @@ import { describe, expect, it } from 'vitest';
 
 import { dateEnLettres, leJour, leJourDuMois, moisEnLettres, montant } from '@/gestion/format';
 import {
-  basculer,
+  CHOIX_MENU,
+  choixDe,
   CLE_MENU,
   ecrirePreferencesLocales,
-  estFigee,
   lirePreferencesLocales,
+  preferencesDe,
   retardsDuMois,
   sectionsAffichees,
 } from '@/gestion/menu';
@@ -29,12 +30,15 @@ describe('sections du menu', () => {
     expect(sectionsAffichees('chargement', ANALYSER_MASQUE)).toEqual(ANALYSER_MASQUE);
   });
 
-  it('basculer inverse une section, jamais les deux ; la dernière est figée', () => {
-    expect(basculer({ analyser: true, gerer: true }, 'analyser')).toEqual(ANALYSER_MASQUE);
-    expect(basculer(ANALYSER_MASQUE, 'analyser')).toEqual({ analyser: true, gerer: true });
-    expect(basculer(ANALYSER_MASQUE, 'gerer')).toBeNull();
-    expect(estFigee(ANALYSER_MASQUE, 'gerer')).toBe(true);
-    expect(estFigee(ANALYSER_MASQUE, 'analyser')).toBe(false);
+  it('trois choix, chacun avec au moins une section, et retour du choix depuis les préférences', () => {
+    for (const choix of CHOIX_MENU) {
+      const p = preferencesDe(choix);
+      expect(p.analyser || p.gerer).toBe(true);
+      expect(choixDe(p)).toBe(choix);
+    }
+    expect(preferencesDe('gerer')).toEqual(ANALYSER_MASQUE);
+    // Aucune section (refusé par le schéma) : lu comme les deux, jamais un menu vide.
+    expect(choixDe({ analyser: false, gerer: false })).toBe('les_deux');
   });
 
   it('préférences locales : absentes, abîmées, invalides ou valides', () => {

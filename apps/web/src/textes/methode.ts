@@ -22,8 +22,10 @@ import {
 import { sectionDefauts, sectionScenarios, sectionTri, sectionVerdict } from './methode-verdict';
 
 /**
- * La page « Comment c'est calculé » : une section par module du moteur, générée depuis
+ * La documentation « Comment c'est calculé » : une section par module du moteur, générée depuis
  * les règles datées (aucune constante recopiée) et les défauts lus dans le code.
+ * Plus affichée dans l'application depuis le 14/09/2026 (décision de Pierre) : gardée ici,
+ * testée, pour documenter le moteur et pouvoir revenir un jour sous une autre forme.
  */
 export function sectionsMethode(regles: Regles, defauts: Defauts): SectionMethode[] {
   const sections: readonly SectionMethode[] = [

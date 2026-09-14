@@ -75,23 +75,25 @@ describe('Menu des petits écrans', () => {
     const { utilisateur, bouton } = await ouvrirMesProjets();
 
     await utilisateur.click(bouton);
-    await utilisateur.click(within(tiroir()).getByRole('link', { name: 'Comparer' }));
-    expect(await screen.findByRole('heading', { level: 1, name: 'Comparer' })).toBeInTheDocument();
+    await utilisateur.click(within(tiroir()).getByRole('link', { name: 'Accueil' }));
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Bienvenue sur Deklic' }),
+    ).toBeInTheDocument();
     expect(bouton).toHaveAttribute('aria-expanded', 'false');
     expect(contenu()).toHaveFocus();
 
     await utilisateur.click(bouton);
-    await utilisateur.click(within(tiroir()).getByRole('link', { name: 'Comparer' }));
+    await utilisateur.click(within(tiroir()).getByRole('link', { name: 'Accueil' }));
     expect(bouton).toHaveAttribute('aria-expanded', 'false');
     expect(contenu()).toHaveFocus();
 
     // Tiroir fermé (barre latérale d'ordinateur) : naviguer ne déplace pas le focus.
-    const lienMethode = within(tiroir()).getByRole('link', { name: "Comment c'est calculé" });
-    await utilisateur.click(lienMethode);
+    const lienExtension = within(tiroir()).getByRole('link', { name: 'Extension navigateur' });
+    await utilisateur.click(lienExtension);
     expect(
-      await screen.findByRole('heading', { level: 1, name: "Comment c'est calculé" }),
+      await screen.findByRole('heading', { level: 1, name: 'Lisez une annonce en un clic.' }),
     ).toBeInTheDocument();
-    expect(lienMethode).toHaveFocus();
+    expect(lienExtension).toHaveFocus();
   });
 
   it('se referme quand l’écran devient large, et ignore un écran resté étroit', async () => {

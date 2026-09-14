@@ -7,6 +7,7 @@ import { optionsAuth } from '../src/auth';
 import type { Dependances } from '../src/dependances';
 import { depotD1 } from '../src/gestion/depot-d1';
 import { journalMemoire } from '../src/journal';
+import { depotProjetsD1 } from '../src/projets/depot-d1';
 import { d1SurSqlite } from './d1-sqlite';
 
 /** La migration des comptes, générée depuis la configuration de Better Auth. */
@@ -20,6 +21,7 @@ export const MIGRATIONS: readonly { readonly fichier: string; readonly table: st
   { fichier: '0001_comptes.sql', table: 'user' },
   { fichier: '0002_gestion.sql', table: 'gestion_bien' },
   { fichier: '0003_gestion_documents.sql', table: 'gestion_document' },
+  { fichier: '0004_projets.sql', table: 'projet' },
 ];
 
 export function lireMigrationNommee(fichier: string): string {
@@ -49,6 +51,7 @@ export async function compilerMigration(): Promise<string> {
     secret: 'generation-de-migration-sans-secret-reel-000',
     base: new DatabaseSync(':memory:'),
     gestion: depotD1(d1SurSqlite(new DatabaseSync(':memory:')).base),
+    projets: depotProjetsD1(d1SurSqlite(new DatabaseSync(':memory:')).base),
     courriel: null,
     fournisseurs: {},
     origines: [],

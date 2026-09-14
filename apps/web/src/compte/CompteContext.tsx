@@ -4,9 +4,13 @@ import type { ClientCompte, Fournisseurs, FournisseurSocial, Resultat, Utilisate
 
 export type EtatCompte = 'chargement' | 'anonyme' | 'connecte';
 
+/** Comment la session de cet onglet a pris fin : la synchronisation des projets en dépend. */
+export type SortieCompte = 'deconnexion' | 'suppression' | null;
+
 export interface ContexteCompte {
   readonly etat: EtatCompte;
   readonly utilisateur: Utilisateur | null;
+  readonly sortie: SortieCompte;
   /** `null` tant que le serveur n'a pas répondu. */
   readonly fournisseurs: Fournisseurs | null;
   readonly client: ClientCompte;
@@ -35,6 +39,7 @@ export function CompteProvider({
 }): ReactNode {
   const [session, setSession] = useState<Session>({ charge: false, utilisateur: null });
   const [fournisseurs, setFournisseurs] = useState<Fournisseurs | null>(null);
+  const [sortie, setSortie] = useState<SortieCompte>(null);
 
   useEffect(() => {
     void client.session().then((utilisateur) => {
@@ -51,6 +56,7 @@ export function CompteProvider({
     return {
       etat: !session.charge ? 'chargement' : utilisateur === null ? 'anonyme' : 'connecte',
       utilisateur,
+      sortie,
       fournisseurs,
       client,
       demanderCode: (email) => client.demanderCode(email),
@@ -62,6 +68,7 @@ export function CompteProvider({
       continuerAvec: (fournisseur, retour) => client.continuerAvec(fournisseur, retour),
       deconnecter: async () => {
         await client.deconnecter();
+        setSortie('deconnexion');
         connecter(null);
       },
       renommer: async (nom) => {
@@ -71,11 +78,14 @@ export function CompteProvider({
       },
       supprimer: async () => {
         const r = await client.supprimer();
-        if (r.ok) connecter(null);
+        if (r.ok) {
+          setSortie('suppression');
+          connecter(null);
+        }
         return r;
       },
     };
-  }, [client, session, fournisseurs]);
+  }, [client, session, fournisseurs, sortie]);
 
   return <Contexte.Provider value={valeur}>{children}</Contexte.Provider>;
 }

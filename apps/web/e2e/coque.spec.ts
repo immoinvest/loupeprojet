@@ -60,7 +60,7 @@ test('menu et en-tête restent en vue quand le contenu défile ; changer de vole
     await expect(navigation.getByRole('link', { name: 'Nouveau projet' })).toBeInViewport({
       ratio: 1,
     });
-    await expect(page.getByRole('link', { name: "Comment c'est calculé" })).toBeInViewport({
+    await expect(page.getByRole('link', { name: 'Extension navigateur' })).toBeInViewport({
       ratio: 1,
     });
     await expect(page.getByText('Gratuit · 1 projet')).toBeInViewport({ ratio: 1 });
@@ -82,7 +82,7 @@ test('menu et en-tête restent en vue quand le contenu défile ; changer de vole
   expect(await defilementDeLaFenetre(page)).toBe(0);
 });
 
-test('trente projets : le menu en montre cinq puis « Tous mes projets », le profil reste en bas', async ({
+test('trente projets : le menu en montre trois puis « Tous mes projets », le profil reste en bas', async ({
   page,
 }) => {
   await ouvrirMesProjets(page);
@@ -105,11 +105,11 @@ test('trente projets : le menu en montre cinq puis « Tous mes projets », le pr
   const profil = page.getByText('Gratuit · 30 projets');
   await expect(profil).toBeInViewport({ ratio: 1 });
 
-  // Les cinq plus récents seulement (l'exemple puis les copies 1 à 4), puis le lien vers la liste.
+  // Les trois plus récents seulement (l'exemple puis les copies 1 et 2), puis le lien vers la liste.
   const lien = (nom: string): ReturnType<Page['getByRole']> =>
     navigation.getByRole('link', { name: nom, exact: true });
-  await expect(lien('Copie 4 · T2 · Lyon 3e')).toBeVisible();
-  await expect(lien('Copie 5 · T2 · Lyon 3e')).toHaveCount(0);
+  await expect(lien('Copie 2 · T2 · Lyon 3e')).toBeVisible();
+  await expect(lien('Copie 3 · T2 · Lyon 3e')).toHaveCount(0);
   const tous = lien('Tous mes projets · 30');
   await tous.scrollIntoViewIfNeeded();
   await expect(tous).toBeInViewport({ ratio: 1 });

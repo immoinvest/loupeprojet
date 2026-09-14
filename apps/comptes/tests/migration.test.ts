@@ -111,11 +111,24 @@ describe('migration 0002 : gestion locative', () => {
     appliquerMigrations(base);
     appliquerMigrations(base);
     expect(noms(base, 'table')).toContain('gestion_bien');
+    // 0003 (G1b) et 0004 (synchronisation des projets) sont indépendantes : l'ordre des numéros suffit.
     expect(MIGRATIONS.map((m) => m.fichier)).toEqual([
       '0001_comptes.sql',
       '0002_gestion.sql',
       '0003_gestion_documents.sql',
+      '0004_projets.sql',
     ]);
+  });
+
+  it('migration 0004 : pas de projet sans compte, un même identifiant par compte', () => {
+    const base = new DatabaseSync(':memory:');
+    appliquerMigrations(base);
+    const inserer = base.prepare(
+      'insert into projet (userId, id, contenu, modifieLe, revision, supprime) values (?, ?, ?, ?, ?, ?)',
+    );
+    expect(() => inserer.run('inconnu', 'p1', '{}', 'x', 1, 0)).toThrow(
+      /FOREIGN KEY constraint failed/,
+    );
   });
 
   it('les clés étrangères sont appliquées : pas de bien sans compte', () => {
@@ -183,7 +196,7 @@ describe('migration 0003 : paiements partiels, bailleur, documents', () => {
     ).toThrow(/FOREIGN KEY constraint failed/);
   });
 
-  it('tables et index après 0003', () => {
+  it('tables et index après 0003 (et 0004)', () => {
     const base = baseDeG1a();
     appliquerMigrations(base);
     expect(noms(base, 'table')).toEqual([
@@ -196,6 +209,7 @@ describe('migration 0003 : paiements partiels, bailleur, documents', () => {
       'gestion_location',
       'gestion_paiement',
       'gestion_preference',
+      'projet',
       'session',
       'user',
       'verification',
@@ -210,6 +224,7 @@ describe('migration 0003 : paiements partiels, bailleur, documents', () => {
       'gestion_location_userId_idx',
       'gestion_paiement_location_periode_idx',
       'gestion_paiement_userId_idx',
+      'projet_userId_revision_idx',
       'session_userId_idx',
       'verification_identifier_idx',
     ]);

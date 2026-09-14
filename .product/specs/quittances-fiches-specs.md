@@ -310,10 +310,10 @@ Scénario : bornes
 
 Contrats et données (compléments) :
 
-| Élément | Changement |
-| --- | --- |
-| `NouvelleLocation` | + `libelle` facultatif (1 à 40 caractères) |
-| `CreationLocation`, `NouvelleOccupation` | + `colocataires: NouveauLocataire[]` (0 à 10, défaut vide) |
-| `LocationGeree` | + `libelle` facultatif, + `colocataireIds: string[]` |
-| `ContenuDocument` | `locataire` devient `locataires` (au moins un) ; `logement.libelle` facultatif |
-| Migration `0003` | + colonne `gestion_location.libelle` ; + table `gestion_colocataire (locationId, locataireId, userId, ordre)` en cascade |
+| Élément                                  | Changement                                                                                                               |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `NouvelleLocation`                       | + `libelle` facultatif (1 à 40 caractères)                                                                               |
+| `CreationLocation`, `NouvelleOccupation` | + `colocataires: NouveauLocataire[]` (0 à 10, défaut vide)                                                               |
+| `LocationGeree`                          | + `libelle` facultatif, + `colocataireIds: string[]`                                                                     |
+| `ContenuDocument`                        | `locataire` devient `locataires` (au moins un) ; `logement.libelle` facultatif                                           |
+| Migration `0003`                         | + colonne `gestion_location.libelle` ; + table `gestion_colocataire (locationId, locataireId, userId, ordre)` en cascade |
