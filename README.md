@@ -36,7 +36,7 @@ npm run test:e2e      # vite build puis playwright test : parcours complets dans
 npm run build         # build de chaque workspace
 ```
 
-Node 22 ou plus. La CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) exécute ces six commandes sur chaque pull request (1 022 tests au 14/09/2026 : 233 pour le moteur, 330 pour le web, 111 pour le Worker, 144 pour les référentiels, 145 pour la capture et l'extension, 59 pour les comptes ; dont 14 pour la note de confiance du moteur et 11 pour ses cartes et textes). Une PR est fusionnée automatiquement dès que le check `verify` est vert (`gh pr merge <n> --auto --merge`) ; `master` refuse tout merge sans ce check. Un second job `e2e` joue les parcours Playwright dans Chromium sur ordinateur, téléphone et tablette, puis mesure 16 écrans sur 9 formats ; il n'est pas encore requis pour fusionner.
+Node 22 ou plus. La CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) exécute ces six commandes sur chaque pull request (1 023 tests au 14/09/2026 : 234 pour le moteur, 330 pour le web, 111 pour le Worker, 144 pour les référentiels, 145 pour la capture et l'extension, 59 pour les comptes ; dont 14 pour la note de confiance du moteur et 11 pour ses cartes et textes). Une PR est fusionnée automatiquement dès que le check `verify` est vert (`gh pr merge <n> --auto --merge`) ; `master` refuse tout merge sans ce check. Un second job `e2e` joue les parcours Playwright dans Chromium sur ordinateur, téléphone et tablette, puis mesure 16 écrans sur 9 formats ; il n'est pas encore requis pour fusionner.
 
 ## Le moteur (`@loupe/moteur`)
 
@@ -56,7 +56,7 @@ resultats.scenarios?.prixCibles; // prix pour cash-flow nul, net 6 %, brut 8 %
 - **Sortie** : des `Resultats` conformes à `ResultatsSchema` (aucun NaN, aucune clé non documentée), jamais persistés.
 - **Règles datées** dans `src/regles/2026-09.ts` : chaque projet porte sa `versionRegles`. Les valeurs sans source consolidée sont listées dans `meta.aConfirmer`, les simplifications dans `meta.simplifications`.
 - **Pur** : aucune I/O, aucune date système, aucun aléatoire, aucun `console`. Le LLM n'intervient jamais dans un calcul.
-- **Tests** : 233 tests, couverture 100 % (lignes, branches, fonctions), cas de référence vérifiés à la main sur le projet d'exemple (T3 65 m², Marseille 5e, 155 000 € FAI) et cas de confiance de Pierre (arrondissement dispersé sans adresse : 41, faible ; 15 ventes proches, resserrées et récentes : 82, élevée).
+- **Tests** : 234 tests, couverture 100 % (lignes, branches, fonctions), cas de référence vérifiés à la main sur le projet d'exemple (T3 65 m², Marseille 5e, 155 000 € FAI) et cas de confiance de Pierre (arrondissement dispersé sans adresse : 41, faible ; 15 ventes proches, resserrées et récentes : 82, élevée).
 
 Modules : `financement` (frais d'acquisition par formule, PMT, amortissement avec différés, TAEG, HCSF, IRA), `cashflow`, `fiscalite` (micro-BIC, LMNP réel, micro-foncier, nu réel), `revente` (plus-value, abattements, surtaxe, réintégration LMNP), `rendement` (brut/net/net-net, TRI, enrichissement), `verdict`, `scenarios`.
 

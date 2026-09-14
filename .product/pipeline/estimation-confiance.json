@@ -28,7 +28,10 @@
       "stories_completed": 6,
       "stories_total": 6,
       "commits": [
-        { "etape": "docs", "hash": "c5dc1c3" },
+        {
+          "etape": "docs",
+          "hash": "c5dc1c3"
+        },
         {
           "etape": "US-1 moteur (+ web et Méthode adaptés)",
           "hash": "220eb4b",
@@ -40,8 +43,14 @@
           "tests_worker": 111,
           "tests_data": 144
         },
-        { "etape": "US-3 web enrichissement", "hash": "2402e49" },
-        { "etape": "US-4, US-5, US-6 écrans", "hash": "451a386" }
+        {
+          "etape": "US-3 web enrichissement",
+          "hash": "2402e49"
+        },
+        {
+          "etape": "US-4, US-5, US-6 écrans",
+          "hash": "451a386"
+        }
       ],
       "notes": [
         "Le projet d'exemple (rayon 500 m, 31 ventes, sans ancienneté) note 62, moyenne : sa fourchette ±8 % ne change pas",
@@ -83,6 +92,7 @@
     "retrocompatibilite": "champs de marche.dvf optionnels ; précision déduite du rayon ; contrats web tolérants à l'ancien Worker",
     "carte": "PR 2 séparée ; fond IGN Géoplateforme recommandé, décision de Pierre",
     "etat_pipeline": "session parallèle : état dans .product/pipeline/estimation-confiance.json, pipeline-state.json réservé à la session principale",
-    "point_ouvert_rue": "constaté en production : le repère « même côté de la rue » du 144 rue de l'Olivier s'étend sur 531 m et reçoit 30 points de localisation, plus qu'un cercle de 300 m (18) ; à trancher avec Pierre (plafonner les points d'une rue par son étendue, par exemple)"
+    "rue_distance": "décidé par Pierre le 14/09/2026 : les points d'une rue sont limités par la distance ; 30 points jusqu'à 150 m, au-delà les points du quartier pour l'étendue de la rue (rue de l'Olivier, 531 m : 12 points) ; branche fix/confiance-rue-distance",
+    "autres_estimateurs": "décidé par Pierre le 14/09/2026 : aucun lien vers d'autres estimateurs"
   }
 }

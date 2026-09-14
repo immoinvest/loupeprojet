@@ -157,7 +157,7 @@ describe('sectionsMethode', () => {
       'Fourchette : ±5 % si la confiance est élevée, ±6,5 % si la confiance est bonne, ±8 % si la confiance est moyenne, ±12 % si la confiance est faible, ±15 % si la confiance est très faible.',
     );
     expect(v).toContain(
-      'même immeuble 35 · même rue 30 · quartier ≤ 100 m 26, ≤ 200 m 22, ≤ 300 m 18, au-delà 12 · commune 4',
+      'même immeuble 35 · même rue 30 jusqu’à 150 m, au-delà comme le quartier · quartier ≤ 100 m 26, ≤ 200 m 22, ≤ 300 m 18, au-delà 12 · commune 4',
     );
     expect(v).toContain('3 ventes ou moins 0 · 10 ventes 12 · 30 ventes ou plus 20');
     expect(v).toContain('10 % ou moins 30 · 45 % ou plus 0');

@@ -31,6 +31,11 @@ Scénario: même immeuble
   Étant donné un repère de précision « immeuble », 6 ventes, quartiles à ± 5 %, vieilles de 4 mois
   Alors localisation vaut 35/35 et le niveau est « élevée »
 
+Scénario: rue étendue (demande de Pierre, 14/09/2026)
+  Étant donné un repère de précision « rue » dont les ventes s'étendent sur 531 m
+  Alors la localisation vaut les points du quartier pour 531 m, 12/35, et non 30/35
+  Et jusqu'à 150 m, la rue garde ses 30 points
+
 Scénario: paliers interpolés et bornés
   Étant donné le barème des comparables (3 → 0, 10 → 12, 30 → 20)
   Alors 2 ventes donnent 0, 5 ventes 3, 20 ventes 16, 50 ventes 20
@@ -137,7 +142,7 @@ Scénario: repère de commune (projet d'exemple avec adresse absente)
 Scénario: après l'analyse d'une adresse et le clic sur « Utiliser ce repère »
   Étant donné l'analyse du 144 rue de l'Olivier (repère même côté, 6 ventes, période connue, ancienneté 9 mois)
   Quand je clique sur « Utiliser ce repère pour l'estimation »
-  Alors la carte Confiance se met à jour (« Ventes de la même rue · 30/35 », « 6 ventes comparables », « ventes vieilles de 9 mois en médiane »)
+  Alors la carte Confiance se met à jour (« Ventes de la même rue, à 90 m au plus · 30/35 », « 6 ventes comparables », « ventes vieilles de 9 mois en médiane »)
   Et l'invitation à indiquer l'adresse disparaît
 
 Scénario: sans repère

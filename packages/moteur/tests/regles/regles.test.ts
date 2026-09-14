@@ -56,10 +56,16 @@ describe('règles 2026-09', () => {
       Math.max(...paliers.map((p) => p.points));
     const localisation = Math.max(
       c.localisation.immeuble,
-      c.localisation.rue,
+      c.localisation.rue.points,
       c.localisation.commune,
       maximum(c.localisation.quartier),
     );
+    // Une rue compte comme une rue dans une distance plus courte que le dernier cercle fermé.
+    const cercles = c.localisation.quartier.flatMap((p) =>
+      p.jusquaMetres === null ? [] : [p.jusquaMetres],
+    );
+    expect(c.localisation.rue.jusquaMetres).toBeGreaterThan(0);
+    expect(c.localisation.rue.jusquaMetres).toBeLessThan(Math.max(...cercles));
     expect(
       localisation + maximum(c.comparables) + maximum(c.dispersion) + maximum(c.anciennete),
     ).toBe(100);

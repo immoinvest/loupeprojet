@@ -170,7 +170,8 @@ export interface Regles {
     readonly confiance: {
       readonly localisation: {
         readonly immeuble: number;
-        readonly rue: number;
+        /** Ventes de la même rue : `points` tant qu'elles tiennent dans `jusquaMetres`, au-delà les points du quartier pour leur étendue. */
+        readonly rue: { readonly points: number; readonly jusquaMetres: number };
         /** Par rayon croissant, le dernier avec `jusquaMetres: null`. */
         readonly quartier: readonly PalierRayon[];
         readonly commune: number;
