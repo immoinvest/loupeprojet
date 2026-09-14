@@ -2,7 +2,7 @@
   "feature_slug": "revente-curseur",
   "title": "Revente : un curseur d'horizon de 1 à 30 ans (fiche de backlog 06)",
   "started_at": "2026-09-14T14:00:00Z",
-  "current_step": "implement",
+  "current_step": "push",
   "scope": "apps/web/src/composants/Curseur.tsx, index.css, analyses/{revente,plus-value}.ts, ecrans/Revente.tsx, ecrans/revente/Horizon.tsx, tests, e2e/onglets.spec.ts ; aucun changement du moteur",
   "branch": "feat/revente-curseur",
   "base": "master (9d38892, après la PR #38 gestion-locative-menu)",
@@ -19,11 +19,23 @@
       "status": "completed",
       "output": ".product/architecture/revente-curseur.md"
     },
-    "implement": { "status": "in_progress", "stories_completed": 0, "stories_total": 4 },
-    "refactor": { "status": "pending" },
-    "qa_tests": { "status": "pending" },
-    "security": { "status": "pending" },
-    "push": { "status": "pending" }
+    "implement": { "status": "completed", "stories_completed": 4, "stories_total": 4 },
+    "refactor": {
+      "status": "completed",
+      "note": "variantesRevente réécrite sur projetAHorizon ; curseur et bandeau extraits dans ecrans/revente/Horizon.tsx (Revente.tsx sous 200 lignes)"
+    },
+    "qa_tests": {
+      "status": "completed",
+      "note": "Curseur : 9 tests (rendu, repères, seuils, glissement, clavier, bornes et pas décimal, mode document) ; analyses : bornes du schéma, projetAHorizon, impositionPlusValue contre l'Excel, seuilsExoneration ; Revente : 6 tests d'écran (curseur, chiffres en direct sans écriture, relâchement, 150 ms, clavier, cartes) ; impression : texte seul ; e2e Revente : clavier, fill, cartes, Rapport ; vérifié dans le navigateur (glissement à la souris, clavier, alignement des repères et des seuils au pixel, téléphone 375 px sans débordement, document imprimable)"
+    },
+    "security": {
+      "status": "completed",
+      "note": "aucune donnée nouvelle, aucun appel réseau ; la valeur du curseur passe par appliquerSaisie puis par le schéma Zod du moteur avant enregistrement ; aucun innerHTML"
+    },
+    "push": {
+      "status": "in_progress",
+      "note": "docs communes, suite complète et couverture, fusion de master, PR en auto-merge"
+    }
   },
   "decisions": {
     "bornes": "curseur de 1 à 30 ans (zéro impossible dans le moteur et sans sens), bornes alignées sur ReventeSchema et vérifiées par test",
