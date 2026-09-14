@@ -13,7 +13,7 @@ import { REGIMES, explicationRegime } from './regimes';
 
 /** Explications générales, écrites une fois : résumés des sections de la page Méthode. */
 export const EXPLICATIONS = {
-  prix: "On compare au prix estimé du bien, calculé sur les ventes signées chez le notaire (base DVF) ramenées à aujourd'hui, pas aux prix affichés dans les annonces, qui sont 5 à 10 % au-dessus du prix final. L'état, l'étage, le DPE, le balcon et les charges ajustent l'estimation ; l'onglet Estimation montre chaque vente et chaque source.",
+  prix: "On compare au prix estimé du bien, calculé sur les ventes signées chez le notaire (base DVF) ramenées à aujourd'hui, pas aux prix affichés dans les annonces, qui sont 5 à 10 % au-dessus du prix final. L'état, l'étage, le DPE, le balcon, les charges et un locataire en place ajustent l'estimation ; l'onglet Estimation montre chaque vente et chaque source.",
   cashflow:
     "Le cash-flow retient toutes les charges : crédit et assurance, taxe foncière, copropriété, assurance propriétaire, comptable, CFE, provision d'entretien, et les semaines sans locataire. C'est ce que les annonces oublient.",
   fiscalite:
@@ -82,7 +82,7 @@ export function explicationPrix(r: Resultats): string {
     e === null
       ? `contre une médiane de ${nombre(dvf.medianM2)} €/m² sur ${ventes}`
       : `contre un prix estimé de ${nombre(e.prixM2Estime)} €/m², d'après ${ventes} ramenées à aujourd'hui`;
-  return `Le bien est affiché ${prixM2} €/m² ${repere}, soit ${pourcentageSigne(ecart)}. Les prix d'annonces, eux, sont 5 à 10 % au-dessus du prix final ; l'état, l'étage, le DPE, le balcon et les charges ajustent l'estimation.`;
+  return `Le bien est affiché ${prixM2} €/m² ${repere}, soit ${pourcentageSigne(ecart)}. Les prix d'annonces, eux, sont 5 à 10 % au-dessus du prix final ; l'état, l'étage, le DPE, le balcon, les charges et un locataire en place ajustent l'estimation.`;
 }
 
 export function explicationAutofinancement(r: ResultatsComplets): string {

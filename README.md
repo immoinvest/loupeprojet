@@ -73,7 +73,7 @@ comparerOffres(a, simulerPret(projet, cic, regles), lcl, cic).criteres; // neuf 
 - **Sortie** : des `Resultats` conformes à `ResultatsSchema` (aucun NaN, aucune clé non documentée), jamais persistés.
 - **Règles datées** dans `src/regles/2026-09.ts` : chaque projet porte sa `versionRegles`. Les valeurs sans source consolidée sont listées dans `meta.aConfirmer`, les simplifications dans `meta.simplifications`.
 - **Pur** : aucune I/O, aucune date système, aucun aléatoire, aucun `console`. Le LLM n'intervient jamais dans un calcul.
-- **Tests** : 386 tests, couverture 100 % (lignes, branches, fonctions), cas de référence vérifiés à la main sur le projet d'exemple (T3 65 m², Marseille 5e, 155 000 € FAI) et cas de confiance de Pierre (arrondissement dispersé sans adresse : 41, faible ; 15 ventes proches, resserrées et récentes : 82, élevée) et achat négocié (« 92 K » à −5 %, DMTO sur le prix négocié).
+- **Tests** : 388 tests, couverture 100 % (lignes, branches, fonctions), cas de référence vérifiés à la main sur le projet d'exemple (T3 65 m², Marseille 5e, 155 000 € FAI) et cas de confiance de Pierre (arrondissement dispersé sans adresse : 41, faible ; 15 ventes proches, resserrées et récentes : 82, élevée) et achat négocié (« 92 K » à −5 %, DMTO sur le prix négocié).
 
 Modules : `financement` (frais d'acquisition par formule, PMT, amortissement avec différés, TAEG, HCSF, IRA), `location` (cinq types d'exploitation : loyer mensuel équivalent, valeurs de départ par type), `cashflow` (recettes et charges par type), `fiscalite` (micro-BIC, LMNP réel, micro-foncier, nu réel), `revente` (plus-value, abattements, surtaxe, réintégration LMNP), `rendement` (brut/net/net-net, TRI, enrichissement), `verdict`, `scenarios`.
 
