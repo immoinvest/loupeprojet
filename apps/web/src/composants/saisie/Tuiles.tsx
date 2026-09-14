@@ -20,9 +20,9 @@ export interface PropsTuiles<V extends string> {
   readonly onChange: (valeur: V | '') => void;
   readonly effacable?: boolean;
   /** Id de l'élément qui nomme le groupe ; à défaut, `libelle` sert de nom accessible. */
-  readonly idLibelle?: string;
-  readonly libelle?: string;
-  readonly decritPar?: string;
+  readonly idLibelle?: string | undefined;
+  readonly libelle?: string | undefined;
+  readonly decritPar?: string | undefined;
 }
 
 /**

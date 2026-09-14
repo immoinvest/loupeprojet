@@ -8,7 +8,7 @@ import { bornesAtteintes, lireEntier, valeurApresPas, type BornesCompteur } from
 export interface PropsCompteur extends BornesCompteur {
   /** Id de la saisie : le libellé du champ la nomme par `htmlFor`. */
   readonly id: string;
-  readonly nom?: string;
+  readonly nom?: string | undefined;
   /** `''` : inconnu. */
   readonly valeur: string;
   readonly onChange: (valeur: string) => void;
@@ -16,8 +16,8 @@ export interface PropsCompteur extends BornesCompteur {
   readonly nomMoins: string;
   readonly nomPlus: string;
   /** Texte affiché à côté d'une valeur (« RDC » à 0) ; rien si `undefined`. */
-  readonly suffixe?: (valeur: number) => string | undefined;
-  readonly decritPar?: string;
+  readonly suffixe?: ((valeur: number) => string | undefined) | undefined;
+  readonly decritPar?: string | undefined;
   readonly invalide?: boolean;
 }
 

@@ -7,15 +7,15 @@ import { formaterMontant, nettoyerMontant, positionApres, significatifsAvant } f
 export interface PropsChampMontant {
   /** Id de la saisie : le libellé du champ la nomme par `htmlFor`. */
   readonly id: string;
-  readonly nom?: string;
+  readonly nom?: string | undefined;
   /** La chaîne brute gardée par l'appelant : « 155000 », « 32,5 », `''`. */
   readonly valeur: string;
   readonly onChange: (brut: string) => void;
   /** « € », « m² », « €/mois » : affiché à droite de la saisie. */
-  readonly unite?: string;
+  readonly unite?: string | undefined;
   /** Chiffres après la virgule acceptés (défaut 0). */
   readonly decimales?: number;
-  readonly decritPar?: string;
+  readonly decritPar?: string | undefined;
   readonly invalide?: boolean;
 }
 

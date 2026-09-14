@@ -19,7 +19,7 @@ export interface PropsEchelleEnergie {
   readonly onChange: (valeur: LettreEnergie | '') => void;
   /** Id de l'élément qui nomme l'échelle (« DPE »). */
   readonly idLibelle: string;
-  readonly decritPar?: string;
+  readonly decritPar?: string | undefined;
 }
 
 /**
