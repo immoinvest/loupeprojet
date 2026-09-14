@@ -70,7 +70,7 @@ describe('Rapport : autofinancement au centre', () => {
     const utilisateur = userEvent.setup();
     const c = carte("Est-ce que ça s'autofinance ?");
     const icones = within(c).getAllByRole('button', { name: /^Explication : / });
-    expect(icones.map((b) => b.getAttribute('aria-label'))).toEqual([
+    expect(icones.map((b) => b.textContent)).toEqual([
       "Explication : Est-ce que ça s'autofinance ?",
       'Explication : Part du loyer prise par le crédit',
       "Explication : Effort d'épargne",
