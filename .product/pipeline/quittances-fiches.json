@@ -1,0 +1,41 @@
+{
+  "feature_slug": "quittances-fiches",
+  "title": "Quittances et fiches (G1b) : paiement partiel, quittance et reçu figés, page Loyers, fiche bien, fin de location, export des données",
+  "started_at": "2026-09-14T17:40:00Z",
+  "current_step": "implement",
+  "scope": "packages/gestion, apps/comptes (src/gestion, migration 0003), apps/web (gestion/, ecrans/gerer, Compte)",
+  "branch": "feat/quittances-fiches",
+  "worktree": "C:\\Users\\errei\\Claude\\loupe-gestion",
+  "base": "master (ca1d257)",
+  "consigne": "Pierre, 14/09/2026 : « allons-y pour la prochaine étape ; la connexion au compte bancaire peut être faite plus tard (validation manuelle pour le moment) » ; auto-validation des étapes",
+  "baseline": { "status": "en_cours" },
+  "steps": {
+    "discovery": {
+      "status": "completed",
+      "output": ".product/features/quittances-fiches-discovery.md"
+    },
+    "specs": {
+      "status": "completed",
+      "output": ".product/specs/quittances-fiches-specs.md",
+      "stories_count": 7
+    },
+    "architecture": {
+      "status": "completed",
+      "output": ".product/architecture/quittances-fiches.md"
+    },
+    "implement": {
+      "status": "in_progress",
+      "stories_completed": 0,
+      "stories_total": 7,
+      "commits": []
+    },
+    "qa_tests": { "status": "pending" },
+    "security": { "status": "pending" },
+    "push": { "status": "pending" }
+  },
+  "auto_revue": {
+    "specs": "sept stories (cinq P0, deux P1 détachables en G1c) ; « En partie » bouton de ligne (deux clics) ; un reçu par paiement partiel (art. 21) ; annulation bloquée après émission",
+    "architecture": "ADR-G8 à G12 : contenu figé, émission idempotente par clé, numéro déterministe, somme ≤ dû par insertion conditionnelle, PDF par impression ; gestion_paiement recréée (contrainte unique de table) ; dépôt découpé en trois fichiers",
+    "discovery": "G1b avant G2 (il faut produire la quittance avant de l'envoyer) ; colocation, APL, modification du loyer et suppression d'un bien en G1c ; PDF par impression du navigateur ; règles vérifiées sur Légifrance (art. 21 et 25-17)"
+  }
+}
