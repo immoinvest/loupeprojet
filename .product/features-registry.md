@@ -18,6 +18,10 @@ Chaîne serveur (session principale) : à choisir avec Pierre (synchronisation d
 
 Parallélisables : plus aucune fiche en attente (`extension` et `garder` sont livrées).
 
+Idées à spécifier avant implémentation : `.product/backlog/` (11 fiches notées le 14/09/2026 — hypothèses, achat, location, revente, visite, estimation, rapport, coque, simulateur de prêt).
+
+- [ ] simulateur-pret — **spécifiée, prête à implémenter** (discovery, specs 8 stories, architecture, `pipeline/simulateur-pret.json`) : page `/simulateur-pret` hors projet, deux offres de banque côte à côte, comparaison critère par critère, tableaux d'amortissement par année et par mois, CSV téléchargeable, impression, lien `#s=` — 2026-09-14 — `packages/moteur/src/pret`, `apps/web/src/{simulateur,ecrans/SimulateurPret.tsx,ecrans/simulateur}`
+
 ## Livrées (mergées sur `master`)
 
 - [x] estimation-prix — estimation du prix du bien, sans modèle de langage : ventes DVF ramenées au dernier semestre publié par la tendance locale (médiane par semestre sur cinq ans, commune ou département), position selon l'état (à rénover = premier quartile, rénové = troisième), corrections sourcées et désactivables (DPE Notaires de France, étage et ascenseur, balcon ou terrasse MeilleursAgents, charges comparées au repère ARC), fourchette et confiance, feu prix comparé à l'estimation ; onglet « Estimation », Rapport, Méthode, champs État et Balcon ou terrasse (Hypothèses, Vérifier, lecture de l'annonce par règles et par l'IA) — 2026-09-14 — `data/src/sources/dvf/tendance.ts`, `apps/worker/src/adresse/tendance.ts`, `packages/moteur/src/estimation`, `apps/web/src/{ecrans/adresse,textes/estimation.ts,textes/methode-estimation.ts}` — PR #26 (Worker 0.5.0 déployé, DVF du 13 republié avec la tendance, vérifié en production)

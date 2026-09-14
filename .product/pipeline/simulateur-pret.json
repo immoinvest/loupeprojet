@@ -1,0 +1,44 @@
+{
+  "feature_slug": "simulateur-pret",
+  "title": "Simulateur de prêt : deux offres côte à côte, comparaison, tableaux d'amortissement à télécharger (CSV) et à imprimer, lien",
+  "started_at": "2026-09-14T12:00:00Z",
+  "current_step": "implement",
+  "scope": "packages/moteur/src/pret/, apps/web/src/{simulateur,ecrans/SimulateurPret.tsx,ecrans/SimulateurImprimer.tsx,ecrans/simulateur,textes/simulateur.ts,stockage/base64url.ts}, coque/Sidebar.tsx (Outils), App.tsx (routes), Méthode, e2e, docs",
+  "branch": "feat/simulateur-pret (à créer depuis master)",
+  "base": "master",
+  "steps": {
+    "discovery": {
+      "status": "completed",
+      "output": ".product/features/simulateur-pret-discovery.md",
+      "note": "auto-validée avec revue critique (moteur plutôt que web, CSV plutôt que XLSX, impression navigateur, recalcul immédiat, frais bancaires comptant par défaut)"
+    },
+    "specs": {
+      "status": "completed",
+      "output": ".product/specs/simulateur-pret-specs.md",
+      "note": "8 stories : US-1 à US-6 Must, US-7 et US-8 Should ; effort XL ; cas de référence à la main (0 %, 12 % sur un an) et cohérence avec calculerFinancement"
+    },
+    "architecture": {
+      "status": "completed",
+      "output": ".product/architecture/simulateur-pret.md",
+      "note": "ADR-S1 à S6 ; 5 fichiers moteur, 17 fichiers web, 12 fichiers de tests, 1 e2e ; ordre d'implémentation en 9 étapes"
+    },
+    "implement": { "status": "pending", "stories_completed": 0, "stories_total": 8 },
+    "refactor": { "status": "pending" },
+    "qa_tests": { "status": "pending" },
+    "security": { "status": "pending" },
+    "push": { "status": "pending" }
+  },
+  "decisions": {
+    "moteur": "simulerPret dans packages/moteur/src/pret/ réutilise tableauAmortissement, taeg, echeancier ; test de cohérence au centime avec calculerFinancement sur projetExemple",
+    "frais_bancaires": "payés comptant par défaut (Excel, offres réelles), case « financés par le prêt » pour retrouver un projet Deklic ; TAEG les compte dans les deux cas",
+    "csv": "UTF-8 BOM, séparateur ;, virgule décimale, CRLF, une ligne par mois + totaux ; pas de XLSX",
+    "impression": "page hors coque en ModeDocument, années sur papier, mois dans le CSV ; pas de jsPDF",
+    "etat": "fragment #s= (Zod, bornes) + stockage local loupe.simulateur.v1 ; jamais de serveur ; history.replaceState",
+    "endettement": "mensualité totale ÷ revenus nets, nommé « taux d'endettement », distinct de l'effort HCSF ; seuil des règles pour la pastille"
+  },
+  "questions_ouvertes_pour_pierre": [
+    "CSV suffit-il (s'ouvre dans Excel) ou faut-il un vrai .xlsx ?",
+    "Frais bancaires payés comptant par défaut : d'accord ?",
+    "Rubrique « Outils » dans la barre latérale : d'accord avec ce nom ?"
+  ]
+}
