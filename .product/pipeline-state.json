@@ -2,7 +2,7 @@
   "feature_slug": "marche-complet",
   "title": "Marché complet : DPE ADEME retrouvé par l'adresse, risques Géorisques, loyer ANIL de référence et loyer visé proposé, ventes des communes voisines dans les cercles, actualisation par l'onglet Estimation",
   "started_at": "2026-09-14T00:00:00Z",
-  "current_step": "implement",
+  "current_step": "done",
   "scope": "apps/worker/src/{services/dpe.ts,services/risques.ts,adresse/voisines.ts,adresse/route.ts}, apps/web/src/{enrichissement,ecrans/adresse,ecrans/FormulaireProjet.tsx,textes}",
   "branch": "feat/marche-complet",
   "base": "master (7cc72aa)",
@@ -22,9 +22,15 @@
       "stories_total": 5,
       "commits": ["61e4e92 worker US-1/US-2", "bade365 worker US-3"]
     },
-    "qa_tests": { "status": "pending" },
-    "security": { "status": "pending" },
-    "push": { "status": "pending" }
+    "qa_tests": {
+      "status": "completed",
+      "note": "893 tests : services DPE et risques sur réponses réelles abrégées, niveaux Géorisques, étage lu dans le complément (formats relevés à Marseille et Paris), communes voisines (arrondissements, pannes, cache), route avec commune voisine, classement des DPE, risques, loyer, cartes de l'onglet Estimation, bouton « Estimer le loyer »"
+    },
+    "security": {
+      "status": "completed",
+      "note": "aucun modèle de langage ; trois services publics gratuits appelés depuis le Worker seulement, paramètres validés par Zod, réponses amont validées, cache KV, limite de débit générale ; lien Géorisques ouvert avec rel=noopener"
+    },
+    "push": { "status": "done", "pr": 30, "correctif": 32 }
   },
   "decisions": {
     "sources": "ADEME dpe03existant (geo_distance 30 m), Géorisques resultats_rapport_risque, API Géo communes, ANIL déjà sur R2 ; toutes vérifiées en direct le 14/09/2026",
