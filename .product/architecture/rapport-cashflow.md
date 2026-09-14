@@ -34,36 +34,50 @@ export function Info({ sujet, texte }: { sujet: string; texte: string }): JSX.El
 export function decalageBulle(gaucheBouton: number, largeurEcran: number): number;
 
 // composants/ui.tsx
-export function TitreCarte({ children, info, action }: { children: ReactNode; info?: ReactNode; action?: ReactNode }): JSX.Element;
+export function TitreCarte({
+  children,
+  info,
+  action,
+}: {
+  children: ReactNode;
+  info?: ReactNode;
+  action?: ReactNode;
+}): JSX.Element;
 export type Volet = 'adresse' | 'hypotheses' | 'fiscalite' | 'revente' | 'visite';
-export function LienOnglet({ vers, children }: { vers: Volet; children: ReactNode }): JSX.Element | null;
+export function LienOnglet({
+  vers,
+  children,
+}: {
+  vers: Volet;
+  children: ReactNode;
+}): JSX.Element | null;
 
 // analyses/rapport.ts
 export interface CascadeAutofinancement {
-  readonly loyer: number;            // loyers bruts ÷ 12 (recettes brutes en courte durée)
-  readonly credit: number;           // mensualité assurance comprise
-  readonly apresCredit: number;      // loyer − crédit
-  readonly charges: number;          // charges d'exploitation ÷ 12
-  readonly vacance: number;          // perte de vacance ÷ 12 (0 en courte durée)
+  readonly loyer: number; // loyers bruts ÷ 12 (recettes brutes en courte durée)
+  readonly credit: number; // mensualité assurance comprise
+  readonly apresCredit: number; // loyer − crédit
+  readonly charges: number; // charges d'exploitation ÷ 12
+  readonly vacance: number; // perte de vacance ÷ 12 (0 en courte durée)
   readonly fraisCourteDuree: number; // (ménage + conciergerie) ÷ 12, 0 sinon
-  readonly apresCharges: number;     // = r.cashflow.mensuel (reste chaque mois, avant impôt)
-  readonly impot: number;            // impôt total du régime retenu ÷ années ÷ 12
-  readonly apresImpot: number;       // apresCharges − impot
+  readonly apresCharges: number; // = r.cashflow.mensuel (reste chaque mois, avant impôt)
+  readonly impot: number; // impôt total du régime retenu ÷ années ÷ 12
+  readonly apresImpot: number; // apresCharges − impot
 }
 export function cascadeAutofinancement(r: Resultats): CascadeAutofinancement;
 export function multipleSurApport(r: Resultats): number | null; // enrichissement.total ÷ miseDeDepart ; null si mise ≤ 0
 
 // textes/explications.ts
-export const EXPLICATIONS: { prix, cashflow, fiscalite, revente, leviers }; // inchangé, résumés de la page Méthode
-export function explicationPrix(r: Resultats): string;            // avec ou sans DVF, avec ou sans estimation
+export const EXPLICATIONS: { prix; cashflow; fiscalite; revente; leviers }; // inchangé, résumés de la page Méthode
+export function explicationPrix(r: Resultats): string; // avec ou sans DVF, avec ou sans estimation
 export function explicationAutofinancement(r: Resultats): string; // cascade chiffrée, régime et période
-export function explicationCouverture(r: Resultats): string;      // mensualité, part du loyer ; sans loyer : phrase de repli
-export function explicationEffort(r: Resultats): string;          // effort d'épargne ou excédent, par mois et par an
-export function explicationPointMort(r: Resultats): string;       // loyer d'équilibre vs loyer visé ; courte durée : repli
+export function explicationCouverture(r: Resultats): string; // mensualité, part du loyer ; sans loyer : phrase de repli
+export function explicationEffort(r: Resultats): string; // effort d'épargne ou excédent, par mois et par an
+export function explicationPointMort(r: Resultats): string; // loyer d'équilibre vs loyer visé ; courte durée : repli
 export function explicationRendement(r: Resultats, quel: 'brut' | 'net' | 'netNet'): string;
-export function explicationFiscalite(r: Resultats): string;       // impôt du régime retenu, le moins cher des autres
-export function explicationRevente(r: Resultats): string;         // valeur, frais, CRD, IRA, impôt de plus-value, net vendeur
-export function explicationMultiple(r: Resultats): string;        // gain ÷ mise ; sans mise : repli
+export function explicationFiscalite(r: Resultats): string; // impôt du régime retenu, le moins cher des autres
+export function explicationRevente(r: Resultats): string; // valeur, frais, CRD, IRA, impôt de plus-value, net vendeur
+export function explicationMultiple(r: Resultats): string; // gain ÷ mise ; sans mise : repli
 ```
 
 ## Composant Info
