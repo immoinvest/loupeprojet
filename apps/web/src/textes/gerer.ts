@@ -21,6 +21,11 @@ export function tousMesProjets(nombre: number): string {
   return `Tous mes projets · ${String(nombre)}`;
 }
 
+/** « Mes biens · 4 » dans le menu Gérer ; sans le nombre tant que les biens ne sont pas chargés. */
+export function mesBiens(nombre: number | null): string {
+  return nombre === null ? 'Mes biens' : `Mes biens · ${String(nombre)}`;
+}
+
 /** « 1 loyer en retard », « 3 loyers en retard ». */
 export function loyersEnRetard(nombre: number): string {
   return nombre > 1 ? `${String(nombre)} loyers en retard` : `${String(nombre)} loyer en retard`;

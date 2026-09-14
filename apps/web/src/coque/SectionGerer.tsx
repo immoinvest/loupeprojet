@@ -6,14 +6,14 @@ import { NavLink } from 'react-router';
 import { useCompte } from '@/compte/CompteContext';
 import { useGestion } from '@/gestion/GestionContext';
 import { retardsDuMois } from '@/gestion/menu';
-import { loyersEnRetard, TEXTES_MENU } from '@/textes/gerer';
+import { loyersEnRetard, mesBiens, TEXTES_MENU } from '@/textes/gerer';
 
 import { CLASSE_ETIQUETTE, classeLien, classeLienCreation } from './liens';
 
 /**
- * Section « Gérer » : ajouter un bien, les loyers du mois (avec les loyers en retard) et tous les
- * loyers, mois par mois. Sans compte, une seule ligne vers la page qui explique pourquoi il en faut un.
- * Les pages Biens, Locataires et Argent y entreront avec leurs features.
+ * Section « Gérer » : ajouter un bien, les loyers du mois (avec les loyers en retard), tous les
+ * loyers mois par mois, et tous les biens. Sans compte, une seule ligne vers la page qui explique
+ * pourquoi il en faut un. Les pages Locataires et Argent y entreront avec leurs features.
  */
 export function SectionGerer(): JSX.Element {
   const { etat } = useCompte();
@@ -44,6 +44,13 @@ export function SectionGerer(): JSX.Element {
           <NavLink to="/gerer/loyers" className={classeLien}>
             <Receipt size={18} aria-hidden="true" />
             {TEXTES_MENU.tousLesLoyers}
+          </NavLink>
+          {/* La fiche d'un bien (/gerer/biens/:id) garde cette entrée active. */}
+          <NavLink to="/gerer/biens" className={classeLien}>
+            <Building2 size={18} aria-hidden="true" />
+            <span className="flex-1 truncate">
+              {mesBiens(donnees === null ? null : donnees.biens.length)}
+            </span>
           </NavLink>
         </>
       ) : (
