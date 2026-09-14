@@ -38,6 +38,10 @@
       "status": "completed",
       "note": "aucun appel réseau, aucune donnée nouvelle, aucun HTML injecté ; liens internes construits à partir d'identifiants de projet déjà validés par Zod ; retour après connexion toujours filtré par cheminDeRetour"
     },
-    "push": { "status": "pending" }
+    "push": {
+      "status": "done",
+      "pr": 67,
+      "note": "1 637 tests unitaires, 21 e2e (accueil, coque, responsive), fusion automatique armée"
+    }
   }
 }
