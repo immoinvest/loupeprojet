@@ -1,5 +1,6 @@
 import { expect, type Browser, type BrowserContext, type Page } from '@playwright/test';
 
+import { simulerGestion } from './reponses-gestion';
 import { ADRESSE_SIMULEE, simulerWorker } from './reponses-worker';
 
 /** Un format d'écran de la spec (largeur × hauteur, en px CSS). */
@@ -131,69 +132,7 @@ async function simulerSession(page: Page): Promise<void> {
   );
 }
 
-/**
- * Les biens de la maquette de Gérer : Julie a payé le loyer du mois en cours, Antoine pas encore.
- * Le mois vient de l'horloge du test : les loyers du mois se calculent à partir d'aujourd'hui.
- */
-async function simulerGestion(page: Page): Promise<void> {
-  const creeLe = '2026-09-01T08:00:00.000Z';
-  const aujourdhui = new Date().toISOString().slice(0, 10);
-  const bien = {
-    adresse: '12 rue des Lices, Marseille 5e',
-    type: 'appartement',
-    surface: 38,
-    meuble: true,
-    creeLe,
-    modifieLe: creeLe,
-  };
-  const location = { type: 'meublee', debut: '2025-10-01', jourLoyer: 5, charges: 5_000, creeLe };
-  await page.route('**/api/gestion/etat', (route) =>
-    route.fulfill({
-      json: {
-        biens: [
-          { ...bien, id: 'bien-lices', nom: 'T2 Lices' },
-          { ...bien, id: 'bien-baille', nom: 'Studio Baille', type: 'studio' },
-          { ...bien, id: 'bien-prado', nom: 'Parking Prado', type: 'parking', meuble: false },
-        ],
-        locataires: [
-          { id: 'julie', prenom: 'Julie', nom: 'Martin', creeLe },
-          { id: 'antoine', prenom: 'Antoine', nom: 'Dupont', creeLe },
-        ],
-        locations: [
-          {
-            ...location,
-            id: 'location-julie',
-            bienId: 'bien-lices',
-            locataireId: 'julie',
-            loyerHorsCharges: 65_000,
-            depot: 130_000,
-          },
-          {
-            ...location,
-            id: 'location-antoine',
-            bienId: 'bien-baille',
-            locataireId: 'antoine',
-            loyerHorsCharges: 40_000,
-            depot: 80_000,
-          },
-        ],
-        paiements: [
-          {
-            id: 'paiement-julie',
-            locationId: 'location-julie',
-            periode: aujourdhui.slice(0, 7),
-            montant: 70_000,
-            date: aujourdhui,
-            source: 'manuel',
-            creeLe,
-          },
-        ],
-        preferences: { analyser: true, gerer: true },
-      },
-    }),
-  );
-}
-
+/** Une personne connectée qui gère trois biens (voir `reponses-gestion.ts`). */
 async function simulerSessionEtGestion(page: Page): Promise<void> {
   await simulerSession(page);
   await simulerGestion(page);
