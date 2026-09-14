@@ -75,13 +75,15 @@ describe('Menu des petits écrans', () => {
     const { utilisateur, bouton } = await ouvrirMesProjets();
 
     await utilisateur.click(bouton);
-    await utilisateur.click(within(tiroir()).getByRole('link', { name: 'Comparer' }));
-    expect(await screen.findByRole('heading', { level: 1, name: 'Comparer' })).toBeInTheDocument();
+    await utilisateur.click(within(tiroir()).getByRole('link', { name: 'Accueil' }));
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Bienvenue sur Deklic' }),
+    ).toBeInTheDocument();
     expect(bouton).toHaveAttribute('aria-expanded', 'false');
     expect(contenu()).toHaveFocus();
 
     await utilisateur.click(bouton);
-    await utilisateur.click(within(tiroir()).getByRole('link', { name: 'Comparer' }));
+    await utilisateur.click(within(tiroir()).getByRole('link', { name: 'Accueil' }));
     expect(bouton).toHaveAttribute('aria-expanded', 'false');
     expect(contenu()).toHaveFocus();
 
