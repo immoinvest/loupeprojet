@@ -20,6 +20,12 @@ export interface RequeteInterceptee {
 const PREFIXE_CACHE = 'deklic-';
 const CHEMIN_ASSETS = '/assets/';
 
+/**
+ * API des comptes, servie par le worker Pages sur la même origine : jamais par le service worker,
+ * pas même une navigation (retour de Google ou d'Apple), qui remplacerait la coque en cache.
+ */
+const CHEMIN_API = '/api/';
+
 /** Toujours au réseau : le bouton-favori doit rester à jour, le service worker aussi. */
 const JAMAIS_EN_CACHE: ReadonlySet<string> = new Set(['/capture.js', '/sw.js']);
 
@@ -42,8 +48,14 @@ export function strategiePour(requete: RequeteInterceptee, origine: string): Str
   } catch {
     return 'ignorer';
   }
-  // Worker, polices, portails : jamais interceptés.
-  if (url.origin !== origine || JAMAIS_EN_CACHE.has(url.pathname)) return 'ignorer';
+  // Worker d'enrichissement, polices, portails, API des comptes : jamais interceptés.
+  if (
+    url.origin !== origine ||
+    JAMAIS_EN_CACHE.has(url.pathname) ||
+    url.pathname.startsWith(CHEMIN_API)
+  ) {
+    return 'ignorer';
+  }
   if (requete.mode === 'navigate') return 'navigation';
   if (url.pathname.startsWith(CHEMIN_ASSETS)) return 'cache-d-abord';
   return FICHIERS_FIXES.includes(url.pathname) ? 'reseau-d-abord' : 'ignorer';

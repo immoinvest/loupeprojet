@@ -63,6 +63,15 @@ describe('strategiePour', () => {
   });
 });
 
+describe('strategiePour et l’API des comptes', () => {
+  it('laisse passer l’API des comptes, même en navigation (retour de Google ou d’Apple)', () => {
+    expect(
+      strategiePour(requete('/api/auth/callback/google?code=x', { mode: 'navigate' }), ORIGINE),
+    ).toBe('ignorer');
+    expect(strategiePour(requete('/api/auth/get-session'), ORIGINE)).toBe('ignorer');
+  });
+});
+
 describe('fichiersDeLaCoque', () => {
   it('relève scripts et styles construits, sans doublon', () => {
     const html = `<!doctype html><html><head>
