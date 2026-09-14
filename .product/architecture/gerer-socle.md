@@ -193,3 +193,47 @@ Sidebar : sectionsAffichees(etat compte, preferences) → SectionAnalyser ? Sect
 - **Point faible : conflit probable avec `feat/coque-fixe`.** Parade : sections extraites dans leurs fichiers ; `Sidebar.tsx` ne garde que l'assemblage ; fusion de `master` juste avant la PR.
 - **Changement suite à la revue** : le dépôt mémoire côté serveur est abandonné (prévu au départ) au profit de la seule D1 simulée ; il aurait masqué les erreurs SQL et la cascade des clés étrangères.
 - **Changement suite à la revue** : « Loyers », « Biens », « Locataires », « Argent » n'apparaissent pas encore dans le menu : des liens vers des pages vides contrediraient « très clean ». Ils arrivent avec leurs pages.
+
+## 10. Écarts au plan et trouvailles d'implémentation
+
+- **`occupationDe` ajouté à `@loupe/gestion`** (US-2) : la règle « un locataire va avec une location » était recopiée dans le dépôt D1 et le client mémoire, avec une branche jamais atteinte ; une seule fonction, testée avec une création incohérente.
+- **D1 simulée déplacée dans `scripts/d1-sqlite.ts`** (partagée par les tests et le serveur Node) et **`batch` rendu atomique** comme dans D1 ; un test prouve qu'une création qui échoue au deuxième ordre n'écrit rien.
+- **Régression évitée dans le banc de test des comptes** : l'option `origine` écrasait l'en-tête `Origin` qu'un test CSRF existant fournit lui-même ; les en-têtes du test l'emportent désormais.
+- **Textes découpés par écran** : `textes/gerer.ts` (menu, erreurs), `gerer-ecrans.ts` (accueil), `gerer-saisie.ts` (ajout à la main), `gerer-pret.ts` (porte achat), tous couverts à 100 %. `ChampGerer` sert aux deux formulaires.
+- **Carte « Mon menu » au vouvoiement** (comme le reste de la page Mon compte) ; écrans de Gérer au tutoiement (comme l'analyse).
+- **Fautes trouvées par les tests** : accord de « loyer » sur le nombre reçu (« 1 loyer sur 4 reçu ») et élision (« d'Antoine », « d'Hugo »).
+- **Défaut trouvé en relisant US-6** : un bien dont le locataire entre le mois suivant était annoncé « Sans locataire ». Un bien est vacant sans location en cours ni à venir ; l'accueil affiche « Entrée à venir : … le 1er octobre 2026 ».
+- **Statut de projet « Acheté »** ajouté à `stockage/projets.ts` ; les projets achetés ne sont plus proposés par la porte de l'accueil et n'affichent plus « J'ai acheté ce bien ».
+- **Machine chargée** (dizaine de sessions parallèles, 58 processus Node) : des suites ne démarraient pas (« Timeout calling fetch » pendant la transformation des modules). Les tests ciblés tournent avec `--maxWorkers=1` ; ce n'étaient pas des échecs du code.
+- **Spec « formats » (e2e)** : écrans de Gérer ajoutés en fin de feature, avec session et état simulés.
+
+## 11. Audit de sécurité (14/09/2026)
+
+Périmètre : `packages/gestion`, `apps/comptes/src/gestion`, migration `0002`, `apps/web/src/gestion`, écrans `ecrans/gerer`, `ecrans/compte/MonMenu.tsx`, sections du menu.
+
+| Catégorie              | Constat                                                                                                                                                                                                                    | Score |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| Auth et autorisation   | Chaque route `/api/gestion/*` exige une session (401) ; chaque requête SQL filtre par `userId` ; une ressource d'un autre compte rend 404 (tests d'accès croisé entre deux comptes)                                        | 25/25 |
+| Injection              | Toutes les requêtes sont préparées avec des paramètres liés ; aucun nom de table ni fragment SQL construit depuis une entrée ; identifiants de chemin encodés côté client                                                  | 20/20 |
+| Validation des entrées | Zod sur chaque corps (longueurs, entiers, dates réelles, au moins une section du menu) ; corps limité à 64 Ko (413) ; **corrigé** : bornes métier et anti-abus (voir ci-dessous)                                           | 20/20 |
+| Données et journaux    | Journaux sans nom, e-mail ni montant (tests) ; locataire minimal (prénom, nom, e-mail facultatif) ; suppression en cascade avec le compte (test) ; réponses `no-store` ; rien de la gestion en mémoire locale sauf le menu | 12/15 |
+| Configuration          | Écritures : hôte et en-tête `Origin` connus en plus du cookie `SameSite=Lax` (CSRF) ; base non migrée : 503 sans casser le site ; aucun secret ajouté                                                                      | 10/10 |
+| IA / modèle de langage | Aucun usage dans la feature                                                                                                                                                                                                | 10/10 |
+
+**Score : 97/100 (A).**
+
+### Vulnérabilité trouvée et corrigée
+
+- **Moyenne, confiance 0,8 — écritures sans borne** (`apps/comptes/src/gestion/depot-d1.ts`). Un compte connecté pouvait créer des biens sans limite et marquer « reçus » des loyers sur n'importe quel mois, jusqu'à épuiser le quota d'écritures de la base D1 partagée par tous les comptes. Correctif `b04d620` : 409 `LIMITE_ATTEINTE` au-delà de 200 biens par compte ; 400 `HORS_LOCATION` pour une période avant l'entrée, après la sortie ou plus d'un an à l'avance (règle métier aussi). Vérifié : 89 tests des comptes, couverture 100 %. Traduction des deux codes côté web : commit séparé.
+
+### Reste ouvert
+
+- **Faible, confiance 0,8 — pas encore d'export des données de gestion** (droit à la portabilité) : prévu en G1b avec les fiches ; la suppression, elle, fonctionne (cascade testée). −3.
+
+### Faux positifs écartés
+
+| Motif détecté                                   | Raison                                                                                         |
+| ----------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| Instantané du projet en JSON libre (`z.record`) | Borné par la limite de 64 Ko, relu seulement par son propriétaire, jamais injecté dans le HTML |
+| `compter()` interpole un nom de table           | Aide de test uniquement, noms constants                                                        |
+| Lecture sans en-tête `Origin` acceptée          | Voulu : navigation et service worker ; les lectures n'ont pas d'effet et exigent la session    |

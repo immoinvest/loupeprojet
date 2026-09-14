@@ -26,7 +26,7 @@
     "architecture": { "status": "completed", "output": ".product/architecture/gerer-socle.md" },
     "implement": {
       "status": "in_progress",
-      "stories_completed": 5,
+      "stories_completed": 6,
       "stories_total": 6,
       "commits": [
         "fb84c35 docs",
@@ -35,9 +35,11 @@
         "2751993 US-3 menu à deux sections et Mon menu (suite web complète : 333 tests verts, src/gestion 100 %)",
         "bb8fa1f US-4 accueil de Gérer, loyers du mois, Reçu puis Annuler (13 tests, textes 100 %)",
         "4995011 US-5 Ajouter à la main (29 tests dont le parcours à 2 clics, saisie 100 %)",
-        "b04d620 fix(security) bornes de l'API : 200 biens par compte, loyer reçu seulement dans la location (89 tests comptes, 100 %)"
+        "b04d620 fix(security) bornes de l'API : 200 biens par compte, loyer reçu seulement dans la location (89 tests comptes, 100 %)",
+        "92eac0f US-6 J'ai acheté ce bien (40 tests, depuis-projet et textes 100 %)",
+        "66fcaa3 fix(security) web : traduction de HORS_LOCATION et LIMITE_ATTEINTE"
       ],
-      "en_cours": "US-6 J'ai acheté ce bien : 39 tests sur 40 au premier contrôle ; test corrigé, revérification avec la traduction web des codes HORS_LOCATION et LIMITE_ATTEINTE",
+      "en_cours": "écrans de Gérer dans la spec e2e des formats (sans compte, loyers du mois, ajouter, prêt) ; puis fusion de master (coque fixe : menu en trois zones, en-tête collé, déconnexion visible)",
       "incidents": [
         "suites qui ne démarrent pas (Timeout calling fetch) sous la charge de 58 processus Node : relance avec --maxWorkers=1",
         "accord de « loyer » corrigé (suit le nombre reçu), élision « d’Antoine » ajoutée",
@@ -48,7 +50,13 @@
       ]
     },
     "qa_tests": { "status": "pending" },
-    "security": { "status": "pending" },
+    "security": {
+      "status": "completed",
+      "score": 97,
+      "rapport": ".product/architecture/gerer-socle.md, section 11",
+      "corrige": "écritures sans borne (b04d620, 66fcaa3)",
+      "ouvert": "export des données de gestion, prévu en G1b"
+    },
     "push": { "status": "pending" }
   },
   "auto_revue": {
