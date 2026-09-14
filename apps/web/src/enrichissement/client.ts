@@ -6,10 +6,12 @@ import {
   ReponseDpeSchema,
   ReponseExtractionSchema,
   ReponseGeocodageSchema,
+  ReponseLectureSchema,
   ReponseMarcheSchema,
   ReponseRisquesSchema,
   type ChampsIa,
   type DpeAdresse,
+  type PageLue,
   type ReponseAdresse,
   type ReponseMarche,
   type ReponseRisques,
@@ -49,6 +51,8 @@ export interface ClientWorker {
   analyserAdresse(parametres: ParametresAdresse): Promise<Resultat<ReponseAdresse>>;
   dpe(position: Position): Promise<Resultat<readonly DpeAdresse[]>>;
   risques(position: Position): Promise<Resultat<ReponseRisques>>;
+  /** La page d'une annonce, lue par le Worker ; `signal` permet d'abandonner l'attente. */
+  lirePage(url: string, signal?: AbortSignal): Promise<Resultat<PageLue>>;
 }
 
 export type Fetch = (url: string, init: RequestInit) => Promise<Response>;
@@ -67,6 +71,22 @@ export const DELAI_EXTRACTION_MS = 30_000;
 export const DELAI_DONNEES_MS = 10_000;
 /** Lecture du CSV de la commune et deux appels au cadastre : un peu plus long. */
 export const DELAI_ADRESSE_MS = 20_000;
+/** Le Worker fait jusqu'à deux lectures de 70 s chacune (SeLoger a mis 74 s le 14/09/2026). */
+export const DELAI_LECTURE_PAGE_MS = 160_000;
+
+/** Le délai de la requête, et l'abandon demandé par l'écran s'il y en a un : le premier des deux l'emporte. */
+export function signalDeRequete(delaiMs: number, externe?: AbortSignal): AbortSignal {
+  const delai = AbortSignal.timeout(delaiMs);
+  if (externe === undefined) return delai;
+  const controleur = new AbortController();
+  const interrompre = (): void => {
+    controleur.abort();
+  };
+  if (externe.aborted) interrompre();
+  externe.addEventListener('abort', interrompre, { once: true });
+  delai.addEventListener('abort', interrompre, { once: true });
+  return controleur.signal;
+}
 
 /** Adresse du Worker : `VITE_WORKER_URL` si elle est valable, la production sinon. */
 export function urlWorker(valeur: unknown): string {
@@ -81,10 +101,11 @@ async function appeler<T>(
   init: RequestInit,
   schema: z.ZodType<T>,
   delaiMs: number,
+  signal?: AbortSignal,
 ): Promise<Resultat<T>> {
   let reponse: Response;
   try {
-    reponse = await fetcher(url, { ...init, signal: AbortSignal.timeout(delaiMs) });
+    reponse = await fetcher(url, { ...init, signal: signalDeRequete(delaiMs, signal) });
   } catch {
     return { ok: false, code: 'RESEAU' };
   }
@@ -193,6 +214,20 @@ export function clientWorker(base: string, fetcher: Fetch): ClientWorker {
       );
       return r.ok ? { ok: true, valeur: r.valeur.donnees } : r;
     },
+    lirePage(url, signal) {
+      return appeler(
+        fetcher,
+        `${base}/lecture`,
+        {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ url }),
+        },
+        ReponseLectureSchema,
+        DELAI_LECTURE_PAGE_MS,
+        signal,
+      );
+    },
   };
 }
 
@@ -206,4 +241,5 @@ export const clientHorsLigne: ClientWorker = {
   analyserAdresse: () => horsLigne(),
   dpe: () => horsLigne(),
   risques: () => horsLigne(),
+  lirePage: () => horsLigne(),
 };

@@ -1,5 +1,5 @@
 {
-  "version": "pap-2026-09-13",
+  "version": "pap-2026-09-14",
   "portail": "pap",
   "champs": {
     "prix": [
@@ -89,6 +89,33 @@
         "chemin": "address.streetAddress",
         "typeLd": "Product",
         "type": "texte"
+      }
+    ],
+    "photos": [{ "source": "jsonld", "chemin": "image", "typeLd": "Product", "type": "urls" }],
+    "ascenseur": [
+      {
+        "source": "jsonld",
+        "chemin": "additionalProperty[name=Ascenseur].value",
+        "typeLd": "Product",
+        "type": "booleen"
+      }
+    ],
+    "balcon": [
+      {
+        "source": "jsonld",
+        "chemin": "additionalProperty[name=Balcon / Terrasse].value",
+        "typeLd": "Product",
+        "type": "booleen"
+      }
+    ],
+    "vendeur": [
+      {
+        "source": "jsonld",
+        "chemin": "offers.seller.name",
+        "typeLd": "Product",
+        "regex": "^particulier",
+        "type": "texte",
+        "valeur": "particulier"
       }
     ],
     "dpe": [{ "source": "css", "selecteur": ".energy-indice li.active", "type": "classe" }],

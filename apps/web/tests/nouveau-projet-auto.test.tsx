@@ -91,6 +91,7 @@ describe('Nouveau projet — coller le lien suffit (extension installée)', () =
       expect(screen.getByLabelText(/Taxe foncière/)).toHaveValue('1050');
 
       await utilisateur.type(screen.getByLabelText(/Loyer visé/), '980');
+      await utilisateur.clear(screen.getByLabelText(/^Apport/));
       await utilisateur.type(screen.getByLabelText(/^Apport/), '15000');
       await utilisateur.click(screen.getByRole('button', { name: /Créer le projet/ }));
 

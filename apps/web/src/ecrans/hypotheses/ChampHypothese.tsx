@@ -33,12 +33,15 @@ export function ChampHypothese({
   erreur,
   badge,
   onChange,
+  aide = d.aide,
 }: {
   descripteur: Descripteur;
   texte: string;
   erreur?: string | undefined;
   badge: BadgeProvenance | null;
   onChange: (texte: string) => void;
+  /** Phrase d'aide sous le champ ; par défaut, celle du descripteur. */
+  aide?: string | undefined;
 }): JSX.Element {
   const bordure = erreur === undefined ? 'border-bordure' : 'border-probleme';
   const aToi = badge?.libelle === 'à toi';
@@ -84,7 +87,7 @@ export function ChampHypothese({
           ))}
         </select>
       )}
-      {d.aide !== undefined && <span className="text-xs text-encre-3">{d.aide}</span>}
+      {aide !== undefined && <span className="text-xs text-encre-3">{aide}</span>}
       {erreur !== undefined && <span className="text-xs text-probleme">{erreur}</span>}
     </label>
   );

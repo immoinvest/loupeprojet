@@ -1,9 +1,9 @@
 import type { ChampPret } from '@/gestion/depuis-projet';
 import { montant } from '@/gestion/format';
 
-/** Textes de la porte « J'ai acheté ce bien » (tutoiement). */
+/** Textes de la porte ouverte par le statut « Acheté » (tutoiement). */
 export const TEXTES_PRET = {
-  jaiAchete: 'J’ai acheté ce bien',
+  gererCeBien: 'Gérer ce bien',
   titre: 'Prêt à gérer',
   leBien: 'Le bien',
   laLocation: 'La location',

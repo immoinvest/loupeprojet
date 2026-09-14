@@ -110,6 +110,7 @@ describe('dépendances depuis l’environnement', () => {
       KV_CACHE: kv,
       LIMITEUR: limiteur,
       LIMITEUR_EXTRACTION: limiteur,
+      LIMITEUR_LECTURE: limiteur,
       DONNEES: r2,
     });
     expect(deps.environnement).toBe('dev');
@@ -123,6 +124,7 @@ describe('dépendances depuis l’environnement', () => {
       KV_CACHE: kv,
       LIMITEUR: limiteur,
       LIMITEUR_EXTRACTION: limiteur,
+      LIMITEUR_LECTURE: limiteur,
       DONNEES: r2,
       ENVIRONNEMENT: 'production',
       ORIGINES_AUTORISEES: 'https://loupe.example',
@@ -137,6 +139,7 @@ describe('dépendances depuis l’environnement', () => {
         KV_CACHE: kv,
         LIMITEUR: limiteur,
         LIMITEUR_EXTRACTION: limiteur,
+        LIMITEUR_LECTURE: limiteur,
         DONNEES: r2,
         ENVIRONNEMENT: 'staging',
       }),
@@ -151,6 +154,7 @@ describe('dépendances depuis l’environnement', () => {
       KV_CACHE: kv,
       LIMITEUR: limiteur,
       LIMITEUR_EXTRACTION: limiteur,
+      LIMITEUR_LECTURE: limiteur,
       DONNEES: r2,
     });
     const url = new URL('https://exemple.test/x');

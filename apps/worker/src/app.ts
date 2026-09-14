@@ -7,10 +7,11 @@ import type { Dependances } from './dependances';
 import { reponseErreur } from './erreurs';
 import { creerExtraction } from './extraction';
 import { limiterDebit } from './http';
+import { creerLecture } from './lecture';
 import { creerMarche } from './marche';
 import { creerProxy } from './proxy/proxy';
 
-export const VERSION_WORKER = '0.9.0';
+export const VERSION_WORKER = '0.10.0';
 
 /** L'application Hono, construite à partir de dépendances injectées (réelles en production, doubles en test). */
 export function creerApp(deps: Dependances): Hono {
@@ -32,6 +33,7 @@ export function creerApp(deps: Dependances): Hono {
       version: VERSION_WORKER,
       environnement: deps.environnement,
       extraction: deps.extracteur === null ? null : deps.extracteur.modele,
+      lecture: deps.lecteurPages === null ? null : deps.lecteurPages.fournisseur,
     }),
   );
 
@@ -45,6 +47,10 @@ export function creerApp(deps: Dependances): Hono {
 
   app.use('/extract', limiterDebit(deps.limiteurExtraction, deps.journal));
   app.post('/extract', creerExtraction(deps));
+
+  // Lecture d'une annonce à la demande de la personne, quand l'extension ne le peut pas (ADR-008).
+  app.use('/lecture', limiterDebit(deps.limiteurLecture, deps.journal));
+  app.post('/lecture', creerLecture(deps));
 
   app.notFound(() => reponseErreur(404, 'INTROUVABLE'));
   app.onError((erreur, c) => {

@@ -77,6 +77,16 @@ describe('detecterExtension', () => {
     });
     expect(await detecterExtension(bruit, 20)).toBe(false);
   });
+
+  it('ne lève pas si la page a disparu pendant l’attente (onglet fermé, fin d’un test)', async () => {
+    const fermee: FenetreDeklic = {
+      ...fenetre(null),
+      removeEventListener: () => {
+        throw new TypeError('fenetre.removeEventListener is not a function');
+      },
+    };
+    expect(await detecterExtension(fermee, 5)).toBe(false);
+  });
 });
 
 describe('lireParExtension', () => {

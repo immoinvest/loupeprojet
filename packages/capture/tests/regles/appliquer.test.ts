@@ -96,6 +96,52 @@ describe('appliquerRegles', () => {
     expect(appliquerRegles(page('<p>La maquette a changé.</p>'), REGLES)).toEqual({});
   });
 
+  it('lit photos, caractéristiques en tableau et dates dans l’état applicatif', () => {
+    const regles = ReglesPortailSchema.parse({
+      version: 'leboncoin-2026-09-14',
+      portail: 'leboncoin',
+      champs: {
+        photos: [{ source: 'json', selecteur: '#etat', chemin: 'ad.images[*].url', type: 'urls' }],
+        cave: [
+          {
+            source: 'json',
+            selecteur: '#etat',
+            chemin: 'ad.attributes[key=specificities].values',
+            regex: '\\bcellar\\b',
+            type: 'booleen',
+            valeur: true,
+          },
+        ],
+        parking: [
+          {
+            source: 'json',
+            selecteur: '#etat',
+            chemin: 'ad.attributes[key=specificities].values',
+            regex: '\\bparking\\b',
+            type: 'booleen',
+            valeur: true,
+          },
+        ],
+        publieeLe: [{ source: 'json', selecteur: '#etat', chemin: 'ad.publication', type: 'date' }],
+      },
+    });
+    const etat = {
+      ad: {
+        images: [{ url: 'https://img.exemple.fr/1.jpg' }, { url: 'http://img.exemple.fr/2.jpg' }],
+        attributes: [{ key: 'specificities', values: ['cellar', 'intercom'] }],
+        publication: '2026-08-28 20:32:49',
+      },
+    };
+    const document = page(
+      `<script id="etat" type="application/json">${JSON.stringify(etat)}</script>`,
+    );
+    expect(appliquerRegles(document, regles)).toEqual({
+      photos: ['https://img.exemple.fr/1.jpg'],
+      cave: true,
+      publieeLe: '2026-08-28',
+    });
+  });
+
   it('tronque la description à la longueur maximale', () => {
     const longue = `<div class="description">${'x'.repeat(LONGUEUR_MAX_DESCRIPTION + 500)}</div>`;
     expect(appliquerRegles(page(longue), REGLES).description).toHaveLength(

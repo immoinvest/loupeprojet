@@ -27,12 +27,14 @@ export function AppLayout(): JSX.Element {
         />
       )}
       <Sidebar ouvert={menu.ouvert} onFermer={menu.fermer} />
-      {/* Téléphone à encoche (viewport-fit=cover) : le contenu reste hors des zones masquées. */}
+      {/* Téléphone à encoche (viewport-fit=cover) : le contenu reste hors des zones masquées.
+          `relative` : les éléments en position absolue (champs `sr-only`) restent dans le contenu qui
+          défile ; sans ancêtre positionné, ils agrandissaient le document et la fenêtre défilait. */}
       <main
         ref={menu.contenuRef}
         tabIndex={-1}
         inert={menu.ouvert}
-        className="min-h-0 min-w-0 flex-1 overflow-y-auto pr-[env(safe-area-inset-right)] pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] print:overflow-visible"
+        className="relative min-h-0 min-w-0 flex-1 overflow-y-auto pr-[env(safe-area-inset-right)] pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] print:overflow-visible"
       >
         <Outlet />
       </main>

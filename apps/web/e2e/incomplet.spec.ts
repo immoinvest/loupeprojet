@@ -34,13 +34,13 @@ test('quatre chiffres suffisent : le rapport dit qu’il manque le loyer et se c
   await page.getByRole('button', { name: 'Appliquer' }).click();
 
   await expect(page.getByRole('heading', { level: 2, name: BANDEAU })).toHaveCount(0);
-  await expect(feux.getByText('Cash-flow −261 €/mois')).toBeVisible();
+  await expect(feux.getByText('Cash-flow −192 €/mois')).toBeVisible();
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(
     'Prix sans repère de marché. Le loyer ne couvre pas tout.',
   );
 
-  // Taxe foncière estimée au m² (560 €) faute de loyer à la création : −261 €/mois, pas −273.
-  // Le loyer saisi dans le bandeau est enregistré.
+  // Apport par défaut : 10 % du coût total (13 500 €). Taxe foncière estimée au m² (560 €) faute de
+  // loyer à la création. Le loyer saisi dans le bandeau est enregistré.
   await page.reload();
-  await expect(feux.getByText('Cash-flow −261 €/mois')).toBeVisible();
+  await expect(feux.getByText('Cash-flow −192 €/mois')).toBeVisible();
 });

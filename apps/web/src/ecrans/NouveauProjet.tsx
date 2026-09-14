@@ -11,6 +11,7 @@ import {
   type CaptureImportee,
   type SaisieProjet,
 } from '@/annonces';
+import { annonceLue } from '@/annonces/fiche';
 import { Chapo, Page, TitrePage } from '@/composants/mise-en-page';
 import { Bouton, Carte, Pastille } from '@/composants/ui';
 import { useClientWorker } from '@/coque/ClientWorker';
@@ -112,9 +113,15 @@ export function NouveauProjet(): JSX.Element {
     const enrichi = await enrichirSaisie(saisie, client);
     const nom = nomDuProjet(saisie);
     const source = construireProjet(saisie, 'a-remplacer', enrichi);
+    // Photos et fiche de l'annonce lue suivent le projet ; rien en saisie manuelle.
+    const annonce =
+      manuel || importee === null
+        ? undefined
+        : annonceLue(importee.photos, importee.fiche ?? {}, new Date().toISOString());
     const enregistre = creer({
       nom,
       source,
+      ...(annonce === undefined ? {} : { annonce }),
       ...(options.visiteFaite
         ? { visite: { faite: true, date: new Date().toISOString(), reponses: {} } }
         : {}),
@@ -169,33 +176,28 @@ export function NouveauProjet(): JSX.Element {
               lecture={auto.lecture}
               lienReconnu={annonce !== null}
               relancer={auto.relancer}
+              lireSansExtension={auto.lireSansExtension}
+              annuler={auto.annuler}
             />
           )}
         </Carte>
       )}
 
+      {/* Une annonce lue (extension, favori ou Deklic) n'a plus besoin de son texte collé. */}
       {!manuel &&
         !lectureEnCours &&
+        importee === null &&
         (etape === 'texte' || etape === 'verifier' || url.trim() !== '') && (
           <Carte>
             <div className="flex flex-col gap-1">
-              <h2 className="m-0 font-display text-[22px] font-semibold">
-                {importee === null ? "Le texte de l'annonce" : 'Il manque quelque chose ?'}
-              </h2>
+              <h2 className="m-0 font-display text-[22px] font-semibold">Le texte de l'annonce</h2>
               <p className="m-0 text-sm text-encre-2">
-                {importee === null ? (
-                  <>
-                    Avec l'
-                    <Link to="/extension" className="font-bold text-accent">
-                      extension Deklic
-                    </Link>
-                    , coller le lien suffit. Sinon : sur l'annonce, tout sélectionner (Ctrl+A),
-                    copier (Ctrl+C), et coller ici.
-                  </>
-                ) : (
-                  'Collez le texte de l’annonce pour compléter ce qui a été lu.'
-                )}{' '}
-                Le texte n'est pas conservé, seulement ce qu'on y lit.
+                Avec l'
+                <Link to="/extension" className="font-bold text-accent">
+                  extension Deklic
+                </Link>
+                , coller le lien suffit. Sinon : sur l'annonce, tout sélectionner (Ctrl+A), copier
+                (Ctrl+C), et coller ici. Le texte n'est pas conservé, seulement ce qu'on y lit.
               </p>
             </div>
             <textarea
