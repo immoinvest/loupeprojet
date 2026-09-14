@@ -1,0 +1,39 @@
+{
+  "feature_slug": "lecture-serveur",
+  "title": "Lire une annonce sans extension : le Worker récupère la page (Bright Data, Bien'ici direct), écran d'attente guidé, données enrichies et photos",
+  "started_at": "2026-09-14T16:40:00Z",
+  "current_step": "discovery",
+  "scope": "apps/worker (POST /lecture), packages/capture (schéma enrichi, types liste), apps/extension/regles, apps/web (client, lecture serveur, attente, fiche du bien)",
+  "branch": "feat/lecture-serveur",
+  "worktree": "C:/Users/errei/Claude/loupe-lecture-serveur",
+  "base": "origin/master (47d9e59)",
+  "steps": {
+    "discovery": {
+      "status": "completed",
+      "output": ".product/features/lecture-serveur-discovery.md",
+      "self_review": "Relu d'un œil critique : (1) le principe 6 et l'ADR-002 sont contredits, c'est la demande explicite de Pierre ; le risque est écrit et un ADR-008 est prévu, pas de décision cachée. (2) Deux demandes dans une feature (lecture serveur + données enrichies) : gardées ensemble parce que les règles enrichies sont ce que la lecture serveur applique, mais les nouveaux calculs sont exclus. (3) Compteur global en KV écarté : 1 000 écritures/jour gratuites. (4) Réponse vide de SeLoger observée deux fois : nouvelle tentative au programme."
+    },
+    "specs": {
+      "status": "completed",
+      "output": ".product/specs/lecture-serveur-specs.md",
+      "stories_count": 7,
+      "self_review": "7 stories, 3 epics (6 Must, 1 Should). Relu : (1) coordonnées GPS et transports retirés (hors discovery, données peu fiables) ; (2) nouveaux champs optionnels sans changer VERSION_CAPTURE : les anciennes captures restent valides, le web ignore les champs inconnus ; (3) honoraires repris seulement à la charge de l'acquéreur, sinon le coût d'acquisition serait faussé ; (4) risque e2e : sans extension, coller un lien lancera /lecture, à neutraliser dans l'architecture."
+    },
+    "architecture": {
+      "status": "completed",
+      "output": ".product/architecture/lecture-serveur.md",
+      "adr": ".product/adr/008-lecture-serveur.md",
+      "self_review": "Relu : (1) le Worker n'importe que @loupe/capture/portails, sinon son typecheck (sans DOM) casse ; (2) pas de cache ni de compteur KV (principe 6, quota d'écritures) ; (3) hook sorti de LectureAuto.tsx pour garder NouveauProjet.tsx et LectureAuto.tsx sous 300 lignes ; (4) e2e : le Worker est injoignable depuis Playwright, la lecture serveur y échoue vite en « reseau » sans toucher la production ; (5) US-6 avant US-4 pour que la création de projet sache déjà garder photos et fiche."
+    },
+    "implement": { "status": "pending" },
+    "refactor": { "status": "pending" },
+    "qa_tests": { "status": "pending" },
+    "security": { "status": "pending" },
+    "push": { "status": "pending" }
+  },
+  "decisions": {
+    "test_prealable": "14/09/2026 : Bright Data passe DataDome (LeBonCoin, SeLoger, Logic-Immo) et Cloudflare (PAP) ; Bien'ici répond sans protection ; règles de l'extension appliquées avec succès au HTML reçu",
+    "cout": "offre gratuite Bright Data 5 000 lectures/mois, compte sans fonds = plafond naturel à 0 €",
+    "decisions_pierre_en_attente": "avis juridique avant ouverture large ; dépôt de fonds Bright Data au-delà du gratuit"
+  }
+}
