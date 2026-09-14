@@ -24,7 +24,7 @@ Statuts : `idée` → `en discussion` → `spécifiée` → `en cours` → `livr
 | 08  | [Simulateur de prêt](08-simulateur-pret.md)                          | Outil indépendant des projets : deux offres côte à côte, comparaison, tableaux d'amortissement en CSV et à imprimer  | spécifiée | —         |
 | 09  | [Estimation : carte et confiance](09-estimation-carte-confiance.md)  | Carte des ventes du quartier, chiffres du repère visibles même sans adresse, indice de confiance expliqué en tête    | idée      | —         |
 | 10  | [Rapport : icônes et cash-flow](10-rapport-icones-cashflow.md)       | Icônes ⓘ avec infobulle, liens vers Estimation / Fiscalité / Revente, autofinancement au centre, rendement brut      | livrée    | —         |
-| 11  | [Coque : menu et en-tête fixes](11-coque-menu-entete-fixes.md)       | Menu fixe et plus étroit, compte visible en bas, onglets du projet collés en haut, seul le contenu défile            | idée      | —         |
+| 11  | [Coque : menu et en-tête fixes](11-coque-menu-entete-fixes.md)       | Menu fixe et plus étroit, compte visible en bas, onglets du projet collés en haut, seul le contenu défile            | livrée    | —         |
 
 ## Ordre suggéré
 
