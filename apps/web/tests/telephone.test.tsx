@@ -1,11 +1,16 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi, type Mock, type MockInstance } from 'vitest';
 
 import { AppEnMemoire } from '@/App';
 import { LONGUEUR_MAX_TEXTE_PARTAGE } from '@/annonces';
+import { creerSuiviInstallation, type FenetreInstallation } from '@/application';
 import { creerProjet, ecrireProjets } from '@/stockage/projets';
-import { TEXTES_PARTAGE_RECU } from '@/textes/application';
+import {
+  TEXTES_CARTE_TELEPHONE,
+  TEXTES_INSTALLATION,
+  TEXTES_PARTAGE_RECU,
+} from '@/textes/application';
 import { TEXTES_PARTAGE_PROJET } from '@/textes/partage';
 
 const LEBONCOIN = 'https://www.leboncoin.fr/ad/ventes_immobilieres/2214738851';
@@ -162,5 +167,51 @@ describe('Recevoir une annonce partagée', () => {
 
     expect(screen.getByText(/capture reçue est illisible/)).toBeInTheDocument();
     expect(screen.getByLabelText("Lien de l'annonce")).toHaveValue('');
+  });
+});
+
+describe('Page Extension : carte « Sur téléphone et tablette »', () => {
+  function carte(): HTMLElement {
+    const titre = screen.getByRole('heading', { level: 2, name: TEXTES_CARTE_TELEPHONE.titre });
+    const section = titre.closest('section');
+    if (section === null) throw new Error('carte introuvable');
+    return section;
+  }
+
+  it('sans invite du navigateur, explique l’installation sur Android et iPhone', async () => {
+    render(<AppEnMemoire chemin="/extension" />);
+    await screen.findByRole('heading', { level: 2, name: TEXTES_CARTE_TELEPHONE.titre });
+    expect(within(carte()).getByText(TEXTES_CARTE_TELEPHONE.installerAndroid)).toBeInTheDocument();
+    expect(within(carte()).getByText(TEXTES_CARTE_TELEPHONE.installerIphone)).toBeInTheDocument();
+    expect(within(carte()).getByText(TEXTES_CARTE_TELEPHONE.envoyerAndroid)).toBeInTheDocument();
+  });
+
+  it('propose le bouton quand le navigateur le permet, et dit quand c’est déjà installé', async () => {
+    const ecouteurs: ((evenement: Event) => void)[] = [];
+    const fenetre: FenetreInstallation = {
+      addEventListener: (type, ecouteur) => {
+        if (type === 'beforeinstallprompt') ecouteurs.push(ecouteur);
+      },
+    };
+    const suivi = creerSuiviInstallation(fenetre);
+    const invite = Object.assign(new Event('beforeinstallprompt', { cancelable: true }), {
+      prompt: () => Promise.resolve(),
+      userChoice: Promise.resolve({ outcome: 'accepted' }),
+    });
+    for (const ecouteur of ecouteurs) ecouteur(invite);
+    const { unmount } = render(<AppEnMemoire chemin="/extension" installation={suivi} />);
+    await screen.findByRole('heading', { level: 2, name: TEXTES_CARTE_TELEPHONE.titre });
+    expect(
+      within(carte()).getByRole('button', { name: TEXTES_INSTALLATION.bouton }),
+    ).toBeInTheDocument();
+    unmount();
+
+    const installee = creerSuiviInstallation({
+      addEventListener: () => undefined,
+      matchMedia: () => ({ matches: true }),
+    });
+    render(<AppEnMemoire chemin="/extension" installation={installee} />);
+    await screen.findByRole('heading', { level: 2, name: TEXTES_CARTE_TELEPHONE.titre });
+    expect(within(carte()).getByText(TEXTES_CARTE_TELEPHONE.installee)).toBeInTheDocument();
   });
 });

@@ -37,3 +37,22 @@ test('presse-papiers refusé : le lien de partage à copier tient dans l’écra
     ),
   ).toBe(0);
 });
+
+test('page Extension : au doigt, la carte du téléphone vient en tête ; à la souris, après les autres', async ({
+  page,
+}, testInfo) => {
+  await page.goto('/extension');
+  const telephone = page.getByRole('heading', { level: 2, name: 'Sur téléphone et tablette' });
+  const favori = page.getByRole('heading', {
+    level: 2,
+    name: 'Le bouton-favori, sans rien installer',
+  });
+  await expect(telephone).toBeVisible();
+  await expect(favori).toBeVisible();
+  const auDoigt = await page.evaluate(() => window.matchMedia('(pointer: coarse)').matches);
+  // Le téléphone émulé doit être tactile : sans quoi ce test ne vérifierait que l'ordinateur.
+  expect(auDoigt || testInfo.project.name !== 'telephone').toBe(true);
+  const hautTelephone = (await telephone.boundingBox())?.y ?? Number.NaN;
+  const hautFavori = (await favori.boundingBox())?.y ?? Number.NaN;
+  expect(hautTelephone < hautFavori).toBe(auDoigt);
+});

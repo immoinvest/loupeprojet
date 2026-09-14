@@ -5,8 +5,17 @@ import { NOM_FAVORI, codeFavori } from '@/bookmarklet/favori';
 import { Chapo, Page, TitrePage } from '@/composants/mise-en-page';
 import { Bouton, Carte, Pastille } from '@/composants/ui';
 
+import { CarteTelephone } from './extension/CarteTelephone';
+
 const README_EXTENSION =
   'https://github.com/immoinvest/loupeprojet/tree/master/apps/extension#charger-lextension-non-empaquetée';
+
+/**
+ * Sur écran tactile, la carte « Sur téléphone et tablette » passe en tête (ordre visuel) ; à la
+ * souris, elle suit les cartes de l'ordinateur, dans l'ordre du document.
+ */
+const APRES_AU_DOIGT = 'pointer-coarse:order-2';
+const D_ABORD_AU_DOIGT = 'pointer-coarse:order-1';
 
 type EtatCopie = 'initial' | 'copie' | 'echec';
 
@@ -48,7 +57,7 @@ export function Extension(): JSX.Element {
         </Chapo>
       </div>
 
-      <Carte>
+      <Carte className={APRES_AU_DOIGT}>
         <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
           <h2 className="m-0 font-display text-[22px] font-semibold">
             Le bouton-favori, sans rien installer
@@ -109,11 +118,11 @@ export function Extension(): JSX.Element {
         </p>
       </Carte>
 
-      <Carte>
+      <Carte className={APRES_AU_DOIGT}>
         <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
           <h2 className="m-0 font-display text-[22px] font-semibold">L'extension navigateur</h2>
           <Pastille ton="neutre" compacte>
-            Chrome · Edge · Firefox
+            ordinateur : Chrome · Edge · Firefox
           </Pastille>
         </div>
         <p className="m-0 text-[15px] text-encre-2">
@@ -127,7 +136,7 @@ export function Extension(): JSX.Element {
         </p>
       </Carte>
 
-      <Carte>
+      <Carte className={APRES_AU_DOIGT}>
         <h2 className="m-0 font-display text-[22px] font-semibold">Ce qui reste chez vous</h2>
         <ul className="m-0 flex list-disc flex-col gap-1 pl-5 text-[15px] text-encre-2">
           <li>La page de l'annonce est lue dans votre navigateur, jamais par nos serveurs.</li>
@@ -146,6 +155,8 @@ export function Extension(): JSX.Element {
           dans Nouveau projet.
         </p>
       </Carte>
+
+      <CarteTelephone className={D_ABORD_AU_DOIGT} />
     </Page>
   );
 }
