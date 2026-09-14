@@ -28,8 +28,8 @@ describe('Page Méthode', () => {
     // Le libellé exact (la liste des simplifications contient une phrase plus longue).
     expect(screen.getByText('Surtaxe sur les plus-values élevées')).toBeInTheDocument();
     expect(screen.getByText('CGI art. 1594 D', { exact: false })).toBeInTheDocument();
-    expect(screen.getAllByText('à confirmer')).toHaveLength(18);
-    expect(screen.getByText(/18 valeurs attendent une source officielle/)).toBeInTheDocument();
+    expect(screen.getAllByText('à confirmer')).toHaveLength(19);
+    expect(screen.getByText(/19 valeurs attendent une source officielle/)).toBeInTheDocument();
     expect(screen.getByText(/Frais d’acquisition passés en charge/)).toBeInTheDocument();
     expect(screen.getAllByRole('table').length).toBeGreaterThanOrEqual(10);
   });
