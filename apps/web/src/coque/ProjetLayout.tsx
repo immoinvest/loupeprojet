@@ -17,6 +17,7 @@ import { euros } from '@/formatage/nombres';
 import { useProjets } from '@/stockage/ProjetsContext';
 import { STATUTS, StatutProjetSchema, type ProjetEnregistre } from '@/stockage/projets';
 import { MODES } from '@/textes/regimes';
+import { visiteDe } from '@/visite';
 
 import { BoutonPartager } from './BoutonPartager';
 import { defilementPourVoir } from './defilement';
@@ -104,6 +105,8 @@ function EnTete(): JSX.Element {
   const naviguer = useNavigate();
   const bandeRef = useOngletActifEnVue();
   const { achat, location } = enregistre.projet.hypotheses;
+  // Visite faite : l'onglet quitte la bande ; la page reste ouverte par le lien du Rapport.
+  const onglets = ONGLETS.filter((o) => o.to !== 'visite' || !visiteDe(enregistre).faite);
 
   return (
     <header
@@ -125,7 +128,7 @@ function EnTete(): JSX.Element {
       </div>
       <div className="hidden 2xl:block 2xl:flex-1" />
       <nav ref={bandeRef} aria-label="Volets du rapport" className={BANDE_ONGLETS}>
-        {ONGLETS.map((o) => (
+        {onglets.map((o) => (
           <NavLink key={o.to} to={o.to} end={o.to === ''} className={onglet}>
             {o.libelle}
           </NavLink>
