@@ -49,10 +49,25 @@
         "DvfMarche du Worker redéfinit dateMediane en string | null (Omit du schéma tolérant)"
       ]
     },
-    "refactor": { "status": "pending" },
-    "qa_tests": { "status": "pending" },
-    "security": { "status": "pending" },
-    "push": { "status": "pending" }
+    "refactor": {
+      "status": "completed",
+      "note": "BADGES et badgeDeSource extraits de Hypotheses.tsx vers hypotheses/ChampHypothese.tsx pour la carte Repère ; textes de la confiance dans textes/confiance.ts (estimation.ts reste sous 300 lignes)"
+    },
+    "qa_tests": {
+      "status": "completed",
+      "tests": 1003,
+      "fichiers_de_test": 143,
+      "note": "couverture 100 % sur le moteur (confiance.ts), le Worker (anciennete.ts, assembler, analyse, routes), data/ (statistiques), enrichissement/ et textes/ du web ; sous charge, six tests d'écran dépassent leurs 30 s puis passent seuls (fait connu de la machine)"
+    },
+    "security": {
+      "status": "completed",
+      "note": "aucune donnée nouvelle vers le réseau ; les nouveaux champs des réponses sont revalidés par Zod (optionnels, nullable) ; textes rendus comme texte (aucun innerHTML) ; le lieu vient du référentiel des communes, jamais de l'adresse saisie"
+    },
+    "push": {
+      "status": "completed",
+      "pr": "https://github.com/immoinvest/loupeprojet/pull/42",
+      "note": "auto-merge armé ; master fusionné une fois (coque-fixe, PR #39) : trois conflits de docs résolus ; après la fusion : déployer le Worker 0.7.0 et relancer l'Action Référentiels (DVF, 13)"
+    }
   },
   "decisions": {
     "indice": "note 0-100 en mots avec quatre composantes chiffrées (recommandation, à confirmer par Pierre) ; cinq niveaux ; marge de la fourchette selon le niveau",
