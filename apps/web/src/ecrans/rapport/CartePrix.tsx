@@ -2,10 +2,11 @@ import type { Resultats } from '@loupe/moteur';
 import { useLayoutEffect, useRef, useState, type JSX } from 'react';
 
 import { rangerLibelles } from '@/analyses/reperes';
-import { Carte, GrosChiffre, Pourquoi, TitreCarte } from '@/composants/ui';
+import { Info } from '@/composants/info';
+import { Carte, GrosChiffre, LienOnglet, TitreCarte } from '@/composants/ui';
 import { nombre } from '@/formatage/nombres';
 import { eurosArrondis, LIBELLES_CONFIANCE } from '@/textes/estimation';
-import { EXPLICATIONS } from '@/textes/explications';
+import { explicationPrix } from '@/textes/explications';
 import { reponseCourte } from '@/textes/verdict';
 
 function JaugePrix({ r }: { r: Resultats }): JSX.Element {
@@ -132,16 +133,16 @@ function Jauge({
   );
 }
 
-/** « Est-ce que c'est cher ? » : le feu prix, la jauge et la fourchette d'estimation. */
+const TITRE = "Est-ce que c'est cher ?";
+
+/** « Est-ce que c'est cher ? » : le feu prix, la jauge, la fourchette d'estimation et le lien vers l'onglet. */
 export function CartePrix({ r }: { r: Resultats }): JSX.Element {
   const feu = r.verdict.feux.find((f) => f.axe === 'prix')?.feu ?? 'inconnu';
   const reponse = feu === 'bon' ? 'non' : feu === 'surveiller' ? 'presque' : 'oui';
   const n = r.projet.marche.dvf?.nombreVentes ?? 0;
   return (
     <Carte>
-      <TitreCarte action={<Pourquoi texte={EXPLICATIONS.prix} />}>
-        Est-ce que c'est cher ?
-      </TitreCarte>
+      <TitreCarte info={<Info sujet={TITRE} texte={explicationPrix(r)} />}>{TITRE}</TitreCarte>
       {feu === 'inconnu' ? (
         <GrosChiffre ton="encre">On ne sait pas.</GrosChiffre>
       ) : (
@@ -165,6 +166,7 @@ export function CartePrix({ r }: { r: Resultats }): JSX.Element {
             : ''}
         </p>
       )}
+      <LienOnglet vers="adresse">Voir l'estimation</LienOnglet>
     </Carte>
   );
 }

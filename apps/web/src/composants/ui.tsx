@@ -196,29 +196,6 @@ export function Ligne({
   );
 }
 
-const CLASSE_EXPLICATION = 'rounded-encart bg-accent-fond p-3 leading-relaxed text-encre-2';
-
-/** Explication longue, repliée par défaut ; toujours visible dans un document. */
-export function Pourquoi({
-  texte,
-  libelle = 'Pourquoi ?',
-}: {
-  texte: string;
-  libelle?: string;
-}): JSX.Element {
-  if (useModeDocument()) {
-    return <p className={`m-0 text-sm ${CLASSE_EXPLICATION}`}>{texte}</p>;
-  }
-  return (
-    <details className="text-sm">
-      <summary className="cursor-pointer list-none font-bold text-accent pointer-coarse:min-w-11 pointer-coarse:py-3">
-        {libelle}
-      </summary>
-      <p className={`mt-2 mb-0 ${CLASSE_EXPLICATION}`}>{texte}</p>
-    </details>
-  );
-}
-
 /** Un document n'a pas de boutons : rendu nul en mode document. */
 export function Bouton({
   children,

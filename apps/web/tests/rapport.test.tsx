@@ -102,3 +102,96 @@ describe('Rapport : autofinancement au centre', () => {
     expect(n(within(c).getByRole('tooltip').textContent)).toContain('11 760 € ÷ 172 987 € = 6,8 %');
   });
 });
+
+describe('Rapport : prix, impôts et revente', () => {
+  it('chaque carte mène à son onglet par un lien distinct de l’icône', async () => {
+    await ouvrirRapport();
+    expect(screen.getByRole('link', { name: "Voir l'estimation" })).toHaveAttribute(
+      'href',
+      '/projets/exemple/adresse',
+    );
+    expect(screen.getByRole('link', { name: 'Voir la fiscalité' })).toHaveAttribute(
+      'href',
+      '/projets/exemple/fiscalite',
+    );
+    expect(screen.getByRole('link', { name: 'Voir la revente' })).toHaveAttribute(
+      'href',
+      '/projets/exemple/revente',
+    );
+    // Les faux liens d'avant ont disparu.
+    expect(screen.queryByText('Pourquoi ?')).not.toBeInTheDocument();
+    expect(screen.queryByText('Comparer les 4 régimes')).not.toBeInTheDocument();
+    expect(screen.queryByText('Détail')).not.toBeInTheDocument();
+
+    const utilisateur = userEvent.setup();
+    await utilisateur.click(screen.getByRole('link', { name: 'Voir la fiscalité' }));
+    expect(
+      await screen.findByRole('heading', { level: 1, name: /Combien d'impôts, selon le régime/ }),
+    ).toBeInTheDocument();
+  });
+
+  it('les icônes des trois cartes ouvrent des bulles chiffrées', async () => {
+    await ouvrirRapport();
+    const utilisateur = userEvent.setup();
+    const prix = carte("Est-ce que c'est cher ?");
+    await utilisateur.click(
+      within(prix).getByRole('button', { name: "Explication : Est-ce que c'est cher ?" }),
+    );
+    expect(n(within(prix).getByRole('tooltip').textContent)).toContain(
+      '2 385 €/m² contre un prix estimé de 3 181 €/m²',
+    );
+
+    const impots = carte("Combien d'impôts ?");
+    await utilisateur.click(
+      within(impots).getByRole('button', { name: "Explication : Combien d'impôts ?" }),
+    );
+    expect(n(within(impots).getByRole('tooltip').textContent)).toContain(
+      'le meublé au réel ne coûte aucun impôt',
+    );
+    // Une seule bulle ouverte à la fois.
+    expect(within(prix).queryByRole('tooltip')).not.toBeInTheDocument();
+
+    const revente = carte("Qu'est-ce qu'il vous restera ?");
+    await utilisateur.click(
+      within(revente).getByRole('button', { name: "Explication : Qu'est-ce qu'il vous restera ?" }),
+    );
+    expect(n(within(revente).getByRole('tooltip').textContent)).toContain('58 217 € net vendeur');
+  });
+
+  it('la revente affiche le multiple sur apport avec sa bulle', async () => {
+    await ouvrirRapport();
+    const revente = carte("Qu'est-ce qu'il vous restera ?");
+    expect(within(revente).getByText('Multiple sur apport')).toBeInTheDocument();
+    expect(n(within(revente).getByText('× 0,7').textContent)).toBe('× 0,7');
+    const utilisateur = userEvent.setup();
+    await utilisateur.click(
+      within(revente).getByRole('button', { name: 'Explication : Multiple sur apport' }),
+    );
+    expect(n(within(revente).getByRole('tooltip').textContent)).toContain(
+      '13 647 € ÷ 19 337 € = × 0,7',
+    );
+  });
+
+  it('dans le document imprimé : les explications sous les titres, ni icônes ni liens', async () => {
+    await ouvrirRapport('/imprimer');
+    await screen.findByText(/dossier d'analyse locative/);
+    expect(screen.queryByRole('button', { name: /^Explication : / })).not.toBeInTheDocument();
+    expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /^Voir / })).not.toBeInTheDocument();
+    for (const extrait of [
+      /ventes signées chez le notaire/,
+      /paie d'abord le crédit et l'assurance/,
+      /représente 84 % du loyer/,
+      /Ce que vous sortez de votre poche/,
+      /Point mort : le loyer hors charges/,
+      /11 760 €/,
+      /C'est lui que juge le feu/,
+      /une fois la banque et le fisc servis/,
+      /Le moins cher des trois autres régimes/,
+      /net vendeur\./,
+      /Gain total ÷ mise de départ/,
+    ]) {
+      expect(screen.getAllByText(extrait).length).toBeGreaterThan(0);
+    }
+  });
+});

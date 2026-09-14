@@ -1,11 +1,18 @@
 import type { Resultats } from '@loupe/moteur';
 import type { JSX } from 'react';
 
+import { multipleSurApport } from '@/analyses/rapport';
+import { useModeDocument } from '@/composants/document';
+import { Info } from '@/composants/info';
 import { Chapo, Page, TitrePage } from '@/composants/mise-en-page';
-import { Carte, GrosChiffre, Ligne, Pastille, Pourquoi, TitreCarte } from '@/composants/ui';
-import { euros, eurosSignes, pourcentage } from '@/formatage/nombres';
+import { Carte, GrosChiffre, Ligne, LienOnglet, Pastille, TitreCarte } from '@/composants/ui';
+import { euros, eurosSignes, nombre, pourcentage } from '@/formatage/nombres';
 import { useProjetCourant } from '@/coque/ProjetLayout';
-import { EXPLICATIONS } from '@/textes/explications';
+import {
+  explicationFiscalite,
+  explicationMultiple,
+  explicationRevente,
+} from '@/textes/explications';
 import { libelleFeu } from '@/textes/feux';
 import { REGIMES } from '@/textes/regimes';
 import { texteVerdict } from '@/textes/verdict';
@@ -14,6 +21,10 @@ import { CarteAutofinancement } from './rapport/CarteAutofinancement';
 import { CartePrix } from './rapport/CartePrix';
 import { CarteRendements } from './rapport/CarteRendements';
 import { Leviers } from './rapport/Leviers';
+
+const TITRE_FISCALITE = "Combien d'impôts ?";
+const TITRE_REVENTE = "Qu'est-ce qu'il vous restera ?";
+const TITRE_MULTIPLE = 'Multiple sur apport';
 
 function CarteFiscalite({ r }: { r: Resultats }): JSX.Element {
   const f = r.fiscalite;
@@ -24,10 +35,8 @@ function CarteFiscalite({ r }: { r: Resultats }): JSX.Element {
   const annees = r.projet.hypotheses.revente.annees;
   return (
     <Carte>
-      <TitreCarte
-        action={<Pourquoi texte={EXPLICATIONS.fiscalite} libelle="Comparer les 4 régimes" />}
-      >
-        Combien d'impôts ?
+      <TitreCarte info={<Info sujet={TITRE_FISCALITE} texte={explicationFiscalite(r)} />}>
+        {TITRE_FISCALITE}
       </TitreCarte>
       <GrosChiffre
         ton={retenu.impotTotal === 0 ? 'bon' : 'encre'}
@@ -49,6 +58,7 @@ function CarteFiscalite({ r }: { r: Resultats }): JSX.Element {
           </Pastille>
         ))}
       </div>
+      <LienOnglet vers="fiscalite">Voir la fiscalité</LienOnglet>
     </Carte>
   );
 }
@@ -56,10 +66,14 @@ function CarteFiscalite({ r }: { r: Resultats }): JSX.Element {
 function CarteRevente({ r }: { r: Resultats }): JSX.Element {
   const e = r.rendement.enrichissement;
   const annees = r.projet.hypotheses.revente.annees;
+  const multiple = multipleSurApport(r);
+  // Sur papier, l'explication du multiple vient sous les lignes plutôt qu'à côté de son libellé.
+  const document = useModeDocument();
+  const infoMultiple = <Info sujet={TITRE_MULTIPLE} texte={explicationMultiple(r)} />;
   return (
     <Carte>
-      <TitreCarte action={<Pourquoi texte={EXPLICATIONS.revente} libelle="Détail" />}>
-        Qu'est-ce qu'il vous restera ?
+      <TitreCarte info={<Info sujet={TITRE_REVENTE} texte={explicationRevente(r)} />}>
+        {TITRE_REVENTE}
       </TitreCarte>
       <GrosChiffre complement={`dans ${String(annees)} ans`}>
         {euros(r.revente.cashNetVendeur)}
@@ -79,7 +93,25 @@ function CarteRevente({ r }: { r: Resultats }): JSX.Element {
           valeur={eurosSignes(e.total)}
           fort
         />
+        {multiple !== null && (
+          <Ligne
+            libelle={
+              document ? (
+                TITRE_MULTIPLE
+              ) : (
+                <span className="flex items-center gap-0.5">
+                  {TITRE_MULTIPLE}
+                  {infoMultiple}
+                </span>
+              )
+            }
+            valeur={`× ${multiple < 0 ? '−' : ''}${nombre(Math.abs(multiple), 1)}`}
+            tonValeur="font-semibold"
+          />
+        )}
       </div>
+      {document && multiple !== null ? infoMultiple : null}
+      <LienOnglet vers="revente">Voir la revente</LienOnglet>
     </Carte>
   );
 }
