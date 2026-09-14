@@ -220,6 +220,16 @@ describe('ProjetsProvider / useProjets', () => {
       result.current.mettreAJour(a.id, a.projet);
     });
     expect(result.current.trouver(a.id)?.visite).toEqual(visite);
+
+    // Le projet déjà enregistré, passé tel quel : son identité est gardée (pas de recalcul).
+    const charge = result.current.trouver(a.id)?.projet;
+    act(() => {
+      result.current.mettreAJour(a.id, charge ?? a.projet, {
+        visite: { faite: true, reponses: {} },
+      });
+    });
+    expect(result.current.trouver(a.id)?.projet).toBe(charge);
+    expect(result.current.trouver(a.id)?.visite?.faite).toBe(true);
   });
 
   it('réutilise une liste déjà présente sans la réamorcer', () => {

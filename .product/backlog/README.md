@@ -20,7 +20,7 @@ Statuts : `idée` → `en discussion` → `spécifiée` → `en cours` → `livr
 | 04  | [Achat : négociation et travaux](04-achat-negociation-travaux.md)    | Curseur de négociation sous le prix affiché, sort de la « rénovation énergétique », travaux facultatifs à 0          | idée      | —         |
 | 05  | [Location : types d'exploitation](05-location-types-exploitation.md) | Choisir d'abord le type (nue, meublée, colocation, courte durée, moyenne durée) et n'afficher que ses champs         | idée      | —         |
 | 06  | [Revente : curseur d'horizon](06-revente-curseur.md)                 | Un curseur de 1 à 30 ans qui recalcule tout l'onglet                                                                 | idée      | —         |
-| 07  | [Visite : base de questions](07-visite-questions.md)                 | Questions de visite tirées d'une base et de règles ; onglet masqué quand la visite est faite                         | idée      | —         |
+| 07  | [Visite : base de questions](07-visite-questions.md)                 | Questions de visite tirées d'une base et de règles ; onglet masqué quand la visite est faite                         | livrée    | —         |
 | 08  | [Simulateur de prêt](08-simulateur-pret.md)                          | Outil indépendant des projets : deux offres côte à côte, comparaison, tableaux d'amortissement en CSV et à imprimer  | spécifiée | —         |
 | 09  | [Estimation : carte et confiance](09-estimation-carte-confiance.md)  | Carte des ventes du quartier, chiffres du repère visibles même sans adresse, indice de confiance expliqué en tête    | idée      | —         |
 | 10  | [Rapport : icônes et cash-flow](10-rapport-icones-cashflow.md)       | Icônes ⓘ avec infobulle, liens vers Estimation / Fiscalité / Revente, autofinancement au centre, rendement brut      | idée      | —         |
@@ -28,7 +28,7 @@ Statuts : `idée` → `en discussion` → `spécifiée` → `en cours` → `livr
 
 ## Ordre suggéré
 
-`08` (spécifiée, prête à implémenter) → `03` (une heure) → `11` et `06` (visuel, sans moteur) → `01` → `04` → `10` → `02` (touche au moteur et à tous les onglets : mieux après 01 et 04) → `09` → `05` (le plus gros : moteur + formulaires + fiscalité) → `07`.
+`08` (spécifiée, prête à implémenter) → `03` (une heure) → `11` et `06` (visuel, sans moteur) → `01` → `04` → `10` → `02` (touche au moteur et à tous les onglets : mieux après 01 et 04) → `09` → `05` (le plus gros : moteur + formulaires + fiscalité ; les questions de visite propres à la colocation et à la moyenne durée sont déjà écrites, voir `07`). `07` est livrée.
 
 ## Sources
 

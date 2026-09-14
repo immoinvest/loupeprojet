@@ -1,5 +1,5 @@
 import { questionsPourProjet } from '@loupe/moteur';
-import { useMemo, type JSX } from 'react';
+import { useCallback, useMemo, useRef, type JSX } from 'react';
 import { Link, useNavigate } from 'react-router';
 
 import { useModeDocument } from '@/composants/document';
@@ -8,7 +8,7 @@ import { Bouton, Carte, Pastille } from '@/composants/ui';
 import { useProjetCourant } from '@/coque/ProjetLayout';
 import { dateCourte } from '@/formatage/nombres';
 import { useProjets } from '@/stockage/ProjetsContext';
-import type { Visite as VisiteEnregistree } from '@/stockage/projets';
+import type { EtatReponse, Visite as VisiteEnregistree } from '@/stockage/projets';
 import { libelleFeu } from '@/textes/feux';
 import { CATEGORIES_VISITE } from '@/textes/visite';
 import {
@@ -36,9 +36,26 @@ export function Visite(): JSX.Element {
   const compte = progression(questions, visite);
   const lectureSeule = document || visite.faite;
 
-  const enregistrer = (suivante: VisiteEnregistree): void => {
-    mettreAJour(enregistre.id, enregistre.projet, { visite: suivante });
-  };
+  // Les rappels donnés aux questions restent les mêmes d'un rendu à l'autre (elles sont
+  // mémoïsées) et lisent toujours la dernière visite : taper une note ne redessine qu'une ligne.
+  const derniers = useRef({ enregistre, mettreAJour, visite });
+  derniers.current = { enregistre, mettreAJour, visite };
+  const enregistrer = useCallback((suivante: VisiteEnregistree): void => {
+    const { enregistre: e, mettreAJour: ecrire } = derniers.current;
+    ecrire(e.id, e.projet, { visite: suivante });
+  }, []);
+  const repondreA = useCallback(
+    (id: string, etat: EtatReponse): void => {
+      enregistrer(repondre(derniers.current.visite, id, etat));
+    },
+    [enregistrer],
+  );
+  const noterA = useCallback(
+    (id: string, note: string): void => {
+      enregistrer(noter(derniers.current.visite, id, note));
+    },
+    [enregistrer],
+  );
   const marquer = (): void => {
     enregistrer(marquerFaite(visite, new Date().toISOString()));
     void naviguer(`/projets/${enregistre.id}`);
@@ -88,12 +105,8 @@ export function Visite(): JSX.Element {
                 reponse={reponseDe(visite, q.id)}
                 lectureSeule={lectureSeule}
                 aCocherSurPapier={document && !visite.faite}
-                onEtat={(etat) => {
-                  enregistrer(repondre(visite, q.id, etat));
-                }}
-                onNote={(note) => {
-                  enregistrer(noter(visite, q.id, note));
-                }}
+                onEtat={repondreA}
+                onNote={noterA}
               />
             ))}
           </ul>

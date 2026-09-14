@@ -1,5 +1,5 @@
 import type { QuestionPosee } from '@loupe/moteur';
-import { useState, type JSX } from 'react';
+import { memo, useState, type JSX } from 'react';
 
 import { Pastille, type TonPastille } from '@/composants/ui';
 import type { EtatReponse, ReponseVisite } from '@/stockage/projets';
@@ -25,7 +25,7 @@ function Note({
   id: string;
   texte: string;
   note: string | undefined;
-  onChange: (note: string) => void;
+  onChange: (id: string, note: string) => void;
 }): JSX.Element {
   const [ouverte, setOuverte] = useState(note !== undefined);
   const [saisie, setSaisie] = useState(note ?? '');
@@ -51,7 +51,7 @@ function Note({
       autoFocus={note === undefined}
       onChange={(e) => {
         setSaisie(e.target.value);
-        onChange(e.target.value);
+        onChange(id, e.target.value);
       }}
       className="min-h-[44px] w-full max-w-[560px] rounded-encart border border-bordure bg-surface px-3 text-[15px] pointer-coarse:text-base"
     />
@@ -60,9 +60,10 @@ function Note({
 
 /**
  * Une question de la liste : texte et source, puis la réponse (quatre boutons ou, en lecture
- * seule, une pastille), le champ à valeur s'il y en a un, et la note.
+ * seule, une pastille), le champ à valeur s'il y en a un, et la note. Mémoïsée : seule la ligne
+ * dont la réponse change se redessine.
  */
-export function QuestionVisite({
+export const QuestionVisite = memo(function QuestionVisite({
   question,
   reponse,
   lectureSeule,
@@ -76,8 +77,8 @@ export function QuestionVisite({
   lectureSeule: boolean;
   /** Document d'une visite à faire : une case vide devant chaque question. */
   aCocherSurPapier: boolean;
-  onEtat: (etat: EtatReponse) => void;
-  onNote: (note: string) => void;
+  onEtat: (id: string, etat: EtatReponse) => void;
+  onNote: (id: string, note: string) => void;
 }): JSX.Element {
   const texte = texteQuestion(question);
   const descripteur = descripteurDeValeur(question);
@@ -102,7 +103,14 @@ export function QuestionVisite({
           </Pastille>
         )
       ) : (
-        <ChoixEtat id={question.id} texte={texte} etat={reponse.etat} onChange={onEtat} />
+        <ChoixEtat
+          id={question.id}
+          texte={texte}
+          etat={reponse.etat}
+          onChange={(etat) => {
+            onEtat(question.id, etat);
+          }}
+        />
       )}
       {!lectureSeule && descripteur !== null && (
         <ChampValeur question={question} descripteur={descripteur} />
@@ -116,4 +124,4 @@ export function QuestionVisite({
       )}
     </li>
   );
-}
+});

@@ -2,8 +2,8 @@
   "feature_slug": "visite-questions",
   "title": "Visite : base de questions sourcées, règles d'affichage, réponses conservées, onglet masqué quand la visite est faite",
   "started_at": "2026-09-14T14:00:00Z",
-  "current_step": "specs",
-  "scope": "packages/moteur/src/visite (base, règles, questionsPourProjet), regles/2026-09.ts (seuils visite), verdict/vigilance.ts (points financiers seulement) ; apps/web/src/{stockage (ProjetEnregistre.visite), visite, textes/visite.ts, ecrans/Visite.tsx, ecrans/visite, ecrans/Rapport.tsx, ecrans/FormulaireProjet.tsx, ecrans/NouveauProjet.tsx, ecrans/Partage.tsx, ecrans/document/DocumentProjet.tsx, coque/ProjetLayout.tsx} ; e2e ; docs",
+  "current_step": "push",
+  "scope": "packages/moteur/src/visite (base, règles, questionsPourProjet), regles/2026-09.ts (seuils visite), verdict/vigilance.ts (points financiers seulement) ; apps/web/src/{stockage (ProjetEnregistre.visite), visite, textes/visite.ts, ecrans/Visite.tsx, ecrans/visite, ecrans/Rapport.tsx, ecrans/rapport/Vigilance.tsx, ecrans/FormulaireProjet.tsx, ecrans/NouveauProjet.tsx, ecrans/Partage.tsx, ecrans/document/DocumentProjet.tsx, coque/ProjetLayout.tsx} ; e2e ; docs",
   "branch": "feat/visite-questions",
   "base": "master (b74bbc6)",
   "baseline": {
@@ -16,18 +16,46 @@
       "status": "completed",
       "output": ".product/features/visite-questions-discovery.md"
     },
-    "specs": { "status": "in_progress", "output": ".product/specs/visite-questions-specs.md" },
-    "architecture": { "status": "pending", "output": ".product/architecture/visite-questions.md" },
-    "implement": { "status": "pending", "stories_completed": 0, "stories_total": 0 },
-    "qa_tests": { "status": "pending" },
-    "security": { "status": "pending" },
-    "push": { "status": "pending" }
+    "specs": {
+      "status": "completed",
+      "output": ".product/specs/visite-questions-specs.md",
+      "stories_count": 5
+    },
+    "architecture": {
+      "status": "completed",
+      "output": ".product/architecture/visite-questions.md"
+    },
+    "implement": {
+      "status": "completed",
+      "stories_completed": 5,
+      "stories_total": 5,
+      "commits": [
+        { "etape": "US-1 moteur : base, règles, questionsPourProjet, docs de la feature", "hash": "404eefd" },
+        { "etape": "US-2 stockage : ProjetEnregistre.visite, logique pure, partage", "hash": "b188e38" },
+        { "etape": "US-3 écran Visite, onglet masqué", "hash": "7333ab9" },
+        { "etape": "US-4 Rapport, Vérifier, impression, partage, Méthode", "hash": "e3bff77" },
+        { "etape": "US-5 preuve : Playwright, formats, perf (mémoïsation), docs communes", "hash": "à venir" }
+      ]
+    },
+    "qa_tests": {
+      "status": "completed",
+      "note": "1 016 tests unitaires (dont 58 pour la visite : 32 moteur, 26 web) ; couverture 100 % sur packages/moteur et apps/web/src/{stockage,textes,visite} ; un test d'écran dépassait 30 s sous la charge de la suite complète : corrigé à la source (pas de revalidation Zod quand le projet ne change pas, résultats mémoïsés sur le projet, questions mémoïsées avec rappels stables)"
+    },
+    "security": {
+      "status": "completed",
+      "note": "aucun innerHTML ni eval ; notes et textes affichés comme texte ; réponses validées par Zod (états fermés, note ≤ 300) ; le lien de partage porte les réponses (infobulle existante : le lien contient tout le projet) ; aucune donnée d'annonce persistée ; pas d'appel réseau nouveau"
+    },
+    "push": {
+      "status": "in_progress",
+      "note": "fusion de master, vérification navigateur et Playwright, puis PR avec auto-merge"
+    }
   },
   "decisions": {
-    "base": "environ 70 questions rédigées par Claude, chacune avec sa source ; texte gabarit dans le moteur, paramètres formatés par le web",
+    "base": "74 questions rédigées par Claude, chacune avec sa source ; texte gabarit dans le moteur, paramètres formatés par le web (ADR-V1)",
     "categories": "documents, diagnostics, logement, immeuble, quartier, vendeur, exploitation",
-    "valeurs": "neuf questions écrivent une hypothèse par les descripteurs de l'onglet Hypothèses (appliquerSaisie, provenance utilisateur)",
-    "visite_faite": "onglet masqué, route ouverte (compte rendu + Rouvrir), volet imprimé seulement avec des réponses, partage avec les réponses",
-    "finances": "les cinq points financiers restent dans verdict.vigilance et passent dans le Rapport ; les neuf autres deviennent des questions"
+    "valeurs": "neuf questions écrivent une hypothèse par les descripteurs de l'onglet Hypothèses (appliquerSaisie, provenance utilisateur), et passent à OK",
+    "visite_faite": "onglet masqué, route ouverte (compte rendu + Rouvrir), volet imprimé seulement avec des réponses, partage avec les réponses (ADR-V4)",
+    "finances": "les cinq points financiers restent dans verdict.vigilance et passent dans le Rapport, carte « Avant de faire une offre » toujours affichée avec l'état de la visite ; les neuf autres codes sont devenus des questions (ADR-V2)",
+    "exploitation": "typeExploitation(projet) traduit le mode d'aujourd'hui ; colocation et moyenne durée testées par contexte forgé (ADR-V5)"
   }
 }

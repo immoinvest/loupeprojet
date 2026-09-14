@@ -43,7 +43,8 @@ export function FournisseurProjet({
   enregistre: ProjetEnregistre;
   children: ReactNode;
 }): JSX.Element {
-  const resultats = useMemo(() => calculerProjet(enregistre.projet), [enregistre]);
+  // Sur le projet, pas sur l'enregistrement : une réponse de visite ne recalcule rien.
+  const resultats = useMemo(() => calculerProjet(enregistre.projet), [enregistre.projet]);
   return <Contexte.Provider value={{ enregistre, resultats }}>{children}</Contexte.Provider>;
 }
 
