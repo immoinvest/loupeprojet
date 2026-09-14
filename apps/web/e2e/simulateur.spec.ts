@@ -77,6 +77,11 @@ test('comparer deux offres, déplier une année, télécharger le CSV, rouvrir p
   expect(lignes).toHaveLength(303);
 
   // La dernière simulation est retrouvée après rechargement, et l'adresse porte le lien.
+  // La page enregistre 300 ms après la dernière saisie : sur une machine rapide, recharger plus tôt
+  // perdrait la simulation. On attend l'enregistrement de la dernière valeur saisie.
+  await expect
+    .poll(() => page.evaluate(() => window.localStorage.getItem('loupe.simulateur.v1') ?? ''))
+    .toContain('"CIC"');
   await page.reload();
   await expect(formulaire(page, 'LCL').getByLabel('Durée')).toHaveValue('25');
   await expect.poll(() => page.url()).toMatch(/#s=/);
@@ -97,13 +102,15 @@ test('comparer deux offres, déplier une année, télécharger le CSV, rouvrir p
 });
 
 test('imprimer ouvre le document de la simulation, hors coque', async ({ page }) => {
+  // Avant le premier chargement : « Imprimer » navigue sans recharger la page, un script ajouté
+  // après coup ne s'appliquerait pas et la vraie fenêtre d'impression bloquerait le navigateur.
+  await page.addInitScript(() => {
+    window.print = () => undefined;
+  });
   await page.goto('/simulateur-pret');
   await expect(
     page.getByRole('heading', { level: 1, name: 'Comparer deux offres de prêt' }),
   ).toBeVisible();
-  await page.addInitScript(() => {
-    window.print = () => undefined;
-  });
   await page.getByRole('button', { name: 'Imprimer', exact: true }).click();
   await expect(page.getByRole('heading', { level: 1, name: 'Simulation de prêt' })).toBeVisible();
   await expect(page.getByRole('heading', { level: 2, name: 'Les hypothèses' })).toBeVisible();
