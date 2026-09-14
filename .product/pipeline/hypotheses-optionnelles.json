@@ -30,9 +30,9 @@
     },
     "implement": {
       "status": "in_progress",
-      "stories_completed": 3,
+      "stories_completed": 5,
       "stories_total": 7,
-      "note": "US-1 à US-3 commitées ; e2e (aides, incomplet.spec, mes-projets, formats) écrits, à commiter avec US-6"
+      "note": "US-1 à US-5 commitées (US-4 livrée dans le commit US-2 : écrans à compléter) ; US-6 (Méthode faite en US-3, e2e écrits) et US-7 (docs) en cours"
     },
     "refactor": {
       "status": "pending"

@@ -7,7 +7,7 @@ import { euros, eurosSignes, nombre, pourcentage } from '@/formatage/nombres';
 import { useProjetCourant } from '@/coque/ProjetLayout';
 import { EXPLICATIONS } from '@/textes/explications';
 import { libelleFeu } from '@/textes/feux';
-import { manquesBloquants } from '@/textes/manques';
+import { manquesBloquants, TEXTES_TRANCHE } from '@/textes/manques';
 import { REGIMES } from '@/textes/regimes';
 import { reponseCourte, texteVerdict } from '@/textes/verdict';
 
@@ -92,6 +92,9 @@ function CarteFiscalite({ r }: { r: ResultatsComplets }): JSX.Element {
           ? ' : aucun impôt sur la période.'
           : ` : imposé à partir de l'année ${String(retenu.premiereAnneeImposable)}.`}
         {!retenu.eligible ? ' Plafond du régime dépassé.' : ''}
+        {r.projet.provenance['fiscalite.tmi'] === 'estime'
+          ? ` ${TEXTES_TRANCHE.mentionRapport} ${pourcentage(r.projet.hypotheses.fiscalite.tmi, 0)}.`
+          : ''}
       </p>
       <div className="flex flex-wrap gap-2">
         {autres.map((x) => (

@@ -40,3 +40,13 @@ export const TEXTES_A_COMPLETER = {
   boutonLoyerMarche: 'Utiliser le loyer de marché :',
   appliquer: 'Appliquer',
 } as const;
+
+/** La tranche d'imposition posée par défaut (provenance « estime ») : dite comme telle, changeable sur place. */
+export const TEXTES_TRANCHE = {
+  titre: "Votre tranche d'imposition",
+  phrase:
+    'Les impôts ci-dessus supposent une tranche à 30 %, la plus fréquente pour un ménage qui emprunte pour investir. Choisissez la vôtre : les feux du verdict ne changent pas, les impôts et le TRI oui.',
+  supposee: 'une tranche supposée à',
+  choisie: 'votre tranche à',
+  mentionRapport: 'Tranche supposée à',
+} as const;
