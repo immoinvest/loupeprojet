@@ -1,0 +1,34 @@
+{
+  "feature_slug": "vendu-loue",
+  "title": "Estimation : décote « vendu loué » (proposition 2 de l'analyse du dépôt FIDI)",
+  "started_at": "2026-09-14T18:00:00Z",
+  "current_step": "implement",
+  "scope": "packages/moteur/src/{schema/bien.ts,schema/estimation.ts,schema/resultats-estimation.ts,regles,estimation}, apps/web/src/{annonces,enrichissement,ecrans/formulaire,ecrans/FormulaireProjet.tsx,hypotheses/groupes-bien.ts,textes}",
+  "branch": "feat/vendu-loue",
+  "base": "master (ca1d257, PR #56 fusionnée)",
+  "steps": {
+    "discovery": { "status": "completed", "output": ".product/features/vendu-loue-discovery.md" },
+    "specs": {
+      "status": "completed",
+      "output": ".product/specs/vendu-loue-specs.md",
+      "stories_count": 4
+    },
+    "architecture": { "status": "completed", "output": ".product/architecture/vendu-loue.md" },
+    "implement": {
+      "status": "in_progress",
+      "stories_completed": 0,
+      "stories_total": 4,
+      "commits": []
+    },
+    "refactor": { "status": "pending" },
+    "qa_tests": { "status": "pending" },
+    "security": { "status": "pending" },
+    "push": { "status": "pending" }
+  },
+  "decisions": {
+    "taux": "−10 % du prix de marché, additionné aux autres corrections, à confirmer (DGFiP « L'évaluation des immeubles bâtis » : moins-value des immeubles occupés, ≤ 40 % pour une maison ; pratique 10 à 20 %) ; choix Deklic du bas de fourchette",
+    "lecture": "règles sur le texte (mention libre prioritaire) + loyerActuel de /extract déjà renvoyé par le Worker ; aucun changement ni redéploiement du Worker",
+    "checkpoints": "auto-validés avec relecture critique (autorisation de Pierre) ; périmètre choisi par Pierre : proposition 2 seulement",
+    "etat_pipeline": "session parallèle : état dans .product/pipeline/vendu-loue.json"
+  }
+}
