@@ -59,7 +59,7 @@
       "verification": "comme la CI : lint, format:check, typecheck, 234 fichiers et 1 881 tests avec les seuils de couverture, build de tous les espaces",
       "formats": "spec des formats : 32 écrans sur 9 formats (Loyers, fiche d'un bien, louer, quittance ajoutés) ; premier passage : cibles trop petites au doigt sur Gérer et Loyers (lien du bien 24 px, « Voir tous les loyers » 20 px), corrigées par pointer-coarse:min-h-11 ; second passage vert (12 formats et mesures, 4,6 min, configuration locale sur le port 5299)"
     },
-    "migrations_production": "vérifié le 14/09/2026 (wrangler d1 migrations list --remote, lecture seule) : 0002 et 0004 appliquées, reste 0003_gestion_documents.sql ; à appliquer par Pierre AVANT la fusion (le code de G1b lit les nouvelles tables ; sans elles, 503 GESTION_INDISPONIBLE) ; appliquée avant, elle ne gêne pas le code de G1a",
+    "migrations_production": "0002 et 0004 appliquées le 14/09/2026 ; 0003_gestion_documents.sql appliquée par Pierre le 14/09/2026 vers 22 h 30, avant la fusion (npx.cmd depuis le worktree loupe-gestion) ; vérifié en lecture seule : plus aucune migration en attente",
     "security": {
       "status": "completed",
       "score": "96/100",
