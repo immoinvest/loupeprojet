@@ -72,6 +72,10 @@ export function lecteurBrightData(
           });
           return { ok: false, code: 'AMONT_INDISPONIBLE' };
         }
+        // Une page annoncée démesurée n'est pas lue du tout (mémoire du Worker).
+        if (Number(reponse.headers.get('content-length')) > TAILLE_MAX_PAGE) {
+          return { ok: false, code: 'AMONT_INVALIDE' };
+        }
         const html = await reponse.text();
         if (html.length > TAILLE_MAX_PAGE) return { ok: false, code: 'AMONT_INVALIDE' };
         return { ok: true, statutPortail: statutPortail ?? reponse.status, html };

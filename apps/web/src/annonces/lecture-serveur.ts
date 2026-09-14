@@ -29,6 +29,8 @@ const RAISONS: Readonly<Record<string, RaisonEchecServeur>> = {
   // Un Worker d'avant la route /lecture répond 404 INTROUVABLE.
   INTROUVABLE: 'indisponible',
   HTTP_404: 'indisponible',
+  // Page servie depuis une adresse que le Worker ne connaît pas (autre port en développement).
+  ORIGINE_REFUSEE: 'indisponible',
   ANNONCE_INTROUVABLE: 'introuvable',
   TROP_DE_REQUETES: 'limite',
   RESEAU: 'reseau',

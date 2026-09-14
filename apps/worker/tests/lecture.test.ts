@@ -25,8 +25,16 @@ const page = (html: string, statutPortail = 200): ReponsePage => ({
   html,
 });
 
+const ORIGINE = 'https://loupeprojet.pages.dev';
+
+/** POST depuis une page de Deklic : type JSON, adresse IP et origine. */
+function depuisDeklic(corps: unknown, origine = ORIGINE): RequestInit {
+  const base = corpsJson(corps);
+  return { ...base, headers: { ...(base.headers as Record<string, string>), Origin: origine } };
+}
+
 async function lire(b: ReturnType<typeof banc>, corps: unknown): Promise<Response> {
-  return b.requete('/lecture', corpsJson(corps));
+  return b.requete('/lecture', depuisDeklic(corps));
 }
 
 describe('POST /lecture · Bright Data', () => {
@@ -211,7 +219,7 @@ describe('POST /lecture · entrées refusées', () => {
   ])('refuse %s : 400, aucun appel sortant', async (_, corps, champ) => {
     const lecteur = lecteurFixe(page(PAGE_LBC));
     const b = banc({ lecteurPages: lecteur });
-    const r = await b.requete('/lecture', corpsJson(corps));
+    const r = await b.requete('/lecture', depuisDeklic(corps));
     expect(r.status).toBe(400);
     expect(await r.json()).toEqual({ code: 'PARAMETRES_INVALIDES', details: { champs: [champ] } });
     expect(lecteur.urls).toEqual([]);
@@ -225,5 +233,46 @@ describe('POST /lecture · entrées refusées', () => {
     const refus = await lire(b, { url: LBC });
     expect(refus.status).toBe(429);
     expect(await refus.json()).toEqual({ code: 'TROP_DE_REQUETES' });
+  });
+
+  it('refuse une demande qui ne vient pas d’une page de Deklic : 403, aucun appel au fournisseur', async () => {
+    const lecteur = lecteurFixe(page(PAGE_LBC));
+    const b = banc({ lecteurPages: lecteur });
+    const sansOrigine = await b.requete('/lecture', corpsJson({ url: LBC }));
+    expect(sansOrigine.status).toBe(403);
+    expect(await sansOrigine.json()).toEqual({ code: 'ORIGINE_REFUSEE' });
+    const autre = await b.requete('/lecture', depuisDeklic({ url: LBC }, 'https://pirate.example'));
+    expect(autre.status).toBe(403);
+    expect(lecteur.urls).toEqual([]);
+    const apercu = await b.requete(
+      '/lecture',
+      depuisDeklic({ url: LBC }, 'https://feat-lecture.loupeprojet.pages.dev'),
+    );
+    expect(apercu.status).toBe(200);
+  });
+
+  it('refuse un corps annoncé trop long avant de le lire, et une annonce qui n’est pas en https', async () => {
+    const lecteur = lecteurFixe(page(PAGE_LBC));
+    const b = banc({ lecteurPages: lecteur });
+    const annonce = depuisDeklic({ url: LBC });
+    const long = await b.requete('/lecture', {
+      ...annonce,
+      headers: {
+        ...(annonce.headers as Record<string, string>),
+        'Content-Length': String(TAILLE_MAX_CORPS + 1),
+      },
+    });
+    expect(long.status).toBe(400);
+    expect(await long.json()).toEqual({
+      code: 'PARAMETRES_INVALIDES',
+      details: { champs: ['corps'] },
+    });
+    const http = await lire(b, { url: LBC.replace('https:', 'http:') });
+    expect(http.status).toBe(400);
+    expect(await http.json()).toEqual({
+      code: 'PARAMETRES_INVALIDES',
+      details: { champs: ['url'] },
+    });
+    expect(lecteur.urls).toEqual([]);
   });
 });

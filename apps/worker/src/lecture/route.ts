@@ -4,6 +4,7 @@ import type { BlankEnv } from 'hono/types';
 import type { ContentfulStatusCode } from 'hono/utils/http-status';
 import { z } from 'zod';
 
+import { origineAutorisee } from '../cors';
 import type { Dependances } from '../dependances';
 import { reponseErreur, type CodeErreur } from '../erreurs';
 import { lireDonneesBienici } from './bienici';
@@ -103,19 +104,45 @@ function repondre(c: Context, deps: Dependances, annonce: AnnonceResolue, issue:
   });
 }
 
+type Demande =
+  | { readonly ok: true; readonly annonce: AnnonceResolue }
+  | { readonly ok: false; readonly reponse: Response };
+
+/**
+ * Qui demande, et quoi. Chaque lecture coûte une requête au fournisseur : seules les pages de
+ * Deklic peuvent la demander, pour une annonce en https d'un des cinq portails, avec un corps court
+ * dont la taille est vérifiée avant d'être lu.
+ */
+async function lireDemande(c: Context, deps: Dependances): Promise<Demande> {
+  const origine = c.req.header('Origin');
+  if (origine === undefined || !origineAutorisee(origine, deps.origines)) {
+    return { ok: false, reponse: reponseErreur(403, 'ORIGINE_REFUSEE') };
+  }
+  const refusCorps = {
+    ok: false,
+    reponse: reponseErreur(400, 'PARAMETRES_INVALIDES', { champs: ['corps'] }),
+  } as const;
+  if (Number(c.req.header('Content-Length') ?? '0') > TAILLE_MAX_CORPS) return refusCorps;
+  const texte = await c.req.text();
+  const corps = texte.length > TAILLE_MAX_CORPS ? undefined : analyserCorps(texte);
+  if (corps === undefined) return refusCorps;
+  const requete = RequeteLectureSchema.safeParse(corps);
+  const annonce = requete.success ? resoudreAnnonce(requete.data.url) : null;
+  if (annonce?.urlCanonique.startsWith('https://') !== true) {
+    return { ok: false, reponse: reponseErreur(400, 'PARAMETRES_INVALIDES', { champs: ['url'] }) };
+  }
+  return { ok: true, annonce };
+}
+
 /**
  * POST /lecture { url } : récupère la page d'une annonce des cinq portails, à la demande de la
  * personne (ADR-008). Rien n'est mis en cache ni journalisé du contenu.
  */
 export function creerLecture(deps: Dependances): Handler<BlankEnv, '/lecture'> {
   return async (c) => {
-    const texte = await c.req.text();
-    const corps = texte.length > TAILLE_MAX_CORPS ? undefined : analyserCorps(texte);
-    if (corps === undefined)
-      return reponseErreur(400, 'PARAMETRES_INVALIDES', { champs: ['corps'] });
-    const requete = RequeteLectureSchema.safeParse(corps);
-    const annonce = requete.success ? resoudreAnnonce(requete.data.url) : null;
-    if (annonce === null) return reponseErreur(400, 'PARAMETRES_INVALIDES', { champs: ['url'] });
+    const demande = await lireDemande(c, deps);
+    if (!demande.ok) return demande.reponse;
+    const { annonce } = demande;
 
     const debut = deps.maintenant();
     const enCours = lire(deps, annonce);

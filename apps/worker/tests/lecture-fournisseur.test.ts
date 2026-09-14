@@ -114,6 +114,15 @@ describe('lecteurBrightData', () => {
       ),
     ).toEqual({ ok: false, code: 'AMONT_INDISPONIBLE' });
 
+    const annonceeEnorme = new Response('<html></html>', {
+      headers: { 'content-length': String(TAILLE_MAX_PAGE + 1) },
+    });
+    expect(
+      await lecteurBrightData(CONFIG, fournisseur(annonceeEnorme).fetcher, journalMemoire()).lire(
+        URL_ANNONCE,
+      ),
+    ).toEqual({ ok: false, code: 'AMONT_INVALIDE' });
+
     const enorme = new Response('a'.repeat(TAILLE_MAX_PAGE + 1));
     expect(
       await lecteurBrightData(CONFIG, fournisseur(enorme).fetcher, journalMemoire()).lire(

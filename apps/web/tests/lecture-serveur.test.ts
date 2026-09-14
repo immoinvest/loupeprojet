@@ -127,6 +127,7 @@ describe('raisonDuCode', () => {
     ['HORS_LIGNE', 'indisponible'],
     ['INTROUVABLE', 'indisponible'],
     ['HTTP_404', 'indisponible'],
+    ['ORIGINE_REFUSEE', 'indisponible'],
     ['ANNONCE_INTROUVABLE', 'introuvable'],
     ['TROP_DE_REQUETES', 'limite'],
     ['RESEAU', 'reseau'],
