@@ -1,7 +1,8 @@
 import type { Resultats } from '@loupe/moteur';
 import type { JSX } from 'react';
 
-import { Carte, GrosChiffre, Ligne, Pastille, Pourquoi, TitreCarte } from '@/composants/ui';
+import { Info } from '@/composants/info';
+import { Carte, GrosChiffre, Ligne, Pastille, TitreCarte } from '@/composants/ui';
 import { euros, eurosSignes, pourcentage } from '@/formatage/nombres';
 import { EXPLICATIONS } from '@/textes/explications';
 import { TEXTES_FINANCEMENT as T, phraseCouverture } from '@/textes/financement';
@@ -15,7 +16,9 @@ export function CarteCout({ r }: { r: Resultats }): JSX.Element {
   const fraisBancaires = pret.fraisDossier + pret.fraisGarantie;
   return (
     <Carte>
-      <TitreCarte action={<Pourquoi texte={EXPLICATIONS.financement} />}>{T.cout}</TitreCarte>
+      <TitreCarte info={<Info sujet={T.cout} texte={EXPLICATIONS.financement} />}>
+        {T.cout}
+      </TitreCarte>
       {f.montantEmprunte > 0 ? (
         <GrosChiffre complement="par mois, assurance comprise">
           {euros(f.mensualiteTotale)}
@@ -102,7 +105,9 @@ export function CarteCouverture({ r }: { r: Resultats }): JSX.Element {
           : 'encre';
   return (
     <Carte>
-      <TitreCarte action={<Pourquoi texte={EXPLICATIONS.couverture} />}>{T.couverture}</TitreCarte>
+      <TitreCarte info={<Info sujet={T.couverture} texte={EXPLICATIONS.couverture} />}>
+        {T.couverture}
+      </TitreCarte>
       <GrosChiffre
         ton={ton}
         complement={valeur === null ? 'pas de loyer' : 'du loyer part dans le crédit'}

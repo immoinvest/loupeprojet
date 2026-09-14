@@ -1,4 +1,5 @@
 import type { Feu } from '@loupe/moteur';
+import { ArrowRight } from 'lucide-react';
 import type { JSX, ReactNode } from 'react';
 import { Link } from 'react-router';
 
@@ -82,26 +83,65 @@ export function Carte({
   );
 }
 
+const CLASSE_TITRE_CARTE = 'm-0 font-display text-[22px] font-semibold';
+
+/**
+ * Titre d'une carte : la question, son icône d'information juste à côté (`info`, hors du `h2`
+ * pour ne pas changer son nom accessible) et une action à droite. En mode document, l'explication
+ * et l'action s'empilent sous le titre.
+ */
 export function TitreCarte({
   children,
+  info,
   action,
 }: {
   children: ReactNode;
+  info?: ReactNode;
   action?: ReactNode;
 }): JSX.Element {
-  // En mode document, l'action (souvent une explication dépliée) passe sous le titre.
   const document = useModeDocument();
+  if (document) {
+    return (
+      <div className="flex flex-col gap-2">
+        <h2 className={CLASSE_TITRE_CARTE}>{children}</h2>
+        {info}
+        {action}
+      </div>
+    );
+  }
   return (
-    <div
-      className={
-        document
-          ? 'flex flex-col gap-2'
-          : 'flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1'
-      }
-    >
-      <h2 className="m-0 font-display text-[22px] font-semibold">{children}</h2>
+    <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
+      <div className="flex min-w-0 items-center gap-1">
+        <h2 className={CLASSE_TITRE_CARTE}>{children}</h2>
+        {info}
+      </div>
       {action}
     </div>
+  );
+}
+
+export type Volet = 'adresse' | 'hypotheses' | 'fiscalite' | 'revente' | 'visite';
+
+/**
+ * Lien vers un volet du projet, en bas de carte (« Voir la fiscalité »). Relatif à la route
+ * `projets/:id`. Rien dans un document : il contient déjà tous les volets.
+ */
+export function LienOnglet({
+  vers,
+  children,
+}: {
+  vers: Volet;
+  children: ReactNode;
+}): JSX.Element | null {
+  if (useModeDocument()) return null;
+  return (
+    <Link
+      to={vers}
+      className="mt-auto inline-flex min-h-11 items-center gap-1.5 self-start text-[15px] font-bold no-underline hover:underline"
+    >
+      {children}
+      <ArrowRight size={18} aria-hidden="true" />
+    </Link>
   );
 }
 
@@ -153,29 +193,6 @@ export function Ligne({
       {/* Un montant ne se coupe jamais : c'est le libellé qui passe à la ligne. */}
       <span className={`shrink-0 text-right whitespace-nowrap ${tonValeur}`}>{valeur}</span>
     </div>
-  );
-}
-
-const CLASSE_EXPLICATION = 'rounded-encart bg-accent-fond p-3 leading-relaxed text-encre-2';
-
-/** Explication longue, repliée par défaut ; toujours visible dans un document. */
-export function Pourquoi({
-  texte,
-  libelle = 'Pourquoi ?',
-}: {
-  texte: string;
-  libelle?: string;
-}): JSX.Element {
-  if (useModeDocument()) {
-    return <p className={`m-0 text-sm ${CLASSE_EXPLICATION}`}>{texte}</p>;
-  }
-  return (
-    <details className="text-sm">
-      <summary className="cursor-pointer list-none font-bold text-accent pointer-coarse:min-w-11 pointer-coarse:py-3">
-        {libelle}
-      </summary>
-      <p className={`mt-2 mb-0 ${CLASSE_EXPLICATION}`}>{texte}</p>
-    </details>
   );
 }
 
