@@ -28,6 +28,30 @@ export const AdresseBienSchema = z.object({
 });
 export type AdresseBien = z.infer<typeof AdresseBienSchema>;
 
+export const EtatReponseSchema = z.enum(['a_verifier', 'ok', 'probleme', 'sans_objet']);
+export type EtatReponse = z.infer<typeof EtatReponseSchema>;
+
+/** Une note reste courte : elle voyage dans le lien de partage avec tout le projet. */
+export const LONGUEUR_MAX_NOTE = 300;
+
+export const ReponseVisiteSchema = z.object({
+  etat: EtatReponseSchema,
+  note: z.string().max(LONGUEUR_MAX_NOTE).optional(),
+});
+export type ReponseVisite = z.infer<typeof ReponseVisiteSchema>;
+
+/**
+ * La visite du bien : faite ou non, et les réponses données, par identifiant de question de la
+ * base du moteur. Une réponse dont l'identifiant n'existe plus est ignorée à l'affichage.
+ */
+export const VisiteSchema = z.object({
+  faite: z.boolean(),
+  /** Date ISO du jour où la visite a été marquée faite. */
+  date: z.string().optional(),
+  reponses: z.record(z.string(), ReponseVisiteSchema).default({}),
+});
+export type Visite = z.infer<typeof VisiteSchema>;
+
 export const ProjetEnregistreSchema = z.object({
   id: z.string().min(1),
   nom: z.string().min(1),
@@ -35,6 +59,8 @@ export const ProjetEnregistreSchema = z.object({
   creeLe: z.string(),
   modifieLe: z.string(),
   adresse: AdresseBienSchema.optional(),
+  /** Absente : visite non faite, aucune réponse (projets enregistrés avant cette feature). */
+  visite: VisiteSchema.optional(),
   projet: ProjetSchema,
 });
 export type ProjetEnregistre = z.infer<typeof ProjetEnregistreSchema>;
@@ -63,6 +89,9 @@ export interface OptionsCreation {
   readonly nom?: string;
   readonly statut?: StatutProjet;
   readonly source?: ProjetEntree;
+  /** Adresse exacte et visite reprises d'un projet reçu par lien, ou visite déjà faite à la création. */
+  readonly adresse?: AdresseBien;
+  readonly visite?: Visite;
   readonly maintenant?: () => string;
   readonly genererId?: () => string;
 }
@@ -80,6 +109,8 @@ export function creerProjet(options: OptionsCreation = {}): ProjetEnregistre {
     statut: options.statut ?? 'analyse',
     creeLe: date,
     modifieLe: date,
+    ...(options.adresse === undefined ? {} : { adresse: options.adresse }),
+    ...(options.visite === undefined ? {} : { visite: options.visite }),
     projet: ProjetSchema.parse({ ...source, id }),
   };
 }
