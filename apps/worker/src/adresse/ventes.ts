@@ -13,6 +13,8 @@ export interface VenteDvf {
   readonly codeVoie: string | null;
   readonly voie: string | null;
   readonly carrez: number | null;
+  /** Commune de la vente quand elle vient d'une commune voisine ; absente pour la commune du bien. */
+  readonly codeInsee?: string | undefined;
 }
 
 const DATE_ISO = /^\d{4}-\d{2}-\d{2}$/;
