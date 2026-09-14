@@ -65,6 +65,11 @@ export function periodeSuivante(periode: string): string {
   return periodeDe(ajouterJours(bornesPeriode(periode).fin, 1));
 }
 
+/** « 2027-01 » → « 2026-12 ». */
+export function periodePrecedente(periode: string): string {
+  return periodeDe(ajouterJours(bornesPeriode(periode).debut, -1));
+}
+
 /** Le jour civil d'un instant dans le fuseau de l'appareil (celui de la personne, côté web). */
 export function jourLocal(instant: Date): string {
   return `${String(instant.getFullYear())}-${deuxChiffres(instant.getMonth() + 1)}-${deuxChiffres(instant.getDate())}`;

@@ -1,7 +1,7 @@
 import { obtenirRegles, prixRetenu } from '@loupe/moteur';
 import { useEffect, useState, type JSX } from 'react';
 
-import { Chapo, Page, TitrePage } from '@/composants/mise-en-page';
+import { Page, TitrePage } from '@/composants/mise-en-page';
 import { Bouton, Carte, Pastille } from '@/composants/ui';
 import { useClientWorker } from '@/coque/ClientWorker';
 import { useProjetCourant } from '@/coque/ProjetLayout';
@@ -174,16 +174,9 @@ export function Adresse(): JSX.Element {
 
   return (
     <Page>
-      <div className="flex flex-col gap-2">
-        <TitrePage taille="volet" className="max-w-[26ch]">
-          Combien vaut ce bien, à l'adresse exacte ?
-        </TitrePage>
-        <Chapo>
-          Les ventes réelles au plus près du bien, ramenées au prix d'aujourd'hui, puis corrigées
-          selon son état et ses caractéristiques. Le DPE, les risques et le loyer de marché de
-          l'adresse s'y ajoutent. Chaque chiffre montre sa source.
-        </Chapo>
-      </div>
+      <TitrePage taille="volet" className="max-w-[26ch]">
+        Combien vaut ce bien, à l'adresse exacte ?
+      </TitrePage>
 
       <CarteConfiance />
 

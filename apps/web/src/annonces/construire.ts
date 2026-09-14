@@ -38,6 +38,7 @@ export interface SaisieProjet {
   readonly dpe?: ClasseEnergie | undefined;
   readonly etat?: EtatBien | undefined;
   readonly exterieur?: boolean | undefined;
+  readonly venduLoue?: boolean | undefined;
   readonly codePostal: string;
   readonly ville: string;
   readonly chargesCoproMois?: number | undefined;
@@ -164,6 +165,9 @@ function assembler(
   if (s.exterieur !== undefined) {
     provenance['bien.exterieur'] = s.provenance.exterieur ?? 'utilisateur';
   }
+  if (s.venduLoue !== undefined) {
+    provenance['bien.venduLoue'] = s.provenance.venduLoue ?? 'utilisateur';
+  }
   if (s.lotsCopro !== undefined) {
     provenance['bien.copro.lots'] = s.provenance.lotsCopro ?? 'utilisateur';
   }
@@ -196,6 +200,7 @@ function assembler(
       ...(s.dpe === undefined ? {} : { dpe: s.dpe }),
       ...(s.etat === undefined ? {} : { etat: s.etat }),
       ...(s.exterieur === undefined ? {} : { exterieur: s.exterieur }),
+      ...(s.venduLoue === undefined ? {} : { venduLoue: s.venduLoue }),
       departement: departementDuCodePostal(s.codePostal),
     },
     ...(enrichi === null ? {} : { marche: enrichi.marche }),

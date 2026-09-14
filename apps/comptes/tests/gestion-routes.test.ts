@@ -104,6 +104,8 @@ describe('état et création', () => {
       locataires: [],
       locations: [],
       paiements: [],
+      bailleur: null,
+      documents: [],
       preferences: { analyser: true, gerer: true },
     });
   });
@@ -157,32 +159,140 @@ describe('état et création', () => {
 });
 
 describe('paiements', () => {
-  it('reçu, période déjà reçue, annulation, puis introuvable', async () => {
-    const b = bancD1();
+  /** Le 20 octobre 2026 : les paiements d'octobre datés jusqu'à ce jour sont dans le passé. */
+  const HORLOGE = { optionsDepot: { maintenant: () => '2026-10-20T10:00:00.000Z' } };
+
+  function partiel(locationId: string, montant: number, date: string): object {
+    return { locationId, periode: '2026-10', montant, date };
+  }
+
+  it('reçu en deux fois ; au-delà du dû, 409 MONTANT_DEPASSE ; annulation puis introuvable', async () => {
+    const b = bancD1(HORLOGE);
     await connecter(b, CAMILLE);
     const { location } = await creerLouee(b);
     const locationId = location?.id ?? '';
 
-    const paye = await b.requete('/api/gestion/paiements', { corps: paiementDe(locationId) });
-    expect(paye.status).toBe(201);
-    const paiement = await lire<Paiement>(paye);
-    expect(paiement).toMatchObject({ locationId, periode: '2026-10', source: 'manuel' });
+    const premier = await b.requete('/api/gestion/paiements', {
+      corps: partiel(locationId, 30_000, '2026-10-06'),
+    });
+    expect(premier.status).toBe(201);
+    const p1 = await lire<Paiement>(premier);
+    expect(p1).toMatchObject({ locationId, periode: '2026-10', montant: 30_000, source: 'manuel' });
+    const second = await b.requete('/api/gestion/paiements', {
+      corps: partiel(locationId, 40_000, '2026-10-20'),
+    });
+    expect(second.status).toBe(201);
+    const p2 = await lire<Paiement>(second);
 
-    const doublon = await b.requete('/api/gestion/paiements', { corps: paiementDe(locationId) });
-    expect(doublon.status).toBe(409);
-    expect(await doublon.json()).toEqual({ code: 'PERIODE_DEJA_RECUE' });
-    expect((await etat(b)).paiements).toEqual([paiement]);
+    const deTrop = await b.requete('/api/gestion/paiements', {
+      corps: partiel(locationId, 1, '2026-10-20'),
+    });
+    expect(deTrop.status).toBe(409);
+    expect(await deTrop.json()).toEqual({ code: 'MONTANT_DEPASSE' });
+    expect((await etat(b)).paiements).toEqual([p1, p2]);
 
-    const annule = await b.requete(`/api/gestion/paiements/${paiement.id}`, { method: 'DELETE' });
+    const annule = await b.requete(`/api/gestion/paiements/${p1.id}`, { method: 'DELETE' });
     expect(annule.status).toBe(204);
-    expect((await etat(b)).paiements).toEqual([]);
-    const encore = await b.requete(`/api/gestion/paiements/${paiement.id}`, { method: 'DELETE' });
+    expect((await etat(b)).paiements).toEqual([p2]);
+    const encore = await b.requete(`/api/gestion/paiements/${p1.id}`, { method: 'DELETE' });
     expect(encore.status).toBe(404);
     expect(await encore.json()).toEqual({ code: 'INTROUVABLE' });
   });
 
+  it('le dû est celui du serveur, prorata compris : une entrée le 12 ne reçoit pas un mois plein', async () => {
+    const b = bancD1(HORLOGE);
+    await connecter(b, CAMILLE);
+    const r = await b.requete('/api/gestion/locations', {
+      corps: { ...CREATION, location: { ...CREATION.location, debut: '2026-10-12' } },
+    });
+    const { location } = await lire<CreationReponse>(r);
+    const locationId = location?.id ?? '';
+    const moisPlein = await b.requete('/api/gestion/paiements', {
+      corps: partiel(locationId, 70_000, '2026-10-12'),
+    });
+    expect(moisPlein.status).toBe(409);
+    // 65 000 × 20 ÷ 31 + 5 000 × 20 ÷ 31, arrondis séparément : 41 935 + 3 226.
+    const prorata = await b.requete('/api/gestion/paiements', {
+      corps: partiel(locationId, 45_161, '2026-10-12'),
+    });
+    expect(prorata.status).toBe(201);
+  });
+
+  it('un paiement daté dans le futur : 400 DATE_INVALIDE, rien n’est écrit', async () => {
+    const b = bancD1(HORLOGE);
+    await connecter(b, CAMILLE);
+    const { location } = await creerLouee(b);
+    const futur = await b.requete('/api/gestion/paiements', {
+      corps: partiel(location?.id ?? '', 70_000, '2026-10-21'),
+    });
+    expect(futur.status).toBe(400);
+    expect(await futur.json()).toEqual({ code: 'DATE_INVALIDE' });
+    expect(compter(b.sqlite, 'gestion_paiement')).toBe(0);
+  });
+
+  it('un paiement attesté par un reçu ou par la quittance du mois ne s’annule plus : 409 DOCUMENT_EMIS', async () => {
+    const b = bancD1(HORLOGE);
+    await connecter(b, CAMILLE);
+    const { location } = await creerLouee(b);
+    const locationId = location?.id ?? '';
+    const p1 = await lire<Paiement>(
+      await b.requete('/api/gestion/paiements', {
+        corps: partiel(locationId, 30_000, '2026-10-06'),
+      }),
+    );
+    const p2 = await lire<Paiement>(
+      await b.requete('/api/gestion/paiements', {
+        corps: partiel(locationId, 40_000, '2026-10-20'),
+      }),
+    );
+    const compte = b.sqlite.prepare('select id from "user" where email = ?').get(CAMILLE);
+    const inserer = b.sqlite.prepare(
+      'insert into gestion_document (id, userId, cle, type, numero, locationId, periode, paiementId, contenu, emisLe) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+    );
+    inserer.run(
+      'd1',
+      String(compte?.id),
+      `recu:${p1.id}`,
+      'recu',
+      'R',
+      locationId,
+      '2026-10',
+      p1.id,
+      '{}',
+      'x',
+    );
+
+    const recuEmis = await b.requete(`/api/gestion/paiements/${p1.id}`, { method: 'DELETE' });
+    expect(recuEmis.status).toBe(409);
+    expect(await recuEmis.json()).toEqual({ code: 'DOCUMENT_EMIS' });
+    expect((await b.requete(`/api/gestion/paiements/${p2.id}`, { method: 'DELETE' })).status).toBe(
+      204,
+    );
+
+    const p3 = await lire<Paiement>(
+      await b.requete('/api/gestion/paiements', {
+        corps: partiel(locationId, 40_000, '2026-10-20'),
+      }),
+    );
+    inserer.run(
+      'd2',
+      String(compte?.id),
+      `quittance:${locationId}:2026-10`,
+      'quittance',
+      'Q',
+      locationId,
+      '2026-10',
+      null,
+      '{}',
+      'x',
+    );
+    const quittanceEmise = await b.requete(`/api/gestion/paiements/${p3.id}`, { method: 'DELETE' });
+    expect(quittanceEmise.status).toBe(409);
+    expect(compter(b.sqlite, 'gestion_paiement')).toBe(2);
+  });
+
   it('un paiement invalide ou sur une location inconnue : 400 ou 404', async () => {
-    const b = bancD1();
+    const b = bancD1(HORLOGE);
     await connecter(b, CAMILLE);
     const invalide = await b.requete('/api/gestion/paiements', {
       corps: { ...paiementDe('l1'), montant: 0 },
@@ -193,8 +303,8 @@ describe('paiements', () => {
   });
 
   it('accès croisé : un autre compte ne voit, ne paie ni n’annule rien', async () => {
-    const a = bancD1();
-    const b = bancD1({ sqlite: a.sqlite });
+    const a = bancD1(HORLOGE);
+    const b = bancD1({ ...HORLOGE, sqlite: a.sqlite });
     await connecter(a, CAMILLE);
     await connecter(b, 'antoine.dupont@example.org');
     const { location } = await creerLouee(a);
@@ -259,6 +369,12 @@ describe('pannes et suppression du compte', () => {
       payer: () => Promise.reject(new Error('disque plein')),
       annulerPaiement: () => Promise.reject(new Error('disque plein')),
       enregistrerPreferences: () => Promise.reject(new Error('disque plein')),
+      enregistrerBailleur: () => Promise.reject(new Error('disque plein')),
+      emettreDocument: () => Promise.reject(new Error('disque plein')),
+      document: () => Promise.reject(new Error('disque plein')),
+      terminerLocation: () => Promise.reject(new Error('disque plein')),
+      louer: () => Promise.reject(new Error('disque plein')),
+      exporter: () => Promise.reject(new Error('disque plein')),
     };
     const b = bancD1({ surcharges: { gestion: enPanne } });
     await connecter(b, CAMILLE);
@@ -273,10 +389,14 @@ describe('pannes et suppression du compte', () => {
   });
 
   it('supprimer le compte supprime toutes ses données de gestion (clés étrangères en cascade)', async () => {
-    const b = bancD1();
+    // Le 20 octobre 2026 : le paiement du 5 octobre est dans le passé.
+    const b = bancD1({ optionsDepot: { maintenant: () => '2026-10-20T10:00:00.000Z' } });
     await connecter(b, CAMILLE);
     const { location } = await creerLouee(b);
-    await b.requete('/api/gestion/paiements', { corps: paiementDe(location?.id ?? '') });
+    const paye = await b.requete('/api/gestion/paiements', {
+      corps: paiementDe(location?.id ?? ''),
+    });
+    expect(paye.status).toBe(201);
     await b.requete('/api/gestion/preferences', {
       method: 'PUT',
       corps: { analyser: false, gerer: true },

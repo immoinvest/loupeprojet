@@ -61,6 +61,9 @@ describe('textes de l’estimation', () => {
       'Rez-de-chaussée.',
     );
     expect(raisonCorrection(correction('exterieur'), bien, estimation)).toBe('Balcon ou terrasse.');
+    expect(raisonCorrection(correction('occupation'), bien, estimation)).toBe(
+      'Locataire en place : un bien occupé se vend moins cher qu’un bien libre.',
+    );
     expect(n(raisonCorrection(correction('charges'), bien, estimation))).toBe(
       '1 080 € par an, 610 € en dessous du repère de 1 690 €, capitalisés au rendement local de 5,9 %.',
     );

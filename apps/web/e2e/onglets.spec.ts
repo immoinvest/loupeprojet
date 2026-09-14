@@ -30,9 +30,7 @@ test('fiscalité : « Retenir ce régime » change le régime retenu et le rappo
 
   await ouvrirVolet(page, 'Rapport', /Le prix est bon\./);
   await expect(carte(page, "Combien d'impôts ?")).toContainText(/26\s928\s€\s*sur 10 ans/);
-  await expect(carte(page, "Combien d'impôts ?")).toContainText(
-    "Meublé micro-BIC : imposé à partir de l'année 1.",
-  );
+  await expect(carte(page, "Combien d'impôts ?")).toContainText('Meublé micro-BIC.');
 });
 
 test('revente : le curseur, le clavier et les repères changent l’horizon', async ({ page }) => {

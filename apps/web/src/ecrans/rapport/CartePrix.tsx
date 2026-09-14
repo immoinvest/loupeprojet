@@ -140,7 +140,6 @@ const TITRE = "Est-ce que c'est cher ?";
 export function CartePrix({ r }: { r: Resultats }): JSX.Element {
   const feu = r.verdict.feux.find((f) => f.axe === 'prix')?.feu ?? 'inconnu';
   const reponse = feu === 'bon' ? 'non' : feu === 'surveiller' ? 'presque' : 'oui';
-  const n = r.projet.marche.dvf?.nombreVentes ?? 0;
   return (
     <Carte>
       <TitreCarte info={<Info sujet={TITRE} texte={explicationPrix(r)} />}>{TITRE}</TitreCarte>
@@ -160,12 +159,9 @@ export function CartePrix({ r }: { r: Resultats }): JSX.Element {
           {niveauEnPhrase(r.estimation.confiance.niveau)} ({r.estimation.confiance.note}/100).
         </p>
       )}
-      {n > 0 && (
+      {feu === 'bon' && (
         <p className="m-0 text-[15px] leading-relaxed text-encre-2">
-          {n} ventes réelles autour du bien.{' '}
-          {feu === 'bon'
-            ? 'Un prix aussi bas se vérifie en visite : pourquoi le vendeur baisse ?'
-            : ''}
+          Un prix aussi bas se vérifie en visite : pourquoi le vendeur baisse ?
         </p>
       )}
       <LienOnglet vers="adresse">Voir l'estimation</LienOnglet>

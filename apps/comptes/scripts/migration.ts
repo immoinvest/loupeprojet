@@ -20,6 +20,7 @@ export const FICHIER_MIGRATION = new URL('../migrations/0001_comptes.sql', impor
 export const MIGRATIONS: readonly { readonly fichier: string; readonly table: string }[] = [
   { fichier: '0001_comptes.sql', table: 'user' },
   { fichier: '0002_gestion.sql', table: 'gestion_bien' },
+  { fichier: '0003_gestion_documents.sql', table: 'gestion_document' },
   { fichier: '0004_projets.sql', table: 'projet' },
 ];
 

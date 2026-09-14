@@ -29,7 +29,6 @@ export const TEXTES_A_COMPLETER = {
   titre: 'À compléter',
   phrase: 'Indiquez le loyer visé pour voir ce chiffre.',
   verdictCashflow: 'Le loyer reste à indiquer.',
-  sousTitreSeul: 'Indiquez le loyer visé pour connaître le cash-flow.',
   boutonLoyerMarche: 'Utiliser le loyer de marché :',
   appliquer: 'Appliquer',
 } as const;
@@ -39,7 +38,5 @@ export const TEXTES_TRANCHE = {
   titre: "Votre tranche d'imposition",
   phrase:
     'Les impôts ci-dessus supposent une tranche à 30 %, la plus fréquente pour un ménage qui emprunte pour investir. Choisissez la vôtre : les feux du verdict ne changent pas, les impôts et le TRI oui.',
-  supposee: 'une tranche supposée à',
-  choisie: 'votre tranche à',
   mentionRapport: 'Tranche supposée à',
 } as const;

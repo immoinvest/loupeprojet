@@ -4,7 +4,7 @@ import type { JSX } from 'react';
 import { multipleSurApport } from '@/analyses/rapport';
 import { useModeDocument } from '@/composants/document';
 import { Info } from '@/composants/info';
-import { Chapo, Page, TitrePage } from '@/composants/mise-en-page';
+import { Page, TitrePage } from '@/composants/mise-en-page';
 import { Carte, GrosChiffre, Ligne, LienOnglet, Pastille, TitreCarte } from '@/composants/ui';
 import { euros, eurosSignes, nombre, pourcentage } from '@/formatage/nombres';
 import { useProjetCourant } from '@/coque/ProjetLayout';
@@ -53,11 +53,7 @@ function CarteFiscalite({ r }: { r: ResultatsComplets }): JSX.Element {
         {euros(retenu.impotTotal)}
       </GrosChiffre>
       <p className="m-0 text-[15px] text-encre-2">
-        {REGIMES[f.retenu]}
-        {retenu.premiereAnneeImposable === null
-          ? ' : aucun impôt sur la période.'
-          : ` : imposé à partir de l'année ${String(retenu.premiereAnneeImposable)}.`}
-        {!retenu.eligible ? ' Plafond du régime dépassé.' : ''}
+        {REGIMES[f.retenu]}.{!retenu.eligible ? ' Plafond du régime dépassé.' : ''}
         {r.projet.provenance['fiscalite.tmi'] === 'estime'
           ? ` ${TEXTES_TRANCHE.mentionRapport} ${pourcentage(r.projet.hypotheses.fiscalite.tmi, 0)}.`
           : ''}
@@ -183,7 +179,6 @@ export function Rapport(): JSX.Element {
         <TitrePage taille="accroche" className="max-w-[24ch]">
           {verdict.titre}
         </TitrePage>
-        <Chapo className="leading-relaxed">{verdict.sousTitre}</Chapo>
         <div className="flex flex-wrap gap-2.5 pt-1" aria-label="Cinq feux">
           {r.verdict.feux.map((f) => (
             <Pastille key={f.axe} ton={f.feu} feu={f.feu}>
@@ -194,9 +189,6 @@ export function Rapport(): JSX.Element {
       </div>
       <CarteBien />
       {r.complet ? <Analyses r={r} /> : <AnalysesACompleter r={r} />}
-      <p className="m-0 text-xs text-encre-3">
-        Règles fiscales {r.meta.versionRegles}. Outil d'aide à la décision, pas un conseil.
-      </p>
     </Page>
   );
 }

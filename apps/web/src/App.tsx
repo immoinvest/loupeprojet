@@ -25,7 +25,10 @@ import { Extension } from './ecrans/Extension';
 import { Financement } from './ecrans/Financement';
 import { Fiscalite } from './ecrans/Fiscalite';
 import { AjouterMain } from './ecrans/gerer/AjouterMain';
+import { FicheBien } from './ecrans/gerer/FicheBien';
 import { Gerer } from './ecrans/gerer/Gerer';
+import { ImprimerDocument } from './ecrans/gerer/ImprimerDocument';
+import { Loyers } from './ecrans/gerer/Loyers';
 import { PretAGerer } from './ecrans/gerer/PretAGerer';
 import { Hypotheses } from './ecrans/Hypotheses';
 import { Imprimer } from './ecrans/Imprimer';
@@ -45,9 +48,10 @@ import { SynchroProvider } from './stockage/synchro/SynchroContext';
 import type { ClientProjets } from './stockage/synchro/types';
 
 export const routes: RouteObject[] = [
-  // Hors de la coque : la page de connexion classique, centrée, et le document imprimable.
+  // Hors de la coque : la page de connexion classique, centrée, et les documents imprimables.
   { path: 'connexion', element: <Connexion /> },
   { path: 'projets/:id/imprimer', element: <Imprimer /> },
+  { path: 'gerer/documents/:id', element: <ImprimerDocument /> },
   { path: 'simulateur-pret/imprimer', element: <SimulateurImprimer /> },
   {
     element: <AppLayout />,
@@ -70,6 +74,8 @@ export const routes: RouteObject[] = [
       },
       { path: 'gerer', element: <Gerer /> },
       { path: 'gerer/ajouter', element: <AjouterMain /> },
+      { path: 'gerer/loyers', element: <Loyers /> },
+      { path: 'gerer/biens/:id', element: <FicheBien /> },
       { path: 'gerer/pret/:id', element: <PretAGerer /> },
       { path: 'compte', element: <Compte /> },
       { path: 'partage', element: <Partage /> },

@@ -12,7 +12,6 @@ import {
   legendeCarte,
   libelleAccessibleCarte,
   libelleVenteCarte,
-  PHRASES_CARTE,
   phraseCarte,
 } from '@/textes/carte';
 
@@ -118,6 +117,5 @@ describe('carte des ventes : textes', () => {
     expect(n(libelleVenteCarte({ ...vente(3621), classe: 'milieu' }))).toBe(
       '3 621 €/m² · 58 m² · 210 000 € · 1 mars 2025 · à 40 m',
     );
-    expect(PHRASES_CARTE.fondDeCarte).toContain('Plan IGN (Géoplateforme)');
   });
 });

@@ -41,8 +41,6 @@ export function resumeTravaux(travaux: number, mobilier: number): string {
 }
 
 export const PHRASES_ACHAT = {
-  negociation:
-    "Le prix retenu sert à tout le rapport : notaire, prêt, rendement, feu prix, plus-value. Les honoraires d'agence restent en euros.",
   sousEstimation:
     "Le prix affiché est déjà sous le prix estimé : rien à négocier d'après le marché.",
   viser: (prixEstime: string): string => `Prix estimé ${prixEstime}.`,

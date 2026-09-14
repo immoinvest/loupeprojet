@@ -29,6 +29,8 @@ export const BienSchema = z.object({
   etat: EtatBienSchema.optional(),
   /** Balcon, terrasse ou loggia. */
   exterieur: z.boolean().optional(),
+  /** Vendu loué : un locataire est en place à la vente. */
+  venduLoue: z.boolean().optional(),
   /** Numéro de département (« 13 », « 2A », « 976 ») : détermine les droits de mutation. */
   departement: z.string().regex(/^(\d{2,3}|2A|2B)$/),
   copro: CoproSchema.optional(),

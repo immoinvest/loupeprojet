@@ -100,7 +100,6 @@ export function CarteAchat({
             <p className="m-0 text-sm text-encre-2">{PHRASES_ACHAT.sousEstimation}</p>
           )}
         </div>
-        <p className="m-0 px-2 text-xs text-encre-3">{PHRASES_ACHAT.negociation}</p>
       </div>
 
       <div className="flex flex-col gap-2">

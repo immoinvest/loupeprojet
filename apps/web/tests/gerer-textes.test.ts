@@ -4,7 +4,6 @@ import { projetsAReprendre } from '@/ecrans/gerer/Portes';
 import { creerProjet, type StatutProjet } from '@/stockage/projets';
 import {
   avecMajuscule,
-  biensVacants,
   de,
   entreesAVenir,
   loyerRecu,
@@ -13,6 +12,24 @@ import {
   STATUTS_LOYER,
   TONS_LOYER,
 } from '@/textes/gerer-ecrans';
+import { bienEtChambre, nomsDesLocataires, paiementEnregistre } from '@/textes/gerer-loyers';
+
+describe('textes des lignes de loyer', () => {
+  it('tous les locataires du bail : aucun, un, deux, trois', () => {
+    expect(nomsDesLocataires([])).toBe('');
+    expect(nomsDesLocataires(['Julie Martin'])).toBe('Julie Martin');
+    expect(nomsDesLocataires(['Julie Martin', 'Léa Bernard'])).toBe('Julie Martin et Léa Bernard');
+    expect(nomsDesLocataires(['Julie Martin', 'Léa Bernard', 'Hugo Petit'])).toBe(
+      'Julie Martin, Léa Bernard et Hugo Petit',
+    );
+  });
+
+  it('le bien et sa chambre ; le paiement enregistré', () => {
+    expect(bienEtChambre('Coloc Rouet', 'Chambre 2')).toBe('Coloc Rouet · Chambre 2');
+    expect(bienEtChambre('T2 Lices', undefined)).toBe('T2 Lices');
+    expect(paiementEnregistre(30_000).replace(/\s/g, ' ')).toBe('Paiement de 300 € enregistré.');
+  });
+});
 
 describe('textes des écrans de Gérer', () => {
   it('phraseDuMois : aucun, un seul, tous, une partie', () => {
@@ -45,12 +62,8 @@ describe('textes des écrans de Gérer', () => {
     ).toBe('Entrées à venir : T2 Lices le 1er octobre 2026 ; Studio Baille le 15 novembre 2026');
   });
 
-  it('majuscule, biens vacants, statuts et tons', () => {
+  it('majuscule, statuts et tons', () => {
     expect(avecMajuscule('septembre 2026')).toBe('Septembre 2026');
-    expect(biensVacants(['Parking Prado'])).toBe('Sans locataire : Parking Prado');
-    expect(biensVacants(['Parking Prado', 'Cave Rouet'])).toBe(
-      'Sans locataire : Parking Prado, Cave Rouet',
-    );
     expect(STATUTS_LOYER.en_retard).toBe('En retard');
     expect(TONS_LOYER.recu).toBe('bon');
   });

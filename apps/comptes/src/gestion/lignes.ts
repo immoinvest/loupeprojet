@@ -1,11 +1,18 @@
+import type { D1PreparedStatement } from '@cloudflare/workers-types';
 import {
   BienGereSchema,
+  DocumentCompletSchema,
+  DocumentSchema,
+  IdentiteBailleurSchema,
   LocataireSchema,
   LocationGereeSchema,
   PaiementSchema,
   PREFERENCES_PAR_DEFAUT,
   PreferencesMenuSchema,
   type BienGere,
+  type DocumentComplet,
+  type DocumentGestion,
+  type IdentiteBailleur,
   type Locataire,
   type LocationGeree,
   type Paiement,
@@ -16,6 +23,12 @@ import {
 export type Ligne = Readonly<Record<string, unknown>>;
 
 export type ValeurSql = string | number | null;
+
+/** Une requête préparée, valeurs converties pour D1 (partagé par les trois parties du dépôt). */
+export type Lier = (
+  sql: string,
+  ...valeurs: (string | number | boolean | undefined)[]
+) => D1PreparedStatement;
 
 /** Pour D1 : `undefined` devient NULL, un booléen 0 ou 1. */
 export function valeurSql(valeur: string | number | boolean | undefined): ValeurSql {
@@ -55,8 +68,24 @@ export function versLocataire(ligne: Ligne): Locataire {
   return LocataireSchema.parse(sansNulls(ligne));
 }
 
-export function versLocation(ligne: Ligne): LocationGeree {
-  return LocationGereeSchema.parse(sansNulls(ligne));
+/** La location et ses colocataires, lus à part dans gestion_colocataire (ADR-G13). */
+export function versLocation(ligne: Ligne, colocataireIds: readonly string[]): LocationGeree {
+  return LocationGereeSchema.parse({ ...sansNulls(ligne), colocataireIds });
+}
+
+/** Les colocataires de chaque location, dans l'ordre du bail (lignes triées par location puis ordre). */
+export function colocatairesParLocation(
+  lignes: readonly Ligne[],
+): ReadonlyMap<string, readonly string[]> {
+  const parLocation = new Map<string, string[]>();
+  for (const ligne of lignes) {
+    const locationId = String(ligne.locationId);
+    parLocation.set(locationId, [
+      ...(parLocation.get(locationId) ?? []),
+      String(ligne.locataireId),
+    ]);
+  }
+  return parLocation;
 }
 
 export function versPaiement(ligne: Ligne): Paiement {
@@ -67,4 +96,20 @@ export function versPaiement(ligne: Ligne): Paiement {
 export function versPreferences(ligne: Ligne | undefined): PreferencesMenu {
   if (ligne === undefined) return PREFERENCES_PAR_DEFAUT;
   return PreferencesMenuSchema.parse({ analyser: ligne.analyser === 1, gerer: ligne.gerer === 1 });
+}
+
+/** Sans ligne, pas encore d'identité : elle sera demandée à la première quittance. */
+export function versBailleur(ligne: Ligne | undefined): IdentiteBailleur | null {
+  return ligne === undefined ? null : IdentiteBailleurSchema.parse(ligne);
+}
+
+/** Un document tel que l'état le liste : sans son contenu. */
+export function versDocument(ligne: Ligne): DocumentGestion {
+  return DocumentSchema.parse(sansNulls(ligne));
+}
+
+/** Le contenu figé, relu et revalidé : un contenu abîmé est une erreur interne, jamais un document faux. */
+export function versDocumentComplet(ligne: Ligne): DocumentComplet {
+  const { contenu, ...reste } = sansNulls(ligne);
+  return DocumentCompletSchema.parse({ ...reste, contenu: JSON.parse(String(contenu)) as unknown });
 }

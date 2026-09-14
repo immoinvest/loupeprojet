@@ -100,8 +100,13 @@ describe('porte ouverte par le statut « Acheté »', () => {
     await utilisateur.type(screen.getByLabelText(TEXTES_PRET.locataire), 'Julie Martin');
     await cliquer(screen.getByRole('button', { name: TEXTES_PRET.cestParti }));
 
+    // Création, navigation puis rendu de l'accueil : plus d'une seconde quand toute la suite tourne.
     expect(
-      await screen.findByRole('heading', { level: 1, name: 'Aucun loyer attendu ce mois-ci.' }),
+      await screen.findByRole(
+        'heading',
+        { level: 1, name: 'Aucun loyer attendu ce mois-ci.' },
+        { timeout: 10_000 },
+      ),
     ).toBeInTheDocument();
     expect(clics).toBe(2);
     // Le locataire entre le mois prochain : ce n'est pas un bien vacant.
@@ -143,9 +148,10 @@ describe('porte ouverte par le statut « Acheté »', () => {
     const gestion = clientGestionMemoire();
     monter(`/gerer/pret/${id}`, gestion);
     await utilisateur.click(await screen.findByRole('button', { name: TEXTES_PRET.pasEncoreLoue }));
-    expect(
-      await screen.findByText('Sans locataire : T3 · 65 m² · Marseille 5e'),
-    ).toBeInTheDocument();
+    // Le nom du bien vacant est un lien vers sa fiche : le texte se lit sur tout le paragraphe.
+    expect(await screen.findByText(/^Sans locataire/, {}, { timeout: 10_000 })).toHaveTextContent(
+      'Sans locataire : T3 · 65 m² · Marseille 5e',
+    );
     expect(gestion.donnees()).toMatchObject({ locataires: [], locations: [] });
   });
 
@@ -187,9 +193,9 @@ describe('porte ouverte par le statut « Acheté »', () => {
     expect(gestion.appels).not.toContain('creer');
 
     await utilisateur.click(screen.getByRole('button', { name: TEXTES_PRET.pasEncoreLoue }));
-    expect(
-      await screen.findByText('Sans locataire : T3 · 65 m² · Marseille 5e'),
-    ).toBeInTheDocument();
+    expect(await screen.findByText(/^Sans locataire/, {}, { timeout: 10_000 })).toHaveTextContent(
+      'Sans locataire : T3 · 65 m² · Marseille 5e',
+    );
     expect(gestion.donnees()).toMatchObject({ locataires: [], locations: [] });
   });
 

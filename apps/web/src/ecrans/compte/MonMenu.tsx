@@ -81,7 +81,6 @@ export function MonMenu(): JSX.Element {
               {echec}
             </p>
           )}
-          <p className="m-0 text-xs text-encre-3">{T.partout}</p>
         </>
       ) : (
         <p className="m-0 text-sm text-encre-3">

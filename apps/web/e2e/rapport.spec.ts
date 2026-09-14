@@ -8,11 +8,6 @@ test('le rapport affiche le verdict, les cinq feux et les chiffres clés', async
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(
     'Le prix est bon. Le loyer ne couvre pas tout.',
   );
-  await expect(
-    page.getByText(
-      '−25 % par rapport au prix estimé, le crédit prend 84 % du loyer, 210 € à sortir chaque mois.',
-    ),
-  ).toBeVisible();
 
   const feux = page.getByLabel('Cinq feux');
   await expect(feux.getByText(/Prix|Rendement net|Cash-flow|Crédit|Risques/)).toHaveText([
@@ -42,7 +37,6 @@ test('le rapport affiche le verdict, les cinq feux et les chiffres clés', async
   await expect(autofinancement).toContainText(/1\s203\s€/);
 
   await expect(carte(page, "Est-ce que c'est cher ?")).toContainText('Non.');
-  await expect(carte(page, "Est-ce que c'est cher ?")).toContainText('31 ventes réelles');
 
   const rendements = carte(page, 'Combien ça rapporte ?');
   await expect(rendements).toContainText(/6,8\s%/);
@@ -52,15 +46,12 @@ test('le rapport affiche le verdict, les cinq feux et les chiffres clés', async
   await expect(page.getByText('Levier 1 · Négocier').locator('..')).toContainText('119 663 €');
 
   await expect(carte(page, "Combien d'impôts ?")).toContainText(/0\s€\s*sur 10 ans/);
-  await expect(carte(page, "Combien d'impôts ?")).toContainText(
-    'Meublé au réel : aucun impôt sur la période.',
-  );
+  await expect(carte(page, "Combien d'impôts ?")).toContainText('Meublé au réel.');
 
   const revente = carte(page, "Qu'est-ce qu'il vous restera ?");
   await expect(revente).toContainText(/58\s217\s€\s*dans 10 ans/);
   await expect(revente).toContainText('Multiple sur apport');
   await expect(revente).toContainText(/×\s0,7/);
-  await expect(page.getByText(/Outil d'aide à la décision, pas un conseil/)).toBeVisible();
 });
 
 test('les icônes ouvrent une bulle qui tient dans l’écran, les liens mènent aux onglets', async ({

@@ -30,6 +30,7 @@ export const GROUPE_BIEN: Groupe = {
     { chemin: 'bien.dpe', libelle: 'DPE', type: 'enum', options: DPE },
     { chemin: 'bien.etat', libelle: 'État', type: 'enum', options: ETATS },
     { chemin: 'bien.exterieur', libelle: 'Balcon ou terrasse', type: 'bool', options: OUI_NON },
+    { chemin: 'bien.venduLoue', libelle: 'Vendu loué', type: 'bool', options: OUI_NON },
     { chemin: 'bien.departement', libelle: 'Département', type: 'texte', obligatoire: true },
     { chemin: 'bien.copro.lots', libelle: 'Lots de copropriété', type: 'entier' },
   ],

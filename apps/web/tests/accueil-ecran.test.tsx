@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -184,7 +184,6 @@ describe('Accueil connecté', () => {
     expect(
       within(screen.getByRole('main')).queryByRole('heading', { level: 2, name: 'Analyser' }),
     ).toBeNull();
-    expect(screen.getByText('Tes biens loués, tes loyers, sous contrôle.')).toBeInTheDocument();
   });
 
   it('Analyser seulement : un seul bloc, pas de Gérer', async () => {
@@ -193,12 +192,14 @@ describe('Accueil connecté', () => {
         etat: { ...ETAT_SEPTEMBRE, preferences: { analyser: true, gerer: false } },
       }),
     );
-    expect(
-      await screen.findByText('Trouve le bien rentable, annonce après annonce.'),
-    ).toBeInTheDocument();
-    expect(
-      within(screen.getByRole('main')).queryByRole('heading', { level: 2, name: 'Gérer' }),
-    ).toBeNull();
+    await screen.findByRole('heading', { level: 1, name: 'Bonjour Camille' });
+    // Les préférences arrivent après le premier rendu : on attend que le bloc Gérer disparaisse.
+    await waitFor(() => {
+      expect(
+        within(screen.getByRole('main')).queryByRole('heading', { level: 2, name: 'Gérer' }),
+      ).toBeNull();
+    });
+    expect(bloc('Analyser')).toBeInTheDocument();
   });
 
   it('Gérer en chargement, puis en erreur avec « Réessayer »', async () => {
@@ -212,6 +213,7 @@ describe('Accueil connecté', () => {
         return lectures === 1 ? Promise.resolve({ ok: false, code: 'indisponible' }) : base.etat();
       },
     });
+    await screen.findByRole('heading', { level: 1, name: 'Bonjour Camille' });
     expect(await within(bloc('Gérer')).findByRole('alert')).toHaveTextContent(
       ERREURS_GESTION.indisponible,
     );

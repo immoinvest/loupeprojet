@@ -57,7 +57,7 @@ export function sectionEstimation(regles: Regles): SectionMethode {
       'Ventes comparables : même type de logement, surface à 40 % près, du même immeuble au cercle de 300 m (onglet Estimation), sinon la commune. Même immeuble = même parcelle ou même adresse : toutes ses ventes du même type comptent. Chaque prix au m² est ramené à la surface du bien par la pente des prix de la commune (les petits logements se vendent plus cher au m²), mesurée sur au moins 30 ventes et bornée.',
       'Date : chaque vente est ramenée au dernier semestre publié par la médiane du prix au m² par semestre de sa commune (ou du département), lissée sur trois semestres, sur cinq ans de ventes DVF.',
       `État : à rénover = premier quartile des ventes comparables, à rafraîchir = entre premier quartile et médiane, bon état = médiane (supposé par défaut), rénové = troisième quartile. DVF ne dit rien de l'état des biens vendus.`,
-      'Corrections : DPE, étage et ascenseur, balcon ou terrasse, en pourcentage du prix de marché, additionnées. Chacune se désactive pour un projet.',
+      'Corrections : DPE, étage et ascenseur, balcon ou terrasse, bien vendu loué, en pourcentage du prix de marché, additionnées. Chacune se désactive pour un projet.',
       `Charges : l'écart des charges de copropriété au repère de ${nombre(e.charges.repereM2An)} € par m² et par an est un coût permanent, capitalisé au rendement locatif brut local (loyer de référence ÷ prix médian), borné à ${pct(e.charges.borne)} du prix. Charges estimées par défaut : ignorées.`,
       `Confiance : une note sur 100, somme de quatre composantes lues sur le repère de prix : localisation (${String(maximum([...c.localisation.quartier, { points: c.localisation.immeuble }]))} points au plus), dispersion des prix (${String(maximum(c.dispersion))}), nombre de ventes comparables (${String(maximum(c.comparables))}) et ancienneté des ventes (${String(maximum(c.anciennete))}). Chaque barème est interpolé entre ses paliers ; une ancienneté inconnue est supposée à ${String(c.ancienneteSupposeeMois)} mois.`,
       `Fourchette : ${ORDRE_NIVEAUX.map((niveau) => `±${pct(e.marges[niveau])} si la confiance est ${niveauCourt(niveau)}`).join(', ')}.`,
@@ -99,6 +99,13 @@ export function sectionEstimation(regles: Regles): SectionMethode {
         valeur: pctSigne(e.exterieur),
         source: 'MeilleursAgents, onze plus grandes villes, mai 2020 (Marseille +15,9 %)',
         chemin: 'estimation.exterieur',
+      },
+      {
+        libelle: 'Vendu loué (écart à un bien libre)',
+        valeur: pctSigne(e.occupation),
+        source:
+          'DGFiP, « L’évaluation des immeubles bâtis » (moins-value des biens occupés, jusqu’à 40 % pour une maison) ; notaires : 10 à 20 % pour un bail en cours, moins sur les petites surfaces ; bas de la fourchette retenu',
+        chemin: 'estimation.occupation',
       },
       {
         libelle: 'Repère des charges de copropriété',

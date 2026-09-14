@@ -41,10 +41,6 @@ export function EtatLectureAuto({
         <p role="status" className="m-0 text-[15px] font-semibold">
           L'extension Deklic lit l'annonce…
         </p>
-        <p className="m-0 text-sm text-encre-2">
-          Un onglet s'ouvre un instant puis se referme. Si le portail affiche une vérification,
-          validez-la : la lecture reprend toute seule.
-        </p>
       </Carte>
     );
   }

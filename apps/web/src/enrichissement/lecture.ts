@@ -41,6 +41,8 @@ export function fusionnerChamps(regles: ChampsExtraits, ia: ChampsIa): ChampsExt
   }
   // Le type de location du modèle devient le type du formulaire.
   if (ia.typeLocation !== null && ia.typeLocation !== undefined) champs.mode = ia.typeLocation;
+  // Un loyer actuel lu par le modèle : le bien est vendu loué, sauf mention « libre » lue par les règles.
+  if ((ia.loyerActuel ?? 0) > 0 && regles.venduLoue !== false) champs.venduLoue = true;
   return champs;
 }
 

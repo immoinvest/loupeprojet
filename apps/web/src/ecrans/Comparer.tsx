@@ -16,7 +16,7 @@ import {
   type Indicateur,
   type Tri,
 } from '@/analyses';
-import { Chapo, Page, TitrePage } from '@/composants/mise-en-page';
+import { Page, TitrePage } from '@/composants/mise-en-page';
 import { Bouton, Carte, Point } from '@/composants/ui';
 import { euros } from '@/formatage/nombres';
 import { useProjets } from '@/stockage/ProjetsContext';
@@ -204,13 +204,7 @@ export function Comparer(): JSX.Element {
 
   return (
     <Page>
-      <div className="flex flex-col gap-2">
-        <TitrePage>Comparer</TitrePage>
-        <Chapo>
-          Deux à cinq projets côte à côte, avec leurs feux. La meilleure valeur de chaque ligne est
-          en vert.
-        </Chapo>
-      </div>
+      <TitrePage>Comparer</TitrePage>
 
       {projets.length < MIN_COMPARES ? (
         <Carte className="sm:flex-row sm:items-center sm:gap-5">

@@ -246,9 +246,6 @@ describe('verdict', () => {
   it('prix bon + cash-flow négatif (exemple)', () => {
     const t = texteVerdict(calculerProjet(projetExemple));
     expect(t.titre).toBe('Le prix est bon. Le loyer ne couvre pas tout.');
-    expect(n(t.sousTitre)).toContain('−25 % par rapport au prix estimé');
-    expect(n(t.sousTitre)).toContain('le crédit prend 84 % du loyer');
-    expect(n(t.sousTitre)).toContain('210 € à sortir chaque mois');
   });
 
   it('prix dans le marché, cash-flow positif', () => {
@@ -260,27 +257,21 @@ describe('verdict', () => {
     );
     const t = texteVerdict(r);
     expect(t.titre).toBe('Le prix est dans le marché. Le loyer couvre tout.');
-    expect(t.sousTitre).toContain('dans la poche');
   });
 
-  it('prix élevé, crédit qui dépasse le loyer', () => {
+  it('prix élevé', () => {
     const r = calculerProjet(
       variante({
         achat: { ...projetExemple.hypotheses.achat, prix: 240_000 },
         location: { mode: 'meuble', loyerHc: 1_100, vacanceSemaines: 0 },
       }),
     );
-    const t = texteVerdict(r);
-    expect(t.titre.startsWith('Le prix est élevé.')).toBe(true);
-    expect(n(t.sousTitre)).toMatch(/le crédit dépasse le loyer \(1\d\d %\)/);
+    expect(texteVerdict(r).titre.startsWith('Le prix est élevé.')).toBe(true);
   });
 
-  it('sans marché ni loyer : phrases de repli, sans mention du crédit', () => {
+  it('sans marché ni loyer : phrases de repli', () => {
     const r = calculerProjet(variante({ location: { mode: 'nu', loyerHc: 0 } }, { risques: [] }));
-    const t = texteVerdict(r);
-    expect(t.titre).toBe('Prix sans repère de marché. Le loyer ne couvre pas tout.');
-    expect(t.sousTitre).not.toContain('crédit');
-    expect(t.sousTitre).not.toContain('quartier');
+    expect(texteVerdict(r).titre).toBe('Prix sans repère de marché. Le loyer ne couvre pas tout.');
   });
 
   it('cash-flow presque : entre −100 et 0', () => {
@@ -333,13 +324,10 @@ describe('données manquantes', () => {
     );
   });
 
-  it('verdict partiel : le loyer reste à indiquer, sous-titre sans cash-flow', () => {
+  it('verdict partiel : le loyer reste à indiquer', () => {
     const t = texteVerdict(calculerProjet(sansLoyer()));
     expect(t.titre).toBe(`Le prix est bon. ${TEXTES_A_COMPLETER.verdictCashflow}`);
-    expect(n(t.sousTitre)).toBe('−25 % par rapport au prix estimé.');
-    // Sans marché ni loyer : rien à chiffrer, une phrase de repli.
     const seul = texteVerdict(calculerProjet(sansLoyer({})));
     expect(seul.titre).toBe(`Prix sans repère de marché. ${TEXTES_A_COMPLETER.verdictCashflow}`);
-    expect(seul.sousTitre).toBe(TEXTES_A_COMPLETER.sousTitreSeul);
   });
 });

@@ -31,9 +31,6 @@ describe('tranche d’imposition supposée', () => {
     const utilisateur = userEvent.setup();
     render(<AppEnMemoire chemin={`/projets/${id}/fiscalite`} />);
     await screen.findByRole('heading', { name: /Combien d'impôts, selon le régime/ });
-    expect(n(screen.getByText(/Les quatre régimes avec/).textContent)).toContain(
-      'une tranche supposée à 30 %, projetés sur 10 ans',
-    );
     expect(screen.getByRole('heading', { name: "Votre tranche d'imposition" })).toBeInTheDocument();
     expect(n(screen.getByText(/26 928 €/).textContent)).toContain('26 928 €');
 
@@ -42,9 +39,6 @@ describe('tranche d’imposition supposée', () => {
     const enregistre = lireProjets(window.localStorage)[0]?.projet;
     expect(enregistre?.hypotheses.fiscalite.tmi).toBe(0.41);
     expect(enregistre?.provenance['fiscalite.tmi']).toBe('utilisateur');
-    expect(n(screen.getByText(/Les quatre régimes avec/).textContent)).toContain(
-      'votre tranche à 41 %',
-    );
     expect(
       screen.queryByRole('heading', { name: "Votre tranche d'imposition" }),
     ).not.toBeInTheDocument();
@@ -55,18 +49,13 @@ describe('tranche d’imposition supposée', () => {
     const id = amorcer(true);
     render(<AppEnMemoire chemin={`/projets/${id}`} />);
     await screen.findByRole('heading', { name: /Le prix est bon/ });
-    expect(screen.getByText(/Meublé au réel : aucun impôt sur la période\./).textContent).toContain(
-      'Tranche supposée à 30 %.',
-    );
+    expect(screen.getByText(/Meublé au réel\./).textContent).toContain('Tranche supposée à 30 %.');
   });
 
   it('tranche choisie : ni mention ni encart', async () => {
     const id = amorcer(false);
     render(<AppEnMemoire chemin={`/projets/${id}/fiscalite`} />);
     await screen.findByRole('heading', { name: /Combien d'impôts, selon le régime/ });
-    expect(n(screen.getByText(/Les quatre régimes avec/).textContent)).toContain(
-      'votre tranche à 30 %',
-    );
     expect(
       screen.queryByRole('heading', { name: "Votre tranche d'imposition" }),
     ).not.toBeInTheDocument();
@@ -76,8 +65,8 @@ describe('tranche d’imposition supposée', () => {
     const id = amorcer(true);
     render(<AppEnMemoire chemin={`/projets/${id}/imprimer`} />);
     expect(await screen.findByText(/dossier d'analyse locative/)).toBeInTheDocument();
-    expect(n(screen.getByText(/Les quatre régimes avec/).textContent)).toContain(
-      'une tranche supposée à 30 %',
+    expect(n(screen.getByText(/Meublé au réel\./).textContent)).toContain(
+      'Tranche supposée à 30 %.',
     );
     expect(
       screen.queryByRole('heading', { name: "Votre tranche d'imposition" }),

@@ -39,9 +39,6 @@ describe('Rapport sans loyer', () => {
         name: 'Le prix est bon. Le loyer reste à indiquer.',
       }),
     ).toBeInTheDocument();
-    expect(n(screen.getByText(/par rapport au prix estimé/).textContent)).toBe(
-      '−25 % par rapport au prix estimé.',
-    );
     const feux = screen.getByLabelText('Cinq feux');
     expect(within(feux).getByText('Rendement net : loyer à indiquer')).toBeInTheDocument();
     expect(within(feux).getByText('Cash-flow : loyer à indiquer')).toBeInTheDocument();
@@ -128,9 +125,6 @@ describe('Rapport sans loyer', () => {
         level: 1,
         name: 'Prix sans repère de marché. Le loyer reste à indiquer.',
       }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText('Indiquez le loyer visé pour connaître le cash-flow.'),
     ).toBeInTheDocument();
     expect(
       screen.queryByRole('button', { name: /Utiliser le loyer de marché/ }),

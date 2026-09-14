@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { bornesPeriode, periodeSuivante } from '../src/dates';
-import { loyerDuMois, suivreLoyer, type LoyerDu } from '../src/loyers';
+import { loyerDuMois, montantAcceptable, suivreLoyer, type LoyerDu } from '../src/loyers';
 import { location, paiement, tirage } from './exemples';
 
 function du(l: Parameters<typeof loyerDuMois>[0], periode: string): LoyerDu {
@@ -113,20 +113,53 @@ describe('suivreLoyer', () => {
     expect(suivreLoyer(octobre, payes, '2026-12-01')).toEqual({
       statut: 'recu',
       recu: 70_000,
+      resteDu: 0,
       paiements: payes,
     });
   });
 
-  it('un paiement partiel, d’un autre mois ou d’une autre location ne suffit pas', () => {
+  it('un paiement partiel rend le loyer « partiel » ; ceux d’un autre mois ou d’une autre location ne comptent pas', () => {
     const paiements = [
       paiement('p1', 'l1', '2026-10', 30_000),
       paiement('p2', 'l1', '2026-09', 70_000),
       paiement('p3', 'autre', '2026-10', 70_000),
     ];
     const suivi = suivreLoyer(octobre, paiements, '2026-10-06');
-    expect(suivi.statut).toBe('attendu');
+    expect(suivi.statut).toBe('partiel');
     expect(suivi.recu).toBe(30_000);
+    expect(suivi.resteDu).toBe(40_000);
     expect(suivi.paiements.map((p) => p.id)).toEqual(['p1']);
+  });
+
+  it('partiel l’emporte sur le retard et sur « à venir » ; deux paiements qui couvrent le dû le rendent reçu', () => {
+    const partiel = [paiement('p1', 'l1', '2026-10', 30_000, '2026-09-28')];
+    expect(suivreLoyer(octobre, partiel, '2026-11-30').statut).toBe('partiel');
+    expect(suivreLoyer(octobre, partiel, '2026-09-29').statut).toBe('partiel');
+    const complet = [...partiel, paiement('p2', 'l1', '2026-10', 40_000, '2026-10-20')];
+    expect(suivreLoyer(octobre, complet, '2026-10-21')).toMatchObject({
+      statut: 'recu',
+      recu: 70_000,
+      resteDu: 0,
+    });
+  });
+});
+
+describe('montantAcceptable', () => {
+  const octobre = du(location('l1', { debut: '2026-10-01' }), '2026-10');
+  const dejaPaye = [paiement('p1', 'l1', '2026-10', 30_000)];
+
+  it('au moins un centime, au plus ce qui reste dû', () => {
+    expect(montantAcceptable(octobre, dejaPaye, 40_000)).toBe(true);
+    expect(montantAcceptable(octobre, dejaPaye, 1)).toBe(true);
+    expect(montantAcceptable(octobre, dejaPaye, 40_001)).toBe(false);
+    expect(montantAcceptable(octobre, dejaPaye, 0)).toBe(false);
+    expect(montantAcceptable(octobre, dejaPaye, -5)).toBe(false);
+    expect(montantAcceptable(octobre, dejaPaye, 100.5)).toBe(false);
+  });
+
+  it('un loyer entièrement reçu n’accepte plus rien', () => {
+    const complet = [...dejaPaye, paiement('p2', 'l1', '2026-10', 40_000)];
+    expect(montantAcceptable(octobre, complet, 1)).toBe(false);
   });
 
   it('un loyer nul est reçu d’office', () => {

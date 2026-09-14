@@ -1,8 +1,14 @@
 import type {
   CreationLocation,
   CreationReponse,
+  DemandeDocument,
+  DocumentComplet,
   EtatGestion,
+  IdentiteBailleur,
+  LocationGeree,
   NouveauPaiement,
+  NouvelleOccupation,
+  OccupationCreee,
   Paiement,
   PreferencesMenu,
 } from '@loupe/gestion';
@@ -12,7 +18,18 @@ export type CodeErreurGestion =
   | 'non_connecte'
   | 'invalide'
   | 'introuvable'
-  | 'deja_recu'
+  /** Le paiement ferait dépasser ce qui est dû pour le mois. */
+  | 'montant_depasse'
+  /** Un paiement daté dans le futur. */
+  | 'date_invalide'
+  /** Un paiement attesté par une quittance ou un reçu ne s'annule plus. */
+  | 'document_emis'
+  | 'bailleur_manquant'
+  | 'loyer_non_regle'
+  | 'loyer_regle'
+  | 'bien_occupe'
+  | 'fin_avant_entree'
+  | 'paiements_apres_sortie'
   | 'limite'
   | 'indisponible'
   | 'reseau'
@@ -29,4 +46,12 @@ export interface ClientGestion {
   payer(paiement: NouveauPaiement): Promise<ResultatGestion<Paiement>>;
   annulerPaiement(paiementId: string): Promise<ResultatGestion>;
   enregistrerPreferences(preferences: PreferencesMenu): Promise<ResultatGestion<PreferencesMenu>>;
+  enregistrerBailleur(identite: IdentiteBailleur): Promise<ResultatGestion<IdentiteBailleur>>;
+  /** Émet la quittance d'un mois ou le reçu d'un paiement ; rend le même document s'il existe déjà. */
+  emettreDocument(demande: DemandeDocument): Promise<ResultatGestion<DocumentComplet>>;
+  document(id: string): Promise<ResultatGestion<DocumentComplet>>;
+  /** Enregistre (ou déplace) la date de sortie du locataire. */
+  terminerLocation(locationId: string, fin: string): Promise<ResultatGestion<LocationGeree>>;
+  /** Loue un bien existant : vacant, ou une autre chambre ; refusé si la même chambre est déjà louée. */
+  louer(bienId: string, occupation: NouvelleOccupation): Promise<ResultatGestion<OccupationCreee>>;
 }
