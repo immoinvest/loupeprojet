@@ -1,42 +1,32 @@
 {
-  "feature_slug": "marche-complet",
-  "title": "Marché complet : DPE ADEME retrouvé par l'adresse, risques Géorisques, loyer ANIL de référence et loyer visé proposé, ventes des communes voisines dans les cercles, actualisation par l'onglet Estimation",
-  "started_at": "2026-09-14T00:00:00Z",
-  "current_step": "done",
-  "scope": "apps/worker/src/{services/dpe.ts,services/risques.ts,adresse/voisines.ts,adresse/route.ts}, apps/web/src/{enrichissement,ecrans/adresse,ecrans/FormulaireProjet.tsx,textes}",
-  "branch": "feat/marche-complet",
-  "base": "master (7cc72aa)",
+  "feature_slug": "accueil-menu",
+  "title": "Accueil selon les briques activées, menu recentré (Accueil, 3 projets, Comparer dans Tous les projets), Mon menu à trois choix",
+  "started_at": "2026-09-14T17:00:00Z",
+  "current_step": "implement",
+  "scope": "apps/web/src/{accueil,ecrans/Accueil.tsx,ecrans/accueil,coque,textes,gestion/menu.ts,ecrans/compte/MonMenu.tsx}",
+  "branch": "feat/accueil-menu",
+  "base": "master (42072a0)",
+  "worktree": "C:/Users/errei/Claude/loupe-accueil",
   "steps": {
     "discovery": {
       "status": "completed",
-      "output": ".product/features/marche-complet-discovery.md"
+      "output": ".product/features/accueil-menu-discovery.md",
+      "auto_review": "le choix Analyser/Gérer existait déjà (gerer-socle) : reformulé en trois choix exclusifs au lieu d'être refait"
     },
-    "specs": { "status": "completed", "stories_count": 5 },
+    "specs": {
+      "status": "completed",
+      "stories_count": 5,
+      "output": ".product/specs/accueil-menu-specs.md",
+      "auto_review": "prochaine étape « acheté → Gérer » seulement si Gérer affiché ; meilleur cash-flow ignore les résultats partiels"
+    },
     "architecture": {
       "status": "completed",
-      "output": ".product/architecture/marche-complet.md"
+      "output": ".product/architecture/accueil-menu.md",
+      "auto_review": "LoyersDuMois et Portes non modifiés (session Gérer parallèle) ; calcul injecté pour tester sans moteur"
     },
-    "implement": {
-      "status": "completed",
-      "stories_completed": 5,
-      "stories_total": 5,
-      "commits": ["61e4e92 worker US-1/US-2", "bade365 worker US-3"]
-    },
-    "qa_tests": {
-      "status": "completed",
-      "note": "893 tests : services DPE et risques sur réponses réelles abrégées, niveaux Géorisques, étage lu dans le complément (formats relevés à Marseille et Paris), communes voisines (arrondissements, pannes, cache), route avec commune voisine, classement des DPE, risques, loyer, cartes de l'onglet Estimation, bouton « Estimer le loyer »"
-    },
-    "security": {
-      "status": "completed",
-      "note": "aucun modèle de langage ; trois services publics gratuits appelés depuis le Worker seulement, paramètres validés par Zod, réponses amont validées, cache KV, limite de débit générale ; lien Géorisques ouvert avec rel=noopener"
-    },
-    "push": { "status": "done", "pr": 30, "correctif": 32 }
-  },
-  "decisions": {
-    "sources": "ADEME dpe03existant (geo_distance 30 m), Géorisques resultats_rapport_risque, API Géo communes, ANIL déjà sur R2 ; toutes vérifiées en direct le 14/09/2026",
-    "risques": "niveau à l'adresse : important = fort, modéré/existant/concerné = moyen, faible = faible ; seuls les risques à l'adresse vont au verdict, appliqués d'eux-mêmes",
-    "dpe": "proposé (clé BAN, surface à 15 %, étage, date), appliqué seulement sur clic",
-    "voisines": "neuf points dont huit à 300 m, API Géo (arrondissements à Paris, Lyon, Marseille), quatre communes au plus",
-    "sans_llm": "aucun modèle de langage"
+    "implement": { "status": "in_progress", "stories_completed": 0, "stories_total": 5, "commits": [] },
+    "qa_tests": { "status": "pending" },
+    "security": { "status": "pending" },
+    "push": { "status": "pending" }
   }
 }
