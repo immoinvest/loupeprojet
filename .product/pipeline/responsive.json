@@ -31,7 +31,7 @@
     },
     "implement": {
       "status": "in_progress",
-      "stories_completed": 8,
+      "stories_completed": 9,
       "stories_total": 11,
       "commits": [
         {
@@ -111,6 +111,16 @@
         {
           "etape": "refactor Nouveau projet (pastilles du lien)",
           "hash": "643fb87"
+        },
+        {
+          "etape": "US-7",
+          "hash": "86e9c30"
+        },
+        {
+          "etape": "fusion de master (marché complet)",
+          "hash": "857777d",
+          "tests": 946,
+          "fichiers_de_test": 135
         }
       ],
       "notes": [
@@ -119,7 +129,8 @@
         "Styles globaux non « layered » dans index.css (a, :focus-visible) : ils l'emportent sur les utilitaires Tailwind ; hors périmètre, contournés localement",
         "US-6 : Vary: Origin de vite preview rendait le cache introuvable hors ligne ; lectures du cache avec ignoreVary",
         "Fusion de origin/master (comptes, lecture automatique, DVF à l'adresse, estimation) : 8 conflits résolus, ADR responsive renuméroté 007 ; écrans Estimation, Compte et Connexion à adapter (US-3c) ; /api/* à ignorer par le service worker",
-        "US-3c : 16 écrans × 9 formats verts ; au premier passage le serveur vite preview est tombé (connexions refusées), relancé seul sans erreur"
+        "US-3c : 16 écrans × 9 formats verts ; au premier passage le serveur vite preview est tombé (connexions refusées), relancé seul sans erreur",
+        "Seconde fusion de origin/master (marché complet : DPE, risques, loyer, Estimer le loyer) : conflit dans Adresse.tsx résolu (logique de master, mise en page US-3c) ; « Estimer le loyer » en col-span-3 cassait la grille à une colonne (US-3d)"
       ]
     },
     "refactor": {

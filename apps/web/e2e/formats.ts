@@ -1,5 +1,7 @@
 import { expect, type Browser, type BrowserContext, type Page } from '@playwright/test';
 
+import { ADRESSE_SIMULEE, simulerWorker } from './reponses-worker';
+
 /** Un format d'écran de la spec (largeur × hauteur, en px CSS). */
 export interface Format {
   readonly nom: string;
@@ -53,30 +55,33 @@ export function ouvrirContexte(browser: Browser, format: Format): Promise<Browse
 
 export interface DonneesDeTest {
   readonly id: string;
+  /** La copie du projet d'exemple, avec une adresse. */
+  readonly idAvecAdresse: string;
   readonly lienPartage: string;
 }
 
 /**
  * Ouvre Deklic (le projet d'exemple est créé au premier lancement), ajoute une copie pour que
- * Comparer ait deux projets, et fabrique le lien de partage du projet d'exemple.
+ * Comparer ait deux projets (la copie a une adresse, pour l'onglet Estimation), et fabrique le lien
+ * de partage du projet d'exemple.
  */
 export async function preparerDonnees(page: Page): Promise<DonneesDeTest> {
   await page.goto('/projets');
   await expect(page.getByRole('heading', { level: 1, name: 'Mes projets' })).toBeVisible();
-  return page.evaluate(() => {
+  return page.evaluate((adresse) => {
     const cle = 'loupe.projets.v1';
     const projets = JSON.parse(localStorage.getItem(cle) ?? '[]') as { id: string; nom: string }[];
     const exemple = projets[0];
     if (exemple === undefined) throw new Error("Le projet d'exemple est absent.");
-    const copie = { ...exemple, id: 'copie-formats', nom: 'Copie · T3 · Marseille' };
+    const copie = { ...exemple, id: 'copie-formats', nom: 'Copie · T3 · Marseille', adresse };
     localStorage.setItem(cle, JSON.stringify([exemple, copie]));
     // Même encodage que stockage/partage.ts : base64url du JSON UTF-8 du projet enregistré.
     const octets = new TextEncoder().encode(JSON.stringify(exemple));
     let binaire = '';
     for (const octet of octets) binaire += String.fromCharCode(octet);
     const encode = btoa(binaire).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-    return { id: exemple.id, lienPartage: `/partage#p=${encode}` };
-  });
+    return { id: exemple.id, idAvecAdresse: copie.id, lienPartage: `/partage#p=${encode}` };
+  }, ADRESSE_SIMULEE);
 }
 
 /** Tous les moyens de connexion proposés : la page Connexion montre chacun de ses boutons. */
@@ -108,14 +113,18 @@ async function simulerSession(page: Page): Promise<void> {
 export interface Ecran {
   readonly nom: string;
   readonly chemin: string;
-  /** Préparation avant le chargement (réponses simulées de l'API des comptes). */
+  /** Préparation avant le chargement (réponses simulées du Worker ou de l'API des comptes). */
   readonly avant?: (page: Page) => Promise<void>;
   /** Geste qui mène à l'écran une fois le chemin chargé. */
   readonly ouvrir?: (page: Page) => Promise<void>;
 }
 
 /** Les écrans de référence ; la session simulée de « Mon compte » reste active : il vient en dernier. */
-export function ecransDeReference({ id, lienPartage }: DonneesDeTest): readonly Ecran[] {
+export function ecransDeReference({
+  id,
+  idAvecAdresse,
+  lienPartage,
+}: DonneesDeTest): readonly Ecran[] {
   const projet = `/projets/${id}`;
   return [
     { nom: 'Mes projets', chemin: '/projets' },
@@ -131,7 +140,17 @@ export function ecransDeReference({ id, lienPartage }: DonneesDeTest): readonly 
       },
     },
     { nom: 'Rapport', chemin: projet },
-    { nom: 'Estimation', chemin: `${projet}/adresse` },
+    {
+      nom: 'Estimation',
+      chemin: `/projets/${idAvecAdresse}/adresse`,
+      avant: simulerWorker,
+      // Les cartes DPE, loyer et risques arrivent avec les réponses du Worker simulé.
+      ouvrir: async (page) => {
+        await expect(
+          page.getByRole('heading', { level: 2, name: 'Le DPE du logement' }),
+        ).toBeVisible();
+      },
+    },
     { nom: 'Hypothèses', chemin: `${projet}/hypotheses` },
     { nom: 'Fiscalité', chemin: `${projet}/fiscalite` },
     { nom: 'Revente', chemin: `${projet}/revente` },
