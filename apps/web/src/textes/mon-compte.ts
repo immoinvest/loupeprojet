@@ -12,7 +12,7 @@ export const TEXTES_MON_COMPTE = {
   deconnecter: 'Se déconnecter',
   supprimer: 'Supprimer mon compte',
   explicationSuppression:
-    'Votre compte et vos sessions sont effacés. Les projets enregistrés sur cet appareil restent là.',
+    'Votre compte, vos sessions et les projets enregistrés sur le compte sont effacés. Les projets de cet appareil restent là.',
   confirmerSuppression: 'Oui, supprimer mon compte',
   annuler: 'Annuler',
   seReconnecter: 'Me reconnecter',
@@ -23,5 +23,9 @@ export const TEXTES_MON_COMPTE = {
   carteTexte: 'Un compte par e-mail, Google ou Apple, sans mot de passe. Gratuit.',
   creerCompte: 'Créer mon compte',
   carteTitreConnecte: 'Vos projets sur tous vos appareils',
-  carteTexteConnecte: 'La synchronisation arrive bientôt : vos projets restent sur cet appareil.',
+  carteTexteConnecte:
+    'Vos projets sont enregistrés sur votre compte : connectez-vous sur un autre appareil pour les retrouver.',
+  projetsTitre: 'Mes projets',
+  projetsTexte:
+    'Enregistrés sur votre compte, ils vous suivent sur tous vos appareils. À la déconnexion, ils quittent cet appareil et vous attendent sur le compte.',
 } as const;

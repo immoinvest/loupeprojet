@@ -8,6 +8,8 @@ import { lireConfigFournisseurs, type ConfigFournisseurs } from './fournisseurs'
 import type { DepotGestion } from './gestion/depot';
 import { depotD1 } from './gestion/depot-d1';
 import { journalConsole, type Journal } from './journal';
+import type { DepotProjets } from './projets/depot';
+import { depotProjetsD1 } from './projets/depot-d1';
 
 export type Environnement = 'dev' | 'preview' | 'production';
 
@@ -41,6 +43,8 @@ export interface Dependances {
   readonly base: BetterAuthOptions['database'];
   /** Les données de gestion locative : les tables gestion_* de la même base D1. */
   readonly gestion: DepotGestion;
+  /** Les projets d'analyse synchronisés : la table projet de la même base D1. */
+  readonly projets: DepotProjets;
   /** Envoi des codes : Resend avec une clé, le journal en dev, sinon null (l'e-mail n'est pas proposé). */
   readonly courriel: Envoyeur | null;
   readonly fournisseurs: ConfigFournisseurs;
@@ -138,6 +142,7 @@ export function dependancesDepuisEnv(env: Bindings): Dependances {
     secret: lireSecret(v),
     base,
     gestion: depotD1(base),
+    projets: depotProjetsD1(base),
     courriel: lireCourriel(v, journalConsole),
     fournisseurs: lireConfigFournisseurs(v),
     origines: [...ORIGINES_SITE, ...locales, ...lireOriginesSupplementaires(v.ORIGINES_AUTORISEES)],

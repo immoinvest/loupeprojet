@@ -88,6 +88,7 @@ describe('migration 0002 : gestion locative', () => {
       'gestion_location',
       'gestion_paiement',
       'gestion_preference',
+      'projet',
       'session',
       'user',
       'verification',
@@ -99,6 +100,7 @@ describe('migration 0002 : gestion locative', () => {
       'gestion_location_bienId_idx',
       'gestion_location_userId_idx',
       'gestion_paiement_userId_idx',
+      'projet_userId_revision_idx',
       'session_userId_idx',
       'verification_identifier_idx',
     ]);
@@ -111,7 +113,22 @@ describe('migration 0002 : gestion locative', () => {
     appliquerMigrations(base);
     appliquerMigrations(base);
     expect(noms(base, 'table')).toContain('gestion_bien');
-    expect(MIGRATIONS.map((m) => m.fichier)).toEqual(['0001_comptes.sql', '0002_gestion.sql']);
+    expect(MIGRATIONS.map((m) => m.fichier)).toEqual([
+      '0001_comptes.sql',
+      '0002_gestion.sql',
+      '0004_projets.sql',
+    ]);
+  });
+
+  it('migration 0004 : pas de projet sans compte, un même identifiant par compte', () => {
+    const base = new DatabaseSync(':memory:');
+    appliquerMigrations(base);
+    const inserer = base.prepare(
+      'insert into projet (userId, id, contenu, modifieLe, revision, supprime) values (?, ?, ?, ?, ?, ?)',
+    );
+    expect(() => inserer.run('inconnu', 'p1', '{}', 'x', 1, 0)).toThrow(
+      /FOREIGN KEY constraint failed/,
+    );
   });
 
   it('les clés étrangères sont appliquées : pas de bien sans compte', () => {

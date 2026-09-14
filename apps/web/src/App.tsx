@@ -39,6 +39,10 @@ import { SimulateurPret } from './ecrans/SimulateurPret';
 import { Visite } from './ecrans/Visite';
 import { Adresse } from './ecrans/Adresse';
 import { ProjetsProvider } from './stockage/ProjetsContext';
+import { clientProjetsMemoire } from './stockage/synchro/memoire';
+import { clientProjetsReseau } from './stockage/synchro/reseau';
+import { SynchroProvider } from './stockage/synchro/SynchroContext';
+import type { ClientProjets } from './stockage/synchro/types';
 
 export const routes: RouteObject[] = [
   // Hors de la coque : la page de connexion classique, centrée, et le document imprimable.
@@ -100,6 +104,9 @@ const CLIENT_COMPTE = clientReseau();
 /** Le client de la gestion locative : l'API /api/gestion du même worker, même origine. */
 const CLIENT_GESTION = clientGestionReseau();
 
+/** La synchronisation des projets avec le compte : l'API /api/projets du même worker, même origine. */
+const CLIENT_PROJETS = clientProjetsReseau();
+
 /** Invite d'installation et mode application, écoutés dès le chargement, avant le premier rendu. */
 const SUIVI_INSTALLATION = creerSuiviInstallation(window);
 
@@ -108,13 +115,15 @@ export function App(): JSX.Element {
     <ProjetsProvider>
       <ClientWorkerProvider client={CLIENT_WORKER}>
         <CompteProvider client={CLIENT_COMPTE}>
-          <GestionProvider client={CLIENT_GESTION}>
-            <InstallationProvider suivi={SUIVI_INSTALLATION}>
-              <BrowserRouter>
-                <Racine />
-              </BrowserRouter>
-            </InstallationProvider>
-          </GestionProvider>
+          <SynchroProvider client={CLIENT_PROJETS}>
+            <GestionProvider client={CLIENT_GESTION}>
+              <InstallationProvider suivi={SUIVI_INSTALLATION}>
+                <BrowserRouter>
+                  <Racine />
+                </BrowserRouter>
+              </InstallationProvider>
+            </GestionProvider>
+          </SynchroProvider>
         </CompteProvider>
       </ClientWorkerProvider>
     </ProjetsProvider>
@@ -122,8 +131,8 @@ export function App(): JSX.Element {
 }
 
 /**
- * Pour les tests : même arbre de routes, en mémoire ; Worker hors ligne, compte anonyme en mémoire
- * et rien à installer, sauf clients fournis.
+ * Pour les tests : même arbre de routes, en mémoire ; Worker hors ligne, compte anonyme en mémoire,
+ * compte des projets en mémoire (envoi sans délai) et rien à installer, sauf clients fournis.
  */
 export function AppEnMemoire({
   chemin = '/',
@@ -131,6 +140,7 @@ export function AppEnMemoire({
   client = clientHorsLigne,
   compte,
   gestion,
+  projets,
   installation = suiviIndisponible,
 }: {
   chemin?: string;
@@ -138,21 +148,25 @@ export function AppEnMemoire({
   client?: ClientWorker;
   compte?: ClientCompte;
   gestion?: ClientGestion;
+  projets?: ClientProjets;
   installation?: SuiviInstallation;
 }): JSX.Element {
   const clientCompte = useMemo(() => compte ?? clientMemoire(), [compte]);
   const clientGestion = useMemo(() => gestion ?? clientGestionMemoire(), [gestion]);
+  const clientProjets = useMemo(() => projets ?? clientProjetsMemoire(), [projets]);
   return (
     <ProjetsProvider stockage={stockage}>
       <ClientWorkerProvider client={client}>
         <CompteProvider client={clientCompte}>
-          <GestionProvider client={clientGestion} stockage={stockage}>
-            <InstallationProvider suivi={installation}>
-              <MemoryRouter initialEntries={[chemin]}>
-                <Racine />
-              </MemoryRouter>
-            </InstallationProvider>
-          </GestionProvider>
+          <SynchroProvider client={clientProjets} delaiMs={0}>
+            <GestionProvider client={clientGestion} stockage={stockage}>
+              <InstallationProvider suivi={installation}>
+                <MemoryRouter initialEntries={[chemin]}>
+                  <Racine />
+                </MemoryRouter>
+              </InstallationProvider>
+            </GestionProvider>
+          </SynchroProvider>
         </CompteProvider>
       </ClientWorkerProvider>
     </ProjetsProvider>
