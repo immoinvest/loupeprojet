@@ -45,7 +45,28 @@
       "score": "83 → 100",
       "note": "origine exigée, tailles vérifiées avant lecture, https seulement ; Turnstile à décider si abus"
     },
-    "push": { "status": "pending" }
+    "push": {
+      "status": "completed",
+      "pr": "https://github.com/immoinvest/loupeprojet/pull/69",
+      "note": "auto-merge armé ; master fusionné deux fois (accueil-menu, puis sync-projets : le schéma de l'annonce vit désormais dans @loupe/projets, importé de @loupe/capture/schema)"
+    }
+  },
+  "post_mortem": {
+    "blockers_encountered": [
+      "Chromium de Playwright bloqué par Windows (spawn UNKNOWN) : essais faits dans le navigateur intégré puis par Bright Data",
+      "SeLoger a rendu des pages vides (200, 0 octet) : seconde tentative côté Worker",
+      "Typecheck du Worker et des comptes sans DOM : exports ./portails et ./schema de @loupe/capture",
+      "master a avancé de 19 commits pendant la feature, dont le déplacement des schémas de projet dans @loupe/projets"
+    ],
+    "patterns_discovered": [
+      "Libellés français des attributs LeBonCoin (value_label) plus sûrs que les codes anglais devinés",
+      "Extracteur « Pas de … » avant l'extracteur positif sur les listes de caractéristiques SeLoger/Logic-Immo",
+      "Un projet reçu par lien peut être forgé : filtrer photos et liens (surUnPortail)"
+    ],
+    "improvements_for_next_time": [
+      "Arrêter les portes complètes avant tout correctif (audit, fusion) plutôt que de les relancer deux fois",
+      "Vérifier master avant l'audit de sécurité quand plusieurs sessions tournent"
+    ]
   },
   "decisions": {
     "test_prealable": "14/09/2026 : Bright Data passe DataDome (LeBonCoin, SeLoger, Logic-Immo) et Cloudflare (PAP) ; Bien'ici répond sans protection ; règles de l'extension appliquées avec succès au HTML reçu",
