@@ -1,0 +1,41 @@
+{
+  "feature_slug": "gerer-biens",
+  "title": "Mes biens et vie de la location (G1c) : pages Biens et Locataires, modifier une location, supprimer un bien, APL versée au bailleur",
+  "started_at": "2026-09-14T21:10:00Z",
+  "current_step": "implement",
+  "scope": "packages/gestion, apps/comptes (src/gestion, migration 0005), apps/web (gestion/, ecrans/gerer, menu Gérer)",
+  "branch": "feat/gerer-biens",
+  "worktree": "C:\\Users\\errei\\Claude\\loupe-gestion",
+  "base": "master (79a35e1)",
+  "consigne": "Pierre, 14/09/2026 : « crée [Mes biens] dans la prochaine étape. Et commence la prochaine étape. Fais la PR uniquement lorsque toutes les autres PR : 65, 77, 78 sont mergées » ; G1c choisie avant G2 (question posée) ; auto-validation des étapes",
+  "pr_apres": [65, 77, 78],
+  "pr_apres_etat": "#65 fusionnée le 14/09/2026 à 23 h 14 ; #77 et #78 ouvertes (vérifié à 23 h 30)",
+  "baseline": {
+    "status": "completed",
+    "source": "CI de master verte sur 79a35e1 (fusion de la PR #73), base exacte de la branche ; npm ci du worktree refait le 14/09/2026 à 23 h 10"
+  },
+  "steps": {
+    "discovery": {
+      "status": "completed",
+      "output": ".product/features/gerer-biens-discovery.md"
+    },
+    "specs": {
+      "status": "completed",
+      "output": ".product/specs/gerer-biens-specs.md",
+      "stories_count": 7
+    },
+    "architecture": {
+      "status": "completed",
+      "output": ".product/architecture/gerer-biens.md"
+    },
+    "implement": { "status": "pending" },
+    "qa_tests": { "status": "pending" },
+    "security": { "status": "pending" },
+    "push": { "status": "pending" }
+  },
+  "auto_revue": {
+    "architecture": "ADR-G14 à G18 : montants d'entrée gardés sur la location et changements à part (migration sans reprise de données) ; changement après le dernier mois payé par insertion conditionnelle ; APL dans les montants et dans le contenu seulement si positive ; suppression d'un bien en un lot D1 avec locataires orphelins ; Mes biens et Mes locataires calculés côté web ; aucune PR ouverte n'ajoute de migration",
+    "specs": "sept stories (cinq P0, deux P1 détachables) ; changement de montants à partir du premier mois sans paiement ; jour, dépôt et libellé hors périodes ; APL enregistrée dans le même « Reçu » ; suppression confirmée par le nom, locataires orphelins supprimés ; nombre de biens dans le menu",
+    "discovery": "G1c avant G2 (domaine d'envoi absent) ; Mes biens et modifier une location en P0, APL et Mes locataires en P1 ; montants par périodes d'effet pour ne réécrire ni les mois passés ni les documents ; suppression confirmée par le nom, export proposé (prescription de trois ans, art. 7-1) ; mention APL de la quittance « à confirmer »"
+  }
+}
