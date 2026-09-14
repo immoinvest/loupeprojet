@@ -5,6 +5,8 @@ import { z } from 'zod';
 import { envoyeurJournal, envoyeurResend, type Envoyeur } from './courriel';
 import { ErreurConfiguration } from './erreurs';
 import { lireConfigFournisseurs, type ConfigFournisseurs } from './fournisseurs';
+import type { DepotGestion } from './gestion/depot';
+import { depotD1 } from './gestion/depot-d1';
 import { journalConsole, type Journal } from './journal';
 
 export type Environnement = 'dev' | 'preview' | 'production';
@@ -37,6 +39,8 @@ export interface Dependances {
   readonly secret: string;
   /** La base des comptes : le binding D1 en production, un adaptateur mémoire en test. */
   readonly base: BetterAuthOptions['database'];
+  /** Les données de gestion locative : les tables gestion_* de la même base D1. */
+  readonly gestion: DepotGestion;
   /** Envoi des codes : Resend avec une clé, le journal en dev, sinon null (l'e-mail n'est pas proposé). */
   readonly courriel: Envoyeur | null;
   readonly fournisseurs: ConfigFournisseurs;
@@ -128,10 +132,12 @@ function lireCourriel(v: Variables, journal: Journal): Envoyeur | null {
 export function dependancesDepuisEnv(env: Bindings): Dependances {
   const v = lireVariables(env);
   const locales = v.ENVIRONNEMENT === 'dev' ? ORIGINES_DEV : [];
+  const base = lireBase(env);
   return {
     environnement: v.ENVIRONNEMENT,
     secret: lireSecret(v),
-    base: lireBase(env),
+    base,
+    gestion: depotD1(base),
     courriel: lireCourriel(v, journalConsole),
     fournisseurs: lireConfigFournisseurs(v),
     origines: [...ORIGINES_SITE, ...locales, ...lireOriginesSupplementaires(v.ORIGINES_AUTORISEES)],

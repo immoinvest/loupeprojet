@@ -195,10 +195,12 @@ main:focus-visible {
 }
 
 /* Carte des ventes (Leaflet, onglet Estimation). */
-.leaflet-container {
+.carte-quartier.leaflet-container {
   isolation: isolate;
   z-index: 0;
   font: inherit;
+  /* Pendant le chargement des tuiles IGN (parfois plusieurs secondes), un fond neutre plutôt que le gris de Leaflet. */
+  background: var(--color-bordure-douce);
 }
 
 .carte-cercle {

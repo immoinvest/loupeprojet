@@ -9,6 +9,7 @@ import { Bouton, Carte, Ligne, Pastille, TitreCarte } from '@/composants/ui';
 import { ERREURS_COMPTE, initiales, nomAffiche, NOMS_FOURNISSEURS } from '@/textes/compte';
 import { TEXTES_MON_COMPTE as T } from '@/textes/mon-compte';
 
+import { MonMenu } from './compte/MonMenu';
 import { CLASSE_SAISIE } from './connexion/styles';
 
 interface Message {
@@ -150,6 +151,8 @@ export function Compte(): JSX.Element {
           </Bouton>
         </form>
       </Carte>
+
+      <MonMenu />
 
       <Carte>
         <TitreCarte>{T.connexion}</TitreCarte>

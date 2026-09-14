@@ -51,7 +51,7 @@ test('menu : tiroir sous 1 024 px, barre latérale au-delà', async ({ browser }
     await page.goto('/projets');
     await expect(page.getByRole('heading', { level: 1, name: 'Mes projets' })).toBeVisible();
     const bouton = page.getByRole('button', { name: 'Ouvrir le menu' });
-    const navigation = page.getByRole('navigation', { name: 'Mes projets' });
+    const navigation = page.getByRole('navigation', { name: 'Analyser' });
 
     if (format.largeur >= LARGEUR_BARRE_LATERALE) {
       await expect(bouton, format.nom).toBeHidden();

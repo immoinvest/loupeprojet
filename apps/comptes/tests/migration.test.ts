@@ -1,7 +1,13 @@
 import { DatabaseSync } from 'node:sqlite';
 import { describe, expect, it } from 'vitest';
 
-import { compilerMigration, contenuMigration, lireMigration } from '../scripts/migration';
+import {
+  appliquerMigrations,
+  compilerMigration,
+  contenuMigration,
+  lireMigration,
+  MIGRATIONS,
+} from '../scripts/migration';
 import { banc } from './aide';
 import { d1SurSqlite } from './d1';
 
@@ -68,5 +74,55 @@ describe('migration D1', () => {
     // Les requêtes sont bien passées par l'interface D1 (et non par node:sqlite directement).
     expect(d1.requetes.some((sql) => sql.startsWith('insert into "user"'))).toBe(true);
     expect(b.journal.evenements.filter((e) => e.niveau === 'erreur')).toEqual([]);
+  });
+});
+
+describe('migration 0002 : gestion locative', () => {
+  it('s’applique après 0001 : cinq tables gestion_* et leurs index', () => {
+    const base = new DatabaseSync(':memory:');
+    appliquerMigrations(base);
+    expect(noms(base, 'table')).toEqual([
+      'account',
+      'gestion_bien',
+      'gestion_locataire',
+      'gestion_location',
+      'gestion_paiement',
+      'gestion_preference',
+      'session',
+      'user',
+      'verification',
+    ]);
+    expect(noms(base, 'index')).toEqual([
+      'account_userId_idx',
+      'gestion_bien_userId_idx',
+      'gestion_locataire_userId_idx',
+      'gestion_location_bienId_idx',
+      'gestion_location_userId_idx',
+      'gestion_paiement_userId_idx',
+      'session_userId_idx',
+      'verification_identifier_idx',
+    ]);
+  });
+
+  it('appliquerMigrations est rejouable et sait s’arrêter à une migration donnée', () => {
+    const base = new DatabaseSync(':memory:');
+    appliquerMigrations(base, 1);
+    expect(noms(base, 'table')).not.toContain('gestion_bien');
+    appliquerMigrations(base);
+    appliquerMigrations(base);
+    expect(noms(base, 'table')).toContain('gestion_bien');
+    expect(MIGRATIONS.map((m) => m.fichier)).toEqual(['0001_comptes.sql', '0002_gestion.sql']);
+  });
+
+  it('les clés étrangères sont appliquées : pas de bien sans compte', () => {
+    const base = new DatabaseSync(':memory:');
+    appliquerMigrations(base);
+    expect(() =>
+      base
+        .prepare(
+          'insert into gestion_bien (id, userId, nom, adresse, type, meuble, creeLe, modifieLe) values (?, ?, ?, ?, ?, ?, ?, ?)',
+        )
+        .run('b1', 'inconnu', 'T2', '12 rue des Lices', 'appartement', 1, 'x', 'x'),
+    ).toThrow(/FOREIGN KEY constraint failed/);
   });
 });

@@ -5,8 +5,9 @@ import type { Dependances } from './dependances';
 import { reponseErreur } from './erreurs';
 import { disponibles } from './fournisseurs';
 import { garde } from './garde';
+import { routeurGestion } from './gestion/routes';
 
-export const VERSION_COMPTES = '0.1.0';
+export const VERSION_COMPTES = '0.2.0';
 
 /** L'application Hono des comptes, construite à partir de dépendances injectées (réelles en production, doubles en test). */
 export function creerApp(deps: Dependances): Hono {
@@ -26,6 +27,9 @@ export function creerApp(deps: Dependances): Hono {
   // Better Auth, derrière la garde : la requête brute (cookies, Origin) lui est passée telle quelle.
   app.use('/api/auth/*', garde(deps));
   app.on(['GET', 'POST'], '/api/auth/*', (c) => auth(new URL(c.req.url).origin).handler(c.req.raw));
+
+  // Gestion locative : même origine, même session, même base (ADR-G1).
+  app.route('/api/gestion', routeurGestion(deps, auth));
 
   app.notFound(() => reponseErreur(404, 'INTROUVABLE'));
   app.onError((erreur, c) => {

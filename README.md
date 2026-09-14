@@ -13,9 +13,10 @@ Monorepo npm workspaces, TypeScript strict, Vitest, ESLint, Prettier. Cible : Re
 ```
 packages/moteur/     Moteur de calcul pur (TypeScript + Zod), 100 % couvert par les tests
 packages/capture/    Contrat de capture d'une annonce (schéma, encodage pour fragment d'URL, règles de lecture par portail), partagé par l'extension, le bouton-favori et le web
-apps/web/            Application React + Vite + Tailwind v4 (coque SaaS, Mes projets, Nouveau projet, Rapport, Hypothèses, Fiscalité, Revente, Visite, Comparer, Simulateur de prêt, Méthode, impression, partage, Extension), Cloudflare Pages
+packages/gestion/    Calcul pur de la gestion locative (loyers dus, retards, résumé du mois, schémas Zod), 100 % couvert par les tests
+apps/web/            Application React + Vite + Tailwind v4 (coque SaaS, menu Analyser et Gérer, Mes projets, Nouveau projet, Rapport, Hypothèses, Fiscalité, Revente, Visite, Comparer, Simulateur de prêt, Méthode, impression, partage, Extension, Gérer : loyers du mois, ajouter un bien, « J'ai acheté ce bien »), Cloudflare Pages
 apps/worker/         Serveur Hono sur Cloudflare Workers : proxy des données publiques (cache KV, limite de débit)
-apps/comptes/        Comptes optionnels (Better Auth sur Hono) : Google, Apple ou code e-mail, servis par le worker Pages sur l'origine du site, base D1
+apps/comptes/        Comptes optionnels (Better Auth sur Hono) : Google, Apple ou code e-mail, et API de la gestion locative, servis par le worker Pages sur l'origine du site, base D1
 apps/extension/      Extension navigateur (Manifest V3, Chrome/Edge/Firefox) : lit l'annonce ouverte et l'envoie à Deklic ; règles par portail
 data/                Référentiels publics pré-agrégés (DVF, loyers ANIL, taxe foncière, zonage ABC, usure, communes) publiés sur R2 par GitHub Action
 marque/              Identité de marque Deklic : logos SVG, favicon, icônes, image de partage, guide (ADR-005)
@@ -31,12 +32,12 @@ npm run lint          # eslint . --max-warnings=0
 npm run format:check  # prettier --check .
 npm run typecheck     # tsc --noEmit dans chaque workspace
 npm run test          # vitest run
-npm run test:coverage # vitest run --coverage (seuil 100 % sur packages/moteur, packages/capture, apps/worker, apps/comptes, apps/extension, data et les modules de logique d'apps/web)
+npm run test:coverage # vitest run --coverage (seuil 100 % sur packages/moteur, packages/capture, packages/gestion, apps/worker, apps/comptes, apps/extension, data et les modules de logique d'apps/web)
 npm run test:e2e      # vite build puis playwright test : parcours complets dans Chromium (apps/web/e2e)
 npm run build         # build de chaque workspace
 ```
 
-Node 22 ou plus. La CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) exécute ces six commandes sur chaque pull request (1 402 tests au 14/09/2026 : 386 pour le moteur, 553 pour le web, 115 pour le Worker, 144 pour les référentiels, 145 pour la capture et l'extension, 59 pour les comptes ; dont 14 pour la note de confiance du moteur, 11 pour ses cartes et textes, et 35 pour le Rapport expliqué : icône ⓘ, cascade de l'autofinancement, rendements, liens vers les onglets ; 39 pour la négociation du prix, et 58 pour la liste de visite ; 20 pour l'onglet Financement, le feu couverture et le lien du simulateur). Une PR est fusionnée automatiquement dès que le check `verify` est vert (`gh pr merge <n> --auto --merge`) ; `master` refuse tout merge sans ce check. Un second job `e2e` joue les parcours Playwright dans Chromium sur ordinateur, téléphone et tablette, puis mesure 18 écrans sur 9 formats ; il n'est pas encore requis pour fusionner.
+Node 22 ou plus. La CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) exécute ces six commandes sur chaque pull request (1 402 tests au 14/09/2026 : 386 pour le moteur, 553 pour le web, 115 pour le Worker, 144 pour les référentiels, 145 pour la capture et l'extension, 89 pour les comptes, 62 pour la gestion locative ; dont 14 pour la note de confiance du moteur, 11 pour ses cartes et textes, et 35 pour le Rapport expliqué : icône ⓘ, cascade de l'autofinancement, rendements, liens vers les onglets ; 39 pour la négociation du prix, et 58 pour la liste de visite ; 20 pour l'onglet Financement, le feu couverture et le lien du simulateur). Une PR est fusionnée automatiquement dès que le check `verify` est vert (`gh pr merge <n> --auto --merge`) ; `master` refuse tout merge sans ce check. Un second job `e2e` joue les parcours Playwright dans Chromium sur ordinateur, téléphone et tablette, puis mesure 27 écrans sur 9 formats ; il n'est pas encore requis pour fusionner.
 
 ## Le moteur (`@loupe/moteur`)
 
@@ -83,7 +84,7 @@ npm run build -w apps/web    # apps/web/dist
 ```
 
 - Direction visuelle « Le guide » ([ADR-004](.product/adr/004-direction-visuelle.md)) : tokens dans `src/index.css`, polices Outfit et Nunito Sans.
-- Coque d'application (feature `coque-fixe`, [architecture](.product/architecture/coque-fixe.md)) : la fenêtre ne défile jamais, seul le contenu défile. Barre latérale de 224 px en trois zones (logo et « Nouveau projet » en haut ; liste des projets et Comparer, seule zone qui défile ; méthode, extension, « Installer l'application » et profil en bas, toujours visibles) ; sous 1 024 px, elle devient un tiroir ouvert depuis une barre d'app. Dans un projet, l'en-tête compact (nom · prix · mode, statut, PDF, Partager, onglets Rapport, Estimation, Financement, Hypothèses, Fiscalité, Revente, Visite) reste collé en haut du contenu : sur téléphone, seule la bande des onglets reste ; la synthèse d'Hypothèses se colle dessous ; changer de page remet le contenu en haut.
+- Coque d'application (feature `coque-fixe`, [architecture](.product/architecture/coque-fixe.md)) : la fenêtre ne défile jamais, seul le contenu défile. Barre latérale de 224 px en trois zones (logo en haut ; sections « Analyser » — Nouveau projet, cinq projets récents, Comparer — et « Gérer », seule zone qui défile ; simulateur de prêt, méthode, extension, « Installer l'application » et profil en bas, toujours visibles) ; sous 1 024 px, elle devient un tiroir ouvert depuis une barre d'app. Dans un projet, l'en-tête compact (nom · prix · mode, statut, PDF, Partager, onglets Rapport, Estimation, Financement, Hypothèses, Fiscalité, Revente, Visite) reste collé en haut du contenu : sur téléphone, seule la bande des onglets reste ; la synthèse d'Hypothèses se colle dessous ; changer de page remet le contenu en haut.
 - Écrans livrés : **Nouveau projet** (lien d'annonce reconnu sur LeBonCoin, SeLoger, Bien'ici, PAP, Logic-Immo ; page lue par l'extension ou le bouton-favori ; texte de l'annonce collé et lu par règles ; ou saisie manuelle ; formulaire Vérifier avec provenance de chaque valeur, où seuls prix, surface, code postal et ville sont exigés : apport, durée et tranche sont pré-remplis « estimé », le loyer vide vient des loyers de marché de la commune ; sans loyer, le rapport dit « Il manque le loyer visé pour cette analyse » et offre le champ sur place), **Mes projets** (liste, filtres, statut, suppression), **Rapport** (verdict, cinq feux, autofinancement en carte principale : cascade loyer → après le crédit → après les charges → après l'impôt avec ses trois repères, prix vs ventes réelles, rendements brut · net · net-net, leviers, fiscalité, revente avec multiple sur apport ; une icône ⓘ par titre et par repère ouvre une bulle chiffrée, un lien « Voir … → » mène à l'onglet qui détaille), calculés par le moteur, et **Extension navigateur** (bouton-favori à glisser, guide de l'extension).
 - Lecture automatique de la page d'annonce (ADR-002) : l'extension ou le bouton-favori ouvre `/projets/nouveau#capture=…` ; le fragment est décodé, validé (Zod), affiché dans Vérifier avec les badges `annonce`, puis effacé de l'adresse. Il n'est jamais envoyé au serveur ; le texte de l'annonce sert à l'extraction puis disparaît, seuls les champs lus sont conservés.
 - Bouton-favori : `npm run build -w apps/web` construit d'abord `public/capture.js` (règles incluses, adresse de production ou de l'aperçu Cloudflare Pages, ou `LOUPE_BASE_URL`). Le favori lui-même (`src/bookmarklet/favori.ts`) est minuscule : il charge `capture.js` depuis Deklic au clic, donc il reste à jour et se glisse ou se colle dans la barre de favoris depuis la page `/extension` (bouton « Copier le favori »). Si un site bloque les scripts externes, le favori le dit et l'extension prend le relais.
@@ -167,7 +168,7 @@ En local : `npx wrangler pages deploy dist` depuis `apps/web` (compte Cloudflare
 
 ## Les comptes (`@loupe/comptes`)
 
-Compte optionnel : connexion par Google, Apple ou un code à 6 chiffres reçu par e-mail ([ADR-006](.product/adr/006-comptes-better-auth.md), Better Auth). Rien n'est verrouillé sans compte ; les projets restent sur l'appareil (la synchronisation viendra ensuite).
+Compte optionnel : connexion par Google, Apple ou un code à 6 chiffres reçu par e-mail ([ADR-006](.product/adr/006-comptes-better-auth.md), Better Auth). L'analyse ne demande jamais de compte ; les projets restent sur l'appareil (la synchronisation viendra ensuite). Gérer (la gestion locative) demande un compte : ses données vivent dans la base D1.
 
 ```bash
 npm run dev -w apps/comptes                 # API sur http://localhost:8787 (D1 locale, migrations appliquées)
@@ -182,12 +183,13 @@ npm run migration:generer -w apps/comptes   # après une montée de version de B
 - Base D1 `deklic-comptes` (tables de Better Auth), migration `apps/comptes/migrations/0001_comptes.sql`, testée à travers une D1 simulée sur `node:sqlite`.
 - En développement, sans clé Resend, le code s'affiche dans le terminal du worker (événement `courriel.dev`).
 - Web : `src/compte/` (client réseau fetch + Zod, client mémoire, `CompteProvider`), écrans `/connexion` et `/compte`, profil dans la barre latérale.
+- **Gestion locative** (feature `gerer-socle`, [architecture](.product/architecture/gerer-socle.md)) : `src/gestion/` sert `/api/gestion/*` à un compte connecté : `GET /etat`, `POST /locations` (un bien, et au besoin son locataire et sa location, écrits ensemble), `POST /paiements` (loyer reçu), `DELETE /paiements/:id`, `PUT /preferences` (sections du menu). Écriture seulement avec un en-tête `Origin` connu ; corps ≤ 64 Ko ; 200 biens par compte ; loyer reçu seulement pendant la location et au plus un an à l'avance. Tables `gestion_*` de la migration `0002_gestion.sql`, effacées avec le compte. Base non migrée : 503 `GESTION_INDISPONIBLE`, le reste du site fonctionne. Calculs dans `@loupe/gestion` (montants en centimes, loyers dus déduits des locations, jamais stockés) ; web : `src/gestion/`, écrans `ecrans/gerer/`, carte « Mon menu ».
 
 ### Mettre en service les comptes (une fois, compte Cloudflare de Pierre)
 
 État au 14/09/2026 : étapes 1 à 4 configurées en Production, Apple non configuré. Sans ces réglages, le site se déploie comme avant et la page de connexion indique que la connexion n'est pas disponible.
 
-1. **Base D1** : fait le 14/09/2026. La base `deklic-comptes` est créée dans la juridiction UE (`npx wrangler d1 create deklic-comptes --jurisdiction eu`), son identifiant est dans `apps/comptes/wrangler.toml` et la migration 0001 est appliquée. Nouvelle migration : `npx wrangler d1 migrations apply deklic-comptes --remote` depuis `apps/comptes`.
+1. **Base D1** : fait le 14/09/2026. La base `deklic-comptes` est créée dans la juridiction UE (`npx wrangler d1 create deklic-comptes --jurisdiction eu`), son identifiant est dans `apps/comptes/wrangler.toml` et la migration 0001 est appliquée. Nouvelle migration : `npx wrangler d1 migrations apply deklic-comptes --remote` depuis `apps/comptes`. **À faire** : la migration `0002_gestion.sql` (gestion locative), par cette même commande ; sans elle, Gérer indique « pas disponible » aux comptes connectés.
 2. **Projet Pages `deklic`** (adresse loupeprojet.pages.dev ; tableau de bord Cloudflare, Workers & Pages, deklic, Settings), en Production (Preview facultatif) :
    - Bindings : D1 database, nom de variable `DB`, base `deklic-comptes` ;
    - Runtime : Compatibility flags, `nodejs_compat` ;
