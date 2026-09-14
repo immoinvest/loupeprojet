@@ -22,11 +22,28 @@
       "output": ".product/architecture/hypotheses-financement.md",
       "note": "ADR-HF1 à HF6 ; registre TOUS_LES_GROUPES ; schéma local du lien #s= ; base64url partagé"
     },
-    "implement": { "status": "in_progress", "stories_completed": 0, "stories_total": 6 },
-    "refactor": { "status": "pending" },
-    "qa_tests": { "status": "pending" },
-    "security": { "status": "pending" },
-    "push": { "status": "pending" }
+    "implement": {
+      "status": "completed",
+      "stories_completed": 6,
+      "stories_total": 6,
+      "note": "US-1 moteur (dc4d7c9), US-2 revenus retirés (14cd93e), US-3 fiche 03 (ca53d23), US-4/US-5 onglet Financement et lien du simulateur (06d4cfa), US-6 docs"
+    },
+    "refactor": {
+      "status": "completed",
+      "note": "GrilleHypotheses extraite de Hypotheses.tsx et partagée avec Financement ; base64url extrait de partage.ts ; classeBouton partagé entre Bouton et LienBouton"
+    },
+    "qa_tests": {
+      "status": "completed",
+      "note": "moteur 223 tests (100 %) ; web : financement-ecran (5), simulation-pret (5), hypotheses (16), textes, impression, onglets, app ; e2e financement.spec, rapport.spec, aides sans revenus, écran Financement dans les formats ; vérifié dans le navigateur (ordinateur 1 280 px et téléphone 375 px sans débordement, page Bientôt, Hypothèses sans Le marché, Rapport « Crédit 84 % du loyer »)"
+    },
+    "security": {
+      "status": "completed",
+      "note": "aucun innerHTML ni eval ; le lien #s= est décodé sans exception et validé par Zod, jamais envoyé au serveur ; plus de revenus dans le lien de partage ; aucune donnée nouvelle persistée"
+    },
+    "push": {
+      "status": "in_progress",
+      "note": "suite complète, couverture, fusion de master puis PR avec auto-merge"
+    }
   },
   "decisions": {
     "onglet": "Financement entre Estimation et Hypothèses ; hypothèses du prêt en haut, lecture dessous ; la carte Le financement quitte Hypothèses (confirmation demandée à Pierre, option par défaut)",
