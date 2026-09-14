@@ -91,8 +91,12 @@ export function valeurApresTouche(
   }
 }
 
-/** Largeur du pouce : les repères sont décalés d'une demi-largeur pour tomber sous son centre. */
-const DEMI_POUCE = 'mx-3';
+/**
+ * Le pouce mesure 24 px : son centre va d'une demi-largeur du bord gauche à une demi-largeur du
+ * bord droit. Repères (marges) et marques des seuils (bords de la couche) sont décalés d'autant.
+ */
+const DEMI_POUCE_MARGES = 'mx-3';
+const DEMI_POUCE_BORDS = 'inset-x-3';
 
 /**
  * Curseur contrôlé : un `<input type="range">` natif (rôle, toucher, `aria-valuetext`), stylé par
@@ -173,7 +177,7 @@ export function Curseur({
         {seuils.length > 0 && (
           <div
             aria-hidden="true"
-            className={`pointer-events-none absolute inset-y-0 ${DEMI_POUCE}`}
+            className={`pointer-events-none absolute inset-y-0 ${DEMI_POUCE_BORDS}`}
           >
             <div className="absolute inset-x-0 top-1/2 h-0">
               {seuils.map((s) => (
@@ -206,7 +210,7 @@ export function Curseur({
       {reperes.length > 0 && (
         <div
           aria-hidden="true"
-          className={`relative h-4 text-xs font-semibold text-encre-3 ${DEMI_POUCE}`}
+          className={`relative h-4 text-xs font-semibold text-encre-3 ${DEMI_POUCE_MARGES}`}
         >
           {reperes.map((r) => (
             <span
