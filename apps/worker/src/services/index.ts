@@ -11,7 +11,13 @@ export const SERVICES: Readonly<Record<string, Service>> = {
 };
 
 export { definirService, type Service } from './types';
-export { URL_ADEME, type DpeAdresse, type Lettre, type ReponseDpe } from './dpe';
+export {
+  etageDepuisComplement,
+  URL_ADEME,
+  type DpeAdresse,
+  type Lettre,
+  type ReponseDpe,
+} from './dpe';
 export {
   type PrecisionGeocodage,
   type ReponseGeocodage,

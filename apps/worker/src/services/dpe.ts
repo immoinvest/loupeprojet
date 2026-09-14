@@ -85,6 +85,31 @@ function libre(valeur: string | null | undefined): string | null {
 
 const dateTri = (date: string | null): string => date ?? '';
 
+/**
+ * Étage lu dans le complément d'adresse saisi par le diagnostiqueur : « Rdc », « Rez de Chaussée », « Etage 4 »,
+ * « Etage : 3ème », « ETG 1 », « 2ème étage », « 1er Etage », « 5eme ». `null` quand il n'en dit rien.
+ */
+export function etageDepuisComplement(complement: string | null): number | null {
+  if (complement === null) return null;
+  if (/\brdc\b|rez[\s-]+de[\s-]+chauss/i.test(complement)) return 0;
+  const apresMot = /(?:[eéÉ]tage|\betg)\s*:?\s*(\d{1,2})/i.exec(complement)?.[1];
+  const avantMot = /(\d{1,2})\s*(?:er|ère|e|ème|eme)?\s*[eéÉ]tage/i.exec(complement)?.[1];
+  const enTete = /^\s*(\d{1,2})\s*(?:er|ère|ème|eme|e)(?![\p{L}])/iu.exec(complement)?.[1];
+  const etage = apresMot ?? avantMot ?? enTete;
+  return etage === undefined ? null : Number(etage);
+}
+
+/**
+ * La base ADEME met 0 par défaut dans `numero_etage_appartement` : le complément d'adresse fait foi ;
+ * à défaut, un numéro d'étage non nul ; sinon l'étage reste inconnu.
+ */
+function etageDuDpe(complement: string | null, numero: number | null | undefined): number | null {
+  return (
+    etageDepuisComplement(complement) ??
+    (numero !== null && numero !== undefined && numero > 0 ? numero : null)
+  );
+}
+
 export const dpe = definirService({
   nom: 'dpe',
   ttlSecondes: 7 * 24 * 3600,
@@ -103,6 +128,7 @@ export const dpe = definirService({
       .flatMap((l): DpeAdresse[] => {
         const etiquette = lettre(l.etiquette_dpe);
         if (etiquette === null) return [];
+        const complement = libre(l.complement_adresse_logement);
         return [
           {
             numero: l.numero_dpe,
@@ -112,8 +138,8 @@ export const dpe = definirService({
             etiquetteGes: lettre(l.etiquette_ges),
             typeBatiment: l.type_batiment ?? null,
             surface: l.surface_habitable_logement ?? null,
-            etage: l.numero_etage_appartement ?? null,
-            complement: libre(l.complement_adresse_logement),
+            etage: etageDuDpe(complement, l.numero_etage_appartement),
+            complement,
             cleBan: l.identifiant_ban ?? null,
             anneeConstruction: l.annee_construction ?? null,
             distanceMetres: Math.round(l._geo_distance ?? 0),
