@@ -1,11 +1,22 @@
 import { regimesCompatibles } from '@loupe/moteur';
 
+import { coutTotalDuProjet } from '@/annonces/apport';
+import { texteApport } from '@/textes/apport';
+
 import type { Groupe } from './types';
 
 export const GROUPE_FINANCEMENT: Groupe = {
   titre: 'Le financement',
   champs: [
-    { chemin: 'hypotheses.pret.apport', libelle: 'Apport', type: 'euros', unite: '€', aToi: true },
+    {
+      chemin: 'hypotheses.pret.apport',
+      libelle: 'Apport',
+      type: 'euros',
+      unite: '€',
+      aToi: true,
+      aideSelon: (projet) =>
+        texteApport(projet.hypotheses.pret.apport ?? null, coutTotalDuProjet(projet)),
+    },
     {
       chemin: 'hypotheses.pret.dureeAnnees',
       libelle: 'Durée du prêt',

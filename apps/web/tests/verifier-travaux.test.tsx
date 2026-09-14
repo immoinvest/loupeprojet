@@ -31,6 +31,7 @@ describe('Vérifier : travaux facultatifs', () => {
     await utilisateur.type(screen.getByLabelText(/Code postal/), '69003');
     await utilisateur.type(screen.getByLabelText(/^Ville/), 'Lyon');
     await utilisateur.type(screen.getByLabelText(/Loyer visé/), '700');
+    await utilisateur.clear(screen.getByLabelText(/^Apport/));
     await utilisateur.type(screen.getByLabelText(/^Apport/), '10000');
     await utilisateur.click(screen.getByRole('button', { name: /Créer le projet/ }));
     await screen.findByRole('heading', { name: /Prix sans repère de marché/ }, { timeout: 10_000 });

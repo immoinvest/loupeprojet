@@ -31,6 +31,7 @@ Définies une fois dans `apps/web/src/index.css` (`@utility survol-*`). Elles ig
 | `survol-danger`       | Action destructrice discrète                                                                | Fond `probleme-fond`, texte rouge           | Corbeille d'un projet, déconnexion                                                    |
 | `survol-texte`        | Lien ou bouton texte, titre cliquable                                                       | Bleu foncé et souligné (2 px)               | « Voir la fiscalité → », « Ajouter une note », nom d'un projet, tri de Comparer       |
 | `survol-discret`      | Texte gris cliquable                                                                        | Passe à l'encre ; un volet montre son trait | Volets inactifs du projet, « Changer d'adresse », type de location non choisi         |
+| `survol-pastille`     | Pastille colorée cliquable                                                                  | Halo de sa propre couleur (la teinte reste) | Statut du projet dans l'en-tête                                                       |
 
 Sans classe, deux règles de base s'appliquent déjà partout :
 

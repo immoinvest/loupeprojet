@@ -214,6 +214,7 @@ export function Bouton({
   type = 'button',
   disabled = false,
   title,
+  ouvre,
 }: {
   children: ReactNode;
   onClick?: () => void;
@@ -221,6 +222,8 @@ export function Bouton({
   type?: 'button' | 'submit';
   disabled?: boolean;
   title?: string;
+  /** Bouton qui ouvre une boîte : `true` quand elle est ouverte (aria-expanded). */
+  ouvre?: boolean;
 }): JSX.Element | null {
   if (useModeDocument()) return null;
   return (
@@ -229,6 +232,8 @@ export function Bouton({
       onClick={onClick}
       disabled={disabled}
       title={title}
+      aria-haspopup={ouvre === undefined ? undefined : 'dialog'}
+      aria-expanded={ouvre}
       className={`${classeBouton(variante)} disabled:cursor-not-allowed disabled:opacity-50`}
     >
       {children}
