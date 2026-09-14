@@ -3,6 +3,7 @@ import type { JSX } from 'react';
 import { NavLink } from 'react-router';
 
 import { LogotypeDeklic } from '@/marque/Logo';
+import { TEXTES_LOGO } from '@/textes/accueil';
 
 import type { Menu } from './menu';
 import { ID_NAVIGATION } from './Sidebar';
@@ -28,7 +29,7 @@ export function BarreApp({ menu }: { menu: Menu }): JSX.Element {
       >
         <IconeMenu size={22} aria-hidden="true" />
       </button>
-      <NavLink to="/projets" className="flex min-h-11 items-center px-1">
+      <NavLink to="/" aria-label={TEXTES_LOGO} className="flex min-h-11 items-center px-1">
         <LogotypeDeklic hauteur={24} />
       </NavLink>
     </header>

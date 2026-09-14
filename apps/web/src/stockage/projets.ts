@@ -78,6 +78,9 @@ const ListeSchema = z.array(ProjetEnregistreSchema);
 
 export const CLE_STOCKAGE = 'loupe.projets.v1';
 
+/** Nom du projet d'exemple amorcé au premier lancement. */
+export const NOM_PROJET_EXEMPLE = 'T3 · 65 m² · Marseille 5e';
+
 /**
  * Un projet enregistré dans un format antérieur est migré avant validation (types d'exploitation de
  * septembre 2026) : les projets déjà enregistrés et les liens de partage continuent de se charger.
