@@ -10,6 +10,10 @@ main = "src/index.ts"
 compatibility_date = "2026-09-01"
 compatibility_flags = ["nodejs_compat"]
 workers_dev = false
+# Sans noms conservés : esbuild ajoute sinon des blocs `static { __name(this, "…") }` que le runtime Cloudflare
+# refuse au démarrage (« Object.defineProperty called on non-object », cloudflare/workerd#3736), ce qui fait
+# échouer tout le déploiement de production du site quand le worker des comptes est inclus.
+keep_names = false
 
 [observability]
 enabled = true
