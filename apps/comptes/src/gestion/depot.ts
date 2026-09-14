@@ -96,7 +96,7 @@ export interface DepotGestion {
   terminerLocation(userId: string, locationId: string, fin: string): Promise<LocationGeree>;
   /** Lève INTROUVABLE, BIEN_OCCUPE ou LIMITE_ATTEINTE. */
   louer(userId: string, bienId: string, occupation: NouvelleOccupation): Promise<OccupationCreee>;
-  /** Montants à partir d'un mois, jour, dépôt, libellé ; lève INTROUVABLE, HORS_LOCATION, PERIODE_PAYEE ou BIEN_OCCUPE. */
+  /** Montants à partir d'un mois, jour, dépôt, libellé ; lève INTROUVABLE, HORS_LOCATION, LIMITE_ATTEINTE, PERIODE_PAYEE ou BIEN_OCCUPE. */
   modifierLocation(
     userId: string,
     locationId: string,

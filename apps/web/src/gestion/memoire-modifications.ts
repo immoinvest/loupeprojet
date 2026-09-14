@@ -4,6 +4,7 @@ import {
   chevauche,
   ModificationLocationSchema,
   NouveauLocataireSchema,
+  tropDeChangements,
   type EtatGestion,
   type Locataire,
   type LocationGeree,
@@ -49,6 +50,7 @@ export function modifierEnMemoire(
   if (montants !== undefined) {
     const code = changementRefuse(location, donnees.paiements, montants.aPartirDe, aujourdhui);
     if (code !== null) return refus(donnees, CODES_REFUS_CHANGEMENT[code]);
+    if (tropDeChangements(location, montants.aPartirDe)) return refus(donnees, 'limite');
   }
   if (libelle !== undefined) {
     const autres = donnees.locations.filter(

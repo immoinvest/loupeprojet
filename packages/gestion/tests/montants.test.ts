@@ -8,6 +8,7 @@ import {
   moisModifiables,
   montantsDuMois,
   premierMoisModifiable,
+  tropDeChangements,
 } from '../src/montants';
 import { CHANGEMENTS_MAX } from '../src/regles';
 import {
@@ -171,16 +172,27 @@ describe('schémas des changements', () => {
     expect(ChangementSchema.safeParse(changement('2026-13', 65_000)).success).toBe(false);
   });
 
-  it('une location enregistrée : aide couverte, 120 changements au plus', () => {
+  it('une location enregistrée : aide couverte ; nombre de changements non borné à la lecture', () => {
     expect(LocationGereeSchema.safeParse(location('l1', { apl: 70_001 })).success).toBe(false);
     const beaucoup = Array.from({ length: CHANGEMENTS_MAX + 1 }, (_, i) =>
       changement(ajouterMois('2026-01', i), 65_000),
     );
-    const assez = location('l1', { changements: beaucoup.slice(1) });
-    expect(LocationGereeSchema.safeParse(assez).success).toBe(true);
     expect(LocationGereeSchema.safeParse(location('l1', { changements: beaucoup })).success).toBe(
+      true,
+    );
+  });
+
+  it('borne à l’écriture : 120 changements, un de plus refusé, le même mois toujours remplaçable', () => {
+    const cent20 = Array.from({ length: CHANGEMENTS_MAX }, (_, i) =>
+      changement(ajouterMois('2010-01', i), 65_000),
+    );
+    const pleine = location('l1', { debut: '2010-01-01', changements: cent20 });
+    expect(tropDeChangements(pleine, '2026-10')).toBe(true);
+    expect(tropDeChangements(pleine, '2015-06')).toBe(false);
+    expect(tropDeChangements(location('l2', { changements: cent20.slice(1) }), '2026-10')).toBe(
       false,
     );
+    expect(tropDeChangements(location('l3'), '2026-10')).toBe(false);
   });
 
   it('une modification change au moins un champ ; un libellé à null le retire', () => {

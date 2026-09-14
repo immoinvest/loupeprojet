@@ -1,6 +1,7 @@
 import {
   changementRefuse,
   chevauche,
+  tropDeChangements,
   type Locataire,
   type LocationGeree,
   type ModificationLocation,
@@ -79,6 +80,10 @@ export function depotModifications(outils: OutilsBaux): DepotModifications {
         // Les bornes seulement : le mois déjà payé se décide à l'écriture, sans course possible.
         const hors = changementRefuse(location, [], montants.aPartirDe, maintenant().slice(0, 10));
         if (hors !== null) throw new ErreurGestion(hors);
+        // Borne contre l'abus du quota D1 ; remplacer le changement d'un mois reste permis.
+        if (tropDeChangements(location, montants.aPartirDe)) {
+          throw new ErreurGestion('LIMITE_ATTEINTE');
+        }
       }
       if (libelle !== undefined) await verifierLibelle(userId, location, libelle);
 

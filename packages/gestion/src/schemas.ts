@@ -3,7 +3,6 @@ import { z } from 'zod';
 import { JourSchema, PeriodeSchema } from './dates';
 import { DocumentCompletSchema, DocumentSchema, IdentiteBailleurSchema } from './documents';
 import {
-  CHANGEMENTS_MAX,
   COLOCATAIRES_MAX,
   JOUR_LOYER_MAX,
   MONTANT_MAX_CENTIMES,
@@ -124,8 +123,11 @@ export const LocationGereeSchema = z
     /** Les colocataires du même bail, dans l'ordre ; vide hors colocation. */
     colocataireIds: z.array(IdentifiantSchema).max(COLOCATAIRES_MAX),
     ...champsLocation,
-    /** Les changements de montants, dans l'ordre des mois ; absents = aucun. */
-    changements: z.array(ChangementSchema).max(CHANGEMENTS_MAX).optional(),
+    /**
+     * Les changements de montants, dans l'ordre des mois ; absents = aucun. Sans borne à la lecture :
+     * la borne s'applique à l'écriture (`tropDeChangements`), un dépassement ne casse jamais l'état.
+     */
+    changements: z.array(ChangementSchema).optional(),
     creeLe: HorodatageSchema,
   })
   .refine(finApresDebut, FIN_APRES_DEBUT)

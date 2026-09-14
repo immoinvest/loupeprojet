@@ -1,4 +1,4 @@
-import type { EtatGestion } from '@loupe/gestion';
+import { ajouterMois, CHANGEMENTS_MAX, type EtatGestion } from '@loupe/gestion';
 import { describe, expect, it } from 'vitest';
 
 import { clientGestionMemoire } from '@/gestion/memoire';
@@ -91,6 +91,26 @@ describe('modifier une location en mémoire', () => {
     const sans = modifierEnMemoire(etat, 'location-julie', { libelle: null }, AUJOURDHUI).resultat;
     if (!sans.ok) throw new Error('modification attendue');
     expect(sans.valeur).not.toHaveProperty('libelle');
+  });
+
+  it('borne contre les abus : un changement de trop est refusé (limite), le même mois reste remplaçable', () => {
+    const changements = Array.from({ length: CHANGEMENTS_MAX }, (_, i) => ({
+      aPartirDe: ajouterMois('2010-01', i),
+      loyerHorsCharges: 65_000,
+      charges: 5_000,
+      apl: 0,
+    }));
+    const etat: EtatGestion = {
+      ...ETAT_SEPTEMBRE,
+      paiements: [],
+      locations: [{ ...LOCATION_JULIE, debut: '2010-01-01', changements }, LOCATION_ANTOINE],
+    };
+    expect(
+      modifierEnMemoire(etat, 'location-julie', montants('2026-10'), AUJOURDHUI).resultat,
+    ).toEqual({ ok: false, code: 'limite' });
+    expect(
+      modifierEnMemoire(etat, 'location-julie', montants('2015-06'), AUJOURDHUI).resultat.ok,
+    ).toBe(true);
   });
 });
 

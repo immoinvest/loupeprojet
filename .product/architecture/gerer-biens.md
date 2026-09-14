@@ -136,6 +136,8 @@ Un commit par story ; `master` fusionnée avant la QA et juste avant la PR ; PR 
 - **Menu** : « Mes biens · N » puis « Mes locataires » (sans nombre, comme dans l'UX de l'épic), après « Tous les loyers ».
 - **Migration 0005 et code en production** : `depot-documents.ts` lit `l.apl` ; sans la colonne, l'émission d'un document échouerait en 500 (et non en 503) : la migration doit précéder le déploiement du code, comme 0003.
 
+- **Borne des changements (audit)** : `CHANGEMENTS_MAX` (120) bornait la lecture (`LocationGereeSchema`) sans borner l'écriture : un compte aurait pu rendre son propre état illisible. La borne passe à l'écriture (`tropDeChangements`, 409 `LIMITE_ATTEINTE` ; remplacer le changement d'un mois reste permis) et la lecture n'a plus de borne.
+
 ## Auto-revue (checkpoint validé par Claude, sur autorisation de Pierre)
 
 - **ADR-G14 plutôt qu'une table de périodes complète** : c'est le choix le moins risqué pour des données déjà en production (Pierre gère de vrais biens) ; la lecture reste une seule fonction pure.

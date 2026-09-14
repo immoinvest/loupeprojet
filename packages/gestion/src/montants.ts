@@ -1,5 +1,5 @@
 import { ajouterMois, periodeDe, periodeSuivante } from './dates';
-import { HORIZON_MODIFICATION_MOIS } from './regles';
+import { CHANGEMENTS_MAX, HORIZON_MODIFICATION_MOIS } from './regles';
 import type { Changement, LocationGeree, Paiement } from './schemas';
 
 /*
@@ -100,4 +100,16 @@ export function avecChangement<L extends Pick<LocationGeree, 'changements'>>(
     ...location,
     changements: [...autres, changement].sort((a, b) => a.aPartirDe.localeCompare(b.aPartirDe)),
   };
+}
+
+/**
+ * Un nouveau changement dépasserait-il la borne contre l'abus ? Remplacer le changement d'un mois
+ * déjà changé reste toujours permis.
+ */
+export function tropDeChangements(
+  location: Pick<LocationGeree, 'changements'>,
+  aPartirDe: string,
+): boolean {
+  const autres = (location.changements ?? []).filter((c) => c.aPartirDe !== aPartirDe);
+  return autres.length >= CHANGEMENTS_MAX;
 }
