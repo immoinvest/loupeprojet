@@ -82,6 +82,11 @@ export function tauxExterieur(bien: Bien, regles: Regles): number | null {
   return bien.exterieur === true ? regles.estimation.exterieur : null;
 }
 
+/** Les ventes comparables sont surtout des biens libres : un bien vendu loué se vend moins cher. */
+export function tauxOccupation(bien: Bien, regles: Regles): number | null {
+  return bien.venduLoue === true ? regles.estimation.occupation : null;
+}
+
 interface EffetCharges extends ChargesComparees {
   readonly montant: number;
 }
@@ -139,6 +144,7 @@ export function estimerPrix(projet: Projet, regles: Regles): EstimationPrix | nu
     ['dpe', tauxDpe(bien, regles)],
     ['etage', tauxEtage(bien, regles)],
     ['exterieur', tauxExterieur(bien, regles)],
+    ['occupation', tauxOccupation(bien, regles)],
   ];
   const proportionnelles = candidates.flatMap(([code, taux]) =>
     taux === null || taux === 0 ? [] : [{ code, taux, ignoree: ignorees.has(code) }],

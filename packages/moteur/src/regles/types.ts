@@ -239,6 +239,8 @@ export interface Regles {
     };
     /** Prime d'un balcon ou d'une terrasse. */
     readonly exterieur: number;
+    /** Décote d'un bien vendu loué, par rapport à un bien libre (négative). */
+    readonly occupation: number;
     readonly charges: {
       /** Charges de copropriété courantes, en € par m² et par an. */
       readonly repereM2An: number;
