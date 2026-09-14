@@ -113,4 +113,13 @@ describe('Hypothèses : aide du champ Apport', () => {
     const projet = construireProjet({ ...MINIMAL, apport: 0 }, 'p');
     expect(n(apport?.aideSelon?.(projet) ?? '')).toMatch(/^Soit 0 % du coût total du projet/);
   });
+
+  it('sans apport dans le projet (défaut du schéma) : la règle du défaut', () => {
+    const projet = construireProjet(MINIMAL, 'p');
+    const { apport: montant, ...pretSansApport } = projet.hypotheses.pret;
+    expect(montant).toBeGreaterThan(0);
+    const sansApport = { ...projet, hypotheses: { ...projet.hypotheses, pret: pretSansApport } };
+    const champ = GROUPE_FINANCEMENT.champs.find((d) => d.chemin === 'hypotheses.pret.apport');
+    expect(n(champ?.aideSelon?.(sansApport) ?? '')).toMatch(/^Par défaut, 10 %/);
+  });
 });
