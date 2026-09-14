@@ -2,22 +2,43 @@
   "feature_slug": "achat-negociation",
   "title": "Achat : curseur de négociation, prix retenu, rénovation énergétique cachée, travaux repliés (fiche 04)",
   "started_at": "2026-09-14T09:00:00Z",
-  "current_step": "specs",
+  "current_step": "push",
   "scope": "packages/moteur/src/{schema/hypotheses.ts,achat,financement,cashflow/charges.ts,rendement,revente,estimation,verdict,scenarios,calculer-base.ts,schema/resultats.ts}, apps/web/src/{composants/Curseur.tsx,ecrans/Hypotheses.tsx,ecrans/hypotheses,ecrans/FormulaireProjet.tsx,ecrans/rapport/CartePrix.tsx,coque/ProjetLayout.tsx,ecrans/{MesProjets,Comparer,Revente,Adresse}.tsx,ecrans/document,analyses,hypotheses,textes}, apps/web/e2e",
   "branch": "feat/achat-negociation",
-  "base": "master (9d38892, après PR #38)",
+  "base": "master (9d38892, après PR #38), puis fusion de master (coque fixe, PR #39)",
   "steps": {
     "discovery": {
       "status": "completed",
       "output": ".product/features/achat-negociation-discovery.md",
       "note": "questions de périmètre posées à Pierre avec recommandations ; avancée sur les recommandations (taux stocké, négociation sur le total affiché, curseur 0 à −15 % par 0,5 %, rénovation énergétique gardée et cachée, travaux repliés, Viser le prix estimé)"
     },
-    "specs": { "status": "in_progress", "output": ".product/specs/achat-negociation-specs.md" },
-    "architecture": { "status": "pending", "output": ".product/architecture/achat-negociation.md" },
-    "implement": { "status": "pending", "stories_completed": 0, "stories_total": 4 },
-    "qa_tests": { "status": "pending" },
-    "security": { "status": "pending" },
-    "push": { "status": "pending" }
+    "specs": { "status": "completed", "output": ".product/specs/achat-negociation-specs.md" },
+    "architecture": {
+      "status": "completed",
+      "output": ".product/architecture/achat-negociation.md"
+    },
+    "implement": {
+      "status": "completed",
+      "stories_completed": 4,
+      "stories_total": 4,
+      "note": "un commit par story : US-1 moteur (achat/, onze lectures, Resultats.achat), US-2 carte L'achat (Curseur, négociation, Viser, dépliant travaux, rénovation conditionnelle), US-3 prix retenu partout (Rapport, en-tête, listes, Comparer, Revente, Adresse, document), US-4 Vérifier, Méthode, Playwright"
+    },
+    "refactor": {
+      "status": "completed",
+      "note": "CarteAchat compose les descripteurs existants ; Curseur générique réutilisable (fiche 06) ; textes/achat.ts centralise les libellés du prix retenu"
+    },
+    "qa_tests": {
+      "status": "completed",
+      "note": "37 tests ajoutés (19 moteur, 18 web) ; suite complète 1 008 tests, 1 006 verts + 2 tests de l'extension qui dépassent 5 s seulement sous charge (verts en isolation) ; couverture 100 % sur le moteur et les dossiers web listés ; vérifié dans le navigateur (curseur à −5 % : prix retenu 147 250 €, en-tête et Rapport)"
+    },
+    "security": {
+      "status": "completed",
+      "note": "aucune entrée nouvelle venant du réseau ; le taux est borné par Zod (0 à 0,3) et passe par appliquerSaisie ; aucun innerHTML ; le curseur est un input natif"
+    },
+    "push": {
+      "status": "in_progress",
+      "note": "master fusionné (coque fixe) avec un conflit résolu dans ProjetLayout ; PR à ouvrir avec auto-merge"
+    }
   },
   "decisions": {
     "stockage": "achat.negociationTaux (0 à 0,3, défaut 0) ; prixRetenu(achat) = prix × (1 − taux) arrondi à l'euro, prix affiché tel quel à taux nul",
@@ -25,6 +46,7 @@
     "curseur": "0 à −15 % par pas de 0,5 % ; champ % à côté jusqu'à 30 % ; pas de surenchère",
     "viser": "taux arrondi au pas, plafonné à 15 %, qui amène le prix retenu au centre de l'estimation ; masqué si le prix affiché est déjà sous l'estimation",
     "renovation": "règle gardée dans le moteur ; case visible seulement en location nue avec travaux > 0",
-    "travaux": "dépliant « + Ajouter des travaux » (travaux, rénovation, mobilier) dans Hypothèses, « + Ajouter des travaux » dans Vérifier ; pas de curseur à la création"
+    "travaux": "dépliant « + Ajouter des travaux » (travaux, rénovation, mobilier) dans Hypothèses, « + Ajouter des travaux » / « − Retirer les travaux » dans Vérifier ; pas de curseur à la création",
+    "affichage": "le prix retenu remplace le prix affiché dans l'en-tête (« 147 250 € · négocié −5 % »), Mes projets, Comparer, Revente, Adresse et le document ; le Rapport dit les deux"
   }
 }
