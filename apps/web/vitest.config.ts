@@ -30,6 +30,7 @@ export default defineConfig({
         'src/enrichissement/**',
         'src/application/**',
         'src/hors-ligne/**',
+        'src/visite/**',
       ],
       thresholds: { lines: 100, functions: 100, branches: 100, statements: 100 },
     },

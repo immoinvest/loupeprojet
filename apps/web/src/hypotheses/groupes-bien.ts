@@ -1,3 +1,7 @@
+import { VERSION_REGLES_COURANTE, obtenirRegles, type ProjetEntree } from '@loupe/moteur';
+
+import { euros } from '@/formatage/nombres';
+
 import type { Groupe, Option } from './types';
 
 const OUI_NON: readonly Option[] = [
@@ -31,28 +35,11 @@ export const GROUPE_BIEN: Groupe = {
   ],
 };
 
-export const GROUPE_MARCHE: Groupe = {
-  titre: 'Le marché',
-  sousTitre:
-    "Ventes réelles autour du bien (DVF). Bientôt rempli automatiquement ; d'ici là, saisissez ce que vous savez.",
-  champs: [
-    {
-      chemin: 'marche.dvf.medianM2',
-      libelle: 'Prix médian des ventes',
-      type: 'euros',
-      unite: '€/m²',
-    },
-    { chemin: 'marche.dvf.q1M2', libelle: 'Premier quart', type: 'euros', unite: '€/m²' },
-    { chemin: 'marche.dvf.q3M2', libelle: 'Troisième quart', type: 'euros', unite: '€/m²' },
-    { chemin: 'marche.dvf.nombreVentes', libelle: 'Nombre de ventes', type: 'entier' },
-    {
-      chemin: 'marche.plafondLoyerMensuel',
-      libelle: "Plafond d'encadrement",
-      type: 'euros',
-      unite: '€/mois',
-    },
-  ],
-};
+/** La rénovation énergétique ne joue qu'en location nue (déficit foncier) et avec des travaux. */
+const locationNueAvecTravaux = (p: ProjetEntree): boolean =>
+  p.hypotheses.location.mode === 'nu' && (p.hypotheses.achat.travaux ?? 0) > 0;
+
+const DEFICIT_FONCIER = obtenirRegles(VERSION_REGLES_COURANTE).fiscalite.deficitFoncier;
 
 export const GROUPE_ACHAT: Groupe = {
   titre: "L'achat",
@@ -76,13 +63,29 @@ export const GROUPE_ACHAT: Groupe = {
       type: 'bool',
       options: OUI_NON,
     },
+    {
+      chemin: 'hypotheses.achat.negociationTaux',
+      libelle: 'Négociation',
+      type: 'pourcent',
+      unite: '%',
+      aToi: true,
+    },
     { chemin: 'hypotheses.achat.travaux', libelle: 'Travaux', type: 'euros', unite: '€' },
     {
       chemin: 'hypotheses.achat.travauxRenovationEnergetique',
-      libelle: 'Rénovation énergétique',
+      libelle: 'Ces travaux font sortir le logement des classes E, F ou G',
       type: 'bool',
       options: OUI_NON,
+      visibleSi: locationNueAvecTravaux,
+      aide: `Déficit foncier imputable sur le revenu global porté de ${euros(DEFICIT_FONCIER.plafondRevenuGlobal)} à ${euros(DEFICIT_FONCIER.plafondRenovationEnergetique)} (nu au réel, jusqu'au 31/12/2027).`,
     },
     { chemin: 'hypotheses.achat.mobilier', libelle: 'Mobilier', type: 'euros', unite: '€' },
   ],
 };
+
+/** Les champs de la carte « L'achat » repliés derrière « + Ajouter des travaux ». */
+export const CHEMINS_TRAVAUX: readonly string[] = [
+  'hypotheses.achat.travaux',
+  'hypotheses.achat.travauxRenovationEnergetique',
+  'hypotheses.achat.mobilier',
+];

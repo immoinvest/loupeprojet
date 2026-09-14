@@ -146,7 +146,22 @@ export interface Regles {
     readonly prix: { readonly bonJusqua: number; readonly surveillerJusqua: number };
     readonly rendementNet: { readonly bonDes: number; readonly surveillerDes: number };
     readonly cashflowMensuel: { readonly bonDes: number; readonly surveillerDes: number };
-    readonly effort: { readonly bonJusqua: number; readonly surveillerJusqua: number };
+    /** Mensualité assurance comprise ÷ loyer hors charges : le loyer porte-t-il le crédit ? */
+    readonly couverture: { readonly bonJusqua: number; readonly surveillerJusqua: number };
+  };
+
+  /** Seuils qui décident des questions de la liste de visite. */
+  readonly visite: {
+    /** Permis de construire déposé avant cette année : diagnostic amiante obligatoire. */
+    readonly amianteAvantAnnee: number;
+    /** Logement construit avant cette année : constat de risque d'exposition au plomb. */
+    readonly plombAvantAnnee: number;
+    /** Installations électrique et gaz plus vieilles que ce nombre d'années : diagnostics obligatoires. */
+    readonly installationsAnciennesAns: number;
+    /** Premier étage à partir duquel l'absence d'ascenseur pèse sur la location. */
+    readonly etageSansAscenseur: number;
+    /** Surface minimale d'une chambre en colocation (décence). */
+    readonly chambreColocationM2: number;
   };
 
   readonly estimation: {

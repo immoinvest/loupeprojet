@@ -60,8 +60,10 @@ export function TableauGroupes({ analyse }: { analyse: ReponseAdresse }): JSX.El
         </table>
       </div>
       <p className="m-0 text-sm text-encre-3">
-        Comparables : même type de logement, surface à 40 % près. {analyse.ventesCommune} ventes de
-        logements dans la commune sur deux ans.
+        Comparables : même type de logement, surface à 40 % près ; dans le même immeuble (même
+        parcelle ou même adresse), toutes les ventes du même type. Prix ramenés à aujourd'hui et à
+        la surface du bien. {analyse.ventesCommune} ventes de logements dans la commune sur cinq
+        ans.
       </p>
     </Carte>
   );
@@ -97,7 +99,9 @@ export function TableauVentes({ analyse }: { analyse: ReponseAdresse }): JSX.Ele
                 <td className={CELLULE}>{nombre(v.surface)} m²</td>
                 <td className={CELLULE}>{euros(v.prix)}</td>
                 <td className={CELLULE}>{prixM2(v.prixM2)}</td>
-                <td className={CELLULE}>{prixM2(v.prixM2Actualise ?? v.prixM2)}</td>
+                <td className={CELLULE}>
+                  {prixM2(v.prixM2Corrige ?? v.prixM2Actualise ?? v.prixM2)}
+                </td>
                 <td className={CELLULE}>
                   {v.distanceMetres === null ? '—' : `${String(v.distanceMetres)} m`}
                 </td>

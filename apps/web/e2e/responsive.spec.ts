@@ -105,7 +105,7 @@ test("impression : sur une page A4, le document garde la mise en page d'ordinate
 
   const miseEnPage = await page.evaluate(() => {
     const volets = [...document.querySelectorAll('.document article')];
-    const [rapport, fiscalite, revente] = volets;
+    const [rapport, financement, fiscalite, revente] = volets;
     const colonnes = (volet: Element | undefined): number[] =>
       [...(volet?.querySelectorAll('.grid') ?? [])].map(
         (grille) => getComputedStyle(grille).gridTemplateColumns.split(' ').length,
@@ -119,6 +119,7 @@ test("impression : sur une page A4, le document garde la mise en page d'ordinate
     return {
       volets: volets.length,
       grillesRapport: colonnes(rapport),
+      grillesFinancement: colonnes(financement),
       grillesFiscalite: colonnes(fiscalite),
       grillesRevente: colonnes(revente),
       leviers: style(leviers)?.flexDirection ?? null,
@@ -130,14 +131,18 @@ test("impression : sur une page A4, le document garde la mise en page d'ordinate
   });
 
   expect(miseEnPage).toMatchObject({
-    volets: 4,
+    volets: 5,
     leviers: 'row',
     titre: '40px',
     marge: '40px',
     enTete: 'row',
     barre: 'none',
   });
-  expect(miseEnPage.grillesRapport).toEqual([2, 2]);
+  // Rapport, dans l'ordre du document : cascade et repères côte à côte (2), repères empilés (1),
+  // Prix et Rendements (2), brut · net · net-net (3), Impôts et Revente (2).
+  expect(miseEnPage.grillesRapport).toEqual([2, 1, 2, 3, 2]);
+  // Financement sur papier : le prêt en lignes, puis les deux rangées de cartes, toutes à deux colonnes.
+  expect(miseEnPage.grillesFinancement).toEqual([2, 2, 2]);
   expect(miseEnPage.grillesFiscalite[0]).toBe(2);
   expect(miseEnPage.grillesRevente.slice(0, 2)).toEqual([2, 2]);
   await contexte.close();

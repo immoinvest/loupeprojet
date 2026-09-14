@@ -14,6 +14,7 @@ export {
   type Tri,
 } from './comparaison';
 export { defautsDuMoteur, type Defauts } from './defauts';
+export { CURSEUR_NEGOCIATION, pourcentNegociation, pourcentPourViser } from './negociation';
 export {
   impositionPlusValue,
   seuilsExoneration,
@@ -28,3 +29,14 @@ export {
   variantesRevente,
   type VarianteRevente,
 } from './revente';
+export {
+  CHEMIN_SIMULATEUR,
+  SimulationPretEntreeSchema,
+  decoderSimulation,
+  encoderSimulation,
+  lienSimulateurPret,
+  lireFragmentSimulation,
+  simulationDepuisResultats,
+  type DecodageSimulation,
+  type SimulationPretEntree,
+} from './simulation-pret';

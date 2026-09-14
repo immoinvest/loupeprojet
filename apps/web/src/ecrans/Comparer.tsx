@@ -1,3 +1,4 @@
+import { prixRetenu } from '@loupe/moteur';
 import { useMemo, useState, type JSX } from 'react';
 import { Link, useNavigate } from 'react-router';
 
@@ -56,7 +57,7 @@ function Selection({
             />
             {p.nom}
             <span className="font-normal text-encre-3">
-              {euros(p.projet.hypotheses.achat.prix)}
+              {euros(prixRetenu(p.projet.hypotheses.achat))}
             </span>
           </label>
         );
@@ -107,7 +108,9 @@ function Tableau({
   onTrier: (code: CodeIndicateur) => void;
 }): JSX.Element {
   return (
-    <div className="overflow-x-auto rounded-carte border border-bordure bg-surface shadow-carte">
+    // `relative` : les libellés des feux réservés aux lecteurs d'écran sont positionnés en absolu ; sans
+    // ancêtre positionné, ils échappaient au défilement et élargissaient la page à partir de trois projets.
+    <div className="relative overflow-x-auto rounded-carte border border-bordure bg-surface shadow-carte">
       <table className="w-full border-collapse text-[15px]">
         <thead>
           <tr className="border-b border-bordure">

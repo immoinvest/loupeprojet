@@ -69,12 +69,14 @@ describe('detecterMillesime', () => {
 });
 
 describe('executerDvf', () => {
-  it("publie un CSV par commune et l'index du département sur une fenêtre de 24 mois", async () => {
+  it('publie un CSV par commune avec toutes les ventes lues, et l’index du département sur 24 mois', async () => {
     const faux = fauxContexte(repondeurCorse, dossier);
     await executerDvf(faux.contexte, { departements: ['2A'], passeComplete: false });
 
+    // Là où les ventes sont rares, les plus anciennes comptent : le CSV garde les cinq dossiers annuels.
     expect(await lireSortie('dvf/2025/2A004.csv')).toBe(
       'date,prix,surface,type,pieces,lat,lon,idParcelle,numero,suffixe,codeVoie,voie,carrez\n' +
+        '2023-12-31,100000,40,appartement,2,41.91,8.71,2A004000CC0006,7,,0120,RUE BONAPARTE,40\n' +
         '2024-01-01,150000,50,appartement,2,41.9,8.7,2A004000CB0005,6,,0700,RUE DES TROIS MARIE,50.4\n' +
         '2025-01-09,136000,66,appartement,4,41.934774,8.740565,2A004000BO0412,9001,,A090,RES DES CANNES,67.09\n' +
         '2025-01-13,93000,27,appartement,1,41.924773,8.735188,2A004000BW0375,9002,,0990,AV NAPOLEON 3,27.01\n' +
@@ -148,7 +150,7 @@ describe('executerDvf', () => {
     const bilan = faux.journal.find((entree) => entree.message === 'DVF : département publié');
     expect(bilan).toMatchObject({
       communes: 4,
-      ventes: 9,
+      ventes: 10,
       mutations: 21,
       exclusions: {
         nature: 3,

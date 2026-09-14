@@ -43,9 +43,21 @@ describe('calculerFinancement — T3 Marseille', () => {
     expect(f.tauxUsureDepasse).toBe(false);
   });
 
-  it('effort HCSF ≈ 25,2 %', () => {
-    expect(f.effort.hcsf).toBeCloseTo(0.252, 3);
+  it('sans revenus (Deklic ne les demande plus) : aucun effort HCSF, rien de signalé', () => {
+    expect(f.effort.hcsf).toBeNull();
+    expect(f.effort.sansLoyers).toBeNull();
     expect(f.effort.depasseHcsf).toBe(false);
+  });
+
+  it('avec 2 600 € de revenus (projet ancien) : effort HCSF ≈ 25,2 %', () => {
+    const avecRevenus = ProjetSchema.parse({
+      ...projetExemple,
+      hypotheses: { ...projetExemple.hypotheses, revenusMensuels: 2_600 },
+    });
+    const effort = calculerFinancement(avecRevenus, regles).effort;
+    expect(effort.hcsf).toBeCloseTo(0.252, 3);
+    expect(effort.sansLoyers).toBeCloseTo(826.65 / 2_600, 3);
+    expect(effort.depasseHcsf).toBe(false);
   });
 
   it('CRD et IRA à la revente (10 ans) cohérents avec le tableau', () => {

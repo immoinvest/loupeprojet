@@ -1,4 +1,4 @@
-import { ProjetSchema, type ProjetEntree } from '@loupe/moteur';
+import { ProjetSchema, type Projet, type ProjetEntree } from '@loupe/moteur';
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
 
 import {
@@ -9,7 +9,14 @@ import {
   type OptionsCreation,
   type ProjetEnregistre,
   type StatutProjet,
+  type Visite,
 } from './projets';
+
+/** Ce qui s'enregistre avec le projet sans passer par le moteur : adresse exacte, visite. */
+export interface ComplementProjet {
+  readonly adresse?: AdresseBien;
+  readonly visite?: Visite;
+}
 
 export interface ContexteProjets {
   readonly projets: readonly ProjetEnregistre[];
@@ -19,12 +26,12 @@ export interface ContexteProjets {
   readonly trouver: (id: string | undefined) => ProjetEnregistre | undefined;
   /**
    * Remplace le projet après validation Zod ; une entrée invalide n'est pas enregistrée.
-   * Le complément (adresse exacte) est enregistré dans la même écriture, pour ne rien écraser.
+   * Le complément (adresse exacte, visite) est enregistré dans la même écriture, pour ne rien écraser.
    */
   readonly mettreAJour: (
     id: string,
     projet: ProjetEntree,
-    complement?: { readonly adresse?: AdresseBien },
+    complement?: ComplementProjet,
   ) => MiseAJour;
 }
 
@@ -82,23 +89,27 @@ export function ProjetsProvider({ stockage, children }: ProjetsProviderProps): R
       },
       trouver: (id) => projets.find((p) => p.id === id),
       mettreAJour: (id, projet, complement = {}) => {
-        const resultat = ProjetSchema.safeParse(projet);
-        if (!resultat.success) {
-          const erreurs: Record<string, string> = {};
-          for (const issue of resultat.error.issues) {
-            erreurs[issue.path.map(String).join('.')] = issue.message;
+        const courant = projets.find((p) => p.id === id)?.projet;
+        // Le projet déjà enregistré, inchangé (seul le complément bouge) : rien à revalider, et son
+        // identité est gardée pour que les écrans ne recalculent pas les résultats.
+        let valide: Projet;
+        if (courant !== undefined && courant === projet) {
+          valide = courant;
+        } else {
+          const resultat = ProjetSchema.safeParse(projet);
+          if (!resultat.success) {
+            const erreurs: Record<string, string> = {};
+            for (const issue of resultat.error.issues) {
+              erreurs[issue.path.map(String).join('.')] = issue.message;
+            }
+            return { ok: false, erreurs };
           }
-          return { ok: false, erreurs };
+          valide = resultat.data;
         }
         remplacer(
           projets.map((p) =>
             p.id === id
-              ? {
-                  ...p,
-                  ...complement,
-                  projet: resultat.data,
-                  modifieLe: new Date().toISOString(),
-                }
+              ? { ...p, ...complement, projet: valide, modifieLe: new Date().toISOString() }
               : p,
           ),
         );

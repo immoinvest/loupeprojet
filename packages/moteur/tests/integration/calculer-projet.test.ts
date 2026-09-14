@@ -57,12 +57,12 @@ describe('calculerProjet — pureté et robustesse', () => {
   });
 
   it('applique les défauts à une entrée minimale', () => {
-    const { achat, pret, location, fiscalite, revenusMensuels } = projetExemple.hypotheses;
+    const { achat, pret, location, fiscalite } = projetExemple.hypotheses;
     const minimal: ProjetEntree = {
       id: 'minimal',
       versionRegles: '2026-09',
       bien: { type: 'appartement', surface: 40, pieces: 2, departement: '69' },
-      hypotheses: { achat, pret, location, fiscalite, revenusMensuels },
+      hypotheses: { achat, pret, location, fiscalite },
     };
     const r = calculerProjet(minimal);
     expect(r.verdict.feux[0]?.feu).toBe('inconnu');
@@ -104,4 +104,64 @@ describe('calculerProjet — pureté et robustesse', () => {
       expect(moyenne).toBeLessThan(500);
     },
   );
+});
+
+describe('calculerProjet — négociation du prix', () => {
+  const avecNegociation = (negociationTaux: number): ProjetEntree => ({
+    ...projetExemple,
+    hypotheses: {
+      ...projetExemple.hypotheses,
+      achat: { ...projetExemple.hypotheses.achat, negociationTaux },
+    },
+  });
+  const reference = calculerProjet(projetExemple);
+
+  it('à négociation nulle explicite, le rapport est strictement identique à la référence', () => {
+    expect(calculerProjet(avecNegociation(0))).toEqual(reference);
+    expect(reference.achat).toEqual({
+      prixAffiche: 155_000,
+      prixRetenu: 155_000,
+      negociationTaux: 0,
+      negociationMontant: 0,
+    });
+  });
+
+  it('négocié à 5 % : tout est calculé sur 147 250 € (vérifié module par module)', () => {
+    const r = calculerProjet(avecNegociation(0.05));
+    expect(() => ResultatsSchema.parse(r)).not.toThrow();
+    expect(r.achat).toEqual({
+      prixAffiche: 155_000,
+      prixRetenu: 147_250,
+      negociationTaux: 0.05,
+      negociationMontant: 7_750,
+    });
+    // Frais d'acquisition sur le prix négocié, honoraires (7 000 €) inchangés.
+    const frais = r.financement.fraisAcquisition;
+    expect(frais.base).toBe(140_250);
+    expect(frais.total).toBeLessThan(reference.financement.fraisAcquisition.total);
+    // Emprunt = prix retenu + travaux + frais + dossier + garantie − apport.
+    expect(r.financement.montantEmprunte).toBeCloseTo(
+      147_250 + 6_000 + frais.total + 850 + 1_500 - 14_337,
+      6,
+    );
+    expect(r.financement.coutTotalProjet).toBeCloseTo(
+      147_250 + 6_000 + frais.total + 850 + 1_500 + 5_000,
+      6,
+    );
+    // Provision d'entretien : 0,5 % du prix retenu.
+    expect(r.cashflow.charges.find((c) => c.code === 'entretien')?.annuel).toBeCloseTo(736.25, 6);
+    // Rendements sur le coût complet.
+    expect(r.rendement.rendements.coutTotal).toBeCloseTo(147_250 + 6_000 + frais.total, 6);
+    // Revente et plus-value depuis le prix retenu.
+    expect(r.revente.valeur).toBeCloseTo(147_250 * 1.015 ** 10, 6);
+    expect(r.revente.plusValue.prixAcquisitionMajore).toBeGreaterThanOrEqual(147_250);
+    // Estimation (206 733 €) et feu prix comparés au prix retenu.
+    expect(r.estimation?.ecartPrix).toBeCloseTo(147_250 / 206_733 - 1, 3);
+    expect(r.verdict.feux[0]?.valeur).toBeCloseTo(147_250 / 65 / 3181 - 1, 6);
+    // Payer moins cher améliore le cash-flow et le TRI ; les scénarios restent complets.
+    expect(r.cashflow.mensuel).toBeGreaterThan(reference.cashflow.mensuel);
+    expect(r.rendement.tri ?? 0).toBeGreaterThan(reference.rendement.tri ?? 0);
+    expect(r.scenarios?.scenarios).toHaveLength(6);
+    expect(r.scenarios?.prixCibles).toHaveLength(3);
+  });
 });

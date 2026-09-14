@@ -21,13 +21,14 @@ describe('ProjetSchema', () => {
   });
 
   it('remplit marche, charges, revente et provenance quand ils manquent', () => {
-    const { achat, pret, location, fiscalite, revenusMensuels } = projetExemple.hypotheses;
+    const { achat, pret, location, fiscalite } = projetExemple.hypotheses;
     const projet = ProjetSchema.parse({
       id: projetExemple.id,
       versionRegles: projetExemple.versionRegles,
       bien: projetExemple.bien,
-      hypotheses: { achat, pret, location, fiscalite, revenusMensuels },
+      hypotheses: { achat, pret, location, fiscalite },
     });
+    expect(projet.hypotheses.revenusMensuels).toBeUndefined();
     expect(projet.marche.risques).toEqual([]);
     expect(projet.marche.dvf).toBeUndefined();
     expect(projet.hypotheses.charges.taxeFonciere).toBe(0);
@@ -133,5 +134,25 @@ describe('ProjetSchema', () => {
   it('refuse une version de règles inconnue', () => {
     const resultat = ProjetSchema.safeParse({ ...projetExemple, versionRegles: '2031-01' });
     expect(resultat.success).toBe(false);
+  });
+});
+
+describe('AchatSchema — négociation', () => {
+  it('vaut 0 quand le champ manque (projets enregistrés avant la négociation)', () => {
+    expect(ProjetSchema.parse(projetExemple).hypotheses.achat.negociationTaux).toBe(0);
+  });
+
+  it('refuse un taux négatif ou au-delà de 30 % en nommant le champ', () => {
+    for (const negociationTaux of [-0.01, 0.31]) {
+      const resultat = ProjetSchema.safeParse({
+        ...projetExemple,
+        hypotheses: {
+          ...projetExemple.hypotheses,
+          achat: { ...projetExemple.hypotheses.achat, negociationTaux },
+        },
+      });
+      expect(resultat.success).toBe(false);
+      expect(resultat.error?.issues[0]?.path).toEqual(['hypotheses', 'achat', 'negociationTaux']);
+    }
   });
 });

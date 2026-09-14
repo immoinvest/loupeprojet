@@ -132,7 +132,7 @@ export function sectionNuReel(regles: Regles): SectionMethode {
     resume: 'Charges et intérêts déductibles ; le déficit foncier réduit votre revenu global.',
     etapes: [
       "Résultat = loyers − charges d'exploitation − assurance emprunteur − intérêts payés − travaux (année 1).",
-      `Déficit hors intérêts imputé sur le revenu global jusqu'à ${euros(df.plafondRevenuGlobal)} par an (${euros(df.plafondRenovationEnergetique)} avec des travaux de rénovation énergétique) ; le reste, intérêts compris, se reporte ${String(df.reportAnnees)} ans sur les revenus fonciers.`,
+      `Déficit hors intérêts imputé sur le revenu global jusqu'à ${euros(df.plafondRevenuGlobal)} par an (${euros(df.plafondRenovationEnergetique)} quand la case « Ces travaux font sortir le logement des classes E, F ou G » est cochée : elle n'apparaît qu'en location nue avec des travaux) ; le reste, intérêts compris, se reporte ${String(df.reportAnnees)} ans sur les revenus fonciers.`,
       `Impôt = base × votre tranche + base × ${pct(ps.foncier)} ; l'imputation sur le revenu global vous rend votre tranche × le déficit imputé.`,
     ],
     constantes: [

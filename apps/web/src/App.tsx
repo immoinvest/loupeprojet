@@ -17,6 +17,7 @@ import { Comparer } from './ecrans/Comparer';
 import { Compte } from './ecrans/Compte';
 import { Connexion } from './ecrans/Connexion';
 import { Extension } from './ecrans/Extension';
+import { Financement } from './ecrans/Financement';
 import { Fiscalite } from './ecrans/Fiscalite';
 import { Hypotheses } from './ecrans/Hypotheses';
 import { Imprimer } from './ecrans/Imprimer';
@@ -29,6 +30,7 @@ import { Revente } from './ecrans/Revente';
 import { Visite } from './ecrans/Visite';
 import { Adresse } from './ecrans/Adresse';
 import { ProjetsProvider } from './stockage/ProjetsContext';
+import { TEXTES_SIMULATEUR_BIENTOT } from './textes/financement';
 
 export const routes: RouteObject[] = [
   // Hors de la coque : la page de connexion classique, centrée, et le document imprimable.
@@ -45,6 +47,7 @@ export const routes: RouteObject[] = [
         element: <ProjetLayout />,
         children: [
           { index: true, element: <Rapport /> },
+          { path: 'financement', element: <Financement /> },
           { path: 'hypotheses', element: <Hypotheses /> },
           { path: 'fiscalite', element: <Fiscalite /> },
           { path: 'revente', element: <Revente /> },
@@ -57,6 +60,16 @@ export const routes: RouteObject[] = [
       { path: 'comparer', element: <Comparer /> },
       { path: 'methode', element: <Methode /> },
       { path: 'extension', element: <Extension /> },
+      // En attendant le simulateur (fiche 08) : le lien « Simuler un prêt » mène ici, prêt dans le fragment.
+      {
+        path: 'simulateur-pret',
+        element: (
+          <Bientot
+            titre={TEXTES_SIMULATEUR_BIENTOT.titre}
+            phrase={TEXTES_SIMULATEUR_BIENTOT.phrase}
+          />
+        ),
+      },
       {
         path: '*',
         element: (

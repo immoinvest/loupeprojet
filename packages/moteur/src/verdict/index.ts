@@ -1,3 +1,4 @@
+import { prixRetenu } from '../achat';
 import type { EstimationPrix } from '../estimation';
 import type { ResultatFinancement } from '../financement';
 import type { ResultatFiscalite } from '../fiscalite/types';
@@ -6,7 +7,7 @@ import type { ResultatRendement } from '../rendement';
 import type { Projet } from '../schema/projet';
 import {
   feuCashflow,
-  feuEffort,
+  feuCouverture,
   feuPrix,
   feuRendement,
   feuRisques,
@@ -23,7 +24,7 @@ export interface SyntheseVerdict {
 }
 
 export interface ResultatVerdict {
-  /** Toujours cinq, dans l'ordre : prix, rendement, cash-flow, effort, risques. */
+  /** Toujours cinq, dans l'ordre : prix, rendement, cash-flow, couverture, risques. */
   readonly feux: readonly FeuVerdict[];
   readonly synthese: SyntheseVerdict;
   readonly vigilance: readonly PointVigilance[];
@@ -43,7 +44,7 @@ export function calculerVerdict(
 ): ResultatVerdict {
   const retenu = fiscalite.regimes[fiscalite.retenu];
   const prix = feuPrix(
-    projet.hypotheses.achat.prix / projet.bien.surface,
+    prixRetenu(projet.hypotheses.achat) / projet.bien.surface,
     projet.marche,
     regles,
     estimation?.prixM2Estime ?? null,
@@ -52,7 +53,7 @@ export function calculerVerdict(
     prix,
     feuRendement(rendement.rendements.net, regles),
     feuCashflow(retenu.cashflow.mensuel, regles),
-    feuEffort(financement.effort, regles),
+    feuCouverture(retenu.cashflow.tauxCouverture, regles),
     feuRisques(projet.bien, projet.marche),
   ];
   return {
@@ -63,13 +64,13 @@ export function calculerVerdict(
       problemes: compter(feux, 'probleme'),
       inconnus: compter(feux, 'inconnu'),
     },
-    vigilance: pointsDeVigilance(projet, financement, fiscalite, prix, regles),
+    vigilance: pointsDeVigilance(projet, financement, fiscalite),
   };
 }
 
 export {
   feuCashflow,
-  feuEffort,
+  feuCouverture,
   feuPrix,
   feuRendement,
   feuRisques,

@@ -9,18 +9,20 @@ import {
   pourcentageSigne,
 } from '@/formatage/nombres';
 import type { ProjetEnregistre, StatutProjet } from '@/stockage/projets';
+import { libelleTauxNegociation } from '@/textes/achat';
 import { libelleRisques } from '@/textes/feux';
 import { REGIMES } from '@/textes/regimes';
 
 export type CodeIndicateur =
   | 'prix'
+  | 'negociation'
   | 'prixM2'
   | 'ecartMarche'
   | 'loyer'
   | 'cashflow'
   | 'brut'
   | 'net'
-  | 'effort'
+  | 'couverture'
   | 'impot'
   | 'horizon'
   | 'cashNet'
@@ -58,15 +60,23 @@ export const INDICATEURS: readonly Indicateur[] = [
     libelle: 'Prix affiché',
     sens: 'bas',
     meilleur: false,
-    extraire: (r) => r.projet.hypotheses.achat.prix,
+    extraire: (r) => r.achat.prixAffiche,
     formater: euros,
+  },
+  {
+    code: 'negociation',
+    libelle: 'Négociation',
+    sens: 'haut',
+    meilleur: false,
+    extraire: (r) => r.achat.negociationTaux,
+    formater: (v) => (v === 0 ? 'aucune' : libelleTauxNegociation(v)),
   },
   {
     code: 'prixM2',
     libelle: 'Prix au m²',
     sens: 'bas',
     meilleur: false,
-    extraire: (r) => r.projet.hypotheses.achat.prix / r.projet.bien.surface,
+    extraire: (r) => r.achat.prixRetenu / r.projet.bien.surface,
     formater: (v) => `${nombre(v)} €/m²`,
   },
   {
@@ -113,12 +123,12 @@ export const INDICATEURS: readonly Indicateur[] = [
     formater: (v) => pourcentage(v),
   },
   {
-    code: 'effort',
-    libelle: 'Effort bancaire',
+    code: 'couverture',
+    libelle: 'Crédit ÷ loyer',
     sens: 'bas',
     meilleur: true,
-    axe: 'effort',
-    extraire: (r) => r.financement.effort.hcsf,
+    axe: 'couverture',
+    extraire: (r) => valeursDesFeux(r).couverture,
     formater: (v) => pourcentage(v, 0),
   },
   {

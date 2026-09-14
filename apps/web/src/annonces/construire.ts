@@ -41,7 +41,6 @@ export interface SaisieProjet {
   readonly apport: number;
   readonly dureeAnnees: number;
   readonly tmi: 0 | 0.11 | 0.3 | 0.41 | 0.45;
-  readonly revenusMensuels: number;
   readonly provenance: Readonly<Partial<Record<keyof SaisieProjet, Provenance>>>;
   readonly annonce?: AnnonceResolue | undefined;
 }
@@ -184,7 +183,6 @@ export function construireProjet(
         cfe: meuble ? CFE_DEFAUT : 0,
       },
       fiscalite: { tmi: s.tmi, regime },
-      revenusMensuels: s.revenusMensuels,
     },
     provenance: { ...provenance, ...(enrichi === null ? {} : enrichi.provenance) },
   };

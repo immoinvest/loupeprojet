@@ -38,13 +38,14 @@ describe('comparerProjets', () => {
     expect(c).toBeDefined();
     expect(c!.id).toBe('exemple');
     expect(c!.valeurs.prix).toBe(155_000);
+    expect(c!.valeurs.negociation).toBe(0);
     expect(c!.valeurs.prixM2).toBeCloseTo(155_000 / 65, 6);
     // Écart au prix au m² estimé du bien (3 181 €/m²), plus à la seule médiane.
     expect(c!.valeurs.ecartMarche).toBeCloseTo(155_000 / 65 / 3181 - 1, 6);
     expect(c!.valeurs.loyer).toBe(980);
     expect(c!.valeurs.cashflow).toBeCloseTo(r.cashflow.mensuel, 6);
     expect(c!.valeurs.net).toBeCloseTo(r.rendement.rendements.net, 6);
-    expect(c!.valeurs.effort).toBeCloseTo(r.financement.effort.hcsf ?? 0, 6);
+    expect(c!.valeurs.couverture).toBeCloseTo(r.cashflow.tauxCouverture ?? 0, 6);
     expect(c!.valeurs.impot).toBe(r.fiscalite.regimes.lmnp_reel.impotTotal);
     expect(c!.valeurs.horizon).toBe(10);
     expect(c!.valeurs.cashNet).toBeCloseTo(r.revente.cashNetVendeur, 6);
@@ -55,7 +56,7 @@ describe('comparerProjets', () => {
       prix: 'bon',
       rendement: 'surveiller',
       cashflow: 'probleme',
-      effort: 'bon',
+      couverture: 'surveiller',
       risques: 'bon',
     });
   });
@@ -69,21 +70,20 @@ describe('comparerProjets', () => {
       }),
     );
     expect(formats.prix).toBe('155 000 €');
+    expect(formats.negociation).toBe('aucune');
     expect(formats.prixM2).toBe('2 385 €/m²');
     expect(formats.ecartMarche).toBe('−25 %');
     expect(formats.cashflow).toBe('−210 €/mois');
-    expect(formats.effort).toBe('25 %');
+    expect(formats.couverture).toBe('84 %');
     expect(formats.horizon).toBe('10 ans');
     expect(formats.risques).toBe('aucun');
     expect(n(indicateurParCode('impot').detail!(c!.resultats))).toBe('Meublé au réel · 10 ans');
     expect(INDICATEURS.filter((i) => i.detail === undefined).length).toBe(INDICATEURS.length - 1);
   });
 
-  it('les indicateurs sans repère de marché ou sans revenus rendent null', () => {
-    const [c] = comparerProjets([
-      projet('sans', { revenusMensuels: 0, location: { mode: 'nu', loyerHc: 0 } }),
-    ]);
-    expect(c!.valeurs.effort).toBeNull();
+  it('les indicateurs sans repère de marché ou sans loyer rendent null', () => {
+    const [c] = comparerProjets([projet('sans', { location: { mode: 'nu', loyerHc: 0 } })]);
+    expect(c!.valeurs.couverture).toBeNull();
     expect(c!.valeurs.loyer).toBe(0);
   });
 });
@@ -137,8 +137,8 @@ describe('trierColonnes', () => {
   it('dit si la ligne triée est décroissante (pour aria-sort)', () => {
     expect(triDecroissant({ code: 'cashflow', inverse: false })).toBe(true);
     expect(triDecroissant({ code: 'cashflow', inverse: true })).toBe(false);
-    expect(triDecroissant({ code: 'effort', inverse: false })).toBe(false);
-    expect(triDecroissant({ code: 'effort', inverse: true })).toBe(true);
+    expect(triDecroissant({ code: 'couverture', inverse: false })).toBe(false);
+    expect(triDecroissant({ code: 'couverture', inverse: true })).toBe(true);
   });
 });
 
@@ -174,5 +174,29 @@ describe('selectionInitiale', () => {
     expect(selectionInitiale([ecarte, ...actifs.slice(0, 2)])).toEqual(['a', 'b']);
     expect(selectionInitiale([ecarte, actifs[0]!])).toEqual(['x', 'a']);
     expect(selectionInitiale([])).toEqual([]);
+  });
+});
+
+describe('négociation du prix', () => {
+  it('ajoute « Négociation » et calcule le prix au m² sur le prix retenu', () => {
+    const negocie = projet('negocie', {
+      achat: { ...projetExemple.hypotheses.achat, negociationTaux: 0.05 },
+    });
+    const [c] = comparerProjets([negocie]);
+    expect(INDICATEURS).toHaveLength(15);
+    expect(INDICATEURS.map((i) => i.code).slice(0, 3)).toEqual(['prix', 'negociation', 'prixM2']);
+    expect(c!.valeurs.prix).toBe(155_000);
+    expect(c!.valeurs.negociation).toBe(0.05);
+    expect(c!.valeurs.prixM2).toBeCloseTo(147_250 / 65, 6);
+    expect(n(indicateurParCode('negociation').formater(0.05))).toBe('−5 %');
+    // La plus forte négociation d'abord ; aucune valeur mise en avant.
+    const [premiere] = trierColonnes(comparerProjets([exemple, negocie]), {
+      code: 'negociation',
+      inverse: false,
+    });
+    expect(premiere?.id).toBe('negocie');
+    expect(
+      meilleureValeur(comparerProjets([exemple, negocie]), indicateurParCode('negociation')),
+    ).toBeNull();
   });
 });

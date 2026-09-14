@@ -28,12 +28,12 @@ export function sectionVerdict(regles: Regles): SectionMethode {
     titre: 'Le verdict : cinq feux',
     resume: 'Pas de note globale : cinq lectures séparées, chacune avec ses seuils.',
     etapes: [
-      `Prix : écart du prix au m² affiché au prix au m² estimé du bien (voir l'estimation), calculé sur les ventes réelles (DVF). Bon jusqu'à ${pctSigne(v.prix.bonJusqua)}, à surveiller jusqu'à ${pctSigne(v.prix.surveillerJusqua)}, problème au-delà ; inconnu sans ventes autour du bien.`,
+      `Prix : écart du prix au m² retenu (négocié) au prix au m² estimé du bien (voir l'estimation), calculé sur les ventes réelles (DVF). Bon jusqu'à ${pctSigne(v.prix.bonJusqua)}, à surveiller jusqu'à ${pctSigne(v.prix.surveillerJusqua)}, problème au-delà ; inconnu sans ventes autour du bien.`,
       `Rendement net : bon dès ${pct(v.rendementNet.bonDes)}, à surveiller dès ${pct(v.rendementNet.surveillerDes)}, problème en dessous.`,
       `Cash-flow mensuel : bon dès ${euros(v.cashflowMensuel.bonDes)}, à surveiller dès ${euros(v.cashflowMensuel.surveillerDes)}, problème en dessous.`,
-      `Effort bancaire : bon jusqu'à ${pct(v.effort.bonJusqua)}, à surveiller jusqu'à ${pct(v.effort.surveillerJusqua)}, problème au-delà ; inconnu sans revenus.`,
+      `Crédit ÷ loyer : mensualité assurance comprise ÷ loyer hors charges du régime retenu. Bon jusqu'à ${pct(v.couverture.bonJusqua)} (le loyer porte le crédit), à surveiller jusqu'à ${pct(v.couverture.surveillerJusqua)}, problème au-delà (le loyer ne couvre plus la mensualité) ; inconnu sans loyer.`,
       `Risques : DPE F ou G = problème (location interdite dès ${String(dpe.G)} pour G, ${String(dpe.F)} pour F) ; DPE E (interdit dès ${String(dpe.E)}), copropriété en procédure ou risque naturel fort = à surveiller.`,
-      "Les points de vigilance de l'onglet Visite sortent des mêmes règles : copropriété, DPE, étage sans ascenseur, prix sous le marché, effort, plafonds des régimes, loyer encadré.",
+      "Sous les feux, le rapport liste ce qui se règle avant l'offre : effort au-dessus du seuil (projets enregistrés avec des revenus), prêt trop long, plafond du micro dépassé, loyer au-dessus de l'encadrement, prélèvements sociaux à confirmer. L'onglet Visite tire ses questions d'une base sourcée (ANIL, Notaires de France, Service-public.fr, textes de loi) filtrée par le bien : copropriété, année de construction, DPE, étage, mode d'exploitation, risques, travaux, prix.",
     ],
     constantes: [
       {
@@ -52,9 +52,10 @@ export function sectionVerdict(regles: Regles): SectionMethode {
         source: 'Choix Deklic',
       },
       {
-        libelle: 'Seuils du feu effort',
-        valeur: `bon jusqu'à ${pct(v.effort.bonJusqua)} · à surveiller jusqu'à ${pct(v.effort.surveillerJusqua)}`,
-        source: 'Choix Deklic, alignés sur le seuil du HCSF',
+        libelle: 'Seuils du feu crédit ÷ loyer',
+        valeur: `bon jusqu'à ${pct(v.couverture.bonJusqua)} · à surveiller jusqu'à ${pct(v.couverture.surveillerJusqua)}`,
+        source:
+          'Choix Deklic, aligné sur la part des loyers que le HCSF retient comme revenu (70 %)',
       },
       {
         libelle: 'Interdiction de louer selon le DPE',
@@ -73,7 +74,7 @@ export function sectionScenarios(regles: Regles): SectionMethode {
     titre: 'Les scénarios « et si »',
     resume: EXPLICATIONS.leviers,
     etapes: [
-      'Négocier : le prix qui met le cash-flow à zéro avec vos hypothèses (à défaut, −10 %) ; trois prix cibles : cash-flow nul, rendement net 6 %, rendement brut 8 %.',
+      'Négocier : le prix qui met le cash-flow à zéro avec vos hypothèses (à défaut, −10 % du prix retenu) ; trois prix cibles : cash-flow nul, rendement net 6 %, rendement brut 8 %.',
       `Colocation : loyer total +${pct(e.primeColocation)}, ${String(e.vacanceSemainesColocation)} semaines de vacance, en meublé, sans travaux d'aménagement.`,
       'Durée du prêt : 20 ans (15 ans si le prêt fait déjà 20 ans). Taux : +0,5 point.',
       `Passer en nu ou en meublé : loyer ÷ ou × (1 + ${pct(e.primeMeuble)}), avec le régime réel correspondant.`,
@@ -84,7 +85,7 @@ export function sectionScenarios(regles: Regles): SectionMethode {
       {
         libelle: 'Repli de négociation, durées alternatives, hausse de taux, vacance longue',
         valeur:
-          '−10 % · 20 ou 15 ans · +0,5 point · 8 semaines (−15 points d’occupation en courte durée)',
+          '−10 % du prix retenu · 20 ou 15 ans · +0,5 point · 8 semaines (−15 points d’occupation en courte durée)',
         source: 'Scénarios prédéfinis du moteur (packages/moteur, scenarios/predefinis.ts)',
       },
     ],
@@ -114,6 +115,11 @@ export function sectionDefauts(defauts: Defauts): SectionMethode {
         libelle: 'Assurance emprunteur',
         valeur: `${pct(d.tauxAssurance)} du capital par an`,
         source: 'Spec Deklic (0,10 à 0,35 % selon l’âge)',
+      },
+      {
+        libelle: 'Négociation du prix affiché',
+        valeur: `${pct(d.negociationTaux)} : prix affiché retenu tel quel`,
+        source: 'Curseur de 0 à −15 % dans Hypothèses ; le prix retenu sert à tout le rapport',
       },
       {
         libelle: "Honoraires d'agence",

@@ -13,6 +13,7 @@ export {
   type OptionsCalcul,
   type Resultats,
 } from './calculer-projet';
+export * from './achat';
 export * from './cashflow';
 export * from './commun';
 export * from './estimation';
@@ -25,4 +26,5 @@ export * from './scenarios';
 export * from './schema';
 export * from './schema/resultats';
 export * from './verdict';
+export * from './visite';
 export { projetExemple } from './exemples/t3-marseille';

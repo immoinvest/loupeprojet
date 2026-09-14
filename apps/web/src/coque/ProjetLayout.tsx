@@ -13,10 +13,11 @@ import { Link, NavLink, Outlet, useLocation, useNavigate, useParams } from 'reac
 
 import { MARGES_LATERALES, Page, TitrePage } from '@/composants/mise-en-page';
 import { Bouton } from '@/composants/ui';
-import { euros } from '@/formatage/nombres';
 import { useProjets } from '@/stockage/ProjetsContext';
 import { STATUTS, StatutProjetSchema, type ProjetEnregistre } from '@/stockage/projets';
+import { libellePrixEnTete } from '@/textes/achat';
 import { MODES } from '@/textes/regimes';
+import { visiteDe } from '@/visite';
 
 import { BoutonPartager } from './BoutonPartager';
 import { defilementPourVoir } from './defilement';
@@ -43,7 +44,8 @@ export function FournisseurProjet({
   enregistre: ProjetEnregistre;
   children: ReactNode;
 }): JSX.Element {
-  const resultats = useMemo(() => calculerProjet(enregistre.projet), [enregistre]);
+  // Sur le projet, pas sur l'enregistrement : une réponse de visite ne recalcule rien.
+  const resultats = useMemo(() => calculerProjet(enregistre.projet), [enregistre.projet]);
   return <Contexte.Provider value={{ enregistre, resultats }}>{children}</Contexte.Provider>;
 }
 
@@ -61,6 +63,7 @@ export function ProjetIntrouvable(): JSX.Element {
 const ONGLETS = [
   { to: '', libelle: 'Rapport' },
   { to: 'adresse', libelle: 'Estimation' },
+  { to: 'financement', libelle: 'Financement' },
   { to: 'hypotheses', libelle: 'Hypothèses' },
   { to: 'fiscalite', libelle: 'Fiscalité' },
   { to: 'revente', libelle: 'Revente' },
@@ -108,13 +111,15 @@ function useOngletActifEnVue(): RefObject<HTMLElement | null> {
  * une rangée de 48 px, volets dessous (44 px). À partir de 1 536 px : une seule rangée de 56 px.
  */
 function EnTete(): JSX.Element {
-  const { enregistre } = useProjetCourant();
+  const { enregistre, resultats } = useProjetCourant();
   const { changerStatut } = useProjets();
   const naviguer = useNavigate();
   const bandeRef = useOngletActifEnVue();
+  const { location } = enregistre.projet.hypotheses;
   const enTeteRef = useRef<HTMLElement>(null);
   useMesuresEnTete(enTeteRef, bandeRef);
-  const { achat, location } = enregistre.projet.hypotheses;
+  // Visite faite : l'onglet quitte la bande ; la page reste ouverte par le lien du Rapport.
+  const onglets = ONGLETS.filter((o) => o.to !== 'visite' || !visiteDe(enregistre).faite);
 
   return (
     <header ref={enTeteRef} className={`${EN_TETE} ${MARGES_LATERALES}`}>
@@ -130,12 +135,12 @@ function EnTete(): JSX.Element {
           <span className="font-display text-[17px] font-bold text-encre">{enregistre.nom}</span>
         </span>
         <span className="shrink-0 font-display text-lg font-bold md:text-[15px] md:font-semibold md:text-encre-2">
-          {euros(achat.prix)} · {MODES[location.mode]}
+          {libellePrixEnTete(resultats.achat)} · {MODES[location.mode]}
         </span>
       </div>
       <div className="hidden 2xl:block 2xl:flex-1" />
       <nav ref={bandeRef} aria-label="Volets du rapport" className={BANDE_ONGLETS}>
-        {ONGLETS.map((o) => (
+        {onglets.map((o) => (
           <NavLink key={o.to} to={o.to} end={o.to === ''} className={onglet}>
             {o.libelle}
           </NavLink>

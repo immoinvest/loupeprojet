@@ -1,19 +1,18 @@
-import type { TauxEffort } from '../financement/effort';
 import type { Regles } from '../regles/types';
 import type { Bien } from '../schema/bien';
 import type { Marche } from '../schema/marche';
 
 export type Feu = 'bon' | 'surveiller' | 'probleme' | 'inconnu';
-export type AxeVerdict = 'prix' | 'rendement' | 'cashflow' | 'effort' | 'risques';
+export type AxeVerdict = 'prix' | 'rendement' | 'cashflow' | 'couverture' | 'risques';
 
 export interface FeuVerdict {
   readonly axe: AxeVerdict;
   readonly feu: Feu;
-  /** Grandeur jugée : écart de prix (décimal), rendement net, cash-flow mensuel, effort, nombre de signaux. */
+  /** Grandeur jugée : écart de prix (décimal), rendement net, cash-flow mensuel, couverture, nombre de signaux. */
   readonly valeur: number | null;
 }
 
-/** Plus la valeur est basse, mieux c'est (écart de prix, effort). */
+/** Plus la valeur est basse, mieux c'est (écart de prix, couverture). */
 function feuCroissant(valeur: number, bonJusqua: number, surveillerJusqua: number): Feu {
   if (valeur <= bonJusqua) return 'bon';
   if (valeur <= surveillerJusqua) return 'surveiller';
@@ -61,13 +60,17 @@ export function feuCashflow(cashflowMensuel: number, regles: Regles): FeuVerdict
   };
 }
 
-export function feuEffort(effort: TauxEffort, regles: Regles): FeuVerdict {
-  if (effort.hcsf === null) return { axe: 'effort', feu: 'inconnu', valeur: null };
-  const { bonJusqua, surveillerJusqua } = regles.verdict.effort;
+/**
+ * Le loyer porte-t-il le crédit ? Mensualité assurance comprise ÷ loyer hors charges du régime
+ * retenu ; aucune donnée personnelle. `null` (pas de loyer) → inconnu.
+ */
+export function feuCouverture(tauxCouverture: number | null, regles: Regles): FeuVerdict {
+  if (tauxCouverture === null) return { axe: 'couverture', feu: 'inconnu', valeur: null };
+  const { bonJusqua, surveillerJusqua } = regles.verdict.couverture;
   return {
-    axe: 'effort',
-    feu: feuCroissant(effort.hcsf, bonJusqua, surveillerJusqua),
-    valeur: effort.hcsf,
+    axe: 'couverture',
+    feu: feuCroissant(tauxCouverture, bonJusqua, surveillerJusqua),
+    valeur: tauxCouverture,
   };
 }
 

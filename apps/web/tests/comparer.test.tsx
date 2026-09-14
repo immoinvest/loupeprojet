@@ -58,7 +58,7 @@ describe('Comparer', () => {
     expect(screen.getByRole('checkbox', { name: /Écarté cher/ })).not.toBeChecked();
     expect(colonnes()).toEqual(['Marseille', 'Lyon rentable']);
     const table = screen.getByRole('table');
-    expect(within(table).getAllByRole('row')).toHaveLength(15);
+    expect(within(table).getAllByRole('row')).toHaveLength(16);
     expect(within(table).getByRole('link', { name: 'Marseille' })).toHaveAttribute(
       'href',
       '/projets/marseille',
@@ -78,9 +78,9 @@ describe('Comparer', () => {
       'aria-sort',
       'ascending',
     );
-    // L'effort se trie dans l'autre sens (plus bas = mieux).
-    await utilisateur.click(screen.getByRole('button', { name: 'Effort bancaire' }));
-    expect(screen.getByRole('rowheader', { name: /Effort bancaire/ })).toHaveAttribute(
+    // La couverture se trie dans l'autre sens (plus bas = mieux).
+    await utilisateur.click(screen.getByRole('button', { name: 'Crédit ÷ loyer' }));
+    expect(screen.getByRole('rowheader', { name: /Crédit ÷ loyer/ })).toHaveAttribute(
       'aria-sort',
       'ascending',
     );

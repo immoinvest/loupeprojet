@@ -17,6 +17,8 @@ export interface Defauts {
   readonly fraisAgenceTaux: number;
   readonly diagnostics: number;
   readonly honorairesChargeAcquereur: boolean;
+  /** Négociation du prix affiché, en proportion (0 : prix affiché retenu tel quel). */
+  readonly negociationTaux: number;
   readonly pno: number;
   readonly comptable: number;
   readonly cfe: number;
@@ -44,7 +46,6 @@ export function defautsDuMoteur(): Defauts {
       pret: { tauxNominal: 0.03, dureeAnnees: 20 },
       location: { mode: 'meuble_lld', loyerHc: LOYER_TEMOIN },
       fiscalite: { tmi: 0.3, regime: 'lmnp_reel' },
-      revenusMensuels: 2_400,
     },
   }).hypotheses;
   // Les défauts du formulaire Vérifier : une saisie minimale, complétée par construireProjet.
@@ -60,7 +61,6 @@ export function defautsDuMoteur(): Defauts {
         apport: 10_000,
         dureeAnnees: 20,
         tmi: 0.3,
-        revenusMensuels: 2_400,
         provenance: {},
       },
       'defauts',
@@ -78,6 +78,7 @@ export function defautsDuMoteur(): Defauts {
     fraisAgenceTaux: schema.revente.fraisAgenceTaux,
     diagnostics: schema.revente.diagnostics,
     honorairesChargeAcquereur: schema.achat.honorairesChargeAcquereur,
+    negociationTaux: schema.achat.negociationTaux,
     pno: charges.pno,
     comptable: charges.comptable,
     cfe: charges.cfe,

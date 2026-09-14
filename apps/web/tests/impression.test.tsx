@@ -39,13 +39,20 @@ describe('Impression', () => {
       expect(impression).toHaveBeenCalledTimes(1);
     });
 
-    // Les quatre volets, dans l'ordre, avec un en-tête et un pied de page.
+    // Les cinq volets, dans l'ordre, avec un en-tête et un pied de page.
     expect(screen.getByRole('heading', { name: 'T3 · 65 m² · Marseille 5e' })).toBeInTheDocument();
     expect(screen.getByText(/Imprimé le/)).toBeInTheDocument();
     // « Règles fiscales 2026-09 (13 sept. 2026) » dans l'en-tête du document.
     expect(screen.getByText(/2026-09 \(/)).toBeInTheDocument();
     // Les cartes du Rapport reprennent ces questions en h2 : on vise les titres de volet (h1).
     expect(screen.getByRole('heading', { level: 1, name: /Le prix est bon/ })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { level: 1, name: "Comment se finance l'achat ?" }),
+    ).toBeInTheDocument();
+    // Le prêt en lignes lisibles, sans champ ni lien vers le simulateur.
+    expect(screen.queryByLabelText(/Durée du prêt/)).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Simuler un prêt' })).not.toBeInTheDocument();
+    expect(screen.getByText('25 ans')).toBeInTheDocument();
     expect(
       screen.getByRole('heading', { level: 1, name: /Combien d'impôts, selon le régime/ }),
     ).toBeInTheDocument();
@@ -56,7 +63,7 @@ describe('Impression', () => {
       screen.getByRole('heading', { level: 1, name: 'Préparer la visite' }),
     ).toBeInTheDocument();
     expect(screen.getByText(/pas un conseil en investissement/)).toBeInTheDocument();
-    expect(document.querySelectorAll('.document-volet')).toHaveLength(3);
+    expect(document.querySelectorAll('.document-volet')).toHaveLength(4);
 
     // Mode document : pas de boutons d'action, explications dépliées, horizons figés.
     expect(screen.queryByRole('button', { name: 'Retenir ce régime' })).not.toBeInTheDocument();
@@ -85,6 +92,49 @@ describe('Impression', () => {
     expect(
       await screen.findByRole('navigation', { name: 'Volets du rapport' }),
     ).toBeInTheDocument();
+  });
+
+  it('visite faite avec des réponses : le quatrième volet devient le compte rendu, en lecture', async () => {
+    const p = creerProjet({
+      nom: 'T3 · 65 m² · Marseille 5e',
+      genererId: () => 'visite',
+      visite: {
+        faite: true,
+        date: '2026-09-14T10:00:00.000Z',
+        reponses: { DOC_TAXE_FONCIERE: { etat: 'probleme', note: 'avis 2025 : 1 320 €' } },
+      },
+    });
+    ecrireProjets(window.localStorage, [p]);
+    render(<AppEnMemoire chemin={`/projets/${p.id}/imprimer`} />);
+    await screen.findByText(/dossier d'analyse locative/);
+    expect(
+      screen.getByRole('heading', { level: 1, name: 'Compte rendu de visite' }),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/5 · Compte rendu de visite ·/)).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Préparer la visite' })).not.toBeInTheDocument();
+    expect(document.querySelectorAll('.document-volet')).toHaveLength(4);
+    expect(screen.getByText('avis 2025 : 1 320 €')).toBeInTheDocument();
+    expect(screen.queryAllByRole('radio')).toHaveLength(0);
+    expect(screen.queryByRole('button', { name: 'Rouvrir la visite' })).not.toBeInTheDocument();
+    // Le Rapport imprimé dit l'état de la visite en texte, sans lien.
+    expect(screen.getByText(/Visite faite le 14 sept\. 2026 · 1 problème/)).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /Visite faite/ })).not.toBeInTheDocument();
+  });
+
+  it('visite faite sans réponse : le dossier n’a que quatre volets (Rapport, Financement, Fiscalité, Revente)', async () => {
+    const p = creerProjet({
+      nom: 'T3 · 65 m² · Marseille 5e',
+      genererId: () => 'sans-visite',
+      visite: { faite: true, date: '2026-09-14T10:00:00.000Z', reponses: {} },
+    });
+    ecrireProjets(window.localStorage, [p]);
+    render(<AppEnMemoire chemin={`/projets/${p.id}/imprimer`} />);
+    await screen.findByText(/dossier d'analyse locative/);
+    expect(document.querySelectorAll('.document-volet')).toHaveLength(3);
+    expect(
+      screen.queryByRole('heading', { name: 'Compte rendu de visite' }),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Préparer la visite' })).not.toBeInTheDocument();
   });
 
   it('un identifiant inconnu donne « Projet introuvable »', async () => {

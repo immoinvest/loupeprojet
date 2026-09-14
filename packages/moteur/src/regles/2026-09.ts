@@ -114,7 +114,23 @@ export const regles202609: Regles = {
     prix: { bonJusqua: -0.05, surveillerJusqua: 0.05 },
     rendementNet: { bonDes: 0.055, surveillerDes: 0.04 },
     cashflowMensuel: { bonDes: 0, surveillerDes: -100 },
-    effort: { bonJusqua: 0.33, surveillerJusqua: 0.35 },
+    // Choix Deklic, aligné sur le HCSF : la banque compte 70 % des loyers comme revenu (le reste
+    // absorbe charges et vacance). Mensualité ≤ 70 % du loyer : le loyer porte le crédit dans la
+    // lecture de la banque ; ≤ 100 % : le loyer couvre encore la mensualité ; au-delà : problème.
+    couverture: { bonJusqua: 0.7, surveillerJusqua: 1 },
+  },
+
+  visite: {
+    // Diagnostic amiante : permis de construire avant le 1er juillet 1997 (art. L1334-13 du Code de la santé publique).
+    amianteAvantAnnee: 1997,
+    // Constat de risque d'exposition au plomb : construction avant le 1er janvier 1949 (art. L1334-5).
+    plombAvantAnnee: 1949,
+    // Diagnostics électricité et gaz : installations de plus de 15 ans (art. L134-7 et L134-6 du CCH).
+    installationsAnciennesAns: 15,
+    // Choix Deklic, aligné sur les coefficients d'étage de l'estimation.
+    etageSansAscenseur: 3,
+    // Décence : 9 m² de surface habitable pour la pièce principale (décret 2002-120, art. 4), appliqué à chaque chambre.
+    chambreColocationM2: 9,
   },
 
   estimation: {

@@ -192,7 +192,7 @@ export const VerdictSchema = z.strictObject({
   feux: z
     .array(
       z.strictObject({
-        axe: z.enum(['prix', 'rendement', 'cashflow', 'effort', 'risques']),
+        axe: z.enum(['prix', 'rendement', 'cashflow', 'couverture', 'risques']),
         feu: FeuSchema,
         valeur: nOuNull,
       }),
@@ -289,6 +289,12 @@ export const EstimationResultatSchema = z.strictObject({
 
 export const ResultatsSchema = z.strictObject({
   projet: ProjetSchema,
+  achat: z.strictObject({
+    prixAffiche: n,
+    prixRetenu: n,
+    negociationTaux: n,
+    negociationMontant: n,
+  }),
   financement: FinancementSchema,
   cashflow: CashflowSchema,
   fiscalite: FiscaliteResultatSchema,

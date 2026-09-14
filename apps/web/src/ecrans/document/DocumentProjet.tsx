@@ -1,26 +1,51 @@
+import { resumerAchat } from '@loupe/moteur';
 import type { JSX } from 'react';
 
 import { ModeDocument } from '@/composants/document';
 import { MARGES_LATERALES } from '@/composants/mise-en-page';
 import { useProjetCourant } from '@/coque/ProjetLayout';
-import { dateCourte, euros, nombre } from '@/formatage/nombres';
+import { dateCourte, nombre } from '@/formatage/nombres';
+import { Financement } from '@/ecrans/Financement';
 import { Fiscalite } from '@/ecrans/Fiscalite';
 import { Rapport } from '@/ecrans/Rapport';
 import { Revente } from '@/ecrans/Revente';
 import { Visite } from '@/ecrans/Visite';
 import { LogotypeDeklic } from '@/marque/Logo';
+import type { ProjetEnregistre } from '@/stockage/projets';
+import { libellePrixEnTete } from '@/textes/achat';
 import { MODES } from '@/textes/regimes';
+import { aDesReponses, visiteDe } from '@/visite';
 
-const VOLETS: readonly { readonly titre: string; readonly Volet: () => JSX.Element }[] = [
+interface VoletDocument {
+  readonly titre: string;
+  readonly Volet: () => JSX.Element;
+}
+
+const VOLETS_ANALYSE: readonly VoletDocument[] = [
   { titre: 'Rapport', Volet: Rapport },
+  { titre: 'Financement', Volet: Financement },
   { titre: 'Fiscalité', Volet: Fiscalite },
   { titre: 'Revente', Volet: Revente },
-  { titre: 'Visite', Volet: Visite },
 ];
 
 /**
- * Le projet complet en un seul document : en-tête, les quatre volets (un par page à
- * l'impression), pied de page. Rendu en mode document : lecture seule, explications visibles.
+ * Le volet Visite : la liste à cocher sur papier tant que la visite n'est pas faite, le compte
+ * rendu quand elle l'est et qu'il y a des réponses ; rien pour une visite faite sans réponse.
+ */
+export function voletsDuDossier(
+  enregistre: Pick<ProjetEnregistre, 'visite'>,
+): readonly VoletDocument[] {
+  const visite = visiteDe(enregistre);
+  if (visite.faite && !aDesReponses(visite)) return VOLETS_ANALYSE;
+  return [
+    ...VOLETS_ANALYSE,
+    { titre: visite.faite ? 'Compte rendu de visite' : 'Visite', Volet: Visite },
+  ];
+}
+
+/**
+ * Le projet complet en un seul document : en-tête, les volets (un par page à l'impression),
+ * pied de page. Rendu en mode document : lecture seule, explications visibles.
  */
 export function DocumentProjet({
   date,
@@ -32,6 +57,7 @@ export function DocumentProjet({
   const { enregistre, resultats: r } = useProjetCourant();
   const { bien, hypotheses, source } = enregistre.projet;
   const jour = dateCourte(date ?? new Date().toISOString());
+  const volets = voletsDuDossier(enregistre);
 
   return (
     <ModeDocument>
@@ -47,8 +73,9 @@ export function DocumentProjet({
               {enregistre.nom}
             </h1>
             <span className="text-[15px] text-encre-2">
-              {euros(hypotheses.achat.prix)} · {MODES[hypotheses.location.mode]} ·{' '}
-              {nombre(bien.surface)} m² · département {bien.departement}
+              {libellePrixEnTete(resumerAchat(hypotheses.achat))} ·{' '}
+              {MODES[hypotheses.location.mode]} · {nombre(bien.surface)} m² · département{' '}
+              {bien.departement}
             </span>
           </div>
           <dl className="m-0 flex flex-col gap-0.5 text-[13px] text-encre-3 sm:text-right print:text-right">
@@ -65,7 +92,7 @@ export function DocumentProjet({
           </dl>
         </header>
 
-        {VOLETS.map(({ titre, Volet }, index) => (
+        {volets.map(({ titre, Volet }, index) => (
           <article key={titre} className={index === 0 ? '' : 'document-volet'}>
             <div
               className={`pt-6 text-xs font-bold tracking-wider text-encre-4 uppercase ${MARGES_LATERALES}`}

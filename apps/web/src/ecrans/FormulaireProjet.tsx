@@ -6,6 +6,7 @@ import { Bouton, Carte } from '@/composants/ui';
 import { Champ } from './formulaire/Champ';
 import { EstimerLoyer } from './formulaire/EstimerLoyer';
 import {
+  nombre,
   valider,
   versSaisie,
   type Cle,
@@ -46,6 +47,14 @@ const TMI = [
   { v: '0.45', l: '45 %' },
 ];
 
+/** Ce que le formulaire dit du projet sans passer par le moteur. */
+export interface OptionsFormulaire {
+  /** La personne a déjà visité le bien : l'onglet Visite n'a pas lieu d'être. */
+  readonly visiteFaite: boolean;
+}
+
+const GRILLE = 'grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3';
+
 export function FormulaireProjet({
   initial,
   annonce,
@@ -53,11 +62,15 @@ export function FormulaireProjet({
 }: {
   initial: ValeursInitiales;
   annonce: AnnonceResolue | null;
-  onCreer: (saisie: SaisieProjet) => void;
+  onCreer: (saisie: SaisieProjet, options: OptionsFormulaire) => void;
 }): JSX.Element {
   const [valeurs, setValeurs] = useState<Valeurs>(initial.valeurs);
   const [provenance, setProvenance] = useState(initial.provenance);
   const [erreurs, setErreurs] = useState<Erreurs>({});
+  const [visiteFaite, setVisiteFaite] = useState(false);
+
+  // Les travaux sont facultatifs : le champ n'apparaît que si l'on en prévoit.
+  const [travauxOuverts, setTravauxOuverts] = useState((nombre(initial.valeurs.travaux) ?? 0) > 0);
 
   const changer = (cle: Cle, v: string): void => {
     setValeurs((prev) => ({ ...prev, [cle]: v }));
@@ -68,6 +81,10 @@ export function FormulaireProjet({
     setValeurs((prev) => ({ ...prev, loyerHc: v }));
     setProvenance((prev) => ({ ...prev, loyerHc: 'estime' }));
   };
+  const basculerTravaux = (): void => {
+    if (travauxOuverts) setValeurs((prev) => ({ ...prev, travaux: '' }));
+    setTravauxOuverts(!travauxOuverts);
+  };
 
   return (
     <form
@@ -76,13 +93,15 @@ export function FormulaireProjet({
         e.preventDefault();
         const trouvees = valider(valeurs);
         setErreurs(trouvees);
-        if (Object.keys(trouvees).length === 0) onCreer(versSaisie(valeurs, provenance, annonce));
+        if (Object.keys(trouvees).length === 0) {
+          onCreer(versSaisie(valeurs, provenance, annonce), { visiteFaite });
+        }
       }}
       className="flex flex-col gap-5"
     >
       <Carte>
         <h2 className="m-0 font-display text-[22px] font-semibold">Le bien</h2>
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+        <div className={GRILLE}>
           <Champ cle="typeBien" libelle="Type de bien" options={TYPES} {...c} />
 
           <Champ cle="prix" libelle="Prix affiché" unite="€" erreur={erreurs.prix} {...c} />
@@ -99,13 +118,28 @@ export function FormulaireProjet({
           <Champ cle="exterieur" libelle="Balcon ou terrasse" options={OUI_NON} {...c} />
           <Champ cle="codePostal" libelle="Code postal" erreur={erreurs.codePostal} {...c} />
           <Champ cle="ville" libelle="Ville" erreur={erreurs.ville} {...c} />
-          <Champ cle="travaux" libelle="Travaux prévus" unite="€" {...c} />
+        </div>
+        <div className="flex flex-col gap-2">
+          <button
+            type="button"
+            aria-expanded={travauxOuverts}
+            aria-controls="champ-travaux"
+            onClick={basculerTravaux}
+            className="inline-flex min-h-[44px] items-center gap-2 self-start rounded-full border border-bordure bg-surface px-4 text-sm font-semibold text-encre-2 hover:bg-accent-fond"
+          >
+            {travauxOuverts ? '− Retirer les travaux' : '+ Ajouter des travaux'}
+          </button>
+          {travauxOuverts && (
+            <div id="champ-travaux" className={GRILLE}>
+              <Champ cle="travaux" libelle="Travaux prévus" unite="€" {...c} />
+            </div>
+          )}
         </div>
       </Carte>
 
       <Carte>
         <h2 className="m-0 font-display text-[22px] font-semibold">Vous</h2>
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+        <div className={GRILLE}>
           <Champ cle="mode" libelle="Mode de location" options={MODES} aToi {...c} />
           <Champ
             cle="loyerHc"
@@ -125,14 +159,6 @@ export function FormulaireProjet({
             {...c}
           />
           <Champ cle="tmi" libelle="Tranche d'imposition" options={TMI} aToi {...c} />
-          <Champ
-            cle="revenusMensuels"
-            libelle="Vos revenus nets"
-            unite="€/mois"
-            aToi
-            erreur={erreurs.revenusMensuels}
-            {...c}
-          />
           <EstimerLoyer valeurs={valeurs} onEstime={loyerEstime} />
         </div>
       </Carte>
@@ -142,7 +168,7 @@ export function FormulaireProjet({
         <p className="m-0 text-sm text-encre-2">
           Laissez vide si vous ne savez pas : on estime, et ce sera marqué comme tel.
         </p>
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+        <div className={GRILLE}>
           <Champ cle="chargesCoproMois" libelle="Charges de copropriété" unite="€/mois" {...c} />
           <Champ cle="taxeFonciere" libelle="Taxe foncière" unite="€/an" {...c} />
           <Champ cle="lotsCopro" libelle="Lots de copropriété" {...c} />
@@ -154,6 +180,21 @@ export function FormulaireProjet({
           />
         </div>
       </Carte>
+
+      <label className="flex min-h-[44px] w-fit cursor-pointer items-center gap-3 rounded-encart px-2 text-[15px] hover:bg-accent-fond">
+        <input
+          type="checkbox"
+          checked={visiteFaite}
+          onChange={(e) => {
+            setVisiteFaite(e.target.checked);
+          }}
+          className="h-5 w-5 accent-accent"
+        />
+        <span>
+          J'ai déjà visité ce bien{' '}
+          <span className="text-sm text-encre-3">(la liste de visite ne sera pas proposée)</span>
+        </span>
+      </label>
 
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
         <Bouton variante="primaire" type="submit">

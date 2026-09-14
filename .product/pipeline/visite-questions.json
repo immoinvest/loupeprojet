@@ -1,0 +1,96 @@
+{
+  "feature_slug": "visite-questions",
+  "title": "Visite : base de questions sourcées, règles d'affichage, réponses conservées, onglet masqué quand la visite est faite",
+  "started_at": "2026-09-14T14:00:00Z",
+  "current_step": "push",
+  "scope": "packages/moteur/src/visite (base, règles, questionsPourProjet), regles/2026-09.ts (seuils visite), verdict/vigilance.ts (points financiers seulement) ; apps/web/src/{stockage (ProjetEnregistre.visite), visite, textes/visite.ts, ecrans/Visite.tsx, ecrans/visite, ecrans/Rapport.tsx, ecrans/rapport/Vigilance.tsx, ecrans/FormulaireProjet.tsx, ecrans/NouveauProjet.tsx, ecrans/Partage.tsx, ecrans/document/DocumentProjet.tsx, coque/ProjetLayout.tsx} ; e2e ; docs",
+  "branch": "feat/visite-questions",
+  "base": "master (b74bbc6)",
+  "baseline": {
+    "unit_tests_passed": 961,
+    "e2e_passed": 8,
+    "vigilance_exemple": 7
+  },
+  "steps": {
+    "discovery": {
+      "status": "completed",
+      "output": ".product/features/visite-questions-discovery.md"
+    },
+    "specs": {
+      "status": "completed",
+      "output": ".product/specs/visite-questions-specs.md",
+      "stories_count": 5
+    },
+    "architecture": {
+      "status": "completed",
+      "output": ".product/architecture/visite-questions.md"
+    },
+    "implement": {
+      "status": "completed",
+      "stories_completed": 5,
+      "stories_total": 5,
+      "commits": [
+        {
+          "etape": "US-1 moteur : base, règles, questionsPourProjet, docs de la feature",
+          "hash": "404eefd"
+        },
+        {
+          "etape": "US-2 stockage : ProjetEnregistre.visite, logique pure, partage",
+          "hash": "b188e38"
+        },
+        { "etape": "US-3 écran Visite, onglet masqué", "hash": "7333ab9" },
+        { "etape": "US-4 Rapport, Vérifier, impression, partage, Méthode", "hash": "e3bff77" },
+        {
+          "etape": "US-5 preuve : Playwright, formats, perf (mémoïsation), docs communes",
+          "hash": "6a1b735"
+        },
+        { "etape": "fusion de master (coque-fixe #39, revente-curseur #40)", "hash": "7b7f92b" },
+        { "etape": "correctif : pastille du compte rendu à sa largeur", "hash": "a377b0c" },
+        {
+          "etape": "correctif Comparer : libellés sr-only des feux contenus par le tableau défilant",
+          "hash": "f3032d7"
+        },
+        {
+          "etape": "seconde fusion de master (déconnexion #41, estimation-confiance #42, #44) ; badges de provenance unifiés dans ChampHypothese, badgePour partagé",
+          "hash": "809961c"
+        },
+        {
+          "etape": "troisième fusion de master (rapport-cashflow #43) : carte « Avant de faire une offre » placée après les leviers dans le nouveau Rapport",
+          "hash": "25d7f07"
+        },
+        {
+          "etape": "quatrième fusion de master (achat-negociation #45, même adresse DVF #50, grilles d'impression #51) : case « déjà visité » et travaux repliables réunis dans Vérifier",
+          "hash": "d5e549e"
+        },
+        {
+          "etape": "correction du test Playwright de négociation (espaces insécables), remplacée ensuite par celle de master (#52)",
+          "hash": "ae65bf9"
+        },
+        {
+          "etape": "cinquième fusion de master (#52) : version de master gardée pour le test de négociation",
+          "hash": "90ceed9"
+        }
+      ]
+    },
+    "qa_tests": {
+      "status": "completed",
+      "note": "1 045 tests unitaires après fusion de master (dont 58 pour la visite : 32 moteur, 26 web) ; couverture 100 % sur packages/moteur et apps/web/src/{stockage,textes,visite} ; un test d'écran dépassait 30 s sous la charge de la suite complète : corrigé à la source (pas de revalidation Zod quand le projet ne change pas, résultats mémoïsés sur le projet, questions mémoïsées avec rappels stables). Playwright sur le build de la branche (port 5198 : le 5199 servait l'aperçu d'une autre session) : 57 sur 60 ; les trois échecs (Comparer à 320, 375 et 390 px) révèlent un défaut préexistant de master, les libellés sr-only des feux, positionnés en absolu, échappaient au tableau défilant à partir de trois projets ; corrigé par un cadre `relative`"
+    },
+    "security": {
+      "status": "completed",
+      "note": "aucun innerHTML ni eval ; notes et textes affichés comme texte ; réponses validées par Zod (états fermés, note ≤ 300) ; le lien de partage porte les réponses (infobulle existante : le lien contient tout le projet) ; aucune donnée d'annonce persistée ; pas d'appel réseau nouveau"
+    },
+    "push": {
+      "status": "in_progress",
+      "note": "fusion de master, vérification navigateur et Playwright, puis PR avec auto-merge"
+    }
+  },
+  "decisions": {
+    "base": "74 questions rédigées par Claude, chacune avec sa source ; texte gabarit dans le moteur, paramètres formatés par le web (ADR-V1)",
+    "categories": "documents, diagnostics, logement, immeuble, quartier, vendeur, exploitation",
+    "valeurs": "neuf questions écrivent une hypothèse par les descripteurs de l'onglet Hypothèses (appliquerSaisie, provenance utilisateur), et passent à OK",
+    "visite_faite": "onglet masqué, route ouverte (compte rendu + Rouvrir), volet imprimé seulement avec des réponses, partage avec les réponses (ADR-V4)",
+    "finances": "les cinq points financiers restent dans verdict.vigilance et passent dans le Rapport, carte « Avant de faire une offre » toujours affichée avec l'état de la visite ; les neuf autres codes sont devenus des questions (ADR-V2)",
+    "exploitation": "typeExploitation(projet) traduit le mode d'aujourd'hui ; colocation et moyenne durée testées par contexte forgé (ADR-V5)"
+  }
+}
