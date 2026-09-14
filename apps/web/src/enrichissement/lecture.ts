@@ -41,11 +41,14 @@ export function fusionnerChamps(regles: ChampsExtraits, ia: ChampsIa): ChampsExt
   }
   // Le type de location du modèle devient le type du formulaire.
   if (ia.typeLocation !== null && ia.typeLocation !== undefined) champs.mode = ia.typeLocation;
+  // Un loyer actuel lu par le modèle : le bien est vendu loué, sauf mention « libre » lue par les règles.
+  if ((ia.loyerActuel ?? 0) > 0 && regles.venduLoue !== false) champs.venduLoue = true;
   return champs;
 }
 
 /**
- * Lit le texte collé : lecture par le modèle quand le Worker répond, par règles sinon.
+ * Lit le texte d'une annonce (description capturée ou texte partagé) : lecture par le modèle quand
+ * le Worker répond, par règles sinon.
  * Le texte part au Worker pour la lecture et n'est conservé nulle part.
  */
 export async function lireAnnonce(texte: string, client: ClientWorker): Promise<LectureAnnonce> {

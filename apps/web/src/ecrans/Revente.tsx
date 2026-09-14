@@ -2,7 +2,7 @@ import { calculerProjet } from '@loupe/moteur';
 import { useCallback, useEffect, useMemo, useState, type JSX } from 'react';
 
 import { HORIZONS, projetAHorizon, variantesRevente } from '@/analyses';
-import { Chapo, Page, TitrePage } from '@/composants/mise-en-page';
+import { Page, TitrePage } from '@/composants/mise-en-page';
 import { Carte, Ligne, Pastille, TitreCarte } from '@/composants/ui';
 import { useProjetCourant } from '@/coque/ProjetLayout';
 import { euros, eurosSignes, pourcentage } from '@/formatage/nombres';
@@ -65,10 +65,7 @@ export function Revente(): JSX.Element {
   if (!r.complet) {
     return (
       <Page>
-        <div className="flex flex-col gap-2">
-          <TitrePage taille="volet">{TITRE}</TitrePage>
-          <Chapo>La revente et l'enrichissement se calculent à partir du loyer visé.</Chapo>
-        </div>
+        <TitrePage taille="volet">{TITRE}</TitrePage>
         {manquesBloquants(r.manques).map((m) => (
           <AnalyseIncomplete key={m.code} manque={m} />
         ))}
@@ -82,13 +79,7 @@ export function Revente(): JSX.Element {
 
   return (
     <Page>
-      <div className="flex flex-col gap-2">
-        <TitrePage taille="volet">{TITRE}</TitrePage>
-        <Chapo>
-          Revente estimée à {pourcentage(r.projet.hypotheses.revente.evolutionAnnuelle)} par an,
-          crédit remboursé, agence et impôt payés. Déplacez le curseur : tout suit.
-        </Chapo>
-      </div>
+      <TitrePage taille="volet">{TITRE}</TitrePage>
 
       <CarteHorizon
         horizon={horizon}

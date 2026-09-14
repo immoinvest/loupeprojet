@@ -46,12 +46,6 @@ const TMI = [
   { v: '0.45', l: '45 %' },
 ];
 
-/** Tout est facultatif dans cette carte : les défauts affichés portent le badge « estimé ». */
-export const INDICATIONS = {
-  vous: 'Tout ici est facultatif : ce qui est marqué « estimé » se change quand vous voulez.',
-  loyerHc: 'Vide : le loyer de marché de la commune, si on le connaît.',
-} as const;
-
 /** Ce que le formulaire dit du projet sans passer par le moteur. */
 export interface OptionsFormulaire {
   /** La personne a déjà visité le bien : l'onglet Visite n'a pas lieu d'être. */
@@ -130,6 +124,7 @@ export function FormulaireProjet({
           <Champ cle="ges" libelle="GES" options={DPE} {...c} />
           <Champ cle="etat" libelle="État" options={ETATS} {...c} />
           <Champ cle="exterieur" libelle="Balcon ou terrasse" options={OUI_NON} {...c} />
+          <Champ cle="venduLoue" libelle="Vendu loué" options={OUI_NON} {...c} />
           <Champ cle="codePostal" libelle="Code postal" erreur={erreurs.codePostal} {...c} />
           <Champ cle="ville" libelle="Ville" erreur={erreurs.ville} {...c} />
         </div>
@@ -171,7 +166,6 @@ export function FormulaireProjet({
               unite="€/mois"
               aToi
               erreur={erreurs.loyerHc}
-              indication={INDICATIONS.loyerHc}
               {...c}
             />
           )}
@@ -216,15 +210,10 @@ export function FormulaireProjet({
           )}
           <EstimerLoyer valeurs={valeurs} onEstime={loyerEstime} />
         </div>
-        <p className="m-0 text-sm text-encre-3">
-          Vacance, ménage, plateforme et charges comprises partent des valeurs de référence du type,
-          marquées « estimé » et modifiables dans les hypothèses.
-        </p>
       </Carte>
 
       <Carte>
         <h2 className="m-0 font-display text-[22px] font-semibold">Vous</h2>
-        <p className="m-0 text-sm text-encre-2">{INDICATIONS.vous}</p>
         <div className={GRILLE}>
           <Champ
             cle="apport"
@@ -250,9 +239,6 @@ export function FormulaireProjet({
 
       <Carte>
         <h2 className="m-0 font-display text-[22px] font-semibold">Charges connues</h2>
-        <p className="m-0 text-sm text-encre-2">
-          Laissez vide si vous ne savez pas : on estime, et ce sera marqué comme tel.
-        </p>
         <div className={GRILLE}>
           <Champ cle="chargesCoproMois" libelle="Charges de copropriété" unite="€/mois" {...c} />
           <Champ cle="taxeFonciere" libelle="Taxe foncière" unite="€/an" {...c} />

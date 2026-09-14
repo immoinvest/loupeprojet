@@ -91,34 +91,26 @@ describe('lirePartageRecu (annonce partagée vers Deklic)', () => {
 });
 
 describe('annoncePartagee (premier rendu de Nouveau projet)', () => {
-  it('lien d’annonce reconnu ou texte à lire : l’écran s’ouvre sur le texte de l’annonce', () => {
+  it('un lien partagé est repris comme lien ; un texte sans lien, comme texte à lire', () => {
     expect(annoncePartagee(false, recherche({ texte: `Vu ${LEBONCOIN}` }))).toEqual({
       recue: true,
       lien: LEBONCOIN,
       texte: '',
-      etape: 'texte',
     });
     expect(annoncePartagee(false, recherche({ texte: 'T3 lumineux' }))).toEqual({
       recue: true,
       lien: null,
       texte: 'T3 lumineux',
-      etape: 'texte',
     });
   });
 
-  it('site non reconnu : l’écran reste sur le lien ; rien de partagé : rien ne change', () => {
+  it('site non reconnu : le lien est gardé tel quel ; rien de partagé : rien ne change', () => {
     expect(annoncePartagee(false, recherche({ lien: 'https://exemple.fr/42' }))).toEqual({
       recue: true,
       lien: 'https://exemple.fr/42',
       texte: '',
-      etape: 'lien',
     });
-    expect(annoncePartagee(false, '')).toEqual({
-      recue: false,
-      lien: null,
-      texte: '',
-      etape: 'lien',
-    });
+    expect(annoncePartagee(false, '')).toEqual({ recue: false, lien: null, texte: '' });
   });
 
   it('une capture de l’extension reçue en même temps l’emporte : le partage est ignoré', () => {
@@ -126,7 +118,6 @@ describe('annoncePartagee (premier rendu de Nouveau projet)', () => {
       recue: false,
       lien: null,
       texte: '',
-      etape: 'lien',
     });
   });
 });

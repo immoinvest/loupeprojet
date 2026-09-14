@@ -15,8 +15,6 @@ import type { Descripteur } from '@/hypotheses';
 /** Textes du simulateur de prêt ; les chiffres viennent toujours du moteur, jamais recopiés. */
 export const TITRES_SIMULATEUR = {
   page: 'Comparer deux offres de prêt',
-  chapo:
-    "Saisissez le bien financé et une ou deux offres : tout se recalcule à chaque frappe, avec les formules du rapport d'un projet. Rien ne quitte votre navigateur.",
   projet: 'Le projet financé',
   resultats: 'Ce que coûte chaque offre',
   comparaison: 'Laquelle coûte le moins ?',

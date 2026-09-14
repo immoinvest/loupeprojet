@@ -150,7 +150,7 @@ export function Extension(): JSX.Element {
         <p className="m-0 text-sm text-encre-3">
           Sans extension ni favori, ça marche aussi :{' '}
           <Link to="/projets/nouveau" className="font-bold text-accent">
-            collez le texte de l'annonce
+            collez le lien de l'annonce
           </Link>{' '}
           dans Nouveau projet.
         </p>

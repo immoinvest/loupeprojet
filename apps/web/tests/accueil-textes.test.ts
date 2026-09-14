@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 
 import {
   BOUTONS_ETAPE,
-  chapoAccueil,
   nombreDeBiens,
   phraseEtape,
   projetsAEtudier,
@@ -16,18 +15,6 @@ describe('textes de l’accueil', () => {
     expect(titreAccueil('')).toBe('Bienvenue sur Deklic');
     expect(titreAccueil('   ')).toBe('Bienvenue sur Deklic');
     expect(titreAccueil(null)).toBe('Bienvenue sur Deklic');
-  });
-
-  it('chapô selon les sections affichées', () => {
-    expect(chapoAccueil({ analyser: true, gerer: true })).toBe(
-      'Trouve un bien rentable, puis laisse Deklic t’aider à le gérer.',
-    );
-    expect(chapoAccueil({ analyser: true, gerer: false })).toBe(
-      'Trouve le bien rentable, annonce après annonce.',
-    );
-    expect(chapoAccueil({ analyser: false, gerer: true })).toBe(
-      'Tes biens loués, tes loyers, sous contrôle.',
-    );
   });
 
   it('pluriels', () => {

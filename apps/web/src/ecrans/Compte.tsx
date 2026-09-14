@@ -6,11 +6,10 @@ import { useCompte } from '@/compte/CompteContext';
 import type { CodeErreurCompte, Resultat } from '@/compte/types';
 import { Page, TitrePage } from '@/composants/mise-en-page';
 import { Bouton, Carte, Ligne, TitreCarte } from '@/composants/ui';
-import { useProjets } from '@/stockage/ProjetsContext';
 import { useSynchro } from '@/stockage/synchro/SynchroContext';
 import { ERREURS_COMPTE, initiales, nomAffiche } from '@/textes/compte';
 import { TEXTES_MON_COMPTE as T } from '@/textes/mon-compte';
-import { ligneSauvegarde } from '@/textes/synchro';
+import { alerteSynchro } from '@/textes/synchro';
 
 import { MesDonneesGestion } from './compte/MesDonneesGestion';
 import { MonMenu } from './compte/MonMenu';
@@ -26,8 +25,7 @@ const ALLER_A_LA_CONNEXION = '/connexion?retour=/compte';
 /** La page « Mon compte » : profil, projets, menu, déconnexion, suppression du compte. */
 export function Compte(): JSX.Element {
   const compte = useCompte();
-  const { projets } = useProjets();
-  const { statut } = useSynchro();
+  const alerte = alerteSynchro(useSynchro().statut);
   const [nom, setNom] = useState<string | null>(null);
   const [message, setMessage] = useState<Message | null>(null);
   const [confirmation, setConfirmation] = useState(false);
@@ -154,9 +152,7 @@ export function Compte(): JSX.Element {
       <Carte>
         <TitreCarte>{T.projetsTitre}</TitreCarte>
         <p className="m-0 text-sm text-encre-2">{T.projetsTexte}</p>
-        <p className="m-0 text-sm font-semibold text-encre-2">
-          {ligneSauvegarde(projets.length, statut)}
-        </p>
+        {alerte !== null && <p className="m-0 text-sm font-semibold text-encre-2">{alerte}</p>}
       </Carte>
 
       <MonMenu />

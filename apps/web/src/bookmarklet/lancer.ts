@@ -17,7 +17,7 @@ export type IssueFavori = 'hors-annonce' | 'sans-regles' | 'ouverte';
 export const MESSAGE_HORS_ANNONCE =
   "Deklic : ouvrez une annonce LeBonCoin, SeLoger, Bien'ici, PAP ou Logic-Immo, puis cliquez sur le favori.";
 export const MESSAGE_SANS_REGLES =
-  "Deklic ne sait pas encore lire ce portail. Collez le texte de l'annonce dans Deklic, ça marche aussi.";
+  "Deklic ne sait pas encore lire ce portail. Collez le lien de l'annonce dans Deklic, ou saisissez les chiffres à la main.";
 
 /**
  * Cœur du bouton-favori : lit la page ouverte avec les règles de son portail et ouvre Deklic avec la

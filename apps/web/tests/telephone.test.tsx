@@ -123,7 +123,7 @@ describe('Recevoir une annonce partagée', () => {
     expect(screen.getByLabelText("Lien de l'annonce")).toHaveValue(LEBONCOIN);
     expect(screen.getByText('leboncoin.fr reconnu')).toBeInTheDocument();
     expect(screen.getByText(TEXTES_PARTAGE_RECU.pastille)).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: "Le texte de l'annonce" })).toBeInTheDocument();
+    expect(screen.getByRole('progressbar', { name: "Lecture de l'annonce" })).toBeInTheDocument();
   });
 
   it('un site non reconnu garde son lien, sans la pastille du partage', async () => {
@@ -136,24 +136,22 @@ describe('Recevoir une annonce partagée', () => {
     expect(screen.queryByText(TEXTES_PARTAGE_RECU.pastille)).toBeNull();
   });
 
-  it('un texte partagé sans lien est prêt à être lu', async () => {
-    const annonce = 'Appartement T3 de 65 m² au 3e étage, prix 155 000 €, DPE D';
+  it('un texte partagé sans lien est lu tout de suite : le formulaire s’ouvre pré-rempli', async () => {
+    const annonce = 'Appartement T3 de 65 m² au 3e étage. Prix : 155 000 €. DPE : D.';
     render(<AppEnMemoire chemin={`/projets/nouveau?texte=${encodeURIComponent(annonce)}`} />);
-    await screen.findByRole('heading', { level: 1, name: /Colle le lien/ });
+    await screen.findByRole('heading', { name: /Vérifiez, corrigez/ });
 
-    expect(document.querySelector('textarea[name="texte"]')).toHaveValue(annonce);
-    expect(screen.getByRole('button', { name: 'Lire le texte' })).toBeEnabled();
+    expect(screen.getByLabelText(/Prix affiché/)).toHaveValue('155000');
+    expect(screen.getByLabelText(/^Surface/)).toHaveValue('65');
     expect(screen.queryByText(TEXTES_PARTAGE_RECU.pastille)).toBeNull();
   });
 
-  it('un texte démesuré est tronqué à 10 000 caractères, et rien n’en est gardé', async () => {
+  it('un texte démesuré est lu tronqué à 10 000 caractères, et rien n’en est gardé', async () => {
     const demesure = `T3 lumineux ${'a'.repeat(20_000)}`;
+    expect(demesure.length).toBeGreaterThan(LONGUEUR_MAX_TEXTE_PARTAGE);
     render(<AppEnMemoire chemin={`/projets/nouveau?texte=${encodeURIComponent(demesure)}`} />);
-    await screen.findByRole('heading', { level: 1, name: /Colle le lien/ });
+    await screen.findByRole('heading', { name: /Vérifiez, corrigez/ });
 
-    expect(document.querySelector('textarea[name="texte"]')).toHaveValue(
-      demesure.slice(0, LONGUEUR_MAX_TEXTE_PARTAGE),
-    );
     const stocke = Array.from({ length: window.localStorage.length }, (_, i) =>
       window.localStorage.getItem(window.localStorage.key(i) ?? ''),
     ).join('');

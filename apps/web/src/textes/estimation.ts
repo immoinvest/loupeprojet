@@ -16,6 +16,7 @@ export const LIBELLES_CORRECTIONS: Readonly<Record<CodeCorrection, string>> = {
   dpe: 'Étiquette énergie',
   etage: 'Étage et ascenseur',
   exterieur: 'Balcon ou terrasse',
+  occupation: 'Vendu loué',
   charges: 'Charges de copropriété',
 };
 
@@ -23,6 +24,8 @@ export const SOURCES_CORRECTIONS: Readonly<Record<CodeCorrection, string>> = {
   dpe: 'Notaires de France, « La valeur verte des logements », ventes 2024 (janvier 2026)',
   etage: 'MeilleursAgents, prix selon l’étage, grandes villes de province (juin 2017)',
   exterieur: 'MeilleursAgents, balcons et terrasses, onze plus grandes villes (mai 2020)',
+  occupation:
+    'DGFiP, « L’évaluation des immeubles bâtis » ; pratique des notaires : 10 à 20 % pour un bail en cours',
   charges: 'Observatoire des charges de copropriété ARC/UNARC (2024)',
 };
 
@@ -31,10 +34,10 @@ export const PHRASES_ESTIMATION = {
   sansVentes:
     'Pas encore de ventes réelles pour ce projet : analysez l’adresse pour obtenir une estimation.',
   aucuneCorrection:
-    'Aucune correction : renseignez le DPE, l’étage, l’ascenseur, le balcon et les charges dans Hypothèses.',
+    'Aucune correction : renseignez le DPE, l’étage, l’ascenseur, le balcon, les charges et si le bien est vendu loué dans Hypothèses.',
   prixDesActes: 'Prix des actes, sans actualisation : la tendance locale n’est pas encore publiée.',
   limites:
-    'Les ventes DVF ne disent rien de l’état, de l’étage, de l’ascenseur ni du DPE : ces effets viennent d’études publiées, affichées avec leur source.',
+    'Les ventes DVF ne disent rien de l’état, de l’étage, de l’ascenseur, du DPE ni de la présence d’un locataire : ces effets viennent d’études publiées, affichées avec leur source.',
 } as const;
 
 /** Arrondi au millier d'euros : une estimation n'a pas la précision de l'euro. */
@@ -62,6 +65,8 @@ export function raisonCorrection(
       return `${String(bien.etage)}e étage ${bien.ascenseur === true ? 'avec' : 'sans'} ascenseur, comparé à un 2e étage.`;
     case 'exterieur':
       return 'Balcon ou terrasse.';
+    case 'occupation':
+      return 'Locataire en place : un bien occupé se vend moins cher qu’un bien libre.';
     case 'charges': {
       const c = estimation.charges;
       if (c === null) return '';

@@ -26,6 +26,8 @@ export interface ChampsExtraits {
   readonly etat?: EtatBien;
   /** Balcon, terrasse ou loggia. */
   readonly exterieur?: boolean;
+  /** Vendu loué : un locataire est en place à la vente. */
+  readonly venduLoue?: boolean;
   /** Type de location que l'annonce décrit ou propose (colocation, « idéal Airbnb », bail mobilité…). */
   readonly mode?: ModeLocation;
 }
@@ -130,6 +132,20 @@ function exterieur(texte: string): boolean | undefined {
   return /(?<![\p{L}])(?:balcons?|terrasses?|loggias?)(?![\p{L}])/iu.test(texte) ? true : undefined;
 }
 
+/** Une mention « libre » l'emporte : on ne décote pas un bien qui sera livré libre. */
+function venduLoue(texte: string): boolean | undefined {
+  if (
+    /(?:vendu|livr[ée]|libre)\s+(?:libre|[àa]\s+la\s+vente|de\s+tout(?:e)?\s+occup)/i.test(texte)
+  ) {
+    return false;
+  }
+  return /vendu\s+lou[ée]|vente\s+occup[ée]e|locataires?\s+en\s+place|bail\s+en\s+cours|actuellement\s+lou[ée]/i.test(
+    texte,
+  )
+    ? true
+    : undefined;
+}
+
 /** Le type de location, du plus précis au plus général : « colocation » l'emporte sur « meublé ». */
 function typeLocation(texte: string): ModeLocation | undefined {
   if (/colocation|coloc(?![\p{L}])/iu.test(texte)) return 'colocation';
@@ -162,6 +178,7 @@ export function extraireChamps(texte: string): ChampsExtraits {
     meuble: /meubl[ée]/i.test(texte) ? true : undefined,
     etat: etat(texte),
     exterieur: exterieur(texte),
+    venduLoue: venduLoue(texte),
     mode: typeLocation(texte),
   };
   const champs: Record<string, unknown> = {};

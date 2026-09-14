@@ -7,9 +7,6 @@ export const PHRASES_CARTE = {
   titre: 'Les ventes autour du bien',
   chargement: 'Chargement de la carte…',
   bien: 'Le bien',
-  cercles: 'Cercles de 100, 200 et 300 m autour du bien.',
-  fondDeCarte:
-    'Fond de carte : Plan IGN (Géoplateforme). Les tuiles sont chargées depuis le site de l’IGN, qui voit la zone affichée et rien d’autre.',
 } as const;
 
 /** « 18 ventes comparables à 300 m au plus, … ». */

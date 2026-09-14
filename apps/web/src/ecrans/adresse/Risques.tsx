@@ -79,7 +79,7 @@ export function CarteRisques({ resultat }: { resultat: Resultat<ReponseRisques> 
         </>
       )}
       <p className="m-0 text-xs text-encre-3">
-        {PHRASES_DONNEES_ADRESSE.risquesAppliques} Source : Géorisques.{' '}
+        Source : Géorisques.{' '}
         {url !== null && (
           <a href={url} target="_blank" rel="noopener noreferrer">
             Voir le rapport officiel

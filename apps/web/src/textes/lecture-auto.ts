@@ -1,6 +1,6 @@
 import type { RaisonEchecLecture } from '@loupe/capture';
 
-const REPLI = "Collez le texte de l'annonce ci-dessous, ça marche aussi.";
+const REPLI = 'Vous pouvez aussi saisir les chiffres à la main.';
 
 /** Pourquoi l'extension n'a rien rapporté, en une phrase, avec ce que l'utilisateur peut faire. */
 export function texteEchecLecture(raison: RaisonEchecLecture): string {

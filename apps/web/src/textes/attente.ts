@@ -25,5 +25,5 @@ export const TEXTES_ATTENTE = {
   progression: "Lecture de l'annonce",
   ecoule: (secondes: number): string => `${String(secondes)} s`,
   astuce: 'Le saviez-vous ?',
-  annuler: 'Annuler et coller le texte',
+  annuler: 'Annuler',
 } as const;

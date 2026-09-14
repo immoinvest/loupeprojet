@@ -53,21 +53,19 @@ const CLIENT: ClientWorker = {
 
 describe('Nouveau projet — avec le Worker', () => {
   it(
-    'lit l’annonce par l’IA, puis crée le projet avec les ventes réelles de l’arrondissement',
+    'lit par l’IA une annonce partagée en texte, puis crée le projet avec les ventes réelles de l’arrondissement',
     { timeout: 30_000 },
     async () => {
       const utilisateur = userEvent.setup();
-      render(<AppEnMemoire chemin="/projets/nouveau" client={CLIENT} />);
-      await screen.findByRole('heading', { name: /Colle le lien/ });
-      await utilisateur.type(
-        screen.getByLabelText("Lien de l'annonce"),
-        'https://www.leboncoin.fr/ad/ventes_immobilieres/2214738851',
+      render(
+        <AppEnMemoire
+          chemin={`/projets/nouveau?texte=${encodeURIComponent(ANNONCE)}`}
+          client={CLIENT}
+        />,
       );
-      await utilisateur.click(screen.getByPlaceholderText(/Appartement T3 de 65 m²/));
-      await utilisateur.paste(ANNONCE);
-      await utilisateur.click(screen.getByRole('button', { name: 'Lire le texte' }));
+      await screen.findByRole('heading', { name: /Vérifiez, corrigez/ });
 
-      expect(await screen.findByText(/lus dans l'annonce par l'IA/)).toBeInTheDocument();
+      // « Marseille » et 150 € de charges : les valeurs du modèle, pas celles des règles.
       expect(screen.getByLabelText(/^Ville/)).toHaveValue('Marseille');
       expect(screen.getByLabelText(/Charges de copropriété/)).toHaveValue('150');
       expect(screen.getByLabelText(/Taxe foncière/)).toHaveValue('980');

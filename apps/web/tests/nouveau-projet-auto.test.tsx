@@ -76,8 +76,10 @@ describe('Nouveau projet — coller le lien suffit (extension installée)', () =
       expect(
         await screen.findByText(/L'extension Deklic lit l'annonce/, {}, { timeout: 5_000 }),
       ).toBeInTheDocument();
-      expect(lire).toHaveBeenCalledWith(window, URL_CANONIQUE);
-      expect(screen.queryByPlaceholderText(/Appartement T3 de 65 m²/)).not.toBeInTheDocument();
+      // La carte s'affiche dès le lien collé ; la lecture part après la pause.
+      await vi.waitFor(() => {
+        expect(lire).toHaveBeenCalledWith(window, URL_CANONIQUE);
+      });
       terminer({ ok: true, capture: CAPTURE });
 
       await screen.findByRole('heading', { name: /Vérifiez, corrigez/ });
@@ -122,7 +124,7 @@ describe('Nouveau projet — coller le lien suffit (extension installée)', () =
     expect(await screen.findByRole('alert', {}, { timeout: 5_000 })).toHaveTextContent(
       /Autoriser la lecture automatique/,
     );
-    expect(screen.getByPlaceholderText(/Appartement T3 de 65 m²/)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Saisir à la main' })).toBeInTheDocument();
     await utilisateur.click(screen.getByRole('button', { name: 'Réessayer la lecture' }));
     await screen.findByRole('heading', { name: /Vérifiez, corrigez/ });
     expect(screen.getByLabelText(/Surface/)).toHaveValue('65');
@@ -131,17 +133,24 @@ describe('Nouveau projet — coller le lien suffit (extension installée)', () =
 });
 
 describe('Nouveau projet — sans extension', () => {
-  it('invite à installer l’extension et garde le texte collé', { timeout: 30_000 }, async () => {
-    detecter.mockResolvedValue(false);
-    await collerLeLien();
-    expect(
-      await screen.findByText(/coller le lien suffit : elle lit l'annonce pour vous/),
-    ).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: "Installer l'extension" })).toHaveAttribute(
-      'href',
-      '/extension',
-    );
-    expect(screen.getByPlaceholderText(/Appartement T3 de 65 m²/)).toBeInTheDocument();
-    expect(lire).not.toHaveBeenCalled();
-  });
+  it(
+    'lecture serveur indisponible : le dit, invite à installer l’extension, propose la saisie',
+    { timeout: 30_000 },
+    async () => {
+      detecter.mockResolvedValue(false);
+      await collerLeLien();
+      expect(await screen.findByRole('alert', {}, { timeout: 5_000 })).toHaveTextContent(
+        /pas disponible/,
+      );
+      expect(
+        screen.getByText(/coller le lien suffit : elle lit l'annonce pour vous/),
+      ).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: "Installer l'extension" })).toHaveAttribute(
+        'href',
+        '/extension',
+      );
+      expect(screen.getByRole('button', { name: 'Saisir à la main' })).toBeInTheDocument();
+      expect(lire).not.toHaveBeenCalled();
+    },
+  );
 });
