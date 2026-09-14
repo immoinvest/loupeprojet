@@ -2,7 +2,6 @@ import { useEffect, useState, type JSX } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router';
 
 import {
-  PORTAILS,
   construireProjet,
   lireFragmentCapture,
   nomDuProjet,
@@ -19,6 +18,7 @@ import { useProjets } from '@/stockage/ProjetsContext';
 
 import { FormulaireProjet, valeursDepuisChamps } from './FormulaireProjet';
 import { EtatLectureAuto, useLectureAutomatique } from './nouveau-projet/LectureAuto';
+import { PastillesLien } from './nouveau-projet/PastillesLien';
 
 type Etape = 'lien' | 'texte' | 'verifier';
 
@@ -146,37 +146,12 @@ export function NouveauProjet(): JSX.Element {
               className="min-h-[52px] rounded-encart border border-bordure bg-surface px-4 text-[16px]"
             />
           </label>
-          <div className="flex flex-wrap items-center gap-2">
-            {annonce !== null ? (
-              <>
-                <Pastille ton="bon" compacte>
-                  {PORTAILS[annonce.portail]} reconnu
-                </Pastille>
-                <Pastille ton="neutre" compacte>
-                  annonce {annonce.id}
-                </Pastille>
-                {importee !== null && (
-                  <Pastille ton="accent" compacte>
-                    {importee.mode === 'bookmarklet'
-                      ? 'lue par le bouton-favori'
-                      : "lue par l'extension"}
-                  </Pastille>
-                )}
-              </>
-            ) : url.trim() !== '' ? (
-              <Pastille ton="surveiller" compacte>
-                Site non reconnu : collez le texte ci-dessous, ça marche aussi
-              </Pastille>
-            ) : fragment.statut === 'illisible' ? (
-              <Pastille ton="surveiller" compacte>
-                La capture reçue est illisible : collez le lien, puis le texte de l'annonce
-              </Pastille>
-            ) : (
-              <span className="text-sm text-encre-3">
-                LeBonCoin, SeLoger, Bien'ici, PAP, Logic-Immo.
-              </span>
-            )}
-          </div>
+          <PastillesLien
+            annonce={annonce}
+            url={url}
+            importee={importee}
+            captureIllisible={fragment.statut === 'illisible'}
+          />
           {importee === null && (
             <EtatLectureAuto
               extension={auto.extension}
