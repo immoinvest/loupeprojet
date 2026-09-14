@@ -38,6 +38,19 @@
   --radius-carte: 20px;
   --radius-encart: 12px;
   --shadow-carte: 0 6px 24px rgba(35, 39, 47, 0.05);
+
+  /* Apparition d'une liste de choix (MenuChoix), utilisée derrière `motion-safe:`. */
+  --animate-apparition: apparition 100ms ease-out;
+  @keyframes apparition {
+    from {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 }
 
 /* La coque tient dans la fenêtre et seul le contenu défile (AppLayout). Largeur de la barre
@@ -74,6 +87,7 @@ body {
   a[href],
   button,
   [role='button'],
+  [role='option'],
   summary,
   select,
   label:has(input:is([type='checkbox'], [type='radio'])),
