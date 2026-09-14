@@ -289,7 +289,6 @@ describe('données de marché', () => {
     apport: 15000,
     dureeAnnees: 25,
     tmi: 0.3,
-    revenusMensuels: 2600,
     provenance: { prix: 'annonce' },
   };
 

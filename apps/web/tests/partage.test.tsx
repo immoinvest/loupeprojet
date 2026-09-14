@@ -238,7 +238,7 @@ describe('Bouton Partager', () => {
       'title',
       AVERTISSEMENT_PARTAGE,
     );
-    expect(AVERTISSEMENT_PARTAGE).toContain('revenus et apport');
+    expect(AVERTISSEMENT_PARTAGE).toContain("apport et tranche d'imposition");
     await utilisateur.click(screen.getByRole('button', { name: 'Partager' }));
     expect(await screen.findByRole('button', { name: 'Lien copié' })).toBeInTheDocument();
     const lien = await navigator.clipboard.readText();

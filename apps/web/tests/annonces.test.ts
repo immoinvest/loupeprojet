@@ -124,7 +124,6 @@ describe('construireProjet', () => {
     apport: 15_000,
     dureeAnnees: 25,
     tmi: 0.3,
-    revenusMensuels: 2_600,
     provenance: {
       prix: 'annonce',
       surface: 'annonce',
@@ -276,17 +275,15 @@ describe('construireProjet', () => {
     );
     expect(estime.provenance?.['location.loyerHc']).toBe('anil');
     const complet = construireProjet(
-      { ...minimale, apport: 10_000, dureeAnnees: 20, tmi: 0.11, revenusMensuels: 2_400 },
+      { ...minimale, apport: 10_000, dureeAnnees: 20, tmi: 0.11 },
       'p11',
     );
     expect(complet.provenance).toMatchObject({
       'pret.apport': 'utilisateur',
       'pret.dureeAnnees': 'utilisateur',
       'fiscalite.tmi': 'utilisateur',
-      revenusMensuels: 'utilisateur',
     });
     expect(complet.hypotheses.pret.tauxNominal).toBe(0.0327);
-    expect(complet.hypotheses.revenusMensuels).toBe(2_400);
     // Défauts pré-remplis par le formulaire : leur provenance « estime » est conservée.
     const prerempli = construireProjet(
       {

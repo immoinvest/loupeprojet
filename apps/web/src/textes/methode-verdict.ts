@@ -31,9 +31,9 @@ export function sectionVerdict(regles: Regles): SectionMethode {
       `Prix : écart du prix au m² retenu (négocié) au prix au m² estimé du bien (voir l'estimation), calculé sur les ventes réelles (DVF). Bon jusqu'à ${pctSigne(v.prix.bonJusqua)}, à surveiller jusqu'à ${pctSigne(v.prix.surveillerJusqua)}, problème au-delà ; inconnu sans ventes autour du bien.`,
       `Rendement net : bon dès ${pct(v.rendementNet.bonDes)}, à surveiller dès ${pct(v.rendementNet.surveillerDes)}, problème en dessous.`,
       `Cash-flow mensuel : bon dès ${euros(v.cashflowMensuel.bonDes)}, à surveiller dès ${euros(v.cashflowMensuel.surveillerDes)}, problème en dessous.`,
-      `Effort bancaire : bon jusqu'à ${pct(v.effort.bonJusqua)}, à surveiller jusqu'à ${pct(v.effort.surveillerJusqua)}, problème au-delà ; inconnu sans revenus.`,
+      `Crédit ÷ loyer : mensualité assurance comprise ÷ loyer hors charges du régime retenu. Bon jusqu'à ${pct(v.couverture.bonJusqua)} (le loyer porte le crédit), à surveiller jusqu'à ${pct(v.couverture.surveillerJusqua)}, problème au-delà (le loyer ne couvre plus la mensualité) ; inconnu sans loyer.`,
       `Risques : DPE F ou G = problème (location interdite dès ${String(dpe.G)} pour G, ${String(dpe.F)} pour F) ; DPE E (interdit dès ${String(dpe.E)}), copropriété en procédure ou risque naturel fort = à surveiller.`,
-      "Sous les feux, le rapport liste ce qui se règle avant l'offre : effort au-dessus du seuil, prêt trop long, plafond du micro dépassé, loyer au-dessus de l'encadrement, prélèvements sociaux à confirmer. L'onglet Visite tire ses questions d'une base sourcée (ANIL, Notaires de France, Service-public.fr, textes de loi) filtrée par le bien : copropriété, année de construction, DPE, étage, mode d'exploitation, risques, travaux, prix.",
+      "Sous les feux, le rapport liste ce qui se règle avant l'offre : effort au-dessus du seuil (projets enregistrés avec des revenus), prêt trop long, plafond du micro dépassé, loyer au-dessus de l'encadrement, prélèvements sociaux à confirmer. L'onglet Visite tire ses questions d'une base sourcée (ANIL, Notaires de France, Service-public.fr, textes de loi) filtrée par le bien : copropriété, année de construction, DPE, étage, mode d'exploitation, risques, travaux, prix.",
     ],
     constantes: [
       {
@@ -52,9 +52,10 @@ export function sectionVerdict(regles: Regles): SectionMethode {
         source: 'Choix Deklic',
       },
       {
-        libelle: 'Seuils du feu effort',
-        valeur: `bon jusqu'à ${pct(v.effort.bonJusqua)} · à surveiller jusqu'à ${pct(v.effort.surveillerJusqua)}`,
-        source: 'Choix Deklic, alignés sur le seuil du HCSF',
+        libelle: 'Seuils du feu crédit ÷ loyer',
+        valeur: `bon jusqu'à ${pct(v.couverture.bonJusqua)} · à surveiller jusqu'à ${pct(v.couverture.surveillerJusqua)}`,
+        source:
+          'Choix Deklic, aligné sur la part des loyers que le HCSF retient comme revenu (70 %)',
       },
       {
         libelle: 'Interdiction de louer selon le DPE',

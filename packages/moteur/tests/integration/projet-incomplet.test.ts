@@ -14,15 +14,14 @@ function sansCle<T extends object, K extends keyof T>(objet: T, cle: K): Omit<T,
   return Object.fromEntries(Object.entries(objet).filter(([k]) => k !== cle)) as Omit<T, K>;
 }
 
-/** Le T3 d'exemple sans loyer visé (et, à la demande, sans revenus). */
-function sansLoyer(options: { sansRevenus?: boolean } = {}): ProjetEntree {
-  const hypotheses = {
-    ...projetExemple.hypotheses,
-    location: sansCle(projetExemple.hypotheses.location, 'loyerHc'),
-  };
+/** Le T3 d'exemple sans loyer visé. */
+function sansLoyer(): ProjetEntree {
   return {
     ...projetExemple,
-    hypotheses: options.sansRevenus === true ? sansCle(hypotheses, 'revenusMensuels') : hypotheses,
+    hypotheses: {
+      ...projetExemple.hypotheses,
+      location: sansCle(projetExemple.hypotheses.location, 'loyerHc'),
+    },
   };
 }
 
@@ -54,19 +53,16 @@ describe('calculerProjet — projet sans loyer', () => {
     expect(partiel.estimation).toEqual(complet.estimation);
   });
 
-  it('effort inconnu : les loyers HCSF sont inconnus, la lecture sans loyers reste', () => {
+  it('effort : ni revenus ni loyer, aucune lecture et rien de signalé', () => {
     expect(partiel.financement.effort.hcsf).toBeNull();
-    expect(partiel.financement.effort.sansLoyers).toBeCloseTo(
-      complet.financement.mensualiteTotale / 2_600,
-      10,
-    );
+    expect(partiel.financement.effort.sansLoyers).toBeNull();
     expect(partiel.financement.effort.depasseHcsf).toBe(false);
   });
 
   it('cinq feux : prix et risques comme avant, les trois autres inconnus avec la raison', () => {
     expect(partiel.verdict.feux[0]).toEqual(complet.verdict.feux[0]);
     expect(partiel.verdict.feux[4]).toEqual(complet.verdict.feux[4]);
-    for (const axe of ['rendement', 'cashflow', 'effort']) {
+    for (const axe of ['rendement', 'cashflow', 'couverture']) {
       expect(partiel.verdict.feux.find((f) => f.axe === axe)).toEqual({
         axe,
         feu: 'inconnu',
@@ -85,10 +81,15 @@ describe('calculerProjet — projet sans loyer', () => {
     expect(complet.verdict.vigilance.map((p) => p.code)).toContain('PS_BIC_A_CONFIRMER');
   });
 
-  it('sans loyer ni revenus : les deux manques, l’effort sans aucune lecture', () => {
-    const r = calculerProjet(sansLoyer({ sansRevenus: true }));
-    expect(r.manques.map((m) => m.code)).toEqual(['LOYER_ABSENT', 'REVENUS_ABSENTS']);
-    expect(r.financement.effort.sansLoyers).toBeNull();
+  it('projet ancien avec des revenus, sans loyer : la lecture sans loyers reste, la couverture attend le loyer', () => {
+    const entree = sansLoyer();
+    const r = calculerProjet({
+      ...entree,
+      hypotheses: { ...entree.hypotheses, revenusMensuels: 2_600 },
+    });
+    expect(r.manques.map((m) => m.code)).toEqual(['LOYER_ABSENT']);
+    expect(r.financement.effort.hcsf).toBeNull();
+    expect(r.financement.effort.sansLoyers).toBeCloseTo(r.financement.mensualiteTotale / 2_600, 10);
     expect(r.verdict.feux[3]?.raison).toBe('LOYER_ABSENT');
     expect(() => ResultatsSchema.parse(r)).not.toThrow();
   });

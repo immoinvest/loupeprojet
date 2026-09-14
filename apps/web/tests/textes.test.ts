@@ -7,6 +7,7 @@ import {
 import { describe, expect, it } from 'vitest';
 
 import { AXES, ETATS, libelleFeu } from '@/textes/feux';
+import { PHASES, TEXTES_FINANCEMENT, phraseCouverture } from '@/textes/financement';
 import { MANQUES, TEXTES_A_COMPLETER, manquesBloquants } from '@/textes/manques';
 import {
   CRITERES_PRIX,
@@ -38,6 +39,18 @@ const variante = (
   hypotheses: { ...projetExemple.hypotheses, ...h },
 });
 
+describe('financement', () => {
+  it('a une phrase par feu de couverture et des libellés paramétrés', () => {
+    expect(phraseCouverture('bon')).toContain('porte le crédit');
+    expect(phraseCouverture('surveiller')).toContain('couvre la mensualité');
+    expect(phraseCouverture('probleme')).toContain('ne couvre même pas');
+    expect(phraseCouverture('inconnu')).toContain('Indiquez un loyer');
+    expect(TEXTES_FINANCEMENT.dureeMax(27)).toBe('plus long que le maximum bancaire de 27 ans');
+    expect(TEXTES_FINANCEMENT.effortDepasse('35 %')).toBe('au-dessus de 35 %');
+    expect(Object.keys(PHASES)).toEqual(['differe_total', 'differe_partiel', 'amortissement']);
+  });
+});
+
 describe('feux', () => {
   it('libelle chaque axe avec sa valeur formatée', () => {
     expect(n(libelleFeu({ axe: 'prix', feu: 'bon', valeur: -0.218, raison: null }))).toBe(
@@ -49,9 +62,9 @@ describe('feux', () => {
     expect(n(libelleFeu({ axe: 'cashflow', feu: 'probleme', valeur: -210.3, raison: null }))).toBe(
       'Cash-flow −210 €/mois',
     );
-    expect(n(libelleFeu({ axe: 'effort', feu: 'bon', valeur: 0.2516, raison: null }))).toBe(
-      'Effort 25 %',
-    );
+    expect(
+      n(libelleFeu({ axe: 'couverture', feu: 'surveiller', valeur: 0.8435, raison: null })),
+    ).toBe('Crédit 84 % du loyer');
     expect(libelleFeu({ axe: 'risques', feu: 'bon', valeur: 0, raison: null })).toBe(
       'Risques : aucun',
     );
@@ -218,7 +231,7 @@ describe('verdict', () => {
     const t = texteVerdict(calculerProjet(projetExemple));
     expect(t.titre).toBe('Le prix est bon. Le loyer ne couvre pas tout.');
     expect(n(t.sousTitre)).toContain('−25 % par rapport au prix estimé');
-    expect(n(t.sousTitre)).toContain("banque d'accord (effort 25 %)");
+    expect(n(t.sousTitre)).toContain('le crédit prend 84 % du loyer');
     expect(n(t.sousTitre)).toContain('210 € à sortir chaque mois');
   });
 
@@ -234,26 +247,23 @@ describe('verdict', () => {
     expect(t.sousTitre).toContain('dans la poche');
   });
 
-  it('prix élevé, effort au-dessus du seuil', () => {
+  it('prix élevé, crédit qui dépasse le loyer', () => {
     const r = calculerProjet(
       variante({
         achat: { ...projetExemple.hypotheses.achat, prix: 240_000 },
-        location: { mode: 'meuble_lld', loyerHc: 1_500, vacanceSemaines: 0 },
-        revenusMensuels: 1_500,
+        location: { mode: 'meuble_lld', loyerHc: 1_100, vacanceSemaines: 0 },
       }),
     );
     const t = texteVerdict(r);
     expect(t.titre.startsWith('Le prix est élevé.')).toBe(true);
-    expect(t.sousTitre).toContain('au-dessus du seuil');
+    expect(n(t.sousTitre)).toMatch(/le crédit dépasse le loyer \(1\d\d %\)/);
   });
 
-  it('sans marché ni revenus : phrases de repli', () => {
-    const r = calculerProjet(
-      variante({ location: { mode: 'nu', loyerHc: 0 }, revenusMensuels: 0 }, { risques: [] }),
-    );
+  it('sans marché ni loyer : phrases de repli, sans mention du crédit', () => {
+    const r = calculerProjet(variante({ location: { mode: 'nu', loyerHc: 0 } }, { risques: [] }));
     const t = texteVerdict(r);
     expect(t.titre).toBe('Prix sans repère de marché. Le loyer ne couvre pas tout.');
-    expect(t.sousTitre).not.toContain('effort');
+    expect(t.sousTitre).not.toContain('crédit');
     expect(t.sousTitre).not.toContain('quartier');
   });
 
@@ -281,17 +291,16 @@ describe('données manquantes', () => {
     return variante({ location }, marche);
   };
 
-  it('chaque code a un titre, une phrase et un complément de feu ; seul le loyer bloque', () => {
+  it('chaque code a un titre, une phrase et un complément de feu ; le loyer bloque', () => {
     for (const t of Object.values(MANQUES)) {
       expect(t.titre.length).toBeGreaterThan(10);
       expect(t.phrase.length).toBeGreaterThan(20);
       expect(t.feu).toMatch(/à indiquer$/);
     }
     expect(
-      manquesBloquants([
-        { code: 'REVENUS_ABSENTS', champ: 'hypotheses.revenusMensuels' },
-        { code: 'LOYER_ABSENT', champ: 'hypotheses.location.loyerHc' },
-      ]).map((m) => m.code),
+      manquesBloquants([{ code: 'LOYER_ABSENT', champ: 'hypotheses.location.loyerHc' }]).map(
+        (m) => m.code,
+      ),
     ).toEqual(['LOYER_ABSENT']);
     expect(manquesBloquants([])).toEqual([]);
   });
@@ -301,10 +310,10 @@ describe('données manquantes', () => {
       libelleFeu({ axe: 'cashflow', feu: 'inconnu', valeur: null, raison: 'LOYER_ABSENT' }),
     ).toBe('Cash-flow : loyer à indiquer');
     expect(
-      libelleFeu({ axe: 'effort', feu: 'inconnu', valeur: null, raison: 'REVENUS_ABSENTS' }),
-    ).toBe('Effort bancaire : revenus à indiquer');
-    expect(libelleFeu({ axe: 'effort', feu: 'inconnu', valeur: null, raison: null })).toBe(
-      'Effort bancaire : pas de données',
+      libelleFeu({ axe: 'couverture', feu: 'inconnu', valeur: null, raison: 'LOYER_ABSENT' }),
+    ).toBe('Crédit ÷ loyer : loyer à indiquer');
+    expect(libelleFeu({ axe: 'couverture', feu: 'inconnu', valeur: null, raison: null })).toBe(
+      'Crédit ÷ loyer : pas de données',
     );
   });
 
@@ -312,7 +321,7 @@ describe('données manquantes', () => {
     const t = texteVerdict(calculerProjet(sansLoyer()));
     expect(t.titre).toBe(`Le prix est bon. ${TEXTES_A_COMPLETER.verdictCashflow}`);
     expect(n(t.sousTitre)).toBe('−25 % par rapport au prix estimé.');
-    // Sans marché ni loyer ni effort : rien à chiffrer, une phrase de repli.
+    // Sans marché ni loyer : rien à chiffrer, une phrase de repli.
     const seul = texteVerdict(calculerProjet(sansLoyer({})));
     expect(seul.titre).toBe(`Prix sans repère de marché. ${TEXTES_A_COMPLETER.verdictCashflow}`);
     expect(seul.sousTitre).toBe(TEXTES_A_COMPLETER.sousTitreSeul);

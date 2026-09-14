@@ -117,7 +117,10 @@ export const HypothesesSchema = z.object({
   charges: ChargesSchema.prefault({}),
   fiscalite: FiscaliteSchema,
   revente: ReventeSchema.prefault({}),
-  /** Revenus nets mensuels du ménage, pour le taux d'effort ; absents, l'effort est inconnu. */
+  /**
+   * Revenus nets mensuels du ménage, pour le taux d'effort HCSF. Deklic ne les demande plus ;
+   * les projets enregistrés qui les portent restent lisibles.
+   */
   revenusMensuels: montant().optional(),
 });
 export type Hypotheses = z.infer<typeof HypothesesSchema>;

@@ -106,7 +106,10 @@ describe('sectionsMethode', () => {
     expect(valeurs('acquisition')).toContain('36 : 3,8 %, 56 : 3,8 %, 976 : 3,8 %');
     expect(valeurs('credit')).toContain('3,14 % · 3,27 % · 3,35 %');
     expect(n(section('credit').etapes[4] ?? '')).toContain(
-      'Seuil 35 % ; durée 25 ans (27 ans si les travaux dépassent 10 % du prix)',
+      'Crédit ÷ loyer = mensualité assurance comprise ÷ loyer hors charges',
+    );
+    expect(n(section('credit').etapes[5] ?? '')).toContain(
+      "Deklic ne demande pas vos revenus : la banque calculera votre taux d'effort avec 70 % des loyers, seuil 35 % ; durée maximale 25 ans (27 ans si les travaux dépassent 10 % du prix)",
     );
     expect(n(section('revente').etapes[3] ?? '')).toContain(
       '6 % par an de la 6e à la 21e année, 4 % la 22e année',

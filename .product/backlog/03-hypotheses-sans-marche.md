@@ -1,6 +1,8 @@
 # 03 — Hypothèses : retirer le bloc « Le marché » (DVF)
 
-Statut : `idée` · Notée le 14/09/2026 · Dépend de : rien
+Statut : `livrée` (14/09/2026, avec la fiche 01 dans la feature `hypotheses-financement`) · Notée le 14/09/2026 · Dépend de : rien
+
+Réponses aux questions ouvertes : (1) pas de saisie manuelle du repère DVF, l'onglet Estimation est la seule porte d'entrée ; (2) le plafond d'encadrement est dans « La location », sous le loyer visé. `descripteurParChemin` n'était appelé avec un chemin `marche.dvf.*` nulle part : les descripteurs DVF et `preparerDvf` ont été supprimés.
 
 ## La demande de Pierre
 

@@ -48,13 +48,6 @@ export const GROUPE_FINANCEMENT: Groupe = {
       type: 'entier',
       unite: 'mois',
     },
-    {
-      chemin: 'hypotheses.revenusMensuels',
-      libelle: 'Vos revenus nets',
-      type: 'euros',
-      unite: '€/mois',
-      aToi: true,
-    },
   ],
 };
 
@@ -78,6 +71,13 @@ export const GROUPE_LOCATION: Groupe = {
       type: 'euros',
       unite: '€/mois',
       aToi: true,
+    },
+    // L'encadrement des loyers n'est dans aucun référentiel : à saisir, à côté du loyer visé.
+    {
+      chemin: 'marche.plafondLoyerMensuel',
+      libelle: "Plafond d'encadrement",
+      type: 'euros',
+      unite: '€/mois',
     },
     {
       chemin: 'hypotheses.location.loyerHcNu',

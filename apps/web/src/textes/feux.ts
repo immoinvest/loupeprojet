@@ -8,7 +8,7 @@ export const AXES: Readonly<Record<AxeVerdict, string>> = {
   prix: 'Prix vs ventes réelles',
   rendement: 'Rendement net',
   cashflow: 'Cash-flow',
-  effort: 'Effort bancaire',
+  couverture: 'Crédit ÷ loyer',
   risques: 'Risques',
 };
 
@@ -26,7 +26,7 @@ export function libelleRisques(nombre: number): string {
 }
 
 /**
- * Texte court d'une pastille de feu : « Prix −22 % », « Cash-flow −210 €/mois »… Un feu inconnu dit
+ * Texte court d'une pastille de feu : « Prix −22 % », « Crédit 84 % du loyer »… Un feu inconnu dit
  * ce qui manque (« Cash-flow : loyer à indiquer ») ou, sans raison, « pas de données ».
  */
 export function libelleFeu(feu: FeuVerdict): string {
@@ -40,8 +40,8 @@ export function libelleFeu(feu: FeuVerdict): string {
       return `Rendement net ${pourcentage(feu.valeur)}`;
     case 'cashflow':
       return `Cash-flow ${eurosParMois(feu.valeur)}`;
-    case 'effort':
-      return `Effort ${pourcentage(feu.valeur, 0)}`;
+    case 'couverture':
+      return `Crédit ${pourcentage(feu.valeur, 0)} du loyer`;
     case 'risques':
       return `Risques : ${libelleRisques(feu.valeur)}`;
   }

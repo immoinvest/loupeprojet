@@ -3,7 +3,6 @@ import { describe, expect, it } from 'vitest';
 import { projetExemple } from '../../src/exemples/t3-marseille';
 import {
   CHAMP_LOYER,
-  CHAMP_REVENUS,
   ManqueSchema,
   ProjetSchema,
   TMI_PAR_DEFAUT,
@@ -35,43 +34,34 @@ describe('défauts et absences du schéma', () => {
     ).toBe(false);
   });
 
-  it('accepte un projet sans revenus', () => {
-    const sansRevenus = sansCle(projetExemple.hypotheses, 'revenusMensuels');
-    const projet = ProjetSchema.parse(avecHypotheses(sansRevenus));
-    expect(projet.hypotheses.revenusMensuels).toBeUndefined();
+  it('les revenus d’un projet ancien restent lisibles, jamais négatifs', () => {
+    expect(projetExemple.hypotheses).not.toHaveProperty('revenusMensuels');
+    const ancien = ProjetSchema.parse(
+      avecHypotheses({ ...projetExemple.hypotheses, revenusMensuels: 2_600 }),
+    );
+    expect(ancien.hypotheses.revenusMensuels).toBe(2_600);
     expect(
-      ProjetSchema.safeParse(avecHypotheses({ ...sansRevenus, revenusMensuels: -1 })).success,
+      ProjetSchema.safeParse(avecHypotheses({ ...projetExemple.hypotheses, revenusMensuels: -1 }))
+        .success,
     ).toBe(false);
   });
 });
 
 describe('manquesDe', () => {
-  it('rien ne manque au projet d’exemple', () => {
+  it('rien ne manque au projet d’exemple, même sans revenus : Deklic ne les demande pas', () => {
     expect(manquesDe(ProjetSchema.parse(projetExemple))).toEqual([]);
   });
 
-  it('signale les revenus absents avec le chemin du champ', () => {
-    const manques = manquesDe(
-      ProjetSchema.parse(avecHypotheses(sansCle(projetExemple.hypotheses, 'revenusMensuels'))),
-    );
-    expect(manques).toEqual([{ code: 'REVENUS_ABSENTS', champ: CHAMP_REVENUS }]);
-    expect(CHAMP_REVENUS).toBe('hypotheses.revenusMensuels');
-    expect(CHAMP_LOYER).toBe('hypotheses.location.loyerHc');
-    for (const m of manques) expect(() => ManqueSchema.parse(m)).not.toThrow();
-  });
-
-  it('signale le loyer avant les revenus ; estComplet et parserComplet le savent', () => {
+  it('signale le loyer avec le chemin du champ ; estComplet et parserComplet le savent', () => {
     const location = sansCle(projetExemple.hypotheses.location, 'loyerHc');
-    const entree = avecHypotheses(
-      sansCle({ ...projetExemple.hypotheses, location }, 'revenusMensuels'),
-    );
+    const entree = avecHypotheses({ ...projetExemple.hypotheses, location });
     const projet = ProjetSchema.parse(entree);
     expect(projet.hypotheses.location.loyerHc).toBeUndefined();
     expect(estComplet(projet)).toBe(false);
-    expect(manquesDe(projet)).toEqual([
-      { code: 'LOYER_ABSENT', champ: CHAMP_LOYER },
-      { code: 'REVENUS_ABSENTS', champ: CHAMP_REVENUS },
-    ]);
+    const manques = manquesDe(projet);
+    expect(manques).toEqual([{ code: 'LOYER_ABSENT', champ: CHAMP_LOYER }]);
+    expect(CHAMP_LOYER).toBe('hypotheses.location.loyerHc');
+    for (const m of manques) expect(() => ManqueSchema.parse(m)).not.toThrow();
     expect(() => parserComplet(entree)).toThrow(/loyer visé manque/);
     const complet = parserComplet(projetExemple);
     expect(estComplet(complet)).toBe(true);
@@ -91,9 +81,9 @@ describe('manquesDe', () => {
   });
 
   it('raisonParmi rend le premier manque parmi les codes cherchés, sinon null', () => {
-    const manques = [{ code: 'REVENUS_ABSENTS' as const, champ: CHAMP_REVENUS }];
-    expect(raisonParmi(manques, ['LOYER_ABSENT', 'REVENUS_ABSENTS'])).toBe('REVENUS_ABSENTS');
-    expect(raisonParmi(manques, ['LOYER_ABSENT'])).toBeNull();
-    expect(raisonParmi([], ['REVENUS_ABSENTS'])).toBeNull();
+    const manques = [{ code: 'LOYER_ABSENT' as const, champ: CHAMP_LOYER }];
+    expect(raisonParmi(manques, ['LOYER_ABSENT'])).toBe('LOYER_ABSENT');
+    expect(raisonParmi(manques, [])).toBeNull();
+    expect(raisonParmi([], ['LOYER_ABSENT'])).toBeNull();
   });
 });

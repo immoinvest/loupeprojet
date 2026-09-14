@@ -24,14 +24,6 @@ function preparerCourteDuree(projet: ProjetEntree): ProjetEntree {
   });
 }
 
-/** La première valeur de marché saisie crée le bloc DVF avec un nombre de ventes à 0. */
-function preparerDvf(projet: ProjetEntree, chemin: string): ProjetEntree {
-  if (!chemin.startsWith('marche.dvf.') || lireChemin(projet, 'marche.dvf') !== undefined) {
-    return projet;
-  }
-  return ecrireChemin(projet, 'marche.dvf', { medianM2: 1, nombreVentes: 0 });
-}
-
 /**
  * Applique une saisie texte à un projet : conversion, contrôle « obligatoire »,
  * préparations, écriture immuable et provenance « utilisateur ».
@@ -46,18 +38,19 @@ export function appliquerSaisie(
   if (conversion.valeur === undefined && descripteur.obligatoire === true) {
     return { ok: false, erreur: 'Cette valeur est nécessaire au calcul.' };
   }
-  let prepare = preparerDvf(projet, descripteur.chemin);
-  let suivant = ecrireChemin(prepare, descripteur.chemin, conversion.valeur);
+  let suivant = ecrireChemin(projet, descripteur.chemin, conversion.valeur);
   if (descripteur.chemin === 'hypotheses.location.mode' && conversion.valeur === 'courte_duree') {
     suivant = preparerCourteDuree(suivant);
   }
   // Les clés de provenance contiennent des points (« pret.tauxNominal ») : écriture directe, pas par chemin.
-  prepare = {
-    ...suivant,
-    provenance: {
-      ...(suivant.provenance ?? {}),
-      [cleProvenance(descripteur.chemin)]: 'utilisateur',
+  return {
+    ok: true,
+    projet: {
+      ...suivant,
+      provenance: {
+        ...(suivant.provenance ?? {}),
+        [cleProvenance(descripteur.chemin)]: 'utilisateur',
+      },
     },
   };
-  return { ok: true, projet: prepare };
 }

@@ -18,13 +18,6 @@ export const MANQUES: Readonly<Record<CodeManque, TexteManque>> = {
     feu: 'loyer à indiquer',
     bloque: true,
   },
-  REVENUS_ABSENTS: {
-    titre: 'Il manque vos revenus nets',
-    phrase:
-      "Indiquez vos revenus nets pour vérifier l'effort bancaire : mensualité divisée par vos revenus et 70 % des loyers.",
-    feu: 'revenus à indiquer',
-    bloque: false,
-  },
 };
 
 /** Les manques qui bloquent des analyses, dans l'ordre du moteur. */

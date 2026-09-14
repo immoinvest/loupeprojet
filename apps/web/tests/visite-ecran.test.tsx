@@ -160,7 +160,7 @@ describe('Écran Visite', () => {
     expect(enregistre()?.visite?.faite).toBe(true);
     expect(enregistre()?.visite?.date).toMatch(/^\d{4}-\d{2}-\d{2}T/);
     expect(within(volets()).queryByRole('link', { name: 'Visite' })).not.toBeInTheDocument();
-    expect(within(volets()).getAllByRole('link')).toHaveLength(5);
+    expect(within(volets()).getAllByRole('link')).toHaveLength(6);
 
     cleanup();
     render(<AppEnMemoire chemin={`/projets/${id}/visite`} />);

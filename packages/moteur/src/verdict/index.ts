@@ -8,7 +8,7 @@ import { manquesDe, raisonParmi, type Manque } from '../schema/manques';
 import type { Projet } from '../schema/projet';
 import {
   feuCashflow,
-  feuEffort,
+  feuCouverture,
   feuPrix,
   feuRendement,
   feuRisques,
@@ -25,7 +25,7 @@ export interface SyntheseVerdict {
 }
 
 export interface ResultatVerdict {
-  /** Toujours cinq, dans l'ordre : prix, rendement, cash-flow, effort, risques. */
+  /** Toujours cinq, dans l'ordre : prix, rendement, cash-flow, couverture, risques. */
   readonly feux: readonly FeuVerdict[];
   readonly synthese: SyntheseVerdict;
   readonly vigilance: readonly PointVigilance[];
@@ -43,7 +43,7 @@ export interface OptionsVerdict {
 
 /**
  * Les cinq feux et les points de vigilance. Fiscalité et rendement sont `null` quand le loyer manque :
- * les feux rendement, cash-flow et effort sont alors « inconnu » avec cette raison.
+ * les feux rendement, cash-flow et couverture sont alors « inconnu » avec cette raison.
  */
 export function calculerVerdict(
   projet: Projet,
@@ -56,6 +56,7 @@ export function calculerVerdict(
   const estimation = options.estimation ?? null;
   const manques = options.manques ?? manquesDe(projet);
   const raisonLoyer = raisonParmi(manques, ['LOYER_ABSENT']);
+  const retenu = fiscalite === null ? null : fiscalite.regimes[fiscalite.retenu];
   const prix = feuPrix(
     prixRetenu(projet.hypotheses.achat) / projet.bien.surface,
     projet.marche,
@@ -65,16 +66,8 @@ export function calculerVerdict(
   const feux: readonly FeuVerdict[] = [
     prix,
     feuRendement(rendement === null ? null : rendement.rendements.net, regles, raisonLoyer),
-    feuCashflow(
-      fiscalite === null ? null : fiscalite.regimes[fiscalite.retenu].cashflow.mensuel,
-      regles,
-      raisonLoyer,
-    ),
-    feuEffort(
-      financement.effort,
-      regles,
-      raisonParmi(manques, ['LOYER_ABSENT', 'REVENUS_ABSENTS']),
-    ),
+    feuCashflow(retenu === null ? null : retenu.cashflow.mensuel, regles, raisonLoyer),
+    feuCouverture(retenu === null ? null : retenu.cashflow.tauxCouverture, regles, raisonLoyer),
     feuRisques(projet.bien, projet.marche),
   ];
   return {
@@ -91,7 +84,7 @@ export function calculerVerdict(
 
 export {
   feuCashflow,
-  feuEffort,
+  feuCouverture,
   feuPrix,
   feuRendement,
   feuRisques,

@@ -51,7 +51,6 @@ const TMI = [
 export const INDICATIONS = {
   vous: 'Tout ici est facultatif : ce qui est marqué « estimé » se change quand vous voulez.',
   loyerHc: 'Vide : le loyer de marché de la commune, si on le connaît.',
-  revenusMensuels: "Sert seulement à l'effort bancaire.",
 } as const;
 
 /** Ce que le formulaire dit du projet sans passer par le moteur. */
@@ -168,15 +167,6 @@ export function FormulaireProjet({
             {...c}
           />
           <Champ cle="tmi" libelle="Tranche d'imposition" options={TMI} aToi {...c} />
-          <Champ
-            cle="revenusMensuels"
-            libelle="Vos revenus nets"
-            unite="€/mois"
-            aToi
-            erreur={erreurs.revenusMensuels}
-            indication={INDICATIONS.revenusMensuels}
-            {...c}
-          />
           <EstimerLoyer valeurs={valeurs} onEstime={loyerEstime} />
         </div>
       </Carte>

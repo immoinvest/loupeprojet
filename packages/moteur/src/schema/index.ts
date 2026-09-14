@@ -39,7 +39,6 @@ export {
 } from './hypotheses';
 export {
   CHAMP_LOYER,
-  CHAMP_REVENUS,
   CodeManqueSchema,
   ManqueSchema,
   manquesDe,

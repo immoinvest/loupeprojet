@@ -40,8 +40,7 @@ export type Cle =
   | 'loyerHc'
   | 'apport'
   | 'dureeAnnees'
-  | 'tmi'
-  | 'revenusMensuels';
+  | 'tmi';
 
 export type Valeurs = Readonly<Record<Cle, string>>;
 export type ProvenanceValeurs = Partial<Record<Cle, Provenance>>;
@@ -79,7 +78,6 @@ const VIDE: Valeurs = {
   apport: String(APPORT_DEFAUT),
   dureeAnnees: String(DUREE_DEFAUT_ANNEES),
   tmi: String(TMI_PAR_DEFAUT),
-  revenusMensuels: '',
 };
 
 const PROVENANCE_DEFAUTS: ProvenanceValeurs = {
@@ -154,7 +152,7 @@ export function valider(v: Valeurs): Erreurs {
   if (surface === undefined || surface <= 0) erreurs.surface = MESSAGES.surface;
   if (!/^\d{5}$/.test(v.codePostal.trim())) erreurs.codePostal = MESSAGES.codePostal;
   if (v.ville.trim() === '') erreurs.ville = MESSAGES.ville;
-  for (const cle of ['loyerHc', 'apport', 'revenusMensuels'] as const) {
+  for (const cle of ['loyerHc', 'apport'] as const) {
     const message = controlerMontant(v[cle]);
     if (message !== undefined) erreurs[cle] = message;
   }
@@ -198,7 +196,6 @@ export function versSaisie(
     apport: opt('apport'),
     dureeAnnees: opt('dureeAnnees'),
     tmi: v.tmi === '' ? undefined : (Number(v.tmi) as SaisieProjet['tmi']),
-    revenusMensuels: opt('revenusMensuels'),
     provenance,
     annonce: annonce ?? undefined,
   };

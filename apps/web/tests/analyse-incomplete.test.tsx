@@ -42,7 +42,7 @@ describe('Rapport sans loyer', () => {
     const feux = screen.getByLabelText('Cinq feux');
     expect(within(feux).getByText('Rendement net : loyer à indiquer')).toBeInTheDocument();
     expect(within(feux).getByText('Cash-flow : loyer à indiquer')).toBeInTheDocument();
-    expect(within(feux).getByText('Effort bancaire : loyer à indiquer')).toBeInTheDocument();
+    expect(within(feux).getByText('Crédit ÷ loyer : loyer à indiquer')).toBeInTheDocument();
     expect(within(feux).getByText('Risques : aucun')).toBeInTheDocument();
 
     expect(
@@ -165,7 +165,7 @@ describe('autres volets sans loyer', () => {
     expect(n(synthese('Cash-flow').textContent)).toBe('Cash-flow—');
     expect(n(synthese('Rendement net').textContent)).toBe('Rendement net—');
     expect(n(synthese('TRI').textContent)).toBe('TRI—');
-    expect(n(synthese('Effort bancaire').textContent)).toBe('Effort bancaire—');
+    expect(n(synthese('Crédit ÷ loyer').textContent)).toBe('Crédit ÷ loyer—');
 
     const loyer = screen.getByLabelText(/Loyer visé, hors charges/);
     expect(loyer).toHaveValue('');
@@ -184,9 +184,20 @@ describe('autres volets sans loyer', () => {
     render(<AppEnMemoire chemin={`/projets/${id}/visite`} />);
     await screen.findByRole('heading', { name: 'Préparer la visite' });
     expect(screen.getByText('Cash-flow : loyer à indiquer')).toBeInTheDocument();
-    expect(screen.getByText(/Demander les trois derniers PV/)).toBeInTheDocument();
     expect(screen.queryByText(/Prélèvements sociaux/)).not.toBeInTheDocument();
     expect(screen.queryByText(/Taux d'effort/)).not.toBeInTheDocument();
+  });
+
+  it('Financement : le crédit reste lisible, la couverture attend le loyer', async () => {
+    const id = amorcerSansLoyer();
+    render(<AppEnMemoire chemin={`/projets/${id}/financement`} />);
+    const titre = await screen.findByRole('heading', { name: 'Le loyer porte-t-il le crédit ?' });
+    const texte = n(titre.closest('section')?.textContent);
+    expect(texte).toContain('Indiquez un loyer pour savoir si le crédit est couvert.');
+    expect(texte).toContain('pas de loyer');
+    expect(texte).toContain('Crédit et assurance');
+    expect(texte).not.toContain('Loyer hors charges');
+    expect(texte).not.toContain('Reste pour les charges et pour vous');
   });
 
   it('Mes projets : « — » pour ce qui attend le loyer, les feux inconnus en gris', async () => {

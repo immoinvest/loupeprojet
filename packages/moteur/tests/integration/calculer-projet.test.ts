@@ -34,23 +34,10 @@ describe('calculerProjet — T3 Marseille', () => {
     expect(resultats.meta.aConfirmer).toContain('estimation.dpe');
   });
 
-  it('ne manque de rien ; sans revenus, seul le feu effort devient inconnu', () => {
+  it('ne manque de rien : les revenus ne sont pas demandés, aucun feu n’attend une donnée', () => {
     expect(resultats.manques).toEqual([]);
-    const hypotheses = Object.fromEntries(
-      Object.entries(projetExemple.hypotheses).filter(([k]) => k !== 'revenusMensuels'),
-    ) as ProjetEntree['hypotheses'];
-    const sansRevenus = complet(calculerProjet({ ...projetExemple, hypotheses }));
-    expect(sansRevenus.manques).toEqual([
-      { code: 'REVENUS_ABSENTS', champ: 'hypotheses.revenusMensuels' },
-    ]);
-    expect(sansRevenus.financement.effort.hcsf).toBeNull();
-    expect(sansRevenus.verdict.feux[3]).toMatchObject({
-      feu: 'inconnu',
-      raison: 'REVENUS_ABSENTS',
-    });
-    expect(sansRevenus.cashflow.mensuel).toBeCloseTo(resultats.cashflow.mensuel, 6);
-    expect(sansRevenus.rendement.tri).toBe(resultats.rendement.tri);
-    expect(() => ResultatsSchema.parse(sansRevenus)).not.toThrow();
+    expect(resultats.financement.effort.hcsf).toBeNull();
+    expect(resultats.verdict.feux.every((f) => f.raison === null)).toBe(true);
   });
 
   it('porte la version des règles et les drapeaux à afficher', () => {
@@ -82,12 +69,12 @@ describe('calculerProjet — pureté et robustesse', () => {
   });
 
   it('applique les défauts à une entrée minimale', () => {
-    const { achat, pret, location, fiscalite, revenusMensuels } = projetExemple.hypotheses;
+    const { achat, pret, location, fiscalite } = projetExemple.hypotheses;
     const minimal: ProjetEntree = {
       id: 'minimal',
       versionRegles: '2026-09',
       bien: { type: 'appartement', surface: 40, pieces: 2, departement: '69' },
-      hypotheses: { achat, pret, location, fiscalite, revenusMensuels },
+      hypotheses: { achat, pret, location, fiscalite },
     };
     const r = complet(calculerProjet(minimal));
     expect(r.verdict.feux[0]?.feu).toBe('inconnu');

@@ -40,7 +40,6 @@ describe('Nouveau projet — depuis un lien', () => {
 
       await utilisateur.type(screen.getByLabelText(/Loyer visé/), '980');
       await utilisateur.type(screen.getByLabelText(/^Apport/), '15000');
-      await utilisateur.type(screen.getByLabelText(/Vos revenus/), '2600');
       await utilisateur.click(screen.getByRole('button', { name: /Créer le projet/ }));
 
       expect(
@@ -77,7 +76,6 @@ describe('Nouveau projet — depuis un lien', () => {
       await utilisateur.type(screen.getByLabelText(/^Ville/), 'Lyon');
       await utilisateur.type(screen.getByLabelText(/Loyer visé/), '700');
       await utilisateur.type(screen.getByLabelText(/^Apport/), '10000');
-      await utilisateur.type(screen.getByLabelText(/Vos revenus/), '2400');
       const deja = screen.getByRole('checkbox', { name: /J'ai déjà visité ce bien/ });
       expect(deja).not.toBeChecked();
       await utilisateur.click(deja);
@@ -195,7 +193,7 @@ describe('Nouveau projet — à la main', () => {
     await utilisateur.type(duree, '31');
     expect(screen.getAllByText('estimé')).toHaveLength(2);
     await utilisateur.type(screen.getByLabelText(/Loyer visé/), '-5');
-    await utilisateur.type(screen.getByLabelText(/Vos revenus/), 'abc');
+    await utilisateur.type(screen.getByLabelText(/^Apport/), 'abc');
     await utilisateur.click(screen.getByRole('button', { name: /Créer le projet/ }));
     expect(screen.getByText('Entre 1 et 30 ans.')).toBeInTheDocument();
     expect(screen.getByText('Un montant positif, ou rien.')).toBeInTheDocument();
@@ -204,7 +202,7 @@ describe('Nouveau projet — à la main', () => {
     // Vidé, un champ facultatif revient au défaut sans erreur.
     await utilisateur.clear(duree);
     await utilisateur.clear(screen.getByLabelText(/Loyer visé/));
-    await utilisateur.clear(screen.getByLabelText(/Vos revenus/));
+    await utilisateur.clear(screen.getByLabelText(/^Apport/));
     await utilisateur.click(screen.getByRole('button', { name: /Créer le projet/ }));
     expect(screen.queryByText('Entre 1 et 30 ans.')).not.toBeInTheDocument();
     expect(screen.queryByText('Nombre attendu.')).not.toBeInTheDocument();
@@ -230,7 +228,6 @@ describe('Nouveau projet — à la main', () => {
       await utilisateur.type(screen.getByLabelText(/^Apport/), '0');
       await utilisateur.clear(screen.getByLabelText(/Durée du prêt/));
       await utilisateur.type(screen.getByLabelText(/Durée du prêt/), '20');
-      await utilisateur.type(screen.getByLabelText(/Vos revenus/), '1900');
       await utilisateur.click(screen.getByRole('button', { name: /Créer le projet/ }));
       await screen.findByRole(
         'heading',

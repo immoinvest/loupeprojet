@@ -72,7 +72,7 @@ describe('Nouveau projet — avec le Worker', () => {
       expect(screen.getByLabelText(/Charges de copropriété/)).toHaveValue('150');
       expect(screen.getByLabelText(/Taxe foncière/)).toHaveValue('980');
 
-      // Ni loyer, ni apport, ni revenus : le loyer vient des loyers de marché de la commune.
+      // Ni loyer ni apport : le loyer vient des loyers de marché de la commune.
       await utilisateur.click(screen.getByRole('button', { name: /Créer le projet/ }));
 
       // 155 000 € / 65 m² = 2 385 €/m², sous la médiane de 3 423 €/m² : le prix est bon.
@@ -100,7 +100,6 @@ describe('Nouveau projet — avec le Worker', () => {
       expect(projet?.hypotheses.charges.taxeFonciere).toBe(980);
       expect(projet?.hypotheses.pret.apport).toBe(0);
       expect(projet?.hypotheses.revenusMensuels).toBeUndefined();
-      expect(screen.getByText('Effort bancaire : revenus à indiquer')).toBeInTheDocument();
     },
   );
 });

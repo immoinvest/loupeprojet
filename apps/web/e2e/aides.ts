@@ -3,7 +3,8 @@ import { expect, type Locator, type Page } from '@playwright/test';
 /** Nom du projet créé au premier lancement (voir `ProjetsProvider`). */
 export const NOM_EXEMPLE = 'T3 · 65 m² · Marseille 5e';
 
-export type Volet = 'Rapport' | 'Hypothèses' | 'Fiscalité' | 'Revente' | 'Visite';
+export type Volet =
+  'Rapport' | 'Estimation' | 'Financement' | 'Hypothèses' | 'Fiscalité' | 'Revente' | 'Visite';
 
 /** Ouvre la liste « Mes projets » et attend son titre. */
 export async function ouvrirMesProjets(page: Page): Promise<void> {
@@ -51,10 +52,13 @@ export const NOM_LYON = '40 m² · Lyon';
 
 /**
  * Depuis la liste, crée un projet à la main avec le strict minimum (Lyon, 120 000 €, 40 m²),
- * plus le loyer s'il est donné. Le Worker n'est pas joignable depuis les tests : pas de ventes
+ * plus le loyer et l'apport s'ils sont donnés. Le Worker n'est pas joignable depuis les tests : pas de ventes
  * réelles ni de loyer de marché, donc « Prix sans repère de marché ».
  */
-export async function creerProjetMinimal(page: Page, loyer?: string): Promise<void> {
+export async function creerProjetMinimal(
+  page: Page,
+  saisie: { readonly loyer?: string; readonly apport?: string } = {},
+): Promise<void> {
   await ouvrirMesProjets(page);
   await page.getByRole('main').getByRole('button', { name: 'Nouveau projet' }).click();
   await expect(page.getByRole('heading', { level: 1, name: /Colle le lien/ })).toBeVisible();
@@ -64,7 +68,10 @@ export async function creerProjetMinimal(page: Page, loyer?: string): Promise<vo
   await page.getByLabel('Surface').fill('40');
   await page.getByLabel('Code postal').fill('69003');
   await page.getByLabel('Ville').fill('Lyon');
-  if (loyer !== undefined) await page.getByLabel('Loyer visé, hors charges').fill(loyer);
+  if (saisie.loyer !== undefined) {
+    await page.getByLabel('Loyer visé, hors charges').fill(saisie.loyer);
+  }
+  if (saisie.apport !== undefined) await page.getByLabel('Apport').fill(saisie.apport);
   await page.getByRole('button', { name: 'Créer le projet et voir le rapport' }).click();
 
   await expect(
@@ -72,9 +79,9 @@ export async function creerProjetMinimal(page: Page, loyer?: string): Promise<vo
   ).toBeVisible();
 }
 
-/** Le projet de Lyon avec un loyer de 700 € : apport, durée et tranche gardent leurs défauts. */
+/** Le projet de Lyon, loyer 700 € et apport 10 000 € : durée et tranche gardent leurs défauts. */
 export async function creerProjetManuel(page: Page): Promise<void> {
-  await creerProjetMinimal(page, '700');
+  await creerProjetMinimal(page, { loyer: '700', apport: '10000' });
 }
 
 /** Attend que le service worker, installé après le chargement, prenne la main sur la page. */

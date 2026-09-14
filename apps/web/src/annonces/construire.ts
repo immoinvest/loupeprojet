@@ -48,7 +48,6 @@ export interface SaisieProjet {
   readonly apport?: number | undefined;
   readonly dureeAnnees?: number | undefined;
   readonly tmi?: 0 | 0.11 | 0.3 | 0.41 | 0.45 | undefined;
-  readonly revenusMensuels?: number | undefined;
   readonly provenance: Readonly<Partial<Record<keyof SaisieProjet, Provenance>>>;
   readonly annonce?: AnnonceResolue | undefined;
 }
@@ -157,9 +156,6 @@ export function construireProjet(
     'achat.mobilier': 'estime',
   };
   if (loyer !== null) provenance['location.loyerHc'] = loyer.provenance;
-  if (s.revenusMensuels !== undefined) {
-    provenance.revenusMensuels = s.provenance.revenusMensuels ?? 'utilisateur';
-  }
   if (s.dpe !== undefined) provenance['bien.dpe'] = s.provenance.dpe ?? 'utilisateur';
   if (s.typeBien !== undefined) provenance['bien.type'] = s.provenance.typeBien ?? 'utilisateur';
   if (s.ges !== undefined) provenance['bien.ges'] = s.provenance.ges ?? 'utilisateur';
@@ -233,7 +229,6 @@ export function construireProjet(
         cfe: meuble ? CFE_DEFAUT : 0,
       },
       fiscalite: { tmi, regime },
-      ...(s.revenusMensuels === undefined ? {} : { revenusMensuels: s.revenusMensuels }),
     },
     provenance: { ...provenance, ...(enrichi === null ? {} : enrichi.provenance) },
   };
