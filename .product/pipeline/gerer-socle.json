@@ -1,0 +1,37 @@
+{
+  "feature_slug": "gerer-socle",
+  "title": "Gérer, le socle (G1a) : menu à deux sections et « Mon menu », API et données de gestion, paquet de calcul des loyers, portes « J'ai acheté ce bien » et « Ajouter à la main » en deux clics, loyers du mois",
+  "started_at": "2026-09-14T09:10:00Z",
+  "current_step": "implement",
+  "scope": "packages/gestion, apps/comptes (src/gestion, migration 0002), apps/web (gestion/, coque, ecrans/gerer, Compte, ProjetLayout)",
+  "branch": "feat/gerer-socle",
+  "worktree": "C:\\Users\\errei\\Claude\\loupe-gestion",
+  "base": "master (9d38892)",
+  "consigne": "Pierre, 14/09/2026 : banque par API comme Rentila ; commencer l'implémentation avec /new-feature en auto-validant chaque étape",
+  "baseline": {
+    "tests_passed": 961,
+    "tests_failed": 0,
+    "test_files": 138,
+    "typecheck_errors": 0,
+    "git_status": "clean",
+    "last_commit": "9d38892"
+  },
+  "steps": {
+    "discovery": { "status": "completed", "output": ".product/features/gerer-socle-discovery.md" },
+    "specs": {
+      "status": "completed",
+      "output": ".product/specs/gerer-socle-specs.md",
+      "stories_count": 6
+    },
+    "architecture": { "status": "completed", "output": ".product/architecture/gerer-socle.md" },
+    "implement": { "status": "pending", "stories_completed": 0, "stories_total": 6, "commits": [] },
+    "qa_tests": { "status": "pending" },
+    "security": { "status": "pending" },
+    "push": { "status": "pending" }
+  },
+  "auto_revue": {
+    "discovery": "G1a avant la banque : la banque rapproche des virements de loyers attendus qui n'existent pas encore ; proposition A (découpage de G1) acceptée",
+    "specs": "six stories P0 ; paiement complet seulement (partiel en G1b) ; « Mon menu » lié au compte",
+    "architecture": "API dans apps/comptes (même origine, même D1) ; centimes entiers ; loyers dus déduits, non stockés ; un seul dépôt D1 testé par la D1 simulée (dépôt mémoire abandonné) ; 503 si la migration manque"
+  }
+}
