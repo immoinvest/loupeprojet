@@ -22,7 +22,7 @@ Statuts : `idée` → `en discussion` → `spécifiée` → `en cours` → `livr
 | 06  | [Revente : curseur d'horizon](06-revente-curseur.md)                 | Un curseur de 1 à 30 ans qui recalcule tout l'onglet                                                                 | livrée    | —         |
 | 07  | [Visite : base de questions](07-visite-questions.md)                 | Questions de visite tirées d'une base et de règles ; onglet masqué quand la visite est faite                         | livrée    | —         |
 | 08  | [Simulateur de prêt](08-simulateur-pret.md)                          | Outil indépendant des projets : deux offres côte à côte, comparaison, tableaux d'amortissement en CSV et à imprimer  | spécifiée | —         |
-| 09  | [Estimation : carte et confiance](09-estimation-carte-confiance.md)  | Carte des ventes du quartier, chiffres du repère visibles même sans adresse, indice de confiance expliqué en tête    | idée      | —         |
+| 09  | [Estimation : carte et confiance](09-estimation-carte-confiance.md)  | Carte des ventes du quartier, chiffres du repère visibles même sans adresse, indice de confiance expliqué en tête    | en cours  | —         |
 | 10  | [Rapport : icônes et cash-flow](10-rapport-icones-cashflow.md)       | Icônes ⓘ avec infobulle, liens vers Estimation / Fiscalité / Revente, autofinancement au centre, rendement brut      | idée      | —         |
 | 11  | [Coque : menu et en-tête fixes](11-coque-menu-entete-fixes.md)       | Menu fixe et plus étroit, compte visible en bas, onglets du projet collés en haut, seul le contenu défile            | livrée    | —         |
 

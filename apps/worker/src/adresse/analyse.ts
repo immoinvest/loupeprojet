@@ -65,6 +65,11 @@ export interface StatistiquesPrix {
   readonly maxM2: number;
 }
 
+export interface Periode {
+  readonly debut: string;
+  readonly fin: string;
+}
+
 export interface Groupe {
   readonly code: CodeGroupe;
   /** Toutes les ventes de logement du groupe. */
@@ -74,6 +79,10 @@ export interface Groupe {
   /** Prix au m² actualisés (ramenés au dernier semestre connu). */
   readonly statistiques: StatistiquesPrix | null;
   readonly distanceMaxMetres: number | null;
+  /** Date de la vente comparable médiane (la plus ancienne des deux centrales pour un nombre pair). */
+  readonly dateMediane: string | null;
+  /** Première et dernière vente comparable du groupe. */
+  readonly periode: Periode | null;
 }
 
 export interface VenteProche {
@@ -96,6 +105,8 @@ export interface Reference {
   readonly code: CodeGroupe;
   readonly rayonMetres: number;
   readonly statistiques: StatistiquesPrix;
+  readonly dateMediane: string | null;
+  readonly periode: Periode | null;
 }
 
 export interface AnalyseAdresse {
@@ -111,10 +122,20 @@ export type Actualiser = (vente: VenteDvf) => number;
 const SANS_ACTUALISATION: Actualiser = () => 1;
 
 /** Valeur à un rang d'une liste ; un rang hors liste est une erreur de programmation. */
-export function valeurAuRang(liste: readonly number[], rang: number): number {
+export function valeurAuRang<T>(liste: readonly T[], rang: number): T {
   const valeur = liste[rang];
   if (valeur === undefined) throw new RangeError(`rang ${String(rang)} hors de la liste`);
   return valeur;
+}
+
+/** Date médiane et période d'une liste de dates `AAAA-MM-JJ` ; tout `null` sans date. */
+export function periodeDe(dates: readonly string[]): Pick<Groupe, 'dateMediane' | 'periode'> {
+  if (dates.length === 0) return { dateMediane: null, periode: null };
+  const triees = [...dates].sort((a, b) => a.localeCompare(b));
+  return {
+    dateMediane: valeurAuRang(triees, Math.floor((triees.length - 1) / 2)),
+    periode: { debut: valeurAuRang(triees, 0), fin: valeurAuRang(triees, triees.length - 1) },
+  };
 }
 
 /** Quantile par interpolation linéaire (méthode 7 de Hyndman et Fan, celle de l'index DVF publié). */
@@ -198,6 +219,7 @@ function groupe(code: CodeGroupe, situees: readonly VenteSituee[]): Groupe {
     comparables: comparables.length,
     statistiques: statistiquesPrix(comparables.map((s) => s.prixM2Actualise)),
     distanceMaxMetres: distances.length === 0 ? null : Math.round(Math.max(...distances)),
+    ...periodeDe(comparables.map((s) => s.vente.date)),
   };
 }
 
@@ -231,9 +253,15 @@ export function analyserAdresse(
   ) as Record<CodeGroupe, Groupe>;
   let reference: Reference | null = null;
   for (const code of ORDRE_REFERENCE) {
-    const { statistiques, distanceMaxMetres } = parCode[code];
+    const { statistiques, distanceMaxMetres, dateMediane, periode } = parCode[code];
     if (statistiques !== null && statistiques.ventes >= SEUIL_REFERENCE) {
-      reference = { code, rayonMetres: Math.max(10, distanceMaxMetres ?? 10), statistiques };
+      reference = {
+        code,
+        rayonMetres: Math.max(10, distanceMaxMetres ?? 10),
+        statistiques,
+        dateMediane,
+        periode,
+      };
       break;
     }
   }

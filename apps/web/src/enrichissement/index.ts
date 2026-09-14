@@ -2,6 +2,7 @@ export {
   ecartAuRepere,
   lireCleBan,
   marcheDepuisReference,
+  precisionDuGroupe,
   type MarcheAdresse,
   type VoieBan,
 } from './adresse';

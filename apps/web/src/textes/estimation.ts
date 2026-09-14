@@ -1,14 +1,9 @@
-import type {
-  Bien,
-  CodeCorrection,
-  Correction,
-  EstimationPrix,
-  EtatBien,
-  NiveauConfiance,
-} from '@loupe/moteur';
+import type { Bien, CodeCorrection, Correction, EstimationPrix, EtatBien } from '@loupe/moteur';
 
 import type { TendanceAdresse } from '@/enrichissement';
 import { euros, pourcentage, pourcentageSigne } from '@/formatage/nombres';
+
+export { LIBELLES_CONFIANCE, niveauEnPhrase, TON_CONFIANCE } from './confiance';
 
 export const LIBELLES_ETATS: Readonly<Record<EtatBien, string>> = {
   a_renover: 'À rénover',
@@ -29,12 +24,6 @@ export const SOURCES_CORRECTIONS: Readonly<Record<CodeCorrection, string>> = {
   etage: 'MeilleursAgents, prix selon l’étage, grandes villes de province (juin 2017)',
   exterieur: 'MeilleursAgents, balcons et terrasses, onze plus grandes villes (mai 2020)',
   charges: 'Observatoire des charges de copropriété ARC/UNARC (2024)',
-};
-
-export const LIBELLES_CONFIANCE: Readonly<Record<NiveauConfiance, string>> = {
-  elevee: 'Confiance élevée',
-  moyenne: 'Confiance moyenne',
-  faible: 'Confiance faible',
 };
 
 export const PHRASES_ESTIMATION = {

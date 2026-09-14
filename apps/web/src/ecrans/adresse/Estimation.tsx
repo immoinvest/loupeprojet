@@ -15,11 +15,10 @@ import {
   phraseEstimation,
   raisonCorrection,
   SOURCES_CORRECTIONS,
+  TON_CONFIANCE,
 } from '@/textes/estimation';
 
 const CELLULE = 'border-b border-bordure-douce px-3 py-2 text-left align-top';
-
-const TON_CONFIANCE = { elevee: 'bon', moyenne: 'neutre', faible: 'surveiller' } as const;
 
 /**
  * Le prix estimé du bien : fourchette selon l'état, corrections sourcées une à une (désactivables),
@@ -64,8 +63,8 @@ export function CarteEstimation(): JSX.Element {
     <Carte className="border-accent-bordure bg-accent-fond">
       <div className="flex flex-wrap items-baseline justify-between gap-3">
         <h2 className="m-0 font-display text-[22px] font-semibold">L'estimation du bien</h2>
-        <Pastille ton={TON_CONFIANCE[e.confiance]} compacte>
-          {LIBELLES_CONFIANCE[e.confiance]}
+        <Pastille ton={TON_CONFIANCE[e.confiance.niveau]} compacte>
+          {LIBELLES_CONFIANCE[e.confiance.niveau]}
         </Pastille>
       </div>
       <p

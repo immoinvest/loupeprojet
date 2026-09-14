@@ -1,0 +1,88 @@
+{
+  "feature_slug": "estimation-confiance",
+  "title": "Estimation : note de confiance expliquée en tête d'onglet, repère visible sans adresse (PR 1) ; carte des ventes (PR 2)",
+  "started_at": "2026-09-14T12:00:00Z",
+  "current_step": "pr1_livree_pr2_a_faire",
+  "scope": "packages/moteur/src/{estimation,regles,schema/marche.ts,schema/resultats.ts}, data/src/{schemas/dvf.ts,sources/dvf/statistiques.ts}, apps/worker/src/{donnees/anciennete.ts,marche,adresse}, apps/web/src/{enrichissement,textes/confiance.ts,ecrans/Adresse.tsx,ecrans/adresse,ecrans/rapport/CartePrix.tsx,textes/methode-estimation.ts}, e2e",
+  "branch": "feat/estimation-confiance",
+  "base": "master (9d38892, PR #38 fusionnée)",
+  "backlog": ".product/backlog/09-estimation-carte-confiance.md",
+  "steps": {
+    "discovery": {
+      "status": "completed",
+      "output": ".product/features/estimation-confiance-discovery.md",
+      "note": "Les CSV DVF portent déjà lat et lon par vente : la carte (PR 2) n'exige aucune republication"
+    },
+    "specs": {
+      "status": "completed",
+      "output": ".product/specs/estimation-confiance-specs.md",
+      "stories_count": 6,
+      "stories_pr2": 2
+    },
+    "architecture": {
+      "status": "completed",
+      "output": ".product/architecture/estimation-confiance.md"
+    },
+    "implement": {
+      "status": "completed",
+      "stories_completed": 6,
+      "stories_total": 6,
+      "commits": [
+        { "etape": "docs", "hash": "c5dc1c3" },
+        {
+          "etape": "US-1 moteur (+ web et Méthode adaptés)",
+          "hash": "220eb4b",
+          "tests_moteur": 233
+        },
+        {
+          "etape": "US-2 data + worker",
+          "hash": "2f4c887",
+          "tests_worker": 111,
+          "tests_data": 144
+        },
+        { "etape": "US-3 web enrichissement", "hash": "2402e49" },
+        { "etape": "US-4, US-5, US-6 écrans", "hash": "451a386" }
+      ],
+      "notes": [
+        "Le projet d'exemple (rayon 500 m, 31 ventes, sans ancienneté) note 62, moyenne : sa fourchette ±8 % ne change pas",
+        "interpolerPaliers réécrite sans branche inatteignable pour tenir la couverture à 100 %",
+        "DvfMarche du Worker redéfinit dateMediane en string | null (Omit du schéma tolérant)"
+      ]
+    },
+    "refactor": {
+      "status": "completed",
+      "note": "BADGES et badgeDeSource extraits de Hypotheses.tsx vers hypotheses/ChampHypothese.tsx pour la carte Repère ; textes de la confiance dans textes/confiance.ts (estimation.ts reste sous 300 lignes)"
+    },
+    "qa_tests": {
+      "status": "completed",
+      "tests": 1003,
+      "fichiers_de_test": 143,
+      "note": "couverture 100 % sur le moteur (confiance.ts), le Worker (anciennete.ts, assembler, analyse, routes), data/ (statistiques), enrichissement/ et textes/ du web ; sous charge, six tests d'écran dépassent leurs 30 s puis passent seuls (fait connu de la machine)"
+    },
+    "security": {
+      "status": "completed",
+      "note": "aucune donnée nouvelle vers le réseau ; les nouveaux champs des réponses sont revalidés par Zod (optionnels, nullable) ; textes rendus comme texte (aucun innerHTML) ; le lieu vient du référentiel des communes, jamais de l'adresse saisie"
+    },
+    "push": {
+      "status": "completed",
+      "pr": "https://github.com/immoinvest/loupeprojet/pull/42",
+      "merge": "fbd6361",
+      "note": "fusionnée par auto-merge le 14/09/2026 ; master fusionné deux fois dans la branche (coque-fixe #39, puis revente-curseur #40 et déconnexion #41), conflits de docs seulement ; 1 022 tests au décompte final"
+    },
+    "deploiement": {
+      "status": "completed",
+      "worker": "0.7.0 déployé le 14/09/2026 (version c2e2b4d0-8e37-4688-bd26-9d9e98891c19) ; /health, /marche v2 et /marche/adresse v4 vérifiés en production",
+      "referentiels": "Action Référentiels DVF 13 relancée (run 34836113637, succès) ; l'index publié porte dateMediane (vérifié : maisons de Marseille 5e, 2025-02-13, 19 mois) ; les réponses /marche déjà en cache gardent dateMediane null jusqu'à 24 h",
+      "pages": "le build de production Cloudflare Pages du commit fbd6361 a échoué alors que son contenu est identique au dernier commit de la branche (preview verte), que rien n'a changé dans les comptes ni la configuration de build depuis le déploiement réussi précédent (d3ff28e) et que le build passe en local avec et sans DEKLIC_COMPTES=1 : échec ponctuel côté Cloudflare, journal visible seulement dans le tableau de bord ; relancé par la fusion de cette mise à jour"
+    }
+  },
+  "decisions": {
+    "indice": "note 0-100 en mots avec quatre composantes chiffrées (recommandation, à confirmer par Pierre) ; cinq niveaux ; marge de la fourchette selon le niveau",
+    "composantes": "localisation 35, dispersion 30, comparables 20, ancienneté 15 ; barèmes en paliers interpolés, règle datée dans regles/2026-09.ts",
+    "anciennete": "mesurée par le Worker (dates du CSV, dateMediane de l'index DVF) et rangée en mois dans marche.dvf ; supposée 12 mois quand elle manque",
+    "retrocompatibilite": "champs de marche.dvf optionnels ; précision déduite du rayon ; contrats web tolérants à l'ancien Worker",
+    "carte": "PR 2 séparée ; fond IGN Géoplateforme recommandé, décision de Pierre",
+    "etat_pipeline": "session parallèle : état dans .product/pipeline/estimation-confiance.json, pipeline-state.json réservé à la session principale",
+    "point_ouvert_rue": "constaté en production : le repère « même côté de la rue » du 144 rue de l'Olivier s'étend sur 531 m et reçoit 30 points de localisation, plus qu'un cercle de 300 m (18) ; à trancher avec Pierre (plafonner les points d'une rue par son étendue, par exemple)"
+  }
+}

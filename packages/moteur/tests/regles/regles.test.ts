@@ -58,4 +58,29 @@ describe('règles 2026-09', () => {
     expect(regles.visite.etageSansAscenseur).toBe(3);
     expect(regles.visite.chambreColocationM2).toBe(9);
   });
+
+  it('a des barèmes de confiance cohérents : 100 points, paliers triés, niveaux jusqu’à zéro, marges croissantes', () => {
+    const c = regles.estimation.confiance;
+    const maximum = (paliers: readonly { points: number }[]): number =>
+      Math.max(...paliers.map((p) => p.points));
+    const localisation = Math.max(
+      c.localisation.immeuble,
+      c.localisation.rue,
+      c.localisation.commune,
+      maximum(c.localisation.quartier),
+    );
+    expect(
+      localisation + maximum(c.comparables) + maximum(c.dispersion) + maximum(c.anciennete),
+    ).toBe(100);
+    for (const bareme of [c.comparables, c.dispersion, c.anciennete]) {
+      const valeurs = bareme.map((p) => p.valeur);
+      expect([...valeurs].sort((a, b) => a - b)).toEqual(valeurs);
+    }
+    expect(c.localisation.quartier.at(-1)?.jusquaMetres).toBeNull();
+    expect(c.niveaux.at(-1)?.des).toBe(0);
+    const seuils = c.niveaux.map((s) => s.des);
+    expect([...seuils].sort((a, b) => b - a)).toEqual(seuils);
+    const marges = c.niveaux.map((s) => regles.estimation.marges[s.niveau]);
+    expect([...marges].sort((a, b) => a - b)).toEqual(marges);
+  });
 });

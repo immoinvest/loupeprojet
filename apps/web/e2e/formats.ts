@@ -173,6 +173,8 @@ export function ecransDeReference({
         ).toBeVisible();
       },
     },
+    // Le projet d'exemple n'a pas d'adresse : confiance et repère de commune, sans appel au Worker.
+    { nom: 'Estimation sans adresse', chemin: `${projet}/adresse` },
     { nom: 'Hypothèses', chemin: `${projet}/hypotheses` },
     { nom: 'Fiscalité', chemin: `${projet}/fiscalite` },
     { nom: 'Revente', chemin: `${projet}/revente` },
