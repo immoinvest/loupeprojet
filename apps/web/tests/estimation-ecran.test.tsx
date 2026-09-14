@@ -168,6 +168,7 @@ describe('Onglet Estimation', () => {
         q3M2: 3750,
         nombreVentes: 6,
         rayonMetres: 90,
+        precision: 'rue',
         actualiseAu: '2025-S1',
       });
     },
