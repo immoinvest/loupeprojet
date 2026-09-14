@@ -24,9 +24,20 @@
       "output": ".product/architecture/accueil-menu.md",
       "auto_review": "LoyersDuMois et Portes non modifiés (session Gérer parallèle) ; calcul injecté pour tester sans moteur"
     },
-    "implement": { "status": "in_progress", "stories_completed": 0, "stories_total": 5, "commits": [] },
-    "qa_tests": { "status": "pending" },
-    "security": { "status": "pending" },
+    "implement": {
+      "status": "completed",
+      "stories_completed": 5,
+      "stories_total": 5,
+      "commits": ["12274b5 US-2 à US-4", "f002eb8 US-1 et US-5"]
+    },
+    "qa_tests": {
+      "status": "completed",
+      "note": "règles pures de l'accueil (vide, exemple intact, étapes, priorités, meilleur cash-flow) et écran (sans compte, avec projets, tout écarté, Gérer avec biens, à jour, sans bien, une seule section, chargement, erreur et Réessayer) ; tests du menu, de Mon menu, de la connexion et de l'application mis à jour ; e2e accueil.spec.ts, coque.spec (3 projets), responsive.spec, écran Accueil dans les formats"
+    },
+    "security": {
+      "status": "completed",
+      "note": "aucun appel réseau, aucune donnée nouvelle, aucun HTML injecté ; liens internes construits à partir d'identifiants de projet déjà validés par Zod ; retour après connexion toujours filtré par cheminDeRetour"
+    },
     "push": { "status": "pending" }
   }
 }
