@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import { ModeLocationSchema, RegimeSchema } from './hypotheses';
+import { CodeManqueSchema, ManqueSchema } from './manques';
 import { ProjetSchema, VersionReglesSchema } from './projet';
 
 /**
@@ -195,6 +196,7 @@ export const VerdictSchema = z.strictObject({
         axe: z.enum(['prix', 'rendement', 'cashflow', 'effort', 'risques']),
         feu: FeuSchema,
         valeur: nOuNull,
+        raison: CodeManqueSchema.nullable(),
       }),
     )
     .length(5),
@@ -283,6 +285,7 @@ export const ResultatsSchema = z.strictObject({
   rendement: RendementSchema,
   estimation: EstimationResultatSchema.nullable(),
   verdict: VerdictSchema,
+  manques: z.array(ManqueSchema),
   scenarios: ScenariosSchema.nullable(),
   meta: z.strictObject({
     versionRegles: VersionReglesSchema,

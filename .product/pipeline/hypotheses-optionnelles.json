@@ -9,7 +9,8 @@
   "prealables": {
     "fiche_01_hypotheses-financement": "non fusionnée au 14/09/2026 (worktree charming-margulis-6cbc94 à la tête de master, aucun commit, aucune PR)",
     "fiche_04_achat-negociation": "non fusionnée au 14/09/2026 (worktree trusting-proskuriakova-d8c7d3 à la tête de master, aucun commit, aucune PR)",
-    "recommandation": "attendre leur fusion avant d'implémenter (mêmes fichiers : schéma des hypothèses, effort, feux, Vérifier, Rapport) ; question posée à Pierre au premier message"
+    "recommandation": "attendre leur fusion avant d'implémenter (mêmes fichiers : schéma des hypothèses, effort, feux, Vérifier, Rapport) ; question posée à Pierre au premier message",
+    "decision_pierre": "14/09/2026 : « Avancer quand même » ; TMI 30 % estimée, durée 25 ans, régime inchangé (recommandations retenues)"
   },
   "steps": {
     "discovery": {
@@ -27,11 +28,24 @@
       "output": ".product/architecture/hypotheses-optionnelles.md",
       "note": "ADR-H1 à H5 : union discriminée complet/partiel, tranche par défaut, loyer de marché à la création, effort inconnu ≠ dépassé, défauts affichés dans Vérifier ; ordre en 7 étapes"
     },
-    "implement": { "status": "pending", "stories_completed": 0, "stories_total": 7 },
-    "refactor": { "status": "pending" },
-    "qa_tests": { "status": "pending" },
-    "security": { "status": "pending" },
-    "push": { "status": "pending" }
+    "implement": {
+      "status": "in_progress",
+      "stories_completed": 1,
+      "stories_total": 7,
+      "note": "US-1 commitée : tranche 30 % par défaut, revenus optionnels, manques, raison des feux (le loyer optionnel arrive avec US-2)"
+    },
+    "refactor": {
+      "status": "pending"
+    },
+    "qa_tests": {
+      "status": "pending"
+    },
+    "security": {
+      "status": "pending"
+    },
+    "push": {
+      "status": "pending"
+    }
   },
   "decisions": {
     "moteur": "loyerHc optionnel, tmi .default(0.3), revenusMensuels optionnel ; Resultats = ResultatsComplets | ResultatsPartiels (discriminant complet) + manques + raison des feux inconnus ; aucune exception pour un loyer absent",
@@ -41,9 +55,6 @@
     "hors_perimetre": "onglet Financement et feu effort par la couverture (fiche 01), négociation (04), régime « meilleur des quatre » (refusé), Worker, comptes"
   },
   "questions_pour_pierre": [
-    "Les PR des fiches 01 et 04 ne sont pas fusionnées : attendre (recommandé) ou avancer quand même ?",
-    "Tranche d'imposition : défaut 30 % « estimé » avec mention (recommandé) plutôt que bloquer l'onglet Fiscalité ?",
-    "Durée du prêt par défaut : 25 ans (recommandé, défaut actuel et maximum HCSF) plutôt que 20 ?",
-    "Régime retenu par défaut : inchangé (réel du mode, recommandé) plutôt que « le meilleur des quatre » ?"
+    "(répondues le 14/09/2026 : avancer ; TMI 30 % par défaut ; 25 ans ; régime inchangé)"
   ]
 }

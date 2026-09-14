@@ -26,12 +26,23 @@ export {
   PretSchema,
   RegimeSchema,
   ReventeSchema,
+  TMI_PAR_DEFAUT,
   TmiSchema,
   type Hypotheses,
   type HypothesesEntree,
   type ModeLocation,
   type Regime,
 } from './hypotheses';
+export {
+  CHAMP_LOYER,
+  CHAMP_REVENUS,
+  CodeManqueSchema,
+  ManqueSchema,
+  manquesDe,
+  raisonParmi,
+  type CodeManque,
+  type Manque,
+} from './manques';
 export {
   DvfSchema,
   MarcheSchema,

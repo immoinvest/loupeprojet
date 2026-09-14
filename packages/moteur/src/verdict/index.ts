@@ -3,6 +3,7 @@ import type { ResultatFinancement } from '../financement';
 import type { ResultatFiscalite } from '../fiscalite/types';
 import type { Regles } from '../regles/types';
 import type { ResultatRendement } from '../rendement';
+import { manquesDe, raisonParmi, type Manque } from '../schema/manques';
 import type { Projet } from '../schema/projet';
 import {
   feuCashflow,
@@ -33,14 +34,22 @@ function compter(feux: readonly FeuVerdict[], feu: Feu): number {
   return feux.filter((f) => f.feu === feu).length;
 }
 
+export interface OptionsVerdict {
+  readonly estimation?: EstimationPrix | null;
+  /** Données absentes du projet (défaut : lues dans le projet). */
+  readonly manques?: readonly Manque[];
+}
+
 export function calculerVerdict(
   projet: Projet,
   financement: ResultatFinancement,
   fiscalite: ResultatFiscalite,
   rendement: ResultatRendement,
   regles: Regles,
-  estimation: EstimationPrix | null = null,
+  options: OptionsVerdict = {},
 ): ResultatVerdict {
+  const estimation = options.estimation ?? null;
+  const manques = options.manques ?? manquesDe(projet);
   const retenu = fiscalite.regimes[fiscalite.retenu];
   const prix = feuPrix(
     projet.hypotheses.achat.prix / projet.bien.surface,
@@ -52,7 +61,11 @@ export function calculerVerdict(
     prix,
     feuRendement(rendement.rendements.net, regles),
     feuCashflow(retenu.cashflow.mensuel, regles),
-    feuEffort(financement.effort, regles),
+    feuEffort(
+      financement.effort,
+      regles,
+      raisonParmi(manques, ['LOYER_ABSENT', 'REVENUS_ABSENTS']),
+    ),
     feuRisques(projet.bien, projet.marche),
   ];
   return {

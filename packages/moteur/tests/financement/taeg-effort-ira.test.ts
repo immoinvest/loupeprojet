@@ -80,11 +80,23 @@ describe('tauxEffort', () => {
     expect(tauxEffort({ ...base, dureeAnnees: 27 }, regles).depasseDuree).toBe(true);
   });
 
-  it('rend null sans aucun revenu (pas de division par zéro)', () => {
+  it('rend null sans aucun revenu (pas de division par zéro) et ne le compte pas comme dépassé', () => {
     const effort = tauxEffort({ ...base, revenusMensuels: 0, loyerMensuel: 0 }, regles);
     expect(effort.hcsf).toBeNull();
     expect(effort.sansLoyers).toBeNull();
-    expect(effort.depasseHcsf).toBe(true);
+    expect(effort.depasseHcsf).toBe(false);
+  });
+
+  it('revenus inconnus : tout est null ; loyer inconnu : seule la lecture sans loyers reste', () => {
+    const sansRevenus = tauxEffort({ ...base, revenusMensuels: null }, regles);
+    expect(sansRevenus.hcsf).toBeNull();
+    expect(sansRevenus.sansLoyers).toBeNull();
+    expect(sansRevenus.depasseHcsf).toBe(false);
+    expect(sansRevenus.depasseDuree).toBe(false);
+    const sansLoyer = tauxEffort({ ...base, loyerMensuel: null }, regles);
+    expect(sansLoyer.hcsf).toBeNull();
+    expect(sansLoyer.sansLoyers).toBeCloseTo(0.318, 3);
+    expect(sansLoyer.depasseHcsf).toBe(false);
   });
 });
 

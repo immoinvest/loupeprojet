@@ -28,6 +28,25 @@ describe('calculerProjet — T3 Marseille', () => {
     expect(resultats.meta.aConfirmer).toContain('estimation.dpe');
   });
 
+  it('ne manque de rien ; sans revenus, seul le feu effort devient inconnu', () => {
+    expect(resultats.manques).toEqual([]);
+    const hypotheses = Object.fromEntries(
+      Object.entries(projetExemple.hypotheses).filter(([k]) => k !== 'revenusMensuels'),
+    ) as ProjetEntree['hypotheses'];
+    const sansRevenus = calculerProjet({ ...projetExemple, hypotheses });
+    expect(sansRevenus.manques).toEqual([
+      { code: 'REVENUS_ABSENTS', champ: 'hypotheses.revenusMensuels' },
+    ]);
+    expect(sansRevenus.financement.effort.hcsf).toBeNull();
+    expect(sansRevenus.verdict.feux[3]).toMatchObject({
+      feu: 'inconnu',
+      raison: 'REVENUS_ABSENTS',
+    });
+    expect(sansRevenus.cashflow.mensuel).toBeCloseTo(resultats.cashflow.mensuel, 6);
+    expect(sansRevenus.rendement.tri).toBe(resultats.rendement.tri);
+    expect(() => ResultatsSchema.parse(sansRevenus)).not.toThrow();
+  });
+
   it('porte la version des règles et les drapeaux à afficher', () => {
     expect(resultats.meta.versionRegles).toBe('2026-09');
     expect(resultats.meta.aConfirmer).toContain('fiscalite.prelevementsSociaux.bic');

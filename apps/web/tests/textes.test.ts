@@ -36,18 +36,28 @@ const variante = (
 
 describe('feux', () => {
   it('libelle chaque axe avec sa valeur formatée', () => {
-    expect(n(libelleFeu({ axe: 'prix', feu: 'bon', valeur: -0.218 }))).toBe('Prix −22 %');
-    expect(n(libelleFeu({ axe: 'rendement', feu: 'surveiller', valeur: 0.0428 }))).toBe(
-      'Rendement net 4,3 %',
+    expect(n(libelleFeu({ axe: 'prix', feu: 'bon', valeur: -0.218, raison: null }))).toBe(
+      'Prix −22 %',
     );
-    expect(n(libelleFeu({ axe: 'cashflow', feu: 'probleme', valeur: -210.3 }))).toBe(
+    expect(
+      n(libelleFeu({ axe: 'rendement', feu: 'surveiller', valeur: 0.0428, raison: null })),
+    ).toBe('Rendement net 4,3 %');
+    expect(n(libelleFeu({ axe: 'cashflow', feu: 'probleme', valeur: -210.3, raison: null }))).toBe(
       'Cash-flow −210 €/mois',
     );
-    expect(n(libelleFeu({ axe: 'effort', feu: 'bon', valeur: 0.2516 }))).toBe('Effort 25 %');
-    expect(libelleFeu({ axe: 'risques', feu: 'bon', valeur: 0 })).toBe('Risques : aucun');
-    expect(libelleFeu({ axe: 'risques', feu: 'surveiller', valeur: 1 })).toBe('Risques : 1 signal');
-    expect(libelleFeu({ axe: 'risques', feu: 'probleme', valeur: 2 })).toBe('Risques : 2 signaux');
-    expect(libelleFeu({ axe: 'prix', feu: 'inconnu', valeur: null })).toBe(
+    expect(n(libelleFeu({ axe: 'effort', feu: 'bon', valeur: 0.2516, raison: null }))).toBe(
+      'Effort 25 %',
+    );
+    expect(libelleFeu({ axe: 'risques', feu: 'bon', valeur: 0, raison: null })).toBe(
+      'Risques : aucun',
+    );
+    expect(libelleFeu({ axe: 'risques', feu: 'surveiller', valeur: 1, raison: null })).toBe(
+      'Risques : 1 signal',
+    );
+    expect(libelleFeu({ axe: 'risques', feu: 'probleme', valeur: 2, raison: null })).toBe(
+      'Risques : 2 signaux',
+    );
+    expect(libelleFeu({ axe: 'prix', feu: 'inconnu', valeur: null, raison: null })).toBe(
       'Prix vs ventes réelles : pas de données',
     );
   });

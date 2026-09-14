@@ -44,6 +44,7 @@ describe('feux unitaires', () => {
       axe: 'prix',
       feu: 'inconnu',
       valeur: null,
+      raison: null,
     });
   });
 
@@ -80,14 +81,55 @@ describe('feux unitaires', () => {
     expect(feuEffort(effort(null), regles).feu).toBe('inconnu');
   });
 
+  it('un feu inconnu porte la donnée qui manque ; un feu connu ne porte aucune raison', () => {
+    const effort: TauxEffort = {
+      hcsf: null,
+      sansLoyers: null,
+      seuil: 0.35,
+      depasseHcsf: false,
+      dureeMaxAnnees: 25,
+      depasseDuree: false,
+    };
+    expect(feuEffort(effort, regles, 'REVENUS_ABSENTS')).toEqual({
+      axe: 'effort',
+      feu: 'inconnu',
+      valeur: null,
+      raison: 'REVENUS_ABSENTS',
+    });
+    expect(feuEffort(effort, regles).raison).toBeNull();
+    expect(feuEffort({ ...effort, hcsf: 0.2 }, regles, 'REVENUS_ABSENTS').raison).toBeNull();
+    expect(feuRendement(null, regles, 'LOYER_ABSENT')).toEqual({
+      axe: 'rendement',
+      feu: 'inconnu',
+      valeur: null,
+      raison: 'LOYER_ABSENT',
+    });
+    expect(feuRendement(null, regles).raison).toBeNull();
+    expect(feuRendement(0.06, regles, 'LOYER_ABSENT').raison).toBeNull();
+    expect(feuCashflow(null, regles, 'LOYER_ABSENT')).toEqual({
+      axe: 'cashflow',
+      feu: 'inconnu',
+      valeur: null,
+      raison: 'LOYER_ABSENT',
+    });
+    expect(feuCashflow(null, regles).raison).toBeNull();
+    expect(feuCashflow(12, regles, 'LOYER_ABSENT').raison).toBeNull();
+  });
+
   it('risques : DPE F/G bloquant ; E, procédure ou risque fort à surveiller ; sinon bon', () => {
     const bien = ProjetSchema.parse(projetExemple).bien;
-    expect(feuRisques(bien, marche)).toEqual({ axe: 'risques', feu: 'bon', valeur: 0 });
+    expect(feuRisques(bien, marche)).toEqual({
+      axe: 'risques',
+      feu: 'bon',
+      valeur: 0,
+      raison: null,
+    });
     expect(feuRisques({ ...bien, dpe: 'G' }, marche).feu).toBe('probleme');
     expect(feuRisques({ ...bien, dpe: 'E' }, marche)).toEqual({
       axe: 'risques',
       feu: 'surveiller',
       valeur: 1,
+      raison: null,
     });
     expect(feuRisques({ ...bien, copro: { procedure: true } }, marche).feu).toBe('surveiller');
     const inondable = MarcheSchema.parse({ risques: [{ type: 'inondation', niveau: 'fort' }] });
@@ -187,6 +229,31 @@ describe('calculerVerdict — variantes', () => {
     expect(codes(verdictDe(variante({ etage: 1 })).verdict)).not.toContain(
       'SANS_ASCENSEUR_ETAGE_ELEVE',
     );
+  });
+
+  it('sans revenus : effort inconnu avec sa raison, aucun signal d’effort dépassé', () => {
+    const hypotheses = Object.fromEntries(
+      Object.entries(projetExemple.hypotheses).filter(([k]) => k !== 'revenusMensuels'),
+    ) as ProjetEntree['hypotheses'];
+    const { verdict } = verdictDe({ ...projetExemple, hypotheses });
+    expect(verdict.feux[3]).toEqual({
+      axe: 'effort',
+      feu: 'inconnu',
+      valeur: null,
+      raison: 'REVENUS_ABSENTS',
+    });
+    expect(verdict.synthese.inconnus).toBe(1);
+    expect(codes(verdict)).not.toContain('EFFORT_HCSF_DEPASSE');
+    // Les manques peuvent aussi être fournis par l'appelant : ils priment sur la lecture du projet.
+    const projet = ProjetSchema.parse(projetExemple);
+    const financement = calculerFinancement(projet, regles);
+    const fiscalite = calculerFiscalite(projet, financement, regles);
+    const revente = calculerRevente(projet, financement, fiscalite, regles);
+    const rendement = calculerRendement(projet, financement, fiscalite, revente);
+    const force = calculerVerdict(projet, financement, fiscalite, rendement, regles, {
+      manques: [],
+    });
+    expect(force.feux[3]?.raison).toBeNull();
   });
 
   it('revenus trop faibles et prêt trop long : effort et durée signalés', () => {

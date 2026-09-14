@@ -81,8 +81,15 @@ export const TmiSchema = z.union([
   z.literal(0.45),
 ]);
 
+/**
+ * Tranche marginale supposée quand elle n'est pas saisie : 30 %, atteinte dès 29 316 € de revenu
+ * imposable par part (barème 2026), la plus fréquente d'un ménage qui emprunte pour investir.
+ * Les cinq feux du verdict n'en dépendent pas ; l'interface la présente comme « supposée ».
+ */
+export const TMI_PAR_DEFAUT = 0.3;
+
 export const FiscaliteSchema = z.object({
-  tmi: TmiSchema,
+  tmi: TmiSchema.default(TMI_PAR_DEFAUT),
   psBic: taux(0.3).default(0.186),
   psFoncier: taux(0.3).default(0.172),
   regime: RegimeSchema,
@@ -102,8 +109,8 @@ export const HypothesesSchema = z.object({
   charges: ChargesSchema.prefault({}),
   fiscalite: FiscaliteSchema,
   revente: ReventeSchema.prefault({}),
-  /** Revenus nets mensuels du ménage, pour le taux d'effort. */
-  revenusMensuels: montant(),
+  /** Revenus nets mensuels du ménage, pour le taux d'effort ; absents, l'effort est inconnu. */
+  revenusMensuels: montant().optional(),
 });
 export type Hypotheses = z.infer<typeof HypothesesSchema>;
 export type HypothesesEntree = z.input<typeof HypothesesSchema>;
