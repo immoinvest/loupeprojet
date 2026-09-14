@@ -1,4 +1,4 @@
-import { captureDepuisHash, resoudreAnnonce, type Capture } from '@loupe/capture';
+import { captureDepuisHash, resoudreAnnonce, type Capture, type ModeCapture } from '@loupe/capture';
 
 import { extraireChamps, type ChampsExtraits } from './extraire';
 import type { AnnonceResolue } from './resoudre';
@@ -12,7 +12,7 @@ export interface CaptureImportee {
   readonly champs: ChampsExtraits;
   /** Texte de l'annonce, gardé en mémoire le temps de compléter la lecture ; jamais enregistré. */
   readonly description?: string | undefined;
-  readonly mode: 'extension' | 'bookmarklet';
+  readonly mode: ModeCapture;
 }
 
 export type LectureFragment =

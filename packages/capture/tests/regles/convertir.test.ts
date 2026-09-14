@@ -76,6 +76,53 @@ describe('convertir', () => {
     expect(convertir('Étage 3/5', 'entier', { regex: 'ascenseur' })).toBeUndefined();
   });
 
+  it('tableau de valeurs simples : lu comme un texte joint, pour qu’une regex y trouve une caractéristique', () => {
+    expect(convertir(['cellar', 'intercom'], 'texte')).toBe('cellar, intercom');
+    expect(convertir(['cellar', 'intercom'], 'booleen', { regex: 'intercom' })).toBeUndefined();
+    expect(convertir(['cellar', 'intercom'], 'texte', { regex: '\\bintercom\\b' })).toBe(
+      'intercom',
+    );
+    expect(convertir([3, true], 'texte')).toBe('3, true');
+    expect(convertir([], 'texte')).toBeUndefined();
+    expect(convertir([{ a: 1 }], 'texte')).toBeUndefined();
+  });
+
+  it('urls : adresses https dans l’ordre, sans doublon, 30 au plus ; le reste est écarté', () => {
+    const https = 'https://img.exemple.fr/1.jpg';
+    expect(convertir(https, 'urls')).toEqual([https]);
+    expect(
+      convertir(
+        [
+          ` ${https} `,
+          'http://img.exemple.fr/2.jpg',
+          'javascript:alert(1)',
+          'pas une adresse',
+          https,
+          42,
+          { url: https },
+          `https://img.exemple.fr/${'a'.repeat(500)}`,
+          'https://img.exemple.fr/3.jpg',
+        ],
+        'urls',
+        { regex: 'ignoré', diviser: 2 },
+      ),
+    ).toEqual([https, 'https://img.exemple.fr/3.jpg']);
+    const quarante = Array.from({ length: 40 }, (_, i) => `https://i.fr/${String(i)}.jpg`);
+    expect(convertir(quarante, 'urls')).toEqual(quarante.slice(0, 30));
+    expect(convertir(['http://a.fr/1.jpg'], 'urls')).toBeUndefined();
+    expect(convertir(undefined, 'urls')).toBeUndefined();
+  });
+
+  it('date : AAAA-MM-JJ trouvée dans le texte, date impossible refusée', () => {
+    expect(convertir('2026-08-28 20:32:49', 'date')).toBe('2026-08-28');
+    expect(convertir('2026-06-29T08:59:00Z', 'date')).toBe('2026-06-29');
+    expect(convertir('DPE réalisé le 2025-03-12.', 'date')).toBe('2025-03-12');
+    expect(convertir('2026-02-30', 'date')).toBeUndefined();
+    expect(convertir('2026-13-01', 'date')).toBeUndefined();
+    expect(convertir('hier', 'date')).toBeUndefined();
+    expect(convertir(20260828, 'date')).toBeUndefined();
+  });
+
   it('diviser : ramène des charges annuelles au mois, sans toucher aux textes', () => {
     expect(convertir('1 080 € / an', 'montant', { diviser: 12 })).toBe(90);
     expect(convertir('1 080 € / an', 'texte', { diviser: 12 })).toBe('1 080 € / an');

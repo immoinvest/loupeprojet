@@ -49,6 +49,21 @@ describe('lireChemin', () => {
     expect(lireChemin('texte', 'length')).toBeUndefined();
   });
 
+  it('[*] applique la suite du chemin à chaque élément et garde les valeurs trouvées', () => {
+    const donnees = {
+      photos: [{ url: 'https://a/1.jpg' }, { autre: true }, 'texte', { url: 'https://a/2.jpg' }],
+      groupes: [{ items: [{ v: 1 }, { v: 2 }] }, { items: [] }, { items: [{ v: 3 }] }, {}],
+    };
+    expect(lireChemin(donnees, 'photos[*].url')).toEqual(['https://a/1.jpg', 'https://a/2.jpg']);
+    expect(lireChemin(donnees, 'photos[*]')).toEqual(donnees.photos);
+    // Projections imbriquées : les listes intérieures sont aplaties.
+    expect(lireChemin(donnees, 'groupes[*].items[*].v')).toEqual([1, 2, 3]);
+    expect(lireChemin(donnees, 'groupes[*].items')).toEqual([[{ v: 1 }, { v: 2 }], [], [{ v: 3 }]]);
+    expect(lireChemin({ photos: [] }, 'photos[*].url')).toEqual([]);
+    expect(lireChemin({ photos: { url: 'x' } }, 'photos[*].url')).toBeUndefined();
+    expect(lireChemin({}, 'photos[*].url')).toBeUndefined();
+  });
+
   it('rend undefined pour un chemin mal formé', () => {
     expect(lireChemin(ETAT, 'props[')).toBeUndefined();
     expect(lireChemin(ETAT, 'props[]')).toBeUndefined();
