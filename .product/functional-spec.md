@@ -133,7 +133,8 @@ Page de l'annonce (structuré) · texte (LLM) · Géoplateforme (géocodage) · 
 - **v1 (8–10 sem.)** : extension + bookmarklet (LBC, SeLoger, Bien'ici, PAP, Logic-Immo) ; pipeline complet ; texte collé et saisie manuelle ; 5 volets, verdict, scénarios ; sauvegarde locale, PDF, partage ; test réel Marseille/Lyon/Aix.
 - **v1.5 (+4)** : compte (livré : code e-mail, Google, Apple), sync ; comparaison 2–5 projets, statuts ; Safari iOS, partage mobile (livré en avance : application installable et hors ligne, « Partager → Deklic » sur Android, partage natif d'un projet ; iPhone : installation par Safari, sans cible de partage) ; portails supplémentaires.
 - **v2 (+6)** : historique de prix (extension), loyers infra-communaux, registre copro, DPE PDF, photos → travaux (option).
-- **v3** : suivi après achat, liasse LMNP, monétisation (affiliation, export premium).
+- **Gérer (gestion locative après l'achat, épic G1 à G5, `specs/gestion-locative-specs.md`)** : commencé le 14/09/2026 avec le socle G1a (menu Analyser et Gérer, « Mon menu », biens, locataires, locations, loyers du mois, « Ajouter à la main » et « J'ai acheté ce bien » en deux clics, compte requis) ; ensuite G3 banque (détection des virements de loyer par les API bancaires, comme Rentila), G1b fiches et paiements partiels, G2 quittances automatiques, G4 vie du bail, G5 bilan et déclaration.
+- **v3** : liasse LMNP, monétisation (affiliation, export premium).
 - **Pas en v1** : recherche/alertes d'annonces, chat IA, SCI IS, carte au-delà des DVF, app native.
 
 ## Risques

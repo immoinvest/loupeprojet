@@ -46,7 +46,11 @@
         "FormEvent obsolète dans React 19 : preventDefault dans le gestionnaire, comme Mon compte",
         "relecture US-6 : un bien dont le locataire entre le mois suivant était annoncé « Sans locataire » ; corrigé (Entrée à venir)",
         "test du bouton masqué : vérifiait avant la lecture des préférences du compte (première visite) ; attend désormais la disparition",
-        "audit de sécurité : aucune borne sur les écritures (quota D1 partagé) ; 200 biens par compte et période de paiement dans la location"
+        "audit de sécurité : aucune borne sur les écritures (quota D1 partagé) ; 200 biens par compte et période de paiement dans la location",
+        "spec des formats d'abord jouée sur l'aperçu d'une autre session (port 5199 réutilisé) : relance sur le port 5299 par une config locale non commitée",
+        "fusion de master (coque fixe) : conflit sur Sidebar.tsx résolu en gardant les trois zones, sections Analyser et Gérer dans la zone qui défile ; styles des liens à 14 px repris dans coque/liens.ts ; tests coque-fixe et parcours coque.spec.ts adaptés (section Analyser, cinq projets puis « Tous mes projets · 30 »)",
+        "parcours coque.spec.ts sur tablette : après la fusion, « J'ai acheté ce bien » (4e action sur la rangée compacte de 48 px) écrasait le nom du projet à 20 px ; bouton en icône de 768 à 1 279 px, libellé pour les lecteurs d'écran et en infobulle",
+        "suite ciblée d'abord en échec par délai (682 s pour 81 tests, 43 processus Node, 2,4 Go libres) : verte à la relance avec --testTimeout=30000"
       ]
     },
     "qa_tests": { "status": "pending" },
