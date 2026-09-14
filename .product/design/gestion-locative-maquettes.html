@@ -1,0 +1,2507 @@
+<title>Deklic Gérer</title>
+<meta
+  name="description"
+  content="Maquettes de l'espace Gérer de Deklic : trois portes d'entrée, deux clics, et la location tourne."
+/>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700;6..12,800&display=swap"
+/>
+<style>
+  /* Tokens de l'application Deklic (apps/web/src/index.css) : maquette volontairement en thème clair, comme l'app. */
+  :root {
+    color-scheme: light;
+    --page: #eceff7;
+    --page-encre: #2a3050;
+    --fond: #fffdf9;
+    --surface: #ffffff;
+    --bordure: #ece8e0;
+    --bordure-douce: #f1ede5;
+    --encre: #23272f;
+    --encre-2: #4b5563;
+    --encre-3: #6b7280;
+    --encre-4: #9ca3af;
+    --accent: #2b4bf2;
+    --accent-fonce: #1f38c4;
+    --accent-doux: #e8ecff;
+    --accent-fond: #f5f7ff;
+    --accent-bordure: #d9dfff;
+    --flash: #ff7a1a;
+    --flash-fond: #fff1e6;
+    --bon: #2e9e6b;
+    --bon-texte: #1f7a4d;
+    --bon-fond: #e3f4ea;
+    --surv: #d98a1e;
+    --surv-texte: #9a5b0f;
+    --surv-fond: #fbeeda;
+    --pb: #d9453d;
+    --pb-texte: #a3302a;
+    --pb-fond: #fbe5e3;
+    --carte: 20px;
+    --encart: 12px;
+    --ombre: 0 6px 24px rgba(35, 39, 47, 0.05);
+    --display: 'Outfit', 'Segoe UI', system-ui, sans-serif;
+    --texte: 'Nunito Sans', 'Segoe UI', system-ui, sans-serif;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    margin: 0;
+    background: var(--page);
+    color: var(--encre);
+    font-family: var(--texte);
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--display);
+    margin: 0;
+    text-wrap: balance;
+  }
+  p {
+    margin: 0;
+  }
+  .num {
+    font-variant-numeric: tabular-nums;
+  }
+  svg.i {
+    width: 18px;
+    height: 18px;
+    flex: none;
+  }
+
+  /* ---------- Document autour des maquettes ---------- */
+  .doc {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 48px 28px 96px;
+    display: flex;
+    flex-direction: column;
+    gap: 72px;
+  }
+
+  .tete {
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+    gap: 40px;
+    align-items: end;
+  }
+  .tete .logo-doc {
+    height: 28px;
+    display: block;
+    margin-bottom: 28px;
+  }
+  .surtitre {
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--page-encre);
+    opacity: 0.7;
+  }
+  .tete h1 {
+    font-size: 52px;
+    line-height: 1.02;
+    font-weight: 700;
+    color: var(--page-encre);
+    margin: 10px 0 16px;
+    letter-spacing: -0.02em;
+  }
+  .tete .chapo {
+    font-size: 18px;
+    color: #4a5070;
+    max-width: 52ch;
+  }
+  .these {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    justify-self: end;
+  }
+  .these .deux {
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: 168px;
+    line-height: 0.78;
+    color: var(--flash);
+    letter-spacing: -0.06em;
+  }
+  .these .deux-texte {
+    font-family: var(--display);
+    font-size: 26px;
+    font-weight: 600;
+    line-height: 1.15;
+    color: var(--page-encre);
+    max-width: 11ch;
+  }
+  .these .deux-texte small {
+    display: block;
+    font-family: var(--texte);
+    font-size: 14px;
+    font-weight: 600;
+    color: #5a6080;
+    margin-top: 10px;
+    max-width: 26ch;
+    line-height: 1.4;
+  }
+
+  .portes-resume {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    margin-top: 36px;
+  }
+  .portes-resume a {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 16px 18px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid #d8dcea;
+    color: var(--page-encre);
+    text-decoration: none;
+  }
+  .portes-resume a:hover,
+  .portes-resume a:focus-visible {
+    background: #fff;
+    outline: none;
+    border-color: var(--accent-bordure);
+  }
+  .portes-resume b {
+    font-family: var(--display);
+    font-size: 17px;
+    font-weight: 600;
+  }
+  .portes-resume span {
+    font-size: 13.5px;
+    color: #5a6080;
+  }
+  .legende {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 22px;
+    margin-top: 18px;
+    font-size: 13.5px;
+    color: #5a6080;
+    align-items: center;
+  }
+  .legende .k {
+    position: static;
+  }
+
+  .planche {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .planche-tete {
+    display: grid;
+    grid-template-columns: 220px minmax(0, 1fr);
+    gap: 28px;
+    align-items: baseline;
+  }
+  .planche-tete h2 {
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--page-encre);
+    letter-spacing: -0.01em;
+  }
+  .planche-tete p.note {
+    font-size: 15px;
+    color: #4a5070;
+    max-width: 70ch;
+    margin-top: 6px;
+  }
+  .planche-tete .surtitre {
+    padding-top: 8px;
+  }
+  .defile {
+    overflow-x: auto;
+    padding: 4px 4px 18px;
+    margin: 0 -4px;
+  }
+  .rang {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+  }
+  .legende-ecran {
+    font-size: 13px;
+    color: #5a6080;
+    margin-top: 10px;
+    padding-left: 4px;
+    max-width: 80ch;
+  }
+
+  /* ---------- Cadre d'écran ---------- */
+  .ecran {
+    background: var(--fond);
+    border: 1px solid #d6dae6;
+    border-radius: 14px;
+    box-shadow: 0 24px 60px -28px rgba(30, 38, 80, 0.35);
+    overflow: hidden;
+    flex: none;
+  }
+  .url {
+    height: 36px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 16px;
+    background: #fbfbfd;
+    border-bottom: 1px solid #e6e8f0;
+    font-size: 12.5px;
+    color: var(--encre-3);
+  }
+  .url svg {
+    width: 13px;
+    height: 13px;
+  }
+  .app {
+    display: grid;
+    grid-template-columns: 236px minmax(0, 1fr);
+    width: 1120px;
+  }
+  .app.etroit {
+    width: 980px;
+  }
+
+  .side {
+    background: var(--surface);
+    border-right: 1px solid var(--bordure);
+    padding: 20px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    min-height: 100%;
+  }
+  .side .logo {
+    padding: 2px 10px;
+    height: 30px;
+  }
+  .side .logo svg {
+    height: 24px;
+    width: auto;
+    display: block;
+  }
+  .seg {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    background: var(--bordure-douce);
+    border-radius: 999px;
+    padding: 4px;
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .seg span {
+    text-align: center;
+    padding: 7px 0;
+    border-radius: 999px;
+    color: var(--encre-3);
+  }
+  .seg span.on {
+    background: var(--surface);
+    color: var(--encre);
+    box-shadow: 0 1px 3px rgba(35, 39, 47, 0.12);
+  }
+  .nav {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .nav a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 42px;
+    padding: 0 14px;
+    border-radius: var(--encart);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--encre-2);
+    text-decoration: none;
+  }
+  .nav a svg {
+    width: 18px;
+    height: 18px;
+    flex: none;
+  }
+  .nav a.on {
+    background: var(--accent-doux);
+    color: var(--encre);
+  }
+  .nav a .compte {
+    margin-left: auto;
+    min-width: 22px;
+    height: 22px;
+    border-radius: 999px;
+    background: var(--pb-fond);
+    color: var(--pb-texte);
+    font-size: 12px;
+    font-weight: 800;
+    display: grid;
+    place-items: center;
+    padding: 0 6px;
+  }
+  .etiquette {
+    font-size: 11.5px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--encre-4);
+    padding: 0 14px 6px;
+  }
+  .mes-biens a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 38px;
+    padding: 0 14px;
+    font-size: 14.5px;
+    font-weight: 600;
+    color: var(--encre-2);
+    text-decoration: none;
+    border-radius: var(--encart);
+  }
+  .mes-biens a small {
+    margin-left: auto;
+    font-size: 12.5px;
+    color: var(--encre-4);
+    font-weight: 700;
+  }
+  .ressort {
+    flex: 1;
+  }
+  .profil {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    border-top: 1px solid var(--bordure-douce);
+  }
+  .ini {
+    width: 36px;
+    height: 36px;
+    border-radius: 999px;
+    background: var(--accent-doux);
+    color: var(--accent-fonce);
+    display: grid;
+    place-items: center;
+    font-weight: 800;
+    font-size: 13px;
+    flex: none;
+  }
+  .profil b {
+    display: block;
+    font-size: 14px;
+  }
+  .profil small {
+    display: block;
+    font-size: 12.5px;
+    color: var(--encre-3);
+  }
+
+  .main {
+    padding: 30px 40px 36px;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    min-width: 0;
+  }
+  .fil {
+    font-size: 13px;
+    color: var(--encre-3);
+  }
+  .h-ecran {
+    font-size: 30px;
+    font-weight: 700;
+    letter-spacing: -0.015em;
+    line-height: 1.15;
+  }
+  .sous {
+    color: var(--encre-3);
+    font-size: 15.5px;
+    margin-top: 4px;
+  }
+
+  .carte {
+    background: var(--surface);
+    border: 1px solid var(--bordure);
+    border-radius: var(--carte);
+    box-shadow: var(--ombre);
+    padding: 20px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .carte h4 {
+    font-size: 17px;
+    font-weight: 600;
+  }
+  .carte .phrase {
+    font-size: 14.5px;
+    color: var(--encre-2);
+  }
+  .grille-2 {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+    align-items: start;
+  }
+  .grille-3 {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+    align-items: stretch;
+  }
+  .pile {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  /* Boutons */
+  .btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 0 20px;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 15px;
+    white-space: nowrap;
+    border: 1px solid transparent;
+    font-family: var(--texte);
+  }
+  .btn svg {
+    width: 17px;
+    height: 17px;
+  }
+  .btn.p {
+    background: var(--accent);
+    color: #fff;
+  }
+  .btn.s {
+    background: var(--surface);
+    border-color: var(--bordure);
+    color: var(--encre-2);
+  }
+  .btn.d {
+    background: transparent;
+    color: var(--accent);
+    padding: 0 8px;
+    min-height: 36px;
+  }
+  .btn.petit {
+    min-height: 36px;
+    padding: 0 14px;
+    font-size: 14px;
+  }
+  .btn.plein {
+    width: 100%;
+  }
+  .btn.inactif {
+    background: var(--bordure-douce);
+    color: var(--encre-4);
+  }
+
+  /* Le clic compté : pastille orange numérotée */
+  .k {
+    position: absolute;
+    top: -11px;
+    right: -11px;
+    width: 26px;
+    height: 26px;
+    border-radius: 999px;
+    background: var(--flash);
+    color: #fff;
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: 14px;
+    display: grid;
+    place-items: center;
+    box-shadow:
+      0 0 0 4px var(--flash-fond),
+      0 4px 10px rgba(255, 122, 26, 0.35);
+    z-index: 2;
+  }
+  .k.clair {
+    background: #fff;
+    color: var(--flash);
+    border: 2px solid var(--flash);
+    box-shadow: 0 0 0 3px var(--flash-fond);
+    width: auto;
+    padding: 0 8px;
+    font-size: 12px;
+    font-family: var(--texte);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .k:not(.clair) {
+      animation: declic 2.4s ease-out infinite;
+    }
+    @keyframes declic {
+      0%,
+      70%,
+      100% {
+        box-shadow:
+          0 0 0 4px var(--flash-fond),
+          0 4px 10px rgba(255, 122, 26, 0.35);
+      }
+      80% {
+        box-shadow:
+          0 0 0 9px rgba(255, 122, 26, 0.12),
+          0 4px 10px rgba(255, 122, 26, 0.35);
+      }
+    }
+  }
+
+  /* Provenance, états, points */
+  .prov {
+    display: inline-flex;
+    align-items: center;
+    height: 22px;
+    padding: 0 9px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .prov.analyse {
+    background: var(--accent-doux);
+    color: var(--accent-fonce);
+  }
+  .prov.defaut {
+    background: var(--bordure-douce);
+    color: var(--encre-3);
+  }
+  .prov.banque {
+    background: var(--bon-fond);
+    color: var(--bon-texte);
+  }
+  .prov.toi {
+    background: var(--flash-fond);
+    color: #b4520c;
+  }
+  .etat {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    height: 26px;
+    padding: 0 11px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .etat::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: currentColor;
+  }
+  .etat.recu {
+    background: var(--bon-fond);
+    color: var(--bon-texte);
+  }
+  .etat.retard {
+    background: var(--pb-fond);
+    color: var(--pb-texte);
+  }
+  .etat.attendu {
+    background: var(--accent-fond);
+    color: var(--accent-fonce);
+  }
+  .etat.vacant {
+    background: transparent;
+    color: var(--encre-3);
+    border: 1px solid var(--bordure);
+  }
+  .etat.vacant::before {
+    background: transparent;
+    border: 2px solid currentColor;
+    width: 5px;
+    height: 5px;
+  }
+  .pt {
+    width: 9px;
+    height: 9px;
+    border-radius: 999px;
+    flex: none;
+  }
+  .pt.bon {
+    background: var(--bon);
+  }
+  .pt.pb {
+    background: var(--pb);
+  }
+  .pt.surv {
+    background: var(--surv);
+  }
+  .pt.creux {
+    border: 2px solid var(--encre-4);
+    width: 9px;
+    height: 9px;
+  }
+
+  /* Lignes clé / valeur */
+  .lignes {
+    display: flex;
+    flex-direction: column;
+  }
+  .ligne {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    gap: 12px;
+    align-items: center;
+    padding: 9px 0;
+    border-top: 1px solid var(--bordure-douce);
+  }
+  .ligne:first-child {
+    border-top: 0;
+    padding-top: 2px;
+  }
+  .ligne .cle {
+    color: var(--encre-3);
+    font-size: 14.5px;
+  }
+  .ligne .val {
+    font-weight: 700;
+    font-size: 15px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+  .ligne.defaut .val {
+    color: var(--encre-2);
+    font-weight: 600;
+  }
+
+  /* Champs */
+  .champ {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .champ label {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--encre-2);
+  }
+  .saisie {
+    min-height: 44px;
+    border: 1px solid var(--bordure);
+    border-radius: var(--encart);
+    background: var(--surface);
+    padding: 0 14px;
+    display: flex;
+    align-items: center;
+    font-size: 15px;
+    color: var(--encre);
+    gap: 8px;
+  }
+  .saisie.vide {
+    color: var(--encre-4);
+  }
+  .saisie.focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-doux);
+  }
+  .saisie .unite {
+    margin-left: auto;
+    color: var(--encre-3);
+    font-size: 14px;
+  }
+  .coche {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14.5px;
+    color: var(--encre-2);
+  }
+  .boite {
+    width: 20px;
+    height: 20px;
+    border-radius: 6px;
+    border: 2px solid var(--encre-4);
+    display: grid;
+    place-items: center;
+    flex: none;
+  }
+  .boite.on {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .boite.on::after {
+    content: '';
+    width: 9px;
+    height: 5px;
+    border-left: 2.5px solid #fff;
+    border-bottom: 2.5px solid #fff;
+    transform: rotate(-45deg) translate(1px, -1px);
+  }
+  .choix {
+    display: inline-grid;
+    grid-auto-flow: column;
+    background: var(--bordure-douce);
+    border-radius: 999px;
+    padding: 4px;
+  }
+  .choix span {
+    padding: 6px 16px;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--encre-3);
+  }
+  .choix span.on {
+    background: var(--surface);
+    color: var(--encre);
+    box-shadow: 0 1px 3px rgba(35, 39, 47, 0.12);
+  }
+
+  .pied-action {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 18px;
+    padding-top: 4px;
+  }
+  .pied-action p {
+    color: var(--encre-3);
+    font-size: 14.5px;
+  }
+
+  /* Porte : cartes d'accueil */
+  .porte {
+    gap: 14px;
+  }
+  .porte .ico {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    display: grid;
+    place-items: center;
+  }
+  .porte .ico svg {
+    width: 22px;
+    height: 22px;
+  }
+  .porte h4 {
+    font-size: 19px;
+  }
+  .porte .bas {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .mini-projet {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border: 1px solid var(--bordure);
+    border-radius: var(--encart);
+  }
+  .mini-projet b {
+    font-size: 14px;
+    display: block;
+  }
+  .mini-projet small {
+    font-size: 12.5px;
+    color: var(--encre-3);
+  }
+  .mini-projet .btn {
+    margin-left: auto;
+  }
+  .recommande {
+    align-self: flex-start;
+    font-size: 12px;
+    font-weight: 800;
+    color: #b4520c;
+    background: var(--flash-fond);
+    padding: 3px 10px;
+    border-radius: 999px;
+  }
+
+  /* En-tête de projet (porte 1, clic 1) */
+  .entete-projet {
+    width: 1120px;
+    display: flex;
+    align-items: flex-end;
+    gap: 18px;
+    background: var(--surface);
+    padding: 14px 32px 0;
+    border-bottom: 1px solid var(--bordure);
+  }
+  .entete-projet .titre {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding-bottom: 14px;
+  }
+  .entete-projet .titre span {
+    font-size: 13px;
+    color: var(--encre-3);
+  }
+  .entete-projet .titre b {
+    font-family: var(--display);
+    font-size: 20px;
+  }
+  .onglets {
+    display: flex;
+    gap: 2px;
+    margin: 0 auto;
+  }
+  .onglets span {
+    padding: 12px 14px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--encre-3);
+    border-bottom: 2px solid transparent;
+  }
+  .onglets span.on {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+  .entete-projet .actions {
+    display: flex;
+    gap: 8px;
+    padding-bottom: 12px;
+  }
+  .statut-projet {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 44px;
+    padding: 0 14px;
+    border: 1px solid var(--bordure);
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--encre-2);
+  }
+
+  /* Banque */
+  .op {
+    display: grid;
+    grid-template-columns: 22px minmax(0, 1.25fr) 150px minmax(0, 1fr);
+    gap: 16px;
+    align-items: center;
+    padding: 14px 0;
+    border-top: 1px solid var(--bordure-douce);
+  }
+  .op:first-of-type {
+    border-top: 0;
+  }
+  .libelle {
+    font-family: ui-monospace, 'Cascadia Mono', 'Consolas', monospace;
+    font-size: 13px;
+    letter-spacing: 0.01em;
+    color: var(--encre);
+    font-weight: 600;
+  }
+  .rythme {
+    font-size: 13.5px;
+    color: var(--encre-3);
+    margin-top: 2px;
+  }
+  .mois13 {
+    display: flex;
+    gap: 3px;
+    align-items: flex-end;
+    height: 22px;
+  }
+  .mois13 i {
+    width: 8px;
+    height: 22px;
+    border-radius: 3px;
+    background: var(--bon);
+  }
+  .mois13 i.non {
+    background: var(--bordure);
+    height: 8px;
+  }
+  .mois13-leg {
+    font-size: 11.5px;
+    color: var(--encre-4);
+    margin-top: 4px;
+  }
+  .montant {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 18px;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .lien-apl {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--accent-fonce);
+    background: var(--accent-fond);
+    border: 1px dashed var(--accent-bordure);
+    padding: 8px 12px;
+    border-radius: var(--encart);
+  }
+
+  /* Accueil en régime de croisière */
+  .grand-titre {
+    font-family: var(--display);
+    font-size: 40px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.05;
+  }
+  .barre {
+    height: 14px;
+    border-radius: 999px;
+    background: var(--bordure-douce);
+    overflow: hidden;
+    display: flex;
+  }
+  .barre i {
+    background: var(--bon);
+    display: block;
+  }
+  .barre-leg {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    color: var(--encre-3);
+  }
+  .afaire {
+    display: grid;
+    grid-template-columns: 10px minmax(0, 1fr) auto;
+    gap: 12px;
+    align-items: center;
+    padding: 10px 0;
+    border-top: 1px solid var(--bordure-douce);
+    font-size: 15px;
+  }
+  .afaire:first-of-type {
+    border-top: 0;
+  }
+  .afaire small {
+    display: block;
+    color: var(--encre-3);
+    font-size: 13px;
+  }
+  .chiffres {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .chiffre {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: 14.5px;
+    color: var(--encre-3);
+  }
+  .chiffre b {
+    font-family: var(--display);
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--encre);
+    font-variant-numeric: tabular-nums;
+  }
+  .chiffre.total {
+    border-top: 1px solid var(--bordure-douce);
+    padding-top: 12px;
+  }
+  .chiffre.total b {
+    color: var(--bon-texte);
+    font-size: 26px;
+  }
+  table.biens {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 15px;
+  }
+  table.biens td {
+    padding: 12px 8px;
+    border-top: 1px solid var(--bordure-douce);
+    vertical-align: middle;
+  }
+  table.biens tr:first-child td {
+    border-top: 0;
+  }
+  table.biens td:first-child {
+    padding-left: 0;
+    font-weight: 700;
+  }
+  table.biens td.m {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+  }
+  table.biens td.d {
+    text-align: right;
+    color: var(--encre-3);
+    font-size: 13.5px;
+  }
+  table.biens td:last-child {
+    text-align: right;
+    padding-right: 0;
+    width: 1%;
+  }
+  .frise {
+    display: flex;
+    gap: 5px;
+  }
+  .frise i {
+    width: 12px;
+    height: 12px;
+    border-radius: 999px;
+    background: var(--bon);
+  }
+  .frise i.pb {
+    background: var(--pb);
+  }
+  .frise i.vide {
+    background: transparent;
+    border: 2px solid var(--bordure);
+  }
+
+  /* Loyers */
+  .mois {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    font-family: var(--display);
+    font-size: 20px;
+    font-weight: 600;
+  }
+  .mois span {
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--bordure);
+    border-radius: 999px;
+    display: grid;
+    place-items: center;
+    color: var(--encre-3);
+  }
+  .mois svg {
+    width: 16px;
+    height: 16px;
+  }
+  .groupe-loyers h4 {
+    font-size: 14px;
+    font-family: var(--texte);
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--encre-3);
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .loyer {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 110px 110px auto;
+    gap: 14px;
+    align-items: center;
+    padding: 12px 0;
+    border-top: 1px solid var(--bordure-douce);
+  }
+  .loyer:first-of-type {
+    border-top: 0;
+  }
+  .loyer b {
+    display: block;
+    font-size: 15px;
+  }
+  .loyer small {
+    color: var(--encre-3);
+    font-size: 13px;
+  }
+  .loyer .m {
+    text-align: right;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+  }
+  .loyer .actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    align-items: center;
+  }
+  .plus {
+    width: 36px;
+    height: 36px;
+    border-radius: 999px;
+    border: 1px solid var(--bordure);
+    display: grid;
+    place-items: center;
+    color: var(--encre-3);
+    font-weight: 800;
+    letter-spacing: 1px;
+  }
+  .toast {
+    align-self: center;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    background: var(--encre);
+    color: #fff;
+    border-radius: 999px;
+    padding: 10px 12px 10px 20px;
+    font-size: 14.5px;
+    font-weight: 600;
+    box-shadow: 0 10px 30px rgba(35, 39, 47, 0.25);
+  }
+  .toast .btn {
+    min-height: 34px;
+    background: rgba(255, 255, 255, 0.14);
+    color: #fff;
+    padding: 0 14px;
+    font-size: 14px;
+  }
+
+  /* Téléphone */
+  .tel {
+    width: 340px;
+    flex: none;
+    border-radius: 40px;
+    border: 10px solid #20243a;
+    background: var(--fond);
+    overflow: hidden;
+    box-shadow: 0 24px 60px -28px rgba(30, 38, 80, 0.45);
+  }
+  .tel .haut {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px 10px;
+  }
+  .tel .haut svg {
+    height: 18px;
+    width: auto;
+  }
+  .tel .seg {
+    font-size: 12.5px;
+    width: 150px;
+    padding: 3px;
+  }
+  .tel .seg span {
+    padding: 5px 0;
+  }
+  .tel .corps {
+    padding: 6px 18px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .tel .grand-titre {
+    font-size: 30px;
+  }
+  .tel .carte {
+    padding: 14px 16px;
+    border-radius: 16px;
+    gap: 8px;
+  }
+  .tel .afaire {
+    grid-template-columns: 10px minmax(0, 1fr);
+    font-size: 14px;
+  }
+  .tel .afaire .btn {
+    grid-column: 2;
+    justify-self: start;
+  }
+  .tel .bas-nav {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    border-top: 1px solid var(--bordure);
+    background: var(--surface);
+    padding: 8px 6px 14px;
+  }
+  .tel .bas-nav span {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--encre-3);
+  }
+  .tel .bas-nav span.on {
+    color: var(--accent);
+  }
+  .tel .bas-nav svg {
+    width: 20px;
+    height: 20px;
+  }
+  .tel .bas-nav .rond {
+    width: 44px;
+    height: 44px;
+    border-radius: 999px;
+    background: var(--accent);
+    color: #fff;
+    display: grid;
+    place-items: center;
+    margin-top: -18px;
+    box-shadow: 0 6px 16px rgba(43, 75, 242, 0.35);
+  }
+
+  /* E-mails et quittance */
+  .courriel {
+    width: 400px;
+    flex: none;
+    background: var(--surface);
+    border: 1px solid #d6dae6;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 24px 60px -28px rgba(30, 38, 80, 0.3);
+  }
+  .courriel .entete-c {
+    padding: 14px 18px;
+    border-bottom: 1px solid #e6e8f0;
+    background: #fbfbfd;
+    font-size: 13px;
+    color: var(--encre-3);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .courriel .entete-c b {
+    color: var(--encre);
+    font-size: 15.5px;
+    margin-top: 4px;
+    font-family: var(--display);
+    font-weight: 600;
+  }
+  .courriel .corps-c {
+    padding: 20px 22px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    font-size: 14.5px;
+    color: var(--encre-2);
+  }
+  .courriel .corps-c svg.mini-logo {
+    height: 18px;
+    width: auto;
+  }
+  .ligne-conf {
+    border: 1px solid var(--bordure);
+    border-radius: var(--encart);
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .ligne-conf .haut-l {
+    display: flex;
+    justify-content: space-between;
+    color: var(--encre);
+    font-weight: 700;
+  }
+  .ligne-conf .boutons {
+    display: flex;
+    gap: 8px;
+  }
+  .pj {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid var(--bordure);
+    border-radius: var(--encart);
+    padding: 10px 12px;
+    font-size: 13.5px;
+    color: var(--encre);
+    font-weight: 700;
+  }
+  .pj svg {
+    width: 18px;
+    height: 18px;
+    color: var(--pb);
+  }
+  .pj small {
+    color: var(--encre-3);
+    font-weight: 600;
+    margin-left: auto;
+  }
+
+  .feuille {
+    width: 380px;
+    flex: none;
+    aspect-ratio: 210 / 297;
+    background: #fff;
+    border-radius: 4px;
+    box-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.08),
+      0 24px 60px -28px rgba(30, 38, 80, 0.35);
+    padding: 30px 30px 26px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    font-size: 11px;
+    color: #2b2f38;
+  }
+  .feuille h4 {
+    font-family: var(--display);
+    font-size: 19px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+  .feuille .periode {
+    font-size: 11.5px;
+    color: #555b66;
+  }
+  .feuille .parties {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  .feuille .parties p {
+    line-height: 1.45;
+  }
+  .feuille .parties small {
+    display: block;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #8a8f99;
+    margin-bottom: 2px;
+  }
+  .feuille table {
+    width: 100%;
+    border-collapse: collapse;
+    font-variant-numeric: tabular-nums;
+  }
+  .feuille td {
+    padding: 6px 0;
+    border-bottom: 1px solid #eceae4;
+  }
+  .feuille td:last-child {
+    text-align: right;
+  }
+  .feuille tr.total td {
+    border-bottom: 0;
+    border-top: 1.5px solid #2b2f38;
+    font-weight: 800;
+    padding-top: 8px;
+  }
+  .feuille .acquit {
+    font-size: 10.5px;
+    line-height: 1.55;
+    color: #3d424c;
+  }
+  .feuille .signe {
+    margin-top: auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    font-size: 9.5px;
+    color: #8a8f99;
+  }
+  .feuille .signe b {
+    font-family: var(--display);
+    font-size: 12px;
+    color: #2b2f38;
+  }
+
+  /* Pied du document */
+  .suite {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
+    gap: 28px;
+  }
+  .suite .bloc {
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid #d8dcea;
+    border-radius: 16px;
+    padding: 22px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    color: var(--page-encre);
+  }
+  .suite h3 {
+    font-size: 19px;
+    font-weight: 600;
+  }
+  .suite ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    font-size: 14.5px;
+  }
+  .suite code {
+    font-family: ui-monospace, 'Cascadia Mono', 'Consolas', monospace;
+    font-size: 13px;
+    background: #fff;
+    border: 1px solid #e0e3ee;
+    padding: 1px 6px;
+    border-radius: 6px;
+  }
+  .suite li b {
+    display: block;
+  }
+  .suite li span {
+    color: #5a6080;
+  }
+  .exemple {
+    font-size: 13px;
+    color: #5a6080;
+  }
+
+  a:focus-visible,
+  .btn:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  @media (max-width: 900px) {
+    .tete {
+      grid-template-columns: 1fr;
+    }
+    .these {
+      justify-self: start;
+    }
+    .these .deux {
+      font-size: 120px;
+    }
+    .tete h1 {
+      font-size: 40px;
+    }
+    .portes-resume {
+      grid-template-columns: 1fr;
+    }
+    .planche-tete {
+      grid-template-columns: 1fr;
+      gap: 4px;
+    }
+    .suite {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<div class="doc">
+  <header>
+    <div class="tete">
+      <div>
+        <span class="logo-doc" data-logo></span>
+        <p class="surtitre">Maquettes · 14 septembre 2026 · rien n'est développé</p>
+        <h1>Gérer, l'espace d'après l'achat</h1>
+        <p class="chapo">
+          Tes biens, tes locataires, tes loyers. Deklic reprend ce qu'il sait déjà, suit les
+          paiements et envoie les quittances tout seul.
+        </p>
+      </div>
+      <div class="these" aria-label="Deux clics">
+        <span class="deux" aria-hidden="true">2</span>
+        <p class="deux-texte">
+          clics, et la location tourne.<small
+            >Tout le reste a une valeur par défaut sourcée, modifiable plus tard.</small
+          >
+        </p>
+      </div>
+    </div>
+
+    <nav class="portes-resume" aria-label="Les trois portes">
+      <a href="#porte-achat"
+        ><b>J'ai acheté ce bien</b
+        ><span>Depuis une analyse Deklic. On reprend prêt, charges et loyer.</span></a
+      >
+      <a href="#porte-banque"
+        ><b>Connecter ma banque</b
+        ><span>Déjà propriétaire. On retrouve les loyers dans tes comptes.</span></a
+      >
+      <a href="#porte-main"
+        ><b>Ajouter à la main</b><span>Une adresse, un loyer, un locataire. Un écran.</span></a
+      >
+    </nav>
+    <p class="legende">
+      <span class="btn s petit" style="pointer-events: none">Bouton<span class="k">1</span></span>
+      un clic compté dans Deklic · <span>Taper au clavier ne compte pas</span> ·
+      <span class="exemple">Noms, adresses et montants : données d'exemple</span>
+    </p>
+  </header>
+
+  <!-- Accueil vide -->
+  <section class="planche" id="accueil-vide">
+    <div class="planche-tete">
+      <p class="surtitre">Premier accès</p>
+      <div>
+        <h2>Trois portes, une seule question : d'où pars-tu ?</h2>
+        <p class="note">
+          Le sélecteur Analyser · Gérer change tout le menu. Chaque porte commence par un seul
+          bouton.
+        </p>
+      </div>
+    </div>
+    <div class="defile">
+      <div class="ecran">
+        <div class="url"><i data-ic="cadenas"></i>loupeprojet.pages.dev/gerer</div>
+        <div class="app">
+          <aside class="side" data-side="gerer" data-actif="accueil"></aside>
+          <main class="main">
+            <div>
+              <h3 class="h-ecran">Mettons tes biens en pilote automatique.</h3>
+              <p class="sous">Deux clics, promis.</p>
+            </div>
+            <div class="grille-3">
+              <div class="carte porte">
+                <span class="ico" style="background: var(--accent-doux); color: var(--accent)"
+                  ><i data-ic="maisonok"></i
+                ></span>
+                <h4>J'ai acheté un bien analysé</h4>
+                <p class="phrase">On reprend tout de ton analyse : prêt, charges, loyer.</p>
+                <div class="bas">
+                  <div class="mini-projet">
+                    <div><b>T2 · 38 m² · dépt 13</b><small>Offre faite</small></div>
+                    <span class="btn p petit">Gérer ce bien<span class="k">1</span></span>
+                  </div>
+                  <div class="mini-projet">
+                    <div><b>Studio · 24 m² · dépt 13</b><small>En analyse</small></div>
+                    <span class="btn s petit">Gérer</span>
+                  </div>
+                </div>
+              </div>
+              <div class="carte porte">
+                <span class="ico" style="background: var(--bon-fond); color: var(--bon-texte)"
+                  ><i data-ic="banque"></i
+                ></span>
+                <h4>Connecter ma banque</h4>
+                <p class="phrase">Déjà propriétaire ? On retrouve tes loyers dans tes comptes.</p>
+                <div class="bas">
+                  <span class="recommande">Le plus rapide si tu as déjà des locataires</span>
+                  <span class="btn p">Choisir ma banque<span class="k">1</span></span>
+                </div>
+              </div>
+              <div class="carte porte">
+                <span class="ico" style="background: var(--flash-fond); color: #b4520c"
+                  ><i data-ic="crayon"></i
+                ></span>
+                <h4>Ajouter à la main</h4>
+                <p class="phrase">Une adresse, un loyer, un locataire.</p>
+                <div class="bas">
+                  <span class="btn s">Ajouter<span class="k">1</span></span>
+                </div>
+              </div>
+            </div>
+          </main>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Porte 1 -->
+  <section class="planche" id="porte-achat">
+    <div class="planche-tete">
+      <p class="surtitre">Porte 1 · J'ai acheté ce bien</p>
+      <div>
+        <h2>L'analyse devient un bien géré, sans rien ressaisir.</h2>
+        <p class="note">
+          Le bouton vit aussi dans l'en-tête de chaque projet. L'écran suivant est déjà rempli ;
+          seule la ligne du locataire attend une saisie.
+        </p>
+      </div>
+    </div>
+    <div class="defile">
+      <div class="ecran">
+        <div class="url"><i data-ic="cadenas"></i>loupeprojet.pages.dev/projets/t2-lices</div>
+        <div class="entete-projet">
+          <div class="titre">
+            <span>Mes projets / T2 · 38 m² · dépt 13</span><b>148 000 € · Meublé</b>
+          </div>
+          <div class="onglets">
+            <span class="on">Rapport</span><span>Estimation</span><span>Hypothèses</span
+            ><span>Fiscalité</span><span>Revente</span><span>Visite</span>
+          </div>
+          <div class="actions">
+            <span class="statut-projet"
+              >Offre faite <i data-ic="bas" style="width: 14px; height: 14px"></i
+            ></span>
+            <span class="btn s">PDF</span>
+            <span class="btn s">Partager</span>
+            <span class="btn p">J'ai acheté ce bien<span class="k">1</span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="defile">
+      <div class="ecran">
+        <div class="url"><i data-ic="cadenas"></i>loupeprojet.pages.dev/gerer/pret/t2-lices</div>
+        <div class="app">
+          <aside class="side" data-side="gerer" data-actif="accueil"></aside>
+          <main class="main">
+            <div>
+              <p class="fil">Gérer / Prêt à gérer</p>
+              <h3 class="h-ecran">Prêt à gérer</h3>
+              <p class="sous">
+                T2 · 12 rue des Lices, Marseille 5e · tout vient de ton analyse du 12 septembre.
+                Touche une ligne pour la changer.
+              </p>
+            </div>
+            <div class="grille-2">
+              <div class="pile">
+                <div class="carte">
+                  <h4>Le bien</h4>
+                  <div class="lignes">
+                    <div class="ligne">
+                      <span class="cle">Appartement</span><span class="val">38 m² · 2 pièces</span
+                      ><span class="prov analyse">analyse</span>
+                    </div>
+                    <div class="ligne">
+                      <span class="cle">DPE</span><span class="val">D</span
+                      ><span class="prov analyse">analyse</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="carte">
+                  <h4>Le prêt</h4>
+                  <div class="lignes">
+                    <div class="ligne">
+                      <span class="cle">Mensualité, assurance comprise</span
+                      ><span class="val">612 €</span><span class="prov analyse">analyse</span>
+                    </div>
+                    <div class="ligne">
+                      <span class="cle">Dernière échéance</span
+                      ><span class="val">septembre 2046</span
+                      ><span class="prov analyse">analyse</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="carte">
+                  <h4>Les charges</h4>
+                  <div class="lignes">
+                    <div class="ligne">
+                      <span class="cle">Taxe foncière</span><span class="val">720 €/an</span
+                      ><span class="prov analyse">analyse</span>
+                    </div>
+                    <div class="ligne">
+                      <span class="cle">Copropriété</span><span class="val">90 €/mois</span
+                      ><span class="prov analyse">analyse</span>
+                    </div>
+                    <div class="ligne">
+                      <span class="cle">Assurance propriétaire</span
+                      ><span class="val">12 €/mois</span><span class="prov analyse">analyse</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="pile">
+                <div class="carte">
+                  <h4>La location</h4>
+                  <div class="lignes">
+                    <div class="ligne">
+                      <span class="cle">Meublée</span
+                      ><span class="val">650 € + 50 € de charges</span
+                      ><span class="prov analyse">analyse</span>
+                    </div>
+                    <div class="ligne defaut">
+                      <span class="cle">Loyer attendu</span><span class="val">le 5 du mois</span
+                      ><span class="prov defaut">par défaut</span>
+                    </div>
+                    <div class="ligne defaut">
+                      <span class="cle">Dépôt de garantie</span
+                      ><span class="val">1 300 € (2 mois)</span
+                      ><span class="prov defaut">par défaut</span>
+                    </div>
+                    <div class="ligne defaut">
+                      <span class="cle">Entrée du locataire</span
+                      ><span class="val">1er octobre 2026</span
+                      ><span class="prov defaut">par défaut</span>
+                    </div>
+                    <div class="ligne defaut">
+                      <span class="cle">Révision du loyer</span
+                      ><span class="val">chaque 1er octobre · IRL</span
+                      ><span class="prov defaut">par défaut</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="carte" style="border-color: var(--accent-bordure)">
+                  <h4>Ton locataire</h4>
+                  <div class="grille-2" style="gap: 12px">
+                    <div class="champ">
+                      <label>Prénom et nom</label>
+                      <div class="saisie">Julie Martin</div>
+                    </div>
+                    <div class="champ">
+                      <label>E-mail</label>
+                      <div class="saisie focus">julie.martin@exemple.fr</div>
+                    </div>
+                  </div>
+                  <span class="coche"><span class="boite"></span>Pas encore loué</span>
+                </div>
+              </div>
+            </div>
+            <div class="pied-action">
+              <p>Ensuite, on s'occupe des quittances.</p>
+              <span class="btn p" style="padding: 0 30px">C'est parti<span class="k">2</span></span>
+            </div>
+          </main>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Porte 2 -->
+  <section class="planche" id="porte-banque">
+    <div class="planche-tete">
+      <p class="surtitre">Porte 2 · Connecter ma banque</p>
+      <div>
+        <h2>Les virements qui reviennent chaque mois sont tes loyers.</h2>
+        <p class="note">
+          Après le choix de la banque (clic 1) et la validation dans l'appli de la banque, Deklic
+          lit 13 mois d'opérations et propose tout. Il ne reste qu'à dire où est chaque bien.
+          Suppose un contrat avec un fournisseur agréé (décision à prendre).
+        </p>
+      </div>
+    </div>
+    <div class="defile">
+      <div class="ecran">
+        <div class="url"><i data-ic="cadenas"></i>loupeprojet.pages.dev/gerer/banque/trouve</div>
+        <div class="app">
+          <aside class="side" data-side="gerer" data-actif="banque"></aside>
+          <main class="main">
+            <div>
+              <p class="fil">Gérer / Banque</p>
+              <h3 class="h-ecran">On a trouvé 2 loyers, une APL et 4 dépenses.</h3>
+              <p class="sous">
+                Dans tes 13 derniers mois, sur 2 comptes. Décoche ce que tu ne veux pas créer.
+              </p>
+            </div>
+            <div class="carte">
+              <h4>Loyers</h4>
+              <div>
+                <div class="op">
+                  <span class="boite on"></span>
+                  <div>
+                    <p class="libelle">VIR SEPA MARTIN JULIE LOYER</p>
+                    <p class="rythme">vers le 5 · depuis octobre 2025</p>
+                  </div>
+                  <div>
+                    <div class="mois13">
+                      <i class="non"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i
+                      ><i></i><i></i><i></i><i></i>
+                    </div>
+                    <p class="mois13-leg">sept. 2025 → sept. 2026</p>
+                  </div>
+                  <div style="display: flex; gap: 14px; align-items: center">
+                    <span class="montant">700 €</span>
+                    <div class="saisie" style="flex: 1">12 rue des Lices, Marseille 5e</div>
+                  </div>
+                </div>
+                <div class="op">
+                  <span class="boite on"></span>
+                  <div>
+                    <p class="libelle">VIR DUPONT ANTOINE</p>
+                    <p class="rythme">vers le 3 · depuis janvier 2026</p>
+                  </div>
+                  <div>
+                    <div class="mois13">
+                      <i class="non"></i><i class="non"></i><i class="non"></i><i class="non"></i
+                      ><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+                    </div>
+                    <p class="mois13-leg">sept. 2025 → sept. 2026</p>
+                  </div>
+                  <div style="display: flex; gap: 14px; align-items: center">
+                    <span class="montant">430 €</span>
+                    <div class="saisie focus" style="flex: 1">8 boulevard Baille, Marseille 6e</div>
+                  </div>
+                </div>
+                <div class="op">
+                  <span class="boite on"></span>
+                  <div>
+                    <p class="libelle">VIR CAF DES BOUCHES-DU-RHONE</p>
+                    <p class="rythme">le 5 · depuis janvier 2026</p>
+                  </div>
+                  <div>
+                    <div class="mois13">
+                      <i class="non"></i><i class="non"></i><i class="non"></i><i class="non"></i
+                      ><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+                    </div>
+                    <p class="mois13-leg">sept. 2025 → sept. 2026</p>
+                  </div>
+                  <div style="display: flex; gap: 14px; align-items: center">
+                    <span class="montant">180 €</span
+                    ><span class="lien-apl">APL du loyer de DUPONT ANTOINE</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="carte">
+              <h4>Dépenses</h4>
+              <div>
+                <div class="op">
+                  <span class="boite on"></span>
+                  <div>
+                    <p class="libelle">PRLV SEPA ECH PRET IMMO 0042</p>
+                    <p class="rythme">Prêt · le 10 de chaque mois</p>
+                  </div>
+                  <span class="montant">612 €/mois</span>
+                  <div class="saisie">
+                    T2 Lices
+                    <i data-ic="bas" style="width: 14px; height: 14px; margin-left: auto"></i>
+                  </div>
+                </div>
+                <div class="op">
+                  <span class="boite on"></span>
+                  <div>
+                    <p class="libelle">PRLV SYNDIC LES PINS</p>
+                    <p class="rythme">Copropriété · chaque trimestre</p>
+                  </div>
+                  <span class="montant">270 €/trim.</span>
+                  <div class="saisie">
+                    T2 Lices
+                    <i data-ic="bas" style="width: 14px; height: 14px; margin-left: auto"></i>
+                  </div>
+                </div>
+                <div class="op">
+                  <span class="boite on"></span>
+                  <div>
+                    <p class="libelle">DGFIP TAXE FONCIERE 2025</p>
+                    <p class="rythme">Taxe foncière · en octobre</p>
+                  </div>
+                  <span class="montant">720 €/an</span>
+                  <div class="saisie">
+                    T2 Lices
+                    <i data-ic="bas" style="width: 14px; height: 14px; margin-left: auto"></i>
+                  </div>
+                </div>
+                <div class="op">
+                  <span class="boite"></span>
+                  <div>
+                    <p class="libelle">PRLV ASSURANCE HABITATION PNO</p>
+                    <p class="rythme">Assurance · le 1er de chaque mois</p>
+                  </div>
+                  <span class="montant">12 €/mois</span>
+                  <div class="saisie vide">
+                    Choisir le bien
+                    <i data-ic="bas" style="width: 14px; height: 14px; margin-left: auto"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="pied-action">
+              <p>Les virements irréguliers restent « à classer ». Rien n'est inventé.</p>
+              <span class="btn p" style="padding: 0 30px">Tout créer<span class="k">2</span></span>
+            </div>
+          </main>
+        </div>
+      </div>
+    </div>
+    <p class="legende-ecran">
+      Tant qu'une adresse manque sur une ligne cochée, le bouton dit « Encore 1 adresse » et reste
+      inactif : on sait exactement ce qui bloque.
+    </p>
+  </section>
+
+  <!-- Porte 3 -->
+  <section class="planche" id="porte-main">
+    <div class="planche-tete">
+      <p class="surtitre">Porte 3 · Ajouter à la main</p>
+      <div>
+        <h2>Un écran, six champs, un bouton.</h2>
+        <p class="note">
+          Dépôt, jour du loyer, indice de révision et type de bien sont déduits. Le reste attend
+          derrière « Plus de détails ».
+        </p>
+      </div>
+    </div>
+    <div class="defile">
+      <div class="ecran">
+        <div class="url"><i data-ic="cadenas"></i>loupeprojet.pages.dev/gerer/ajouter</div>
+        <div class="app etroit">
+          <aside class="side" data-side="gerer" data-actif="biens"></aside>
+          <main class="main" style="align-items: center">
+            <div class="carte" style="width: 600px; gap: 16px; padding: 26px 28px">
+              <h3 class="h-ecran" style="font-size: 24px">Ajouter un bien loué</h3>
+              <div class="champ">
+                <label>Adresse</label>
+                <div class="saisie">3 rue du Rouet, Marseille 6e</div>
+              </div>
+              <div class="champ">
+                <label>Location</label>
+                <div class="choix"><span>Vide</span><span class="on">Meublée</span></div>
+              </div>
+              <div class="grille-2" style="gap: 12px">
+                <div class="champ">
+                  <label>Loyer</label>
+                  <div class="saisie num">490<span class="unite">€ hors charges</span></div>
+                </div>
+                <div class="champ">
+                  <label>Charges</label>
+                  <div class="saisie num">40<span class="unite">€</span></div>
+                </div>
+              </div>
+              <div class="grille-2" style="gap: 12px">
+                <div class="champ">
+                  <label>Locataire</label>
+                  <div class="saisie">Léa Bernard</div>
+                </div>
+                <div class="champ">
+                  <label>E-mail</label>
+                  <div class="saisie">lea.bernard@exemple.fr</div>
+                </div>
+              </div>
+              <div class="champ" style="max-width: 260px">
+                <label>Entrée</label>
+                <div class="saisie num">1er septembre 2026</div>
+              </div>
+              <span class="btn d" style="align-self: flex-start"
+                ><i data-ic="droite"></i>Plus de détails (surface, DPE, jour du loyer, APL,
+                colocation)</span
+              >
+              <div class="pied-action">
+                <span class="btn p" style="padding: 0 34px">Créer<span class="k">2</span></span>
+              </div>
+            </div>
+          </main>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Régime de croisière -->
+  <section class="planche" id="accueil">
+    <div class="planche-tete">
+      <p class="surtitre">Ensuite, chaque mois</p>
+      <div>
+        <h2>L'accueil répond à « qui a payé ? », puis montre les exceptions.</h2>
+        <p class="note">
+          Trois actions au plus, chacune avec un seul bouton. Un mois sans incident affiche « Tout
+          est reçu. Rien à faire ce mois-ci. »
+        </p>
+      </div>
+    </div>
+    <div class="defile">
+      <div class="ecran">
+        <div class="url"><i data-ic="cadenas"></i>loupeprojet.pages.dev/gerer</div>
+        <div class="app">
+          <aside class="side" data-side="gerer" data-actif="accueil" data-biens="oui"></aside>
+          <main class="main">
+            <div class="grille-2" style="grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr)">
+              <div class="carte" style="gap: 14px">
+                <p class="surtitre" style="color: var(--encre-3); opacity: 1">Septembre 2026</p>
+                <p class="grand-titre">3 loyers sur 4 reçus</p>
+                <div class="barre" role="img" aria-label="1 680 euros reçus sur 2 110">
+                  <i style="width: 79.6%"></i>
+                </div>
+                <div class="barre-leg num">
+                  <span><b style="color: var(--encre)">1 680 €</b> reçus</span
+                  ><span>sur 2 110 €</span>
+                </div>
+              </div>
+              <div class="carte">
+                <h4>Ce mois-ci</h4>
+                <div class="chiffres">
+                  <div class="chiffre"><span>Encaissé</span><b>1 680 €</b></div>
+                  <div class="chiffre"><span>Dépenses et crédits</span><b>1 012 €</b></div>
+                  <div class="chiffre total"><span>Cash-flow réel</span><b>+668 €</b></div>
+                </div>
+              </div>
+            </div>
+            <div class="carte">
+              <h4>À faire</h4>
+              <div>
+                <div class="afaire">
+                  <span class="pt pb"></span
+                  ><span
+                    >Loyer d'Antoine : 430 € attendus depuis le 3<small
+                      >Studio Baille · aucun virement reçu</small
+                    ></span
+                  ><span class="btn p petit">Relancer</span>
+                </div>
+                <div class="afaire">
+                  <span class="pt surv"></span
+                  ><span
+                    >Réviser le loyer de Julie : 650 € → 657,49 €<small
+                      >IRL 2e trimestre 2026 · à partir du 1er octobre</small
+                    ></span
+                  ><span class="btn s petit">Voir</span>
+                </div>
+                <div class="afaire">
+                  <span class="pt surv"></span
+                  ><span
+                    >Ta banque se déconnecte dans 12 jours<small
+                      >Une validation dans l'appli de ta banque</small
+                    ></span
+                  ><span class="btn s petit">Reconnecter</span>
+                </div>
+              </div>
+            </div>
+            <div class="carte">
+              <h4>Mes biens</h4>
+              <table class="biens">
+                <tr>
+                  <td>T2 Lices</td>
+                  <td>Julie Martin</td>
+                  <td>
+                    <div class="frise" aria-label="12 mois reçus">
+                      <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i
+                      ><i></i>
+                    </div>
+                  </td>
+                  <td class="m">700 €</td>
+                  <td class="d">le 5</td>
+                  <td><span class="etat recu">Reçu</span></td>
+                </tr>
+                <tr>
+                  <td>Studio Baille</td>
+                  <td>Antoine Dupont</td>
+                  <td>
+                    <div class="frise" aria-label="8 mois reçus, 1 en retard">
+                      <i class="vide"></i><i class="vide"></i><i class="vide"></i><i></i><i></i
+                      ><i></i><i></i><i></i><i></i><i></i><i></i><i class="pb"></i>
+                    </div>
+                  </td>
+                  <td class="m">430 €</td>
+                  <td class="d">le 3</td>
+                  <td><span class="etat retard">En retard</span></td>
+                </tr>
+                <tr>
+                  <td>Coloc Rouet</td>
+                  <td>2 chambres sur 3</td>
+                  <td>
+                    <div class="frise" aria-label="12 mois reçus">
+                      <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i
+                      ><i></i>
+                    </div>
+                  </td>
+                  <td class="m">980 €</td>
+                  <td class="d">le 1er</td>
+                  <td><span class="etat recu">Reçu</span></td>
+                </tr>
+                <tr>
+                  <td>Parking Prado</td>
+                  <td style="color: var(--encre-3)">Pas de locataire</td>
+                  <td>
+                    <div class="frise" aria-label="vacant">
+                      <i class="vide"></i><i class="vide"></i><i class="vide"></i
+                      ><i class="vide"></i><i class="vide"></i><i class="vide"></i
+                      ><i class="vide"></i><i class="vide"></i><i class="vide"></i
+                      ><i class="vide"></i><i class="vide"></i><i class="vide"></i>
+                    </div>
+                  </td>
+                  <td class="m">—</td>
+                  <td class="d"></td>
+                  <td><span class="etat vacant">Vacant</span></td>
+                </tr>
+              </table>
+            </div>
+          </main>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Loyers + téléphone -->
+  <section class="planche" id="loyers">
+    <div class="planche-tete">
+      <p class="surtitre">Loyers du mois</p>
+      <div>
+        <h2>En retard, attendus, reçus. Une action principale par ligne.</h2>
+        <p class="note">
+          « Reçu » enregistre le paiement et envoie la quittance ; le bandeau permet d'annuler
+          pendant 10 secondes. Au téléphone, les mêmes actions, au pouce.
+        </p>
+      </div>
+    </div>
+    <div class="defile">
+      <div class="rang">
+        <div class="ecran">
+          <div class="url"><i data-ic="cadenas"></i>loupeprojet.pages.dev/gerer/loyers</div>
+          <div class="app etroit">
+            <aside class="side" data-side="gerer" data-actif="loyers" data-biens="oui"></aside>
+            <main class="main">
+              <div class="mois">
+                <span><i data-ic="gauche"></i></span>Septembre 2026<span
+                  ><i data-ic="droite"></i
+                ></span>
+              </div>
+              <div class="carte groupe-loyers">
+                <h4><span class="pt pb"></span>En retard · 1</h4>
+                <div>
+                  <div class="loyer">
+                    <div>
+                      <b>Antoine Dupont</b><small>Studio Baille · APL 180 € reçue le 5</small>
+                    </div>
+                    <span class="m">430 €</span><small>dû le 3</small>
+                    <div class="actions">
+                      <span class="btn s petit">Relancer</span><span class="btn p petit">Reçu</span
+                      ><span class="plus">···</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="carte groupe-loyers">
+                <h4><span class="pt bon"></span>Reçus · 3</h4>
+                <div>
+                  <div class="loyer">
+                    <div><b>Julie Martin</b><small>T2 Lices · banque, le 5</small></div>
+                    <span class="m">700 €</span><small>quittance envoyée</small>
+                    <div class="actions">
+                      <span class="btn s petit">Quittance</span><span class="plus">···</span>
+                    </div>
+                  </div>
+                  <div class="loyer">
+                    <div>
+                      <b>Léa Bernard</b><small>Coloc Rouet · chambre 1 · banque, le 1er</small>
+                    </div>
+                    <span class="m">530 €</span><small>quittance envoyée</small>
+                    <div class="actions">
+                      <span class="btn s petit">Quittance</span><span class="plus">···</span>
+                    </div>
+                  </div>
+                  <div class="loyer">
+                    <div>
+                      <b>Hugo Petit</b><small>Coloc Rouet · chambre 2 · confirmé par e-mail</small>
+                    </div>
+                    <span class="m">450 €</span><small>quittance envoyée</small>
+                    <div class="actions">
+                      <span class="btn s petit">Quittance</span><span class="plus">···</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="toast">
+                <span>Reçu · quittance envoyée à Julie</span><span class="btn">Annuler</span>
+              </div>
+            </main>
+          </div>
+        </div>
+
+        <div class="tel" aria-label="Accueil au téléphone">
+          <div class="haut">
+            <span data-icone></span>
+            <div class="seg"><span>Analyser</span><span class="on">Gérer</span></div>
+          </div>
+          <div class="corps">
+            <div>
+              <p class="surtitre" style="color: var(--encre-3); opacity: 1">Septembre 2026</p>
+              <p class="grand-titre">3 loyers sur 4 reçus</p>
+            </div>
+            <div class="barre"><i style="width: 79.6%"></i></div>
+            <div class="barre-leg num" style="font-size: 13px">
+              <span><b style="color: var(--encre)">1 680 €</b> reçus</span><span>sur 2 110 €</span>
+            </div>
+            <div class="carte">
+              <h4 style="font-size: 15px">À faire</h4>
+              <div class="afaire">
+                <span class="pt pb"></span
+                ><span>Loyer d'Antoine : 430 €<small>attendu depuis le 3</small></span
+                ><span class="btn p petit">Relancer</span>
+              </div>
+              <div class="afaire">
+                <span class="pt surv"></span
+                ><span>Réviser le loyer de Julie<small>650 € → 657,49 €</small></span
+                ><span class="btn s petit">Voir</span>
+              </div>
+            </div>
+            <div class="carte">
+              <div class="afaire" style="border: 0; padding: 0">
+                <span class="pt bon"></span
+                ><span>T2 Lices · 700 €<small>Reçu le 5 · quittance envoyée</small></span>
+              </div>
+              <div class="afaire">
+                <span class="pt bon"></span
+                ><span>Coloc Rouet · 980 €<small>2 chambres sur 3 · reçu</small></span>
+              </div>
+            </div>
+          </div>
+          <div class="bas-nav">
+            <span class="on"><i data-ic="maison"></i>Accueil</span>
+            <span><i data-ic="euro"></i>Loyers</span>
+            <span
+              ><b class="rond"><i data-ic="plus"></i></b
+            ></span>
+            <span><i data-ic="argent"></i>Argent</span>
+            <span><i data-ic="menu"></i>Plus</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- E-mails -->
+  <section class="planche" id="courriels">
+    <div class="planche-tete">
+      <p class="surtitre">Sans banque, sans ouvrir Deklic</p>
+      <div>
+        <h2>Une question par e-mail, une réponse d'un clic.</h2>
+        <p class="note">
+          Le bailleur confirme le loyer depuis sa messagerie ; une page Deklic demande de confirmer
+          (les antivirus ouvrent les liens). Le locataire reçoit sa quittance, après avoir accepté
+          une fois l'envoi par e-mail.
+        </p>
+      </div>
+    </div>
+    <div class="defile">
+      <div class="rang">
+        <div class="courriel">
+          <div class="entete-c">
+            <span>De : Deklic &lt;loyers@deklic…&gt;</span><span>À : Camille Roux</span
+            ><b>2 loyers à confirmer</b>
+          </div>
+          <div class="corps-c">
+            <span data-logo-mini></span>
+            <p>Bonjour Camille, as-tu reçu ces loyers en entier ?</p>
+            <div class="ligne-conf">
+              <div class="haut-l">
+                <span>Antoine · Studio Baille</span><span class="num">430 €</span>
+              </div>
+              <small style="color: var(--encre-3)">dû le 3 septembre</small>
+              <div class="boutons">
+                <span class="btn p petit">Oui, en entier<span class="k clair">un clic</span></span
+                ><span class="btn s petit">Pas encore</span>
+              </div>
+            </div>
+            <div class="ligne-conf">
+              <div class="haut-l">
+                <span>Hugo · Coloc Rouet, chambre 2</span><span class="num">450 €</span>
+              </div>
+              <small style="color: var(--encre-3)">dû le 1er septembre</small>
+              <div class="boutons">
+                <span class="btn p petit">Oui, en entier</span
+                ><span class="btn s petit">Pas encore</span>
+              </div>
+            </div>
+            <p style="font-size: 13px; color: var(--encre-3)">
+              Un « oui » envoie la quittance au locataire. Tu peux aussi répondre dans Deklic.
+            </p>
+          </div>
+        </div>
+
+        <div class="courriel">
+          <div class="entete-c">
+            <span>De : Camille Roux via Deklic</span><span>À : Julie Martin</span
+            ><b>Votre quittance de loyer – septembre 2026</b>
+          </div>
+          <div class="corps-c">
+            <p>Bonjour Madame Martin,</p>
+            <p>
+              Vous trouverez ci-joint la quittance de votre loyer de septembre 2026 pour le logement
+              du 12 rue des Lices, Marseille 5e :
+              <b class="num" style="color: var(--encre)">700,00 €</b> reçus le 5 septembre.
+            </p>
+            <div class="pj">
+              <i data-ic="trombone"></i>quittance-2026-09-t2-lices.pdf<small>38 Ko</small>
+            </div>
+            <p style="font-size: 13px; color: var(--encre-3)">
+              Envoyé pour Camille Roux, qui reçoit vos réponses. Vous préférez un envoi papier ?
+              Répondez à cet e-mail.
+            </p>
+          </div>
+        </div>
+
+        <div class="feuille" aria-label="Aperçu de la quittance">
+          <div>
+            <h4>Quittance de loyer</h4>
+            <p class="periode">Période du 1er au 30 septembre 2026 · n° 2026-09-T2L</p>
+          </div>
+          <div class="parties">
+            <p><small>Bailleur</small>Camille Roux<br />24 avenue du Prado<br />13008 Marseille</p>
+            <p>
+              <small>Locataire</small>Julie Martin<br /><small style="margin-top: 8px"
+                >Logement loué</small
+              >12 rue des Lices, 2e étage<br />13005 Marseille
+            </p>
+          </div>
+          <table>
+            <tr>
+              <td>Loyer hors charges</td>
+              <td>650,00 €</td>
+            </tr>
+            <tr>
+              <td>Provision pour charges</td>
+              <td>50,00 €</td>
+            </tr>
+            <tr class="total">
+              <td>Total reçu le 5 septembre 2026</td>
+              <td>700,00 €</td>
+            </tr>
+          </table>
+          <p class="acquit">
+            Je soussignée Camille Roux, bailleur du logement désigné ci-dessus, déclare avoir reçu
+            de Julie Martin la somme de sept cents euros au titre du loyer et des charges de la
+            période indiquée, et lui en donne quittance, sous réserve de tous mes droits.
+          </p>
+          <div class="signe"><span>Émise le 5 septembre 2026</span><b>Camille Roux</b></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="suite">
+    <div class="bloc">
+      <h3>Où lire la suite</h3>
+      <ul>
+        <li><b>Discovery</b><code>.product/features/gestion-locative-discovery.md</code></li>
+        <li>
+          <b>Specs : 33 stories en 5 features</b
+          ><code>.product/specs/gestion-locative-specs.md</code>
+        </li>
+        <li><b>UX détaillée</b><code>.product/design/gestion-locative-ux.md</code></li>
+      </ul>
+    </div>
+    <div class="bloc">
+      <h3>À décider avant de coder</h3>
+      <ul>
+        <li>
+          <b>Fournisseur bancaire et budget</b
+          ><span
+            >Aucune offre gratuite pour de vrais utilisateurs. Reco : demander trois devis, livrer
+            G1 et G2 sans banque.</span
+          >
+        </li>
+        <li>
+          <b>Gratuit ou payant</b
+          ><span>Reco : Gérer gratuit sans banque, synchronisation bancaire payante.</span>
+        </li>
+        <li>
+          <b>Le sélecteur Analyser · Gérer</b
+          ><span>Reco : en haut de la barre latérale, retenu d'une visite à l'autre.</span>
+        </li>
+        <li><b>Import depuis Rentila</b><span>À tester sur tes exports.</span></li>
+      </ul>
+    </div>
+  </footer>
+</div>
+
+<script>
+  // Logo Deklic (marque/logo, ADR-005) : maison bleue, éclats orange, mot en tracés.
+  const MOT_AVANT =
+    'M29.9 1.8Q24.1 1.8 19.35 -0.3Q14.6 -2.4 11.1 -6.15Q7.6 -9.9 5.75 -15Q3.9 -20.1 3.9 -26L3.9 -28.3Q3.9 -34.2 5.65 -39.3Q7.4 -44.4 10.75 -48.25Q14.1 -52.1 18.8 -54.25Q23.5 -56.4 29.3 -56.4Q35.9 -56.4 40.7 -53.55Q45.5 -50.7 48.2 -45.15Q50.9 -39.6 51.2 -31.5L47 -35.4L47 -73L63.1 -73L63.1 0L50.4 0L50.4 -22.7L52.6 -22.7Q52.3 -14.9 49.35 -9.4Q46.4 -3.9 41.4 -1.05Q36.4 1.8 29.9 1.8ZM33.9 -11.6Q37.6 -11.6 40.65 -13.25Q43.7 -14.9 45.550 -18.1Q47.4 -21.3 47.4 -25.8L47.4 -29.5Q47.4 -33.9 45.5 -36.9Q43.6 -39.9 40.5 -41.5Q37.4 -43.1 33.8 -43.1Q29.8 -43.1 26.65 -41.05Q23.5 -39 21.7 -35.45Q19.9 -31.9 19.9 -27.2Q19.9 -22.4 21.7 -18.9Q23.5 -15.4 26.7 -13.5Q29.9 -11.6 33.9 -11.6Z M97.7 1.9Q90.7 1.9 85.35 -0.5Q80 -2.9 76.45 -6.95Q72.9 -11 71.05 -16.05Q69.2 -21.1 69.2 -26.4L69.2 -28.4Q69.2 -33.9 71.05 -38.95Q72.9 -44 76.4 -48Q79.9 -52 85.15 -54.35Q90.4 -56.7 97.1 -56.7Q105.9 -56.7 111.95 -52.75Q118 -48.8 121.2 -42.45Q124.4 -36.1 124.4 -28.6L124.4 -23.2L75.9 -23.2L75.9 -32.3L114.7 -32.3L109.5 -28.1Q109.5 -33 108.1 -36.5Q106.7 -40 103.95 -41.85Q101.2 -43.7 97.1 -43.7Q92.9 -43.7 90 -41.8Q87.1 -39.9 85.6 -36.25Q84.1 -32.6 84.1 -27.3Q84.1 -22.4 85.5 -18.75Q86.9 -15.1 89.9 -13.1Q92.9 -11.1 97.7 -11.1Q102.1 -11.1 104.9 -12.8Q107.7 -14.5 108.7 -17L123.4 -17Q122.2 -11.5 118.7 -7.2Q115.2 -2.9 109.9 -0.5Q104.6 1.9 97.7 1.9Z M168.6 0L151.3 -25.6L143.6 -25.6L165.9 -54.8L182.7 -54.8L161.7 -27.6L161.9 -35.4L186.6 0ZM130 0L130 -73L146 -73L146 0Z M189.2 0L189.2 -73L205.3 -73L205.3 0ZM182.7 -61.2L182.7 -73L205.3 -73L205.3 -61.2Z';
+  const MOT_I =
+    'M217.6 0L217.6 -54.8L233.6 -54.8L233.6 0ZM210.3 -43L210.3 -54.8L233.6 -54.8L233.6 -43ZM223.8 -60.2Q219.3 -60.2 217.15 -62.55Q215 -64.9 215 -68.5Q215 -72.2 217.15 -74.55Q219.3 -76.9 223.8 -76.9Q228.3 -76.9 230.45 -74.55Q232.6 -72.2 232.6 -68.5Q232.6 -64.9 230.45 -62.55Q228.3 -60.2 223.8 -60.2Z';
+  const MOT_APRES =
+    'M268 1.9Q260.9 1.9 255.65 -0.45Q250.4 -2.8 246.9 -6.8Q243.4 -10.8 241.7 -15.85Q240 -20.9 240 -26.3L240 -28.2Q240 -33.8 241.8 -38.95Q243.6 -44.1 247.1 -48.1Q250.6 -52.1 255.85 -54.4Q261.1 -56.7 267.9 -56.7Q275.3 -56.7 281 -53.85Q286.7 -51 290.1 -45.9Q293.5 -40.8 293.9 -34.2L278.2 -34.2Q277.8 -37.9 275.25 -40.45Q272.7 -43 267.9 -43Q263.9 -43 261.25 -41Q258.6 -39 257.3 -35.5Q256 -32 256 -27.2Q256 -22.8 257.2 -19.25Q258.4 -15.7 261.05 -13.75Q263.7 -11.8 268 -11.8Q271.2 -11.8 273.45 -12.95Q275.7 -14.1 277.05 -16.15Q278.4 -18.2 278.7 -20.9L294.3 -20.9Q294 -14.1 290.5 -8.95Q287 -3.8 281.2 -0.95Q275.4 1.9 268 1.9Z';
+  const MAISON =
+    '<path d="M32 22 L50 36 V56 H14 V36 Z" fill="#2b4bf2" stroke="#2b4bf2" stroke-width="4" stroke-linejoin="round"/><path d="M32 16 V6 M21 19 L14 12 M43 19 L50 12" fill="none" stroke="#ff7a1a" stroke-width="5" stroke-linecap="round"/>';
+  const LOGO =
+    '<svg viewBox="0 0 399 64" role="img" aria-label="Deklic">' +
+    MAISON +
+    '<g transform="translate(78 56) scale(0.6)"><path d="' +
+    MOT_AVANT +
+    '" fill="#2b4bf2"/><path d="' +
+    MOT_I +
+    '" fill="#ff7a1a"/><path d="' +
+    MOT_APRES +
+    '" fill="#2b4bf2"/></g></svg>';
+  const ICONE =
+    '<svg viewBox="0 0 64 64" role="img" aria-label="Deklic" style="height:26px;width:26px">' +
+    MAISON +
+    '</svg>';
+
+  const TRACES = {
+    maison: 'M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z',
+    maisonok: 'M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z M8.5 14.5l2.5 2.5 4.5-5',
+    euro: 'M18 7.5A6.5 6.5 0 1 0 18 16.5 M4 10h9 M4 14h9',
+    immeuble:
+      'M4 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16 M16 9h2a2 2 0 0 1 2 2v10 M8 7h4 M8 11h4 M8 15h4 M2 21h20',
+    personnes:
+      'M16 20v-1.5A3.5 3.5 0 0 0 12.5 15h-5A3.5 3.5 0 0 0 4 18.5V20 M10 11.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7 M20 20v-1.5a3.5 3.5 0 0 0-2.5-3.35 M15.5 4.65a3.5 3.5 0 0 1 0 6.7',
+    argent: 'M3 3v18h18 M7 15l4-4 3 3 5-6',
+    banque: 'M3 21h18 M5 21V10 M19 21V10 M9 21V10 M15 21V10 M12 3 2.5 8h19z',
+    plus: 'M12 5v14 M5 12h14',
+    crayon: 'M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16z M13.5 6.5l4 4',
+    trombone:
+      'M21 11.5 12.5 20a5 5 0 0 1-7-7L14 4.5a3.3 3.3 0 0 1 4.7 4.7L10.2 17.7a1.7 1.7 0 0 1-2.4-2.4L15.5 7.6',
+    gauche: 'M15 6l-6 6 6 6',
+    droite: 'M9 6l6 6-6 6',
+    bas: 'M6 9l6 6 6-6',
+    cadenas: 'M6 11h12v10H6z M8.5 11V8a3.5 3.5 0 0 1 7 0v3',
+    menu: 'M4 7h16 M4 12h16 M4 17h16',
+  };
+  const ic = (nom, style) =>
+    '<svg class="i"' +
+    (style ? ' style="' + style + '"' : '') +
+    ' viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="' +
+    TRACES[nom] +
+    '"/></svg>';
+
+  const MENU = [
+    ['accueil', 'maison', 'Accueil'],
+    ['loyers', 'euro', 'Loyers'],
+    ['biens', 'immeuble', 'Biens'],
+    ['locataires', 'personnes', 'Locataires'],
+    ['argent', 'argent', 'Argent'],
+    ['banque', 'banque', 'Banque'],
+  ];
+  const BIENS = [
+    ['T2 Lices', '', 'bon'],
+    ['Studio Baille', '', 'pb'],
+    ['Coloc Rouet', '2/3', 'bon'],
+    ['Parking Prado', '', 'creux'],
+  ];
+
+  function barreLaterale(el) {
+    const actif = el.dataset.actif;
+    const avecBiens = el.dataset.biens === 'oui';
+    const nav = MENU.map(([cle, icone, libelle]) => {
+      const compte = cle === 'loyers' && avecBiens ? '<span class="compte">1</span>' : '';
+      return (
+        '<a class="' + (cle === actif ? 'on' : '') + '">' + ic(icone) + libelle + compte + '</a>'
+      );
+    }).join('');
+    const biens = avecBiens
+      ? '<div class="mes-biens"><p class="etiquette">Mes biens</p>' +
+        BIENS.map(
+          ([nom, detail, pt]) =>
+            '<a><span class="pt ' +
+            pt +
+            '"></span>' +
+            nom +
+            (detail ? '<small>' + detail + '</small>' : '') +
+            '</a>',
+        ).join('') +
+        '</div>'
+      : '';
+    el.innerHTML =
+      '<div class="logo">' +
+      LOGO +
+      '</div>' +
+      '<div class="seg" role="group" aria-label="Espace"><span>Analyser</span><span class="on">Gérer</span></div>' +
+      '<span class="btn p plein">' +
+      ic('plus') +
+      'Ajouter un bien</span>' +
+      '<nav class="nav">' +
+      nav +
+      '</nav>' +
+      biens +
+      '<div class="ressort"></div>' +
+      '<div class="profil"><span class="ini">CR</span><span><b>Camille Roux</b><small>Mon compte</small></span></div>';
+  }
+
+  document.querySelectorAll('[data-side]').forEach(barreLaterale);
+  document.querySelectorAll('[data-ic]').forEach((el) => {
+    el.outerHTML = ic(el.dataset.ic, el.getAttribute('style'));
+  });
+  document.querySelectorAll('[data-logo]').forEach((el) => {
+    el.innerHTML = LOGO;
+    el.querySelector('svg').style.height = '28px';
+    el.querySelector('svg').style.width = 'auto';
+  });
+  document.querySelectorAll('[data-logo-mini]').forEach((el) => {
+    el.innerHTML = LOGO;
+    el.querySelector('svg').setAttribute('class', 'mini-logo');
+  });
+  document.querySelectorAll('[data-icone]').forEach((el) => {
+    el.outerHTML = ICONE;
+  });
+</script>
