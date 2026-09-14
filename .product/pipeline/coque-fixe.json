@@ -1,0 +1,46 @@
+{
+  "feature_slug": "coque-fixe",
+  "title": "Coque fixe : menu et en-tête fixes, seul le contenu défile (fiche de backlog 11)",
+  "started_at": "2026-09-14T14:00:00Z",
+  "current_step": "implement",
+  "scope": "apps/web/src/coque/{AppLayout,BarreApp,Sidebar,ProjetLayout}.tsx, coque/{entete,contenu}.ts, ecrans/Hypotheses.tsx (synthèse), index.css, tests/coque-fixe.test.tsx, e2e/{coque.spec.ts,formats.ts}, docs",
+  "branch": "feat/coque-fixe",
+  "base": "master (9d38892, après responsive #36, backlog #37, gestion-locative-menu #38)",
+  "baseline": {
+    "unit_tests": "961 tests, 138 fichiers (fin de responsive)",
+    "e2e": "8 parcours × 3 appareils + formats (54 tests)"
+  },
+  "steps": {
+    "discovery": {
+      "status": "completed",
+      "output": ".product/features/coque-fixe-discovery.md"
+    },
+    "specs": {
+      "status": "completed",
+      "output": ".product/specs/coque-fixe-specs.md",
+      "stories_count": 4
+    },
+    "architecture": {
+      "status": "completed",
+      "output": ".product/architecture/coque-fixe.md"
+    },
+    "implement": {
+      "status": "in_progress",
+      "stories_completed": 0,
+      "stories_total": 4,
+      "commits": [],
+      "notes": []
+    },
+    "qa_tests": { "status": "pending" },
+    "security": { "status": "pending" },
+    "push": { "status": "pending" }
+  },
+  "decisions": {
+    "largeur_menu": "224 px (--largeur-menu: 14rem), marges intérieures resserrées, libellés inchangés",
+    "surimpression": "sous 1 024 px seulement, déjà livrée par responsive (tiroir) ; pas de mode icônes seules",
+    "en_tete": "collé et compact : 48 + 44 px de 768 à 1 535 px, 56 px au-delà ; sur téléphone seule la bande des volets reste collée (top négatif mesuré)",
+    "titres": "titre-verdict et H1 restent dans le contenu qui défile",
+    "coque": "application (h-dvh overflow-hidden, main qui défile) ; retour en haut au changement de pathname",
+    "etat_pipeline": "session parallèle : état dans .product/pipeline/coque-fixe.json, pipeline-state.json réservé à la session principale"
+  }
+}
