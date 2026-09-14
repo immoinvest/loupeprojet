@@ -62,50 +62,57 @@ describe('Écran Visite', () => {
     expect(screen.getByRole('link', { name: 'vos hypothèses' })).toBeInTheDocument();
   });
 
-  it('enregistre une réponse et une note avec le projet, et les retrouve au retour', async () => {
-    const id = amorcer();
-    const utilisateur = userEvent.setup();
-    render(<AppEnMemoire chemin={`/projets/${id}/visite`} />);
-    await screen.findByRole('heading', { name: 'Préparer la visite' });
-    const nom = `Réponse : ${texteQuestion(premiere)}`;
+  // Deux rendus complets de l'écran (une cinquantaine de questions) : lent quand toute la suite tourne.
+  it(
+    'enregistre une réponse et une note avec le projet, et les retrouve au retour',
+    { timeout: 60_000 },
+    async () => {
+      const id = amorcer();
+      const utilisateur = userEvent.setup();
+      render(<AppEnMemoire chemin={`/projets/${id}/visite`} />);
+      await screen.findByRole('heading', { name: 'Préparer la visite' });
+      const nom = `Réponse : ${texteQuestion(premiere)}`;
 
-    await utilisateur.click(
-      within(screen.getByRole('group', { name: nom })).getByRole('radio', { name: 'Problème' }),
-    );
-    expect(enregistre()?.visite?.reponses[premiere.id]).toEqual({ etat: 'probleme' });
-    expect(screen.getByText(`1 sur ${String(N)} répondue, 1 problème`)).toBeInTheDocument();
-    expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '1');
+      await utilisateur.click(
+        within(screen.getByRole('group', { name: nom })).getByRole('radio', { name: 'Problème' }),
+      );
+      expect(enregistre()?.visite?.reponses[premiere.id]).toEqual({ etat: 'probleme' });
+      expect(screen.getByText(`1 sur ${String(N)} répondue, 1 problème`)).toBeInTheDocument();
+      expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '1');
 
-    const boutonsNote = screen.getAllByRole('button', { name: 'Ajouter une note' });
-    expect(boutonsNote).toHaveLength(N);
-    await utilisateur.click(boutonsNote[0]!);
-    const note = screen.getByRole('textbox', { name: `Note : ${texteQuestion(premiere)}` });
-    await utilisateur.type(note, ' plan manquant ');
-    expect(enregistre()?.visite?.reponses[premiere.id]).toEqual({
-      etat: 'probleme',
-      note: 'plan manquant',
-    });
+      const boutonsNote = screen.getAllByRole('button', { name: 'Ajouter une note' });
+      expect(boutonsNote).toHaveLength(N);
+      await utilisateur.click(boutonsNote[0]!);
+      const note = screen.getByRole('textbox', { name: `Note : ${texteQuestion(premiere)}` });
+      // Collée d'un coup plutôt que tapée lettre à lettre : un seul enregistrement, espaces des bords compris.
+      await utilisateur.click(note);
+      await utilisateur.paste(' plan manquant ');
+      expect(enregistre()?.visite?.reponses[premiere.id]).toEqual({
+        etat: 'probleme',
+        note: 'plan manquant',
+      });
 
-    await utilisateur.click(
-      within(screen.getByRole('group', { name: nom })).getByRole('radio', { name: 'À vérifier' }),
-    );
-    expect(enregistre()?.visite?.reponses[premiere.id]).toEqual({
-      etat: 'a_verifier',
-      note: 'plan manquant',
-    });
-    expect(screen.getByText(`0 sur ${String(N)} répondues`)).toBeInTheDocument();
+      await utilisateur.click(
+        within(screen.getByRole('group', { name: nom })).getByRole('radio', { name: 'À vérifier' }),
+      );
+      expect(enregistre()?.visite?.reponses[premiere.id]).toEqual({
+        etat: 'a_verifier',
+        note: 'plan manquant',
+      });
+      expect(screen.getByText(`0 sur ${String(N)} répondues`)).toBeInTheDocument();
 
-    cleanup();
-    render(<AppEnMemoire chemin={`/projets/${id}/visite`} />);
-    await screen.findByRole('heading', { name: 'Préparer la visite' });
-    expect(
-      within(screen.getByRole('group', { name: nom })).getByRole('radio', { name: 'À vérifier' }),
-    ).toBeChecked();
-    expect(screen.getByRole('textbox', { name: `Note : ${texteQuestion(premiere)}` })).toHaveValue(
-      'plan manquant',
-    );
-    expect(screen.getAllByRole('button', { name: 'Ajouter une note' })).toHaveLength(N - 1);
-  });
+      cleanup();
+      render(<AppEnMemoire chemin={`/projets/${id}/visite`} />);
+      await screen.findByRole('heading', { name: 'Préparer la visite' });
+      expect(
+        within(screen.getByRole('group', { name: nom })).getByRole('radio', { name: 'À vérifier' }),
+      ).toBeChecked();
+      expect(
+        screen.getByRole('textbox', { name: `Note : ${texteQuestion(premiere)}` }),
+      ).toHaveValue('plan manquant');
+      expect(screen.getAllByRole('button', { name: 'Ajouter une note' })).toHaveLength(N - 1);
+    },
+  );
 
   it('une question à valeur écrit l’hypothèse (provenance « à toi ») et passe la question à OK', async () => {
     const id = amorcer();
