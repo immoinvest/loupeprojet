@@ -23,12 +23,14 @@ Statuts : `idée` → `en discussion` → `spécifiée` → `en cours` → `livr
 | 07  | [Visite : base de questions](07-visite-questions.md)                 | Questions de visite tirées d'une base et de règles ; onglet masqué quand la visite est faite                         | idée      | —         |
 | 08  | [Simulateur de prêt](08-simulateur-pret.md)                          | Outil indépendant des projets : deux offres côte à côte, comparaison, tableaux d'amortissement en CSV et à imprimer  | spécifiée | —         |
 | 09  | [Estimation : carte et confiance](09-estimation-carte-confiance.md)  | Carte des ventes du quartier, chiffres du repère visibles même sans adresse, indice de confiance expliqué en tête    | en cours  | —         |
-| 10  | [Rapport : icônes et cash-flow](10-rapport-icones-cashflow.md)       | Icônes ⓘ avec infobulle, liens vers Estimation / Fiscalité / Revente, autofinancement au centre, rendement brut      | idée      | —         |
+| 10  | [Rapport : icônes et cash-flow](10-rapport-icones-cashflow.md)       | Icônes ⓘ avec infobulle, liens vers Estimation / Fiscalité / Revente, autofinancement au centre, rendement brut      | livrée    | —         |
 | 11  | [Coque : menu et en-tête fixes](11-coque-menu-entete-fixes.md)       | Menu fixe et plus étroit, compte visible en bas, onglets du projet collés en haut, seul le contenu défile            | livrée    | —         |
 
 ## Ordre suggéré
 
-`08` (spécifiée, prête à implémenter) → `03` (une heure) → `11` (visuel, sans moteur ; `06` est livrée) → `01` → `04` (réutilise le composant `Curseur` de la fiche 06) → `10` → `02` (touche au moteur et à tous les onglets : mieux après 01 et 04) → `09` → `05` (le plus gros : moteur + formulaires + fiscalité) → `07`.
+Livrées : `06`, `10` et `11` (14/09/2026).
+
+`08` (spécifiée, prête à implémenter) → `03` (une heure) → `01` → `04` (réutilise le composant `Curseur` de la fiche 06) → `02` (touche au moteur et à tous les onglets : mieux après 01 et 04) → `09` (en cours) → `05` (le plus gros : moteur + formulaires + fiscalité) → `07`.
 
 ## Sources
 
