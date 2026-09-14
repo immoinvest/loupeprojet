@@ -29,7 +29,7 @@
     },
     "qa_tests": {
       "status": "completed",
-      "note": "37 tests ajoutés (19 moteur, 18 web) ; suite complète 1 008 tests, 1 006 verts + 2 tests de l'extension qui dépassent 5 s seulement sous charge (verts en isolation) ; couverture 100 % sur le moteur et les dossiers web listés ; vérifié dans le navigateur (curseur à −5 % : prix retenu 147 250 €, en-tête et Rapport)"
+      "note": "39 tests ajoutés (19 moteur, 20 web) ; suite complète 1 008 tests, 1 006 verts + 2 tests de l'extension qui dépassent 5 s seulement sous charge (verts en isolation) ; couverture 100 % sur le moteur et les dossiers web listés ; vérifié dans le navigateur (curseur à −5 % : prix retenu 147 250 €, en-tête et Rapport)"
     },
     "security": {
       "status": "completed",
