@@ -27,12 +27,11 @@ function Rendement({
   precision: string;
   ton?: string;
 }): JSX.Element {
-  const document = useModeDocument();
   return (
     <div className="flex min-w-0 flex-col gap-0.5">
       <div className="flex items-center gap-0.5 text-[13px] font-bold text-encre-3">
         <span>{libelle}</span>
-        {document ? null : info}
+        {info}
       </div>
       <span
         className={`font-display text-[26px] leading-tight font-bold sm:text-[30px] print:text-[30px] ${ton}`}
@@ -40,7 +39,6 @@ function Rendement({
         {valeur}
       </span>
       <span className="text-xs text-encre-3">{precision}</span>
-      {document ? info : null}
     </div>
   );
 }
@@ -52,30 +50,58 @@ export function CarteRendements({ r }: { r: Resultats }): JSX.Element {
   for (const f of r.verdict.feux) {
     if (f.axe === 'rendement') feuNet = f.feu;
   }
+  // Sur papier, les trois explications viennent sous les chiffres, en pleine largeur : trois
+  // colonnes étroites ne les laisseraient pas se lire.
+  const document = useModeDocument();
+  const rendements = [
+    { quel: 'brut', libelle: 'Brut', valeur: brut, precision: 'loyers ÷ coût total', ton: '' },
+    {
+      quel: 'net',
+      libelle: 'Net',
+      valeur: net,
+      precision: 'charges et vacance déduites',
+      ton: TONS_FEU[feuNet],
+    },
+    {
+      quel: 'netNet',
+      libelle: 'Net-net',
+      valeur: netNet,
+      precision: 'après intérêts, assurance et impôt',
+      ton: '',
+    },
+  ] as const;
   return (
     <Carte>
       <TitreCarte>Combien ça rapporte ?</TitreCarte>
       <div className="grid grid-cols-3 gap-3">
-        <Rendement
-          libelle="Brut"
-          info={<Info sujet="Rendement brut" texte={explicationRendement(r, 'brut')} />}
-          valeur={pourcentage(brut)}
-          precision="loyers ÷ coût total"
-        />
-        <Rendement
-          libelle="Net"
-          info={<Info sujet="Rendement net" texte={explicationRendement(r, 'net')} />}
-          valeur={pourcentage(net)}
-          precision="charges et vacance déduites"
-          ton={TONS_FEU[feuNet]}
-        />
-        <Rendement
-          libelle="Net-net"
-          info={<Info sujet="Rendement net-net" texte={explicationRendement(r, 'netNet')} />}
-          valeur={pourcentage(netNet)}
-          precision="après intérêts, assurance et impôt"
-        />
+        {rendements.map((x) => (
+          <Rendement
+            key={x.quel}
+            libelle={x.libelle}
+            info={
+              document ? null : (
+                <Info
+                  sujet={`Rendement ${x.libelle.toLowerCase()}`}
+                  texte={explicationRendement(r, x.quel)}
+                />
+              )
+            }
+            valeur={pourcentage(x.valeur)}
+            precision={x.precision}
+            ton={x.ton}
+          />
+        ))}
       </div>
+      {document && (
+        <div className="flex flex-col gap-1.5 text-sm leading-relaxed text-encre-2">
+          {rendements.map((x) => (
+            <p key={x.quel} className="m-0">
+              <span className="font-semibold text-encre">{x.libelle}.</span>{' '}
+              {explicationRendement(r, x.quel)}
+            </p>
+          ))}
+        </div>
+      )}
       <p className="m-0 text-[15px] leading-relaxed text-encre-2">
         Le brut est le chiffre des annonces ; le net, celui du feu ; le net-net, ce qui vous reste.
       </p>

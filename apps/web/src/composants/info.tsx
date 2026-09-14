@@ -32,12 +32,12 @@ export function Info({ sujet, texte }: { sujet: string; texte: string }): JSX.El
   const [ouvert, setOuvert] = useState(false);
   const [decalage, setDecalage] = useState(0);
   const racine = useRef<HTMLSpanElement>(null);
-  const bouton = useRef<HTMLButtonElement>(null);
 
-  // Position calculée à l'ouverture : la bulle ne dépasse jamais de l'écran.
+  // Position calculée à l'ouverture, depuis le bord du conteneur (le bouton déborde de 10 px
+  // par ses marges négatives) : la bulle ne dépasse jamais de l'écran.
   useLayoutEffect(() => {
-    if (!ouvert || bouton.current === null) return;
-    const { left } = bouton.current.getBoundingClientRect();
+    if (!ouvert || racine.current === null) return;
+    const { left } = racine.current.getBoundingClientRect();
     setDecalage(decalageBulle(left, window.document.documentElement.clientWidth));
   }, [ouvert]);
 
@@ -64,7 +64,6 @@ export function Info({ sujet, texte }: { sujet: string; texte: string }): JSX.El
   return (
     <span ref={racine} className="relative inline-flex shrink-0">
       <button
-        ref={bouton}
         type="button"
         aria-label={`Explication : ${sujet}`}
         aria-expanded={ouvert}
