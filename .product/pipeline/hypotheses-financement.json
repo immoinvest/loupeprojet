@@ -2,7 +2,7 @@
   "feature_slug": "hypotheses-financement",
   "title": "Hypothèses et financement : onglet Financement, revenus retirés, feu couverture, bouton Simuler un prêt, Hypothèses sans Le marché (fiches 01 et 03)",
   "started_at": "2026-09-14T15:00:00Z",
-  "current_step": "implement",
+  "current_step": "push",
   "scope": "packages/moteur/src/{schema,financement,regles,verdict,exemples}, apps/web/src/{hypotheses,analyses/simulation-pret.ts,analyses/comparaison.ts,stockage/base64url.ts,ecrans/Financement.tsx,ecrans/financement,ecrans/hypotheses,ecrans/Hypotheses.tsx,ecrans/FormulaireProjet.tsx,ecrans/formulaire,annonces/construire.ts,coque/ProjetLayout.tsx,App.tsx,textes}, apps/web/e2e, docs",
   "branch": "feat/hypotheses-financement",
   "base": "master (9d38892)",
@@ -41,8 +41,9 @@
       "note": "aucun innerHTML ni eval ; le lien #s= est décodé sans exception et validé par Zod, jamais envoyé au serveur ; plus de revenus dans le lien de partage ; aucune donnée nouvelle persistée"
     },
     "push": {
-      "status": "in_progress",
-      "note": "master fusionné (coque fixe, curseur de revente, confiance de l'estimation : conflits bénins, les deux côtés gardés) ; suite complète et couverture après fusion, puis PR avec auto-merge"
+      "status": "completed",
+      "pr": "https://github.com/immoinvest/loupeprojet/pull/48",
+      "note": "master fusionné (coque fixe, curseur de revente, confiance de l’estimation) ; test de la coque fixe passé à sept onglets ; 1 040/1 044 en suite complète, les 3 restants sont des délais sous charge qui passent seuls ; auto-merge armé"
     }
   },
   "decisions": {
