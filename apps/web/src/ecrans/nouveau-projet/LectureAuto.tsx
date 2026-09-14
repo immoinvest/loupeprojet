@@ -17,23 +17,23 @@ export {
 } from './useLectureAutomatique';
 
 /**
- * Ce que l'écran dit de la lecture automatique : extension ou Deklic en train de lire, échec avec
- * la marche à suivre, ou invitation à installer l'extension.
+ * Ce que l'écran dit de la lecture automatique : extension ou Deklic en train de lire, ou échec
+ * avec de quoi réessayer ou saisir les chiffres à la main.
  */
 export function EtatLectureAuto({
   extension,
   lecture,
-  lienReconnu,
   relancer,
   lireSansExtension,
   annuler,
+  saisirALaMain,
 }: {
   extension: EtatExtension;
   lecture: EtatLecture;
-  lienReconnu: boolean;
   relancer: () => void;
   lireSansExtension: () => void;
   annuler: () => void;
+  saisirALaMain: () => void;
 }): JSX.Element | null {
   if (lecture?.statut === 'en-cours' && lecture.par === 'extension') {
     return (
@@ -60,18 +60,17 @@ export function EtatLectureAuto({
           {lecture.par === 'extension' && (
             <Bouton onClick={lireSansExtension}>Lire sans l'extension</Bouton>
           )}
+          <Bouton onClick={saisirALaMain}>Saisir à la main</Bouton>
         </div>
+        {extension === 'absente' && (
+          <p className="m-0 text-sm text-encre-2">
+            Avec l'extension Deklic, coller le lien suffit : elle lit l'annonce pour vous.{' '}
+            <Link to="/extension" className="font-bold text-accent">
+              Installer l'extension
+            </Link>
+          </p>
+        )}
       </Carte>
-    );
-  }
-  if (extension === 'absente' && lienReconnu) {
-    return (
-      <p className="m-0 text-sm text-encre-2">
-        Avec l'extension Deklic, coller le lien suffit : elle lit l'annonce pour vous.{' '}
-        <Link to="/extension" className="font-bold text-accent">
-          Installer l'extension
-        </Link>
-      </p>
     );
   }
   return null;

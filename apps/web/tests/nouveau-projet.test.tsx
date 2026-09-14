@@ -5,42 +5,38 @@ import { describe, expect, it } from 'vitest';
 import { AppEnMemoire } from '@/App';
 import { lireProjets } from '@/stockage/projets';
 
-const ANNONCE = `Appartement T3 de 65 m² à Marseille 5e (13005), quartier Baille.
-Au 3e étage sans ascenseur d'un immeuble construit en 1962.
-Prix : 155 000 € (honoraires charge acquéreur : 7 000 € inclus).
-2 chambres. Charges de copropriété : 90 € / mois. Taxe foncière : 1 050 €. DPE : D. Loué meublé.`;
-
 describe('Nouveau projet — depuis un lien', () => {
   it(
-    'reconnaît le portail, lit le texte collé, pré-remplit, crée le projet et ouvre le rapport',
+    'lecture impossible : « Saisir à la main » ouvre le formulaire et garde le lien comme source',
     { timeout: 30_000 },
     async () => {
       const utilisateur = userEvent.setup();
       render(<AppEnMemoire chemin="/projets/nouveau" />);
       await screen.findByRole('heading', { name: /Colle le lien/ });
 
-      await utilisateur.type(
-        screen.getByLabelText("Lien de l'annonce"),
+      await utilisateur.click(screen.getByLabelText("Lien de l'annonce"));
+      await utilisateur.paste(
         'https://www.leboncoin.fr/ad/ventes_immobilieres/2214738851?utm_source=partage',
       );
       expect(screen.getByText('leboncoin.fr reconnu')).toBeInTheDocument();
       expect(screen.getByText('annonce 2214738851')).toBeInTheDocument();
+      // Aucune zone de texte à coller, ni avant ni pendant la lecture.
+      expect(screen.queryByRole('textbox', { name: /texte/i })).not.toBeInTheDocument();
 
-      const zone = screen.getByPlaceholderText(/Appartement T3 de 65 m²/);
-      await utilisateur.click(zone);
-      await utilisateur.paste(ANNONCE);
-      await utilisateur.click(screen.getByRole('button', { name: 'Lire le texte' }));
-      expect(await screen.findByText(/champs lus dans l'annonce, à vérifier/)).toBeInTheDocument();
-      expect(screen.getByLabelText(/Prix affiché/)).toHaveValue('155000');
-      expect(screen.getByLabelText(/Surface/)).toHaveValue('65');
-      expect(screen.getByLabelText(/Code postal/)).toHaveValue('13005');
-      expect(screen.getByLabelText(/^Ville/)).toHaveValue('Marseille 5e');
-      expect(screen.getByLabelText(/Taxe foncière/)).toHaveValue('1050');
-      expect(screen.getAllByText('annonce').length).toBeGreaterThan(5);
+      // Hors ligne (client par défaut) : la lecture n'est pas disponible.
+      expect(await screen.findByRole('alert', {}, { timeout: 5_000 })).toHaveTextContent(
+        /pas disponible/,
+      );
+      await utilisateur.click(screen.getByRole('button', { name: 'Saisir à la main' }));
+      await screen.findByRole('heading', { name: /Vérifiez, corrigez/ });
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+      expect(screen.getByLabelText("Lien de l'annonce")).toBeInTheDocument();
 
+      await utilisateur.type(screen.getByLabelText(/Prix affiché/), '155000');
+      await utilisateur.type(screen.getByLabelText(/^Surface/), '65');
+      await utilisateur.type(screen.getByLabelText(/Code postal/), '13005');
+      await utilisateur.type(screen.getByLabelText(/^Ville/), 'Marseille 5e');
       await utilisateur.type(screen.getByLabelText(/Loyer visé/), '980');
-      await utilisateur.clear(screen.getByLabelText(/^Apport/));
-      await utilisateur.type(screen.getByLabelText(/^Apport/), '15000');
       await utilisateur.click(screen.getByRole('button', { name: /Créer le projet/ }));
 
       expect(
@@ -51,14 +47,11 @@ describe('Nouveau projet — depuis un lien', () => {
         ),
       ).toBeInTheDocument();
       const cree = lireProjets(window.localStorage)[0];
-      expect(cree?.nom).toBe('T3 · 65 m² · Marseille 5e');
       expect(cree?.projet.source).toEqual({
         portail: 'leboncoin',
         id: '2214738851',
         url: 'https://www.leboncoin.fr/ad/ventes_immobilieres/2214738851',
       });
-      expect(cree?.projet.hypotheses.charges.taxeFonciere).toBe(1_050);
-      expect(cree?.projet.provenance['achat.prix']).toBe('annonce');
     },
   );
 
@@ -101,7 +94,7 @@ describe('Nouveau projet — depuis un lien', () => {
     },
   );
 
-  it('signale un site non reconnu et un texte sans rien de lisible', async () => {
+  it('site non reconnu : pas de lecture, la saisie à la main est proposée', async () => {
     const utilisateur = userEvent.setup();
     render(<AppEnMemoire chemin="/projets/nouveau" />);
     await screen.findByRole('heading', { name: /Colle le lien/ });
@@ -110,11 +103,9 @@ describe('Nouveau projet — depuis un lien', () => {
       'https://www.exemple.fr/annonce/1',
     );
     expect(screen.getByText(/Site non reconnu/)).toBeInTheDocument();
-    const zone = screen.getByPlaceholderText(/Appartement T3 de 65 m²/);
-    await utilisateur.click(zone);
-    await utilisateur.paste('bonjour');
-    await utilisateur.click(screen.getByRole('button', { name: 'Lire le texte' }));
-    expect(await screen.findByText(/Rien de reconnu/)).toBeInTheDocument();
+    expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
+    await utilisateur.click(screen.getByRole('button', { name: /je saisis à la main/ }));
+    expect(await screen.findByLabelText(/Prix affiché/)).toHaveValue('');
   });
 });
 

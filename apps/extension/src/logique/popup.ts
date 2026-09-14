@@ -16,7 +16,7 @@ export interface EtatOnglet {
 }
 
 const PORTAILS_LISTE = "LeBonCoin, SeLoger, Bien'ici, PAP ou Logic-Immo";
-const REPLI = "Collez le texte de l'annonce dans Deklic, ça marche aussi.";
+const REPLI = "Collez le lien de l'annonce dans Deklic, ça marche aussi.";
 
 /** Les cinq portails que l'extension doit pouvoir ouvrir et lire quand Deklic le demande. */
 export const ORIGINES_PORTAILS: readonly string[] = Object.values(MOTIFS_PORTAILS);

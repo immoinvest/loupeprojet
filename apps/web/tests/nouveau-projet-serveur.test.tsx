@@ -77,11 +77,16 @@ describe('Nouveau projet — Deklic lit l’annonce sans extension', () => {
       );
       const utilisateur = await collerLeLien(clientAvec(lirePage));
 
+      // Dès le lien collé, avant la fin de la pause : l'attente est déjà là, rien d'autre ne s'intercale.
+      expect(screen.getByRole('progressbar', { name: "Lecture de l'annonce" })).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: /je saisis à la main/ })).not.toBeInTheDocument();
+      expect(screen.queryByRole('textbox', { name: /texte/i })).not.toBeInTheDocument();
       expect(
         await screen.findByText(/Deklic lit l'annonce PAP/, {}, { timeout: 5_000 }),
       ).toBeInTheDocument();
-      expect(lirePage).toHaveBeenCalledWith(URL_PAP, expect.any(AbortSignal));
-      expect(screen.queryByPlaceholderText(/Appartement T3 de 65 m²/)).not.toBeInTheDocument();
+      await vi.waitFor(() => {
+        expect(lirePage).toHaveBeenCalledWith(URL_PAP, expect.any(AbortSignal));
+      });
       rendre(PAGE_LUE);
 
       await screen.findByRole('heading', { name: /Vérifiez, corrigez/ });
@@ -108,7 +113,7 @@ describe('Nouveau projet — Deklic lit l’annonce sans extension', () => {
   );
 
   it(
-    '« Annuler et coller le texte » interrompt la lecture et propose le texte',
+    '« Annuler » interrompt la lecture et propose de saisir à la main',
     { timeout: 30_000 },
     async () => {
       detecter.mockResolvedValue(false);
@@ -123,18 +128,31 @@ describe('Nouveau projet — Deklic lit l’annonce sans extension', () => {
           }),
       );
       const utilisateur = await collerLeLien(clientAvec(lirePage));
-      await utilisateur.click(
-        await screen.findByRole(
-          'button',
-          { name: 'Annuler et coller le texte' },
-          { timeout: 5_000 },
-        ),
+      await vi.waitFor(
+        () => {
+          expect(lirePage).toHaveBeenCalledTimes(1);
+        },
+        { timeout: 5_000 },
       );
+      await utilisateur.click(screen.getByRole('button', { name: 'Annuler' }));
       expect(signalRecu?.aborted).toBe(true);
       expect(await screen.findByRole('alert')).toHaveTextContent(/Lecture annulée/);
-      expect(screen.getByPlaceholderText(/Appartement T3 de 65 m²/)).toBeInTheDocument();
+      await utilisateur.click(screen.getByRole('button', { name: 'Saisir à la main' }));
+      await screen.findByRole('heading', { name: /Vérifiez, corrigez/ });
+      expect(screen.getByLabelText(/Prix affiché/)).toHaveValue('');
     },
   );
+
+  it('« Annuler » pendant la pause : aucune lecture ne part', { timeout: 30_000 }, async () => {
+    detecter.mockResolvedValue(false);
+    const lirePage = vi.fn<ClientWorker['lirePage']>(() => Promise.resolve(PAGE_LUE));
+    const utilisateur = await collerLeLien(clientAvec(lirePage));
+    await utilisateur.click(screen.getByRole('button', { name: 'Annuler' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent(/Lecture annulée/);
+    await new Promise((resoudre) => setTimeout(resoudre, 1_000));
+    expect(lirePage).not.toHaveBeenCalled();
+    expect(screen.getByRole('alert')).toHaveTextContent(/Lecture annulée/);
+  });
 
   it(
     'page bloquée : l’explique, puis « Réessayer la lecture » réussit',

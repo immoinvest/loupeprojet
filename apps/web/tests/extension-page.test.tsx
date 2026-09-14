@@ -51,7 +51,7 @@ describe('Page Extension navigateur', () => {
       'href',
       expect.stringContaining('github.com/immoinvest/loupeprojet') as string,
     );
-    expect(screen.getByRole('link', { name: /collez le texte/ })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: /collez le lien/ })).toHaveAttribute(
       'href',
       '/projets/nouveau',
     );

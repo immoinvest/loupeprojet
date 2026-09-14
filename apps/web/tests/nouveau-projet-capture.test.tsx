@@ -42,11 +42,9 @@ describe('Nouveau projet — depuis l’extension', () => {
       );
       expect(screen.getByText('leboncoin.fr reconnu')).toBeInTheDocument();
       expect(screen.getByText("lue par l'extension")).toBeInTheDocument();
-      // Annonce lue : plus de carte pour coller son texte.
-      expect(
-        screen.queryByRole('heading', { name: /Il manque quelque chose/ }),
-      ).not.toBeInTheDocument();
-      expect(screen.queryByPlaceholderText(/Appartement T3 de 65 m²/)).not.toBeInTheDocument();
+      // Annonce lue : ni attente ni message d'échec au-dessus du formulaire.
+      expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument();
 
       expect(screen.getByLabelText(/Prix affiché/)).toHaveValue('155000');
       expect(screen.getByLabelText(/Surface/)).toHaveValue('65');

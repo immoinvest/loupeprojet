@@ -151,7 +151,7 @@ loupeprojet/
 3. **Tests d'abord pour tout calcul financier.** Les cas de référence reproduisent l'Excel « Projet 92K » (tableau « Ton Excel → Loupe » de la spec) et des cas vérifiés à la main, documentés dans le test.
 4. **Règles fiscales versionnées** : `packages/moteur/src/regles/2026-09.ts`. Un projet stocke sa `version_regles`. Les valeurs « à confirmer » (PS BIC 18,6 %) portent un drapeau visible et sont modifiables.
 5. **Jamais de case vide** : chaque hypothèse a une valeur par défaut sourcée et un badge de provenance (`annonce`, `donnée publique`, `estimé`, `à toi`). Les résultats ne sont jamais persistés : ils se recalculent à l'ouverture.
-6. **Capture côté client uniquement** : la page de l'annonce est lue dans le navigateur de l'utilisateur, jamais par nos serveurs. Aucune base d'annonces, aucun texte d'annonce stocké (seulement son hash SHA-256 comme clé de cache, 30 jours). Repli texte collé et saisie manuelle toujours disponibles.
+6. **Capture côté client uniquement** : la page de l'annonce est lue dans le navigateur de l'utilisateur, jamais par nos serveurs. Aucune base d'annonces, aucun texte d'annonce stocké (seulement son hash SHA-256 comme clé de cache, 30 jours). Repli : saisie manuelle toujours disponible (plus de zone « coller le texte » depuis le 14/09/2026).
 7. **Positionnement légal** : « outil d'aide à la décision, pas un conseil ». Pas de score unique magique : cinq feux lisibles.
 8. **Vie privée** : pas de tracking tiers, données hébergées en UE, sources (ANIL, DVF, ADEME) affichées.
 9. **Sans compte et gratuit** : la première analyse ne demande rien. Zéro fenêtre, zéro bandeau.
