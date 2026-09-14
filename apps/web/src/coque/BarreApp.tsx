@@ -8,14 +8,14 @@ import type { Menu } from './menu';
 import { ID_NAVIGATION } from './Sidebar';
 
 /**
- * Barre d'app des écrans de moins de 1 024 px : le bouton de menu et le logo. Sa hauteur vient de
- * `--hauteur-barre-app` (index.css), que les éléments collants et les ancres utilisent aussi.
+ * Barre d'app des écrans de moins de 1 024 px : le bouton de menu et le logo. Elle est hors du
+ * contenu qui défile, donc toujours en vue ; sa hauteur vient de `--hauteur-barre-app` (index.css).
  */
 export function BarreApp({ menu }: { menu: Menu }): JSX.Element {
   return (
     <header
       inert={menu.ouvert}
-      className="sticky top-0 z-20 flex h-[var(--hauteur-barre-app)] items-center gap-1 border-b border-bordure bg-surface/95 pt-[env(safe-area-inset-top)] pr-[max(0.5rem,env(safe-area-inset-right))] pl-[max(0.5rem,env(safe-area-inset-left))] backdrop-blur lg:hidden print:hidden"
+      className="flex h-[var(--hauteur-barre-app)] shrink-0 items-center gap-1 border-b border-bordure bg-surface pt-[env(safe-area-inset-top)] pr-[max(0.5rem,env(safe-area-inset-right))] pl-[max(0.5rem,env(safe-area-inset-left))] lg:hidden print:hidden"
     >
       <button
         ref={menu.boutonRef}

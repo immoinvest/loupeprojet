@@ -13,6 +13,7 @@ import {
   groupesDe,
   lireVentes,
   ParametresAdresseSchema,
+  periodeDe,
   quantile,
   statistiquesPrix,
   valeurAuRang,
@@ -231,7 +232,14 @@ interface Reponse {
   cadastre: string;
   ventesCommune: number;
   groupes: { code: string; ventes: number; comparables: number }[];
-  reference: { code: string; rayonMetres: number; statistiques: Record<string, number> } | null;
+  reference: {
+    code: string;
+    rayonMetres: number;
+    statistiques: Record<string, number>;
+    dateMediane: string | null;
+    periode: { debut: string; fin: string } | null;
+    ancienneteMedianeMois: number | null;
+  } | null;
   ventesProches: { adresse: string | null; distanceMetres: number | null }[];
   sources: { nom: string }[];
 }
@@ -299,6 +307,12 @@ describe('statistiques et groupes', () => {
     expect(quantile([1, 2, 3, 4], 0.5)).toBe(2.5);
     expect(() => valeurAuRang([1], 1)).toThrow(RangeError);
     expect(statistiquesPrix([])).toBeNull();
+    expect(periodeDe([])).toEqual({ dateMediane: null, periode: null });
+    expect(periodeDe(['2025-03-01', '2024-11-02'])).toEqual({
+      dateMediane: '2024-11-02',
+      periode: { debut: '2024-11-02', fin: '2025-03-01' },
+    });
+    expect(periodeDe(['2025-03-01', '2024-11-02', '2025-06-15']).dateMediane).toBe('2025-03-01');
     expect(statistiquesPrix([3000, 4000])).toEqual({
       ventes: 2,
       medianeM2: 3500,
@@ -364,6 +378,8 @@ describe('analyserAdresse', () => {
         minM2: 2929,
         maxM2: 4000,
       },
+      dateMediane: '2025-03-01',
+      periode: { debut: '2024-11-02', fin: '2025-03-01' },
     });
     expect(r.ventesProches).toHaveLength(8);
     expect(r.ventesProches[0]).toMatchObject({
@@ -511,7 +527,15 @@ describe('GET /marche/adresse', () => {
       parcellesVoisines: ['132058200E0319'],
       cadastre: 'ok',
       ventesCommune: 10,
-      reference: { code: 'meme_cote', rayonMetres: 90, statistiques: { medianeM2: 3600 } },
+      reference: {
+        code: 'meme_cote',
+        rayonMetres: 90,
+        statistiques: { medianeM2: 3600 },
+        dateMediane: '2025-03-01',
+        periode: { debut: '2024-11-02', fin: '2025-03-01' },
+        // Du 1er mars 2025 au 13 septembre 2026 : 18 mois.
+        ancienneteMedianeMois: 18,
+      },
     });
     expect(corps.sources.map((s) => s.nom)).toEqual([
       'Demandes de valeurs foncières géolocalisées (Etalab, à partir des données DGFiP)',

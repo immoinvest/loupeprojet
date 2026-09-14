@@ -1,6 +1,8 @@
 # 11 — Coque : menu et en-tête fixes, seul le contenu défile
 
-Statut : `idée` · Notée le 14/09/2026 · Dépend de : rien
+Statut : `livrée` (feature `coque-fixe`, 14/09/2026, PR `feat/coque-fixe` ; discovery `../features/coque-fixe-discovery.md`, specs `../specs/coque-fixe-specs.md`, architecture `../architecture/coque-fixe.md`) · Notée le 14/09/2026 · Dépend de : rien
+
+Décisions prises : menu de 224 px ; surimpression sous 1 024 px seulement (tiroir de `responsive`, inchangé) ; en-tête compacté (48 + 44 px, une rangée de 56 px à partir de 1 536 px) et collé, seule la bande des volets sur téléphone ; titre-verdict et H1 dans le contenu qui défile ; coque « application » (`h-dvh`, `main` qui défile) avec retour en haut au changement de chemin.
 
 ## La demande de Pierre
 

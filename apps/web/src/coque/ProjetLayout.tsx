@@ -20,6 +20,7 @@ import { MODES } from '@/textes/regimes';
 
 import { BoutonPartager } from './BoutonPartager';
 import { defilementPourVoir } from './defilement';
+import { useMesuresEnTete } from './entete';
 
 export interface ContexteProjet {
   readonly enregistre: ProjetEnregistre;
@@ -67,14 +68,22 @@ const ONGLETS = [
   { to: 'visite', libelle: 'Visite' },
 ] as const;
 
+/** Un volet occupe toute la hauteur de sa bande : son trait actif se pose sur celui de l'en-tête. */
 const onglet = ({ isActive }: { isActive: boolean }): string =>
-  `shrink-0 border-b-2 px-4 py-3 text-[15px] font-semibold whitespace-nowrap ${
+  `flex h-full shrink-0 items-center border-b-2 px-4 text-[15px] font-semibold whitespace-nowrap ${
     isActive ? 'border-accent text-accent' : 'border-transparent text-encre-3 hover:text-encre'
   }`;
 
 /** Sous 1 536 px, la bande des volets va d'un bord à l'autre de l'en-tête et défile au doigt. */
 const BANDE_ONGLETS =
-  'defilement-discret relative order-last -mx-4 flex gap-1 overflow-x-auto px-4 sm:-mx-6 sm:px-6 md:col-span-2 lg:-mx-10 lg:px-10 2xl:order-none 2xl:mx-0 2xl:overflow-visible 2xl:px-0';
+  'defilement-discret relative order-last -mx-4 flex h-11 gap-1 overflow-x-auto px-4 sm:-mx-6 sm:px-6 md:col-span-2 lg:-mx-10 lg:px-10 2xl:order-none 2xl:mx-0 2xl:h-14 2xl:overflow-visible 2xl:px-0';
+
+/**
+ * L'en-tête reste collé en haut du contenu qui défile. Sous 768 px, son `top` négatif (mesuré :
+ * le début de la bande) ne laisse en vue que la bande des volets ; au-delà, tout l'en-tête.
+ */
+const EN_TETE =
+  'sticky top-[calc(-1*var(--decalage-entete,0px))] z-20 grid gap-x-4 border-b border-bordure bg-surface md:top-0 md:grid-cols-[minmax(0,1fr)_auto] md:items-center 2xl:flex 2xl:items-stretch print:static print:hidden';
 
 /** Ramène l'onglet actif dans la partie visible de la bande, par exemple un volet ouvert directement. */
 function useOngletActifEnVue(): RefObject<HTMLElement | null> {
@@ -95,32 +104,33 @@ function useOngletActifEnVue(): RefObject<HTMLElement | null> {
 }
 
 /**
- * Téléphone : nom et prix, puis les actions qui passent à la ligne, puis la bande des volets.
- * De 768 à 1 535 px : nom et actions sur une rangée, volets dessous. À partir de 1 536 px : une
- * seule rangée ; en dessous, elle écraserait le nom du projet sur quelques mots par ligne.
+ * Compact, pour ne pas manger l'écran une fois collé. Téléphone : nom (fil d'Ariane, prix · mode),
+ * puis les actions, puis la bande des volets. De 768 à 1 535 px : nom · prix · mode et actions sur
+ * une rangée de 48 px, volets dessous (44 px). À partir de 1 536 px : une seule rangée de 56 px.
  */
 function EnTete(): JSX.Element {
   const { enregistre } = useProjetCourant();
   const { changerStatut } = useProjets();
   const naviguer = useNavigate();
   const bandeRef = useOngletActifEnVue();
+  const enTeteRef = useRef<HTMLElement>(null);
+  useMesuresEnTete(enTeteRef, bandeRef);
   const { achat, location } = enregistre.projet.hypotheses;
 
   return (
-    <header
-      className={`grid gap-x-4 gap-y-2 border-b border-bordure bg-surface pt-3 md:grid-cols-[minmax(0,1fr)_auto] md:items-end 2xl:flex 2xl:pt-4 ${MARGES_LATERALES} print:hidden`}
-    >
-      <div className="flex min-w-0 flex-col gap-1 2xl:pb-3.5">
-        <span className="text-[13px] break-words text-encre-3">
+    <header ref={enTeteRef} className={`${EN_TETE} ${MARGES_LATERALES}`}>
+      <div className="flex min-w-0 flex-col justify-center gap-0.5 py-2 md:h-12 md:flex-row md:items-center md:gap-2 md:py-0 2xl:h-14">
+        <span className="min-w-0 text-[13px] break-words text-encre-3 md:truncate">
           <Link
             to="/projets"
             className="text-encre-3 no-underline hover:text-accent pointer-coarse:inline-flex pointer-coarse:min-h-11 pointer-coarse:items-center"
           >
             Mes projets
-          </Link>{' '}
-          / {enregistre.nom}
+          </Link>
+          {' / '}
+          <span className="font-display text-[17px] font-bold text-encre">{enregistre.nom}</span>
         </span>
-        <span className="font-display text-lg font-bold sm:text-xl">
+        <span className="shrink-0 font-display text-lg font-bold md:text-[15px] md:font-semibold md:text-encre-2">
           {euros(achat.prix)} · {MODES[location.mode]}
         </span>
       </div>
@@ -133,7 +143,7 @@ function EnTete(): JSX.Element {
         ))}
       </nav>
       <div className="hidden 2xl:block 2xl:flex-1" />
-      <div className="flex flex-wrap items-center gap-2 md:justify-end 2xl:flex-nowrap 2xl:pb-3">
+      <div className="flex min-h-11 flex-wrap items-center gap-2 pb-2 md:h-12 md:flex-nowrap md:justify-end md:pb-0 2xl:h-14">
         <label className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-bordure bg-surface px-3.5 text-sm font-semibold text-encre-2">
           <span className="sr-only">Statut du projet</span>
           <select
@@ -172,8 +182,11 @@ export function ProjetLayout(): JSX.Element {
 
   return (
     <FournisseurProjet enregistre={enregistre}>
-      <EnTete />
-      <Outlet />
+      {/* Le cadre porte les variables publiées par l'en-tête : décalage et hauteur collée. */}
+      <div data-cadre-projet>
+        <EnTete />
+        <Outlet />
+      </div>
     </FournisseurProjet>
   );
 }

@@ -128,11 +128,11 @@ describe('Onglet Estimation', () => {
       expect(prixEstime()).toBe('229 000 €');
 
       render(<AppEnMemoire chemin={`/projets/${id}`} />);
-      // L'onglet Estimation reste affiché au-dessus : seul le Rapport dit « · confiance moyenne. ».
-      const resume = await screen.findByText(/· confiance moyenne\./, {}, { timeout: 10_000 });
+      // L'onglet Estimation reste affiché au-dessus : seul le Rapport dit « · confiance moyenne (62/100). ».
+      const resume = await screen.findByText(/· confiance moyenne \(/, {}, { timeout: 10_000 });
       // 229 279 € ± 8 % : 210 937 € et 247 621 €.
       expect(n(resume.textContent)).toBe(
-        'Estimé entre 211 000 € et 248 000 € · confiance moyenne.',
+        'Estimé entre 211 000 € et 248 000 € · confiance moyenne (62/100).',
       );
     },
   );
@@ -168,6 +168,7 @@ describe('Onglet Estimation', () => {
         q3M2: 3750,
         nombreVentes: 6,
         rayonMetres: 90,
+        precision: 'rue',
         actualiseAu: '2025-S1',
       });
     },

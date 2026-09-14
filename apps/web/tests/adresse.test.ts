@@ -6,6 +6,7 @@ import {
   ecartAuRepere,
   lireCleBan,
   marcheDepuisReference,
+  precisionDuGroupe,
   type Fetch,
   type ReferenceAdresse,
   type ReponseAdresse,
@@ -78,7 +79,14 @@ describe('clé BAN', () => {
 describe('repère de l’analyse d’adresse', () => {
   it('devient le bloc marche.dvf du moteur, avec le rayon et la provenance', () => {
     expect(marcheDepuisReference(REFERENCE)).toEqual({
-      dvf: { medianM2: 3600, q1M2: 3440, q3M2: 3750, nombreVentes: 6, rayonMetres: 90 },
+      dvf: {
+        medianM2: 3600,
+        q1M2: 3440,
+        q3M2: 3750,
+        nombreVentes: 6,
+        rayonMetres: 90,
+        precision: 'rue',
+      },
       provenance: {
         'marche.dvf.medianM2': 'dvf',
         'marche.dvf.q1M2': 'dvf',
@@ -93,9 +101,34 @@ describe('repère de l’analyse d’adresse', () => {
       q3M2: 3750,
       nombreVentes: 6,
       rayonMetres: 90,
+      precision: 'rue',
       actualiseAu: '2025-S1',
     });
     expect(ecartAuRepere(2700, 3600)).toBeCloseTo(-0.25, 10);
+  });
+
+  it('garde la période et l’ancienneté des ventes du repère, et déduit la précision du groupe', () => {
+    const complet = marcheDepuisReference({
+      ...REFERENCE,
+      code: 'rayon_200',
+      dateMediane: '2025-03-01',
+      periode: { debut: '2024-11-02', fin: '2025-03-01' },
+      ancienneteMedianeMois: 18,
+    });
+    expect(complet.dvf).toMatchObject({
+      precision: 'quartier',
+      periode: { debut: '2024-11-02', fin: '2025-03-01' },
+      ancienneteMedianeMois: 18,
+    });
+    expect(complet.provenance['marche.dvf.ancienneteMedianeMois']).toBe('dvf');
+    expect(
+      marcheDepuisReference({ ...REFERENCE, periode: null, ancienneteMedianeMois: null }).dvf,
+    ).not.toHaveProperty('periode');
+    expect(precisionDuGroupe('meme_parcelle')).toBe('immeuble');
+    expect(precisionDuGroupe('parcelles_voisines')).toBe('immeuble');
+    expect(precisionDuGroupe('en_face')).toBe('rue');
+    expect(precisionDuGroupe('rayon_100')).toBe('quartier');
+    expect(precisionDuGroupe('rayon_300')).toBe('quartier');
   });
 });
 
