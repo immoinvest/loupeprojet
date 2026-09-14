@@ -1,3 +1,4 @@
+import { FicheAnnonceSchema, PhotosCaptureSchema } from '@loupe/capture/schema';
 import { migrerProjet, ProjetSchema } from '@loupe/moteur';
 import { z } from 'zod';
 
@@ -52,6 +53,17 @@ export const VisiteSchema = z.object({
 });
 export type Visite = z.infer<typeof VisiteSchema>;
 
+/**
+ * L'annonce lue quand le projet a été créé depuis un lien : adresses des photos (sur le portail,
+ * jamais copiées), fiche du bien et date de lecture. Ni texte, ni donnée sur le vendeur.
+ */
+export const AnnonceEnregistreeSchema = z.object({
+  photos: PhotosCaptureSchema.optional(),
+  fiche: FicheAnnonceSchema,
+  lueLe: z.string(),
+});
+export type AnnonceEnregistree = z.infer<typeof AnnonceEnregistreeSchema>;
+
 export const ProjetEnregistreSchema = z.object({
   id: z.string().min(1),
   nom: z.string().min(1),
@@ -61,6 +73,8 @@ export const ProjetEnregistreSchema = z.object({
   adresse: AdresseBienSchema.optional(),
   /** Absente : visite non faite, aucune réponse (projets enregistrés avant cette feature). */
   visite: VisiteSchema.optional(),
+  /** Absente : projet saisi à la main, ou créé avant la lecture enrichie des annonces. */
+  annonce: AnnonceEnregistreeSchema.optional(),
   projet: ProjetSchema,
 });
 export type ProjetEnregistre = z.infer<typeof ProjetEnregistreSchema>;

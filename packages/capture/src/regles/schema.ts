@@ -13,6 +13,10 @@ export const TypeValeurSchema = z.enum([
   'booleen',
   'classe',
   'codePostal',
+  /** Liste d'adresses https (photos) : dédoublonnées, 30 au plus ; `regex` et `diviser` sont ignorés. */
+  'urls',
+  /** Date `AAAA-MM-JJ` trouvée dans le texte (« 2026-08-28 20:32:49 », ISO 8601). */
+  'date',
 ]);
 export type TypeValeur = z.infer<typeof TypeValeurSchema>;
 

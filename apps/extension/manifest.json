@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Deklic",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Collez le lien d'une annonce (LeBonCoin, SeLoger, Bien'ici, PAP, Logic-Immo) dans Deklic : l'extension la lit dans votre navigateur et remplit l'analyse.",
   "permissions": ["activeTab", "scripting"],
   "host_permissions": [

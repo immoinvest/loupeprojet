@@ -1,5 +1,5 @@
 {
-  "version": "bienici-2026-09-13",
+  "version": "bienici-2026-09-14",
   "portail": "bienici",
   "donnees": { "url": "/realEstateAd.json?id={id}" },
   "champs": {
@@ -38,9 +38,20 @@
     ],
     "chambres": [{ "source": "donnees", "chemin": "bedroomsQuantity", "type": "entier" }],
     "etage": [{ "source": "donnees", "chemin": "floor", "type": "etage" }],
+    "etagesImmeuble": [{ "source": "donnees", "chemin": "floorQuantity", "type": "entier" }],
     "ascenseur": [{ "source": "donnees", "chemin": "hasElevator", "type": "booleen" }],
     "dpe": [{ "source": "donnees", "chemin": "energyClassification", "type": "classe" }],
     "ges": [{ "source": "donnees", "chemin": "greenhouseGazClassification", "type": "classe" }],
+    "consommationEnergie": [{ "source": "donnees", "chemin": "energyValue", "type": "entier" }],
+    "dateDpe": [
+      { "source": "donnees", "chemin": "energyPerformanceDiagnosticDate", "type": "date" }
+    ],
+    "budgetEnergieMin": [
+      { "source": "donnees", "chemin": "minEnergyConsumption", "type": "montant" }
+    ],
+    "budgetEnergieMax": [
+      { "source": "donnees", "chemin": "maxEnergyConsumption", "type": "montant" }
+    ],
     "chargesCopro": [
       { "source": "donnees", "chemin": "annualCondominiumFees", "type": "montant", "diviser": 12 }
     ],
@@ -56,6 +67,151 @@
     "codePostal": [
       { "source": "donnees", "chemin": "postalCode", "type": "codePostal" },
       { "source": "meta", "nom": "og:title", "type": "codePostal" }
+    ],
+    "quartier": [{ "source": "donnees", "chemin": "district.libelle", "type": "texte" }],
+    "photos": [{ "source": "donnees", "chemin": "photos[*].url", "type": "urls" }],
+    "chauffageCollectif": [
+      {
+        "source": "donnees",
+        "chemin": "heating",
+        "regex": "collectif",
+        "type": "booleen",
+        "valeur": true
+      },
+      {
+        "source": "donnees",
+        "chemin": "heating",
+        "regex": "individuel",
+        "type": "booleen",
+        "valeur": false
+      }
+    ],
+    "chauffageEnergie": [
+      {
+        "source": "donnees",
+        "chemin": "heating",
+        "regex": "pompe à chaleur|\\bPAC\\b",
+        "type": "texte",
+        "valeur": "pompe_a_chaleur"
+      },
+      {
+        "source": "donnees",
+        "chemin": "heating",
+        "regex": "gaz",
+        "type": "texte",
+        "valeur": "gaz"
+      },
+      {
+        "source": "donnees",
+        "chemin": "heating",
+        "regex": "lectri",
+        "type": "texte",
+        "valeur": "electricite"
+      },
+      {
+        "source": "donnees",
+        "chemin": "heating",
+        "regex": "fioul|fuel",
+        "type": "texte",
+        "valeur": "fioul"
+      },
+      {
+        "source": "donnees",
+        "chemin": "heating",
+        "regex": "bois|granul",
+        "type": "texte",
+        "valeur": "bois"
+      },
+      {
+        "source": "donnees",
+        "chemin": "heating",
+        "regex": "urbain|réseau",
+        "type": "texte",
+        "valeur": "reseau_de_chaleur"
+      }
+    ],
+    "etat": [
+      {
+        "source": "donnees",
+        "chemin": "workToDo",
+        "regex": "^true$",
+        "type": "texte",
+        "valeur": "a_renover"
+      }
+    ],
+    "balcon": [
+      {
+        "source": "donnees",
+        "chemin": "balconyQuantity",
+        "regex": "^[1-9]",
+        "type": "booleen",
+        "valeur": true
+      },
+      {
+        "source": "donnees",
+        "chemin": "balconyQuantity",
+        "regex": "^0$",
+        "type": "booleen",
+        "valeur": false
+      }
+    ],
+    "terrasse": [{ "source": "donnees", "chemin": "hasTerrace", "type": "booleen" }],
+    "cave": [{ "source": "donnees", "chemin": "hasCellar", "type": "booleen" }],
+    "parking": [
+      {
+        "source": "donnees",
+        "chemin": "parkingPlacesQuantity",
+        "regex": "^[1-9]",
+        "type": "booleen",
+        "valeur": true
+      },
+      {
+        "source": "donnees",
+        "chemin": "parkingPlacesQuantity",
+        "regex": "^0$",
+        "type": "booleen",
+        "valeur": false
+      }
+    ],
+    "gardien": [{ "source": "donnees", "chemin": "hasCaretaker", "type": "booleen" }],
+    "piscine": [{ "source": "donnees", "chemin": "hasPool", "type": "booleen" }],
+    "climatisation": [{ "source": "donnees", "chemin": "hasAirConditioning", "type": "booleen" }],
+    "cheminee": [{ "source": "donnees", "chemin": "hasFirePlace", "type": "booleen" }],
+    "accessiblePmr": [
+      { "source": "donnees", "chemin": "isDisabledPeopleFriendly", "type": "booleen" }
+    ],
+    "sallesEau": [{ "source": "donnees", "chemin": "showerRoomsQuantity", "type": "entier" }],
+    "honorairesACharge": [
+      {
+        "source": "donnees",
+        "chemin": "feesChargedTo",
+        "regex": "^buyer$",
+        "type": "texte",
+        "valeur": "acquereur"
+      },
+      {
+        "source": "donnees",
+        "chemin": "feesChargedTo",
+        "regex": "^seller$",
+        "type": "texte",
+        "valeur": "vendeur"
+      }
+    ],
+    "vendeur": [
+      {
+        "source": "donnees",
+        "chemin": "adCreatedByPro",
+        "regex": "^true$",
+        "type": "texte",
+        "valeur": "pro"
+      },
+      {
+        "source": "donnees",
+        "chemin": "adCreatedByPro",
+        "regex": "^false$",
+        "type": "texte",
+        "valeur": "particulier"
+      }
     ],
     "description": [
       { "source": "donnees", "chemin": "description", "type": "texte" },

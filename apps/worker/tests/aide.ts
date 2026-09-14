@@ -3,6 +3,7 @@ import type { Dependances } from '../src/dependances';
 import { lecteurMemoire } from '../src/donnees/lecteur';
 import type { Extracteur, ReponseExtracteur } from '../src/extraction';
 import { journalMemoire } from '../src/journal';
+import type { LecteurPages, ReponsePage } from '../src/lecture';
 import { cacheMemoire } from '../src/proxy/cache';
 import { limiteurMemoire } from '../src/proxy/debit';
 import { SERVICES } from '../src/services';
@@ -106,6 +107,22 @@ export function extracteurFixe(
   };
 }
 
+/** Un lecteur de pages qui rend les réponses données dans l'ordre (la dernière ensuite) et note les URL demandées. */
+export function lecteurFixe(
+  ...reponses: ReponsePage[]
+): LecteurPages & { readonly urls: string[] } {
+  const urls: string[] = [];
+  return {
+    fournisseur: 'lecteur-test',
+    urls,
+    lire: (url) => {
+      urls.push(url);
+      const reponse = reponses[Math.min(urls.length, reponses.length) - 1];
+      return Promise.resolve(reponse ?? { ok: false, code: 'AMONT_INDISPONIBLE' });
+    },
+  };
+}
+
 export interface Banc {
   readonly deps: Dependances;
   readonly journal: ReturnType<typeof journalMemoire>;
@@ -127,7 +144,9 @@ export function banc(surcharges: Partial<Dependances> = {}, limite = 60): Banc {
     cache: cacheMemoire(maintenant),
     limiteur: limiteurMemoire(limite, 60, maintenant),
     limiteurExtraction: limiteurMemoire(limite, 60, maintenant),
+    limiteurLecture: limiteurMemoire(limite, 60, maintenant),
     extracteur: extracteurFixe(),
+    lecteurPages: null,
     donnees: lecteurMemoire({}),
     fetcher: (url) => {
       appels.push(url);

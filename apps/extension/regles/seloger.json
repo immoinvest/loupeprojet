@@ -1,5 +1,5 @@
 {
-  "version": "seloger-2026-09-13",
+  "version": "seloger-2026-09-14",
   "portail": "seloger",
   "champs": {
     "prix": [
@@ -94,6 +94,22 @@
         "type": "etage"
       }
     ],
+    "etagesImmeuble": [
+      {
+        "source": "json",
+        "selecteur": "#__UFRN_LIFECYCLE_SERVERREQUEST__",
+        "chemin": "app_cldp.data.classified.sections.features.preview[icon=floors].value",
+        "regex": "/\\s*(\\d+)\\s*étage",
+        "type": "entier"
+      },
+      {
+        "source": "json",
+        "selecteur": "#__UFRN_LIFECYCLE_SERVERREQUEST__",
+        "chemin": "app_cldp.data.classified.sections.hardFacts.facts[type=numberOfFloors].label",
+        "regex": "/(\\d+)$",
+        "type": "entier"
+      }
+    ],
     "ascenseur": [
       {
         "source": "json",
@@ -140,6 +156,419 @@
         "type": "classe"
       }
     ],
+    "consommationEnergie": [
+      {
+        "source": "json",
+        "selecteur": "#__UFRN_LIFECYCLE_SERVERREQUEST__",
+        "chemin": "app_cldp.data.classified.sections.energy.certificates[0].scales[type=FR_ENERGY_AFTER_2021].values[label=Consommation (énergie primaire)].value",
+        "type": "entier"
+      },
+      {
+        "source": "json",
+        "selecteur": "#__UFRN_LIFECYCLE_SERVERREQUEST__",
+        "chemin": "app_cldp.data.classified.sections.energy.certificates[0].scales[type=FR_ENERGY_BEFORE_2021].values[label=Consommation (énergie primaire)].value",
+        "type": "entier"
+      }
+    ],
+    "budgetEnergieMin": [
+      {
+        "source": "json",
+        "selecteur": "#__UFRN_LIFECYCLE_SERVERREQUEST__",
+        "chemin": "app_cldp.data.classified.sections.energy.certificates[0].features[type=minMaxEstimation].value",
+        "regex": "entre\\s+(\\d[\\d\\s]*)",
+        "type": "montant"
+      }
+    ],
+    "budgetEnergieMax": [
+      {
+        "source": "json",
+        "selecteur": "#__UFRN_LIFECYCLE_SERVERREQUEST__",
+        "chemin": "app_cldp.data.classified.sections.energy.certificates[0].features[type=minMaxEstimation].value",
+        "regex": "\\bet\\s+(\\d[\\d\\s]*)\\s*€",
+        "type": "montant"
+      }
+    ],
+    "anneeConstruction": [
+      {
+        "source": "json",
+        "selecteur": "#__UFRN_LIFECYCLE_SERVERREQUEST__",
+        "chemin": "app_cldp.data.classified.sections.energy.features[type=yearOfConstruction].value",
+        "type": "entier"
+      }
+    ],
+    "etat": [
+      {
+        "source": "json",
+        "selecteur": "#__UFRN_LIFECYCLE_SERVERREQUEST__",
+        "chemin": "app_cldp.data.classified.sections.energy.features[type=state].value",
+        "regex": "rénover|travaux",
+        "type": "texte",
+        "valeur": "a_renover"
+      },
+      {
+        "source": "json",
+        "selecteur": "#__UFRN_LIFECYCLE_SERVERREQUEST__",
+        "chemin": "app_cldp.data.classified.sections.energy.features[type=state].value",
+        "regex": "rafra[iî]chir",
+        "type": "texte",
+        "valeur": "a_rafraichir"
+      },
+      {
+        "source": "json",
+        "selecteur": "#__UFRN_LIFECYCLE_SERVERREQUEST__",
+        "chemin": "app_cldp.data.classified.sections.energy.features[type=state].value",
+        "regex": "neuf|rénové",
+        "type": "texte",
+        "valeur": "renove"
+      },
+      {
+        "source": "json",
+        "selecteur": "#__UFRN_LIFECYCLE_SERVERREQUEST__",
+        "chemin": "app_cldp.data.classified.sections.energy.features[type=state].value",
+        "regex": "bon état",
+        "type": "texte",
+        "valeur": "bon_etat"
+      }
+    ],
+    "chauffageCollectif": [
+      {
+        "source": "json",
+        "selecteur": "#__UFRN_LIFECYCLE_SERVERREQUEST__",
+        "chemin": "app_cldp.data.classified.sections.energy.features[type=heatingSystem].value",
+        "regex": "collectif",
+        "type": "booleen",
+        "valeur": true
+      },
+      {
+        "source": "json",
+        "selecteur": "#__UFRN_LIFECYCLE_SERVERREQUEST__",
+        "chemin": "app_cldp.data.classified.sections.energy.features[type=heatingSystem].value",
+        "regex": "individuel",
+        "type": "booleen",
+        "valeur": false
+      }
+    ],
+    "chauffageEnergie": [
+      {
+        "source": "json",
+        "selecteur": "#__UFRN_LIFECYCLE_SERVERREQUEST__",
+        "chemin": "app_cldp.data.classified.sections.energy.features[type=energySource].value",
+        "regex": "pompe",
+        "type": "texte",
+        "valeur": "pompe_a_chaleur"
+      },
+      {
+        "source": "json",
+        "selecteur": "#__UFRN_LIFECYCLE_SERVERREQUEST__",
+        "chemin": "app_cldp.data.classified.sections.energy.features[type=energySource].value",
+        "regex": "^gaz",
+        "type": "texte",
+        "valeur": "gaz"
+      },
+      {
+        "source": "json",
+        "selecteur": "#__UFRN_LIFECYCLE_SERVERREQUEST__",
+        "chemin": "app_cldp.data.classified.sections.energy.features[type=energySource].value",
+        "regex": "lectri",
+        "type": "texte",
+        "valeur": "electricite"
+      },
+      {
+        "source": "json",
+        "selecteur": "#__UFRN_LIFECYCLE_SERVERREQUEST__",
+        "chemin": "app_cldp.data.classified.sections.energy.features[type=energySource].value",
+        "regex": "fioul|fuel",
+        "type": "texte",
+        "valeur": "fioul"
+      },
+      {
+        "source": "json",
+        "selecteur": "#__UFRN_LIFECYCLE_SERVERREQUEST__",
+        "chemin": "app_cldp.data.classified.sections.energy.features[type=energySource].value",
+        "regex": "bois|granul",
+        "type": "texte",
+        "valeur": "bois"
+      },
+      {
+        "source": "json",
+        "selecteur": "#__UFRN_LIFECYCLE_SERVERREQUEST__",
+        "chemin": "app_cldp.data.classified.sections.energy.features[type=energySource].value",
+        "regex": "urbain|réseau",
+        "type": "texte",
+        "valeur": "reseau_de_chaleur"
+      }
+    ],
+    "meuble": [
+      {
+        "source": "json",
+        "selecteur": "#__UFRN_LIFECYCLE_SERVERREQUEST__",
+        "chemin": "app_cldp.data.classified.sections.features.details.categories[*].elements[icon=furnished].value",
+        "regex": "non meubl",
+        "type": "booleen",
+        "valeur": false
+      },
+      {
+        "source": "json",
+        "selecteur": "#__UFRN_LIFECYCLE_SERVERREQUEST__",
+        "chemin": "app_cldp.data.classified.sections.features.details.categories[*].elements[icon=furnished].value",
+        "regex": "meubl",
+        "type": "booleen",
+        "valeur": true
+      }
+    ],
+    "balcon": [
+      {
+        "source": "json",
+        "selecteur": "#__UFRN_LIFECYCLE_SERVERREQUEST__",
+        "chemin": "app_cldp.data.classified.sections.features.details.categories[*].elements[*].value",
+        "regex": "pas de balcon",
+        "type": "booleen",
+        "valeur": false
+      },
+      {
+        "source": "json",
+        "selecteur": "#__UFRN_LIFECYCLE_SERVERREQUEST__",
+        "chemin": "app_cldp.data.classified.sections.features.details.categories[*].elements[*].value",
+        "regex": "\\bbalcon",
+        "type": "booleen",
+        "valeur": true
+      }
+    ],
+    "terrasse": [
+      {
+        "source": "json",
+        "selecteur": "#__UFRN_LIFECYCLE_SERVERREQUEST__",
+        "chemin": "app_cldp.data.classified.sections.features.details.categories[*].elements[*].value",
+        "regex": "pas de terrasse",
+        "type": "booleen",
+        "valeur": false
+      },
+      {
+        "source": "json",
+        "selecteur": "#__UFRN_LIFECYCLE_SERVERREQUEST__",
+        "chemin": "app_cldp.data.classified.sections.features.details.categories[*].elements[*].value",
+        "regex": "\\bterrasse",
+        "type": "booleen",
+        "valeur": true
+      }
+    ],
+    "jardin": [
+      {
+        "source": "json",
+        "selecteur": "#__UFRN_LIFECYCLE_SERVERREQUEST__",
+        "chemin": "app_cldp.data.classified.sections.features.details.categories[*].elements[*].value",
+        "regex": "pas de jardin",
+        "type": "booleen",
+        "valeur": false
+      },
+      {
+        "source": "json",
+        "selecteur": "#__UFRN_LIFECYCLE_SERVERREQUEST__",
+        "chemin": "app_cldp.data.classified.sections.features.details.categories[*].elements[*].value",
+        "regex": "\\bjardin",
+        "type": "booleen",
+        "valeur": true
+      }
+    ],
+    "cave": [
+      {
+        "source": "json",
+        "selecteur": "#__UFRN_LIFECYCLE_SERVERREQUEST__",
+        "chemin": "app_cldp.data.classified.sections.features.details.categories[*].elements[*].value",
+        "regex": "pas de cave",
+        "type": "booleen",
+        "valeur": false
+      },
+      {
+        "source": "json",
+        "selecteur": "#__UFRN_LIFECYCLE_SERVERREQUEST__",
+        "chemin": "app_cldp.data.classified.sections.features.details.categories[*].elements[*].value",
+        "regex": "\\bcave\\b",
+        "type": "booleen",
+        "valeur": true
+      }
+    ],
+    "parking": [
+      {
+        "source": "json",
+        "selecteur": "#__UFRN_LIFECYCLE_SERVERREQUEST__",
+        "chemin": "app_cldp.data.classified.sections.features.details.categories[*].elements[*].value",
+        "regex": "pas de (?:parking|garage)",
+        "type": "booleen",
+        "valeur": false
+      },
+      {
+        "source": "json",
+        "selecteur": "#__UFRN_LIFECYCLE_SERVERREQUEST__",
+        "chemin": "app_cldp.data.classified.sections.features.details.categories[*].elements[*].value",
+        "regex": "parking|garage|\\bbox\\b",
+        "type": "booleen",
+        "valeur": true
+      }
+    ],
+    "gardien": [
+      {
+        "source": "json",
+        "selecteur": "#__UFRN_LIFECYCLE_SERVERREQUEST__",
+        "chemin": "app_cldp.data.classified.sections.features.details.categories[*].elements[*].value",
+        "regex": "gardien|concierge",
+        "type": "booleen",
+        "valeur": true
+      }
+    ],
+    "digicode": [
+      {
+        "source": "json",
+        "selecteur": "#__UFRN_LIFECYCLE_SERVERREQUEST__",
+        "chemin": "app_cldp.data.classified.sections.features.details.categories[*].elements[*].value",
+        "regex": "digicode",
+        "type": "booleen",
+        "valeur": true
+      }
+    ],
+    "interphone": [
+      {
+        "source": "json",
+        "selecteur": "#__UFRN_LIFECYCLE_SERVERREQUEST__",
+        "chemin": "app_cldp.data.classified.sections.features.details.categories[*].elements[*].value",
+        "regex": "interphone|visiophone",
+        "type": "booleen",
+        "valeur": true
+      }
+    ],
+    "piscine": [
+      {
+        "source": "json",
+        "selecteur": "#__UFRN_LIFECYCLE_SERVERREQUEST__",
+        "chemin": "app_cldp.data.classified.sections.features.details.categories[*].elements[*].value",
+        "regex": "pas de piscine",
+        "type": "booleen",
+        "valeur": false
+      },
+      {
+        "source": "json",
+        "selecteur": "#__UFRN_LIFECYCLE_SERVERREQUEST__",
+        "chemin": "app_cldp.data.classified.sections.features.details.categories[*].elements[*].value",
+        "regex": "piscine",
+        "type": "booleen",
+        "valeur": true
+      }
+    ],
+    "climatisation": [
+      {
+        "source": "json",
+        "selecteur": "#__UFRN_LIFECYCLE_SERVERREQUEST__",
+        "chemin": "app_cldp.data.classified.sections.features.details.categories[*].elements[*].value",
+        "regex": "pas de climatisation",
+        "type": "booleen",
+        "valeur": false
+      },
+      {
+        "source": "json",
+        "selecteur": "#__UFRN_LIFECYCLE_SERVERREQUEST__",
+        "chemin": "app_cldp.data.classified.sections.features.details.categories[*].elements[*].value",
+        "regex": "climatis",
+        "type": "booleen",
+        "valeur": true
+      }
+    ],
+    "cheminee": [
+      {
+        "source": "json",
+        "selecteur": "#__UFRN_LIFECYCLE_SERVERREQUEST__",
+        "chemin": "app_cldp.data.classified.sections.features.details.categories[*].elements[*].value",
+        "regex": "chemin[ée]e",
+        "type": "booleen",
+        "valeur": true
+      }
+    ],
+    "accessiblePmr": [
+      {
+        "source": "json",
+        "selecteur": "#__UFRN_LIFECYCLE_SERVERREQUEST__",
+        "chemin": "app_cldp.data.classified.sections.features.details.categories[*].elements[icon=barrier-free].value",
+        "regex": "^non ",
+        "type": "booleen",
+        "valeur": false
+      },
+      {
+        "source": "json",
+        "selecteur": "#__UFRN_LIFECYCLE_SERVERREQUEST__",
+        "chemin": "app_cldp.data.classified.sections.features.details.categories[*].elements[icon=barrier-free].value",
+        "regex": "accessible",
+        "type": "booleen",
+        "valeur": true
+      }
+    ],
+    "sallesEau": [
+      {
+        "source": "json",
+        "selecteur": "#__UFRN_LIFECYCLE_SERVERREQUEST__",
+        "chemin": "app_cldp.data.classified.sections.features.details.categories[*].elements[icon=bathroom-amenities].value",
+        "regex": "^(\\d+)",
+        "type": "entier"
+      }
+    ],
+    "honoraires": [
+      {
+        "source": "json",
+        "selecteur": "#__UFRN_LIFECYCLE_SERVERREQUEST__",
+        "chemin": "app_cldp.data.classified.sections.price.breakdown.groups[colorType=MAIN_PRICE].items[1].value.main.ariaLabel",
+        "type": "montant"
+      }
+    ],
+    "honorairesACharge": [
+      {
+        "source": "json",
+        "selecteur": "#__UFRN_LIFECYCLE_SERVERREQUEST__",
+        "chemin": "app_cldp.data.classified.sections.price.breakdown.message.value",
+        "regex": "charge du vendeur",
+        "type": "texte",
+        "valeur": "vendeur"
+      },
+      {
+        "source": "json",
+        "selecteur": "#__UFRN_LIFECYCLE_SERVERREQUEST__",
+        "chemin": "app_cldp.data.classified.sections.price.breakdown.message.value",
+        "regex": "acqu[ée]reur",
+        "type": "texte",
+        "valeur": "acquereur"
+      }
+    ],
+    "vendeur": [
+      {
+        "source": "json",
+        "selecteur": "#__UFRN_LIFECYCLE_SERVERREQUEST__",
+        "chemin": "app_cldp.data.classified.contactSections.contactCard.isPrivateOwner",
+        "regex": "^true$",
+        "type": "texte",
+        "valeur": "particulier"
+      },
+      {
+        "source": "json",
+        "selecteur": "#__UFRN_LIFECYCLE_SERVERREQUEST__",
+        "chemin": "app_cldp.data.classified.contactSections.contactCard.isPrivateOwner",
+        "regex": "^false$",
+        "type": "texte",
+        "valeur": "pro"
+      }
+    ],
+    "publieeLe": [
+      {
+        "source": "json",
+        "selecteur": "#__UFRN_LIFECYCLE_SERVERREQUEST__",
+        "chemin": "app_cldp.data.classified.metadata.creationDate",
+        "type": "date"
+      }
+    ],
+    "photos": [
+      {
+        "source": "json",
+        "selecteur": "#__UFRN_LIFECYCLE_SERVERREQUEST__",
+        "chemin": "app_cldp.data.classified.sections.gallery.images[*].url",
+        "type": "urls"
+      }
+    ],
     "ville": [
       {
         "source": "json",
@@ -156,6 +585,14 @@
         "type": "codePostal"
       },
       { "source": "meta", "nom": "og:title", "type": "codePostal" }
+    ],
+    "quartier": [
+      {
+        "source": "json",
+        "selecteur": "#__UFRN_LIFECYCLE_SERVERREQUEST__",
+        "chemin": "app_cldp.data.classified.sections.location.address.district",
+        "type": "texte"
+      }
     ],
     "description": [
       {
