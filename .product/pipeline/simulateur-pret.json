@@ -2,9 +2,9 @@
   "feature_slug": "simulateur-pret",
   "title": "Simulateur de prêt : deux offres côte à côte, comparaison, tableaux d'amortissement à télécharger (CSV) et à imprimer, lien",
   "started_at": "2026-09-14T12:00:00Z",
-  "current_step": "implement",
+  "current_step": "push",
   "scope": "packages/moteur/src/pret/, apps/web/src/{simulateur,ecrans/SimulateurPret.tsx,ecrans/SimulateurImprimer.tsx,ecrans/simulateur,textes/simulateur.ts,stockage/base64url.ts}, coque/Sidebar.tsx (Outils), App.tsx (routes), Méthode, e2e, docs",
-  "branch": "feat/simulateur-pret (à créer depuis master)",
+  "branch": "feat/simulateur-pret",
   "base": "master",
   "steps": {
     "discovery": {
@@ -22,11 +22,38 @@
       "output": ".product/architecture/simulateur-pret.md",
       "note": "ADR-S1 à S6 ; 5 fichiers moteur, 17 fichiers web, 12 fichiers de tests, 1 e2e ; ordre d'implémentation en 9 étapes"
     },
-    "implement": { "status": "pending", "stories_completed": 0, "stories_total": 8 },
-    "refactor": { "status": "pending" },
-    "qa_tests": { "status": "pending" },
-    "security": { "status": "pending" },
-    "push": { "status": "pending" }
+    "implement": {
+      "status": "completed",
+      "stories_completed": 8,
+      "stories_total": 8,
+      "commits": [
+        "feat(moteur): US-1/US-2 — simulerPret, comparerOffres, fraisNotaireEstimes (37 tests, 100 %)",
+        "feat(web): US-3/US-6/US-7 — modules purs (saisie, calcul, état, lien, mémoire, CSV, textes)",
+        "feat(web): US-3/US-4/US-5/US-6 — écran du simulateur",
+        "feat(web): US-8 — rubrique Outils et section Méthode",
+        "feat(web): US-7 — impression, lien, routes"
+      ],
+      "ecarts_avec_l_architecture": [
+        "saisie.ts ne porte pas de drapeau fraisNotaireManuels : les frais sont « à toi » dès que le texte diffère de l'estimation (dérivé, donc rien à stocker) ; la mémoire locale garde la SimulationPret validée",
+        "calcul.ts (calculer) et etat.ts (etatInitial) ajoutés dans simulateur/ pour rester purs et couverts à 100 %",
+        "nom d'offre : le schéma accepte le vide (0 à 40 caractères), le web pose « Offre A » / « Offre B » ; nomFichierCsv → « offre » quand le nom ne donne rien",
+        "messages français sur toutes les bornes du schéma pret (affichés sous le champ)",
+        "eurosCentimes ajouté à formatage/nombres.ts (mensualités au centime)"
+      ]
+    },
+    "refactor": {
+      "status": "completed",
+      "note": "revue à la relecture : fichiers < 300 lignes, aucun calcul dans le web"
+    },
+    "qa_tests": {
+      "status": "completed",
+      "note": "moteur 37 tests ; web : modules purs (saisie, lien, mémoire, csv, calcul, textes, base64url), écran, impression, Méthode ; e2e simulateur.spec.ts + 2 écrans dans formats.ts"
+    },
+    "security": {
+      "status": "completed",
+      "note": "fragment et mémoire validés par Zod avec bornes ; nom affiché comme texte ; aucun réseau ; téléchargement isolé dans telecharger.ts"
+    },
+    "push": { "status": "in_progress" }
   },
   "decisions": {
     "moteur": "simulerPret dans packages/moteur/src/pret/ réutilise tableauAmortissement, taeg, echeancier ; test de cohérence au centime avec calculerFinancement sur projetExemple",
@@ -37,8 +64,8 @@
     "endettement": "mensualité totale ÷ revenus nets, nommé « taux d'endettement », distinct de l'effort HCSF ; seuil des règles pour la pastille"
   },
   "questions_ouvertes_pour_pierre": [
-    "CSV suffit-il (s'ouvre dans Excel) ou faut-il un vrai .xlsx ?",
-    "Frais bancaires payés comptant par défaut : d'accord ?",
-    "Rubrique « Outils » dans la barre latérale : d'accord avec ce nom ?"
+    "CSV suffit-il (s'ouvre dans Excel) ou faut-il un vrai .xlsx ? (choix appliqué : CSV)",
+    "Frais bancaires payés comptant par défaut : d'accord ? (choix appliqué : comptant, case « financés »)",
+    "Rubrique « Outils » dans la barre latérale : d'accord avec ce nom ? (choix appliqué : « Outils »)"
   ]
 }

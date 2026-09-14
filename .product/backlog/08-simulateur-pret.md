@@ -1,6 +1,6 @@
 # 08 — Simulateur de prêt : un outil indépendant des projets
 
-Statut : `spécifiée` (Pierre l'a avancée le 14/09/2026 : « ajoute un simulateur de prêt qui ressemble à ce qu'il y avait ») · Notée le 14/09/2026 · La fiche 01 y mène par un bouton
+Statut : `livrée` le 14/09/2026 (PR `feat/simulateur-pret` : page `/simulateur-pret`, rubrique « Outils », moteur `packages/moteur/src/pret`, CSV, impression, lien `#s=`) · Spécifiée le 14/09/2026 (Pierre : « ajoute un simulateur de prêt qui ressemble à ce qu'il y avait ») · Notée le 14/09/2026 · La fiche 01 y mènera par un bouton (`lienSimulateur`)
 
 Documents prêts pour l'implémentation : discovery `.product/features/simulateur-pret-discovery.md`, specs `.product/specs/simulateur-pret-specs.md` (8 stories), architecture `.product/architecture/simulateur-pret.md`, état `.product/pipeline/simulateur-pret.json`.
 
