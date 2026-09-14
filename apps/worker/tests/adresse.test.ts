@@ -210,6 +210,8 @@ const BOITE_PAR_DEFAUT = (): Promise<Response> =>
 /** Faux API Carto : la parcelle du bien au point, trois parcelles dans la boîte élargie. */
 function fauxCadastre(appels: URL[], boite = BOITE_PAR_DEFAUT): Fetcher {
   return (url) => {
+    // API Géo : aucune commune voisine autour de ce point.
+    if (url.hostname === 'geo.api.gouv.fr') return Promise.resolve(reponseJson([]));
     appels.push(url);
     const geom = url.searchParams.get('geom') ?? '';
     return geom.includes('"Point"')

@@ -20,13 +20,14 @@ import {
   type ResumeTendance,
 } from './tendance';
 import { lireVentes, type VenteDvf } from './ventes';
+import { communesAutour } from './voisines';
 
 /** Une analyse vaut 24 heures (les ventes changent au mieux chaque semestre). */
 export const TTL_ADRESSE_SECONDES = 24 * 3600;
 /** Le parcellaire change rarement : 30 jours. */
 export const TTL_CADASTRE_SECONDES = 30 * 24 * 3600;
 /** À incrémenter quand le contrat de réponse change : les réponses en cache en dépendent. */
-const VERSION_CONTRAT = 2;
+const VERSION_CONTRAT = 3;
 
 export const SOURCE_DVF = {
   nom: 'Demandes de valeurs foncières géolocalisées (Etalab, à partir des données DGFiP)',
@@ -89,8 +90,25 @@ async function ventesCommune(passe: Passe, codeInsee: string): Promise<VentesCom
   return null;
 }
 
+interface VentesVoisine {
+  readonly codeInsee: string;
+  readonly ventes: VenteDvf[];
+}
+
+/** Ventes d'une commune voisine, marquées de leur code ; `null` quand la commune n'est pas publiée. */
+async function ventesVoisine(
+  passe: Passe,
+  millesime: string,
+  codeInsee: string,
+): Promise<VentesVoisine | null> {
+  const texte = await lireTexte(passe, `dvf/${millesime}/${codeInsee}.csv`);
+  return texte === null
+    ? null
+    : { codeInsee, ventes: lireVentes(texte).map((v) => ({ ...v, codeInsee })) };
+}
+
 interface Actualisation {
-  readonly actualiser: Actualiser;
+  readonly coefficient: (date: string) => number;
   readonly resume: ResumeTendance;
 }
 
@@ -106,15 +124,15 @@ async function actualisation(
   if (serie === null) return null;
   const indices = lisser(serie.points);
   return {
-    actualiser: (date) => coefficientPour(indices, date),
+    coefficient: (date) => coefficientPour(indices, date),
     resume: resumeTendance(serie.zone, indices),
   };
 }
 
 /**
  * GET /marche/adresse?codeInsee&lat&lon&numero&codeVoie&type&surface : ventes réelles autour d'une adresse
- * précise (même immeuble, parcelles voisines, même côté de la rue, en face, 100 à 300 m), prix ramenés au
- * dernier semestre connu par la tendance locale, et repère de prix.
+ * précise (même immeuble, parcelles voisines, même côté de la rue, en face, 100 à 300 m, communes voisines
+ * comprises), prix ramenés au dernier semestre connu par la tendance de chaque commune, et repère de prix.
  */
 export function creerAnalyseAdresse(deps: Dependances): Handler<BlankEnv, '/marche/adresse'> {
   return async (c) => {
@@ -129,16 +147,37 @@ export function creerAnalyseAdresse(deps: Dependances): Handler<BlankEnv, '/marc
     if (enCache !== null) return repondre(c, enCache, 'HIT');
 
     const passe = nouvellePasse(deps);
-    const [commune, voisinage] = await Promise.all([
+    const point = { lat: p.lat, lon: p.lon };
+    const [commune, voisinage, autour] = await Promise.all([
       ventesCommune(passe, p.codeInsee),
       voisinageEnCache(deps, p.lat, p.lon),
+      communesAutour(deps, point, p.codeInsee),
     ]);
-    const tendance =
-      commune === null ? null : await actualisation(passe, commune.millesime, p.codeInsee, p.type);
+    const voisines =
+      commune === null
+        ? []
+        : (
+            await Promise.all(
+              autour.codes.map((code) => ventesVoisine(passe, commune.millesime, code)),
+            )
+          ).filter((v): v is VentesVoisine => v !== null);
+    const codes = [p.codeInsee, ...voisines.map((v) => v.codeInsee)];
+    const actualisations = new Map(
+      commune === null
+        ? []
+        : await Promise.all(
+            codes.map(
+              async (code) =>
+                [code, await actualisation(passe, commune.millesime, code, p.type)] as const,
+            ),
+          ),
+    );
+    const actualiser: Actualiser = (vente) =>
+      actualisations.get(vente.codeInsee ?? p.codeInsee)?.coefficient(vente.date) ?? 1;
     const analyse = analyserAdresse(
-      commune?.ventes ?? [],
+      [...(commune?.ventes ?? []), ...voisines.flatMap((v) => v.ventes)],
       {
-        point: { lat: p.lat, lon: p.lon },
+        point,
         numero: p.numero ?? null,
         codeVoie: p.codeVoie ?? null,
         idParcelle: voisinage?.idParcelle ?? null,
@@ -146,7 +185,7 @@ export function creerAnalyseAdresse(deps: Dependances): Handler<BlankEnv, '/marc
         type: p.type,
         surface: p.surface,
       },
-      tendance?.actualiser,
+      actualiser,
     );
     const texte = JSON.stringify({
       codeInsee: p.codeInsee,
@@ -155,11 +194,13 @@ export function creerAnalyseAdresse(deps: Dependances): Handler<BlankEnv, '/marc
       parcellesVoisines: voisinage?.voisines ?? [],
       cadastre: voisinage === null ? 'indisponible' : 'ok',
       ...analyse,
-      tendance: tendance?.resume ?? null,
+      ventesCommune: commune?.ventes.length ?? 0,
+      communesVoisines: voisines.map((v) => ({ codeInsee: v.codeInsee, ventes: v.ventes.length })),
+      tendance: actualisations.get(p.codeInsee)?.resume ?? null,
       sources: commune === null ? [] : [SOURCE_DVF],
       obtenuLe: new Date(deps.maintenant()).toISOString(),
     });
-    if (!passe.panne && voisinage !== null) {
+    if (!passe.panne && voisinage !== null && autour.complet) {
       await ecrireCache(deps, cle, texte, TTL_ADRESSE_SECONDES);
     }
     return repondre(c, texte, 'MISS');

@@ -1,3 +1,4 @@
+import { obtenirRegles } from '@loupe/moteur';
 import { useEffect, useState, type JSX } from 'react';
 
 import { Chapo, Page, TitrePage } from '@/composants/mise-en-page';
@@ -5,24 +6,45 @@ import { Bouton, Carte, Pastille } from '@/composants/ui';
 import { useClientWorker } from '@/coque/ClientWorker';
 import { useProjetCourant } from '@/coque/ProjetLayout';
 import {
+  appliquerLoyerReference,
+  appliquerRisques,
   ecartAuRepere,
   lireCleBan,
+  loyerPourBien,
   marcheDepuisReference,
+  memesRisques,
+  risquesDuProjet,
+  type DpeAdresse,
   type ReponseAdresse,
+  type ReponseMarche,
+  type ReponseRisques,
+  type Resultat,
 } from '@/enrichissement';
 import { useProjets } from '@/stockage/ProjetsContext';
 import type { AdresseBien } from '@/stockage/projets';
 import { PHRASES_ADRESSE, phrasePrecision, phraseReference } from '@/textes/adresse';
 
+import { CarteDpe } from './adresse/Dpe';
 import { CarteEstimation } from './adresse/Estimation';
+import { CarteLoyer } from './adresse/Loyer';
+import { CarteRisques } from './adresse/Risques';
 import { TableauGroupes, TableauVentes } from './adresse/Tableaux';
 import { Tendance } from './adresse/Tendance';
+
+interface DonneesAdresse {
+  readonly analyse: ReponseAdresse;
+  readonly dpe: Resultat<readonly DpeAdresse[]>;
+  readonly risques: Resultat<ReponseRisques>;
+  readonly marche: Resultat<ReponseMarche>;
+}
 
 type Etat =
   | { readonly etape: 'saisie' }
   | { readonly etape: 'recherche' }
   | { readonly etape: 'erreur'; readonly message: string }
-  | { readonly etape: 'resultat'; readonly adresse: AdresseBien; readonly analyse: ReponseAdresse };
+  | { readonly etape: 'resultat'; readonly adresse: AdresseBien; readonly donnees: DonneesAdresse };
+
+const SANS_CODE_POSTAL: Resultat<ReponseMarche> = { ok: false, code: 'SANS_CODE_POSTAL' };
 
 export function Adresse(): JSX.Element {
   const { enregistre } = useProjetCourant();
@@ -32,22 +54,55 @@ export function Adresse(): JSX.Element {
   const [etat, setEtat] = useState<Etat>({ etape: 'saisie' });
   const { projet } = enregistre;
 
+  /** Ventes, DPE, risques et loyer en parallèle ; risques et loyer de référence s'appliquent d'eux-mêmes. */
   const analyser = async (adresse: AdresseBien): Promise<void> => {
     setEtat({ etape: 'recherche' });
-    const analyse = await client.analyserAdresse({
-      codeInsee: adresse.codeInsee,
-      lat: adresse.lat,
-      lon: adresse.lon,
-      numero: adresse.numero,
-      codeVoie: adresse.codeVoie,
-      type: projet.bien.type,
-      surface: projet.bien.surface,
+    const position = { lat: adresse.lat, lon: adresse.lon };
+    const [analyse, dpe, risques, marche] = await Promise.all([
+      client.analyserAdresse({
+        codeInsee: adresse.codeInsee,
+        lat: adresse.lat,
+        lon: adresse.lon,
+        numero: adresse.numero,
+        codeVoie: adresse.codeVoie,
+        type: projet.bien.type,
+        surface: projet.bien.surface,
+      }),
+      client.dpe(position),
+      client.risques(position),
+      adresse.codePostal === undefined
+        ? Promise.resolve(SANS_CODE_POSTAL)
+        : client.marche({
+            codeInsee: adresse.codeInsee,
+            codePostal: adresse.codePostal,
+            type: projet.bien.type,
+            pieces: projet.bien.pieces,
+          }),
+    ]);
+    if (!analyse.ok) {
+      setEtat({ etape: 'erreur', message: PHRASES_ADRESSE.indisponible });
+      return;
+    }
+    let suivant = projet;
+    if (risques.ok) {
+      const nouveaux = risquesDuProjet(risques.valeur);
+      if (!memesRisques(projet.marche.risques, nouveaux)) {
+        suivant = appliquerRisques(suivant, nouveaux);
+      }
+    }
+    if (marche.ok && marche.valeur.loyer !== null) {
+      const prime = obtenirRegles(projet.versionRegles).exploitation.primeMeuble;
+      const loyer = loyerPourBien(marche.valeur.loyer, projet.bien.surface, prime);
+      if (projet.marche.loyerReferenceM2 !== loyer.referenceM2) {
+        suivant = appliquerLoyerReference(suivant, loyer);
+      }
+    }
+    if (suivant !== projet) mettreAJour(enregistre.id, suivant, { adresse });
+    setEtat({
+      etape: 'resultat',
+      adresse,
+      donnees: { analyse: analyse.valeur, dpe, risques, marche },
     });
-    setEtat(
-      analyse.ok
-        ? { etape: 'resultat', adresse, analyse: analyse.valeur }
-        : { etape: 'erreur', message: PHRASES_ADRESSE.indisponible },
-    );
   };
 
   const chercher = async (): Promise<void> => {
@@ -75,20 +130,23 @@ export function Adresse(): JSX.Element {
       codeInsee: trouve.codeInsee,
       codeVoie: voie?.codeVoie ?? null,
       numero: voie?.numero ?? null,
+      ...(trouve.codePostal === null ? {} : { codePostal: trouve.codePostal }),
     };
     setTexte(adresse.libelle);
     mettreAJour(enregistre.id, projet, { adresse });
     await analyser(adresse);
   };
 
-  // Une adresse déjà enregistrée est réanalysée une seule fois, à l'ouverture de l'onglet (réponse en cache 24 h).
+  // Une adresse déjà enregistrée est réanalysée une seule fois, à l'ouverture de l'onglet : c'est
+  // l'actualisation du projet (ventes, tendance, DPE, risques, loyer ; réponses en cache côté Worker).
   const adresseEnregistree = enregistre.adresse;
   useEffect(() => {
     if (adresseEnregistree !== undefined) void analyser(adresseEnregistree);
   }, []);
 
   const prixM2Bien = projet.hypotheses.achat.prix / projet.bien.surface;
-  const reference = etat.etape === 'resultat' ? etat.analyse.reference : null;
+  const analyse = etat.etape === 'resultat' ? etat.donnees.analyse : null;
+  const reference = analyse?.reference ?? null;
   const repereUtilise =
     reference !== null &&
     projet.marche.dvf?.medianM2 === reference.statistiques.medianeM2 &&
@@ -98,7 +156,7 @@ export function Adresse(): JSX.Element {
     if (etat.etape !== 'resultat' || reference === null) return;
     const repere = marcheDepuisReference(
       reference,
-      etat.analyse.tendance?.periodeReference ?? null,
+      etat.donnees.analyse.tendance?.periodeReference ?? null,
     );
     mettreAJour(
       enregistre.id,
@@ -119,7 +177,8 @@ export function Adresse(): JSX.Element {
         </TitrePage>
         <Chapo>
           Les ventes réelles au plus près du bien, ramenées au prix d'aujourd'hui, puis corrigées
-          selon son état et ses caractéristiques. Chaque chiffre montre sa source.
+          selon son état et ses caractéristiques. Le DPE, les risques et le loyer de marché de
+          l'adresse s'y ajoutent. Chaque chiffre montre sa source.
         </Chapo>
       </div>
 
@@ -159,7 +218,7 @@ export function Adresse(): JSX.Element {
         )}
       </Carte>
 
-      {etat.etape === 'resultat' && (
+      {etat.etape === 'resultat' && analyse !== null && (
         <Carte>
           <h2 className="m-0 font-display text-[22px] font-semibold">Le repère de prix</h2>
           <p className="m-0 text-[17px]">
@@ -168,7 +227,7 @@ export function Adresse(): JSX.Element {
                   reference,
                   ecartAuRepere(prixM2Bien, reference.statistiques.medianeM2),
                 )
-              : etat.analyse.ventesCommune === 0
+              : analyse.ventesCommune === 0
                 ? PHRASES_ADRESSE.sansVentes
                 : PHRASES_ADRESSE.sansRepere}
           </p>
@@ -183,7 +242,7 @@ export function Adresse(): JSX.Element {
                   Utiliser ce repère pour l'estimation
                 </Bouton>
               ))}
-            {etat.analyse.cadastre === 'indisponible' && (
+            {analyse.cadastre === 'indisponible' && (
               <Pastille ton="surveiller" compacte>
                 {PHRASES_ADRESSE.cadastreIndisponible}
               </Pastille>
@@ -194,14 +253,23 @@ export function Adresse(): JSX.Element {
 
       <CarteEstimation />
 
-      {etat.etape === 'resultat' && (
+      {etat.etape === 'resultat' && analyse !== null && (
         <>
-          {etat.analyse.tendance != null && <Tendance tendance={etat.analyse.tendance} />}
-          <TableauGroupes analyse={etat.analyse} />
-          <TableauVentes analyse={etat.analyse} />
+          <div className="grid gap-5 lg:grid-cols-2">
+            <CarteDpe resultat={etat.donnees.dpe} adresse={etat.adresse} />
+            <CarteLoyer resultat={etat.donnees.marche} />
+          </div>
+          <CarteRisques resultat={etat.donnees.risques} />
+          {analyse.tendance != null && <Tendance tendance={analyse.tendance} />}
+          <TableauGroupes analyse={analyse} />
+          <TableauVentes analyse={analyse} />
           <p className="m-0 text-xs text-encre-3">
-            Sources : {etat.analyse.sources.map((s) => s.nom).join(' ; ')}
-            {etat.analyse.parcelle === null ? '' : ` · parcelle ${etat.analyse.parcelle}`}.
+            Sources : {analyse.sources.map((s) => s.nom).join(' ; ')}
+            {analyse.parcelle === null ? '' : ` · parcelle ${analyse.parcelle}`}
+            {(analyse.communesVoisines ?? []).length === 0
+              ? ''
+              : ` · ventes des communes voisines comprises (${(analyse.communesVoisines ?? []).map((c) => c.codeInsee).join(', ')})`}
+            .
           </p>
         </>
       )}

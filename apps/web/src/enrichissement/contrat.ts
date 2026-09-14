@@ -162,11 +162,57 @@ export const ReponseAdresseSchema = z.object({
     })
     .nullable()
     .optional(),
+  /** Communes voisines dont les ventes comptent dans les cercles ; absent avant la version 0.6 du Worker. */
+  communesVoisines: z
+    .array(z.object({ codeInsee: z.string(), ventes: z.number().int().nonnegative() }))
+    .optional(),
   sources: z.array(SourceSchema),
 });
 export type ReponseAdresse = z.infer<typeof ReponseAdresseSchema>;
 export type TendanceAdresse = NonNullable<ReponseAdresse['tendance']>;
 export type ReferenceAdresse = NonNullable<ReponseAdresse['reference']>;
+
+/** GET /proxy/dpe : DPE de la base ADEME enregistrés autour de l'adresse, du plus proche au plus récent. */
+export const DpeAdresseSchema = z.object({
+  numero: z.string(),
+  date: z.string().nullable(),
+  finValidite: z.string().nullable(),
+  etiquetteDpe: lettre,
+  etiquetteGes: lettre.nullable(),
+  typeBatiment: z.string().nullable(),
+  surface: z.number().positive().nullable(),
+  etage: z.number().nullable(),
+  complement: z.string().nullable(),
+  cleBan: z.string().nullable(),
+  anneeConstruction: z.number().nullable(),
+  distanceMetres: z.number().nonnegative(),
+});
+export type DpeAdresse = z.infer<typeof DpeAdresseSchema>;
+
+export const ReponseDpeSchema = z.object({
+  donnees: z.object({ dpe: z.array(DpeAdresseSchema) }),
+});
+
+export const NiveauRisqueAdresseSchema = z.enum(['fort', 'moyen', 'faible', 'inconnu', 'absent']);
+export type NiveauRisqueAdresse = z.infer<typeof NiveauRisqueAdresseSchema>;
+
+/** GET /proxy/risques : rapport Géorisques, niveau à l'adresse et dans la commune. */
+export const ReponseRisquesSchema = z.object({
+  donnees: z.object({
+    url: z.string().nullable(),
+    risques: z.array(
+      z.object({
+        code: z.string(),
+        famille: z.enum(['naturel', 'technologique']),
+        libelle: z.string(),
+        adresse: NiveauRisqueAdresseSchema,
+        commune: NiveauRisqueAdresseSchema,
+      }),
+    ),
+  }),
+});
+export type ReponseRisques = z.infer<typeof ReponseRisquesSchema>['donnees'];
+export type RisqueAdresse = ReponseRisques['risques'][number];
 
 /** Corps d'erreur du Worker : un code, jamais un texte. */
 export const ErreurWorkerSchema = z.object({ code: z.string() });

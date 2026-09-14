@@ -4,17 +4,21 @@ Format : `- [ ] slug — titre — date — scope`
 
 ## En cours
 
-- [ ] estimation-prix — estimation du prix du bien, sans modèle de langage : ventes DVF ramenées au dernier semestre publié par la tendance locale (médiane par semestre sur cinq ans, commune ou département), position selon l'état (à rénover = premier quartile, rénové = troisième), corrections sourcées et désactivables (DPE Notaires de France, étage et ascenseur, balcon ou terrasse MeilleursAgents, charges comparées au repère ARC), fourchette et confiance, feu prix comparé à l'estimation ; onglet « Estimation », Rapport, Méthode, champs État et Balcon ou terrasse (Hypothèses, Vérifier, lecture de l'annonce par règles et par l'IA) — 2026-09-14 — `data/src/sources/dvf/tendance.ts`, `apps/worker/src/adresse/tendance.ts`, `packages/moteur/src/estimation`, `apps/web/src/{ecrans/adresse,textes/estimation.ts,textes/methode-estimation.ts}` — PR #26
+Rien en cours dans la session principale.
+
+## Livrées récemment
+
+- [x] marche-complet — DPE du logement retrouvé dans la base ADEME (proposé, appliqué d'un clic), risques de l'adresse d'après Géorisques (appliqués au verdict, lien du rapport), loyer de marché ANIL ramené au bien (loyer de référence, loyer visé d'un clic, « Estimer le loyer » au formulaire Vérifier), ventes des communes et arrondissements voisins dans les cercles, actualisation par l'onglet Estimation ; sans modèle de langage — 2026-09-14 — `apps/worker/src/{services/dpe.ts,services/risques.ts,adresse/voisines.ts}`, `apps/web/src/{enrichissement/dpe.ts,enrichissement/risques.ts,enrichissement/loyer.ts,ecrans/adresse,ecrans/formulaire/EstimerLoyer.tsx}` — PR #30 ; étage des DPE lu dans le complément d'adresse — PR #32 (Worker 0.6.0 déployé et vérifié en production)
 
 ## À venir
 
-Chaîne serveur (session principale, en série) :
-
-- [ ] marche-complet — loyer visé estimé depuis l'ANIL, DPE ADEME retrouvé par l'adresse (nourrit l'estimation), risques Géorisques, ventes des communes limitrophes dans les cercles, actualisation du marché d'un projet existant
+Chaîne serveur (session principale) : à choisir avec Pierre (synchronisation des projets des comptes, publication DVF France entière, vérification des règles de l'extension sur de vraies annonces).
 
 Parallélisables : plus aucune fiche en attente (`extension` et `garder` sont livrées).
 
 ## Livrées (mergées sur `master`)
+
+- [x] estimation-prix — estimation du prix du bien, sans modèle de langage : ventes DVF ramenées au dernier semestre publié par la tendance locale (médiane par semestre sur cinq ans, commune ou département), position selon l'état (à rénover = premier quartile, rénové = troisième), corrections sourcées et désactivables (DPE Notaires de France, étage et ascenseur, balcon ou terrasse MeilleursAgents, charges comparées au repère ARC), fourchette et confiance, feu prix comparé à l'estimation ; onglet « Estimation », Rapport, Méthode, champs État et Balcon ou terrasse (Hypothèses, Vérifier, lecture de l'annonce par règles et par l'IA) — 2026-09-14 — `data/src/sources/dvf/tendance.ts`, `apps/worker/src/adresse/tendance.ts`, `packages/moteur/src/estimation`, `apps/web/src/{ecrans/adresse,textes/estimation.ts,textes/methode-estimation.ts}` — PR #26 (Worker 0.5.0 déployé, DVF du 13 republié avec la tendance, vérifié en production)
 
 - [x] moteur-calcul — Moteur de calcul Loupe en TypeScript pur, 204 tests, couverture 100 %, monorepo — 2026-09-13 — PR #1
 - [x] direction-visuelle — Direction C « Le guide » retenue, ADR-004, maquettes coque SaaS — 2026-09-13 — PR #2

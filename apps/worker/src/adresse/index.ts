@@ -62,3 +62,11 @@ export {
   type ZoneTendance,
 } from './tendance';
 export { lireVentes, type VenteDvf } from './ventes';
+export {
+  communesAutour,
+  MAX_COMMUNES_VOISINES,
+  pointsAutour,
+  RAYON_VOISINES_M,
+  URL_API_GEO,
+  type CommunesVoisines,
+} from './voisines';

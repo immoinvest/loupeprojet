@@ -1,42 +1,42 @@
 {
-  "feature_slug": "estimation-prix",
-  "title": "Estimation du prix du bien : prix DVF actualisés par la tendance locale, fourchette à rénover / rénové, corrections sourcées (DPE, étage, ascenseur, extérieur, charges), confiance",
+  "feature_slug": "marche-complet",
+  "title": "Marché complet : DPE ADEME retrouvé par l'adresse, risques Géorisques, loyer ANIL de référence et loyer visé proposé, ventes des communes voisines dans les cercles, actualisation par l'onglet Estimation",
   "started_at": "2026-09-14T00:00:00Z",
-  "current_step": "implement",
-  "scope": "data/src/sources/dvf (tendance), apps/worker/src/adresse (actualisation), packages/moteur/src/estimation, apps/web (onglet Estimation, Rapport, Méthode, Hypothèses, lecture d'annonce)",
-  "branch": "feat/estimation-prix",
-  "base": "master (ad63237)",
-  "next_feature": "marche-complet",
+  "current_step": "done",
+  "scope": "apps/worker/src/{services/dpe.ts,services/risques.ts,adresse/voisines.ts,adresse/route.ts}, apps/web/src/{enrichissement,ecrans/adresse,ecrans/FormulaireProjet.tsx,textes}",
+  "branch": "feat/marche-complet",
+  "base": "master (7cc72aa)",
   "steps": {
     "discovery": {
       "status": "completed",
-      "output": ".product/features/estimation-prix-discovery.md"
+      "output": ".product/features/marche-complet-discovery.md"
     },
     "specs": { "status": "completed", "stories_count": 5 },
     "architecture": {
       "status": "completed",
-      "output": ".product/architecture/estimation-prix.md"
+      "output": ".product/architecture/marche-complet.md"
     },
     "implement": {
       "status": "completed",
       "stories_completed": 5,
       "stories_total": 5,
-      "commits": ["5315e3c data US-1", "e35ab11 worker US-2", "5ba9cc1 moteur US-3"]
+      "commits": ["61e4e92 worker US-1/US-2", "bade365 worker US-3"]
     },
     "qa_tests": {
       "status": "completed",
-      "note": "859 tests après merge de master : tendance (semestres, séries, seuils, publication), actualisation Worker (lissage, coefficients, choix de série, route avec et sans tendance), estimation moteur (chaque correction, bornes, confiance, positions, feu prix), web (textes, écran Estimation, Rapport, Méthode, lecture de l'état et de l'extérieur) ; couverture 100 % sur les modules de logique"
+      "note": "893 tests : services DPE et risques sur réponses réelles abrégées, niveaux Géorisques, étage lu dans le complément (formats relevés à Marseille et Paris), communes voisines (arrondissements, pannes, cache), route avec commune voisine, classement des DPE, risques, loyer, cartes de l'onglet Estimation, bouton « Estimer le loyer »"
     },
     "security": {
       "status": "completed",
-      "note": "aucun modèle de langage dans l'estimation ; aucun nouvel appel réseau (mêmes lectures R2) ; entrées validées par Zod (ProjetSchema, contrat /marche/adresse, contrat /extract) ; coefficients statiques versionnés dans les règles ; rien de personnel stocké côté serveur"
+      "note": "aucun modèle de langage ; trois services publics gratuits appelés depuis le Worker seulement, paramètres validés par Zod, réponses amont validées, cache KV, limite de débit générale ; lien Géorisques ouvert avec rel=noopener"
     },
-    "push": { "status": "done", "pr": 26 }
+    "push": { "status": "done", "pr": 30, "correctif": 32 }
   },
   "decisions": {
-    "tendance": "médiane €/m² par semestre sur 5 ans de DVF, seuil 20 ventes, commune sinon département, moyenne mobile pondérée sur 3 semestres",
-    "etat": "à rénover = 1er quartile, rafraîchir = entre 1er quartile et médiane, bon état = médiane, rénové = 3e quartile",
-    "corrections": "coefficients d'études publiées (Notaires valeur verte 2024, MeilleursAgents étage 2017 et extérieur 2020, ARC charges 2024), versionnés dans les règles et marqués à confirmer",
-    "sans_llm": "aucun modèle de langage dans l'estimation"
+    "sources": "ADEME dpe03existant (geo_distance 30 m), Géorisques resultats_rapport_risque, API Géo communes, ANIL déjà sur R2 ; toutes vérifiées en direct le 14/09/2026",
+    "risques": "niveau à l'adresse : important = fort, modéré/existant/concerné = moyen, faible = faible ; seuls les risques à l'adresse vont au verdict, appliqués d'eux-mêmes",
+    "dpe": "proposé (clé BAN, surface à 15 %, étage, date), appliqué seulement sur clic",
+    "voisines": "neuf points dont huit à 300 m, API Géo (arrondissements à Paris, Lyon, Marseille), quatre communes au plus",
+    "sans_llm": "aucun modèle de langage"
   }
 }
