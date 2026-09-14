@@ -1,14 +1,31 @@
 import { describe, expect, it } from 'vitest';
 
 import { distanceMetres } from '../src/adresse';
-import { communesAutour, pointsAutour } from '../src/adresse/voisines';
+import type { Point } from '../src/adresse/geometrie';
+import { communesAutour, pointsAutour, RAYON_VOISINES_M } from '../src/adresse/voisines';
 import type { Dependances } from '../src/dependances';
 import { cleCache } from '../src/proxy/cache';
 import { banc, reponseJson } from './aide';
 
 const CENTRE = { lat: 43.294813, lon: 5.393807 };
+const GRENOBLE = { lat: 45.1885, lon: 5.7245 };
 
 type Fetcher = Dependances['fetcher'];
+
+/**
+ * Indice, parmi les huit points autour de `centre`, du point que l'URL interroge.
+ * Le faux service répond selon le point et non selon l'ordre d'arrivée des appels,
+ * qui varie avec les calculs d'empreinte asynchrones faits avant chaque appel.
+ */
+function indicePoint(centre: Point, url: URL): number {
+  const lat = Number(url.searchParams.get('lat'));
+  const lon = Number(url.searchParams.get('lon'));
+  const indice = pointsAutour(centre, RAYON_VOISINES_M).findIndex(
+    (p) => Number(p.lat.toFixed(5)) === lat && Number(p.lon.toFixed(5)) === lon,
+  );
+  if (indice < 0) throw new Error(`Point inattendu : ${url.search}`);
+  return indice;
+}
 
 /** Faux API Géo : au nord du bien, le 4e arrondissement ; ailleurs, le 5e. */
 function fauxApiGeo(appels: URL[]): Fetcher {
@@ -51,18 +68,52 @@ describe('communesAutour', () => {
   });
 
   it('hors Paris, Lyon et Marseille : communes entières ; quatre voisines au plus ; point en mer', async () => {
-    let n = 0;
+    // Le deuxième point (nord-est) tombe en mer ; les sept autres sont dans sept communes différentes.
+    const communes = ['38001', null, '38002', '38003', '38004', '38005', '38006', '38007'];
     const appels: URL[] = [];
     const { deps } = banc({
       fetcher: (url) => {
         appels.push(url);
-        n += 1;
-        return Promise.resolve(reponseJson(n === 8 ? [] : [{ code: `3800${String(n)}` }]));
+        const code = communes[indicePoint(GRENOBLE, url)];
+        return Promise.resolve(reponseJson(code ? [{ code }] : []));
       },
     });
-    const r = await communesAutour(deps, { lat: 45.1885, lon: 5.7245 }, '38185');
+    const r = await communesAutour(deps, GRENOBLE, '38185');
     expect(r).toEqual({ codes: ['38001', '38002', '38003', '38004'], complet: true });
+    expect(appels).toHaveLength(8);
     expect(appels.some((u) => u.searchParams.has('type'))).toBe(false);
+  });
+
+  it('range les voisines dans l’ordre des points, quel que soit l’ordre des réponses', async () => {
+    const reponses = new Map<number, () => void>();
+    let tousInterroges: () => void = () => undefined;
+    const huitAppels = new Promise<void>((resoudre) => {
+      tousInterroges = resoudre;
+    });
+    const { deps } = banc({
+      fetcher: (url) => {
+        const indice = indicePoint(GRENOBLE, url);
+        return new Promise<Response>((resoudre) => {
+          reponses.set(indice, () => {
+            resoudre(reponseJson([{ code: `3800${String(indice + 1)}` }]));
+          });
+          if (reponses.size === 8) tousInterroges();
+        });
+      },
+    });
+    const resultat = communesAutour(deps, GRENOBLE, '38185');
+    await huitAppels;
+    // Le dernier point répond le premier : rangés par arrivée, les codes seraient 38008, 38007…
+    for (const indice of [7, 6, 5, 4, 3, 2, 1, 0]) {
+      reponses.get(indice)?.();
+      await new Promise<void>((suite) => {
+        setTimeout(suite, 0);
+      });
+    }
+    expect(await resultat).toEqual({
+      codes: ['38001', '38002', '38003', '38004'],
+      complet: true,
+    });
   });
 
   it('pannes : liste partielle, jamais complète, journalisée ; cache illisible redemandé', async () => {
