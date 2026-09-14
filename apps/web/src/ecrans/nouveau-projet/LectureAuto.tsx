@@ -1,99 +1,40 @@
-import type { RaisonEchecLecture } from '@loupe/capture';
-import { useCallback, useEffect, useRef, useState, type JSX } from 'react';
+import type { JSX } from 'react';
 import { Link } from 'react-router';
 
-import { importerCapture, type AnnonceResolue, type CaptureImportee } from '@/annonces';
-import { detecterExtension, lireParExtension } from '@/annonces/extension';
 import { Bouton, Carte } from '@/composants/ui';
-import { completerAvecIa, type ClientWorker, type ModeLecture } from '@/enrichissement';
 import { texteEchecLecture } from '@/textes/lecture-auto';
+import { NOMS_PORTAILS, texteEchecServeur } from '@/textes/lecture-serveur';
 
-export type EtatExtension = 'inconnue' | 'presente' | 'absente';
+import type { EtatExtension, EtatLecture } from './useLectureAutomatique';
 
-export type EtatLecture =
-  | { readonly statut: 'en-cours' }
-  | { readonly statut: 'echec'; readonly raison: RaisonEchecLecture }
-  | null;
-
-/** Laisse finir de coller ou de taper le lien avant de lancer la lecture. */
-export const PAUSE_AVANT_LECTURE_MS = 600;
+export {
+  PAUSE_AVANT_LECTURE_MS,
+  useLectureAutomatique,
+  type EtatExtension,
+  type EtatLecture,
+  type LectureAutomatique,
+} from './useLectureAutomatique';
 
 /**
- * Lien d'annonce reconnu + extension présente : l'extension lit l'annonce dans un onglet du
- * navigateur, l'IA complète les trous à partir du texte, puis `surCapture` reçoit le résultat.
+ * Ce que l'écran dit de la lecture automatique : extension ou Deklic en train de lire, échec avec
+ * la marche à suivre, ou invitation à installer l'extension.
  */
-export function useLectureAutomatique(
-  annonce: AnnonceResolue | null,
-  actif: boolean,
-  client: ClientWorker,
-  surCapture: (capture: CaptureImportee, mode: ModeLecture | null) => void,
-): { extension: EtatExtension; lecture: EtatLecture; relancer: () => void } {
-  const [extension, setExtension] = useState<EtatExtension>('inconnue');
-  const [lecture, setLecture] = useState<EtatLecture>(null);
-  const derniere = useRef<string | null>(null);
-  const rappel = useRef(surCapture);
-
-  useEffect(() => {
-    rappel.current = surCapture;
-  }, [surCapture]);
-
-  useEffect(() => {
-    let vivant = true;
-    void detecterExtension(window).then((presente) => {
-      if (vivant) setExtension(presente ? 'presente' : 'absente');
-    });
-    return () => {
-      vivant = false;
-    };
-  }, []);
-
-  const lire = useCallback(
-    async (url: string): Promise<void> => {
-      derniere.current = url;
-      setLecture({ statut: 'en-cours' });
-      const resultat = await lireParExtension(window, url);
-      if (!resultat.ok) {
-        setLecture({ statut: 'echec', raison: resultat.raison });
-        return;
-      }
-      const complete = await completerAvecIa(importerCapture(resultat.capture), client);
-      setLecture(null);
-      rappel.current(complete.capture, complete.mode);
-    },
-    [client],
-  );
-
-  const url = annonce?.urlCanonique ?? null;
-  useEffect(() => {
-    if (!actif || extension !== 'presente' || url === null || derniere.current === url) return;
-    const minuterie = setTimeout(() => {
-      void lire(url);
-    }, PAUSE_AVANT_LECTURE_MS);
-    return () => {
-      clearTimeout(minuterie);
-    };
-  }, [actif, extension, url, lire]);
-
-  const relancer = useCallback(() => {
-    if (url !== null) void lire(url);
-  }, [url, lire]);
-
-  return { extension, lecture, relancer };
-}
-
-/** Ce que l'écran dit de la lecture automatique : en cours, échec avec la marche à suivre, ou invitation. */
 export function EtatLectureAuto({
   extension,
   lecture,
   lienReconnu,
   relancer,
+  lireSansExtension,
+  annuler,
 }: {
   extension: EtatExtension;
   lecture: EtatLecture;
   lienReconnu: boolean;
   relancer: () => void;
+  lireSansExtension: () => void;
+  annuler: () => void;
 }): JSX.Element | null {
-  if (lecture?.statut === 'en-cours') {
+  if (lecture?.statut === 'en-cours' && lecture.par === 'extension') {
     return (
       <Carte>
         <p role="status" className="m-0 text-[15px] font-semibold">
@@ -106,14 +47,34 @@ export function EtatLectureAuto({
       </Carte>
     );
   }
+  if (lecture?.statut === 'en-cours') {
+    return (
+      <Carte>
+        <p role="status" className="m-0 text-[15px] font-semibold">
+          Deklic lit l'annonce {NOMS_PORTAILS[lecture.portail]}…
+        </p>
+        <p className="m-0 text-sm text-encre-2">
+          De quelques secondes à une minute selon le portail.
+        </p>
+        <div>
+          <Bouton onClick={annuler}>Annuler et coller le texte</Bouton>
+        </div>
+      </Carte>
+    );
+  }
   if (lecture?.statut === 'echec') {
     return (
       <Carte>
         <p role="alert" className="m-0 text-[15px] text-encre-2">
-          {texteEchecLecture(lecture.raison)}
+          {lecture.par === 'extension'
+            ? texteEchecLecture(lecture.raison)
+            : texteEchecServeur(lecture.raison)}
         </p>
-        <div>
+        <div className="flex flex-wrap gap-3">
           <Bouton onClick={relancer}>Réessayer la lecture</Bouton>
+          {lecture.par === 'extension' && (
+            <Bouton onClick={lireSansExtension}>Lire sans l'extension</Bouton>
+          )}
         </div>
       </Carte>
     );

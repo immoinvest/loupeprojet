@@ -176,6 +176,8 @@ export function NouveauProjet(): JSX.Element {
               lecture={auto.lecture}
               lienReconnu={annonce !== null}
               relancer={auto.relancer}
+              lireSansExtension={auto.lireSansExtension}
+              annuler={auto.annuler}
             />
           )}
         </Carte>
