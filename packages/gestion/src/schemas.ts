@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { JourSchema, PeriodeSchema } from './dates';
 import { DocumentCompletSchema, DocumentSchema, IdentiteBailleurSchema } from './documents';
 import {
+  CHANGEMENTS_MAX,
   COLOCATAIRES_MAX,
   JOUR_LOYER_MAX,
   MONTANT_MAX_CENTIMES,
@@ -64,6 +65,8 @@ export const LocataireSchema = z.object({
 /** Colocation à bail unique : les autres locataires du bail, dans l'ordre de saisie (ADR-G13). */
 export const ColocatairesSchema = z.array(NouveauLocataireSchema).max(COLOCATAIRES_MAX);
 
+const JourLoyerSchema = z.number().int().min(1).max(JOUR_LOYER_MAX);
+
 const champsLocation = {
   /** Location à la chambre : ce qui distingue les locations simultanées d'un bien (« Chambre 2 »). */
   libelle: texte(40).optional(),
@@ -72,9 +75,12 @@ const champsLocation = {
   debut: JourSchema,
   /** Sortie du locataire, si elle est connue. */
   fin: JourSchema.optional(),
-  jourLoyer: z.number().int().min(1).max(JOUR_LOYER_MAX),
+  jourLoyer: JourLoyerSchema,
+  /** Montants d'entrée ; les changements suivants vivent dans `changements` (ADR-G14). */
   loyerHorsCharges: CentimesSchema,
   charges: CentimesSchema,
+  /** Aide au logement versée chaque mois au bailleur, comprise dans le loyer (ADR-G16) ; absente = 0. */
+  apl: CentimesSchema.optional(),
   depot: CentimesSchema,
 };
 
@@ -85,9 +91,30 @@ const FIN_APRES_DEBUT = {
 const finApresDebut = (l: { readonly debut: string; readonly fin?: string | undefined }): boolean =>
   l.fin === undefined || l.fin >= l.debut;
 
+const APL_COUVERTE = {
+  message: 'L’aide au logement ne peut pas dépasser le loyer charges comprises',
+  path: ['apl'],
+};
+const aplCouverte = (m: {
+  readonly loyerHorsCharges: number;
+  readonly charges: number;
+  readonly apl?: number | undefined;
+}): boolean => (m.apl ?? 0) <= m.loyerHorsCharges + m.charges;
+
+/** Nouveaux montants d'une location à partir d'un mois (ADR-G14). */
+export const ChangementSchema = z
+  .object({
+    aPartirDe: PeriodeSchema,
+    loyerHorsCharges: CentimesSchema,
+    charges: CentimesSchema,
+    apl: CentimesSchema,
+  })
+  .refine(aplCouverte, APL_COUVERTE);
+
 export const NouvelleLocationSchema = z
   .object(champsLocation)
-  .refine(finApresDebut, FIN_APRES_DEBUT);
+  .refine(finApresDebut, FIN_APRES_DEBUT)
+  .refine(aplCouverte, APL_COUVERTE);
 export const LocationGereeSchema = z
   .object({
     id: IdentifiantSchema,
@@ -97,9 +124,30 @@ export const LocationGereeSchema = z
     /** Les colocataires du même bail, dans l'ordre ; vide hors colocation. */
     colocataireIds: z.array(IdentifiantSchema).max(COLOCATAIRES_MAX),
     ...champsLocation,
+    /** Les changements de montants, dans l'ordre des mois ; absents = aucun. */
+    changements: z.array(ChangementSchema).max(CHANGEMENTS_MAX).optional(),
     creeLe: HorodatageSchema,
   })
-  .refine(finApresDebut, FIN_APRES_DEBUT);
+  .refine(finApresDebut, FIN_APRES_DEBUT)
+  .refine(aplCouverte, APL_COUVERTE);
+
+/** « Modifier » une location : de nouveaux montants à partir d'un mois, et ce qui vaut pour tout le bail. */
+export const ModificationLocationSchema = z
+  .object({
+    montants: ChangementSchema.optional(),
+    jourLoyer: JourLoyerSchema.optional(),
+    depot: CentimesSchema.optional(),
+    /** `null` retire le libellé. */
+    libelle: texte(40).nullable().optional(),
+  })
+  .refine(
+    (m) =>
+      m.montants !== undefined ||
+      m.jourLoyer !== undefined ||
+      m.depot !== undefined ||
+      m.libelle !== undefined,
+    { message: 'Rien à modifier', path: ['montants'] },
+  );
 
 export const SourcePaiementSchema = z.enum(['manuel']);
 
@@ -177,6 +225,8 @@ export type NouveauLocataire = z.infer<typeof NouveauLocataireSchema>;
 export type Locataire = z.infer<typeof LocataireSchema>;
 export type NouvelleLocation = z.infer<typeof NouvelleLocationSchema>;
 export type LocationGeree = z.infer<typeof LocationGereeSchema>;
+export type Changement = z.infer<typeof ChangementSchema>;
+export type ModificationLocation = z.infer<typeof ModificationLocationSchema>;
 export type NouveauPaiement = z.infer<typeof NouveauPaiementSchema>;
 export type Paiement = z.infer<typeof PaiementSchema>;
 export type PreferencesMenu = z.infer<typeof PreferencesMenuSchema>;

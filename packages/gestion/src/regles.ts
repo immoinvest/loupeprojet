@@ -25,6 +25,22 @@ export const COLOCATAIRES_MAX = 10;
 /** Plafond de tout montant saisi : 100 000 €, en centimes. */
 export const MONTANT_MAX_CENTIMES = 10_000_000;
 
+/** Un nouveau loyer vaut au plus tard 12 mois après le mois en cours (ADR-G15). */
+export const HORIZON_MODIFICATION_MOIS = 12;
+
+/** Changements de montants gardés par location : dix ans de changements mensuels (borne contre l'abus). */
+export const CHANGEMENTS_MAX = 120;
+
+/**
+ * Aide au logement versée au bailleur (tiers payant) : il la déduit du loyer demandé au locataire
+ * (CAF, « Rappel sur le tiers payant » ; CCH art. D832-1 à D832-4). La quittance indique la part de la
+ * CAF et celle du locataire : formulation reprise du guide du bailleur de la CAF, à confirmer.
+ */
+export const APL_QUITTANCE = {
+  aConfirmer: true,
+  source: 'Guide du bailleur de la CAF (résumé consulté le 14/09/2026)',
+} as const;
+
 /** Dépôt de garantie maximal, en mois de loyer hors charges : 1 en location vide, 2 en meublé. */
 export const MOIS_DE_DEPOT: Readonly<Record<TypeLocation, number>> = { nue: 1, meublee: 2 };
 
