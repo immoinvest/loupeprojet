@@ -21,13 +21,14 @@ describe('ProjetSchema', () => {
   });
 
   it('remplit marche, charges, revente et provenance quand ils manquent', () => {
-    const { achat, pret, location, fiscalite, revenusMensuels } = projetExemple.hypotheses;
+    const { achat, pret, location, fiscalite } = projetExemple.hypotheses;
     const projet = ProjetSchema.parse({
       id: projetExemple.id,
       versionRegles: projetExemple.versionRegles,
       bien: projetExemple.bien,
-      hypotheses: { achat, pret, location, fiscalite, revenusMensuels },
+      hypotheses: { achat, pret, location, fiscalite },
     });
+    expect(projet.hypotheses.revenusMensuels).toBeUndefined();
     expect(projet.marche.risques).toEqual([]);
     expect(projet.marche.dvf).toBeUndefined();
     expect(projet.hypotheses.charges.taxeFonciere).toBe(0);

@@ -59,7 +59,6 @@ describe('Nouveau projet — depuis l’extension', () => {
 
       await utilisateur.type(screen.getByLabelText(/Loyer visé/), '980');
       await utilisateur.type(screen.getByLabelText(/^Apport/), '15000');
-      await utilisateur.type(screen.getByLabelText(/Vos revenus/), '2600');
       await utilisateur.click(screen.getByRole('button', { name: /Créer le projet/ }));
 
       await screen.findByRole(

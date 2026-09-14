@@ -10,16 +10,16 @@ test('le rapport affiche le verdict, les cinq feux et les chiffres clés', async
   );
   await expect(
     page.getByText(
-      "−25 % par rapport au prix estimé, banque d'accord (effort 25 %), 210 € à sortir chaque mois.",
+      '−25 % par rapport au prix estimé, le crédit prend 84 % du loyer, 210 € à sortir chaque mois.',
     ),
   ).toBeVisible();
 
   const feux = page.getByLabel('Cinq feux');
-  await expect(feux.getByText(/Prix|Rendement net|Cash-flow|Effort|Risques/)).toHaveText([
+  await expect(feux.getByText(/Prix|Rendement net|Cash-flow|Crédit|Risques/)).toHaveText([
     'Prix −25 %',
     'Rendement net 4,3 %',
     'Cash-flow −210 €/mois',
-    'Effort 25 %',
+    'Crédit 84 % du loyer',
     'Risques : aucun',
   ]);
 

@@ -29,3 +29,4 @@ export {
   variantesRevente,
   type VarianteRevente,
 } from './revente';
+export { lienSimulateurPret, simulationDepuisResultats } from './simulation-pret';

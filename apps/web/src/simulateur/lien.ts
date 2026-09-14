@@ -30,13 +30,9 @@ export function encoderSimulation(simulation: SimulationPretEntree): string {
 export function decoderSimulation(texte: string): DecodageSimulation {
   const nettoye = texte.trim();
   if (nettoye === '') return { ok: false, raison: 'vide' };
-  let brut: unknown;
-  try {
-    brut = decoderJson(nettoye);
-  } catch {
-    return { ok: false, raison: 'illisible' };
-  }
-  const resultat = SimulationPretSchema.safeParse(brut);
+  const lecture = decoderJson(nettoye);
+  if (!lecture.ok) return { ok: false, raison: 'illisible' };
+  const resultat = SimulationPretSchema.safeParse(lecture.valeur);
   return resultat.success
     ? { ok: true, simulation: resultat.data }
     : { ok: false, raison: 'invalide' };

@@ -14,9 +14,9 @@ Statuts : `idée` → `en discussion` → `spécifiée` → `en cours` → `livr
 
 | N°  | Fiche                                                                | En une phrase                                                                                                        | Statut   | Dépend de |
 | --- | -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- | -------- | --------- |
-| 01  | [Hypothèses : financement](01-hypotheses-financement.md)             | Regrouper les hypothèses de prêt, retirer « Vos revenus nets », bouton « Simuler un prêt »                           | idée     | 08 (lien) |
+| 01  | [Hypothèses : financement](01-hypotheses-financement.md)             | Regrouper les hypothèses de prêt, retirer « Vos revenus nets », bouton « Simuler un prêt »                           | livrée   | 08 (lien) |
 | 02  | [Hypothèses optionnelles](02-hypotheses-optionnelles.md)             | Presque tout devient facultatif ; une analyse qui manque d'une donnée le dit clairement au lieu de bloquer la saisie | idée     | 01, 04    |
-| 03  | [Hypothèses : retirer le bloc Marché](03-hypotheses-sans-marche.md)  | Le bloc DVF de l'onglet Hypothèses fait doublon avec l'onglet Estimation                                             | idée     | —         |
+| 03  | [Hypothèses : retirer le bloc Marché](03-hypotheses-sans-marche.md)  | Le bloc DVF de l'onglet Hypothèses fait doublon avec l'onglet Estimation                                             | livrée   | —         |
 | 04  | [Achat : négociation et travaux](04-achat-negociation-travaux.md)    | Curseur de négociation sous le prix affiché, sort de la « rénovation énergétique », travaux facultatifs à 0          | livrée   | —         |
 | 05  | [Location : types d'exploitation](05-location-types-exploitation.md) | Choisir d'abord le type (nue, meublée, colocation, courte durée, moyenne durée) et n'afficher que ses champs         | idée     | —         |
 | 06  | [Revente : curseur d'horizon](06-revente-curseur.md)                 | Un curseur de 1 à 30 ans qui recalcule tout l'onglet                                                                 | livrée   | —         |

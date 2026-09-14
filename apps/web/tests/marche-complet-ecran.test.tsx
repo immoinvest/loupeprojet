@@ -315,7 +315,6 @@ describe('Formulaire Vérifier : estimer le loyer', () => {
     ]);
 
     await u.type(champ(container, 'apport'), '10000');
-    await u.type(champ(container, 'revenusMensuels'), '3000');
     await u.click(screen.getByRole('button', { name: /Créer le projet/ }));
     const saisie = onCreer.mock.calls[0]?.[0];
     expect(saisie?.provenance.loyerHc).toBe('estime');

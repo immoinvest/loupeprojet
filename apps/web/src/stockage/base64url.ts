@@ -1,6 +1,7 @@
 /**
- * Encodage d'une valeur JSON en texte sûr pour un fragment d'URL (base64url d'un JSON UTF-8),
- * partagé par le partage d'un projet (`/partage#p=…`) et le simulateur de prêt (`#s=…`).
+ * Encodage base64url d'un JSON UTF-8, pour les fragments d'URL : partage d'un projet
+ * (`/partage#p=…`) et simulateur de prêt (`/simulateur-pret#s=…`). Un fragment n'est jamais
+ * envoyé au serveur.
  */
 
 export function versBase64Url(octets: Uint8Array): string {
@@ -17,12 +18,19 @@ export function depuisBase64Url(texte: string): Uint8Array {
   return Uint8Array.from(binaire, (c) => c.charCodeAt(0));
 }
 
-/** Valeur JSON → base64url. */
+/** Valeur JSON → texte sûr pour une URL. */
 export function encoderJson(valeur: unknown): string {
   return versBase64Url(new TextEncoder().encode(JSON.stringify(valeur)));
 }
 
-/** base64url → valeur JSON inconnue ; lève si le texte n'est ni du base64url, ni de l'UTF-8, ni du JSON. */
-export function decoderJson(texte: string): unknown {
-  return JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(depuisBase64Url(texte)));
+export type LectureJson = { readonly ok: true; readonly valeur: unknown } | { readonly ok: false };
+
+/** Texte d'un fragment → valeur JSON ; jamais d'exception (base64 abîmé, UTF-8 ou JSON invalide). */
+export function decoderJson(texte: string): LectureJson {
+  try {
+    const json = new TextDecoder('utf-8', { fatal: true }).decode(depuisBase64Url(texte));
+    return { ok: true, valeur: JSON.parse(json) as unknown };
+  } catch {
+    return { ok: false };
+  }
 }

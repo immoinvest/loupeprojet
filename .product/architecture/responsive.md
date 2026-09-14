@@ -49,7 +49,7 @@ marque/favicon/icon-maskable-192.png, icon-maskable-512.png
 apps/web/e2e/
 ├── formats.ts                        FORMATS (9), écrans de référence, mesurer(page) avec la règle de cible effective
 ├── reponses-worker.ts                réponses simulées du Worker : onglet Estimation rempli
-├── responsive.spec.ts                20 écrans × 9 formats (16 du responsive, « Estimation sans adresse », « Visite faite », 2 du simulateur de prêt) : débordement, cibles, champs, menu, onglet actif, impression A4
+├── responsive.spec.ts                21 écrans × 9 formats (16 du responsive, « Estimation sans adresse », « Visite faite », « Financement », 2 du simulateur de prêt) : débordement, cibles, champs, menu, onglet actif, impression A4
 ├── hors-ligne.spec.ts                ouverture sans réseau après une visite, annonce partagée servie par la coque, fichier ouvert dans un onglet
 └── telephone.spec.ts                 partage reçu, lien de partage à copier à la main, ordre des cartes de la page Extension
 apps/web/tests/
@@ -166,7 +166,7 @@ BoutonPartager → capacitesDuNavigateur(window) → modePartage
 - **ADR-R4 : service worker écrit à la main, construit après l'application.** Build IIFE sans import (script classique, compatible partout) ; version = empreinte de `dist/index.html`, donc changée seulement quand les fichiers de l'application changent. Écarté : `vite-plugin-pwa` (dépendance lourde), version horodatée (réinstallation à chaque déploiement même sans changement).
 - **ADR-R5 : partage reçu en GET vers Nouveau projet.** Aucune donnée n'atteint un serveur : la navigation de partage est servie par la coque en cache (`coque-d-abord`, ajouté en implémentation, car en réseau d'abord le texte partait dans l'adresse demandée au serveur) ; la route existe déjà et nettoie l'adresse après lecture. Écarté : POST (demande un service worker qui intercepte le formulaire, pour des fichiers dont on n'a pas l'usage).
 - **ADR-R6 : partage natif sur écran tactile seulement.** Sur ordinateur, la feuille de partage de Windows est moins utile qu'un lien copié, et les tests existants restent valables. L'avertissement devient un texte visible après le partage ou la copie.
-- **ADR-R7 : preuve en deux étages.** Les parcours tournent sur trois appareils ; une spec « formats » mesure les 20 écrans sur 9 formats (Worker et comptes simulés) dans une seule exécution par format. Écarté : les parcours sur 9 formats (72 tests, trop long pour le job CI).
+- **ADR-R7 : preuve en deux étages.** Les parcours tournent sur trois appareils ; une spec « formats » mesure les 21 écrans sur 9 formats (Worker et comptes simulés) dans une seule exécution par format. Écarté : les parcours sur 9 formats (72 tests, trop long pour le job CI).
 - **ADR-R8 : l'état d'installation n'est jamais stocké.** Il est relu à chaque ouverture depuis le navigateur (événements, `display-mode`).
 
 ## 6. Cas limites

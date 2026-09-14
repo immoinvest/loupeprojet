@@ -17,6 +17,7 @@ import { Comparer } from './ecrans/Comparer';
 import { Compte } from './ecrans/Compte';
 import { Connexion } from './ecrans/Connexion';
 import { Extension } from './ecrans/Extension';
+import { Financement } from './ecrans/Financement';
 import { Fiscalite } from './ecrans/Fiscalite';
 import { Hypotheses } from './ecrans/Hypotheses';
 import { Imprimer } from './ecrans/Imprimer';
@@ -48,6 +49,7 @@ export const routes: RouteObject[] = [
         element: <ProjetLayout />,
         children: [
           { index: true, element: <Rapport /> },
+          { path: 'financement', element: <Financement /> },
           { path: 'hypotheses', element: <Hypotheses /> },
           { path: 'fiscalite', element: <Fiscalite /> },
           { path: 'revente', element: <Revente /> },

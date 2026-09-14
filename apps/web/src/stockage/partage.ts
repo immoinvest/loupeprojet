@@ -22,13 +22,9 @@ export function encoderPartage(enregistre: ProjetEnregistre): string {
 export function decoderPartage(texte: string): Decodage {
   const nettoye = texte.trim();
   if (nettoye === '') return { ok: false, raison: 'vide' };
-  let brut: unknown;
-  try {
-    brut = decoderJson(nettoye);
-  } catch {
-    return { ok: false, raison: 'illisible' };
-  }
-  const resultat = ProjetEnregistreSchema.safeParse(brut);
+  const lecture = decoderJson(nettoye);
+  if (!lecture.ok) return { ok: false, raison: 'illisible' };
+  const resultat = ProjetEnregistreSchema.safeParse(lecture.valeur);
   return resultat.success
     ? { ok: true, enregistre: resultat.data }
     : { ok: false, raison: 'invalide' };

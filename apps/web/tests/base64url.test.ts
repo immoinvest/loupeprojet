@@ -20,14 +20,15 @@ describe('base64url', () => {
     const valeur = { nom: 'Crédit Agricole d’Île-de-France 🏦', taux: 0.033, liste: [1, null] };
     const texte = encoderJson(valeur);
     expect(texte).toMatch(/^[A-Za-z0-9_-]+$/);
-    expect(decoderJson(texte)).toEqual(valeur);
+    expect(decoderJson(texte)).toEqual({ ok: true, valeur });
   });
 
-  it('lève sur un texte qui n’est ni du base64url, ni de l’UTF-8, ni du JSON', () => {
+  it('ne lève jamais : base64 abîmé, UTF-8 ou JSON invalide donnent { ok: false }', () => {
     expect(() => depuisBase64Url('%%%')).toThrow();
+    expect(decoderJson('%%%')).toEqual({ ok: false });
     // « _w » = l'octet 0xFF seul : pas de l'UTF-8.
-    expect(() => decoderJson('_w')).toThrow();
+    expect(decoderJson('_w')).toEqual({ ok: false });
     // « YWJj » = « abc » : pas du JSON.
-    expect(() => decoderJson('YWJj')).toThrow();
+    expect(decoderJson('YWJj')).toEqual({ ok: false });
   });
 });

@@ -5,6 +5,7 @@ import { ModeDocument } from '@/composants/document';
 import { MARGES_LATERALES } from '@/composants/mise-en-page';
 import { useProjetCourant } from '@/coque/ProjetLayout';
 import { dateCourte, nombre } from '@/formatage/nombres';
+import { Financement } from '@/ecrans/Financement';
 import { Fiscalite } from '@/ecrans/Fiscalite';
 import { Rapport } from '@/ecrans/Rapport';
 import { Revente } from '@/ecrans/Revente';
@@ -22,6 +23,7 @@ interface VoletDocument {
 
 const VOLETS_ANALYSE: readonly VoletDocument[] = [
   { titre: 'Rapport', Volet: Rapport },
+  { titre: 'Financement', Volet: Financement },
   { titre: 'Fiscalité', Volet: Fiscalite },
   { titre: 'Revente', Volet: Revente },
 ];

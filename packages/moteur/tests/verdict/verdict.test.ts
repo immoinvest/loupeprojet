@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { projetExemple } from '../../src/exemples/t3-marseille';
-import { calculerFinancement, type TauxEffort } from '../../src/financement';
+import { calculerFinancement } from '../../src/financement';
 import { calculerFiscalite } from '../../src/fiscalite';
 import { obtenirRegles } from '../../src/regles';
 import { calculerRendement } from '../../src/rendement';
@@ -10,7 +10,7 @@ import { MarcheSchema, ProjetSchema, type Projet, type ProjetEntree } from '../.
 import {
   calculerVerdict,
   feuCashflow,
-  feuEffort,
+  feuCouverture,
   feuPrix,
   feuRendement,
   feuRisques,
@@ -65,19 +65,18 @@ describe('feux unitaires', () => {
     expect(feuCashflow(-134, regles).feu).toBe('probleme');
   });
 
-  it('effort : bon jusqu’à 33 %, à surveiller jusqu’à 35 %, problème au-dessus, inconnu sans revenu', () => {
-    const effort = (hcsf: number | null): TauxEffort => ({
-      hcsf,
-      sansLoyers: hcsf,
-      seuil: 0.35,
-      depasseHcsf: false,
-      dureeMaxAnnees: 25,
-      depasseDuree: false,
+  it('couverture : bon jusqu’à 70 % du loyer, à surveiller jusqu’à 100 %, problème au-dessus, inconnu sans loyer', () => {
+    const bon = feuCouverture(0.65, regles);
+    expect(bon).toEqual({ axe: 'couverture', feu: 'bon', valeur: 0.65 });
+    expect(feuCouverture(0.7, regles).feu).toBe('bon');
+    expect(feuCouverture(0.84, regles).feu).toBe('surveiller');
+    expect(feuCouverture(1, regles).feu).toBe('surveiller');
+    expect(feuCouverture(1.1, regles).feu).toBe('probleme');
+    expect(feuCouverture(null, regles)).toEqual({
+      axe: 'couverture',
+      feu: 'inconnu',
+      valeur: null,
     });
-    expect(feuEffort(effort(0.25), regles).feu).toBe('bon');
-    expect(feuEffort(effort(0.34), regles).feu).toBe('surveiller');
-    expect(feuEffort(effort(0.4), regles).feu).toBe('probleme');
-    expect(feuEffort(effort(null), regles).feu).toBe('inconnu');
   });
 
   it('risques : DPE F/G bloquant ; E, procédure ou risque fort à surveiller ; sinon bon', () => {
@@ -99,17 +98,25 @@ describe('feux unitaires', () => {
 describe('calculerVerdict — T3 Marseille', () => {
   const { verdict } = verdictDe(projetExemple);
 
-  it('cinq feux dans l’ordre : prix bon (−22 %), rendement à surveiller, cash-flow problème, effort bon, risques bon', () => {
+  it('cinq feux dans l’ordre : prix bon (−22 %), rendement à surveiller, cash-flow problème, couverture à surveiller (84 %), risques bon', () => {
     expect(verdict.feux.map((f) => f.axe)).toEqual([
       'prix',
       'rendement',
       'cashflow',
-      'effort',
+      'couverture',
       'risques',
     ]);
-    expect(verdict.feux.map((f) => f.feu)).toEqual(['bon', 'surveiller', 'probleme', 'bon', 'bon']);
+    expect(verdict.feux.map((f) => f.feu)).toEqual([
+      'bon',
+      'surveiller',
+      'probleme',
+      'surveiller',
+      'bon',
+    ]);
     expect(verdict.feux[0]?.valeur).toBeCloseTo(155_000 / 65 / 3_050 - 1, 6);
-    expect(verdict.synthese).toEqual({ bons: 3, surveiller: 1, problemes: 1, inconnus: 0 });
+    // Mensualité assurance comprise 827 € pour 980 € de loyer.
+    expect(verdict.feux[3]?.valeur).toBeCloseTo(826.65 / 980, 3);
+    expect(verdict.synthese).toEqual({ bons: 2, surveiller: 2, problemes: 1, inconnus: 0 });
   });
 
   it('ne liste que les points financiers, sans phrase rédigée : ici les PS du meublé à confirmer', () => {
@@ -145,16 +152,44 @@ describe('calculerVerdict — variantes', () => {
     expect(codes(verdict)).toEqual(['PS_BIC_A_CONFIRMER']);
   });
 
-  it('revenus trop faibles et prêt trop long : effort et durée signalés', () => {
+  it('revenus trop faibles (projet ancien) et prêt trop long : effort HCSF et durée signalés', () => {
     const { verdict } = verdictDe(
       variante({}, undefined, {
         revenusMensuels: 1_200,
         pret: { ...projetExemple.hypotheses.pret, dureeAnnees: 27 },
       }),
     );
-    expect(verdict.feux[3]?.feu).toBe('probleme');
     expect(codes(verdict)).toContain('EFFORT_HCSF_DEPASSE');
     expect(codes(verdict)).toContain('DUREE_PRET_HORS_HCSF');
+  });
+
+  it('sans revenus, l’effort HCSF n’est jamais signalé ; avec des revenus suffisants non plus', () => {
+    expect(codes(verdictDe(projetExemple).verdict)).not.toContain('EFFORT_HCSF_DEPASSE');
+    expect(
+      codes(verdictDe(variante({}, undefined, { revenusMensuels: 2_600 })).verdict),
+    ).not.toContain('EFFORT_HCSF_DEPASSE');
+  });
+
+  it('couverture : bon quand le loyer porte largement le crédit, problème quand il ne le couvre plus, inconnu sans loyer', () => {
+    const large = verdictDe(
+      variante({}, undefined, {
+        location: { mode: 'meuble_lld', loyerHc: 1_500, vacanceSemaines: 0 },
+      }),
+    ).verdict;
+    expect(large.feux[3]).toMatchObject({ axe: 'couverture', feu: 'bon' });
+    const insuffisant = verdictDe(
+      variante({}, undefined, { location: { mode: 'meuble_lld', loyerHc: 700 } }),
+    ).verdict;
+    expect(insuffisant.feux[3]?.feu).toBe('probleme');
+    expect(insuffisant.feux[3]?.valeur).toBeCloseTo(826.65 / 700, 3);
+    const sansLoyer = verdictDe(
+      variante({}, undefined, {
+        location: { mode: 'nu', loyerHc: 0 },
+        fiscalite: { tmi: 0.3, regime: 'nu_reel' },
+      }),
+    ).verdict;
+    expect(sansLoyer.feux[3]).toEqual({ axe: 'couverture', feu: 'inconnu', valeur: null });
+    expect(sansLoyer.synthese.inconnus).toBeGreaterThanOrEqual(1);
   });
 
   it('régime micro au-dessus du plafond et loyer au-dessus de l’encadrement', () => {
