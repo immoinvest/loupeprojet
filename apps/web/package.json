@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@loupe/capture": "*",
+    "@loupe/gestion": "*",
     "@loupe/moteur": "*",
     "lucide-react": "^0.560.0",
     "react": "^19.2.0",

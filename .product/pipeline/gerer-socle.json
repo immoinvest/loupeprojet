@@ -24,7 +24,17 @@
       "stories_count": 6
     },
     "architecture": { "status": "completed", "output": ".product/architecture/gerer-socle.md" },
-    "implement": { "status": "pending", "stories_completed": 0, "stories_total": 6, "commits": [] },
+    "implement": {
+      "status": "in_progress",
+      "stories_completed": 2,
+      "stories_total": 6,
+      "commits": [
+        "fb84c35 docs",
+        "d8387a7 US-1 paquet @loupe/gestion (60 tests, 100 %)",
+        "5a34ca3 US-2 API de gestion et migration 0002 (85 tests comptes, 100 %)"
+      ],
+      "en_cours": "US-3 menu à deux sections et Mon menu : 45 tests ciblés verts, suite web complète en cours"
+    },
     "qa_tests": { "status": "pending" },
     "security": { "status": "pending" },
     "push": { "status": "pending" }

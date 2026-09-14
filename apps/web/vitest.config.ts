@@ -27,6 +27,7 @@ export default defineConfig({
         'src/analyses/**',
         'src/bookmarklet/**',
         'src/compte/**',
+        'src/gestion/**',
         'src/enrichissement/**',
         'src/application/**',
         'src/hors-ligne/**',
