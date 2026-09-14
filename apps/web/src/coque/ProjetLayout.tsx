@@ -1,4 +1,5 @@
 import { calculerProjet, type Resultats } from '@loupe/moteur';
+import { KeyRound } from 'lucide-react';
 import {
   createContext,
   useContext,
@@ -170,15 +171,21 @@ function EnTete(): JSX.Element {
           PDF
         </Bouton>
         <BoutonPartager enregistre={enregistre} />
-        {/* Lien croisé vers Gérer : masqué si la section l'est, ou si le bien est déjà acheté. */}
+        {/*
+         * Lien croisé vers Gérer : masqué si la section l'est, ou si le bien est déjà acheté.
+         * De 768 à 1 279 px, les actions tiennent sur la rangée du nom : icône seule, libellé lu
+         * par les lecteurs d'écran et en infobulle, pour ne pas écraser le nom du projet.
+         */}
         {sections.gerer && enregistre.statut !== 'achete' && (
           <Bouton
             variante="primaire"
+            title={TEXTES_PRET.jaiAchete}
             onClick={() => {
               void naviguer(`/gerer/pret/${enregistre.id}`);
             }}
           >
-            {TEXTES_PRET.jaiAchete}
+            <KeyRound size={18} className="shrink-0" aria-hidden="true" />
+            <span className="md:max-xl:sr-only">{TEXTES_PRET.jaiAchete}</span>
           </Bouton>
         )}
       </div>
