@@ -173,6 +173,21 @@ export const ReponseAdresseSchema = z.object({
     })
     .nullable()
     .optional(),
+  /** Ventes comparables géolocalisées à 300 m au plus, pour la carte ; absentes avant la version 0.8 du Worker. */
+  ventesCarte: z
+    .array(
+      z.object({
+        lat: z.number().min(-90).max(90),
+        lon: z.number().min(-180).max(180),
+        date: z.string(),
+        prix: z.number().positive(),
+        surface: z.number().positive(),
+        prixM2Corrige: z.number().positive(),
+        distanceMetres: z.number().nonnegative(),
+        groupes: z.array(CodeGroupeSchema),
+      }),
+    )
+    .optional(),
   /** Communes voisines dont les ventes comptent dans les cercles ; absent avant la version 0.6 du Worker. */
   communesVoisines: z
     .array(z.object({ codeInsee: z.string(), ventes: z.number().int().nonnegative() }))
@@ -182,6 +197,7 @@ export const ReponseAdresseSchema = z.object({
 export type ReponseAdresse = z.infer<typeof ReponseAdresseSchema>;
 export type TendanceAdresse = NonNullable<ReponseAdresse['tendance']>;
 export type ReferenceAdresse = NonNullable<ReponseAdresse['reference']>;
+export type VenteCarte = NonNullable<ReponseAdresse['ventesCarte']>[number];
 
 /** GET /proxy/dpe : DPE de la base ADEME enregistrés autour de l'adresse, du plus proche au plus récent. */
 export const DpeAdresseSchema = z.object({

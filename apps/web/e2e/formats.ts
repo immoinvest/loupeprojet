@@ -171,6 +171,8 @@ export function ecransDeReference({
         await expect(
           page.getByRole('heading', { level: 2, name: 'Le DPE du logement' }),
         ).toBeVisible();
+        // La carte des ventes est mesurée avec ses boutons de zoom.
+        await expect(page.locator('.leaflet-container')).toBeVisible();
       },
     },
     // Le projet d'exemple n'a pas d'adresse : confiance et repère de commune, sans appel au Worker.
