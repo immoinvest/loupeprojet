@@ -1,8 +1,15 @@
 import type {
   CreationLocation,
   CreationReponse,
+  DemandeDocument,
+  DocumentComplet,
   EtatGestion,
+  ExportGestion,
+  IdentiteBailleur,
+  Locataire,
+  LocationGeree,
   NouveauPaiement,
+  NouvelleOccupation,
   Paiement,
   PreferencesMenu,
 } from '@loupe/gestion';
@@ -19,7 +26,31 @@ export type CodeErreurGestion =
   /** Un paiement daté dans le futur. */
   | 'DATE_INVALIDE'
   /** Une quittance ou un reçu atteste ce paiement : il ne s'annule plus. */
-  | 'DOCUMENT_EMIS';
+  | 'DOCUMENT_EMIS'
+  /** Pas encore de nom ni d'adresse de bailleur : la quittance ne peut pas être écrite. */
+  | 'BAILLEUR_MANQUANT'
+  /** Quittance demandée pour un mois pas entièrement reçu. */
+  | 'LOYER_NON_REGLE'
+  /** Reçu demandé pour le paiement qui solde le mois : c'est une quittance. */
+  | 'LOYER_REGLE'
+  /** Une sortie avant l'entrée. */
+  | 'FIN_AVANT_ENTREE'
+  /** Des loyers sont déjà reçus pour des mois après la sortie demandée. */
+  | 'PAIEMENTS_APRES_SORTIE'
+  /** La nouvelle location chevauche une location du bien. */
+  | 'BIEN_OCCUPE';
+
+/** Un document rendu par l'émission : `nouveau` est faux s'il existait déjà (même clé). */
+export interface Emission {
+  readonly document: DocumentComplet;
+  readonly nouveau: boolean;
+}
+
+/** Le locataire et la location créés en louant un bien vacant. */
+export interface OccupationCreee {
+  readonly locataire: Locataire;
+  readonly location: LocationGeree;
+}
 
 export class ErreurGestion extends Error {
   readonly code: CodeErreurGestion;
@@ -47,6 +78,21 @@ export interface DepotGestion {
   /** Lève INTROUVABLE si le paiement n'existe pas pour ce compte, DOCUMENT_EMIS s'il est attesté. */
   annulerPaiement(userId: string, paiementId: string): Promise<void>;
   enregistrerPreferences(userId: string, preferences: PreferencesMenu): Promise<PreferencesMenu>;
+  /** Le nom et l'adresse du bailleur, repris sur ses documents. */
+  enregistrerBailleur(userId: string, identite: IdentiteBailleur): Promise<IdentiteBailleur>;
+  /**
+   * Émission idempotente d'un document figé ; lève INTROUVABLE, BAILLEUR_MANQUANT, HORS_LOCATION,
+   * LOYER_NON_REGLE ou LOYER_REGLE.
+   */
+  emettreDocument(userId: string, demande: DemandeDocument): Promise<Emission>;
+  /** Lève INTROUVABLE. */
+  document(userId: string, id: string): Promise<DocumentComplet>;
+  /** Lève INTROUVABLE, FIN_AVANT_ENTREE ou PAIEMENTS_APRES_SORTIE. */
+  terminerLocation(userId: string, locationId: string, fin: string): Promise<LocationGeree>;
+  /** Lève INTROUVABLE, BIEN_OCCUPE ou LIMITE_ATTEINTE. */
+  louer(userId: string, bienId: string, occupation: NouvelleOccupation): Promise<OccupationCreee>;
+  /** Toutes les données de gestion du compte, documents complets compris. */
+  exporter(userId: string): Promise<ExportGestion>;
 }
 
 const TABLE_ABSENTE = 'no such table: gestion_';

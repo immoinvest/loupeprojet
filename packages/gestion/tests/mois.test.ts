@@ -53,6 +53,8 @@ const ETAT: EtatGestion = {
     paiement('p-hugo', 'hugo', '2026-09', 49_000, '2026-09-02'),
     paiement('p-julie-aout', 'julie', '2026-08', 70_000),
   ],
+  bailleur: null,
+  documents: [],
   preferences: PREFERENCES_PAR_DEFAUT,
 };
 

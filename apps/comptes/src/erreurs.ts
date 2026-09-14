@@ -16,6 +16,12 @@ export type CodeErreur =
   | 'MONTANT_DEPASSE'
   | 'DATE_INVALIDE'
   | 'DOCUMENT_EMIS'
+  | 'BAILLEUR_MANQUANT'
+  | 'LOYER_NON_REGLE'
+  | 'LOYER_REGLE'
+  | 'FIN_AVANT_ENTREE'
+  | 'PAIEMENTS_APRES_SORTIE'
+  | 'BIEN_OCCUPE'
   | 'GESTION_INDISPONIBLE';
 
 /** Réponse JSON d'erreur, indépendante du contexte Hono (utilisable dans notFound, onError et index). */

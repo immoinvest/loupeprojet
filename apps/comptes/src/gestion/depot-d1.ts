@@ -3,25 +3,31 @@ import {
   ajouterJours,
   cleDocument,
   CreationReponseSchema,
+  ExportGestionSchema,
   loyerDuMois,
   occupationDe,
   PaiementSchema,
   periodeDe,
   type BienGere,
+  type EtatGestion,
   type Locataire,
   type LocationGeree,
   type Paiement,
 } from '@loupe/gestion';
 
 import { ErreurGestion, type DepotGestion } from './depot';
+import { depotBaux } from './depot-baux';
+import { depotDocuments } from './depot-documents';
 import {
   valeurSql,
   versBien,
+  versDocument,
   versLocataire,
   versLocation,
   versPaiement,
   versPreferences,
   type Ligne,
+  type Lier,
 } from './lignes';
 
 export interface OptionsDepot {
@@ -56,16 +62,14 @@ function tropEnAvance(periode: string, aujourdhui: string): boolean {
   return periode > periodeDe(ajouterJours(aujourdhui, JOURS_D_AVANCE_MAX));
 }
 
-type Lier = (
-  sql: string,
-  ...valeurs: (string | number | boolean | undefined)[]
-) => D1PreparedStatement;
-
 const SQL = {
   biens: 'select * from gestion_bien where userId = ? order by creeLe, id',
+  documents:
+    'select id, type, numero, locationId, periode, paiementId, emisLe from gestion_document where userId = ? order by emisLe, id',
   locataires: 'select * from gestion_locataire where userId = ? order by creeLe, id',
   locations: 'select * from gestion_location where userId = ? order by debut, id',
-  paiements: 'select * from gestion_paiement where userId = ? order by periode, id',
+  // Plusieurs paiements par mois depuis G1b : l'ordre chronologique, stable.
+  paiements: 'select * from gestion_paiement where userId = ? order by periode, date, creeLe, id',
   preferences: 'select * from gestion_preference where userId = ?',
   locationDuCompte:
     'select id, debut, fin, jourLoyer, loyerHorsCharges, charges from gestion_location where id = ? and userId = ?',
@@ -149,7 +153,7 @@ function insererPaiement(lier: Lier, userId: string, p: Paiement, du: number): D
   );
 }
 
-/** Le dépôt de production : la base D1 des comptes (tables gestion_* de la migration 0002). */
+/** Le dépôt de production : la base D1 des comptes (tables gestion_* des migrations 0002 et 0003). */
 export function depotD1(base: D1Database, options: OptionsDepot = {}): DepotGestion {
   const maintenant = options.maintenant ?? ((): string => new Date().toISOString());
   const genererId = options.genererId ?? ((): string => crypto.randomUUID());
@@ -157,24 +161,45 @@ export function depotD1(base: D1Database, options: OptionsDepot = {}): DepotGest
   const lier: Lier = (sql, ...valeurs) => base.prepare(sql).bind(...valeurs.map(valeurSql));
   const lire = async (sql: string, userId: string): Promise<Ligne[]> =>
     (await lier(sql, userId).all<Ligne>()).results;
+  const outils = { lier, maintenant, genererId };
+  const documents = depotDocuments(outils);
+  const baux = depotBaux({ ...outils, ensemble: (instructions) => base.batch(instructions) });
 
-  return {
-    async etat(userId) {
-      const [biens, locataires, locations, paiements, preferences] = await Promise.all([
+  const etat = async (userId: string): Promise<EtatGestion> => {
+    const [biens, locataires, locations, paiements, emis, bailleur, preferences] =
+      await Promise.all([
         lire(SQL.biens, userId),
         lire(SQL.locataires, userId),
         lire(SQL.locations, userId),
         lire(SQL.paiements, userId),
+        lire(SQL.documents, userId),
+        documents.bailleur(userId),
         lire(SQL.preferences, userId),
       ]);
-      return {
-        biens: biens.map(versBien),
-        locataires: locataires.map(versLocataire),
-        locations: locations.map(versLocation),
-        paiements: paiements.map(versPaiement),
-        preferences: versPreferences(preferences[0]),
-      };
-    },
+    return {
+      biens: biens.map(versBien),
+      locataires: locataires.map(versLocataire),
+      locations: locations.map(versLocation),
+      paiements: paiements.map(versPaiement),
+      bailleur,
+      documents: emis.map(versDocument),
+      preferences: versPreferences(preferences[0]),
+    };
+  };
+
+  return {
+    etat,
+    enregistrerBailleur: documents.enregistrerBailleur,
+    emettreDocument: documents.emettreDocument,
+    document: documents.document,
+    terminerLocation: baux.terminerLocation,
+    louer: baux.louer,
+    exporter: async (userId) =>
+      ExportGestionSchema.parse({
+        ...(await etat(userId)),
+        exporteLe: maintenant(),
+        documents: await documents.documentsComplets(userId),
+      }),
 
     async creer(userId, creation) {
       const { results: compte } = await lier(SQL.nombreDeBiens, userId).all<{ n: number }>();

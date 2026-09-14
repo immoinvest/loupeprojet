@@ -5,6 +5,7 @@ import {
   CreationLocationSchema,
   CreationReponseSchema,
   EtatGestionSchema,
+  ExportGestionSchema,
   LocationGereeSchema,
   NouveauPaiementSchema,
   PREFERENCES_PAR_DEFAUT,
@@ -129,13 +130,43 @@ describe('location, paiement, préférences, état', () => {
       locataires: [locataire('locataire-julie', 'Julie', 'Martin')],
       locations: [location('l1')],
       paiements: [paiement('p1', 'l1', '2026-09', 70_000)],
+      bailleur: null,
+      documents: [],
       preferences: PREFERENCES_PAR_DEFAUT,
     };
     expect(EtatGestionSchema.parse(etat)).toEqual(etat);
+    expect(EtatGestionSchema.safeParse({ ...etat, documents: undefined }).success).toBe(false);
     expect(
       CreationReponseSchema.safeParse({ bien: etat.biens[0], locataire: null, location: null })
         .success,
     ).toBe(true);
+  });
+
+  it('l’export reprend l’état, avec la date d’export et les documents complets', () => {
+    const exporte = {
+      biens: [],
+      locataires: [],
+      locations: [],
+      paiements: [],
+      bailleur: { nom: 'Pierre Georgel', adresse: '3 rue Paradis, 13006 Marseille' },
+      documents: [],
+      preferences: PREFERENCES_PAR_DEFAUT,
+      exporteLe: '2026-11-02T09:00:00.000Z',
+    };
+    expect(ExportGestionSchema.parse(exporte)).toEqual(exporte);
+    expect(ExportGestionSchema.safeParse({ ...exporte, exporteLe: undefined }).success).toBe(false);
+    // Un document sans contenu (tel que l'état le liste) ne suffit pas dans un export.
+    const sansContenu = {
+      id: 'd1',
+      type: 'quittance',
+      numero: 'Q-202610-L1',
+      locationId: 'l1',
+      periode: '2026-10',
+      emisLe: '2026-11-02T09:00:00.000Z',
+    };
+    expect(ExportGestionSchema.safeParse({ ...exporte, documents: [sansContenu] }).success).toBe(
+      false,
+    );
   });
 });
 

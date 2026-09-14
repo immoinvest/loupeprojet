@@ -104,6 +104,8 @@ describe('état et création', () => {
       locataires: [],
       locations: [],
       paiements: [],
+      bailleur: null,
+      documents: [],
       preferences: { analyser: true, gerer: true },
     });
   });
@@ -367,6 +369,12 @@ describe('pannes et suppression du compte', () => {
       payer: () => Promise.reject(new Error('disque plein')),
       annulerPaiement: () => Promise.reject(new Error('disque plein')),
       enregistrerPreferences: () => Promise.reject(new Error('disque plein')),
+      enregistrerBailleur: () => Promise.reject(new Error('disque plein')),
+      emettreDocument: () => Promise.reject(new Error('disque plein')),
+      document: () => Promise.reject(new Error('disque plein')),
+      terminerLocation: () => Promise.reject(new Error('disque plein')),
+      louer: () => Promise.reject(new Error('disque plein')),
+      exporter: () => Promise.reject(new Error('disque plein')),
     };
     const b = bancD1({ surcharges: { gestion: enPanne } });
     await connecter(b, CAMILLE);

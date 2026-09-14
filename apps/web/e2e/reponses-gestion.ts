@@ -58,6 +58,8 @@ export async function simulerGestion(page: Page): Promise<void> {
             creeLe,
           },
         ],
+        bailleur: null,
+        documents: [],
         preferences: { analyser: true, gerer: true },
       },
     }),

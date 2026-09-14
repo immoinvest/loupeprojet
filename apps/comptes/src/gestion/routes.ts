@@ -1,6 +1,10 @@
 import {
   CreationLocationSchema,
+  DemandeDocumentSchema,
+  FinLocationSchema,
+  IdentiteBailleurSchema,
   NouveauPaiementSchema,
+  NouvelleOccupationSchema,
   PreferencesMenuSchema,
 } from '@loupe/gestion';
 import { Hono, type Context } from 'hono';
@@ -23,6 +27,12 @@ const STATUTS_METIER = {
   MONTANT_DEPASSE: 409,
   DATE_INVALIDE: 400,
   DOCUMENT_EMIS: 409,
+  BAILLEUR_MANQUANT: 409,
+  LOYER_NON_REGLE: 409,
+  LOYER_REGLE: 409,
+  FIN_AVANT_ENTREE: 400,
+  PAIEMENTS_APRES_SORTIE: 409,
+  BIEN_OCCUPE: 409,
 } as const;
 
 /** Le corps JSON validé par le schéma, ou `null` s'il est illisible ou invalide. */
@@ -70,6 +80,45 @@ export function routeurGestion(
     const preferences = await lireCorps(c, PreferencesMenuSchema);
     if (preferences === null) return reponseErreur(400, 'CHAMPS_INVALIDES');
     return c.json(await deps.gestion.enregistrerPreferences(c.get('userId'), preferences));
+  });
+
+  app.put('/bailleur', async (c) => {
+    const identite = await lireCorps(c, IdentiteBailleurSchema);
+    if (identite === null) return reponseErreur(400, 'CHAMPS_INVALIDES');
+    return c.json(await deps.gestion.enregistrerBailleur(c.get('userId'), identite));
+  });
+
+  app.post('/documents', async (c) => {
+    const demande = await lireCorps(c, DemandeDocumentSchema);
+    if (demande === null) return reponseErreur(400, 'CHAMPS_INVALIDES');
+    const { document, nouveau } = await deps.gestion.emettreDocument(c.get('userId'), demande);
+    return c.json(document, nouveau ? 201 : 200);
+  });
+
+  app.get('/documents/:id', async (c) =>
+    c.json(await deps.gestion.document(c.get('userId'), c.req.param('id'))),
+  );
+
+  app.post('/locations/:id/fin', async (c) => {
+    const corps = await lireCorps(c, FinLocationSchema);
+    if (corps === null) return reponseErreur(400, 'CHAMPS_INVALIDES');
+    return c.json(
+      await deps.gestion.terminerLocation(c.get('userId'), c.req.param('id'), corps.fin),
+    );
+  });
+
+  app.post('/biens/:id/locations', async (c) => {
+    const occupation = await lireCorps(c, NouvelleOccupationSchema);
+    if (occupation === null) return reponseErreur(400, 'CHAMPS_INVALIDES');
+    return c.json(await deps.gestion.louer(c.get('userId'), c.req.param('id'), occupation), 201);
+  });
+
+  // Une lecture : un simple lien de téléchargement suffit (session exigée, pas d'en-tête Origin).
+  app.get('/export', async (c) => {
+    const exporte = await deps.gestion.exporter(c.get('userId'));
+    const jour = exporte.exporteLe.slice(0, 10);
+    c.header('Content-Disposition', `attachment; filename="deklic-gestion-${jour}.json"`);
+    return c.json(exporte);
   });
 
   app.onError((erreur, c) => {

@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import { JourSchema, PeriodeSchema } from './dates';
+import { DocumentCompletSchema, DocumentSchema, IdentiteBailleurSchema } from './documents';
 import { JOUR_LOYER_MAX, MONTANT_MAX_CENTIMES, TYPES_BIEN, TYPES_LOCATION } from './regles';
 
 /*
@@ -136,7 +137,17 @@ export const EtatGestionSchema = z.object({
   locataires: z.array(LocataireSchema),
   locations: z.array(LocationGereeSchema),
   paiements: z.array(PaiementSchema),
+  /** Le nom et l'adresse du bailleur, ou `null` tant qu'ils n'ont pas été demandés. */
+  bailleur: IdentiteBailleurSchema.nullable(),
+  /** Les quittances et reçus émis, sans leur contenu. */
+  documents: z.array(DocumentSchema),
   preferences: PreferencesMenuSchema,
+});
+
+/** « Exporter mes données de gestion » : l'état complet, documents avec leur contenu. */
+export const ExportGestionSchema = EtatGestionSchema.omit({ documents: true }).extend({
+  exporteLe: HorodatageSchema,
+  documents: z.array(DocumentCompletSchema),
 });
 
 export type NouveauBien = z.infer<typeof NouveauBienSchema>;
@@ -151,3 +162,4 @@ export type PreferencesMenu = z.infer<typeof PreferencesMenuSchema>;
 export type CreationLocation = z.infer<typeof CreationLocationSchema>;
 export type CreationReponse = z.infer<typeof CreationReponseSchema>;
 export type EtatGestion = z.infer<typeof EtatGestionSchema>;
+export type ExportGestion = z.infer<typeof ExportGestionSchema>;

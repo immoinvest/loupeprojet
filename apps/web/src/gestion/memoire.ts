@@ -35,6 +35,8 @@ export const ETAT_GESTION_VIDE: EtatGestion = {
   locataires: [],
   locations: [],
   paiements: [],
+  bailleur: null,
+  documents: [],
   preferences: PREFERENCES_PAR_DEFAUT,
 };
 

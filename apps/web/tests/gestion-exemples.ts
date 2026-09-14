@@ -87,6 +87,8 @@ export const ETAT_SEPTEMBRE: EtatGestion = {
   locataires: [JULIE, ANTOINE],
   locations: [LOCATION_JULIE, LOCATION_ANTOINE],
   paiements: [PAIEMENT_JULIE],
+  bailleur: null,
+  documents: [],
   preferences: PREFERENCES_PAR_DEFAUT,
 };
 
