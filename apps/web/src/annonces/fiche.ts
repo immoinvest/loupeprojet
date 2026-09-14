@@ -35,6 +35,33 @@ export function honorairesAcquereur(
   return capture.honorairesACharge === 'acquereur' ? capture.honoraires : undefined;
 }
 
+/** Les portails d'où viennent les annonces, et leurs sous-domaines (img.leboncoin.fr, mms.seloger.com…). */
+const DOMAINES_PORTAILS = [
+  'leboncoin.fr',
+  'seloger.com',
+  'logic-immo.com',
+  'pap.fr',
+  'bienici.com',
+];
+
+/**
+ * Une adresse https sur l'un des cinq portails. Un projet reçu par lien peut avoir été forgé : on
+ * n'affiche ni une image d'un autre site (traceur), ni un lien `javascript:`.
+ */
+export function surUnPortail(adresse: string): boolean {
+  let url: URL;
+  try {
+    url = new URL(adresse);
+  } catch {
+    return false;
+  }
+  const hote = url.hostname.toLowerCase();
+  return (
+    url.protocol === 'https:' &&
+    DOMAINES_PORTAILS.some((domaine) => hote === domaine || hote.endsWith(`.${domaine}`))
+  );
+}
+
 /** L'annonce à enregistrer avec le projet ; `undefined` si elle n'apporte ni photo ni fiche. */
 export function annonceLue(
   photos: readonly string[] | undefined,
