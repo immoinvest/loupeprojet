@@ -1,10 +1,12 @@
-import { Calculator, Download, Info, Puzzle, X } from 'lucide-react';
+import { Calculator, Download, House, Puzzle, X } from 'lucide-react';
 import { useEffect, useRef, type JSX } from 'react';
 import { NavLink } from 'react-router';
 
 import { useGestion } from '@/gestion/GestionContext';
 import { LogotypeDeklic } from '@/marque/Logo';
 import { TEXTES_INSTALLATION } from '@/textes/application';
+import { TEXTES_LOGO } from '@/textes/accueil';
+import { TEXTES_MENU } from '@/textes/gerer';
 
 import { useInstallation } from './Installation';
 import { CLASSE_ETIQUETTE, classeLien as lien } from './liens';
@@ -25,7 +27,7 @@ const ETAT_TIROIR = {
 } as const;
 
 /**
- * La barre latérale tient dans la hauteur de l'écran, en trois zones : le haut (logo) et le bas
+ * La barre latérale tient dans la hauteur de l'écran, en trois zones : le haut (logo, Accueil) et le bas
  * (outils, aide, installation, profil) ne bougent jamais ; entre les deux, les sections Analyser et
  * Gérer, chacune ouverte par son action de création, sont les seules à défiler quand elles sont longues.
  */
@@ -55,7 +57,8 @@ export function Sidebar({
     >
       <div className="flex shrink-0 items-center justify-between gap-2">
         <NavLink
-          to={sections.analyser ? '/projets' : '/gerer'}
+          to="/"
+          aria-label={TEXTES_LOGO}
           className="flex items-center px-2 py-1 pointer-coarse:min-h-11"
         >
           <LogotypeDeklic hauteur={26} />
@@ -70,6 +73,13 @@ export function Sidebar({
           <X size={22} aria-hidden="true" />
         </button>
       </div>
+
+      <nav aria-label={TEXTES_MENU.accueil} className="-mt-2 flex shrink-0 flex-col">
+        <NavLink to="/" end className={lien}>
+          <House size={18} className="shrink-0" aria-hidden="true" />
+          {TEXTES_MENU.accueil}
+        </NavLink>
+      </nav>
 
       {/* La zone qui défile garde 4 px de marge : le cadre de focus des liens n'est pas coupé. */}
       <div
@@ -89,10 +99,6 @@ export function Sidebar({
           </NavLink>
         </nav>
         <nav aria-label="Aide" className="flex flex-col gap-1">
-          <NavLink to="/methode" className={lien}>
-            <Info size={18} className="shrink-0" aria-hidden="true" />
-            <span className="truncate">Comment c'est calculé</span>
-          </NavLink>
           <NavLink to="/extension" className={lien}>
             <Puzzle size={18} className="shrink-0" aria-hidden="true" />
             <span className="truncate">Extension navigateur</span>

@@ -43,7 +43,7 @@ describe('ReglesPortailSchema', () => {
 
   it('refuse un champ inconnu, une liste vide et un extracteur mal formé', () => {
     expect(
-      ReglesPortailSchema.safeParse({ ...LBC, champs: { photos: LBC.champs.prix } }).success,
+      ReglesPortailSchema.safeParse({ ...LBC, champs: { telephone: LBC.champs.prix } }).success,
     ).toBe(false);
     expect(ReglesPortailSchema.safeParse({ ...LBC, champs: { prix: [] } }).success).toBe(false);
     expect(
@@ -60,7 +60,9 @@ describe('ReglesPortailSchema', () => {
     expect(ExtracteurSchema.safeParse({ ...css, regex: '(\\d+)' }).success).toBe(true);
     expect(ExtracteurSchema.safeParse({ ...css, attribut: 'data-id' }).success).toBe(true);
     expect(ExtracteurSchema.safeParse({ ...css, attribut: 'on click' }).success).toBe(false);
-    expect(ExtracteurSchema.safeParse({ ...css, type: 'date' }).success).toBe(false);
+    expect(ExtracteurSchema.safeParse({ ...css, type: 'heure' }).success).toBe(false);
+    expect(ExtracteurSchema.safeParse({ ...css, type: 'date' }).success).toBe(true);
+    expect(ExtracteurSchema.safeParse({ ...css, type: 'urls' }).success).toBe(true);
     expect(ExtracteurSchema.safeParse({ ...css, diviser: 0 }).success).toBe(false);
     expect(ExtracteurSchema.safeParse({ ...css, valeur: false }).success).toBe(true);
     expect(ExtracteurSchema.safeParse({ ...css, valeur: { oui: 1 } }).success).toBe(false);

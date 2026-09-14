@@ -1,5 +1,5 @@
 {
-  "version": "leboncoin-2026-09-13",
+  "version": "leboncoin-2026-09-14",
   "portail": "leboncoin",
   "champs": {
     "prix": [
@@ -77,6 +77,14 @@
         "selecteur": "#__NEXT_DATA__",
         "chemin": "props.pageProps.ad.attributes[key=floor_number].value",
         "type": "etage"
+      }
+    ],
+    "etagesImmeuble": [
+      {
+        "source": "json",
+        "selecteur": "#__NEXT_DATA__",
+        "chemin": "props.pageProps.ad.attributes[key=nb_floors_building].value",
+        "type": "entier"
       }
     ],
     "ascenseur": [
@@ -161,6 +169,318 @@
         "source": "css",
         "selecteur": "[data-qa-id=\"adview_location_informations\"]",
         "type": "codePostal"
+      }
+    ],
+    "quartier": [
+      {
+        "source": "json",
+        "selecteur": "#__NEXT_DATA__",
+        "chemin": "props.pageProps.ad.location.district",
+        "type": "texte"
+      }
+    ],
+    "photos": [
+      {
+        "source": "json",
+        "selecteur": "#__NEXT_DATA__",
+        "chemin": "props.pageProps.ad.images.urls_large",
+        "type": "urls"
+      },
+      {
+        "source": "json",
+        "selecteur": "#__NEXT_DATA__",
+        "chemin": "props.pageProps.ad.images.urls",
+        "type": "urls"
+      }
+    ],
+    "chauffageCollectif": [
+      {
+        "source": "json",
+        "selecteur": "#__NEXT_DATA__",
+        "chemin": "props.pageProps.ad.attributes[key=heating_type].value_label",
+        "regex": "^collectif",
+        "type": "booleen",
+        "valeur": true
+      },
+      {
+        "source": "json",
+        "selecteur": "#__NEXT_DATA__",
+        "chemin": "props.pageProps.ad.attributes[key=heating_type].value_label",
+        "regex": "^individuel",
+        "type": "booleen",
+        "valeur": false
+      }
+    ],
+    "chauffageEnergie": [
+      {
+        "source": "json",
+        "selecteur": "#__NEXT_DATA__",
+        "chemin": "props.pageProps.ad.attributes[key=heating_mode].value_label",
+        "regex": "lectri",
+        "type": "texte",
+        "valeur": "electricite"
+      },
+      {
+        "source": "json",
+        "selecteur": "#__NEXT_DATA__",
+        "chemin": "props.pageProps.ad.attributes[key=heating_mode].value_label",
+        "regex": "^gaz",
+        "type": "texte",
+        "valeur": "gaz"
+      },
+      {
+        "source": "json",
+        "selecteur": "#__NEXT_DATA__",
+        "chemin": "props.pageProps.ad.attributes[key=heating_mode].value_label",
+        "regex": "fioul|fuel",
+        "type": "texte",
+        "valeur": "fioul"
+      },
+      {
+        "source": "json",
+        "selecteur": "#__NEXT_DATA__",
+        "chemin": "props.pageProps.ad.attributes[key=heating_mode].value_label",
+        "regex": "bois|granul",
+        "type": "texte",
+        "valeur": "bois"
+      },
+      {
+        "source": "json",
+        "selecteur": "#__NEXT_DATA__",
+        "chemin": "props.pageProps.ad.attributes[key=heating_mode].value_label",
+        "regex": "pompe",
+        "type": "texte",
+        "valeur": "pompe_a_chaleur"
+      },
+      {
+        "source": "json",
+        "selecteur": "#__NEXT_DATA__",
+        "chemin": "props.pageProps.ad.attributes[key=heating_mode].value_label",
+        "regex": "urbain|réseau",
+        "type": "texte",
+        "valeur": "reseau_de_chaleur"
+      }
+    ],
+    "etat": [
+      {
+        "source": "json",
+        "selecteur": "#__NEXT_DATA__",
+        "chemin": "props.pageProps.ad.attributes[key=global_condition].value_label",
+        "regex": "rénover|travaux",
+        "type": "texte",
+        "valeur": "a_renover"
+      },
+      {
+        "source": "json",
+        "selecteur": "#__NEXT_DATA__",
+        "chemin": "props.pageProps.ad.attributes[key=global_condition].value_label",
+        "regex": "rafra[iî]chir|satisfaisant",
+        "type": "texte",
+        "valeur": "a_rafraichir"
+      },
+      {
+        "source": "json",
+        "selecteur": "#__NEXT_DATA__",
+        "chemin": "props.pageProps.ad.attributes[key=global_condition].value_label",
+        "regex": "^(neuf|très bon état|rénové|refait)",
+        "type": "texte",
+        "valeur": "renove"
+      },
+      {
+        "source": "json",
+        "selecteur": "#__NEXT_DATA__",
+        "chemin": "props.pageProps.ad.attributes[key=global_condition].value_label",
+        "regex": "^bon état",
+        "type": "texte",
+        "valeur": "bon_etat"
+      }
+    ],
+    "balcon": [
+      {
+        "source": "json",
+        "selecteur": "#__NEXT_DATA__",
+        "chemin": "props.pageProps.ad.attributes[key=outside_access].value_label",
+        "regex": "balcon",
+        "type": "booleen",
+        "valeur": true
+      }
+    ],
+    "terrasse": [
+      {
+        "source": "json",
+        "selecteur": "#__NEXT_DATA__",
+        "chemin": "props.pageProps.ad.attributes[key=outside_access].value_label",
+        "regex": "terrasse",
+        "type": "booleen",
+        "valeur": true
+      }
+    ],
+    "jardin": [
+      {
+        "source": "json",
+        "selecteur": "#__NEXT_DATA__",
+        "chemin": "props.pageProps.ad.attributes[key=outside_access].value_label",
+        "regex": "jardin",
+        "type": "booleen",
+        "valeur": true
+      }
+    ],
+    "cave": [
+      {
+        "source": "json",
+        "selecteur": "#__NEXT_DATA__",
+        "chemin": "props.pageProps.ad.attributes[key=specificities].value_label",
+        "regex": "\\bcave\\b",
+        "type": "booleen",
+        "valeur": true
+      }
+    ],
+    "parking": [
+      {
+        "source": "json",
+        "selecteur": "#__NEXT_DATA__",
+        "chemin": "props.pageProps.ad.attributes[key=specificities].value_label",
+        "regex": "parking|garage|box",
+        "type": "booleen",
+        "valeur": true
+      }
+    ],
+    "gardien": [
+      {
+        "source": "json",
+        "selecteur": "#__NEXT_DATA__",
+        "chemin": "props.pageProps.ad.attributes[key=specificities].value_label",
+        "regex": "gardien|concierge",
+        "type": "booleen",
+        "valeur": true
+      }
+    ],
+    "digicode": [
+      {
+        "source": "json",
+        "selecteur": "#__NEXT_DATA__",
+        "chemin": "props.pageProps.ad.attributes[key=specificities].value_label",
+        "regex": "digicode",
+        "type": "booleen",
+        "valeur": true
+      }
+    ],
+    "interphone": [
+      {
+        "source": "json",
+        "selecteur": "#__NEXT_DATA__",
+        "chemin": "props.pageProps.ad.attributes[key=specificities].value_label",
+        "regex": "interphone|visiophone",
+        "type": "booleen",
+        "valeur": true
+      }
+    ],
+    "piscine": [
+      {
+        "source": "json",
+        "selecteur": "#__NEXT_DATA__",
+        "chemin": "props.pageProps.ad.attributes[key=specificities].value_label",
+        "regex": "piscine",
+        "type": "booleen",
+        "valeur": true
+      }
+    ],
+    "climatisation": [
+      {
+        "source": "json",
+        "selecteur": "#__NEXT_DATA__",
+        "chemin": "props.pageProps.ad.attributes[key=specificities].value_label",
+        "regex": "climatisation",
+        "type": "booleen",
+        "valeur": true
+      }
+    ],
+    "cheminee": [
+      {
+        "source": "json",
+        "selecteur": "#__NEXT_DATA__",
+        "chemin": "props.pageProps.ad.attributes[key=specificities].value_label",
+        "regex": "chemin[ée]e",
+        "type": "booleen",
+        "valeur": true
+      }
+    ],
+    "accessiblePmr": [
+      {
+        "source": "json",
+        "selecteur": "#__NEXT_DATA__",
+        "chemin": "props.pageProps.ad.attributes[key=specificities].value_label",
+        "regex": "handicap|mobilité réduite|PMR",
+        "type": "booleen",
+        "valeur": true
+      }
+    ],
+    "sallesEau": [
+      {
+        "source": "json",
+        "selecteur": "#__NEXT_DATA__",
+        "chemin": "props.pageProps.ad.attributes[key=nb_shower_room].value",
+        "type": "entier"
+      }
+    ],
+    "honorairesACharge": [
+      {
+        "source": "json",
+        "selecteur": "#__NEXT_DATA__",
+        "chemin": "props.pageProps.ad.attributes[key=fees_at_the_expanse_of].value_label",
+        "regex": "^vendeur",
+        "type": "texte",
+        "valeur": "vendeur"
+      },
+      {
+        "source": "json",
+        "selecteur": "#__NEXT_DATA__",
+        "chemin": "props.pageProps.ad.attributes[key=fees_at_the_expanse_of].value_label",
+        "regex": "^acqu",
+        "type": "texte",
+        "valeur": "acquereur"
+      }
+    ],
+    "budgetEnergieMin": [
+      {
+        "source": "json",
+        "selecteur": "#__NEXT_DATA__",
+        "chemin": "props.pageProps.ad.attributes[key=annual_energy_budget_min].value",
+        "type": "montant"
+      }
+    ],
+    "budgetEnergieMax": [
+      {
+        "source": "json",
+        "selecteur": "#__NEXT_DATA__",
+        "chemin": "props.pageProps.ad.attributes[key=annual_energy_budget_max].value",
+        "type": "montant"
+      }
+    ],
+    "vendeur": [
+      {
+        "source": "json",
+        "selecteur": "#__NEXT_DATA__",
+        "chemin": "props.pageProps.ad.owner.type",
+        "regex": "^pro$",
+        "type": "texte",
+        "valeur": "pro"
+      },
+      {
+        "source": "json",
+        "selecteur": "#__NEXT_DATA__",
+        "chemin": "props.pageProps.ad.owner.type",
+        "regex": "^(private|particulier)$",
+        "type": "texte",
+        "valeur": "particulier"
+      }
+    ],
+    "publieeLe": [
+      {
+        "source": "json",
+        "selecteur": "#__NEXT_DATA__",
+        "chemin": "props.pageProps.ad.first_publication_date",
+        "type": "date"
       }
     ],
     "description": [

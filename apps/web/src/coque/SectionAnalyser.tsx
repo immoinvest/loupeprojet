@@ -1,5 +1,5 @@
 import { calculerProjet } from '@loupe/moteur';
-import { Columns2, Plus } from 'lucide-react';
+import { List, Plus } from 'lucide-react';
 import type { JSX } from 'react';
 import { NavLink } from 'react-router';
 
@@ -18,7 +18,10 @@ function feuCashflow(p: ProjetEnregistre): 'bon' | 'surveiller' | 'probleme' | '
   );
 }
 
-/** Section « Analyser » : nouveau projet, les projets les plus récents, Comparer. */
+/**
+ * Section « Analyser » : nouveau projet, les trois projets les plus récents, puis « Tous mes
+ * projets », toujours affiché (Comparer est dans cette page).
+ */
 export function SectionAnalyser(): JSX.Element {
   const { projets } = useProjets();
   const recents = projets.slice(0, PROJETS_DANS_LE_MENU);
@@ -36,14 +39,9 @@ export function SectionAnalyser(): JSX.Element {
           <Point feu={feuCashflow(p)} />
         </NavLink>
       ))}
-      {projets.length > PROJETS_DANS_LE_MENU && (
-        <NavLink to="/projets" end className={classeLien}>
-          <span className="flex-1 truncate text-encre-3">{tousMesProjets(projets.length)}</span>
-        </NavLink>
-      )}
-      <NavLink to="/comparer" className={classeLien}>
-        <Columns2 size={18} aria-hidden="true" />
-        {TEXTES_MENU.comparer}
+      <NavLink to="/projets" end className={classeLien}>
+        <List size={18} className="shrink-0" aria-hidden="true" />
+        <span className="flex-1 truncate">{tousMesProjets(projets.length)}</span>
       </NavLink>
     </nav>
   );

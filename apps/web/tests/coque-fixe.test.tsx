@@ -117,7 +117,9 @@ describe('Coque fixe : seul le contenu défile', () => {
     // Chaque section commence par son action de création : plus de grand bouton au-dessus.
     expect(within(analyser).getByRole('link', { name: 'Nouveau projet' })).toBeInTheDocument();
     expect(within(analyser).getByRole('link', { name: NOM_EXEMPLE })).toBeInTheDocument();
-    expect(within(analyser).getByRole('link', { name: 'Comparer' })).toBeInTheDocument();
+    expect(
+      within(analyser).getByRole('link', { name: 'Tous mes projets · 1' }),
+    ).toBeInTheDocument();
 
     const horsZone = [
       within(barre).getByRole('button', { name: 'Fermer le menu' }),

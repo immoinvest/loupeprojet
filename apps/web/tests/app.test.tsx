@@ -17,9 +17,11 @@ async function ouvrirExemple(): Promise<string> {
 }
 
 describe('Mes projets', () => {
-  it('amorce le stockage avec le projet d’exemple et redirige la racine vers /projets', async () => {
+  it('amorce le stockage avec le projet d’exemple ; la racine est l’accueil', async () => {
     render(<AppEnMemoire chemin="/" />);
-    expect(await screen.findByRole('heading', { name: 'Mes projets' })).toBeInTheDocument();
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Bienvenue sur Deklic' }),
+    ).toBeInTheDocument();
     expect(screen.getAllByText('T3 · 65 m² · Marseille 5e').length).toBeGreaterThan(0);
     expect(lireProjets(window.localStorage)).toHaveLength(1);
     expect(window.localStorage.getItem(CLE_STOCKAGE)).not.toBeNull();
@@ -48,6 +50,7 @@ describe('Mes projets', () => {
     await utilisateur.type(screen.getByLabelText(/Code postal/), '69003');
     await utilisateur.type(screen.getByLabelText(/^Ville/), 'Lyon');
     await utilisateur.type(screen.getByLabelText(/Loyer visé/), '700');
+    await utilisateur.clear(screen.getByLabelText(/^Apport/));
     await utilisateur.type(screen.getByLabelText(/^Apport/), '10000');
     await utilisateur.click(screen.getByRole('button', { name: /Créer le projet/ }));
     expect(
@@ -101,8 +104,10 @@ describe('Rapport', () => {
     await ouvrirExemple();
     const utilisateur = userEvent.setup();
     // Deux barres latérales sont montées (liste puis projet) : on prend le lien de la dernière.
-    await utilisateur.click(screen.getAllByRole('link', { name: 'Comparer' }).at(-1)!);
-    expect(await screen.findByRole('heading', { name: 'Comparer' })).toBeInTheDocument();
+    await utilisateur.click(screen.getAllByRole('link', { name: 'Accueil' }).at(-1)!);
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Bienvenue sur Deklic' }),
+    ).toBeInTheDocument();
 
     render(<AppEnMemoire chemin="/projets/inconnu" />);
     expect(await screen.findByRole('heading', { name: 'Projet introuvable' })).toBeInTheDocument();

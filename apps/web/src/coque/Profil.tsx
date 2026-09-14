@@ -35,8 +35,8 @@ export function Profil(): JSX.Element {
   if (etat === 'connecte' && utilisateur !== null) {
     const sortir = async (): Promise<void> => {
       setOccupe(true);
-      // La page Mon compte n'a plus de sens sans session : on revient à Mes projets avant de sortir.
-      if (pathname.startsWith('/compte')) void naviguer('/projets');
+      // La page Mon compte n'a plus de sens sans session : on revient à l'accueil avant de sortir.
+      if (pathname.startsWith('/compte')) void naviguer('/');
       await deconnecter();
       setOccupe(false);
     };

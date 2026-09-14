@@ -5,6 +5,7 @@ import { useCompte } from '@/compte/CompteContext';
 import { cheminDeRetour, emailPlausible } from '@/compte/saisie';
 import type { CodeErreurCompte, Fournisseurs, FournisseurSocial } from '@/compte/types';
 import { LogotypeDeklic } from '@/marque/Logo';
+import { TEXTES_LOGO } from '@/textes/accueil';
 import { ERREURS_COMPTE } from '@/textes/compte';
 import { echecFournisseur, TEXTES_CONNEXION } from '@/textes/connexion';
 
@@ -99,8 +100,8 @@ export function Connexion(): JSX.Element {
     <main className="flex min-h-dvh items-center justify-center bg-fond py-10 pr-[max(1rem,env(safe-area-inset-right))] pl-[max(1rem,env(safe-area-inset-left))]">
       <div className="flex w-full max-w-[440px] flex-col gap-6">
         <Link
-          to="/projets"
-          aria-label="Deklic : retour à mes projets"
+          to="/"
+          aria-label={TEXTES_LOGO}
           className="self-center pointer-coarse:inline-flex pointer-coarse:min-h-11 pointer-coarse:items-center"
         >
           <LogotypeDeklic hauteur={32} />
@@ -174,7 +175,7 @@ export function Connexion(): JSX.Element {
 
         <div className="flex flex-col items-center gap-2 text-center">
           <Link
-            to="/projets"
+            to="/"
             className="text-[15px] font-bold pointer-coarse:inline-flex pointer-coarse:min-h-11 pointer-coarse:items-center"
           >
             {TEXTES_CONNEXION.sansCompte}

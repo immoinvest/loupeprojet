@@ -11,6 +11,12 @@ import {
   type Extracteur,
 } from './extraction';
 import { journalConsole, type Journal } from './journal';
+import {
+  DELAI_PAGE_MS,
+  lecteurBrightData,
+  ZONE_DEFAUT,
+  type LecteurPages,
+} from './lecture/fournisseur';
 import { cacheKv, type Cache, type KvMinimal } from './proxy/cache';
 import type { LimiteurDebit } from './proxy/debit';
 import { SERVICES, type Service } from './services';
@@ -22,6 +28,7 @@ export interface Bindings {
   readonly KV_CACHE: KvMinimal;
   readonly LIMITEUR: LimiteurDebit;
   readonly LIMITEUR_EXTRACTION: LimiteurDebit;
+  readonly LIMITEUR_LECTURE: LimiteurDebit;
   /** Bucket R2 `deklic-data` (juridiction UE) : référentiels publiés par `data/`. */
   readonly DONNEES: R2Minimal;
   readonly ENVIRONNEMENT?: string | undefined;
@@ -30,6 +37,10 @@ export interface Bindings {
   readonly LLM_MODELE?: string | undefined;
   /** Secret (`wrangler secret put`) : sans lui, /extract répond EXTRACTION_INDISPONIBLE. */
   readonly OPENROUTER_API_KEY?: string | undefined;
+  /** Secret : sans lui, /lecture ne lit que Bien'ici (LECTURE_INDISPONIBLE pour les quatre autres portails). */
+  readonly BRIGHTDATA_API_KEY?: string | undefined;
+  /** Zone « Web Unlocker » du compte Bright Data. */
+  readonly BRIGHTDATA_ZONE?: string | undefined;
 }
 
 export type Fetcher = (
@@ -49,7 +60,10 @@ export interface Dependances {
   readonly cache: Cache;
   readonly limiteur: LimiteurDebit;
   readonly limiteurExtraction: LimiteurDebit;
+  readonly limiteurLecture: LimiteurDebit;
   readonly extracteur: Extracteur | null;
+  /** `null` sans clé Bright Data : seules les annonces Bien'ici se lisent. */
+  readonly lecteurPages: LecteurPages | null;
   readonly donnees: LecteurDonnees;
   readonly fetcher: Fetcher;
   readonly maintenant: () => number;
@@ -62,6 +76,11 @@ const VariablesSchema = z.object({
   LLM_URL: z.url().default(URL_OPENROUTER),
   LLM_MODELE: z.string().trim().min(1).default(MODELE_DEFAUT),
   OPENROUTER_API_KEY: z.string().trim().optional(),
+  BRIGHTDATA_API_KEY: z.string().trim().optional(),
+  BRIGHTDATA_ZONE: z
+    .string()
+    .regex(/^[\w-]{1,64}$/)
+    .default(ZONE_DEFAUT),
 });
 
 /** Construit les dépendances de production à partir de l'environnement Cloudflare. */
@@ -72,6 +91,8 @@ export function dependancesDepuisEnv(env: Bindings): Dependances {
     LLM_URL: env.LLM_URL,
     LLM_MODELE: env.LLM_MODELE,
     OPENROUTER_API_KEY: env.OPENROUTER_API_KEY,
+    BRIGHTDATA_API_KEY: env.BRIGHTDATA_API_KEY,
+    BRIGHTDATA_ZONE: env.BRIGHTDATA_ZONE,
   });
   if (!variables.success) {
     throw new ErreurConfiguration(
@@ -95,6 +116,15 @@ export function dependancesDepuisEnv(env: Bindings): Dependances {
           fetcher,
           journalConsole,
         );
+  const cleLecture = variables.data.BRIGHTDATA_API_KEY;
+  const lecteurPages =
+    cleLecture === undefined || cleLecture === ''
+      ? null
+      : lecteurBrightData(
+          { cle: cleLecture, zone: variables.data.BRIGHTDATA_ZONE, delaiMs: DELAI_PAGE_MS },
+          fetcher,
+          journalConsole,
+        );
   return {
     environnement: variables.data.ENVIRONNEMENT,
     origines: [
@@ -105,7 +135,9 @@ export function dependancesDepuisEnv(env: Bindings): Dependances {
     cache: cacheKv(env.KV_CACHE),
     limiteur: env.LIMITEUR,
     limiteurExtraction: env.LIMITEUR_EXTRACTION,
+    limiteurLecture: env.LIMITEUR_LECTURE,
     extracteur,
+    lecteurPages,
     donnees: lecteurR2(env.DONNEES),
     fetcher,
     maintenant: () => Date.now(),

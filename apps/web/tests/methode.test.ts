@@ -47,7 +47,7 @@ describe('defautsDuMoteur', () => {
       taxeFonciereEnMoisDeLoyer: 1,
       taxeFonciereParM2An: 14,
       surfaceParPiece: 20,
-      apport: 0,
+      partApport: 0.1,
       dureeAnnees: 25,
     });
   });

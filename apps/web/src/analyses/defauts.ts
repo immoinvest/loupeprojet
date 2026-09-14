@@ -1,6 +1,6 @@
 import { ProjetSchema, VERSION_REGLES_COURANTE, vacanceSemaines } from '@loupe/moteur';
 
-import { construireProjet } from '@/annonces';
+import { PART_APPORT_DEFAUT, construireProjet } from '@/annonces';
 
 /**
  * Les valeurs par défaut du moteur et du formulaire, lues dans le code plutôt que recopiées :
@@ -34,8 +34,8 @@ export interface Defauts {
   readonly taxeFonciereParM2An: number;
   /** Surface moyenne d'une pièce quand le nombre de pièces est inconnu. */
   readonly surfaceParPiece: number;
-  /** Apport et durée du prêt quand ils ne sont pas saisis. */
-  readonly apport: number;
+  /** Apport, en part du coût total, et durée du prêt quand ils ne sont pas saisis. */
+  readonly partApport: number;
   readonly dureeAnnees: number;
 }
 
@@ -92,7 +92,7 @@ export function defautsDuMoteur(): Defauts {
     taxeFonciereEnMoisDeLoyer: avecLoyer.hypotheses.charges.taxeFonciere / LOYER_TEMOIN,
     taxeFonciereParM2An: charges.taxeFonciere / SURFACE_TEMOIN,
     surfaceParPiece: SURFACE_TEMOIN / formulaire.bien.pieces,
-    apport: pret.apport,
+    partApport: PART_APPORT_DEFAUT,
     dureeAnnees: pret.dureeAnnees,
   };
 }

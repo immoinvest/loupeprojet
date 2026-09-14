@@ -13,6 +13,7 @@ describe('santé et routes', () => {
       version: VERSION_WORKER,
       environnement: 'dev',
       extraction: 'modele-test',
+      lecture: null,
     });
   });
 

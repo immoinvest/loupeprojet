@@ -2,7 +2,9 @@ import { ProjetSchema, calculerProjet } from '@loupe/moteur';
 import { describe, expect, it } from 'vitest';
 
 import {
+  apportParDefaut,
   construireProjet,
+  coutTotalDuProjet,
   departementDuCodePostal,
   extraireChamps,
   nomDuProjet,
@@ -306,7 +308,8 @@ describe('construireProjet', () => {
     expect(projet.hypotheses.location).toMatchObject({ loyerHc: 1_034 });
     expect(projet.hypotheses.charges.taxeFonciere).toBe(1_034);
     expect(projet.hypotheses.pret).toMatchObject({
-      apport: 0,
+      // 10 % du coût total du projet, arrondi à la centaine.
+      apport: apportParDefaut(coutTotalDuProjet(projet) ?? 0),
       dureeAnnees: 25,
       tauxNominal: 0.0335,
     });

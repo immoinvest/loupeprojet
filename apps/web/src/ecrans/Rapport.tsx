@@ -20,6 +20,7 @@ import { texteVerdict } from '@/textes/verdict';
 
 import { AnalyseIncomplete } from './projet/AnalyseIncomplete';
 import { CarteACompleter } from './rapport/CarteACompleter';
+import { CarteBien } from './rapport/CarteBien';
 import { CarteAutofinancement } from './rapport/CarteAutofinancement';
 import { CartePrix } from './rapport/CartePrix';
 import { CarteRendements } from './rapport/CarteRendements';
@@ -191,6 +192,7 @@ export function Rapport(): JSX.Element {
           ))}
         </div>
       </div>
+      <CarteBien />
       {r.complet ? <Analyses r={r} /> : <AnalysesACompleter r={r} />}
       <p className="m-0 text-xs text-encre-3">
         Règles fiscales {r.meta.versionRegles}. Outil d'aide à la décision, pas un conseil.

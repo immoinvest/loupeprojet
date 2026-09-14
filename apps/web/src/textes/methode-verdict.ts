@@ -106,8 +106,9 @@ export function sectionDefauts(defauts: Defauts): SectionMethode {
     constantes: [
       {
         libelle: 'Apport et durée du prêt',
-        valeur: `${euros(d.apport)} · ${String(d.dureeAnnees)} ans, au taux du mois de cette durée`,
-        source: 'Durée maximale HCSF, celle du meilleur cash-flow ; formulaire Vérifier',
+        valeur: `${pct(d.partApport)} du coût total (prix, frais, travaux, mobilier), arrondi à la centaine · ${String(d.dureeAnnees)} ans, au taux du mois de cette durée`,
+        source:
+          'Apport le plus souvent demandé par les banques ; durée maximale HCSF, celle du meilleur cash-flow ; formulaire Vérifier',
       },
       {
         libelle: "Tranche d'imposition supposée",

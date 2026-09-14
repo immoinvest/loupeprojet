@@ -58,7 +58,7 @@ describe('lancerCapture', () => {
         ville: 'Marseille 5e',
         codePostal: '13005',
         mode: 'bookmarklet',
-        regles: 'pap-2026-09-13',
+        regles: 'pap-2026-09-14',
       },
     });
   });

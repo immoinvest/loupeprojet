@@ -15,8 +15,10 @@ import {
 } from '@/formatage/nombres';
 import { useProjets } from '@/stockage/ProjetsContext';
 import { STATUTS, type ProjetEnregistre } from '@/stockage/projets';
+import { useSynchro } from '@/stockage/synchro/SynchroContext';
 import { TEXTES_MON_COMPTE } from '@/textes/mon-compte';
 import { MODES } from '@/textes/regimes';
+import { ligneSauvegarde } from '@/textes/synchro';
 
 type Filtre = 'tous' | 'en_cours' | 'ecartes';
 
@@ -128,6 +130,7 @@ function CarteProjet({
 export function MesProjets(): JSX.Element {
   const { projets, supprimer } = useProjets();
   const connecte = useCompte().etat === 'connecte';
+  const { statut } = useSynchro();
   const naviguer = useNavigate();
   const [filtre, setFiltre] = useState<Filtre>('tous');
   const visibles = projets.filter((p) => garder(p, filtre));
@@ -137,9 +140,8 @@ export function MesProjets(): JSX.Element {
       <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-3">
         <div className="flex flex-col gap-1.5">
           <TitrePage>Mes projets</TitrePage>
-          <span className="text-[15px] text-encre-3">
-            {projets.length} {projets.length > 1 ? 'projets' : 'projet'} · sauvegardés sur cet
-            appareil
+          <span role="status" className="text-[15px] text-encre-3">
+            {ligneSauvegarde(projets.length, statut)}
           </span>
         </div>
         <div className="flex flex-wrap items-center gap-2">

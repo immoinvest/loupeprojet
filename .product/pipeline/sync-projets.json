@@ -1,0 +1,67 @@
+{
+  "feature_slug": "sync-projets",
+  "title": "Synchronisation des projets avec le compte : table D1 projet, API /api/projets/synchroniser, paquet @loupe/projets, appareil d'abord et dernière modification gagne, état visible dans Mes projets",
+  "started_at": "2026-09-14T18:00:00Z",
+  "current_step": "push",
+  "scope": "packages/projets, apps/comptes (src/projets, src/acces.ts, migration 0004), apps/web (stockage, stockage/synchro, compte, ecrans MesProjets et Compte, textes, e2e/formats.ts)",
+  "branch": "feat/sync-projets",
+  "worktree": "C:\\Users\\errei\\Claude\\loupe-sync-projets",
+  "base": "master (47d9e59)",
+  "consigne": "Pierre, 14/09/2026 : sauvegarder les projets en base pour les retrouver avec son compte sur tous ses appareils ; /new-feature, checkpoints auto-validés (autorisation du 13/09/2026)",
+  "baseline": {
+    "tests_passed": 1618,
+    "tests_failed": 0,
+    "test_files": 203,
+    "typecheck_errors": 0,
+    "last_commit": "47d9e59"
+  },
+  "steps": {
+    "discovery": {
+      "status": "completed",
+      "output": ".product/features/sync-projets-discovery.md"
+    },
+    "specs": {
+      "status": "completed",
+      "output": ".product/specs/sync-projets-specs.md",
+      "stories_count": 5
+    },
+    "architecture": {
+      "status": "completed",
+      "output": ".product/architecture/sync-projets.md"
+    },
+    "implement": {
+      "status": "completed",
+      "stories_completed": 5,
+      "stories_total": 5,
+      "tests_ajoutes": {
+        "projets": 29,
+        "comptes": 14,
+        "web": 30
+      },
+      "incidents": [
+        "branches de couverture mortes (`?? 0`, `?.` sur un tableau toujours rempli, `instanceof Error`) réécrites avant la couverture à 100 %",
+        "lint : condition toujours fausse dans la boucle de relance (drapeau booléen rétréci par TypeScript) remplacée par un compteur de demandes",
+        "spec des formats : un faux compte qui renverrait ids vides retirerait les projets de l'appareil ; le faux compte garde la liste des actifs"
+      ]
+    },
+    "qa_tests": {
+      "status": "completed",
+      "tests": 1696,
+      "fichiers": 214,
+      "gates": "lint, format:check, typecheck, test:coverage (seuils 100 %) : verts",
+      "bug_trouve": "même milliseconde et horloge figée : « J'ai acheté ce bien » repassait « Offre faite » ; dateDeModification strictement croissante et, à date égale, dernière arrivée gagne côté serveur"
+    },
+    "security": {
+      "status": "completed",
+      "score": 97,
+      "rapport": ".product/architecture/sync-projets.md, section 9",
+      "ouvert": "pas de limite de débit par compte sur les écritures (comme Gérer)"
+    },
+    "push": { "status": "pending" }
+  },
+  "auto_revue": {
+    "discovery": "appareil d'abord plutôt que serveur seul (hors ligne gardé, écrans inchangés) ; déconnexion = projets synchronisés retirés de l'appareil, modifications non envoyées gardées",
+    "specs": "cinq stories P0 ; ligne d'état en texte court plutôt qu'icône seule",
+    "architecture": "révision par compte sans table compteur (purge qui épargne la révision maximale) ; ids actifs dans chaque réponse ; lots de 10 et pages de 25 pour le CPU de 10 ms ; migration 0004 (0003 prise par quittances-fiches)"
+  }
+}

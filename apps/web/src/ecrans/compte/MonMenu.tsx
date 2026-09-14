@@ -2,40 +2,36 @@ import type { JSX } from 'react';
 import { useState } from 'react';
 
 import { Carte, TitreCarte } from '@/composants/ui';
-import { basculer, estFigee, type Section } from '@/gestion/menu';
 import { useGestion } from '@/gestion/GestionContext';
-import { ERREURS_GESTION, TEXTES_MON_MENU as T } from '@/textes/gerer';
+import { CHOIX_MENU, choixDe, preferencesDe, type ChoixMenu } from '@/gestion/menu';
+import { ERREURS_GESTION, TEXTES_CHOIX_MENU, TEXTES_MON_MENU as T } from '@/textes/gerer';
 
-function Interrupteur({
-  libelle,
-  detail,
+function Choix({
+  choix,
   actif,
-  fige,
-  onBasculer,
+  occupe,
+  onChoisir,
 }: {
-  libelle: string;
-  detail: string;
+  choix: ChoixMenu;
   actif: boolean;
-  fige: boolean;
-  onBasculer: () => void;
+  occupe: boolean;
+  onChoisir: () => void;
 }): JSX.Element {
+  const { libelle, detail } = TEXTES_CHOIX_MENU[choix];
   return (
     <label
-      className={`flex min-h-[52px] items-center gap-4 border-b border-bordure-douce py-2 last:border-b-0 ${
-        fige ? 'cursor-not-allowed' : 'cursor-pointer'
-      }`}
+      className={`flex min-h-[52px] items-center gap-4 rounded-encart border px-3 py-2 has-focus-visible:outline-3 has-focus-visible:outline-offset-2 has-focus-visible:outline-accent ${
+        actif ? 'border-accent-bordure bg-accent-fond' : 'border-bordure hover:bg-accent-fond'
+      } ${occupe ? 'cursor-wait' : 'cursor-pointer'}`}
     >
       <input
-        type="checkbox"
-        role="switch"
+        type="radio"
+        name="menu"
+        value={choix}
         checked={actif}
-        disabled={fige}
-        onChange={onBasculer}
-        className="peer sr-only"
-      />
-      <span
-        aria-hidden="true"
-        className="relative h-[26px] w-[46px] shrink-0 rounded-full bg-encre-4 transition-colors peer-checked:bg-accent peer-disabled:opacity-45 peer-focus-visible:outline-3 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-accent after:absolute after:top-[3px] after:left-[3px] after:h-5 after:w-5 after:rounded-full after:bg-white after:shadow after:transition-[left] peer-checked:after:left-[23px] motion-reduce:transition-none"
+        disabled={occupe}
+        onChange={onChoisir}
+        className="h-5 w-5 shrink-0 accent-accent"
       />
       <span className="flex min-w-0 flex-col">
         <span className="text-[15px] font-bold text-encre">{libelle}</span>
@@ -45,17 +41,17 @@ function Interrupteur({
   );
 }
 
-/** Carte « Mon menu » : masquer la section Analyser ou Gérer ; au moins une reste affichée. */
+/** Carte « Mon menu » : Analyser et Gérer, Analyser seulement ou Gérer seulement. */
 export function MonMenu(): JSX.Element {
   const { statut, preferences, changerPreferences } = useGestion();
   const [occupe, setOccupe] = useState(false);
   const [echec, setEchec] = useState<string | null>(null);
+  const courant = choixDe(preferences);
 
-  const changer = async (section: Section): Promise<void> => {
-    const suivantes = basculer(preferences, section);
-    if (suivantes === null) return;
+  const choisir = async (choix: ChoixMenu): Promise<void> => {
+    if (choix === courant) return;
     setOccupe(true);
-    const r = await changerPreferences(suivantes);
+    const r = await changerPreferences(preferencesDe(choix));
     setOccupe(false);
     setEchec(r.ok ? null : ERREURS_GESTION[r.code]);
   };
@@ -66,21 +62,16 @@ export function MonMenu(): JSX.Element {
       {statut === 'pret' ? (
         <>
           <p className="m-0 text-sm text-encre-2">{T.phrase}</p>
-          <div className="flex flex-col">
-            <Interrupteur
-              libelle={T.analyser}
-              detail={T.analyserDetail}
-              actif={preferences.analyser}
-              fige={occupe || estFigee(preferences, 'analyser')}
-              onBasculer={() => void changer('analyser')}
-            />
-            <Interrupteur
-              libelle={T.gerer}
-              detail={T.gererDetail}
-              actif={preferences.gerer}
-              fige={occupe || estFigee(preferences, 'gerer')}
-              onBasculer={() => void changer('gerer')}
-            />
+          <div role="radiogroup" aria-label={T.titre} className="flex flex-col gap-2">
+            {CHOIX_MENU.map((choix) => (
+              <Choix
+                key={choix}
+                choix={choix}
+                actif={choix === courant}
+                occupe={occupe}
+                onChoisir={() => void choisir(choix)}
+              />
+            ))}
           </div>
           {echec !== null && (
             <p
@@ -90,7 +81,7 @@ export function MonMenu(): JSX.Element {
               {echec}
             </p>
           )}
-          <p className="m-0 text-xs text-encre-3">{T.auMoinsUne}</p>
+          <p className="m-0 text-xs text-encre-3">{T.partout}</p>
         </>
       ) : (
         <p className="m-0 text-sm text-encre-3">

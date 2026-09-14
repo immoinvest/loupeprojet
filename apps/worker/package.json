@@ -12,6 +12,7 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
+    "@loupe/capture": "*",
     "hono": "^4.6.0",
     "zod": "^4.1.0"
   },

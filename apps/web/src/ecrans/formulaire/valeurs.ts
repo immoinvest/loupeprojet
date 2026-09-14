@@ -10,13 +10,15 @@ import {
 } from '@loupe/moteur';
 
 import {
-  APPORT_DEFAUT,
   DUREE_DEFAUT_ANNEES,
+  construireProjet,
+  coutTotalDuProjet,
   type AnnonceResolue,
   type ChampsExtraits,
   type Provenance,
   type SaisieProjet,
 } from '@/annonces';
+import { texteApport } from '@/textes/apport';
 
 export type Cle =
   | 'typeBien'
@@ -88,7 +90,8 @@ const VIDE: Valeurs = {
   loyerChambre: '',
   nuitee: '',
   nuiteesParMois: '',
-  apport: String(APPORT_DEFAUT),
+  // Calculé par `apercuApport` tant qu'il reste estimé : 10 % du coût total.
+  apport: '',
   dureeAnnees: String(DUREE_DEFAUT_ANNEES),
   tmi: String(TMI_PAR_DEFAUT),
 };
@@ -280,5 +283,33 @@ export function versSaisie(
     tmi: v.tmi === '' ? undefined : (Number(v.tmi) as SaisieProjet['tmi']),
     provenance,
     annonce: annonce ?? undefined,
+  };
+}
+
+export interface ApercuApport {
+  /** Ce que montre le champ : la saisie, ou l'apport par défaut tant qu'il est estimé. */
+  readonly texte: string;
+  /** « Soit 10 % du coût total du projet (124 000 €). » */
+  readonly indication: string;
+}
+
+/**
+ * L'apport tel que le projet le recevra, recalculé à chaque frappe : tant qu'il reste « estimé »,
+ * 10 % du coût total du bien saisi ; saisi, sa part de ce coût. Sans prix, surface et code postal
+ * lisibles, pas de coût total : la règle du défaut seulement.
+ */
+export function apercuApport(v: Valeurs, provenance: ProvenanceValeurs): ApercuApport {
+  const estime = provenance.apport === 'estime';
+  const prix = nombre(v.prix) ?? 0;
+  const surface = nombre(v.surface) ?? 0;
+  const projet =
+    prix > 0 && surface > 0 && /^\d{5}$/.test(v.codePostal.trim())
+      ? construireProjet(versSaisie(estime ? { ...v, apport: '' } : v, provenance, null), 'apercu')
+      : null;
+  const cout = projet === null ? null : coutTotalDuProjet(projet);
+  const apportCalcule = projet?.hypotheses.pret.apport ?? null;
+  return {
+    texte: estime ? (apportCalcule === null ? '' : String(apportCalcule)) : v.apport,
+    indication: texteApport(estime ? apportCalcule : (nombre(v.apport) ?? null), cout),
   };
 }

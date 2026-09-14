@@ -4,6 +4,13 @@ import { PORTAILS, type AnnonceResolue, type CaptureImportee } from '@/annonces'
 import { Pastille } from '@/composants/ui';
 import { TEXTES_PARTAGE_RECU } from '@/textes/application';
 
+/** Qui a lu l'annonce : l'extension, le bouton-favori, ou Deklic lui-même (lecture par le serveur). */
+const LUE_PAR: Readonly<Record<CaptureImportee['mode'], string>> = {
+  extension: "lue par l'extension",
+  bookmarklet: 'lue par le bouton-favori',
+  serveur: 'lue par Deklic',
+};
+
 /**
  * Ce que Nouveau projet dit du lien saisi : portail reconnu, identifiant et provenance (extension,
  * bouton-favori ou feuille de partage du téléphone), ou ce qui manque. Sans lien, les portails reconnus.
@@ -34,7 +41,7 @@ export function PastillesLien({
           </Pastille>
           {importee !== null ? (
             <Pastille ton="accent" compacte>
-              {importee.mode === 'bookmarklet' ? 'lue par le bouton-favori' : "lue par l'extension"}
+              {LUE_PAR[importee.mode]}
             </Pastille>
           ) : (
             partagee && (

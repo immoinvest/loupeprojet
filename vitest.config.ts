@@ -13,6 +13,7 @@ export default defineConfig({
         'packages/moteur/src/**': { lines: 100, functions: 100, branches: 100, statements: 100 },
         'packages/capture/src/**': { lines: 100, functions: 100, branches: 100, statements: 100 },
         'packages/gestion/src/**': { lines: 100, functions: 100, branches: 100, statements: 100 },
+        'packages/projets/src/**': { lines: 100, functions: 100, branches: 100, statements: 100 },
         'apps/extension/src/**': { lines: 100, functions: 100, branches: 100, statements: 100 },
         'apps/worker/src/**': { lines: 100, functions: 100, branches: 100, statements: 100 },
         'apps/comptes/src/**': { lines: 100, functions: 100, branches: 100, statements: 100 },
