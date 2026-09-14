@@ -138,14 +138,43 @@ export const regles202609: Regles = {
     // Observatoire des charges de copropriété ARC/UNARC, 2024 : 26 €/m²/an en moyenne en France.
     // L'écart est capitalisé au rendement locatif brut local, borné à ±15 % (choix Deklic).
     charges: { repereM2An: 26, borne: 0.15 },
-    // Choix Deklic : confiance élevée avec 10 ventes à 300 m, moyenne avec 5 ventes à 1 km.
+    // Choix Deklic (14/09/2026) : note sur 100 = localisation (35) + comparables (20) + dispersion (30)
+    // + ancienneté (15). Barèmes en paliers interpolés, bornés au premier et au dernier palier.
     confiance: {
-      eleveeVentes: 10,
-      eleveeRayonMetres: 300,
-      moyenneVentes: 5,
-      moyenneRayonMetres: 1_000,
+      localisation: {
+        immeuble: 35,
+        rue: 30,
+        quartier: [
+          { jusquaMetres: 100, points: 26 },
+          { jusquaMetres: 200, points: 22 },
+          { jusquaMetres: 300, points: 18 },
+          { jusquaMetres: null, points: 12 },
+        ],
+        commune: 4,
+      },
+      comparables: [
+        { valeur: 3, points: 0 },
+        { valeur: 10, points: 12 },
+        { valeur: 30, points: 20 },
+      ],
+      dispersion: [
+        { valeur: 0.1, points: 30 },
+        { valeur: 0.45, points: 0 },
+      ],
+      anciennete: [
+        { valeur: 6, points: 15 },
+        { valeur: 30, points: 0 },
+      ],
+      ancienneteSupposeeMois: 12,
+      niveaux: [
+        { des: 80, niveau: 'elevee' },
+        { des: 65, niveau: 'bonne' },
+        { des: 45, niveau: 'moyenne' },
+        { des: 25, niveau: 'faible' },
+        { des: 0, niveau: 'tres_faible' },
+      ],
     },
-    marges: { elevee: 0.05, moyenne: 0.08, faible: 0.12 },
+    marges: { elevee: 0.05, bonne: 0.065, moyenne: 0.08, faible: 0.12, tres_faible: 0.15 },
   },
 
   aConfirmer: [

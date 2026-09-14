@@ -1,10 +1,36 @@
-import type { ClasseEnergie, Regles } from '@loupe/moteur';
+import type { ClasseEnergie, NiveauConfiance, Palier, Regles } from '@loupe/moteur';
 
 import { nombre } from '@/formatage/nombres';
 
+import { LIBELLES_CONFIANCE } from './confiance';
 import { pct, pctSigne, type SectionMethode } from './methode-commun';
 
 const CLASSES: readonly ClasseEnergie[] = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
+
+const ORDRE_NIVEAUX: readonly NiveauConfiance[] = [
+  'elevee',
+  'bonne',
+  'moyenne',
+  'faible',
+  'tres_faible',
+];
+
+function niveauCourt(niveau: NiveauConfiance): string {
+  return LIBELLES_CONFIANCE[niveau].replace('Confiance ', '');
+}
+
+/** « 3 ventes ou moins 0 · 10 ventes 12 · 30 ventes ou plus 20 ». */
+function bareme(paliers: readonly Palier[], unite: (valeur: number) => string): string {
+  return paliers
+    .map((p, i) => {
+      const borne = i === 0 ? ' ou moins' : i === paliers.length - 1 ? ' ou plus' : '';
+      return `${unite(p.valeur)}${borne} ${String(p.points)}`;
+    })
+    .join(' · ');
+}
+
+const maximum = (paliers: readonly { points: number }[]): number =>
+  Math.max(...paliers.map((p) => p.points));
 
 /** « A +16 % · B +12 % · … » : les classes publiées autres que D. */
 function ecartsDpe(table: Readonly<Record<ClasseEnergie, number | null>>): string {
@@ -20,6 +46,7 @@ function ecartsDpe(table: Readonly<Record<ClasseEnergie, number | null>>): strin
 
 export function sectionEstimation(regles: Regles): SectionMethode {
   const e = regles.estimation;
+  const c = e.confiance;
   const { avecAscenseur: avec, sansAscenseur: sans } = e.etage;
   return {
     code: 'estimation',
@@ -32,7 +59,8 @@ export function sectionEstimation(regles: Regles): SectionMethode {
       `État : à rénover = premier quartile des ventes comparables, à rafraîchir = entre premier quartile et médiane, bon état = médiane (supposé par défaut), rénové = troisième quartile. DVF ne dit rien de l'état des biens vendus.`,
       'Corrections : DPE, étage et ascenseur, balcon ou terrasse, en pourcentage du prix de marché, additionnées. Chacune se désactive pour un projet.',
       `Charges : l'écart des charges de copropriété au repère de ${nombre(e.charges.repereM2An)} € par m² et par an est un coût permanent, capitalisé au rendement locatif brut local (loyer de référence ÷ prix médian), borné à ${pct(e.charges.borne)} du prix. Charges estimées par défaut : ignorées.`,
-      `Fourchette : ±${pct(e.marges.elevee)} avec au moins ${String(e.confiance.eleveeVentes)} ventes comparables dans ${nombre(e.confiance.eleveeRayonMetres)} m, ±${pct(e.marges.moyenne)} avec ${String(e.confiance.moyenneVentes)} ventes dans ${nombre(e.confiance.moyenneRayonMetres)} m, ±${pct(e.marges.faible)} sinon.`,
+      `Confiance : une note sur 100, somme de quatre composantes lues sur le repère de prix : localisation (${String(maximum([...c.localisation.quartier, { points: c.localisation.immeuble }]))} points au plus), dispersion des prix (${String(maximum(c.dispersion))}), nombre de ventes comparables (${String(maximum(c.comparables))}) et ancienneté des ventes (${String(maximum(c.anciennete))}). Chaque barème est interpolé entre ses paliers ; une ancienneté inconnue est supposée à ${String(c.ancienneteSupposeeMois)} mois.`,
+      `Fourchette : ${ORDRE_NIVEAUX.map((niveau) => `±${pct(e.marges[niveau])} si la confiance est ${niveauCourt(niveau)}`).join(', ')}.`,
     ],
     constantes: [
       {
@@ -78,8 +106,39 @@ export function sectionEstimation(regles: Regles): SectionMethode {
         chemin: 'estimation.charges',
       },
       {
+        libelle: 'Confiance : localisation du repère',
+        valeur: `même immeuble ${String(c.localisation.immeuble)} · même rue ${String(c.localisation.rue)} · quartier ${c.localisation.quartier
+          .map((p) =>
+            p.jusquaMetres === null
+              ? `au-delà ${String(p.points)}`
+              : `≤ ${nombre(p.jusquaMetres)} m ${String(p.points)}`,
+          )
+          .join(', ')} · commune ${String(c.localisation.commune)}`,
+        source: 'Choix Deklic',
+      },
+      {
+        libelle: 'Confiance : ventes comparables',
+        valeur: bareme(c.comparables, (v) => `${nombre(v)} ventes`),
+        source: 'Choix Deklic',
+      },
+      {
+        libelle: 'Confiance : dispersion (écart interquartile ÷ médiane)',
+        valeur: bareme(c.dispersion, pct),
+        source: 'Choix Deklic',
+      },
+      {
+        libelle: 'Confiance : ancienneté médiane des ventes',
+        valeur: `${bareme(c.anciennete, (v) => `${nombre(v)} mois`)} · inconnue : ${String(c.ancienneteSupposeeMois)} mois supposés`,
+        source: 'Choix Deklic',
+      },
+      {
+        libelle: 'Niveaux de confiance',
+        valeur: c.niveaux.map((s) => `${niveauCourt(s.niveau)} dès ${String(s.des)}`).join(' · '),
+        source: 'Choix Deklic',
+      },
+      {
         libelle: 'Largeur de la fourchette',
-        valeur: `±${pct(e.marges.elevee)} · ±${pct(e.marges.moyenne)} · ±${pct(e.marges.faible)}`,
+        valeur: ORDRE_NIVEAUX.map((niveau) => `±${pct(e.marges[niveau])}`).join(' · '),
         source: 'Choix Deklic',
       },
     ],
