@@ -85,6 +85,8 @@ const REPONDRE: Readonly<
       return depuisLeCache(COQUE);
     }
   },
+  // Annonce partagée : la coque en cache, pour que le texte partagé ne quitte pas l'appareil.
+  'coque-d-abord': async (requete) => (await caches.match(COQUE, LECTURE)) ?? fetch(requete),
   'cache-d-abord': async (requete) => {
     const trouvee = await caches.match(requete, LECTURE);
     if (trouvee !== undefined) return trouvee;

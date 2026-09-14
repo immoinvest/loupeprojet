@@ -2,6 +2,7 @@ import { useEffect, useState, type JSX } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router';
 
 import {
+  annoncePartagee,
   construireProjet,
   lireFragmentCapture,
   nomDuProjet,
@@ -31,14 +32,16 @@ function pluriel(n: number, mot: string): string {
 export function NouveauProjet(): JSX.Element {
   const { creer } = useProjets();
   const naviguer = useNavigate();
-  const { hash } = useLocation();
+  const { hash, search } = useLocation();
   // Le fragment est lu une seule fois, au premier rendu, puis effacé de l'adresse (effet ci-dessous).
   const [fragment] = useState(() => lireFragmentCapture(hash));
+  // Annonce partagée depuis l'app d'un portail : lue au premier rendu, ignorée si une capture arrive.
+  const [partage] = useState(() => annoncePartagee(fragment.statut !== 'absente', search));
   const capture: CaptureImportee | null = fragment.statut === 'lue' ? fragment.capture : null;
   const [importee, setImportee] = useState<CaptureImportee | null>(capture);
-  const [url, setUrl] = useState(capture?.annonce.urlCanonique ?? '');
-  const [texte, setTexte] = useState('');
-  const [etape, setEtape] = useState<Etape>(capture === null ? 'lien' : 'verifier');
+  const [url, setUrl] = useState(capture?.annonce.urlCanonique ?? partage.lien ?? '');
+  const [texte, setTexte] = useState(partage.texte);
+  const [etape, setEtape] = useState<Etape>(capture === null ? partage.etape : 'verifier');
   const [manuel, setManuel] = useState(false);
   const [initial, setInitial] = useState(() => valeursDepuisChamps(capture?.champs ?? {}));
   const [nbChamps, setNbChamps] = useState(
@@ -68,9 +71,10 @@ export function NouveauProjet(): JSX.Element {
     appliquerCapture,
   );
 
+  // Capture ou partage lus : l'adresse redevient /projets/nouveau, rien n'en reste.
   useEffect(() => {
-    if (fragment.statut !== 'absente') void naviguer(CHEMIN, { replace: true });
-  }, [fragment.statut, naviguer]);
+    if (fragment.statut !== 'absente' || partage.recue) void naviguer(CHEMIN, { replace: true });
+  }, [fragment.statut, partage.recue, naviguer]);
 
   useEffect(() => {
     // Capture reçue par l'adresse (clic sur l'extension, favori) : l'IA complète les trous du texte.
@@ -151,6 +155,7 @@ export function NouveauProjet(): JSX.Element {
             url={url}
             importee={importee}
             captureIllisible={fragment.statut === 'illisible'}
+            partagee={url === partage.lien}
           />
           {importee === null && (
             <EtatLectureAuto

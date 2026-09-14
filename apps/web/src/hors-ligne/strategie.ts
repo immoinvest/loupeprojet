@@ -4,11 +4,13 @@
  */
 
 /**
- * `navigation` : réseau d'abord, repli sur la coque en cache ; `cache-d-abord` : fichiers construits,
- * dont le nom change à chaque version ; `reseau-d-abord` : manifeste et icônes ; `ignorer` : le
- * navigateur fait comme sans service worker.
+ * `navigation` : réseau d'abord, repli sur la coque en cache ; `coque-d-abord` : la coque en cache,
+ * le réseau seulement sans elle (annonce partagée) ; `cache-d-abord` : fichiers construits, dont le
+ * nom change à chaque version ; `reseau-d-abord` : manifeste et icônes ; `ignorer` : le navigateur
+ * fait comme sans service worker.
  */
-export type Strategie = 'navigation' | 'cache-d-abord' | 'reseau-d-abord' | 'ignorer';
+export type Strategie =
+  'navigation' | 'coque-d-abord' | 'cache-d-abord' | 'reseau-d-abord' | 'ignorer';
 
 /** Ce que le service worker lit d'une requête interceptée. */
 export interface RequeteInterceptee {
@@ -25,6 +27,12 @@ const CHEMIN_ASSETS = '/assets/';
  * pas même une navigation (retour de Google ou d'Apple), qui remplacerait la coque en cache.
  */
 const CHEMIN_API = '/api/';
+
+/**
+ * Cible de partage du manifeste (`share_target.action`) : l'annonce partagée arrive dans l'adresse.
+ * Servie par la coque en cache, elle reste sur l'appareil au lieu de passer par le serveur.
+ */
+export const ACTION_PARTAGE = '/projets/nouveau';
 
 /** Toujours au réseau : le bouton-favori doit rester à jour, le service worker aussi. */
 const JAMAIS_EN_CACHE: ReadonlySet<string> = new Set(['/capture.js', '/sw.js']);
@@ -56,7 +64,9 @@ export function strategiePour(requete: RequeteInterceptee, origine: string): Str
   ) {
     return 'ignorer';
   }
-  if (requete.mode === 'navigate') return 'navigation';
+  if (requete.mode === 'navigate') {
+    return url.pathname === ACTION_PARTAGE && url.search !== '' ? 'coque-d-abord' : 'navigation';
+  }
   if (url.pathname.startsWith(CHEMIN_ASSETS)) return 'cache-d-abord';
   return FICHIERS_FIXES.includes(url.pathname) ? 'reseau-d-abord' : 'ignorer';
 }

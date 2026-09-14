@@ -107,6 +107,10 @@
           "etape": "US-3c",
           "hash": "cb43752",
           "e2e_formats": 12
+        },
+        {
+          "etape": "refactor Nouveau projet (pastilles du lien)",
+          "hash": "643fb87"
         }
       ],
       "notes": [

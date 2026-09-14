@@ -2,21 +2,25 @@ import type { JSX } from 'react';
 
 import { PORTAILS, type AnnonceResolue, type CaptureImportee } from '@/annonces';
 import { Pastille } from '@/composants/ui';
+import { TEXTES_PARTAGE_RECU } from '@/textes/application';
 
 /**
- * Ce que Nouveau projet dit du lien saisi : portail reconnu, identifiant et provenance de la lecture,
- * ou ce qui manque. Sans lien, les portails reconnus.
+ * Ce que Nouveau projet dit du lien saisi : portail reconnu, identifiant et provenance (extension,
+ * bouton-favori ou feuille de partage du téléphone), ou ce qui manque. Sans lien, les portails reconnus.
  */
 export function PastillesLien({
   annonce,
   url,
   importee,
   captureIllisible,
+  partagee,
 }: {
   annonce: AnnonceResolue | null;
   url: string;
   importee: CaptureImportee | null;
   captureIllisible: boolean;
+  /** Le lien affiché est celui reçu par la feuille de partage. */
+  partagee: boolean;
 }): JSX.Element {
   return (
     <div className="flex flex-wrap items-center gap-2">
@@ -28,10 +32,16 @@ export function PastillesLien({
           <Pastille ton="neutre" compacte>
             annonce {annonce.id}
           </Pastille>
-          {importee !== null && (
+          {importee !== null ? (
             <Pastille ton="accent" compacte>
               {importee.mode === 'bookmarklet' ? 'lue par le bouton-favori' : "lue par l'extension"}
             </Pastille>
+          ) : (
+            partagee && (
+              <Pastille ton="accent" compacte>
+                {TEXTES_PARTAGE_RECU.pastille}
+              </Pastille>
+            )
           )}
         </>
       ) : url.trim() !== '' ? (

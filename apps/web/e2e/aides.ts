@@ -72,3 +72,13 @@ export async function creerProjetManuel(page: Page): Promise<void> {
     page.getByRole('heading', { level: 1, name: /Prix sans repère de marché\./ }),
   ).toBeVisible();
 }
+
+/** Attend que le service worker, installé après le chargement, prenne la main sur la page. */
+export async function attendreServiceWorker(page: Page): Promise<void> {
+  await page.evaluate(async () => {
+    await navigator.serviceWorker.ready;
+  });
+  await expect
+    .poll(() => page.evaluate(() => navigator.serviceWorker.controller !== null))
+    .toBe(true);
+}

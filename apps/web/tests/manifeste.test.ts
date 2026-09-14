@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { z } from 'zod';
 
+import { PARAMETRES_PARTAGE } from '@/annonces';
+import { ACTION_PARTAGE } from '@/hors-ligne';
+
 import texteManifeste from '../public/manifest.webmanifest?raw';
 
 /** Les images de public/ que Vite connaît : seules les clés servent, pour savoir qu'un fichier existe. */
@@ -25,6 +28,11 @@ const ManifesteSchema = z.object({
   background_color: z.string(),
   icons: z.array(IconeSchema),
   shortcuts: z.array(z.object({ name: z.string(), url: z.string() })),
+  share_target: z.object({
+    action: z.string(),
+    method: z.string(),
+    params: z.object({ title: z.string(), text: z.string(), url: z.string() }),
+  }),
 });
 
 function lireManifeste(): z.infer<typeof ManifesteSchema> {
@@ -63,5 +71,17 @@ describe('Manifeste de l’application', () => {
       ['Nouveau projet', '/projets/nouveau'],
       ['Mes projets', '/projets'],
     ]);
+  });
+
+  it('reçoit les annonces partagées depuis les apps des portails, dans Nouveau projet', () => {
+    expect(lireManifeste().share_target).toEqual({
+      action: ACTION_PARTAGE,
+      method: 'GET',
+      params: {
+        title: PARAMETRES_PARTAGE.titre,
+        text: PARAMETRES_PARTAGE.texte,
+        url: PARAMETRES_PARTAGE.lien,
+      },
+    });
   });
 });

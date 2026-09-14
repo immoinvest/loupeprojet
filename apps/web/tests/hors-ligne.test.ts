@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 
 import {
+  ACTION_PARTAGE,
   FICHIERS_FIXES,
   URL_SERVICE_WORKER,
   cachesPerimes,
@@ -69,6 +70,20 @@ describe('strategiePour et l’API des comptes', () => {
       strategiePour(requete('/api/auth/callback/google?code=x', { mode: 'navigate' }), ORIGINE),
     ).toBe('ignorer');
     expect(strategiePour(requete('/api/auth/get-session'), ORIGINE)).toBe('ignorer');
+  });
+});
+
+describe('strategiePour et les annonces partagées', () => {
+  it('sert la coque en cache à une annonce partagée : son texte ne part pas au serveur', () => {
+    const partage = requete(`${ACTION_PARTAGE}?texte=T3%20lumineux`, { mode: 'navigate' });
+    expect(strategiePour(partage, ORIGINE)).toBe('coque-d-abord');
+    expect(strategiePour(requete(ACTION_PARTAGE, { mode: 'navigate' }), ORIGINE)).toBe(
+      'navigation',
+    );
+    expect(strategiePour(requete('/projets?texte=x', { mode: 'navigate' }), ORIGINE)).toBe(
+      'navigation',
+    );
+    expect(strategiePour(requete(`${ACTION_PARTAGE}?texte=x`), ORIGINE)).toBe('ignorer');
   });
 });
 

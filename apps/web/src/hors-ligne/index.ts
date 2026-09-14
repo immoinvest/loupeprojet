@@ -4,6 +4,7 @@ export {
   type EnvironnementHorsLigne,
 } from './enregistrer';
 export {
+  ACTION_PARTAGE,
   FICHIERS_FIXES,
   cachesPerimes,
   fichiersDeLaCoque,

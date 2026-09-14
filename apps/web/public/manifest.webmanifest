@@ -40,5 +40,10 @@
       "url": "/projets",
       "icons": [{ "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" }]
     }
-  ]
+  ],
+  "share_target": {
+    "action": "/projets/nouveau",
+    "method": "GET",
+    "params": { "title": "titre", "text": "texte", "url": "lien" }
+  }
 }
