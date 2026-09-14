@@ -173,12 +173,12 @@ describe('calculerVerdict — variantes', () => {
   it('couverture : bon quand le loyer porte largement le crédit, problème quand il ne le couvre plus, inconnu sans loyer', () => {
     const large = verdictDe(
       variante({}, undefined, {
-        location: { mode: 'meuble_lld', loyerHc: 1_500, vacanceSemaines: 0 },
+        location: { mode: 'meuble', loyerHc: 1_500, vacanceSemaines: 0 },
       }),
     ).verdict;
     expect(large.feux[3]).toMatchObject({ axe: 'couverture', feu: 'bon' });
     const insuffisant = verdictDe(
-      variante({}, undefined, { location: { mode: 'meuble_lld', loyerHc: 700 } }),
+      variante({}, undefined, { location: { mode: 'meuble', loyerHc: 700 } }),
     ).verdict;
     expect(insuffisant.feux[3]?.feu).toBe('probleme');
     expect(insuffisant.feux[3]?.valeur).toBeCloseTo(826.65 / 700, 3);
@@ -198,7 +198,7 @@ describe('calculerVerdict — variantes', () => {
         {},
         { ...projetExemple.marche, plafondLoyerMensuel: 900 },
         {
-          location: { mode: 'meuble_lld', loyerHc: 8_000, vacanceSemaines: 0 },
+          location: { mode: 'meuble', loyerHc: 8_000, vacanceSemaines: 0 },
           fiscalite: { tmi: 0.3, regime: 'micro_bic' },
         },
       ),

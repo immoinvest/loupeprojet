@@ -1,4 +1,4 @@
-import { ProjetSchema, VERSION_REGLES_COURANTE } from '@loupe/moteur';
+import { ProjetSchema, VERSION_REGLES_COURANTE, vacanceSemaines } from '@loupe/moteur';
 
 import { construireProjet } from '@/annonces';
 
@@ -44,7 +44,7 @@ export function defautsDuMoteur(): Defauts {
     hypotheses: {
       achat: { prix: 120_000 },
       pret: { tauxNominal: 0.03, dureeAnnees: 20 },
-      location: { mode: 'meuble_lld', loyerHc: LOYER_TEMOIN },
+      location: { mode: 'meuble', loyerHc: LOYER_TEMOIN },
       fiscalite: { tmi: 0.3, regime: 'lmnp_reel' },
     },
   }).hypotheses;
@@ -56,7 +56,7 @@ export function defautsDuMoteur(): Defauts {
         surface: SURFACE_TEMOIN,
         codePostal: '69003',
         ville: 'Lyon',
-        mode: 'meuble_lld',
+        mode: 'meuble',
         loyerHc: LOYER_TEMOIN,
         apport: 10_000,
         dureeAnnees: 20,
@@ -68,7 +68,7 @@ export function defautsDuMoteur(): Defauts {
   );
   const { charges, pret, achat } = formulaire.hypotheses;
   return {
-    vacanceSemaines: schema.location.vacanceSemaines,
+    vacanceSemaines: vacanceSemaines(schema.location),
     entretienTaux: schema.charges.entretienTaux,
     tauxAssurance: schema.pret.tauxAssurance,
     psBic: schema.fiscalite.psBic,

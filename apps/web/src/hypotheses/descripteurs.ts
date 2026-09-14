@@ -2,12 +2,8 @@ import type { ProjetEntree } from '@loupe/moteur';
 
 import { lireChemin } from './chemins';
 import { GROUPE_ACHAT, GROUPE_BIEN } from './groupes-bien';
-import {
-  GROUPE_CHARGES,
-  GROUPE_FINANCEMENT,
-  GROUPE_FISCALITE,
-  GROUPE_LOCATION,
-} from './groupes-finances';
+import { GROUPE_CHARGES, GROUPE_FINANCEMENT, GROUPE_FISCALITE } from './groupes-finances';
+import { GROUPE_LOCATION } from './groupes-location';
 import type { Descripteur, Groupe } from './types';
 
 /**

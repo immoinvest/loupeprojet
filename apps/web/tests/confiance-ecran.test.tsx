@@ -182,7 +182,7 @@ describe('Carte Confiance et carte Le repère utilisé', () => {
       // Rue 30 + 6 ventes 5 + dispersion 8,6 % → 30 + 9 mois → 13 = 78, bonne.
       expect(await screen.findByText('Confiance bonne · 78 sur 100')).toBeInTheDocument();
       const lignes = raisons().map((li) => n(li.textContent));
-      expect(lignes[0]).toBe('Localisation du repère30/35Ventes de la même rue.');
+      expect(lignes[0]).toBe('Localisation du repère30/35Ventes de la même rue, à 90 m au plus.');
       expect(lignes[3]).toBe('Ancienneté des ventes13/15Ventes vieilles de 9 mois en médiane.');
       expect(
         screen.queryByRole('heading', { name: PHRASES_CONFIANCE.titreRepere }),

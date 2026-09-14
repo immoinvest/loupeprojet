@@ -11,6 +11,7 @@ import {
 } from '@loupe/moteur';
 import { describe, expect, it } from 'vitest';
 
+import { dateCourte } from '@/formatage/nombres';
 import { CHAMPS_OFFRE } from '@/simulateur';
 
 import {
@@ -58,7 +59,7 @@ describe('textes du simulateur', () => {
 
   it('formate les pastilles d’usure et d’endettement depuis les règles', () => {
     expect(n(PHRASES_SIMULATEUR.usure(regles.credit.tauxUsure, regles.dateReference))).toBe(
-      "au-dessus du taux d'usure (5,29 %, 13 sept. 2026)",
+      `au-dessus du taux d'usure (5,29 %, ${n(dateCourte(regles.dateReference))})`,
     );
     expect(n(PHRASES_SIMULATEUR.endettementEleve(regles.credit.hcsf.seuilEffort))).toBe(
       'au-delà de 35 % : surveiller',

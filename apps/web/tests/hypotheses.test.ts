@@ -78,7 +78,8 @@ describe('descripteurs', () => {
     const projet = ProjetSchema.parse(projetExemple);
     for (const d of TOUS_LES_GROUPES.flatMap((g) => g.champs)) {
       const v = valeurActuelle(projet, d);
-      if (d.obligatoire === true) expect(v, d.chemin).toBeDefined();
+      const visible = d.visibleSi === undefined || d.visibleSi(projet);
+      if (d.obligatoire === true && visible) expect(v, d.chemin).toBeDefined();
     }
   });
 
@@ -145,9 +146,7 @@ describe('texteLisible', () => {
     expect(texteLisible(champ('bien.ascenseur'), false)).toBe('non');
     expect(texteLisible(d({ type: 'bool' }), true)).toBe('oui');
     expect(texteLisible(d({ type: 'bool' }), false)).toBe('non');
-    expect(texteLisible(champ('hypotheses.location.mode'), 'meuble_lld')).toBe(
-      'Meublé longue durée',
-    );
+    expect(texteLisible(champ('hypotheses.location.mode'), 'meuble')).toBe('Meublée');
     expect(texteLisible(champ('hypotheses.location.mode'), 'inconnu')).toBe('inconnu');
     expect(texteLisible(d({ type: 'enum' }), 'D')).toBe('D');
     expect(texteLisible(champ('bien.departement'), '13')).toBe('13');
@@ -187,27 +186,97 @@ describe('appliquerSaisie', () => {
     expect(r.ok && r.projet.provenance).toEqual({ 'achat.travaux': 'utilisateur' });
   });
 
-  it('passer en courte durée initialise la nuitée et l’occupation', () => {
+  it('passer en courte durée reconstruit la location avec les défauts du type, badgés « estimé »', () => {
     const r = appliquerSaisie(projetExemple, champ('hypotheses.location.mode'), 'courte_duree');
-    expect(r.ok && r.projet.hypotheses.location.courteDuree).toEqual({
+    if (!r.ok) throw new Error(r.erreur);
+    // 980 € ÷ 30 × 2 = 65 € la nuit ; 15 nuits par mois.
+    expect(r.projet.hypotheses.location).toEqual({
+      mode: 'courte_duree',
       nuitee: 65,
-      tauxOccupation: 0.6,
+      nuiteesParMois: 15,
+      dureeSejourNuits: 4,
+      menageFactureParSejour: 27,
+      menageCoutParSejour: 27,
+      plateformeTaux: 0.03,
+      conciergerieTaux: 0,
+      tourismeClasse: false,
     });
-    expect(r.ok && ProjetSchema.safeParse(r.projet).success).toBe(true);
-    const deja = r.ok
-      ? appliquerSaisie(r.projet, champ('hypotheses.location.mode'), 'courte_duree')
-      : r;
-    expect(deja.ok && deja.projet.hypotheses.location.courteDuree?.nuitee).toBe(65);
+    expect(r.projet.hypotheses.charges).toMatchObject({ energieMensuel: 190, internetMensuel: 30 });
+    expect(r.projet.provenance).toMatchObject({
+      'location.mode': 'utilisateur',
+      'location.nuitee': 'estime',
+      'charges.energieMensuel': 'estime',
+    });
+    expect(r.projet.provenance?.['location.loyerHc']).toBeUndefined();
+    expect(ProjetSchema.safeParse(r.projet).success).toBe(true);
+    // Le même type une seconde fois : rien ne bouge.
+    const deja = appliquerSaisie(r.projet, champ('hypotheses.location.mode'), 'courte_duree');
+    expect(deja.ok && deja.projet).toBe(r.projet);
+  });
+
+  it('changer de type garde le loyer de référence et les abonnements « à toi », règle le régime', () => {
+    const nuReel: ProjetEntree = {
+      ...projetExemple,
+      hypotheses: {
+        ...projetExemple.hypotheses,
+        charges: { ...projetExemple.hypotheses.charges, energieMensuel: 120 },
+        fiscalite: { tmi: 0.3, regime: 'nu_reel' },
+      },
+      provenance: { ...projetExemple.provenance, 'charges.energieMensuel': 'utilisateur' },
+    };
+    const coloc = appliquerSaisie(nuReel, champ('hypotheses.location.mode'), 'colocation');
+    if (!coloc.ok) throw new Error(coloc.erreur);
+    // 980 € × 1,35 ÷ 2 chambres = 662 € par chambre.
+    expect(coloc.projet.hypotheses.location).toMatchObject({ chambres: 2, loyerChambre: 662 });
+    expect(coloc.projet.hypotheses.charges).toMatchObject({
+      energieMensuel: 120,
+      internetMensuel: 30,
+    });
+    expect(coloc.projet.hypotheses.fiscalite.regime).toBe('lmnp_reel');
+    expect(coloc.projet.provenance).toMatchObject({
+      'charges.energieMensuel': 'utilisateur',
+      'charges.internetMensuel': 'estime',
+    });
+    // Retour en meublé : 1 324 € ÷ 1,35 = 981 €, abonnements estimés remis à 0.
+    const retour = appliquerSaisie(coloc.projet, champ('hypotheses.location.mode'), 'meuble');
+    if (!retour.ok) throw new Error(retour.erreur);
+    expect(retour.projet.hypotheses.location).toEqual({
+      mode: 'meuble',
+      loyerHc: 981,
+      chargesLocataire: 0,
+      vacanceSemaines: 3,
+      gestionTaux: 0,
+    });
+    expect(retour.projet.hypotheses.charges).toMatchObject({
+      energieMensuel: 120,
+      internetMensuel: 0,
+    });
+    expect(retour.projet.provenance?.['location.loyerChambre']).toBeUndefined();
+  });
+
+  it('refuse un type inconnu ; une location illisible repart d’un loyer nul', () => {
+    expect(appliquerSaisie(projetExemple, champ('hypotheses.location.mode'), 'saisonnier')).toEqual(
+      {
+        ok: false,
+        erreur: 'Type de location inconnu.',
+      },
+    );
+    const cassee = {
+      ...projetExemple,
+      hypotheses: { ...projetExemple.hypotheses, location: { mode: 'nu' } },
+    } as unknown as ProjetEntree;
+    const r = appliquerSaisie(cassee, champ('hypotheses.location.mode'), 'meuble');
+    expect(r.ok && r.projet.hypotheses.location).toMatchObject({ mode: 'meuble', loyerHc: 0 });
   });
 });
 
 describe('carte « L’achat » : descripteurs', () => {
   const renovation = champ('hypotheses.achat.travauxRenovationEnergetique');
-  const avec = (mode: 'nu' | 'meuble_lld', travaux?: number): ProjetEntree => ({
+  const avec = (mode: 'nu' | 'meuble', travaux?: number): ProjetEntree => ({
     ...projetExemple,
     hypotheses: {
       ...projetExemple.hypotheses,
-      location: { ...projetExemple.hypotheses.location, mode },
+      location: { mode, loyerHc: 980 },
       achat: {
         prix: projetExemple.hypotheses.achat.prix,
         ...(travaux === undefined ? {} : { travaux }),
@@ -219,7 +288,7 @@ describe('carte « L’achat » : descripteurs', () => {
     expect(renovation.visibleSi?.(avec('nu', 6_000))).toBe(true);
     expect(renovation.visibleSi?.(avec('nu', 0))).toBe(false);
     expect(renovation.visibleSi?.(avec('nu'))).toBe(false);
-    expect(renovation.visibleSi?.(avec('meuble_lld', 6_000))).toBe(false);
+    expect(renovation.visibleSi?.(avec('meuble', 6_000))).toBe(false);
     expect(renovation.aide?.replace(/\s/g, ' ')).toMatch(/10 700 € à 21 400 €/);
   });
 

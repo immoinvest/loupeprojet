@@ -60,11 +60,7 @@ const ancienCourteDuree: ProjetEntree = {
   },
   hypotheses: {
     ...projetExemple.hypotheses,
-    location: {
-      mode: 'courte_duree',
-      loyerHc: 980,
-      courteDuree: { nuitee: 80, tauxOccupation: 0.6 },
-    },
+    location: { mode: 'courte_duree', nuitee: 80, nuiteesParMois: 18 },
     fiscalite: { tmi: 0.3, regime: 'micro_bic' },
   },
 };

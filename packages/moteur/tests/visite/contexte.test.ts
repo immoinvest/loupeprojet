@@ -55,22 +55,21 @@ function forge(
 }
 
 describe('typeExploitation', () => {
-  it('traduit les trois modes du projet', () => {
-    const mode = (m: ProjetEntree['hypotheses']['location']['mode']): Projet =>
+  it('traduit les cinq modes du projet', () => {
+    const avec = (location: ProjetEntree['hypotheses']['location']): Projet =>
       ProjetSchema.parse({
         ...projetExemple,
-        hypotheses: {
-          ...projetExemple.hypotheses,
-          location: {
-            mode: m,
-            loyerHc: 900,
-            ...(m === 'courte_duree' ? { courteDuree: { nuitee: 80, tauxOccupation: 0.6 } } : {}),
-          },
-        },
+        hypotheses: { ...projetExemple.hypotheses, location },
       });
-    expect(typeExploitation(mode('nu'))).toBe('nue');
-    expect(typeExploitation(mode('meuble_lld'))).toBe('meublee');
-    expect(typeExploitation(mode('courte_duree'))).toBe('courte_duree');
+    expect(typeExploitation(avec({ mode: 'nu', loyerHc: 900 }))).toBe('nue');
+    expect(typeExploitation(avec({ mode: 'meuble', loyerHc: 900 }))).toBe('meublee');
+    expect(typeExploitation(avec({ mode: 'colocation', chambres: 3, loyerChambre: 450 }))).toBe(
+      'colocation',
+    );
+    expect(typeExploitation(avec({ mode: 'courte_duree', nuitee: 80, nuiteesParMois: 15 }))).toBe(
+      'courte_duree',
+    );
+    expect(typeExploitation(avec({ mode: 'moyenne_duree', loyerHc: 900 }))).toBe('moyenne_duree');
   });
 });
 

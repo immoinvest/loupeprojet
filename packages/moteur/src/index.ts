@@ -20,6 +20,7 @@ export * from './estimation';
 export * from './financement';
 export * from './pret';
 export * from './fiscalite';
+export * from './location';
 export * from './regles';
 export * from './rendement';
 export * from './revente';
