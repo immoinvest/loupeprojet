@@ -75,3 +75,4 @@ export {
   URL_API_GEO,
   type CommunesVoisines,
 } from './voisines';
+export { MAX_VENTES_CARTE, RAYON_CARTE_METRES, ventesSurCarte, type VenteSurCarte } from './carte';

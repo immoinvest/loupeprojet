@@ -10,7 +10,7 @@ import { limiterDebit } from './http';
 import { creerMarche } from './marche';
 import { creerProxy } from './proxy/proxy';
 
-export const VERSION_WORKER = '0.7.0';
+export const VERSION_WORKER = '0.8.0';
 
 /** L'application Hono, construite à partir de dépendances injectées (réelles en production, doubles en test). */
 export function creerApp(deps: Dependances): Hono {
