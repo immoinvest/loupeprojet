@@ -20,6 +20,8 @@ Scénario : mesure
   Et le test de bout en bout de chaque porte échoue si un clic de plus apparaît
 ```
 
+**Ce qui compte comme un clic** : un bouton ou un lien qui fait avancer (ouvrir la porte, valider, créer). **Ce qui n'en est pas un** : remplir un champ, choisir dans une liste, cocher une case, corriger une valeur par défaut, et tout ce qui se passe hors de Deklic (authentification chez la banque, connexion Google). Le compte part de l'utilisateur **connecté** : sans compte, la connexion s'intercale une fois, puis le parcours reprend là où il en était.
+
 Principes qui en découlent, applicables à toutes les stories :
 
 1. **Une seule question par information inconnue.** Deklic ne demande que ce qu'il ne peut ni reprendre (analyse), ni lire (banque), ni déduire (règle par défaut).
@@ -94,24 +96,45 @@ Priorités : **P0** = sans elle la feature n'a pas de sens ; **P1** = attendue d
 
 ### G1 — `gerer-socle`
 
-#### G1-1 : L'espace Gérer dans la coque
+#### G1-1 : Les sections Analyser et Gérer du menu
 
-En tant que bailleur, je veux passer de l'analyse à la gestion en un geste, pour retrouver mes biens loués sans les mélanger à mes projets.
+En tant que bailleur, je veux voir mes projets à étudier et mes biens loués dans le même menu, chacun dans sa section, et pouvoir masquer celle qui ne me sert pas.
 
-P0 · Effort S
+Décision de Pierre (14/09/2026) : deux sections dans un seul menu, pas de sélecteur ; option dans Mon compte pour en masquer une.
+
+P0 · Effort M
 
 ```gherkin
-Scénario : sélecteur Analyser · Gérer
+Scénario : deux sections
   Étant donné la barre latérale
-  Quand je choisis « Gérer »
-  Alors j'arrive sur /gerer et le menu montre : Accueil, Loyers, Biens, Locataires, Argent
-  Et le bouton principal devient « Ajouter un bien »
-  Et mon choix est retenu à la prochaine visite
+  Alors elle montre la section « Analyser » (Nouveau projet, les 5 projets les plus récents, « Tous mes projets · N » au-delà de 5, Comparer)
+  Puis la section « Gérer » (Ajouter un bien, Accueil, Loyers, Biens, Locataires, Argent ; Banque à partir de G3)
+  Puis l'aide, l'installation et le profil, comme aujourd'hui
+  Et le grand bouton « Nouveau projet » disparaît : chaque section commence par son action de création
+  Et Loyers porte une pastille avec le nombre de loyers en retard ou à confirmer
+  Et sous 1 024 px, le tiroir existant montre les mêmes sections (aucune barre d'onglets en bas)
+
+Scénario : masquer une section depuis Mon compte
+  Étant donné la carte « Mon menu » de la page Mon compte (interrupteurs Analyser et Gérer, les deux actifs par défaut)
+  Quand je désactive « Analyser »
+  Alors la section Analyser disparaît du menu, ainsi que « J'ai acheté ce bien » dans les projets et « Analyser ce bien » dans les fiches bien
+  Et le logo mène à la première section affichée
+  Et le réglage est enregistré avec mon compte (même menu sur tous mes appareils) ; sans compte, sur l'appareil
+  Quand une seule section reste affichée
+  Alors son interrupteur est inactif : impossible de masquer les deux
+
+Scénario : page d'une section masquée
+  Étant donné la section Gérer masquée
+  Quand j'ouvre /gerer par un lien direct
+  Alors la page s'affiche avec un bandeau « Cette section est masquée dans ton menu · L'afficher »
+  Et « L'afficher » réactive la section sans passer par Mon compte
 
 Scénario : Gérer sans compte
   Étant donné que je ne suis pas connecté
-  Quand j'ouvre /gerer
+  Alors la section Gérer se réduit à « Gérer mes biens loués »
+  Quand je l'ouvre
   Alors je vois une page courte : ce que Gérer fait, pourquoi un compte est nécessaire (« tes quittances partent même quand ton ordinateur est éteint ») et « Se connecter »
+  Et après la connexion je reviens sur l'accueil de Gérer
   Et l'analyse reste accessible sans compte
 
 Scénario : premier accès connecté
@@ -137,7 +160,8 @@ Scénario : deux clics depuis un projet
     | Le prêt      | mensualité, fin du prêt                                   | analyse    |
     | Les charges  | taxe foncière, copropriété, assurance                     | analyse    |
     | La location  | loyer, charges, dépôt, jour du loyer, entrée du locataire | analyse / par défaut |
-  Et une seule ligne à remplir : « Ton locataire » (prénom, nom, e-mail) avec l'option « Pas encore loué »
+  Et une seule ligne à remplir : « Ton locataire » (prénom, nom, e-mail)
+  Et deux boutons : « C'est parti » et « Pas encore loué »
   Quand je saisis « Julie Martin, julie@exemple.fr » et clique « C'est parti »                # clic 2
   Alors le bien, le locataire et la location sont créés, statut « Location active »
   Et les échéances jusqu'à la fin du mois suivant sont générées
@@ -145,8 +169,8 @@ Scénario : deux clics depuis un projet
   Et l'instantané des entrées du projet est enregistré avec sa version de règles
 
 Scénario : pas encore loué
-  Quand je coche « Pas encore loué » puis « C'est parti »
-  Alors le bien est créé « Vacant », sans échéance
+  Quand je clique « Pas encore loué » (second bouton, sans case à cocher : un clic, pas deux)   # clic 2
+  Alors le bien est créé « Vacant », sans échéance ni locataire
   Et l'accueil propose « Ajouter le locataire » sur ce bien
 
 Scénario : valeurs par défaut
@@ -343,7 +367,8 @@ Scénario : export et suppression
   Quand je clique « Exporter mes données de gestion »
   Alors je reçois un fichier JSON de tous mes biens, locataires, locations, échéances, paiements et documents
   Quand je supprime mon compte
-  Alors toutes mes données de gestion sont supprimées
+  Alors l'export m'est proposé d'abord (les quittances émises sont des pièces à conserver)
+  Et toutes mes données de gestion sont supprimées
 
 Scénario : journaux
   Alors aucun journal ne contient de nom, d'e-mail, d'adresse ni de montant rattaché à une personne
@@ -485,8 +510,9 @@ P0 · Effort M
 Scénario : connexion
   Quand je clique « Connecter ma banque » et choisis ma banque dans la liste (recherche, logos)          # clic 1
   Alors je suis redirigé vers ma banque pour valider (authentification forte, hors Deklic)
-  Et au retour je choisis les comptes à suivre (tous cochés par défaut)
+  Et au retour Deklic lit tous les comptes autorisés, sans étape de choix (un compte se retire ensuite depuis la page Banque)
   Et Deklic affiche « On lit tes 13 derniers mois… » puis le résultat (G3-2)
+  Et le jour du loyer d'une location créée depuis la banque est le jour observé des virements, pas le 5 par défaut
 
 Scénario : consentement qui expire
   Étant donné un consentement valable jusqu'au 20/03
@@ -766,11 +792,11 @@ Scénario : CSV
 - **Vie privée** : hébergement UE ; minimisation ; journaux sans donnée personnelle ; export et suppression ; mentions « sous-traitant » dans les conditions d'utilisation ; opérations bancaires purgées à 13 mois.
 - **Accessibilité** : cibles de 44 px, contraste AA, navigation au clavier, statuts lisibles sans la couleur (texte + forme).
 - **Mobile** : toutes les actions de l'accueil et des loyers faisables au téléphone.
-- **Tests** : couverture 100 % du paquet de calcul pur et des règles ; tests d'API avec doubles ; un parcours Playwright par porte vérifiant le compte de clics ; courriels testés par instantané de contenu.
+- **Tests** : couverture 100 % du paquet de calcul pur et des règles ; tests d'API avec doubles ; un parcours Playwright par porte vérifiant le compte de clics ; courriels testés par instantané de contenu. Le job `e2e` ne sert aujourd'hui que le build statique : il devra aussi lancer l'API (`npm run dev:node -w apps/comptes` sur une base éphémère), sinon les parcours de Gérer ne peuvent pas tourner en CI.
 
 ## 7. Questions ouvertes (pour l'architecture, pas pour Pierre)
 
-1. Hébergement des données de gestion : dans `apps/comptes` (même origine, même base D1) ou un nouveau module servi par le worker Pages, et où tourne la tâche planifiée quotidienne (Worker avec déclencheur cron et accès à la même base).
+1. Hébergement des données de gestion : dans `apps/comptes` (même origine, même base D1) ou un nouveau module servi par le worker Pages, et où tourne la tâche planifiée quotidienne. **Recommandation** : l'API HTTP dans `apps/comptes` (même origine que le site, donc même cookie de session) et la tâche planifiée dans `apps/worker` (déjà déployé, accepte un déclencheur cron) avec un binding sur la même base D1 `deklic-comptes` ; le calcul pur dans un paquet partagé. À écrire en ADR au début de G1.
 2. Génération PDF côté serveur pour la pièce jointe (bibliothèque PDF pure JavaScript compatible Workers) et côté client pour l'aperçu (`@media print` existant) : un seul gabarit ?
 3. Saisie assistée d'adresse : réutiliser le géocodage de `apps/worker` (Géoplateforme) déjà en place.
 4. Source de l'IRL : série INSEE (identifiant à vérifier) récupérée chaque trimestre par l'Action « Référentiels » et publiée sur R2, comme l'usure.

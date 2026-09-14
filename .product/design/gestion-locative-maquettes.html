@@ -293,25 +293,81 @@
     width: auto;
     display: block;
   }
-  .seg {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    background: var(--bordure-douce);
-    border-radius: 999px;
-    padding: 4px;
-    font-size: 14px;
+  /* Deux sections dans le même menu (décision de Pierre) : chacune commence par son action de création. */
+  .nav a.creer {
+    color: var(--accent);
+  }
+  .nav a .esp {
+    width: 18px;
+    flex: none;
+  }
+  .nav a .tronque {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .nav a .pt,
+  .nav a .nombre {
+    margin-left: auto;
+  }
+  .nav a .nombre {
+    font-size: 12.5px;
     font-weight: 700;
+    color: var(--encre-4);
   }
-  .seg span {
-    text-align: center;
-    padding: 7px 0;
-    border-radius: 999px;
+  .app.seul {
+    grid-template-columns: 236px;
+    width: 236px;
+    min-height: 600px;
+  }
+  .inter {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 0;
+    border-top: 1px solid var(--bordure-douce);
+    font-size: 15px;
+  }
+  .inter:first-of-type {
+    border-top: 0;
+  }
+  .inter b {
+    display: block;
+  }
+  .inter small {
+    display: block;
     color: var(--encre-3);
+    font-size: 13px;
   }
-  .seg span.on {
-    background: var(--surface);
-    color: var(--encre);
-    box-shadow: 0 1px 3px rgba(35, 39, 47, 0.12);
+  .inter .bascule {
+    position: relative;
+    width: 46px;
+    height: 26px;
+    border-radius: 999px;
+    background: var(--accent);
+    flex: none;
+  }
+  .inter .bascule::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 23px;
+    width: 20px;
+    height: 20px;
+    border-radius: 999px;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(35, 39, 47, 0.25);
+  }
+  .inter .bascule.off {
+    background: var(--encre-4);
+  }
+  .inter .bascule.off::after {
+    left: 3px;
+  }
+  .inter .bascule.fige {
+    opacity: 0.45;
   }
   .nav {
     display: flex;
@@ -387,6 +443,11 @@
     gap: 10px;
     padding: 10px;
     border-top: 1px solid var(--bordure-douce);
+  }
+  .profil.on {
+    background: var(--accent-doux);
+    border-radius: var(--encart);
+    border-top-color: transparent;
   }
   .ini {
     width: 36px;
@@ -1183,23 +1244,31 @@
     overflow: hidden;
     box-shadow: 0 24px 60px -28px rgba(30, 38, 80, 0.45);
   }
+  /* Barre d'app de la coque responsive (BarreApp) : bouton de menu et logo ; le tiroir porte les deux sections. */
   .tel .haut {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding: 14px 18px 10px;
+    gap: 4px;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--bordure);
+    background: var(--surface);
   }
-  .tel .haut svg {
-    height: 18px;
+  .tel .haut .burger {
+    width: 44px;
+    height: 44px;
+    border-radius: 999px;
+    display: grid;
+    place-items: center;
+    color: var(--encre-2);
+  }
+  .tel .haut .burger svg {
+    width: 22px;
+    height: 22px;
+  }
+  .tel .haut .logo-tel svg {
+    height: 22px;
     width: auto;
-  }
-  .tel .seg {
-    font-size: 12.5px;
-    width: 150px;
-    padding: 3px;
-  }
-  .tel .seg span {
-    padding: 5px 0;
+    display: block;
   }
   .tel .corps {
     padding: 6px 18px 18px;
@@ -1223,39 +1292,8 @@
     grid-column: 2;
     justify-self: start;
   }
-  .tel .bas-nav {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    border-top: 1px solid var(--bordure);
-    background: var(--surface);
-    padding: 8px 6px 14px;
-  }
-  .tel .bas-nav span {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 3px;
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--encre-3);
-  }
-  .tel .bas-nav span.on {
-    color: var(--accent);
-  }
-  .tel .bas-nav svg {
-    width: 20px;
-    height: 20px;
-  }
-  .tel .bas-nav .rond {
-    width: 44px;
-    height: 44px;
-    border-radius: 999px;
-    background: var(--accent);
-    color: #fff;
-    display: grid;
-    place-items: center;
-    margin-top: -18px;
-    box-shadow: 0 6px 16px rgba(43, 75, 242, 0.35);
+  .tel .corps {
+    padding-bottom: 28px;
   }
 
   /* E-mails et quittance */
@@ -1547,8 +1585,8 @@
       <div>
         <h2>Trois portes, une seule question : d'où pars-tu ?</h2>
         <p class="note">
-          Le sélecteur Analyser · Gérer change tout le menu. Chaque porte commence par un seul
-          bouton.
+          Analyser et Gérer sont deux sections du même menu ; chacune commence par son action de
+          création, et Mon compte permet d'en masquer une. Chaque porte commence par un seul bouton.
         </p>
       </div>
     </div>
@@ -1745,12 +1783,15 @@
                       <div class="saisie focus">julie.martin@exemple.fr</div>
                     </div>
                   </div>
-                  <span class="coche"><span class="boite"></span>Pas encore loué</span>
+                  <p class="phrase" style="font-size: 13.5px; color: var(--encre-3)">
+                    Laisse vide si le bien n'est pas encore loué.
+                  </p>
                 </div>
               </div>
             </div>
             <div class="pied-action">
               <p>Ensuite, on s'occupe des quittances.</p>
+              <span class="btn s">Pas encore loué<span class="k clair">ou 2</span></span>
               <span class="btn p" style="padding: 0 30px">C'est parti<span class="k">2</span></span>
             </div>
           </main>
@@ -2188,8 +2229,8 @@
 
         <div class="tel" aria-label="Accueil au téléphone">
           <div class="haut">
-            <span data-icone></span>
-            <div class="seg"><span>Analyser</span><span class="on">Gérer</span></div>
+            <span class="burger"><i data-ic="menu"></i></span>
+            <span class="logo-tel" data-logo-tel></span>
           </div>
           <div class="corps">
             <div>
@@ -2224,18 +2265,13 @@
               </div>
             </div>
           </div>
-          <div class="bas-nav">
-            <span class="on"><i data-ic="maison"></i>Accueil</span>
-            <span><i data-ic="euro"></i>Loyers</span>
-            <span
-              ><b class="rond"><i data-ic="plus"></i></b
-            ></span>
-            <span><i data-ic="argent"></i>Argent</span>
-            <span><i data-ic="menu"></i>Plus</span>
-          </div>
         </div>
       </div>
     </div>
+    <p class="legende-ecran">
+      Au téléphone, le menu est le tiroir de la coque (bouton en haut à gauche) : il montre les deux
+      sections, sans barre d'onglets en bas.
+    </p>
   </section>
 
   <!-- E-mails -->
@@ -2347,6 +2383,97 @@
     </div>
   </section>
 
+  <!-- Mon menu -->
+  <section class="planche" id="mon-menu">
+    <div class="planche-tete">
+      <p class="surtitre">Mon compte · Mon menu</p>
+      <div>
+        <h2>Deux sections, et le droit d'en masquer une.</h2>
+        <p class="note">
+          Décision de Pierre : Analyser et Gérer vivent dans le même menu. Celui qui ne fait
+          qu'exploiter masque Analyser ; celui qui cherche encore masque Gérer. Au moins une section
+          reste, et les pages masquées restent accessibles par lien direct.
+        </p>
+      </div>
+    </div>
+    <div class="defile">
+      <div class="rang">
+        <div class="ecran">
+          <div class="url"><i data-ic="cadenas"></i>loupeprojet.pages.dev/compte</div>
+          <div class="app etroit">
+            <aside class="side" data-side="gerer" data-actif="compte" data-biens="oui"></aside>
+            <main class="main">
+              <div style="display: flex; align-items: center; gap: 16px">
+                <span class="ini" style="width: 52px; height: 52px; font-size: 18px">CR</span>
+                <div>
+                  <h3 class="h-ecran" style="font-size: 26px">Mon compte</h3>
+                  <p class="sous" style="margin-top: 0">Camille Roux</p>
+                </div>
+              </div>
+              <div class="carte">
+                <h4>Mon menu</h4>
+                <p class="phrase">Choisis ce que Deklic te montre.</p>
+                <div>
+                  <div class="inter">
+                    <span class="bascule"></span>
+                    <span
+                      ><b>Analyser</b><small>Des projets à étudier avant d'acheter.</small></span
+                    >
+                  </div>
+                  <div class="inter">
+                    <span class="bascule"></span>
+                    <span
+                      ><b>Gérer</b><small>Mes biens loués, mes loyers, mes quittances.</small></span
+                    >
+                  </div>
+                </div>
+                <p class="phrase" style="font-size: 13.5px; color: var(--encre-3)">
+                  Au moins une section reste affichée. Le réglage te suit sur tous tes appareils.
+                </p>
+              </div>
+              <div class="carte">
+                <h4>Profil</h4>
+                <div class="lignes">
+                  <div class="ligne">
+                    <span class="cle">E-mail</span><span class="val">camille@exemple.fr</span
+                    ><span></span>
+                  </div>
+                  <div class="ligne">
+                    <span class="cle">Nom</span><span class="val">Camille Roux</span><span></span>
+                  </div>
+                </div>
+              </div>
+            </main>
+          </div>
+        </div>
+        <div>
+          <div class="ecran">
+            <div class="url"><i data-ic="cadenas"></i>Analyser masqué</div>
+            <div class="app seul">
+              <aside
+                class="side"
+                data-side="gerer"
+                data-actif="accueil"
+                data-biens="oui"
+                data-masque="analyser"
+              ></aside>
+            </div>
+          </div>
+          <p class="legende-ecran">Un bailleur qui n'achète plus : Gérer seul, six lignes.</p>
+        </div>
+        <div>
+          <div class="ecran">
+            <div class="url"><i data-ic="cadenas"></i>Gérer masqué</div>
+            <div class="app seul">
+              <aside class="side" data-side="gerer" data-actif="projet" data-masque="gerer"></aside>
+            </div>
+          </div>
+          <p class="legende-ecran">Un acheteur en recherche : le menu d'aujourd'hui, à peu près.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <footer class="suite">
     <div class="bloc">
       <h3>Où lire la suite</h3>
@@ -2374,8 +2501,17 @@
           ><span>Reco : Gérer gratuit sans banque, synchronisation bancaire payante.</span>
         </li>
         <li>
-          <b>Le sélecteur Analyser · Gérer</b
-          ><span>Reco : en haut de la barre latérale, retenu d'une visite à l'autre.</span>
+          <b>Le menu — décidé</b
+          ><span
+            >Deux sections, Analyser et Gérer, dans le même menu ; « Mon menu » dans Mon compte pour
+            en masquer une.</span
+          >
+        </li>
+        <li>
+          <b>Revue critique</b
+          ><span
+            >Neuf corrections appliquées et sept propositions à trancher, dans la discovery.</span
+          >
         </li>
         <li><b>Import depuis Rentila</b><span>À tester sur tes exports.</span></li>
       </ul>
@@ -2427,6 +2563,9 @@
     bas: 'M6 9l6 6 6-6',
     cadenas: 'M6 11h12v10H6z M8.5 11V8a3.5 3.5 0 0 1 7 0v3',
     menu: 'M4 7h16 M4 12h16 M4 17h16',
+    colonnes: 'M4 4h16v16H4z M12 4v16',
+    info: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z M12 16v-5 M12 8h.01',
+    puzzle: 'M4 9h4V6a2 2 0 1 1 4 0v3h4v4h3a2 2 0 1 1 0 4h-3v4H4z',
   };
   const ic = (nom, style) =>
     '<svg class="i"' +
@@ -2435,7 +2574,13 @@
     TRACES[nom] +
     '"/></svg>';
 
-  const MENU = [
+  // Section Analyser : le menu d'aujourd'hui (projets récents, Comparer) sous une étiquette.
+  const PROJETS = [
+    ['projet', 'T2 · 38 m² · dépt 13', 'bon'],
+    ['projet-2', 'Studio · 24 m² · dépt 13', 'surv'],
+  ];
+  // Section Gérer : six lignes, les biens ne sont pas listés (la page Biens le fait).
+  const GERER = [
     ['accueil', 'maison', 'Accueil'],
     ['loyers', 'euro', 'Loyers'],
     ['biens', 'immeuble', 'Biens'],
@@ -2443,49 +2588,71 @@
     ['argent', 'argent', 'Argent'],
     ['banque', 'banque', 'Banque'],
   ];
-  const BIENS = [
-    ['T2 Lices', '', 'bon'],
-    ['Studio Baille', '', 'pb'],
-    ['Coloc Rouet', '2/3', 'bon'],
-    ['Parking Prado', '', 'creux'],
-  ];
+
+  const entree = (cle, actif, icone, libelle, suite) =>
+    '<a class="' +
+    (cle === actif ? 'on' : '') +
+    '">' +
+    ic(icone) +
+    libelle +
+    (suite || '') +
+    '</a>';
 
   function barreLaterale(el) {
     const actif = el.dataset.actif;
     const avecBiens = el.dataset.biens === 'oui';
-    const nav = MENU.map(([cle, icone, libelle]) => {
-      const compte = cle === 'loyers' && avecBiens ? '<span class="compte">1</span>' : '';
-      return (
-        '<a class="' + (cle === actif ? 'on' : '') + '">' + ic(icone) + libelle + compte + '</a>'
-      );
+    const masque = el.dataset.masque || '';
+    const projets = PROJETS.map(
+      ([cle, nom, pt]) =>
+        '<a class="' +
+        (cle === actif ? 'on' : '') +
+        '"><span class="esp"></span><span class="tronque">' +
+        nom +
+        '</span><span class="pt ' +
+        pt +
+        '"></span></a>',
+    ).join('');
+    const analyser =
+      masque === 'analyser'
+        ? ''
+        : '<nav class="nav" aria-label="Analyser"><p class="etiquette">Analyser</p>' +
+          '<a class="creer">' +
+          ic('plus') +
+          'Nouveau projet</a>' +
+          projets +
+          entree('comparer', actif, 'colonnes', 'Comparer') +
+          '</nav>';
+    const lignesGerer = GERER.map(([cle, icone, libelle]) => {
+      let suite = '';
+      if (cle === 'loyers' && avecBiens) suite = '<span class="compte">1</span>';
+      if (cle === 'biens' && avecBiens) suite = '<span class="nombre">4</span>';
+      return entree(cle, actif, icone, libelle, suite);
     }).join('');
-    const biens = avecBiens
-      ? '<div class="mes-biens"><p class="etiquette">Mes biens</p>' +
-        BIENS.map(
-          ([nom, detail, pt]) =>
-            '<a><span class="pt ' +
-            pt +
-            '"></span>' +
-            nom +
-            (detail ? '<small>' + detail + '</small>' : '') +
-            '</a>',
-        ).join('') +
-        '</div>'
-      : '';
+    const gerer =
+      masque === 'gerer'
+        ? ''
+        : '<nav class="nav" aria-label="Gérer"><p class="etiquette">Gérer</p>' +
+          '<a class="creer' +
+          (actif === 'ajouter' ? ' on' : '') +
+          '">' +
+          ic('plus') +
+          'Ajouter un bien</a>' +
+          lignesGerer +
+          '</nav>';
     el.innerHTML =
       '<div class="logo">' +
       LOGO +
       '</div>' +
-      '<div class="seg" role="group" aria-label="Espace"><span>Analyser</span><span class="on">Gérer</span></div>' +
-      '<span class="btn p plein">' +
-      ic('plus') +
-      'Ajouter un bien</span>' +
-      '<nav class="nav">' +
-      nav +
+      analyser +
+      gerer +
+      '<nav class="nav" aria-label="Aide">' +
+      entree('methode', actif, 'info', "Comment c'est calculé") +
+      entree('extension', actif, 'puzzle', 'Extension navigateur') +
       '</nav>' +
-      biens +
       '<div class="ressort"></div>' +
-      '<div class="profil"><span class="ini">CR</span><span><b>Camille Roux</b><small>Mon compte</small></span></div>';
+      '<div class="profil' +
+      (actif === 'compte' ? ' on' : '') +
+      '"><span class="ini">CR</span><span><b>Camille Roux</b><small>Mon compte</small></span></div>';
   }
 
   document.querySelectorAll('[data-side]').forEach(barreLaterale);
@@ -2503,5 +2670,8 @@
   });
   document.querySelectorAll('[data-icone]').forEach((el) => {
     el.outerHTML = ICONE;
+  });
+  document.querySelectorAll('[data-logo-tel]').forEach((el) => {
+    el.innerHTML = LOGO;
   });
 </script>

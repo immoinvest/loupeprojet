@@ -14,40 +14,63 @@ Ce qui distingue Deklic de Rentila à l'écran : aucun onglet dans les formulair
 
 ## Navigation
 
-### Sélecteur « Analyser · Gérer »
+### Deux sections dans un seul menu
 
-Sous le logo, un sélecteur à deux segments. Il change **tout le menu** et le bouton principal ; le choix est retenu.
+Décision de Pierre (14/09/2026) : pas de sélecteur qui cache un des deux univers. La barre latérale montre **deux sections**, « Analyser » et « Gérer », l'une sous l'autre ; on passe de l'une à l'autre sans changer de mode. Chaque section commence par son action de création (lien accentué avec un « + ») : c'est elle qui remplace le grand bouton « Nouveau projet » d'aujourd'hui.
 
 ```
-┌──────────────────────────┐
-│ Deklic                   │
-│ ┌──────────┬───────────┐ │
-│ │ Analyser │ ▌Gérer    │ │
-│ └──────────┴───────────┘ │
-│ [ + Ajouter un bien    ] │
-│                          │
-│ ⌂  Accueil               │
-│ €  Loyers            •2  │   pastille = loyers en retard ou à confirmer
-│ ▢  Biens                 │
-│ ☺  Locataires            │
-│ ↗  Argent                │
-│ ⇄  Banque     (G3)       │
-│                          │
-│ MES BIENS                │
-│ T2 Lices            ●    │   point : reçu / attendu / en retard / vacant
-│ Coloc Rouet    2/3  ●    │
-│                          │
-│ (profil)                 │
-└──────────────────────────┘
+┌────────────────────────────┐
+│ Deklic                     │
+│                            │
+│ ANALYSER                   │
+│ ＋ Nouveau projet          │
+│    T2 · 38 m² · dépt 13 ●  │   les 5 projets les plus récents, point = feu cash-flow
+│    Studio · 24 m²       ●  │
+│    Tous mes projets · 8    │   seulement au-delà de 5
+│ ⫼  Comparer                │
+│                            │
+│ GÉRER                      │
+│ ＋ Ajouter un bien         │
+│ ⌂  Accueil                 │
+│ €  Loyers            •1    │   pastille : loyers en retard ou à confirmer
+│ ▢  Biens             4     │
+│ ☺  Locataires              │
+│ ↗  Argent                  │
+│ ⇄  Banque                  │   à partir de G3
+│                            │
+│ ⓘ  Comment c'est calculé   │
+│ ⧉  Extension navigateur    │
+│ [ Installer l'application ]│
+│ (profil)                   │
+└────────────────────────────┘
 ```
 
-- « Analyser » garde le menu actuel (Nouveau projet, Mes projets, Comparer, aide).
-- La liste « Mes biens » reprend le motif de « Mes projets » (nom + point d'état) pour que les deux espaces se ressemblent.
-- **Téléphone** : barre du bas à 5 entrées : Accueil, Loyers, **+** (ajouter), Argent, Plus ; le sélecteur Analyser · Gérer passe dans l'en-tête.
+- Les biens ne sont **pas** listés dans le menu (la page Biens le fait) : Gérer tient en six lignes et la pastille de Loyers porte l'urgence.
+- Projets : les cinq plus récents, puis « Tous mes projets · N ». La fiche de backlog 11 (menu fixe, plus étroit, compte visible en bas) va dans le même sens ; les deux se feront ensemble.
+- Ordre fixe : Analyser au-dessus de Gérer, parce que c'est l'entrée du produit. Celui qui ne fait plus qu'exploiter masque Analyser (voir « Mon menu »).
+- **Téléphone et tablette** (< 1 024 px) : le menu est déjà un tiroir (ADR-R1 de `responsive`) ; il montre les mêmes deux sections. Pas de barre d'onglets en bas : ce serait une seconde navigation à maintenir, écartée par l'ADR-R1.
+
+### « Mon menu » dans Mon compte
+
+Carte « Mon menu » sur la page Mon compte, entre « Profil » et « Connexion » :
+
+```
+Mon menu
+Choisis ce que Deklic te montre.
+[●  ]  Analyser · des projets à étudier
+[●  ]  Gérer · mes biens loués
+Au moins une section reste affichée.
+```
+
+- Par défaut, les deux. Une section masquée disparaît du menu ; ses liens croisés aussi (« J'ai acheté ce bien » dans un projet, « Analyser ce bien » dans une fiche bien).
+- Ses pages restent accessibles par lien direct ; on y voit alors un bandeau discret « Cette section est masquée dans ton menu · L'afficher ».
+- Impossible de masquer les deux : quand une section est seule, son interrupteur est inactif.
+- Réglage enregistré avec le compte (même menu sur tous les appareils) ; sans compte, sur l'appareil.
+- Le logo mène à la première section affichée.
 
 ### Sans compte
 
-`/gerer` affiche une seule carte : « Tes loyers suivis, tes quittances envoyées toutes seules. » · « Pour envoyer tes quittances même quand ton ordinateur est éteint, Deklic garde tes biens sur ses serveurs en Europe. Il faut un compte. » · bouton « Se connecter » · lien « Continuer à analyser ».
+La section Gérer se réduit à une ligne, « Gérer mes biens loués », qui ouvre une page d'une carte : « Tes loyers suivis, tes quittances envoyées toutes seules. » · « Pour envoyer tes quittances même quand ton ordinateur est éteint, Deklic garde tes biens sur ses serveurs en Europe. Il faut un compte. » · bouton « Se connecter » · lien « Continuer à analyser ». Connexion faite, on revient sur l'accueil de Gérer.
 
 ## Les trois portes (accueil vide)
 
@@ -81,16 +104,17 @@ Tout vient de ton analyse du 12 septembre. Touche une ligne pour la changer.
 │                     [analyse]  │  ┌ Ton locataire ─────────────────────────┐
 └────────────────────────────────┘  │ Prénom Nom      [Julie Martin        ] │
 ┌ Les charges ──────────────────┐  │ E-mail          [julie@exemple.fr    ] │
-│ Taxe foncière 720 €/an         │  │ ☐ Pas encore loué                       │
+│ Taxe foncière 720 €/an         │  │ (laisse vide si le bien n'est pas loué) │
 │ Copropriété 90 €/mois          │  └────────────────────────────────────────┘
 │ Assurance 12 €/mois  [analyse] │
 └────────────────────────────────┘
-                         Ensuite, on s'occupe des quittances.   [ C'est parti ]
+        Ensuite, on s'occupe des quittances.   [ Pas encore loué ]  [ C'est parti ]
 ```
 
 - Les lignes « par défaut » sont en encre secondaire ; toucher une ligne ouvre l'édition **sur place** (pas de nouvel écran).
 - « Ensuite, on s'occupe des quittances » : la seule phrase d'explication, à côté du bouton.
 - **Clic 2** : « C'est parti » → écran de confirmation bref (animation du point qui passe au vert) → accueil avec le bien.
+- « Pas encore loué » est un **second bouton**, pas une case à cocher : il crée le bien vacant, en un clic lui aussi (une case plus un bouton auraient fait trois clics).
 
 ## Porte 2 : « Connecter ma banque » (G3)
 
@@ -238,4 +262,4 @@ Cibles de 44 px ; contraste AA ; statut = couleur + mot + forme du point (plein,
 ## Composants à réutiliser ou créer
 
 - **Réutilisés** : coque et barre latérale, cartes, badge de provenance (nouvelles valeurs `analyse`, `banque`, `par défaut`), point de feu, barres de flux, champ d'adresse du formulaire Vérifier.
-- **Nouveaux** : sélecteur de segments (Analyser · Gérer), carte porte, ligne de loyer avec action principale, frise de 12 mois, carte « À faire », carte d'opération à classer, bandeau d'annulation.
+- **Nouveaux** : sections du menu avec action de création, interrupteurs de « Mon menu », bandeau « section masquée », carte porte, ligne de loyer avec action principale, frise de 12 mois, carte « À faire », carte d'opération à classer, bandeau d'annulation.
