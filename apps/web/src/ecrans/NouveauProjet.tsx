@@ -11,6 +11,7 @@ import {
   type CaptureImportee,
   type SaisieProjet,
 } from '@/annonces';
+import { annonceLue } from '@/annonces/fiche';
 import { Chapo, Page, TitrePage } from '@/composants/mise-en-page';
 import { Bouton, Carte, Pastille } from '@/composants/ui';
 import { useClientWorker } from '@/coque/ClientWorker';
@@ -112,9 +113,15 @@ export function NouveauProjet(): JSX.Element {
     const enrichi = await enrichirSaisie(saisie, client);
     const nom = nomDuProjet(saisie);
     const source = construireProjet(saisie, 'a-remplacer', enrichi);
+    // Photos et fiche de l'annonce lue suivent le projet ; rien en saisie manuelle.
+    const annonce =
+      manuel || importee === null
+        ? undefined
+        : annonceLue(importee.photos, importee.fiche ?? {}, new Date().toISOString());
     const enregistre = creer({
       nom,
       source,
+      ...(annonce === undefined ? {} : { annonce }),
       ...(options.visiteFaite
         ? { visite: { faite: true, date: new Date().toISOString(), reponses: {} } }
         : {}),

@@ -1,3 +1,4 @@
+import { FicheAnnonceSchema, PhotosCaptureSchema } from '@loupe/capture';
 import { ProjetSchema, migrerProjet, projetExemple, type ProjetEntree } from '@loupe/moteur';
 import { z } from 'zod';
 
@@ -61,6 +62,17 @@ export const VisiteSchema = z.object({
 });
 export type Visite = z.infer<typeof VisiteSchema>;
 
+/**
+ * L'annonce lue quand le projet a été créé depuis un lien : adresses des photos (sur le portail,
+ * jamais copiées), fiche du bien et date de lecture. Ni texte, ni donnée sur le vendeur.
+ */
+export const AnnonceEnregistreeSchema = z.object({
+  photos: PhotosCaptureSchema.optional(),
+  fiche: FicheAnnonceSchema,
+  lueLe: z.string(),
+});
+export type AnnonceEnregistree = z.infer<typeof AnnonceEnregistreeSchema>;
+
 export const ProjetEnregistreSchema = z.object({
   id: z.string().min(1),
   nom: z.string().min(1),
@@ -70,6 +82,8 @@ export const ProjetEnregistreSchema = z.object({
   adresse: AdresseBienSchema.optional(),
   /** Absente : visite non faite, aucune réponse (projets enregistrés avant cette feature). */
   visite: VisiteSchema.optional(),
+  /** Absente : projet saisi à la main, ou créé avant la lecture enrichie des annonces. */
+  annonce: AnnonceEnregistreeSchema.optional(),
   projet: ProjetSchema,
 });
 export type ProjetEnregistre = z.infer<typeof ProjetEnregistreSchema>;
@@ -114,6 +128,8 @@ export interface OptionsCreation {
   /** Adresse exacte et visite reprises d'un projet reçu par lien, ou visite déjà faite à la création. */
   readonly adresse?: AdresseBien;
   readonly visite?: Visite;
+  /** Photos et fiche de l'annonce lue ; écartées si elles ne passent pas la validation. */
+  readonly annonce?: AnnonceEnregistree;
   readonly maintenant?: () => string;
   readonly genererId?: () => string;
 }
@@ -125,6 +141,9 @@ export function creerProjet(options: OptionsCreation = {}): ProjetEnregistre {
   const source = options.source ?? projetExemple;
   const id = genererId();
   const date = maintenant();
+  // Une annonce invalide rendrait toute la liste illisible au prochain chargement : on la laisse de côté.
+  const annonce =
+    options.annonce === undefined ? null : AnnonceEnregistreeSchema.safeParse(options.annonce);
   return {
     id,
     nom: options.nom ?? nomParDefaut(source),
@@ -133,6 +152,7 @@ export function creerProjet(options: OptionsCreation = {}): ProjetEnregistre {
     modifieLe: date,
     ...(options.adresse === undefined ? {} : { adresse: options.adresse }),
     ...(options.visite === undefined ? {} : { visite: options.visite }),
+    ...(annonce?.success === true ? { annonce: annonce.data } : {}),
     projet: ProjetSchema.parse({ ...source, id }),
   };
 }

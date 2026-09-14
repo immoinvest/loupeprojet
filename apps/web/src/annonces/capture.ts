@@ -1,6 +1,13 @@
-import { captureDepuisHash, resoudreAnnonce, type Capture, type ModeCapture } from '@loupe/capture';
+import {
+  captureDepuisHash,
+  resoudreAnnonce,
+  type Capture,
+  type FicheAnnonce,
+  type ModeCapture,
+} from '@loupe/capture';
 
 import { extraireChamps, type ChampsExtraits } from './extraire';
+import { exterieurDepuis, ficheDepuisCapture, honorairesAcquereur } from './fiche';
 import type { AnnonceResolue } from './resoudre';
 
 /** Ce que l'écran Nouveau projet reçoit de l'extension (lecture automatique ou clic) ou du bouton-favori. */
@@ -13,6 +20,10 @@ export interface CaptureImportee {
   /** Texte de l'annonce, gardé en mémoire le temps de compléter la lecture ; jamais enregistré. */
   readonly description?: string | undefined;
   readonly mode: ModeCapture;
+  /** Adresses des photos de l'annonce, sur le portail. */
+  readonly photos?: readonly string[] | undefined;
+  /** Ce que l'annonce décrit sans que le calcul l'utilise ; gardé avec le projet. */
+  readonly fiche?: FicheAnnonce | undefined;
 }
 
 export type LectureFragment =
@@ -47,6 +58,9 @@ export function champsStructures(capture: Capture): ChampsExtraits {
     ...si('lotsCopro', capture.lotsCopro),
     ...si('coproEnProcedure', capture.coproEnProcedure),
     ...si('meuble', capture.meuble),
+    ...si('etat', capture.etat),
+    ...si('exterieur', exterieurDepuis(capture)),
+    ...si('honorairesAgence', honorairesAcquereur(capture)),
   };
 }
 
@@ -78,6 +92,8 @@ export function importerCapture(capture: Capture): CaptureImportee {
     champs: champsDepuisCapture(capture),
     description: capture.description,
     mode: capture.mode ?? 'extension',
+    photos: capture.photos,
+    fiche: ficheDepuisCapture(capture),
   };
 }
 
