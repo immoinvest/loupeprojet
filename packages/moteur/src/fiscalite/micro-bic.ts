@@ -1,14 +1,17 @@
 import { SANS_STOCKS, construireAnnee, eligibiliteMicro, finaliserRegime } from './commun-regime';
 import type { ContexteFiscal, ResultatRegime } from './types';
 
-/** Micro-BIC : abattement forfaitaire, pas de charge déductible, pas de déficit possible. */
+/**
+ * Micro-BIC : abattement forfaitaire sur les recettes encaissées (forfaits de charges compris), pas de
+ * charge déductible, pas de déficit possible. Meublé de tourisme non classé (loi du 19/11/2024) :
+ * abattement et plafond réduits.
+ */
 export function projeterMicroBic(ctx: ContexteFiscal): ResultatRegime {
   const { projet, cashflow, regles } = ctx;
   const { microBic } = regles.fiscalite;
   const { tmi, psBic } = projet.hypotheses.fiscalite;
-  const tourismeNonClasse =
-    cashflow.recettes.mode === 'courte_duree' &&
-    projet.hypotheses.location.courteDuree?.tourismeClasse !== true;
+  const { location } = projet.hypotheses;
+  const tourismeNonClasse = location.mode === 'courte_duree' && !location.tourismeClasse;
   const abattement = tourismeNonClasse ? microBic.abattementTourismeNonClasse : microBic.abattement;
   const plafond = tourismeNonClasse ? microBic.plafondTourismeNonClasse : microBic.plafond;
 

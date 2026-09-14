@@ -15,10 +15,22 @@ export const REGIMES: Readonly<Record<Regime, string>> = {
   nu_reel: 'Nu au réel',
 };
 
+/** Le type d'exploitation, en minuscules, pour une phrase (« loyer …, colocation »). */
 export const MODES: Readonly<Record<ModeLocation, string>> = {
-  meuble_lld: 'meublé longue durée',
   nu: 'location nue',
+  meuble: 'meublé longue durée',
+  colocation: 'colocation',
   courte_duree: 'courte durée',
+  moyenne_duree: 'moyenne durée',
+};
+
+/** Le type d'exploitation, en titre (boutons du sélecteur, titre de la carte « La location »). */
+export const TYPES_LOCATION: Readonly<Record<ModeLocation, string>> = {
+  nu: 'Nue',
+  meuble: 'Meublée',
+  colocation: 'Colocation',
+  courte_duree: 'Courte durée',
+  moyenne_duree: 'Moyenne durée',
 };
 
 export const SCENARIOS: Readonly<Record<CodeScenario, string>> = {

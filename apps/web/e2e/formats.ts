@@ -185,6 +185,7 @@ export function ecransDeReference({
     },
     // Le projet d'exemple n'a pas d'adresse : confiance et repère de commune, sans appel au Worker.
     { nom: 'Estimation sans adresse', chemin: `${projet}/adresse` },
+    { nom: 'Financement', chemin: `${projet}/financement` },
     { nom: 'Hypothèses', chemin: `${projet}/hypotheses` },
     { nom: 'Fiscalité', chemin: `${projet}/fiscalite` },
     { nom: 'Revente', chemin: `${projet}/revente` },
@@ -201,6 +202,8 @@ export function ecransDeReference({
     { nom: 'Comparer', chemin: '/comparer' },
     { nom: 'Méthode', chemin: '/methode' },
     { nom: 'Extension', chemin: '/extension' },
+    { nom: 'Simulateur de prêt', chemin: '/simulateur-pret' },
+    { nom: 'Simulation imprimée', chemin: '/simulateur-pret/imprimer' },
     { nom: 'Projet partagé', chemin: lienPartage },
     { nom: "Aperçu d'impression", chemin: `${projet}/imprimer` },
     { nom: 'Gérer (sans compte)', chemin: '/gerer' },

@@ -1,4 +1,4 @@
-import type { Resultats } from '@loupe/moteur';
+import { loyerMensuelHc, vacanceSemaines, type CodeCharge, type Resultats } from '@loupe/moteur';
 
 import { cascadeAutofinancement, multipleSurApport } from '@/analyses/rapport';
 import { euros, nombre, pourcentage, pourcentageSigne } from '@/formatage/nombres';
@@ -16,6 +16,10 @@ export const EXPLICATIONS = {
     "Valeur estimée à la revente, moins l'agence, le capital restant dû, l'indemnité de remboursement anticipé et l'impôt sur la plus-value. Depuis 2025, les amortissements du meublé au réel sont réintégrés dans la plus-value.",
   leviers:
     'Le prix de négociation est celui qui met le cash-flow à zéro avec vos hypothèses. La colocation majore le loyer total de 35 % et compte un mois de vacance par an.',
+  financement:
+    "Mensualité constante sur le taux nominal, assurance calculée sur le capital emprunté. Le TAEG ajoute les frais de dossier et la garantie, puis se compare au taux d'usure. Le coût total du crédit additionne intérêts, assurance et frais bancaires sur toute la durée.",
+  couverture:
+    "Mensualité assurance comprise divisée par le loyer hors charges. La banque compte 70 % des loyers comme revenu, le reste absorbant charges et mois vides : sous 70 %, le loyer porte le crédit dans sa propre lecture. Deklic ne demande pas vos revenus ; l'effort bancaire, c'est elle qui le calculera.",
 } as const;
 
 /*
@@ -25,6 +29,22 @@ export const EXPLICATIONS = {
 
 const CHARGES =
   'taxe foncière, copropriété, assurance propriétaire, comptable, CFE, gestion, entretien';
+
+/** Les charges propres au type de location, nommées seulement quand le projet en paie. */
+const CHARGES_DU_TYPE: readonly (readonly [CodeCharge, string])[] = [
+  ['conciergerie', 'conciergerie'],
+  ['plateforme', 'commission de plateforme'],
+  ['menage', 'ménage'],
+  ['energie', 'énergie'],
+  ['internet', 'internet'],
+];
+
+function charges(r: Resultats): string {
+  const payees = CHARGES_DU_TYPE.filter(([code]) =>
+    r.cashflow.charges.some((l) => l.code === code && l.annuel > 0),
+  ).map(([, libelle]) => libelle);
+  return payees.length === 0 ? CHARGES : `${CHARGES}, ${payees.join(', ')}`;
+}
 
 /** « meublé micro-BIC », « nu au réel » : seule l'initiale passe en minuscule, le sigle reste. */
 function enMinuscule(libelle: string): string {
@@ -61,13 +81,11 @@ export function explicationPrix(r: Resultats): string {
 
 export function explicationAutofinancement(r: Resultats): string {
   const c = cascadeAutofinancement(r);
-  const semaines = r.projet.hypotheses.location.vacanceSemaines;
+  const semaines = vacanceSemaines(r.projet.hypotheses.location);
+  const recuperees =
+    c.recuperees > 0 ? `, plus ${euros(c.recuperees)} de forfaits et de ménage facturés` : '';
   const enPlus =
-    r.cashflow.recettes.courteDuree !== null
-      ? `, le ménage et la conciergerie (${euros(c.fraisCourteDuree)})`
-      : c.vacance > 0
-        ? ` et ${nombre(semaines)} semaines sans locataire (${euros(c.vacance)})`
-        : '';
+    c.vacance > 0 ? ` et ${nombre(semaines)} semaines sans locataire (${euros(c.vacance)})` : '';
   const reste =
     c.apresCharges < 0
       ? `Il manque ${euros(-c.apresCharges)} avant impôt.`
@@ -76,7 +94,7 @@ export function explicationAutofinancement(r: Resultats): string {
     c.impot > 0
       ? `L'impôt du ${regime(r)} coûte en moyenne ${euros(c.impot)} par mois sur ${annees(r)} ans.`
       : `Au ${regime(r)}, l'impôt est nul sur ${annees(r)} ans.`;
-  return `Chaque mois, le loyer de ${euros(c.loyer)} paie d'abord le crédit et l'assurance (${euros(c.credit)}), puis les charges : ${CHARGES} (${euros(c.charges)})${enPlus}. ${reste} ${impot} C'est ce que les annonces oublient.`;
+  return `Chaque mois, le loyer de ${euros(c.loyer)}${recuperees} paie d'abord le crédit et l'assurance (${euros(c.credit)}), puis les charges : ${charges(r)} (${euros(c.charges)})${enPlus}. ${reste} ${impot} C'est ce que les annonces oublient.`;
 }
 
 export function explicationCouverture(r: Resultats): string {
@@ -86,7 +104,7 @@ export function explicationCouverture(r: Resultats): string {
     t <= 1
       ? "Sous 100 %, le loyer paie le crédit ; restent ensuite les charges et l'impôt."
       : 'Au-dessus de 100 %, le loyer ne couvre même pas le crédit.';
-  return `Taux de couverture : la mensualité, assurance comprise (${euros(r.financement.mensualiteTotale)}), représente ${pourcentage(t, 0)} du loyer (${euros(r.projet.hypotheses.location.loyerHc)}). ${suite}`;
+  return `Taux de couverture : la mensualité, assurance comprise (${euros(r.financement.mensualiteTotale)}), représente ${pourcentage(t, 0)} du loyer (${euros(loyerMensuelHc(r.projet.hypotheses.location))}). ${suite}`;
 }
 
 export function explicationEffort(r: Resultats): string {
@@ -100,9 +118,9 @@ export function explicationEffort(r: Resultats): string {
 export function explicationPointMort(r: Resultats): string {
   const pm = r.cashflow.pointMort;
   if (pm === null) {
-    return "En courte durée, pas de loyer d'équilibre : ce sont le prix de la nuit et le taux d'occupation qui font le cash-flow.";
+    return "En courte durée, pas de loyer d'équilibre : ce sont le prix de la nuit et les nuits louées par mois qui font le cash-flow.";
   }
-  const vise = r.projet.hypotheses.location.loyerHc;
+  const vise = loyerMensuelHc(r.projet.hypotheses.location);
   const position =
     pm > vise
       ? `contre ${euros(vise)} visés aujourd'hui : il manque ${euros(pm - vise)} par mois.`
@@ -130,12 +148,11 @@ export function explicationRendement(r: Resultats, quel: 'brut' | 'net' | 'netNe
     case 'brut':
       return `Loyers annuels hors charges ÷ coût total (prix, travaux et frais d'acquisition) : ${euros(c.recettes.loyersBruts)} ÷ ${cout} = ${pourcentage(brut)}. C'est le chiffre des annonces et des sites : il ignore la vacance et toutes les charges.`;
     case 'net': {
-      const cd = c.recettes.courteDuree;
       const retire =
-        cd === null
-          ? `la vacance (${euros(c.recettes.vacance)})`
-          : `le ménage et la conciergerie (${euros(cd.menage + cd.conciergerie)})`;
-      return `Loyers moins ${retire} et toutes les charges (${euros(c.chargesAnnuelles)} : ${CHARGES}), ÷ coût total : ${euros(netAnnuel)} ÷ ${cout} = ${pourcentage(net)}. C'est lui que juge le feu « Rendement ».`;
+        r.projet.hypotheses.location.mode === 'courte_duree'
+          ? 'les nuits non louées (déjà hors des recettes)'
+          : `la vacance (${euros(c.recettes.vacance)})`;
+      return `Loyers moins ${retire} et toutes les charges (${euros(c.chargesAnnuelles)} : ${charges(r)}), ÷ coût total : ${euros(netAnnuel)} ÷ ${cout} = ${pourcentage(net)}. C'est lui que juge le feu « Rendement ».`;
     }
     case 'netNet': {
       const banque = annee1(r.financement.parAnnee, (a) => a.interets + a.assurance);
@@ -150,16 +167,18 @@ export function explicationFiscalite(r: Resultats): string {
   const retenu = f.regimes[f.retenu];
   const n = annees(r);
   let moinsCher = retenu;
-  for (const x of Object.values(f.regimes)) {
-    if (x.regime !== f.retenu && (moinsCher === retenu || x.impotTotal < moinsCher.impotTotal)) {
-      moinsCher = x;
-    }
+  // Seuls les régimes possibles pour ce type de location se comparent.
+  const autres = Object.values(f.regimes).filter(
+    (x) => x.regime !== f.retenu && f.compatibles.includes(x.regime),
+  );
+  for (const x of autres) {
+    if (moinsCher === retenu || x.impotTotal < moinsCher.impotTotal) moinsCher = x;
   }
   const total =
     retenu.impotTotal === 0
       ? `Sur ${n} ans, le ${regime(r)} ne coûte aucun impôt.`
       : `Sur ${n} ans, le ${regime(r)} coûte ${euros(retenu.impotTotal)} d'impôt.`;
-  return `${total} ${explicationRegime(retenu, r.projet.hypotheses.revente.annees)} Le moins cher des trois autres régimes est le ${enMinuscule(REGIMES[moinsCher.regime])} (${euros(moinsCher.impotTotal)}) ; l'onglet Fiscalité les compare année par année.`;
+  return `${total} ${explicationRegime(retenu, r.projet.hypotheses.revente.annees)} ${autres.length === 1 ? "L'autre régime possible est le" : 'Le moins cher des trois autres régimes est le'} ${enMinuscule(REGIMES[moinsCher.regime])} (${euros(moinsCher.impotTotal)}) ; l'onglet Fiscalité les compare année par année.`;
 }
 
 export function explicationRevente(r: Resultats): string {

@@ -21,6 +21,7 @@ import { Comparer } from './ecrans/Comparer';
 import { Compte } from './ecrans/Compte';
 import { Connexion } from './ecrans/Connexion';
 import { Extension } from './ecrans/Extension';
+import { Financement } from './ecrans/Financement';
 import { Fiscalite } from './ecrans/Fiscalite';
 import { AjouterMain } from './ecrans/gerer/AjouterMain';
 import { Gerer } from './ecrans/gerer/Gerer';
@@ -33,6 +34,8 @@ import { NouveauProjet } from './ecrans/NouveauProjet';
 import { Partage } from './ecrans/Partage';
 import { Rapport } from './ecrans/Rapport';
 import { Revente } from './ecrans/Revente';
+import { SimulateurImprimer } from './ecrans/SimulateurImprimer';
+import { SimulateurPret } from './ecrans/SimulateurPret';
 import { Visite } from './ecrans/Visite';
 import { Adresse } from './ecrans/Adresse';
 import { ProjetsProvider } from './stockage/ProjetsContext';
@@ -41,6 +44,7 @@ export const routes: RouteObject[] = [
   // Hors de la coque : la page de connexion classique, centrée, et le document imprimable.
   { path: 'connexion', element: <Connexion /> },
   { path: 'projets/:id/imprimer', element: <Imprimer /> },
+  { path: 'simulateur-pret/imprimer', element: <SimulateurImprimer /> },
   {
     element: <AppLayout />,
     children: [
@@ -52,6 +56,7 @@ export const routes: RouteObject[] = [
         element: <ProjetLayout />,
         children: [
           { index: true, element: <Rapport /> },
+          { path: 'financement', element: <Financement /> },
           { path: 'hypotheses', element: <Hypotheses /> },
           { path: 'fiscalite', element: <Fiscalite /> },
           { path: 'revente', element: <Revente /> },
@@ -65,6 +70,7 @@ export const routes: RouteObject[] = [
       { path: 'compte', element: <Compte /> },
       { path: 'partage', element: <Partage /> },
       { path: 'comparer', element: <Comparer /> },
+      { path: 'simulateur-pret', element: <SimulateurPret /> },
       { path: 'methode', element: <Methode /> },
       { path: 'extension', element: <Extension /> },
       {

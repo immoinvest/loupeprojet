@@ -38,18 +38,14 @@ function projetComplet(): ProjetEnregistre {
         pret: { ...projetExemple.hypotheses.pret, differeTotalMois: 6, differePartielMois: 6 },
         location: {
           mode: 'courte_duree',
-          loyerHc: 980,
-          loyerHcNu: 850,
-          chargesLocataire: 60,
-          vacanceSemaines: 3,
-          gestionTaux: 0.07,
-          courteDuree: {
-            nuitee: 85,
-            tauxOccupation: 0.62,
-            fraisMenageParNuit: 12,
-            conciergerieTaux: 0.2,
-            tourismeClasse: true,
-          },
+          nuitee: 85,
+          nuiteesParMois: 18.9,
+          dureeSejourNuits: 3.5,
+          menageFactureParSejour: 30,
+          menageCoutParSejour: 45,
+          plateformeTaux: 0.03,
+          conciergerieTaux: 0.2,
+          tourismeClasse: true,
         },
       },
     },
@@ -238,7 +234,7 @@ describe('Bouton Partager', () => {
       'title',
       AVERTISSEMENT_PARTAGE,
     );
-    expect(AVERTISSEMENT_PARTAGE).toContain('revenus et apport');
+    expect(AVERTISSEMENT_PARTAGE).toContain("apport et tranche d'imposition");
     await utilisateur.click(screen.getByRole('button', { name: 'Partager' }));
     expect(await screen.findByRole('button', { name: 'Lien copié' })).toBeInTheDocument();
     const lien = await navigator.clipboard.readText();

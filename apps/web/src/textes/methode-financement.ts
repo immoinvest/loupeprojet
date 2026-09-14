@@ -81,13 +81,15 @@ export function sectionCredit(regles: Regles): SectionMethode {
   return {
     code: 'credit',
     titre: 'Le crédit',
-    resume: 'Mensualité constante, coût complet du crédit, effort tel que la banque le calcule.',
+    resume:
+      'Mensualité constante, coût complet du crédit, et la part du loyer que prend le crédit.',
     etapes: [
       "Emprunt = prix retenu + travaux + frais d'acquisition + frais de dossier + garantie − apport. Le mobilier n'est pas financé : mise de départ = apport + mobilier.",
       "Mensualité constante (formule PMT) sur le taux nominal ; assurance = capital emprunté × taux d'assurance ÷ 12, chaque mois.",
       'Différé total : intérêts capitalisés, aucune mensualité ; différé partiel : intérêts seuls. La mensualité de croisière est recalculée après le différé.',
       "TAEG : le taux qui égalise le capital net des frais et toutes les mensualités, résolu numériquement, avec et sans assurance ; comparé au taux d'usure.",
-      `Taux d'effort HCSF = mensualité assurance comprise ÷ (revenus nets + ${pct(hcsf.partLoyers)} des loyers). Seuil ${pct(hcsf.seuilEffort)} ; durée ${dureeMax}.`,
+      'Crédit ÷ loyer = mensualité assurance comprise ÷ loyer hors charges : dit si le loyer porte le crédit sans connaître vos revenus.',
+      `Deklic ne demande pas vos revenus : la banque calculera votre taux d'effort avec ${pct(hcsf.partLoyers)} des loyers, seuil ${pct(hcsf.seuilEffort)} ; durée maximale ${dureeMax}.`,
       `Indemnité de remboursement anticipé = ${indemnite}.`,
     ],
     constantes: [
@@ -130,8 +132,8 @@ export function sectionCashflow(regles: Regles, defauts: Defauts): SectionMethod
     resume: EXPLICATIONS.cashflow,
     etapes: [
       `Loyers nets = loyer hors charges × 12 − vacance (semaines vides ÷ 52 ; ${String(defauts.vacanceSemaines)} semaines par défaut).`,
-      "Courte durée : nuitée × 365 × taux d'occupation − ménage − conciergerie ; la vacance est déjà dans l'occupation.",
-      `Charges pleines : taxe foncière, copropriété, assurance propriétaire, comptable (réel meublé), CFE (meublé), gestion (% des loyers), entretien (${pct(defauts.entretienTaux)} du prix par an).`,
+      'Colocation : loyer par chambre × chambres louées × 12, plus les forfaits de charges comprises ; la vacance vaut pour chaque chambre. Courte durée : nuitée × nuits louées par mois × 12, plus le ménage facturé aux voyageurs ; la vacance est déjà dans les nuitées. Moyenne durée : loyer et forfait de charges × 12, vacance entre deux séjours.',
+      `Charges pleines : taxe foncière, copropriété, assurance propriétaire, comptable (réel meublé), CFE (meublé), gestion (% des loyers), conciergerie et commission de plateforme (% des recettes), ménage payé par séjour, énergie et internet payés par le propriétaire, entretien (${pct(defauts.entretienTaux)} du prix par an).`,
       "Cash-flow mensuel = (loyers nets − charges − 12 mensualités assurance comprise) ÷ 12 ; effort d'épargne = ce qu'il manque quand il est négatif.",
       'Point mort = loyer qui met le cash-flow à zéro ; taux de couverture = mensualité assurance comprise ÷ loyer.',
       `Régimes nus : loyer nu saisi, sinon loyer meublé ÷ (1 + ${pct(e.primeMeuble)}). Régimes meublés d'un bien loué nu : loyer × (1 + ${pct(e.primeMeuble)}).`,
@@ -145,7 +147,7 @@ export function sectionCashflow(regles: Regles, defauts: Defauts): SectionMethod
       },
       {
         libelle: 'Colocation : supplément de loyer total et vacance',
-        valeur: `+${pct(e.primeColocation)} · ${String(e.vacanceSemainesColocation)} semaines par an`,
+        valeur: `+${pct(e.primeColocation)} · ${String(e.parType.colocation.vacanceSemaines)} semaines par an et par chambre`,
         source: 'Spec Deklic (+30 à +45 % observés, un mois de vacance)',
       },
       {
@@ -174,5 +176,49 @@ export function sectionRendements(): SectionMethode {
       'Net-net = (loyers nets − charges − intérêts − assurance − impôt de la première année) ÷ coût complet.',
     ],
     constantes: [],
+  };
+}
+
+export function sectionSimulateur(regles: Regles, defauts: Defauts): SectionMethode {
+  const { tauxMoyens, tauxUsure, hcsf } = regles.credit;
+  return {
+    code: 'simulateur',
+    titre: 'Le simulateur de prêt',
+    resume:
+      "Deux offres côte à côte, avec les formules du crédit d'un projet ; tout reste dans votre navigateur.",
+    etapes: [
+      "Montant emprunté = prix + travaux + frais de notaire − apport. Les frais de dossier et de garantie s'ajoutent seulement s'ils sont « financés par le prêt » ; par défaut ils sont payés à la signature, comme dans une offre réelle.",
+      "Frais de notaire estimés par la formule des frais d'acquisition, sur le prix hors honoraires d'agence, au taux du département s'il est donné ; modifiables à la main.",
+      "Mensualité constante (formule PMT) sur le taux nominal ; assurance = capital emprunté × taux d'assurance ÷ 12, chaque mois, sur le capital initial (simplification : une assurance sur le capital restant dû coûterait moins).",
+      'Différé total : intérêts capitalisés, aucune mensualité ; différé partiel : intérêts seuls ; la mensualité de croisière est recalculée ensuite.',
+      "TAEG : le taux qui égalise le capital net des frais bancaires et toutes les mensualités, résolu numériquement, hors et avec assurance ; comparé au taux d'usure.",
+      'Coût total du crédit = intérêts + assurance + frais de dossier + garantie.',
+      `Taux d'endettement = mensualité assurance comprise ÷ revenus nets. Distinct de l'effort HCSF d'un projet, qui compte ${pct(hcsf.partLoyers)} des loyers attendus.`,
+      'Comparaison : pour chaque critère, la plus petite valeur est la meilleure (à 1 centime ou 0,001 point près) ; durée et montant emprunté restent informatifs.',
+    ],
+    constantes: [
+      {
+        libelle: 'Taux nominal proposé par défaut (20 ans)',
+        valeur: pct(tauxMoyens['20']),
+        source: 'Observatoire Crédit Logement / CSA, août 2026',
+        chemin: 'credit.tauxMoyens',
+      },
+      {
+        libelle: "Taux d'usure (prêts de 20 ans et plus)",
+        valeur: pct(tauxUsure),
+        source: 'Banque de France, 3e trimestre 2026',
+        chemin: 'credit.tauxUsure',
+      },
+      {
+        libelle: "Taux d'endettement signalé au-delà de",
+        valeur: pct(hcsf.seuilEffort),
+        source: 'Haut Conseil de stabilité financière, décision du 29 septembre 2021',
+      },
+      {
+        libelle: 'Assurance emprunteur par défaut',
+        valeur: `${pct(defauts.tauxAssurance)} du capital par an`,
+        source: 'Spec Deklic',
+      },
+    ],
   };
 }

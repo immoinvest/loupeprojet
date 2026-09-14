@@ -14,10 +14,7 @@ export const CATEGORIES_VISITE = [
 ] as const;
 export type CategorieVisite = (typeof CATEGORIES_VISITE)[number];
 
-/**
- * Types d'exploitation d'un investisseur (fiche 05). Aujourd'hui le mode du projet n'en connaît
- * que trois ; colocation et moyenne durée sont prêts pour la suite.
- */
+/** Types d'exploitation d'un investisseur (fiche 05), un par mode de location du projet. */
 export const TYPES_EXPLOITATION = [
   'nue',
   'meublee',

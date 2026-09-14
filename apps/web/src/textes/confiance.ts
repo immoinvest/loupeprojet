@@ -74,7 +74,9 @@ function raisonLocalisation(precision: PrecisionDvf, rayon: number | null): stri
     case 'immeuble':
       return 'Ventes du même immeuble ou des parcelles voisines.';
     case 'rue':
-      return 'Ventes de la même rue.';
+      return rayon === null
+        ? 'Ventes de la même rue.'
+        : `Ventes de la même rue, à ${nombre(rayon)} m au plus.`;
     case 'quartier':
       return rayon === null
         ? 'Ventes du quartier.'

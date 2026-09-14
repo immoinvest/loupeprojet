@@ -194,7 +194,7 @@ describe('Onglet Estimation : DPE, loyer, risques', () => {
       );
       await u.click(screen.getByRole('button', { name: /comme loyer visé/ }));
       expect(await screen.findByText(PHRASES_DONNEES_ADRESSE.loyerApplique)).toBeInTheDocument();
-      expect(enregistre(id)?.projet.hypotheses.location.loyerHc).toBe(1032);
+      expect(enregistre(id)?.projet.hypotheses.location).toMatchObject({ loyerHc: 1032 });
       expect(enregistre(id)?.projet.provenance['location.loyerHc']).toBe('anil');
     },
   );
@@ -315,7 +315,6 @@ describe('Formulaire Vérifier : estimer le loyer', () => {
     ]);
 
     await u.type(champ(container, 'apport'), '10000');
-    await u.type(champ(container, 'revenusMensuels'), '3000');
     await u.click(screen.getByRole('button', { name: /Créer le projet/ }));
     const saisie = onCreer.mock.calls[0]?.[0];
     expect(saisie?.provenance.loyerHc).toBe('estime');

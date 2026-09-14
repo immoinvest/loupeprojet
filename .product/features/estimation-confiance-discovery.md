@@ -30,12 +30,12 @@ Le CSV publié `dvf/<millésime>/<codeInsee>.csv` porte déjà `lat` et `lon` po
 
 Note sur 100 = somme de quatre composantes. Barèmes en paliers, interpolés linéairement entre deux paliers, bornés au premier et au dernier :
 
-| Composante                                 | Maximum | Barème                                                                                                                       |
-| ------------------------------------------ | ------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| Localisation du repère                     | 35      | même immeuble ou parcelles voisines 35 · même rue 30 · quartier : ≤ 100 m 26, ≤ 200 m 22, ≤ 300 m 18, au-delà 12 · commune 4 |
-| Nombre de ventes comparables               | 20      | 3 ventes ou moins 0 · 10 ventes 12 · 30 ventes ou plus 20                                                                    |
-| Dispersion (écart interquartile ÷ médiane) | 30      | 10 % ou moins 30 · 45 % ou plus 0                                                                                            |
-| Ancienneté médiane des ventes              | 15      | 6 mois ou moins 15 · 30 mois ou plus 0 ; inconnue : 12 mois supposés (milieu de la fenêtre de deux ans), signalé             |
+| Composante                                 | Maximum | Barème                                                                                                                                                                |
+| ------------------------------------------ | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Localisation du repère                     | 35      | même immeuble ou parcelles voisines 35 · même rue 30 jusqu’à 150 m, au-delà comme le quartier · quartier : ≤ 100 m 26, ≤ 200 m 22, ≤ 300 m 18, au-delà 12 · commune 4 |
+| Nombre de ventes comparables               | 20      | 3 ventes ou moins 0 · 10 ventes 12 · 30 ventes ou plus 20                                                                                                             |
+| Dispersion (écart interquartile ÷ médiane) | 30      | 10 % ou moins 30 · 45 % ou plus 0                                                                                                                                     |
+| Ancienneté médiane des ventes              | 15      | 6 mois ou moins 15 · 30 mois ou plus 0 ; inconnue : 12 mois supposés (milieu de la fenêtre de deux ans), signalé                                                      |
 
 Niveaux : élevée ≥ 80 · bonne ≥ 65 · moyenne ≥ 45 · faible ≥ 25 · très faible en dessous. Marges de la fourchette : ± 5 % · ± 6,5 % · ± 8 % · ± 12 % · ± 15 %.
 

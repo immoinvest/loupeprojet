@@ -11,7 +11,10 @@ describe('calculerProjet — T3 Marseille', () => {
 
   it('rend un rapport complet que le schéma de sortie accepte tel quel', () => {
     expect(() => ResultatsSchema.parse(resultats)).not.toThrow();
-    expect(resultats.projet.hypotheses.location.vacanceSemaines).toBe(3);
+    expect(resultats.projet.hypotheses.location).toMatchObject({
+      mode: 'meuble',
+      vacanceSemaines: 3,
+    });
     expect(resultats.financement.montantEmprunte).toBeCloseTo(161_000, 0);
     expect(resultats.cashflow.regime).toBe('lmnp_reel');
     expect(resultats.fiscalite.retenu).toBe('lmnp_reel');
@@ -57,12 +60,12 @@ describe('calculerProjet — pureté et robustesse', () => {
   });
 
   it('applique les défauts à une entrée minimale', () => {
-    const { achat, pret, location, fiscalite, revenusMensuels } = projetExemple.hypotheses;
+    const { achat, pret, location, fiscalite } = projetExemple.hypotheses;
     const minimal: ProjetEntree = {
       id: 'minimal',
       versionRegles: '2026-09',
       bien: { type: 'appartement', surface: 40, pieces: 2, departement: '69' },
-      hypotheses: { achat, pret, location, fiscalite, revenusMensuels },
+      hypotheses: { achat, pret, location, fiscalite },
     };
     const r = calculerProjet(minimal);
     expect(r.verdict.feux[0]?.feu).toBe('inconnu');

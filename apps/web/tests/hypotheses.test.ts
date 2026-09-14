@@ -3,21 +3,21 @@ import { describe, expect, it } from 'vitest';
 
 import {
   GROUPES,
+  GROUPE_FINANCEMENT,
+  TOUS_LES_GROUPES,
   appliquerSaisie,
   cleProvenance,
   depuisTexte,
+  descripteurParChemin,
   ecrireChemin,
   lireChemin,
+  texteLisible,
   valeurActuelle,
   versTexte,
   type Descripteur,
 } from '@/hypotheses';
 
-const champ = (chemin: string): Descripteur => {
-  const d = GROUPES.flatMap((g) => g.champs).find((c) => c.chemin === chemin);
-  if (d === undefined) throw new Error(`descripteur inconnu : ${chemin}`);
-  return d;
-};
+const champ = (chemin: string): Descripteur => descripteurParChemin(chemin);
 
 describe('chemins', () => {
   it('lit un chemin pointé, undefined si absent ou si un segment n’est pas un objet', () => {
@@ -73,20 +73,89 @@ describe('conversion', () => {
 
 describe('descripteurs', () => {
   it('chaque chemin existe dans le projet d’exemple ou est optionnel, sans doublon', () => {
-    const chemins = GROUPES.flatMap((g) => g.champs.map((c) => c.chemin));
+    const chemins = TOUS_LES_GROUPES.flatMap((g) => g.champs.map((c) => c.chemin));
     expect(new Set(chemins).size).toBe(chemins.length);
     const projet = ProjetSchema.parse(projetExemple);
-    for (const d of GROUPES.flatMap((g) => g.champs)) {
+    for (const d of TOUS_LES_GROUPES.flatMap((g) => g.champs)) {
       const v = valeurActuelle(projet, d);
-      if (d.obligatoire === true) expect(v, d.chemin).toBeDefined();
+      const visible = d.visibleSi === undefined || d.visibleSi(projet);
+      if (d.obligatoire === true && visible) expect(v, d.chemin).toBeDefined();
     }
+  });
+
+  it('le prêt se règle dans Financement, hors de la liste des cartes de Hypothèses', () => {
+    expect(GROUPES.map((g) => g.titre)).toEqual([
+      'Le bien',
+      "L'achat",
+      'La location',
+      'Les charges',
+      'La fiscalité et la revente',
+    ]);
+    expect(TOUS_LES_GROUPES).toContain(GROUPE_FINANCEMENT);
+    expect(descripteurParChemin('hypotheses.pret.apport').libelle).toBe('Apport');
+    expect(() => descripteurParChemin('marche.dvf.medianM2')).toThrow(/Aucun descripteur/);
   });
 
   it('cleProvenance retire le préfixe hypotheses.', () => {
     expect(cleProvenance('hypotheses.achat.prix')).toBe('achat.prix');
     expect(cleProvenance('bien.surface')).toBe('bien.surface');
   });
+
+  it('l’onglet Hypothèses n’a plus de carte Le marché : les ventes DVF viennent de l’onglet Estimation', () => {
+    expect(GROUPES.map((g) => g.titre)).not.toContain('Le marché');
+    const chemins = GROUPES.flatMap((g) => g.champs.map((c) => c.chemin));
+    expect(chemins.some((c) => c.startsWith('marche.dvf.'))).toBe(false);
+    expect(chemins).not.toContain('hypotheses.revenusMensuels');
+  });
+
+  it('le plafond d’encadrement des loyers est dans La location, juste sous le loyer visé', () => {
+    const location = GROUPES.find((g) => g.titre === 'La location');
+    const chemins = location?.champs.map((c) => c.chemin) ?? [];
+    expect(chemins.indexOf('marche.plafondLoyerMensuel')).toBe(
+      chemins.indexOf('hypotheses.location.loyerHc') + 1,
+    );
+    const r = appliquerSaisie(projetExemple, champ('marche.plafondLoyerMensuel'), '900');
+    expect(r.ok && r.projet.marche?.plafondLoyerMensuel).toBe(900);
+    expect(r.ok && ProjetSchema.safeParse(r.projet).success).toBe(true);
+  });
 });
+
+describe('texteLisible', () => {
+  const d = (partiel: Partial<Descripteur>): Descripteur => ({
+    chemin: 'x',
+    libelle: 'x',
+    type: 'texte',
+    ...partiel,
+  });
+
+  it('formate les montants et les taux avec leur unité, collée au symbole', () => {
+    expect(n(texteLisible(champ('hypotheses.pret.apport'), 14_337))).toBe('14 337 €');
+    expect(n(texteLisible(champ('hypotheses.location.loyerHc'), 980))).toBe('980 €/mois');
+    expect(n(texteLisible(champ('hypotheses.pret.tauxNominal'), 0.0335))).toBe('3,35 %');
+    expect(n(texteLisible(champ('hypotheses.pret.tauxAssurance'), 0.0025))).toBe(
+      '0,25 % du capital / an',
+    );
+    expect(n(texteLisible(d({ type: 'euros' }), 12.4))).toBe('12 €');
+  });
+
+  it('formate entiers, nombres, booléens, listes et textes ; « — » quand la valeur manque', () => {
+    expect(texteLisible(champ('hypotheses.pret.dureeAnnees'), 25)).toBe('25 ans');
+    expect(texteLisible(champ('bien.pieces'), 3)).toBe('3');
+    expect(texteLisible(champ('bien.surface'), 65)).toBe('65 m²');
+    expect(texteLisible(champ('bien.surface'), 32.5)).toBe('32,5 m²');
+    expect(texteLisible(champ('bien.ascenseur'), false)).toBe('non');
+    expect(texteLisible(d({ type: 'bool' }), true)).toBe('oui');
+    expect(texteLisible(d({ type: 'bool' }), false)).toBe('non');
+    expect(texteLisible(champ('hypotheses.location.mode'), 'meuble')).toBe('Meublée');
+    expect(texteLisible(champ('hypotheses.location.mode'), 'inconnu')).toBe('inconnu');
+    expect(texteLisible(d({ type: 'enum' }), 'D')).toBe('D');
+    expect(texteLisible(champ('bien.departement'), '13')).toBe('13');
+    expect(texteLisible(champ('bien.dpe'), undefined)).toBe('—');
+    expect(texteLisible(champ('bien.dpe'), null)).toBe('—');
+  });
+});
+
+const n = (s: string): string => s.replace(/\s/g, ' ');
 
 describe('appliquerSaisie', () => {
   it('écrit la valeur convertie et marque la provenance « utilisateur »', () => {
@@ -111,40 +180,103 @@ describe('appliquerSaisie', () => {
     expect(appliquerSaisie(projetExemple, champ('hypotheses.achat.prix'), 'abc').ok).toBe(false);
   });
 
-  it('passer en courte durée initialise la nuitée et l’occupation', () => {
-    const r = appliquerSaisie(projetExemple, champ('hypotheses.location.mode'), 'courte_duree');
-    expect(r.ok && r.projet.hypotheses.location.courteDuree).toEqual({
-      nuitee: 65,
-      tauxOccupation: 0.6,
-    });
-    expect(r.ok && ProjetSchema.safeParse(r.projet).success).toBe(true);
-    const deja = r.ok
-      ? appliquerSaisie(r.projet, champ('hypotheses.location.mode'), 'courte_duree')
-      : r;
-    expect(deja.ok && deja.projet.hypotheses.location.courteDuree?.nuitee).toBe(65);
+  it('crée la provenance quand le projet n’en a pas encore', () => {
+    const sansProvenance = { ...projetExemple, provenance: undefined };
+    const r = appliquerSaisie(sansProvenance, champ('hypotheses.achat.travaux'), '8000');
+    expect(r.ok && r.projet.provenance).toEqual({ 'achat.travaux': 'utilisateur' });
   });
 
-  it('une première valeur de marché crée le bloc DVF', () => {
-    const base: ProjetEntree = {
-      id: projetExemple.id,
-      versionRegles: projetExemple.versionRegles,
-      bien: projetExemple.bien,
-      hypotheses: projetExemple.hypotheses,
+  it('passer en courte durée reconstruit la location avec les défauts du type, badgés « estimé »', () => {
+    const r = appliquerSaisie(projetExemple, champ('hypotheses.location.mode'), 'courte_duree');
+    if (!r.ok) throw new Error(r.erreur);
+    // 980 € ÷ 30 × 2 = 65 € la nuit ; 15 nuits par mois.
+    expect(r.projet.hypotheses.location).toEqual({
+      mode: 'courte_duree',
+      nuitee: 65,
+      nuiteesParMois: 15,
+      dureeSejourNuits: 4,
+      menageFactureParSejour: 27,
+      menageCoutParSejour: 27,
+      plateformeTaux: 0.03,
+      conciergerieTaux: 0,
+      tourismeClasse: false,
+    });
+    expect(r.projet.hypotheses.charges).toMatchObject({ energieMensuel: 190, internetMensuel: 30 });
+    expect(r.projet.provenance).toMatchObject({
+      'location.mode': 'utilisateur',
+      'location.nuitee': 'estime',
+      'charges.energieMensuel': 'estime',
+    });
+    expect(r.projet.provenance?.['location.loyerHc']).toBeUndefined();
+    expect(ProjetSchema.safeParse(r.projet).success).toBe(true);
+    // Le même type une seconde fois : rien ne bouge.
+    const deja = appliquerSaisie(r.projet, champ('hypotheses.location.mode'), 'courte_duree');
+    expect(deja.ok && deja.projet).toBe(r.projet);
+  });
+
+  it('changer de type garde le loyer de référence et les abonnements « à toi », règle le régime', () => {
+    const nuReel: ProjetEntree = {
+      ...projetExemple,
+      hypotheses: {
+        ...projetExemple.hypotheses,
+        charges: { ...projetExemple.hypotheses.charges, energieMensuel: 120 },
+        fiscalite: { tmi: 0.3, regime: 'nu_reel' },
+      },
+      provenance: { ...projetExemple.provenance, 'charges.energieMensuel': 'utilisateur' },
     };
-    const r = appliquerSaisie(base, champ('marche.dvf.medianM2'), '3000');
-    expect(r.ok && r.projet.marche?.dvf).toEqual({ medianM2: 3000, nombreVentes: 0 });
-    const r2 = appliquerSaisie(projetExemple, champ('marche.dvf.q1M2'), '2500');
-    expect(r2.ok && r2.projet.marche?.dvf?.medianM2).toBe(3050);
+    const coloc = appliquerSaisie(nuReel, champ('hypotheses.location.mode'), 'colocation');
+    if (!coloc.ok) throw new Error(coloc.erreur);
+    // 980 € × 1,35 ÷ 2 chambres = 662 € par chambre.
+    expect(coloc.projet.hypotheses.location).toMatchObject({ chambres: 2, loyerChambre: 662 });
+    expect(coloc.projet.hypotheses.charges).toMatchObject({
+      energieMensuel: 120,
+      internetMensuel: 30,
+    });
+    expect(coloc.projet.hypotheses.fiscalite.regime).toBe('lmnp_reel');
+    expect(coloc.projet.provenance).toMatchObject({
+      'charges.energieMensuel': 'utilisateur',
+      'charges.internetMensuel': 'estime',
+    });
+    // Retour en meublé : 1 324 € ÷ 1,35 = 981 €, abonnements estimés remis à 0.
+    const retour = appliquerSaisie(coloc.projet, champ('hypotheses.location.mode'), 'meuble');
+    if (!retour.ok) throw new Error(retour.erreur);
+    expect(retour.projet.hypotheses.location).toEqual({
+      mode: 'meuble',
+      loyerHc: 981,
+      chargesLocataire: 0,
+      vacanceSemaines: 3,
+      gestionTaux: 0,
+    });
+    expect(retour.projet.hypotheses.charges).toMatchObject({
+      energieMensuel: 120,
+      internetMensuel: 0,
+    });
+    expect(retour.projet.provenance?.['location.loyerChambre']).toBeUndefined();
+  });
+
+  it('refuse un type inconnu ; une location illisible repart d’un loyer nul', () => {
+    expect(appliquerSaisie(projetExemple, champ('hypotheses.location.mode'), 'saisonnier')).toEqual(
+      {
+        ok: false,
+        erreur: 'Type de location inconnu.',
+      },
+    );
+    const cassee = {
+      ...projetExemple,
+      hypotheses: { ...projetExemple.hypotheses, location: { mode: 'nu' } },
+    } as unknown as ProjetEntree;
+    const r = appliquerSaisie(cassee, champ('hypotheses.location.mode'), 'meuble');
+    expect(r.ok && r.projet.hypotheses.location).toMatchObject({ mode: 'meuble', loyerHc: 0 });
   });
 });
 
 describe('carte « L’achat » : descripteurs', () => {
   const renovation = champ('hypotheses.achat.travauxRenovationEnergetique');
-  const avec = (mode: 'nu' | 'meuble_lld', travaux?: number): ProjetEntree => ({
+  const avec = (mode: 'nu' | 'meuble', travaux?: number): ProjetEntree => ({
     ...projetExemple,
     hypotheses: {
       ...projetExemple.hypotheses,
-      location: { ...projetExemple.hypotheses.location, mode },
+      location: { mode, loyerHc: 980 },
       achat: {
         prix: projetExemple.hypotheses.achat.prix,
         ...(travaux === undefined ? {} : { travaux }),
@@ -156,7 +288,7 @@ describe('carte « L’achat » : descripteurs', () => {
     expect(renovation.visibleSi?.(avec('nu', 6_000))).toBe(true);
     expect(renovation.visibleSi?.(avec('nu', 0))).toBe(false);
     expect(renovation.visibleSi?.(avec('nu'))).toBe(false);
-    expect(renovation.visibleSi?.(avec('meuble_lld', 6_000))).toBe(false);
+    expect(renovation.visibleSi?.(avec('meuble', 6_000))).toBe(false);
     expect(renovation.aide?.replace(/\s/g, ' ')).toMatch(/10 700 € à 21 400 €/);
   });
 

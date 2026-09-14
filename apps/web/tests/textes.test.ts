@@ -7,6 +7,7 @@ import {
 import { describe, expect, it } from 'vitest';
 
 import { AXES, ETATS, libelleFeu } from '@/textes/feux';
+import { PHASES, TEXTES_FINANCEMENT, phraseCouverture } from '@/textes/financement';
 import {
   CRITERES_PRIX,
   MODES,
@@ -37,6 +38,18 @@ const variante = (
   hypotheses: { ...projetExemple.hypotheses, ...h },
 });
 
+describe('financement', () => {
+  it('a une phrase par feu de couverture et des libellés paramétrés', () => {
+    expect(phraseCouverture('bon')).toContain('porte le crédit');
+    expect(phraseCouverture('surveiller')).toContain('couvre la mensualité');
+    expect(phraseCouverture('probleme')).toContain('ne couvre même pas');
+    expect(phraseCouverture('inconnu')).toContain('Indiquez un loyer');
+    expect(TEXTES_FINANCEMENT.dureeMax(27)).toBe('plus long que le maximum bancaire de 27 ans');
+    expect(TEXTES_FINANCEMENT.effortDepasse('35 %')).toBe('au-dessus de 35 %');
+    expect(Object.keys(PHASES)).toEqual(['differe_total', 'differe_partiel', 'amortissement']);
+  });
+});
+
 describe('feux', () => {
   it('libelle chaque axe avec sa valeur formatée', () => {
     expect(n(libelleFeu({ axe: 'prix', feu: 'bon', valeur: -0.218 }))).toBe('Prix −22 %');
@@ -46,7 +59,9 @@ describe('feux', () => {
     expect(n(libelleFeu({ axe: 'cashflow', feu: 'probleme', valeur: -210.3 }))).toBe(
       'Cash-flow −210 €/mois',
     );
-    expect(n(libelleFeu({ axe: 'effort', feu: 'bon', valeur: 0.2516 }))).toBe('Effort 25 %');
+    expect(n(libelleFeu({ axe: 'couverture', feu: 'surveiller', valeur: 0.8435 }))).toBe(
+      'Crédit 84 % du loyer',
+    );
     expect(libelleFeu({ axe: 'risques', feu: 'bon', valeur: 0 })).toBe('Risques : aucun');
     expect(libelleFeu({ axe: 'risques', feu: 'surveiller', valeur: 1 })).toBe('Risques : 1 signal');
     expect(libelleFeu({ axe: 'risques', feu: 'probleme', valeur: 2 })).toBe('Risques : 2 signaux');
@@ -59,7 +74,7 @@ describe('feux', () => {
     expect(Object.keys(AXES)).toHaveLength(5);
     expect(Object.keys(ETATS)).toHaveLength(4);
     expect(Object.keys(REGIMES)).toHaveLength(4);
-    expect(Object.keys(MODES)).toHaveLength(3);
+    expect(Object.keys(MODES)).toHaveLength(5);
     expect(Object.keys(SCENARIOS)).toHaveLength(7);
     expect(Object.keys(CRITERES_PRIX)).toHaveLength(3);
   });
@@ -116,7 +131,7 @@ describe('régimes : explications et ordre', () => {
 
   it('LMNP réel imposé et nu réel jamais imposé : les autres phrases', () => {
     const riche = calculerProjet(
-      variante({ location: { mode: 'meuble_lld', loyerHc: 2_300, vacanceSemaines: 0 } }),
+      variante({ location: { mode: 'meuble', loyerHc: 2_300, vacanceSemaines: 0 } }),
     );
     expect(riche.fiscalite.regimes.lmnp_reel.premiereAnneeImposable).not.toBeNull();
     expect(explicationRegime(riche.fiscalite.regimes.lmnp_reel, dix)).toMatch(
@@ -136,7 +151,7 @@ describe('régimes : explications et ordre', () => {
 
   it('plafond dépassé', () => {
     const gros = calculerProjet(
-      variante({ location: { mode: 'meuble_lld', loyerHc: 8_000, vacanceSemaines: 0 } }),
+      variante({ location: { mode: 'meuble', loyerHc: 8_000, vacanceSemaines: 0 } }),
     );
     expect(explicationRegime(gros.fiscalite.regimes.micro_bic, dix)).toContain('inaccessible');
   });
@@ -207,7 +222,7 @@ describe('verdict', () => {
     const t = texteVerdict(calculerProjet(projetExemple));
     expect(t.titre).toBe('Le prix est bon. Le loyer ne couvre pas tout.');
     expect(n(t.sousTitre)).toContain('−25 % par rapport au prix estimé');
-    expect(n(t.sousTitre)).toContain("banque d'accord (effort 25 %)");
+    expect(n(t.sousTitre)).toContain('le crédit prend 84 % du loyer');
     expect(n(t.sousTitre)).toContain('210 € à sortir chaque mois');
   });
 
@@ -215,7 +230,7 @@ describe('verdict', () => {
     const r = calculerProjet(
       variante({
         achat: { ...projetExemple.hypotheses.achat, prix: 198_000 },
-        location: { mode: 'meuble_lld', loyerHc: 1_600, vacanceSemaines: 0 },
+        location: { mode: 'meuble', loyerHc: 1_600, vacanceSemaines: 0 },
       }),
     );
     const t = texteVerdict(r);
@@ -223,32 +238,29 @@ describe('verdict', () => {
     expect(t.sousTitre).toContain('dans la poche');
   });
 
-  it('prix élevé, effort au-dessus du seuil', () => {
+  it('prix élevé, crédit qui dépasse le loyer', () => {
     const r = calculerProjet(
       variante({
         achat: { ...projetExemple.hypotheses.achat, prix: 240_000 },
-        location: { mode: 'meuble_lld', loyerHc: 1_500, vacanceSemaines: 0 },
-        revenusMensuels: 1_500,
+        location: { mode: 'meuble', loyerHc: 1_100, vacanceSemaines: 0 },
       }),
     );
     const t = texteVerdict(r);
     expect(t.titre.startsWith('Le prix est élevé.')).toBe(true);
-    expect(t.sousTitre).toContain('au-dessus du seuil');
+    expect(n(t.sousTitre)).toMatch(/le crédit dépasse le loyer \(1\d\d %\)/);
   });
 
-  it('sans marché ni revenus : phrases de repli', () => {
-    const r = calculerProjet(
-      variante({ location: { mode: 'nu', loyerHc: 0 }, revenusMensuels: 0 }, { risques: [] }),
-    );
+  it('sans marché ni loyer : phrases de repli, sans mention du crédit', () => {
+    const r = calculerProjet(variante({ location: { mode: 'nu', loyerHc: 0 } }, { risques: [] }));
     const t = texteVerdict(r);
     expect(t.titre).toBe('Prix sans repère de marché. Le loyer ne couvre pas tout.');
-    expect(t.sousTitre).not.toContain('effort');
+    expect(t.sousTitre).not.toContain('crédit');
     expect(t.sousTitre).not.toContain('quartier');
   });
 
   it('cash-flow presque : entre −100 et 0', () => {
     const r = calculerProjet(
-      variante({ location: { mode: 'meuble_lld', loyerHc: 1_120, vacanceSemaines: 0 } }),
+      variante({ location: { mode: 'meuble', loyerHc: 1_120, vacanceSemaines: 0 } }),
     );
     expect(r.cashflow.mensuel).toBeGreaterThan(-100);
     expect(r.cashflow.mensuel).toBeLessThan(0);

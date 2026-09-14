@@ -1,4 +1,4 @@
-import { obtenirRegles } from '@loupe/moteur';
+import { loyerMensuelHc, obtenirRegles } from '@loupe/moteur';
 import type { JSX } from 'react';
 
 import { Bouton, Carte, Pastille } from '@/composants/ui';
@@ -41,9 +41,10 @@ export function CarteLoyer({ resultat }: { resultat: Resultat<ReponseMarche> }):
       <p className="m-0 text-[17px]">{phraseLoyer(loyer)}</p>
       <div className="flex flex-wrap items-center gap-3">
         <span className="text-[15px] text-encre-2">
-          Loyer visé du projet : <strong>{euros(projet.hypotheses.location.loyerHc)}</strong>
+          Loyer visé du projet :{' '}
+          <strong>{euros(loyerMensuelHc(projet.hypotheses.location))}</strong>
         </span>
-        {projet.hypotheses.location.loyerHc === vise ? (
+        {loyerMensuelHc(projet.hypotheses.location) === vise ? (
           <Pastille ton="bon" compacte>
             {PHRASES_DONNEES_ADRESSE.loyerApplique}
           </Pastille>

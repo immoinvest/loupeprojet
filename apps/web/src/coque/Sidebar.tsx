@@ -1,4 +1,4 @@
-import { Download, Info, Puzzle, X } from 'lucide-react';
+import { Calculator, Download, Info, Puzzle, X } from 'lucide-react';
 import { useEffect, useRef, type JSX } from 'react';
 import { NavLink } from 'react-router';
 
@@ -7,7 +7,7 @@ import { LogotypeDeklic } from '@/marque/Logo';
 import { TEXTES_INSTALLATION } from '@/textes/application';
 
 import { useInstallation } from './Installation';
-import { classeLien as lien } from './liens';
+import { CLASSE_ETIQUETTE, classeLien as lien } from './liens';
 import { Profil } from './Profil';
 import { SectionAnalyser } from './SectionAnalyser';
 import { SectionGerer } from './SectionGerer';
@@ -26,8 +26,8 @@ const ETAT_TIROIR = {
 
 /**
  * La barre latérale tient dans la hauteur de l'écran, en trois zones : le haut (logo) et le bas
- * (aide, installation, profil) ne bougent jamais ; entre les deux, les sections Analyser et Gérer,
- * chacune ouverte par son action de création, sont les seules à défiler quand elles sont longues.
+ * (outils, aide, installation, profil) ne bougent jamais ; entre les deux, les sections Analyser et
+ * Gérer, chacune ouverte par son action de création, sont les seules à défiler quand elles sont longues.
  */
 export function Sidebar({
   ouvert,
@@ -81,6 +81,13 @@ export function Sidebar({
       </div>
 
       <div className="flex shrink-0 flex-col gap-5">
+        <nav aria-label="Outils" className="flex flex-col gap-1">
+          <div className={CLASSE_ETIQUETTE}>Outils</div>
+          <NavLink to="/simulateur-pret" className={lien}>
+            <Calculator size={18} className="shrink-0" aria-hidden="true" />
+            <span className="truncate">Simulateur de prêt</span>
+          </NavLink>
+        </nav>
         <nav aria-label="Aide" className="flex flex-col gap-1">
           <NavLink to="/methode" className={lien}>
             <Info size={18} className="shrink-0" aria-hidden="true" />

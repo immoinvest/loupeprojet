@@ -40,7 +40,6 @@ describe('Nouveau projet — depuis un lien', () => {
 
       await utilisateur.type(screen.getByLabelText(/Loyer visé/), '980');
       await utilisateur.type(screen.getByLabelText(/^Apport/), '15000');
-      await utilisateur.type(screen.getByLabelText(/Vos revenus/), '2600');
       await utilisateur.click(screen.getByRole('button', { name: /Créer le projet/ }));
 
       expect(
@@ -77,7 +76,6 @@ describe('Nouveau projet — depuis un lien', () => {
       await utilisateur.type(screen.getByLabelText(/^Ville/), 'Lyon');
       await utilisateur.type(screen.getByLabelText(/Loyer visé/), '700');
       await utilisateur.type(screen.getByLabelText(/^Apport/), '10000');
-      await utilisateur.type(screen.getByLabelText(/Vos revenus/), '2400');
       const deja = screen.getByRole('checkbox', { name: /J'ai déjà visité ce bien/ });
       expect(deja).not.toBeChecked();
       await utilisateur.click(deja);
@@ -152,7 +150,6 @@ describe('Nouveau projet — à la main', () => {
       await utilisateur.type(screen.getByLabelText(/^Apport/), '0');
       await utilisateur.clear(screen.getByLabelText(/Durée du prêt/));
       await utilisateur.type(screen.getByLabelText(/Durée du prêt/), '20');
-      await utilisateur.type(screen.getByLabelText(/Vos revenus/), '1900');
       await utilisateur.click(screen.getByRole('button', { name: /Créer le projet/ }));
       await screen.findByRole(
         'heading',

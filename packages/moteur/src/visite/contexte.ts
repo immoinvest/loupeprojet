@@ -4,15 +4,19 @@ import type { Projet } from '../schema/projet';
 import type { AxeVerdict, Feu, FeuVerdict } from '../verdict/feux';
 import type { ContexteVisite, ParametresQuestion, PredicatVisite, TypeExploitation } from './types';
 
-/** Le type d'exploitation déduit du mode de location ; seul point à changer avec la fiche 05. */
+/** Le type d'exploitation de la visite, un pour chacun des cinq modes de location (fiche 05). */
 export function typeExploitation(projet: Projet): TypeExploitation {
   switch (projet.hypotheses.location.mode) {
     case 'nu':
       return 'nue';
-    case 'meuble_lld':
+    case 'meuble':
       return 'meublee';
+    case 'colocation':
+      return 'colocation';
     case 'courte_duree':
       return 'courte_duree';
+    case 'moyenne_duree':
+      return 'moyenne_duree';
   }
 }
 

@@ -119,12 +119,11 @@ describe('construireProjet', () => {
     ville: 'Marseille 5e',
     chargesCoproMois: 90,
     taxeFonciere: 1_050,
-    mode: 'meuble_lld',
+    mode: 'meuble',
     loyerHc: 980,
     apport: 15_000,
     dureeAnnees: 25,
     tmi: 0.3,
-    revenusMensuels: 2_600,
     provenance: {
       prix: 'annonce',
       surface: 'annonce',
@@ -195,9 +194,85 @@ describe('construireProjet', () => {
     expect(projet.source).toBeUndefined();
   });
 
-  it('courte durée : nuitée et occupation par défaut', () => {
+  it('courte durée : nuitée déduite du loyer, nuitées, ménage et plateforme des règles, tout « estimé »', () => {
     const cd = construireProjet({ ...saisie, mode: 'courte_duree' }, 'p3');
-    expect(ProjetSchema.parse(cd).hypotheses.location.courteDuree?.tauxOccupation).toBe(0.6);
+    // 980 € ÷ 30 × 2 = 65 € la nuit ; 15 nuits par mois (Excel Projet 92K).
+    expect(ProjetSchema.parse(cd).hypotheses.location).toEqual({
+      mode: 'courte_duree',
+      nuitee: 65,
+      nuiteesParMois: 15,
+      dureeSejourNuits: 4,
+      menageFactureParSejour: 27,
+      menageCoutParSejour: 27,
+      plateformeTaux: 0.03,
+      conciergerieTaux: 0,
+      tourismeClasse: false,
+    });
+    expect(cd.hypotheses.charges).toMatchObject({ energieMensuel: 190, internetMensuel: 30 });
+    expect(cd.provenance).toMatchObject({
+      'location.mode': 'utilisateur',
+      'location.nuitee': 'estime',
+      'location.nuiteesParMois': 'estime',
+      'location.plateformeTaux': 'estime',
+      'charges.energieMensuel': 'estime',
+    });
+    const precise = construireProjet(
+      { ...saisie, mode: 'courte_duree', nuitee: 90, nuiteesParMois: 20 },
+      'p3b',
+    );
+    expect(precise.hypotheses.location).toMatchObject({ nuitee: 90, nuiteesParMois: 20 });
+    expect(precise.provenance).toMatchObject({
+      'location.nuitee': 'utilisateur',
+      'location.nuiteesParMois': 'utilisateur',
+    });
+  });
+
+  it('colocation : loyer saisi réparti entre les chambres, forfait et abonnements des règles', () => {
+    const coloc = ProjetSchema.parse(
+      construireProjet({ ...saisie, mode: 'colocation', loyerHc: 1_840 }, 'p5'),
+    );
+    expect(coloc.hypotheses.location).toEqual({
+      mode: 'colocation',
+      chambres: 2,
+      loyerChambre: 920,
+      forfaitChargesChambre: 110,
+      vacanceSemaines: 4,
+      gestionTaux: 0,
+    });
+    expect(coloc.hypotheses.charges).toMatchObject({ energieMensuel: 190, internetMensuel: 30 });
+    expect(coloc.hypotheses.fiscalite.regime).toBe('lmnp_reel');
+    expect(coloc.hypotheses.achat.mobilier).toBe(65 * 75);
+    const precise = construireProjet(
+      { ...saisie, mode: 'colocation', loyerHc: 0, chambresLouees: 3, loyerChambre: 450 },
+      'p5b',
+    );
+    expect(precise.hypotheses.location).toMatchObject({ chambres: 3, loyerChambre: 450 });
+    expect(precise.provenance).toMatchObject({
+      'location.chambres': 'utilisateur',
+      'location.loyerChambre': 'utilisateur',
+    });
+    const sansChambres = construireProjet(
+      { ...saisie, mode: 'colocation', chambres: undefined, pieces: undefined },
+      'p5c',
+    );
+    expect(sansChambres.hypotheses.location).toMatchObject({ chambres: 1 });
+    expect(sansChambres.provenance?.['location.chambres']).toBe('estime');
+  });
+
+  it('moyenne durée : loyer saisi, forfait et séjours des règles', () => {
+    const md = ProjetSchema.parse(construireProjet({ ...saisie, mode: 'moyenne_duree' }, 'p6'));
+    expect(md.hypotheses.location).toEqual({
+      mode: 'moyenne_duree',
+      loyerHc: 980,
+      forfaitCharges: 220,
+      dureeSejourMois: 4,
+      vacanceSemaines: 4,
+      menageCoutParSejour: 0,
+      plateformeTaux: 0,
+      gestionTaux: 0,
+    });
+    expect(md.provenance['location.loyerHc']).toBe('utilisateur');
+    expect(md.provenance['location.forfaitCharges']).toBe('estime');
   });
 
   it('département et taux', () => {

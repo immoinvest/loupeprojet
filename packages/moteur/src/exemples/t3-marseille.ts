@@ -43,7 +43,7 @@ export const projetExemple: ProjetEntree = {
       fraisGarantie: 1_500,
     },
     location: {
-      mode: 'meuble_lld',
+      mode: 'meuble',
       loyerHc: 980,
       loyerHcNu: 850,
       chargesLocataire: 60,
@@ -66,7 +66,6 @@ export const projetExemple: ProjetEntree = {
       evolutionAnnuelle: 0.015,
       fraisAgenceTaux: 0.04,
     },
-    revenusMensuels: 2_600,
   },
   provenance: {
     'achat.prix': 'annonce',

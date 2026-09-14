@@ -118,12 +118,11 @@ const SAISIE: SaisieProjet = {
   surface: 65,
   codePostal: '13005',
   ville: 'Marseille',
-  mode: 'meuble_lld',
+  mode: 'meuble',
   loyerHc: 980,
   apport: 15_000,
   dureeAnnees: 25,
   tmi: 0.3,
-  revenusMensuels: 2_600,
   provenance: { typeBien: 'annonce', ges: 'annonce', lotsCopro: 'annonce' },
 };
 

@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { CODES_CHARGES } from '../cashflow/charges';
 import { ModeLocationSchema, RegimeSchema } from './hypotheses';
 import { ProjetSchema, VersionReglesSchema } from './projet';
 
@@ -84,15 +85,15 @@ export const CashflowSchema = z.strictObject({
   recettes: z.strictObject({
     mode: ModeLocationSchema,
     loyersBruts: n,
+    chargesRecuperees: n,
     vacance: n,
     loyersNets: n,
-    courteDuree: z
-      .strictObject({ nuitees: n, recettesBrutes: n, menage: n, conciergerie: n })
-      .nullable(),
+    nuitees: nOuNull,
+    sejours: nOuNull,
   }),
   charges: z.array(
     z.strictObject({
-      code: z.enum(['taxeFonciere', 'copro', 'pno', 'comptable', 'cfe', 'gestion', 'entretien']),
+      code: z.enum(CODES_CHARGES),
       annuel: n,
     }),
   ),
@@ -143,6 +144,7 @@ export const FiscaliteResultatSchema = z.strictObject({
     micro_foncier: RegimeResultatSchema,
     nu_reel: RegimeResultatSchema,
   }),
+  compatibles: z.array(RegimeSchema),
   retenu: RegimeSchema,
   meilleur: RegimeSchema,
   meilleurImpot: RegimeSchema,
@@ -192,7 +194,7 @@ export const VerdictSchema = z.strictObject({
   feux: z
     .array(
       z.strictObject({
-        axe: z.enum(['prix', 'rendement', 'cashflow', 'effort', 'risques']),
+        axe: z.enum(['prix', 'rendement', 'cashflow', 'couverture', 'risques']),
         feu: FeuSchema,
         valeur: nOuNull,
       }),

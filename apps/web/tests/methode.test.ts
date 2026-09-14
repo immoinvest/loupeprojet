@@ -67,6 +67,7 @@ describe('sectionsMethode', () => {
     expect(sections.map((s) => s.code)).toEqual([
       'acquisition',
       'credit',
+      'simulateur',
       'cashflow',
       'rendement',
       'micro_bic',
@@ -102,7 +103,10 @@ describe('sectionsMethode', () => {
     expect(valeurs('acquisition')).toContain('36 : 3,8 %, 56 : 3,8 %, 976 : 3,8 %');
     expect(valeurs('credit')).toContain('3,14 % · 3,27 % · 3,35 %');
     expect(n(section('credit').etapes[4] ?? '')).toContain(
-      'Seuil 35 % ; durée 25 ans (27 ans si les travaux dépassent 10 % du prix)',
+      'Crédit ÷ loyer = mensualité assurance comprise ÷ loyer hors charges',
+    );
+    expect(n(section('credit').etapes[5] ?? '')).toContain(
+      "Deklic ne demande pas vos revenus : la banque calculera votre taux d'effort avec 70 % des loyers, seuil 35 % ; durée maximale 25 ans (27 ans si les travaux dépassent 10 % du prix)",
     );
     expect(n(section('revente').etapes[3] ?? '')).toContain(
       '6 % par an de la 6e à la 21e année, 4 % la 22e année',
@@ -158,7 +162,7 @@ describe('sectionsMethode', () => {
       'Fourchette : ±5 % si la confiance est élevée, ±6,5 % si la confiance est bonne, ±8 % si la confiance est moyenne, ±12 % si la confiance est faible, ±15 % si la confiance est très faible.',
     );
     expect(v).toContain(
-      'même immeuble 35 · même rue 30 · quartier ≤ 100 m 26, ≤ 200 m 22, ≤ 300 m 18, au-delà 12 · commune 4',
+      'même immeuble 35 · même rue 30 jusqu’à 150 m, au-delà comme le quartier · quartier ≤ 100 m 26, ≤ 200 m 22, ≤ 300 m 18, au-delà 12 · commune 4',
     );
     expect(v).toContain('3 ventes ou moins 0 · 10 ventes 12 · 30 ventes ou plus 20');
     expect(v).toContain('10 % ou moins 30 · 45 % ou plus 0');

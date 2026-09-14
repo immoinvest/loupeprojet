@@ -142,7 +142,7 @@ describe('En-tête du projet collé', () => {
       'print:hidden',
     );
     const volets = within(enTete()).getByRole('navigation', { name: 'Volets du rapport' });
-    expect(within(volets).getAllByRole('link')).toHaveLength(6);
+    expect(within(volets).getAllByRole('link')).toHaveLength(7);
     expect(within(enTete()).getByRole('link', { name: 'Mes projets' })).toBeInTheDocument();
     expect(within(enTete()).getByText('155 000 € · meublé longue durée')).toBeInTheDocument();
   });

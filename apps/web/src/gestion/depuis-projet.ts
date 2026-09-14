@@ -7,6 +7,7 @@ import {
   type NouveauBien,
   type NouvelleLocation,
 } from '@loupe/gestion';
+import { estModeMeuble, loyerMensuelHc, type Location } from '@loupe/moteur';
 import { z } from 'zod';
 
 import type { ProjetEnregistre } from '@/stockage/projets';
@@ -39,16 +40,33 @@ function enCentimes(euros: number): number {
   return Math.round(euros * 100);
 }
 
+/** Charges mensuelles demandées au locataire, selon le type de location de l'analyse. */
+function chargesMensuelles(location: Location): number {
+  switch (location.mode) {
+    case 'nu':
+    case 'meuble':
+      return location.chargesLocataire;
+    case 'moyenne_duree':
+      return location.forfaitCharges;
+    case 'colocation':
+      return location.forfaitChargesChambre * location.chambres;
+    case 'courte_duree':
+      return 0;
+  }
+}
+
 /**
- * Le bien et la location repris de l'analyse : type, surface, meublé ou vide, loyer et charges ;
- * par défaut, loyer le 5, entrée le 1er du mois suivant, dépôt au maximum légal. L'instantané des
- * entrées du projet est gardé pour comparer plus tard le réel au prévu.
+ * Le bien et la location repris de l'analyse : type, surface, meublé ou vide, loyer et charges
+ * (colocation : toutes les chambres ; courte durée : l'équivalent mensuel des nuitées) ; par défaut,
+ * loyer le 5, entrée le 1er du mois suivant, dépôt au maximum légal. L'instantané des entrées du
+ * projet est gardé pour comparer plus tard le réel au prévu.
  */
 export function brouillonDepuisProjet(enregistre: ProjetEnregistre, aujourdhui: string): Brouillon {
   const { bien, hypotheses } = enregistre.projet;
-  const meuble = hypotheses.location.mode !== 'nu';
+  const { location } = hypotheses;
+  const meuble = estModeMeuble(location.mode);
   const type = meuble ? 'meublee' : 'nue';
-  const loyerHorsCharges = enCentimes(hypotheses.location.loyerHc);
+  const loyerHorsCharges = enCentimes(loyerMensuelHc(location));
   const codePostal = enregistre.adresse?.codePostal;
   return {
     bien: {
@@ -66,8 +84,10 @@ export function brouillonDepuisProjet(enregistre: ProjetEnregistre, aujourdhui: 
       debut: `${periodeSuivante(periodeDe(aujourdhui))}-01`,
       jourLoyer: JOUR_LOYER_DEFAUT,
       loyerHorsCharges,
-      charges: enCentimes(hypotheses.location.chargesLocataire),
-      depot: depotParDefaut(type, loyerHorsCharges),
+      charges: enCentimes(chargesMensuelles(location)),
+      // Bail mobilité (moyenne durée) : aucun dépôt de garantie ne peut être exigé (loi du 6 juillet
+      // 1989, art. 25-6).
+      depot: location.mode === 'moyenne_duree' ? 0 : depotParDefaut(type, loyerHorsCharges),
     },
   };
 }

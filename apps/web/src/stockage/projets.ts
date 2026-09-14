@@ -1,4 +1,4 @@
-import { ProjetSchema, projetExemple, type ProjetEntree } from '@loupe/moteur';
+import { ProjetSchema, migrerProjet, projetExemple, type ProjetEntree } from '@loupe/moteur';
 import { z } from 'zod';
 
 export const StatutProjetSchema = z.enum([
@@ -78,12 +78,25 @@ const ListeSchema = z.array(ProjetEnregistreSchema);
 
 export const CLE_STOCKAGE = 'loupe.projets.v1';
 
+/**
+ * Un projet enregistré dans un format antérieur est migré avant validation (types d'exploitation de
+ * septembre 2026) : les projets déjà enregistrés et les liens de partage continuent de se charger.
+ */
+export function migrerEnregistre(brut: unknown): unknown {
+  if (typeof brut !== 'object' || brut === null || Array.isArray(brut) || !('projet' in brut)) {
+    return brut;
+  }
+  return { ...brut, projet: migrerProjet(brut.projet) };
+}
+
 /** Lit la liste ; un contenu absent ou invalide donne une liste vide (jamais d'exception). */
 export function lireProjets(stockage: Storage): ProjetEnregistre[] {
   const brut = stockage.getItem(CLE_STOCKAGE);
   if (brut === null) return [];
   try {
-    const resultat = ListeSchema.safeParse(JSON.parse(brut));
+    const json: unknown = JSON.parse(brut);
+    const liste = Array.isArray(json) ? json.map(migrerEnregistre) : json;
+    const resultat = ListeSchema.safeParse(liste);
     return resultat.success ? resultat.data : [];
   } catch {
     return [];
