@@ -1,0 +1,30 @@
+{
+  "feature_slug": "achat-negociation",
+  "title": "Achat : curseur de négociation, prix retenu, rénovation énergétique cachée, travaux repliés (fiche 04)",
+  "started_at": "2026-09-14T09:00:00Z",
+  "current_step": "specs",
+  "scope": "packages/moteur/src/{schema/hypotheses.ts,achat,financement,cashflow/charges.ts,rendement,revente,estimation,verdict,scenarios,calculer-base.ts,schema/resultats.ts}, apps/web/src/{composants/Curseur.tsx,ecrans/Hypotheses.tsx,ecrans/hypotheses,ecrans/FormulaireProjet.tsx,ecrans/rapport/CartePrix.tsx,coque/ProjetLayout.tsx,ecrans/{MesProjets,Comparer,Revente,Adresse}.tsx,ecrans/document,analyses,hypotheses,textes}, apps/web/e2e",
+  "branch": "feat/achat-negociation",
+  "base": "master (9d38892, après PR #38)",
+  "steps": {
+    "discovery": {
+      "status": "completed",
+      "output": ".product/features/achat-negociation-discovery.md",
+      "note": "questions de périmètre posées à Pierre avec recommandations ; avancée sur les recommandations (taux stocké, négociation sur le total affiché, curseur 0 à −15 % par 0,5 %, rénovation énergétique gardée et cachée, travaux repliés, Viser le prix estimé)"
+    },
+    "specs": { "status": "in_progress", "output": ".product/specs/achat-negociation-specs.md" },
+    "architecture": { "status": "pending", "output": ".product/architecture/achat-negociation.md" },
+    "implement": { "status": "pending", "stories_completed": 0, "stories_total": 4 },
+    "qa_tests": { "status": "pending" },
+    "security": { "status": "pending" },
+    "push": { "status": "pending" }
+  },
+  "decisions": {
+    "stockage": "achat.negociationTaux (0 à 0,3, défaut 0) ; prixRetenu(achat) = prix × (1 − taux) arrondi à l'euro, prix affiché tel quel à taux nul",
+    "honoraires": "négociation sur le prix total affiché ; honoraires d'agence inchangés en euros",
+    "curseur": "0 à −15 % par pas de 0,5 % ; champ % à côté jusqu'à 30 % ; pas de surenchère",
+    "viser": "taux arrondi au pas, plafonné à 15 %, qui amène le prix retenu au centre de l'estimation ; masqué si le prix affiché est déjà sous l'estimation",
+    "renovation": "règle gardée dans le moteur ; case visible seulement en location nue avec travaux > 0",
+    "travaux": "dépliant « + Ajouter des travaux » (travaux, rénovation, mobilier) dans Hypothèses, « + Ajouter des travaux » dans Vérifier ; pas de curseur à la création"
+  }
+}

@@ -176,3 +176,27 @@ describe('calculerScenarios et deltas', () => {
     expect(rr.scenarios!.scenarios.every((s) => s.deltas.tri === null)).toBe(true);
   });
 });
+
+describe('négociation du prix', () => {
+  const achatNegocie = { ...projetExemple.hypotheses.achat, negociationTaux: 0.05 };
+  const negocie = variante({ achat: achatNegocie });
+
+  it('avecPrix fixe un prix retenu exact : la négociation est remise à zéro', () => {
+    const v = avecPrix(negocie, 80_000);
+    expect(v.hypotheses.achat).toMatchObject({ prix: 80_000, negociationTaux: 0 });
+    expect(calculerBase(v, regles).achat.prixRetenu).toBe(80_000);
+  });
+
+  it("l'écart d'un prix cible se lit depuis le prix affiché, celui que l'on négocie", () => {
+    const cible = prixCible(negocie, 'cashflow_zero', regles);
+    expect(cible.prix).not.toBeNull();
+    expect(cible.ecart).toBeCloseTo(cible.prix! / 155_000 - 1, 10);
+  });
+
+  it('le repli du levier « Négocier » retient 90 % du prix retenu', () => {
+    const sansLoyer = variante({ location: { mode: 'nu', loyerHc: 0 }, achat: achatNegocie });
+    const negocier = TRANSFORMATIONS[0]!(sansLoyer, regles);
+    expect(negocier.code).toBe('negocier');
+    expect(negocier.parametres.prix).toBe(Math.round(147_250 * 0.9));
+  });
+});

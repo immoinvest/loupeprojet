@@ -1,3 +1,4 @@
+import { prixRetenu } from '../achat';
 import { arrondirEuro, arrondirTaux } from '../commun/arrondi';
 import type { NiveauConfiance, Regles } from '../regles/types';
 import type { Bien, EtatBien } from '../schema/bien';
@@ -44,7 +45,7 @@ export interface EstimationPrix {
   readonly marge: number;
   readonly charges: ChargesComparees | null;
   readonly actualiseAu: string | null;
-  /** Prix affiché ÷ estimation − 1 : négatif = affiché sous l'estimation. */
+  /** Prix retenu (négocié) ÷ estimation − 1 : négatif = sous l'estimation. */
   readonly ecartPrix: number;
 }
 
@@ -103,7 +104,7 @@ export function effetCharges(
   const { loyerReferenceM2 } = projet.marche;
   const rendementLocal =
     loyerReferenceM2 === undefined
-      ? (projet.hypotheses.location.loyerHc * 12) / projet.hypotheses.achat.prix
+      ? (projet.hypotheses.location.loyerHc * 12) / prixRetenu(projet.hypotheses.achat)
       : (loyerReferenceM2 * 12) / dvf.medianM2;
   if (rendementLocal <= 0) return null;
   const repereAnnuel = regles.estimation.charges.repereM2An * projet.bien.surface;
@@ -195,6 +196,6 @@ export function estimerPrix(projet: Projet, regles: Regles): EstimationPrix | nu
             borneAtteinte: charges.borneAtteinte,
           },
     actualiseAu: dvf.actualiseAu ?? null,
-    ecartPrix: arrondirTaux(projet.hypotheses.achat.prix / centre - 1),
+    ecartPrix: arrondirTaux(prixRetenu(projet.hypotheses.achat) / centre - 1),
   };
 }
