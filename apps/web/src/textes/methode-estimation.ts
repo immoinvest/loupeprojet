@@ -107,7 +107,7 @@ export function sectionEstimation(regles: Regles): SectionMethode {
       },
       {
         libelle: 'Confiance : localisation du repère',
-        valeur: `même immeuble ${String(c.localisation.immeuble)} · même rue ${String(c.localisation.rue)} · quartier ${c.localisation.quartier
+        valeur: `même immeuble ${String(c.localisation.immeuble)} · même rue ${String(c.localisation.rue.points)} jusqu’à ${nombre(c.localisation.rue.jusquaMetres)} m, au-delà comme le quartier · quartier ${c.localisation.quartier
           .map((p) =>
             p.jusquaMetres === null
               ? `au-delà ${String(p.points)}`

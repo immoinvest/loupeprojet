@@ -156,10 +156,12 @@ export const regles202609: Regles = {
     charges: { repereM2An: 26, borne: 0.15 },
     // Choix Deklic (14/09/2026) : note sur 100 = localisation (35) + comparables (20) + dispersion (30)
     // + ancienneté (15). Barèmes en paliers interpolés, bornés au premier et au dernier palier.
+    // Rue : 30 points tant que ses ventes tiennent dans 150 m ; au-delà, les points du quartier pour
+    // son étendue (demande de Pierre, 14/09/2026 : une rue de 531 m ne vaut pas mieux qu'un cercle).
     confiance: {
       localisation: {
         immeuble: 35,
-        rue: 30,
+        rue: { points: 30, jusquaMetres: 150 },
         quartier: [
           { jusquaMetres: 100, points: 26 },
           { jusquaMetres: 200, points: 22 },

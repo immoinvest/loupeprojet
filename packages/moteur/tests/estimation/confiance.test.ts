@@ -67,6 +67,8 @@ describe('précision, dispersion et localisation du repère', () => {
   it('localisation : immeuble, rue, quartier par rayon, commune', () => {
     expect(pointsLocalisation('immeuble', undefined, regles)).toBe(35);
     expect(pointsLocalisation('rue', 90, regles)).toBe(30);
+    expect(pointsLocalisation('rue', 150, regles)).toBe(30);
+    expect(pointsLocalisation('rue', undefined, regles)).toBe(30);
     expect(pointsLocalisation('quartier', 90, regles)).toBe(26);
     expect(pointsLocalisation('quartier', 100, regles)).toBe(26);
     expect(pointsLocalisation('quartier', 150, regles)).toBe(22);
@@ -74,6 +76,16 @@ describe('précision, dispersion et localisation du repère', () => {
     expect(pointsLocalisation('quartier', 500, regles)).toBe(12);
     expect(pointsLocalisation('quartier', undefined, regles)).toBe(12);
     expect(pointsLocalisation('commune', undefined, regles)).toBe(4);
+  });
+
+  it('rue étendue au-delà de 150 m : les points du quartier pour son étendue (demande de Pierre)', () => {
+    expect(pointsLocalisation('rue', 151, regles)).toBe(22);
+    expect(pointsLocalisation('rue', 300, regles)).toBe(18);
+    // Rue de l'Olivier, repère « même côté » vu en production le 14/09/2026 : 531 m.
+    expect(pointsLocalisation('rue', 531, regles)).toBe(12);
+    // Jamais plus que les points d'une rue, même si un palier de quartier en donnait davantage.
+    const genereux = avecQuartier([{ jusquaMetres: null, points: 34 }]);
+    expect(pointsLocalisation('rue', 531, genereux)).toBe(30);
   });
 
   it('barème de quartier sans palier ouvert : le dernier palier ; sans palier : zéro', () => {
@@ -143,6 +155,17 @@ describe('confianceEstimation', () => {
     const rue = dvf({ ...immeuble, precision: 'rue', rayonMetres: 90, ancienneteMedianeMois: 15 });
     // 30 + 5 + 30 + (15 mois → 9,4 → 9) = 74.
     expect(confianceEstimation(rue, regles)).toMatchObject({ note: 74, niveau: 'bonne' });
+    expect(confianceEstimation(rue, regles).composantes[0]).toMatchObject({
+      valeur: 90,
+      points: 30,
+    });
+    // La même rue étirée sur 531 m : 12 + 5 + 30 + 9 = 56, moyenne.
+    const longue = confianceEstimation(dvf({ ...rue, rayonMetres: 531 }), regles);
+    expect(longue).toMatchObject({ note: 56, niveau: 'moyenne', precision: 'rue' });
+    expect(longue.composantes[0]).toMatchObject({ valeur: 531, points: 12, maximum: 35 });
+    // Rue sans rayon connu : ses points de rue, valeur inconnue.
+    const sansRayon = confianceEstimation(dvf({ ...rue, rayonMetres: undefined }), regles);
+    expect(sansRayon.composantes[0]).toMatchObject({ valeur: null, points: 30 });
   });
 
   it('projet enregistré avant la feature : précision déduite du rayon, ancienneté supposée', () => {
