@@ -1,24 +1,9 @@
-import {
-  capturer,
-  creerRegistre,
-  resoudreAnnonce,
-  urlDeCapture,
-  type Registre,
-} from '@loupe/capture';
-import bienici from '@loupe/extension/regles/bienici.json';
-import leboncoin from '@loupe/extension/regles/leboncoin.json';
-import logicimmo from '@loupe/extension/regles/logicimmo.json';
-import pap from '@loupe/extension/regles/pap.json';
-import seloger from '@loupe/extension/regles/seloger.json';
+import { capturer, resoudreAnnonce, urlDeCapture, type Registre } from '@loupe/capture';
+
+import { REGISTRE_WEB } from '../annonces/regles';
 
 /** Les mêmes règles que l'extension, figées dans le bouton-favori au moment du build du web. */
-export const REGISTRE_FAVORI: Registre = creerRegistre([
-  leboncoin,
-  seloger,
-  bienici,
-  pap,
-  logicimmo,
-]);
+export const REGISTRE_FAVORI: Registre = REGISTRE_WEB;
 
 /** Ce dont le bouton-favori a besoin de la fenêtre du portail : rien de plus, pour rester testable. */
 export interface FenetrePortail {

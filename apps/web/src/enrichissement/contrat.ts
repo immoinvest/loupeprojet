@@ -1,3 +1,4 @@
+import { PortailSchema } from '@loupe/capture';
 import { z } from 'zod';
 
 /**
@@ -38,6 +39,22 @@ export const ReponseExtractionSchema = z.object({
   modele: z.string(),
 });
 export type ChampsIa = z.infer<typeof ReponseExtractionSchema>['champs'];
+
+/**
+ * POST /lecture : la page d'une annonce, récupérée par le Worker quand l'extension ne le peut pas
+ * (ADR-008). Le HTML ne vit qu'en mémoire, le temps d'y appliquer les règles.
+ */
+export const ReponseLectureSchema = z.object({
+  portail: PortailSchema,
+  url: z.url(),
+  page: z.discriminatedUnion('type', [
+    z.object({ type: z.literal('html'), html: z.string().min(1).max(3_000_000) }),
+    z.object({ type: z.literal('donnees'), donnees: z.record(z.string(), z.unknown()) }),
+  ]),
+  tentatives: z.number().int().min(1).max(2),
+  obtenuLe: z.iso.datetime(),
+});
+export type PageLue = z.infer<typeof ReponseLectureSchema>;
 
 /** GET /proxy/geocodage : on n'utilise que le premier résultat. */
 export const ResultatGeocodageSchema = z.object({

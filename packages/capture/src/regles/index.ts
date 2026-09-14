@@ -7,7 +7,7 @@ export {
   type OptionsCapture,
 } from './appliquer';
 export { lireChemin } from './chemin';
-export { convertir, normaliserTexte } from './convertir';
+export { convertir, normaliserTexte, type ValeurConvertie } from './convertir';
 export { creerRegistre, type Registre } from './registre';
 export {
   DonneesPortailSchema,

@@ -3,7 +3,9 @@ import {
   migrerEnregistre,
   NOM_EXEMPLE,
   ProjetEnregistreSchema,
+  AnnonceEnregistreeSchema,
   type AdresseBien,
+  type AnnonceEnregistree,
   type ProjetEnregistre,
   type StatutProjet,
   type Visite,
@@ -13,6 +15,7 @@ import { z } from 'zod';
 // Les schémas d'un projet enregistré sont partagés avec l'API des comptes (synchronisation).
 export {
   AdresseBienSchema,
+  AnnonceEnregistreeSchema,
   EtatReponseSchema,
   LONGUEUR_MAX_NOTE,
   migrerEnregistre,
@@ -24,6 +27,7 @@ export {
 } from '@loupe/projets';
 export type {
   AdresseBien,
+  AnnonceEnregistree,
   EtatReponse,
   ProjetEnregistre,
   ReponseVisite,
@@ -72,6 +76,8 @@ export interface OptionsCreation {
   /** Adresse exacte et visite reprises d'un projet reçu par lien, ou visite déjà faite à la création. */
   readonly adresse?: AdresseBien;
   readonly visite?: Visite;
+  /** Photos et fiche de l'annonce lue ; écartées si elles ne passent pas la validation. */
+  readonly annonce?: AnnonceEnregistree;
   readonly maintenant?: () => string;
   readonly genererId?: () => string;
 }
@@ -83,6 +89,9 @@ export function creerProjet(options: OptionsCreation = {}): ProjetEnregistre {
   const source = options.source ?? projetExemple;
   const id = genererId();
   const date = maintenant();
+  // Une annonce invalide rendrait toute la liste illisible au prochain chargement : on la laisse de côté.
+  const annonce =
+    options.annonce === undefined ? null : AnnonceEnregistreeSchema.safeParse(options.annonce);
   return {
     id,
     nom: options.nom ?? nomParDefaut(source),
@@ -91,6 +100,7 @@ export function creerProjet(options: OptionsCreation = {}): ProjetEnregistre {
     modifieLe: date,
     ...(options.adresse === undefined ? {} : { adresse: options.adresse }),
     ...(options.visite === undefined ? {} : { visite: options.visite }),
+    ...(annonce?.success === true ? { annonce: annonce.data } : {}),
     projet: ProjetSchema.parse({ ...source, id }),
   };
 }

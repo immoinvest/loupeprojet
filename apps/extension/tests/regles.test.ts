@@ -71,11 +71,11 @@ async function lire(
 describe('registre des règles', () => {
   it('connaît les cinq portails, chacun avec une version datée', () => {
     expect(REGISTRE.versions()).toEqual({
-      leboncoin: 'leboncoin-2026-09-13',
-      seloger: 'seloger-2026-09-13',
-      bienici: 'bienici-2026-09-13',
-      pap: 'pap-2026-09-13',
-      logicimmo: 'logicimmo-2026-09-13',
+      leboncoin: 'leboncoin-2026-09-14',
+      seloger: 'seloger-2026-09-14',
+      bienici: 'bienici-2026-09-14',
+      pap: 'pap-2026-09-14',
+      logicimmo: 'logicimmo-2026-09-14',
     });
   });
 });
@@ -97,7 +97,7 @@ describe('capture par portail', () => {
         dpe: 'D',
         ges: 'B',
         mode: 'extension',
-        regles: `${portail}-2026-09-13`,
+        regles: `${portail}-2026-09-14`,
         captureLe: '2026-09-13T10:41:00.000Z',
       });
       expect(capture.ville).toMatch(/^Marseille/);
@@ -179,7 +179,7 @@ describe('capture par portail', () => {
       id: '26FZC3J4KETZ',
       captureLe: '2026-09-13T10:41:00.000Z',
       mode: 'extension',
-      regles: 'seloger-2026-09-13',
+      regles: 'seloger-2026-09-14',
     });
   });
 

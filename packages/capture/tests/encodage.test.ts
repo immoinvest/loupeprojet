@@ -62,8 +62,13 @@ describe('encoderCapture / decoderCapture', () => {
   });
 
   it('ignore les clés inconnues au décodage (compatibilité ascendante d’une capture enrichie)', () => {
-    const encode = base64url(JSON.stringify({ ...CAPTURE_MINIMALE, photos: ['a', 'b'] }));
+    const encode = base64url(JSON.stringify({ ...CAPTURE_MINIMALE, telephoneVendeur: '06' }));
     expect(decoderCapture(encode)).toEqual({ ok: true, capture: CAPTURE_MINIMALE });
+  });
+
+  it('refuse une capture dont les photos ne sont pas des adresses https (champ connu, donc validé)', () => {
+    const encode = base64url(JSON.stringify({ ...CAPTURE_MINIMALE, photos: ['a', 'b'] }));
+    expect(decoderCapture(encode)).toEqual({ ok: false, raison: 'schema' });
   });
 });
 
