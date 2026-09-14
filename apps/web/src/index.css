@@ -40,9 +40,10 @@
   --shadow-carte: 0 6px 24px rgba(35, 39, 47, 0.05);
 }
 
-/* Hauteur de la barre d'app des écrans de moins de 1 024 px (BarreApp) : les éléments collants se
-   placent dessous, et une ancre ne s'arrête pas derrière elle. */
+/* La coque tient dans la fenêtre et seul le contenu défile (AppLayout). Largeur de la barre
+   latérale à partir de 1 024 px ; hauteur de la barre d'app des écrans plus étroits (BarreApp). */
 :root {
+  --largeur-menu: 14rem;
   --hauteur-barre-app: calc(3.5rem + 1px + env(safe-area-inset-top, 0px));
 }
 @media (min-width: 64rem) {
@@ -56,12 +57,11 @@ html {
   color: var(--color-encre);
   font-family: var(--font-sans);
   font-variant-numeric: tabular-nums;
-  scroll-padding-top: var(--hauteur-barre-app);
 }
 
 body {
   margin: 0;
-  min-height: 100vh;
+  min-height: 100dvh;
 }
 
 a {
