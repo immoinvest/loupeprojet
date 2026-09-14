@@ -1,0 +1,33 @@
+{
+  "feature_slug": "coque-menus",
+  "title": "Menu : ligne « Mes projets · N [+] » (fiche 12) et menu du statut du projet aux couleurs de Deklic (fiche 18)",
+  "started_at": "2026-09-15T00:00:00Z",
+  "current_step": "implement",
+  "scope": "apps/web/src/{coque/LigneAvecAjout,SectionAnalyser,SelecteurStatut,liens ; composants/MenuChoix, menu-choix ; textes/gerer, statut ; index.css (animation)} ; tests Vitest et Playwright du menu et du statut ; docs",
+  "branch": "feat/coque-menus",
+  "base": "master (e6f70f60)",
+  "steps": {
+    "discovery": { "status": "completed", "output": ".product/features/coque-menus-discovery.md" },
+    "specs": {
+      "status": "completed",
+      "output": ".product/specs/coque-menus-specs.md",
+      "stories_count": 4
+    },
+    "architecture": { "status": "completed", "output": ".product/architecture/coque-menus.md" },
+    "implement": {
+      "status": "in_progress",
+      "stories_completed": 0,
+      "stories_total": 3,
+      "commits": []
+    },
+    "qa_tests": { "status": "pending" },
+    "security": { "status": "pending" },
+    "push": { "status": "pending" }
+  },
+  "decisions": {
+    "gerer": "page Mes biens absente de master : US-4 bloquée, Gérer inchangé",
+    "composant": "shadcn/ui absent : composant maison MenuChoix",
+    "ordre_statuts": "parcours puis Scénario / Écarté séparés",
+    "achete_gerer": "déjà livré par la PR #74"
+  }
+}

@@ -29,7 +29,7 @@ export async function ouvrirVolet(page: Page, volet: Volet, titre: string | RegE
 }
 
 /**
- * La section « Analyser » du menu (nouveau projet, trois projets récents, tous mes projets) : barre latérale à
+ * La section « Analyser » du menu (« Mes projets · N » et son « + », trois projets récents) : barre latérale à
  * partir de 1 024 px, tiroir en dessous. Ouvre le tiroir quand le bouton de menu est affiché.
  */
 export async function ouvrirNavigation(page: Page): Promise<Locator> {
