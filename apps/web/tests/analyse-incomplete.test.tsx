@@ -50,7 +50,7 @@ describe('Rapport sans loyer', () => {
     ).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: "Est-ce que c'est cher ?" })).toBeInTheDocument();
     expect(screen.getByText('Non.')).toBeInTheDocument();
-    expect(screen.getAllByText('À compléter')).toHaveLength(3);
+    expect(screen.getAllByText('À compléter')).toHaveLength(4);
     expect(
       screen.getByRole('heading', { name: "Est-ce que ça s'autofinance ?" }),
     ).toBeInTheDocument();

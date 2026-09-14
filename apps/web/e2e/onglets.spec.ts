@@ -35,11 +35,16 @@ test('fiscalité : « Retenir ce régime » change le régime retenu et le rappo
   );
 });
 
-test('revente : cliquer « Dans 20 ans » change l’horizon', async ({ page }) => {
+test('revente : le curseur, le clavier et les repères changent l’horizon', async ({ page }) => {
   await ouvrirExemple(page);
   await ouvrirVolet(page, 'Revente', "Qu'est-ce qu'il vous restera ?");
 
-  const horizons = page.getByRole('group', { name: 'Horizon de revente' });
+  const curseur = page.getByRole('slider', { name: 'Revente dans' });
+  await expect(curseur).toHaveValue('10');
+  await expect(curseur).toHaveAttribute('aria-valuetext', 'Dans 10 ans');
+  await expect(page.getByText(/Plus-value imposée à\s*29,1 %\s*à 10 ans/)).toBeVisible();
+  await expect(page.getByText(/22 ans : plus d'impôt sur le revenu/)).toBeVisible();
+  const horizons = page.getByRole('group', { name: 'Horizons repères' });
   await expect(horizons.getByRole('button')).toHaveCount(4);
   await expect(horizons.getByRole('button', { name: /Dans 10 ans/ })).toHaveAttribute(
     'aria-pressed',
@@ -47,8 +52,26 @@ test('revente : cliquer « Dans 20 ans » change l’horizon', async ({ page }) 
   );
   await expect(page.getByRole('heading', { level: 2, name: 'Revente dans 10 ans' })).toBeVisible();
 
+  // Au clavier : deux pas à droite.
+  await curseur.focus();
+  await curseur.press('ArrowRight');
+  await curseur.press('ArrowRight');
+  await expect(curseur).toHaveValue('12');
+  await expect(page.getByRole('heading', { level: 2, name: 'Revente dans 12 ans' })).toBeVisible();
+  await expect(page.getByText(/Plus-value imposée à\s*26,2 %\s*à 12 ans/)).toBeVisible();
+  await expect(horizons.getByRole('button', { name: /Dans 10 ans/ })).toHaveAttribute(
+    'aria-pressed',
+    'false',
+  );
+
+  // Au pointeur : la valeur posée directement, comme un glissement relâché.
+  await curseur.fill('25');
+  await expect(page.getByRole('heading', { level: 2, name: 'Revente dans 25 ans' })).toBeVisible();
+  await expect(page.getByText('Cash-flows cumulés sur 25 ans')).toBeVisible();
+
   await horizons.getByRole('button', { name: /Dans 20 ans/ }).click();
 
+  await expect(curseur).toHaveValue('20');
   await expect(horizons.getByRole('button', { name: /Dans 20 ans/ })).toHaveAttribute(
     'aria-pressed',
     'true',

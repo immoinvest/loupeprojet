@@ -223,7 +223,14 @@ describe('données de marché', () => {
     expect(marcheDepuisReponse(MARCHE)).toEqual({
       codeInsee: '13205',
       marche: {
-        dvf: { medianM2: 3423, q1M2: 2833, q3M2: 4135, nombreVentes: 1823 },
+        dvf: {
+          medianM2: 3423,
+          q1M2: 2833,
+          q3M2: 4135,
+          nombreVentes: 1823,
+          precision: 'commune',
+          lieu: 'Marseille 5e Arrondissement',
+        },
         loyerReferenceM2: 13.83,
       },
       provenance: {
@@ -239,6 +246,36 @@ describe('données de marché', () => {
       marche: {},
       provenance: {},
     });
+  });
+
+  it('garde la période et l’ancienneté des ventes quand le Worker les donne, sans lieu si la commune est inconnue', () => {
+    const complet = marcheDepuisReponse({
+      ...MARCHE,
+      commune: null,
+      dvf: {
+        ...MARCHE.dvf!,
+        fenetre: { debut: '2024-01-01', fin: '2025-12-31' },
+        dateMediane: '2025-01-13',
+        ancienneteMedianeMois: 20,
+      },
+    });
+    expect(complet.marche.dvf).toEqual({
+      medianM2: 3423,
+      q1M2: 2833,
+      q3M2: 4135,
+      nombreVentes: 1823,
+      precision: 'commune',
+      periode: { debut: '2024-01-01', fin: '2025-12-31' },
+      ancienneteMedianeMois: 20,
+    });
+    expect(complet.provenance['marche.dvf.ancienneteMedianeMois']).toBe('dvf');
+    // Ancienneté nulle (date illisible côté Worker) : le champ est simplement absent.
+    const sansDate = marcheDepuisReponse({
+      ...MARCHE,
+      dvf: { ...MARCHE.dvf!, dateMediane: null, ancienneteMedianeMois: null },
+    });
+    expect(sansDate.marche.dvf?.ancienneteMedianeMois).toBeUndefined();
+    expect(sansDate.provenance['marche.dvf.ancienneteMedianeMois']).toBeUndefined();
   });
 
   const saisie: SaisieProjet = {
@@ -288,6 +325,8 @@ describe('données de marché', () => {
       q1M2: 2833,
       q3M2: 4135,
       nombreVentes: 1823,
+      precision: 'commune',
+      lieu: 'Marseille 5e Arrondissement',
     });
     expect(projet.provenance?.['marche.dvf.medianM2']).toBe('dvf');
     expect(projet.provenance?.['achat.prix']).toBe('annonce');

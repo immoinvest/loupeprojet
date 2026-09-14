@@ -26,7 +26,7 @@ Concurrents : Horiz.io (8–20 €/mois, complet, saisie manuelle), Lybox (9–4
 2. **Lire** — données structurées de la page, puis LLM (JSON strict) pour les champs manquants, repli regex. 0 ou 1 appel, ~2 s.
 3. **Enrichir** — géocodage puis en parallèle : DVF 500 m, DPE ADEME, loyers ANIL, taux TF (REI), Géorisques, zonage ABC, population. Zéro LLM.
 4. **Vérifier** — un écran, badges `annonce` / `donnée publique` / `estimé` / `à toi`. Seuls prix, surface, code postal et ville sont exigés (feature `hypotheses-optionnelles`, 14/09/2026) : apport 0 €, durée 25 ans et tranche 30 % sont pré-remplis et marqués « estimé » ; un loyer vide est pris dans les loyers de marché ANIL de la commune, sinon le projet est créé sans loyer ; les revenus sont facultatifs. Sans loyer, le rapport est partiel : prix, financement, estimation et risques sont calculés ; cash-flow, impôts, revente, rendement et scénarios affichent « Il manque le loyer visé pour cette analyse » avec le champ sur place. Sans revenus, seul le feu « effort » attend.
-5. **Le rapport** — verdict + cinq feux, puis Financement, Cash-flow, Fiscalité (4 régimes), Revente, Rendement & TRI. Tout modifiable en place, recalcul instantané.
+5. **Le rapport** — verdict + cinq feux, puis l'autofinancement en carte principale (cascade loyer → après le crédit → après les charges → après l'impôt, part du loyer prise par le crédit, effort d'épargne ou excédent, loyer d'équilibre), le prix vs ventes réelles, les rendements brut · net · net-net, les leviers, la fiscalité (4 régimes) et la revente (multiple sur apport). Chaque titre et chaque repère porte une icône ⓘ qui ouvre une bulle chiffrée ; un lien « Voir … → » mène à l'onglet qui détaille (Estimation, Fiscalité, Revente). Tout modifiable dans Hypothèses, recalcul instantané.
 6. **Garder** — sauvegarde locale, PDF via impression, lien de partage (projet encodé dans l'URL), compte optionnel par Google, Apple ou code à 6 chiffres reçu par e-mail (livré le 13/09/2026, ADR-006 ; synchronisation des projets à venir). Livré le 13/09/2026 (feature `garder`) : dossier imprimable `/projets/:id/imprimer`, lien `/partage#p=…` en lecture seule avec « Ajouter à mes projets », comparaison de 2 à 5 projets sans compte (`/comparer`, avancée de la v1.5) et page « Comment c'est calculé » (`/methode`).
 
 ## Pipeline technique (9 étapes)
@@ -47,7 +47,8 @@ Concurrents : Horiz.io (8–20 €/mois, complet, saisie manuelle), Lybox (9–4
 
 ### Financement
 
-- **Frais d'acquisition calculés** (base = prix hors honoraires d'agence) : DMTO 4,50 % ou 5 % selon département (jusqu'au 31/03/2028) + taxe communale 1,20 % + frais d'assiette 2,37 % du DMTO ; émoluments notaire par tranches 3,870 % / 1,596 % / 1,064 % / 0,799 % HT + TVA 20 % ; contribution de sécurité immobilière 0,10 % ; débours ~0,4 %. Ancien : 7 à 8,5 %.
+- **Prix retenu** : prix affiché × (1 − négociation), arrondi à l'euro (curseur 0 à −15 % par 0,5 % dans Hypothèses, jusqu'à 30 % au clavier ; défaut 0 : prix affiché tel quel) ; honoraires d'agence inchangés en euros ; tout le rapport (notaire, prêt, rendements, revente, estimation, feu prix, scénarios) se calcule sur le prix retenu. « Viser le prix estimé » règle le curseur sur le centre de l'estimation.
+- **Frais d'acquisition calculés** (base = prix retenu hors honoraires d'agence) : DMTO 4,50 % ou 5 % selon département (jusqu'au 31/03/2028) + taxe communale 1,20 % + frais d'assiette 2,37 % du DMTO ; émoluments notaire par tranches 3,870 % / 1,596 % / 1,064 % / 0,799 % HT + TVA 20 % ; contribution de sécurité immobilière 0,10 % ; débours ~0,4 %. Ancien : 7 à 8,5 %.
 - **Mensualité** PMT, tableau d'amortissement complet ; assurance en % du capital initial (0,10–0,35 %).
 - **TAEG** par résolution du taux interne, frais de dossier + garantie inclus.
 - **Taux d'effort HCSF** : mensualité assurance comprise ÷ (revenus + 70 % des loyers). Seuil 35 %, 25 ans (27 si travaux ≥ 10 %). Afficher « ta banque calculera probablement… » et « au pire… ».
@@ -83,7 +84,7 @@ Projection année par année sur la durée de détention avec stocks de déficit
 - **TRI réel** sur flux annuels (apport + mobilier en année 0, cash-flows après impôt, cash net de revente en N).
 - Enrichissement = capital remboursé + plus-value nette + cash-flows cumulés − apport.
 - **Verdict cinq feux** (bon / à surveiller / problème) : prix vs DVF, rendement net, cash-flow, effort HCSF, risques (DPE F/G, copro en procédure, zone à risque). Pas de note globale.
-- **Scénarios** : négocier (prix cible pour cash-flow 0, net 6 %, brut 8 %), colocation, durée, taux +0,5 pt, nu, vacance.
+- **Scénarios** : négocier (prix cible pour cash-flow 0, net 6 %, brut 8 % ; à défaut −10 % du prix retenu), colocation, durée, taux +0,5 pt, nu, vacance.
 
 ## Cas de référence : « Ton Excel → Loupe » (projet 92K, prix 155 000 €)
 
@@ -107,7 +108,7 @@ Corrections au modèle Excel : travaux soit en charge soit amortis, jamais les d
 
 ## Estimations
 
-- **Prix** : médiane €/m² DVF 500 m / 24 mois, ±10 % selon surface ; fourchette Q1–Q3.
+- **Prix** : médiane €/m² DVF 500 m / 24 mois, ±10 % selon surface ; fourchette Q1–Q3. Depuis `estimation-confiance` : une **note de confiance sur 100** accompagne l'estimation (localisation du repère 35, dispersion des prix 30, ventes comparables 20, ancienneté des ventes 15 ; cinq niveaux, marge de la fourchette de ±5 % à ±15 % selon le niveau), affichée en tête de l'onglet avec ses raisons ; sans adresse, le repère de commune ou d'arrondissement est montré tel quel (« moins précis »).
 - **Loyer** : ANIL commune par type, −8 % HC, +15–25 % meublé, +30–45 % colocation ; plafonné par l'encadrement.
 - **Travaux** : rafraîchissement 150–300 €/m², moyen 500–800, lourd 1 000–1 500 ; DPE F/G → rénovation énergétique + rappel interdictions (G 2025, F 2028, E 2034).
 - **Taxe foncière** : taux REI × VL estimée, croisé avec 0,8–1,2 mois de loyer ; « estimation, demander l'avis ».

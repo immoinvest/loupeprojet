@@ -2,10 +2,10 @@
   "feature_slug": "hypotheses-optionnelles",
   "title": "Hypothèses optionnelles : quatre chiffres suffisent, une analyse qui manque d'une donnée le dit et offre le champ",
   "started_at": "2026-09-14T12:00:00Z",
-  "current_step": "implement",
+  "current_step": "push",
   "scope": "packages/moteur/src/{schema/manques.ts,schema/hypotheses.ts,schema/projet.ts,schema/resultats.ts,calculer-base.ts,calculer-projet.ts,financement/effort.ts,verdict,estimation,cashflow,fiscalite,scenarios}, apps/web/src/{annonces/construire.ts,ecrans/formulaire,ecrans/FormulaireProjet.tsx,ecrans/projet/AnalyseIncomplete.tsx,ecrans/rapport/CarteACompleter.tsx,ecrans/{Rapport,Fiscalite,Revente,Hypotheses,MesProjets}.tsx,ecrans/adresse/Loyer.tsx,hypotheses,analyses,enrichissement/loyer.ts,textes/{manques,feux,verdict,methode-verdict}.ts}, apps/web/e2e, docs",
   "branch": "feat/hypotheses-optionnelles",
-  "base": "master (9d38892, PR #38)",
+  "base": "master (9d38892), puis fusion de origin/master le 14/09/2026 (PR #39 à #45 : coque-fixe, revente-curseur, déconnexion, estimation-confiance, rapport-cashflow, achat-negociation)",
   "prealables": {
     "fiche_01_hypotheses-financement": "non fusionnée au 14/09/2026 (worktree charming-margulis-6cbc94 à la tête de master, aucun commit, aucune PR)",
     "fiche_04_achat-negociation": "non fusionnée au 14/09/2026 (worktree trusting-proskuriakova-d8c7d3 à la tête de master, aucun commit, aucune PR)",
@@ -29,22 +29,25 @@
       "note": "ADR-H1 à H5 : union discriminée complet/partiel, tranche par défaut, loyer de marché à la création, effort inconnu ≠ dépassé, défauts affichés dans Vérifier ; ordre en 7 étapes"
     },
     "implement": {
-      "status": "in_progress",
-      "stories_completed": 5,
+      "status": "completed",
+      "stories_completed": 7,
       "stories_total": 7,
-      "note": "US-1 à US-5 commitées (US-4 livrée dans le commit US-2 : écrans à compléter) ; US-6 (Méthode faite en US-3, e2e écrits) et US-7 (docs) en cours"
+      "note": "US-1 à US-7 commitées ; US-4 livrée avec US-2"
     },
     "refactor": {
-      "status": "pending"
+      "status": "completed",
+      "note": "fusion de master : ResultatsCommuns porte achat ; cartes de la fiche 10 typées ResultatsComplets ; variantesRevente sur projetAHorizon ; helper rapportComplet dans tests/projets.ts"
     },
     "qa_tests": {
-      "status": "pending"
+      "status": "completed",
+      "note": "après fusion : moteur 275 tests, web 420 tests, couverture 100 % ; typecheck des 7 workspaces vert ; vérifié dans le navigateur (quatre champs, bandeau, 700 € → −261 €/mois)"
     },
     "security": {
-      "status": "pending"
+      "status": "completed",
+      "note": "aucune entrée nouvelle hors Zod ; le bandeau passe par appliquerSaisie et mettreAJour (validation Zod) ; aucun appel réseau nouveau ; aucun innerHTML"
     },
     "push": {
-      "status": "pending"
+      "status": "in_progress"
     }
   },
   "decisions": {

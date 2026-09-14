@@ -19,6 +19,8 @@ export interface Defauts {
   readonly honorairesChargeAcquereur: boolean;
   /** Tranche marginale supposée quand elle n'est pas saisie. */
   readonly tmi: number;
+  /** Négociation du prix affiché, en proportion (0 : prix affiché retenu tel quel). */
+  readonly negociationTaux: number;
   readonly pno: number;
   readonly comptable: number;
   readonly cfe: number;
@@ -79,6 +81,7 @@ export function defautsDuMoteur(): Defauts {
     diagnostics: schema.revente.diagnostics,
     honorairesChargeAcquereur: schema.achat.honorairesChargeAcquereur,
     tmi: fiscalite.tmi,
+    negociationTaux: schema.achat.negociationTaux,
     pno: charges.pno,
     comptable: charges.comptable,
     cfe: charges.cfe,

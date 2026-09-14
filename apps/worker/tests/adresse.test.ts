@@ -12,7 +12,11 @@ import {
   estComparable,
   groupesDe,
   lireVentes,
+  MIN_VENTES_PENTE,
   ParametresAdresseSchema,
+  PENTE_MIN,
+  pentePrixSurface,
+  periodeDe,
   quantile,
   statistiquesPrix,
   valeurAuRang,
@@ -231,7 +235,14 @@ interface Reponse {
   cadastre: string;
   ventesCommune: number;
   groupes: { code: string; ventes: number; comparables: number }[];
-  reference: { code: string; rayonMetres: number; statistiques: Record<string, number> } | null;
+  reference: {
+    code: string;
+    rayonMetres: number;
+    statistiques: Record<string, number>;
+    dateMediane: string | null;
+    periode: { debut: string; fin: string } | null;
+    ancienneteMedianeMois: number | null;
+  } | null;
   ventesProches: { adresse: string | null; distanceMetres: number | null }[];
   sources: { nom: string }[];
 }
@@ -299,6 +310,12 @@ describe('statistiques et groupes', () => {
     expect(quantile([1, 2, 3, 4], 0.5)).toBe(2.5);
     expect(() => valeurAuRang([1], 1)).toThrow(RangeError);
     expect(statistiquesPrix([])).toBeNull();
+    expect(periodeDe([])).toEqual({ dateMediane: null, periode: null });
+    expect(periodeDe(['2025-03-01', '2024-11-02'])).toEqual({
+      dateMediane: '2024-11-02',
+      periode: { debut: '2024-11-02', fin: '2025-03-01' },
+    });
+    expect(periodeDe(['2025-03-01', '2024-11-02', '2025-06-15']).dateMediane).toBe('2025-03-01');
     expect(statistiquesPrix([3000, 4000])).toEqual({
       ventes: 2,
       medianeM2: 3500,
@@ -341,6 +358,88 @@ describe('statistiques et groupes', () => {
   });
 });
 
+/** Ventes loin du bien dont le prix au m² suit surface^pente (10 000 € au m² pour 1 m²). */
+function communeAvecPente(pente: number, nombre = MIN_VENTES_PENTE): VenteDvf[] {
+  return Array.from({ length: nombre }, (_, i) => {
+    const surface = 20 + i * 5;
+    return vente({
+      surface,
+      prix: Math.round(10_000 * surface ** pente * surface),
+      idParcelle: '132058200F0003',
+      codeVoie: '9999',
+      numero: 1,
+      lat: LAT + 900 * M_LAT,
+    });
+  });
+}
+
+describe('même adresse et correction de surface', () => {
+  it('une vente au même numéro de la même rue est du même immeuble, même sur une autre parcelle', () => {
+    // 680 avenue de Bagatelle (Aix) : le point de l'adresse tombe sur une parcelle, les ventes sur une autre.
+    expect(groupesDe(vente({ idParcelle: '132058200E0999' }), BIEN, 55)).toEqual([
+      'meme_parcelle',
+      'meme_cote',
+      'rayon_100',
+      'rayon_200',
+      'rayon_300',
+    ]);
+    // Cadastre indisponible : l'adresse suffit.
+    expect(groupesDe(vente(), { ...BIEN, idParcelle: null }, 0)).toContain('meme_parcelle');
+    expect(groupesDe(vente({ numero: 146 }), { ...BIEN, idParcelle: null }, 0)).not.toContain(
+      'meme_parcelle',
+    );
+  });
+
+  it('pente du prix au m² selon la surface, mesurée sur les ventes de la commune du même type', () => {
+    expect(pentePrixSurface(communeAvecPente(-0.2), 'appartement')).toBeCloseTo(-0.2, 3);
+    expect(pentePrixSurface(communeAvecPente(-0.2, MIN_VENTES_PENTE - 1), 'appartement')).toBe(0);
+    expect(pentePrixSurface(communeAvecPente(-0.2), 'maison')).toBe(0);
+    // Communes voisines ignorées : la pente est celle de la commune du bien.
+    const voisine = communeAvecPente(-0.2).map((v) => ({ ...v, codeInsee: '13206' }));
+    expect(pentePrixSurface(voisine, 'appartement')).toBe(0);
+    // Garde-fous : jamais positive, jamais sous PENTE_MIN, nulle quand toutes les surfaces sont égales.
+    expect(pentePrixSurface(communeAvecPente(0.3), 'appartement')).toBe(0);
+    expect(pentePrixSurface(communeAvecPente(-1.2), 'appartement')).toBe(PENTE_MIN);
+    const egales = Array.from({ length: MIN_VENTES_PENTE }, () => vente());
+    expect(pentePrixSurface(egales, 'appartement')).toBe(0);
+  });
+
+  it('garde toutes les ventes du même immeuble, prix au m² ramené à la surface du bien', () => {
+    // La vente du même immeuble compte aussi dans la pente : on la place sur la courbe de la commune.
+    // 120 m² pour un bien de 60 m², pente −0,2 : son prix au m² × (60/120)^−0,2 = celui d'un 60 m².
+    const prixM2A120 = Math.round(10_000 * 120 ** -0.2);
+    const prixM2A60 = Math.round(10_000 * 60 ** -0.2);
+    const memeAdresse = vente({
+      idParcelle: '132058200E0999',
+      surface: 120,
+      prix: Math.round(10_000 * 120 ** -0.2 * 120),
+    });
+    const r = analyserAdresse([...communeAvecPente(-0.2), memeAdresse], BIEN);
+    const parCode = Object.fromEntries(r.groupes.map((g) => [g.code, g]));
+    expect(parCode.meme_parcelle).toMatchObject({ ventes: 1, comparables: 1 });
+    expect(parCode.meme_parcelle?.statistiques?.medianeM2).toBe(prixM2A60);
+    // Ailleurs, la tolérance de surface s'applique toujours.
+    expect(parCode.meme_cote).toMatchObject({ ventes: 1, comparables: 0 });
+    expect(r.ventesProches).toHaveLength(1);
+    expect(r.ventesProches[0]).toMatchObject({
+      adresse: '144 RUE DE L OLIVIER',
+      prixM2: prixM2A120,
+      prixM2Actualise: prixM2A120,
+      correctionSurface: 1.1487,
+      prixM2Corrige: prixM2A60,
+    });
+    // Surface du bien inconnue : aucune correction.
+    const sansSurface = analyserAdresse([...communeAvecPente(-0.2), memeAdresse], {
+      ...BIEN,
+      surface: undefined,
+    });
+    expect(sansSurface.ventesProches[0]).toMatchObject({
+      correctionSurface: 1,
+      prixM2Corrige: prixM2A120,
+    });
+  });
+});
+
 describe('analyserAdresse', () => {
   it('prend le même côté de la rue comme repère quand il compte au moins 5 comparables', () => {
     const r = analyserAdresse(lireVentes(CSV), BIEN);
@@ -364,6 +463,8 @@ describe('analyserAdresse', () => {
         minM2: 2929,
         maxM2: 4000,
       },
+      dateMediane: '2025-03-01',
+      periode: { debut: '2024-11-02', fin: '2025-03-01' },
     });
     expect(r.ventesProches).toHaveLength(8);
     expect(r.ventesProches[0]).toMatchObject({
@@ -511,7 +612,15 @@ describe('GET /marche/adresse', () => {
       parcellesVoisines: ['132058200E0319'],
       cadastre: 'ok',
       ventesCommune: 10,
-      reference: { code: 'meme_cote', rayonMetres: 90, statistiques: { medianeM2: 3600 } },
+      reference: {
+        code: 'meme_cote',
+        rayonMetres: 90,
+        statistiques: { medianeM2: 3600 },
+        dateMediane: '2025-03-01',
+        periode: { debut: '2024-11-02', fin: '2025-03-01' },
+        // Du 1er mars 2025 au 13 septembre 2026 : 18 mois.
+        ancienneteMedianeMois: 18,
+      },
     });
     expect(corps.sources.map((s) => s.nom)).toEqual([
       'Demandes de valeurs foncières géolocalisées (Etalab, à partir des données DGFiP)',
@@ -556,7 +665,8 @@ describe('GET /marche/adresse', () => {
       parcelle: null,
       parcellesVoisines: [],
     });
-    expect(corps.groupes.find((g) => g.code === 'meme_parcelle')?.ventes).toBe(0);
+    // Sans cadastre, les deux ventes au 144 rue de l'Olivier restent du même immeuble par l'adresse.
+    expect(corps.groupes.find((g) => g.code === 'meme_parcelle')?.ventes).toBe(2);
     expect(corps.groupes.find((g) => g.code === 'meme_cote')?.ventes).toBe(6);
     expect((await requete(REQUETE)).headers.get('x-loupe-cache')).toBe('MISS');
   });

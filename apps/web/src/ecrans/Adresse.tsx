@@ -1,4 +1,4 @@
-import { obtenirRegles } from '@loupe/moteur';
+import { obtenirRegles, prixRetenu } from '@loupe/moteur';
 import { useEffect, useState, type JSX } from 'react';
 
 import { Chapo, Page, TitrePage } from '@/composants/mise-en-page';
@@ -24,9 +24,11 @@ import { useProjets } from '@/stockage/ProjetsContext';
 import type { AdresseBien } from '@/stockage/projets';
 import { PHRASES_ADRESSE, phrasePrecision, phraseReference } from '@/textes/adresse';
 
+import { CarteConfiance } from './adresse/Confiance';
 import { CarteDpe } from './adresse/Dpe';
 import { CarteEstimation } from './adresse/Estimation';
 import { CarteLoyer } from './adresse/Loyer';
+import { CarteRepere } from './adresse/Repere';
 import { CarteRisques } from './adresse/Risques';
 import { TableauGroupes, TableauVentes } from './adresse/Tableaux';
 import { Tendance } from './adresse/Tendance';
@@ -144,7 +146,7 @@ export function Adresse(): JSX.Element {
     if (adresseEnregistree !== undefined) void analyser(adresseEnregistree);
   }, []);
 
-  const prixM2Bien = projet.hypotheses.achat.prix / projet.bien.surface;
+  const prixM2Bien = prixRetenu(projet.hypotheses.achat) / projet.bien.surface;
   const analyse = etat.etape === 'resultat' ? etat.donnees.analyse : null;
   const reference = analyse?.reference ?? null;
   const repereUtilise =
@@ -182,6 +184,8 @@ export function Adresse(): JSX.Element {
         </Chapo>
       </div>
 
+      <CarteConfiance />
+
       <Carte>
         <form
           className="flex flex-wrap items-end gap-3"
@@ -217,6 +221,8 @@ export function Adresse(): JSX.Element {
           </Pastille>
         )}
       </Carte>
+
+      {etat.etape !== 'resultat' && <CarteRepere />}
 
       {etat.etape === 'resultat' && analyse !== null && (
         <Carte>

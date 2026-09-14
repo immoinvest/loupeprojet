@@ -1,3 +1,4 @@
+import { prixRetenu } from '../achat';
 import type { Regles } from '../regles/types';
 import type { HypothesesCompletes } from '../schema/hypotheses';
 import type { ProjetComplet } from '../schema/projet';
@@ -25,10 +26,10 @@ function avecHypotheses(projet: ProjetComplet, patch: Partial<HypothesesComplete
   return { ...projet, hypotheses: { ...projet.hypotheses, ...patch } };
 }
 
-/** Prix auquel le cash-flow s'équilibre ; à défaut, −10 %. */
+/** Prix auquel le cash-flow s'équilibre ; à défaut, −10 % du prix retenu. */
 const negocier: Transformation = (projet, regles) => {
   const cible = prixCible(projet, 'cashflow_zero', regles);
-  const prix = Math.round(cible.prix ?? projet.hypotheses.achat.prix * REPLI_NEGOCIATION);
+  const prix = Math.round(cible.prix ?? prixRetenu(projet.hypotheses.achat) * REPLI_NEGOCIATION);
   return { code: 'negocier', parametres: { prix }, projet: avecPrix(projet, prix) };
 };
 

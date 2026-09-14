@@ -18,6 +18,7 @@ export {
 export {
   AchatSchema,
   ChargesSchema,
+  NEGOCIATION_MAX,
   CourteDureeSchema,
   FiscaliteSchema,
   HypothesesSchema,
@@ -50,8 +51,10 @@ export {
   DvfSchema,
   MarcheSchema,
   NiveauRisqueSchema,
+  PrecisionDvfSchema,
   RisqueSchema,
   type Dvf,
+  type PrecisionDvf,
   type Marche,
   type Risque,
 } from './marche';

@@ -20,10 +20,14 @@ const CIBLE_NET = 0.06;
 const CIBLE_BRUT = 0.08;
 const TOLERANCE_EURO = 0.5;
 
+/** Variante achetée exactement à `prix` : la négociation est remise à zéro, ce prix est le prix retenu. */
 export function avecPrix(projet: ProjetComplet, prix: number): ProjetComplet {
   return {
     ...projet,
-    hypotheses: { ...projet.hypotheses, achat: { ...projet.hypotheses.achat, prix } },
+    hypotheses: {
+      ...projet.hypotheses,
+      achat: { ...projet.hypotheses.achat, prix, negociationTaux: 0 },
+    },
   };
 }
 
@@ -64,6 +68,7 @@ function prixPlancher(projet: ProjetComplet): number {
   return honorairesChargeAcquereur ? honorairesAgence + 1 : 1;
 }
 
+/** Cherche entre le plancher et deux fois le prix affiché ; l'écart se lit depuis le prix affiché, celui que l'on négocie. */
 export function prixCible(projet: ProjetComplet, critere: CriterePrix, regles: Regles): PrixCible {
   const prixAffiche = projet.hypotheses.achat.prix;
   const prix = resoudreOuNull(

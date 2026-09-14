@@ -19,8 +19,11 @@ export function obtenirRegles(version: string): Regles {
 
 export type {
   ComposantAmortissement,
+  Palier,
+  PalierRayon,
   PeriodeAbattement,
   Regles,
+  SeuilNiveau,
   Tranche,
   VersionRegles,
 } from './types';

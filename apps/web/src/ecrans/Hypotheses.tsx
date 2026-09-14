@@ -7,6 +7,7 @@ import { useProjetCourant } from '@/coque/ProjetLayout';
 import { eurosParMois, pourcentage } from '@/formatage/nombres';
 import {
   GROUPES,
+  GROUPE_ACHAT,
   appliquerSaisie,
   cleProvenance,
   valeurActuelle,
@@ -15,21 +16,17 @@ import {
 } from '@/hypotheses';
 import { useProjets } from '@/stockage/ProjetsContext';
 
-import { ChampHypothese, type BadgeProvenance } from './hypotheses/ChampHypothese';
-
-const BADGES: Readonly<Record<string, BadgeProvenance>> = {
-  annonce: { ton: 'neutre', libelle: 'annonce' },
-  utilisateur: { ton: 'accent', libelle: 'à toi' },
-  estime: { ton: 'surveiller', libelle: 'estimé' },
-  ademe: { ton: 'bon', libelle: 'donnée publique' },
-  anil: { ton: 'bon', libelle: 'donnée publique' },
-  dvf: { ton: 'bon', libelle: 'donnée publique' },
-  usure: { ton: 'bon', libelle: 'taux du mois' },
-};
+import { CarteAchat } from './hypotheses/CarteAchat';
+import {
+  BADGES,
+  badgeDeSource,
+  ChampHypothese,
+  type BadgeProvenance,
+} from './hypotheses/ChampHypothese';
 
 function badgePour(projet: ProjetEntree, d: Descripteur): BadgeProvenance | null {
-  const source = projet.provenance?.[cleProvenance(d.chemin)];
-  if (source !== undefined) return BADGES[source] ?? { ton: 'neutre', libelle: source };
+  const badge = badgeDeSource(projet.provenance?.[cleProvenance(d.chemin)]);
+  if (badge !== null) return badge;
   return d.aToi === true ? (BADGES.utilisateur ?? null) : null;
 }
 
@@ -53,7 +50,7 @@ function Synthese(): JSX.Element {
     },
   ];
   return (
-    <div className="sticky top-[var(--hauteur-barre-app)] z-10 -mx-4 grid grid-cols-2 gap-x-6 gap-y-2 border-b border-bordure bg-fond/95 px-4 py-3 backdrop-blur sm:-mx-6 sm:flex sm:items-center sm:gap-8 sm:px-6 lg:-mx-10 lg:px-10">
+    <div className="sticky top-[var(--hauteur-entete-projet,0px)] z-10 -mx-4 grid grid-cols-2 gap-x-6 gap-y-2 border-b border-bordure bg-fond/95 px-4 py-3 backdrop-blur sm:-mx-6 sm:flex sm:items-center sm:gap-8 sm:px-6 lg:-mx-10 lg:px-10">
       {kpis.map((k) => (
         <div key={k.l} className="flex flex-col">
           <span className="text-xs text-encre-3">{k.l}</span>
@@ -68,7 +65,7 @@ function Synthese(): JSX.Element {
 }
 
 export function Hypotheses(): JSX.Element {
-  const { enregistre } = useProjetCourant();
+  const { enregistre, resultats } = useProjetCourant();
   const { mettreAJour } = useProjets();
   const projet: ProjetEntree = enregistre.projet;
   const [textes, setTextes] = useState<Readonly<Record<string, string>>>({});
@@ -91,6 +88,19 @@ export function Hypotheses(): JSX.Element {
     setErreurs((prev) => Object.fromEntries(Object.entries(prev).filter(([k]) => k !== d.chemin)));
   };
 
+  const rendre = (d: Descripteur): JSX.Element => (
+    <ChampHypothese
+      key={d.chemin}
+      descripteur={d}
+      texte={textes[d.chemin] ?? versTexte(valeurActuelle(projet, d), d.type)}
+      erreur={erreurs[d.chemin]}
+      badge={badgePour(projet, d)}
+      onChange={(t) => {
+        changer(d, t);
+      }}
+    />
+  );
+
   return (
     <Page haut="serre">
       <Synthese />
@@ -110,24 +120,24 @@ export function Hypotheses(): JSX.Element {
         </span>
       </div>
       {GROUPES.map((g) => {
+        if (g === GROUPE_ACHAT) {
+          return (
+            <CarteAchat
+              key={g.titre}
+              projet={projet}
+              resultats={resultats}
+              rendre={rendre}
+              changer={changer}
+            />
+          );
+        }
         const visibles = g.champs.filter((d) => d.visibleSi === undefined || d.visibleSi(projet));
         return (
           <Carte key={g.titre}>
             <h2 className="m-0 font-display text-[22px] font-semibold">{g.titre}</h2>
             {g.sousTitre !== undefined && <p className="m-0 text-sm text-encre-2">{g.sousTitre}</p>}
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
-              {visibles.map((d) => (
-                <ChampHypothese
-                  key={d.chemin}
-                  descripteur={d}
-                  texte={textes[d.chemin] ?? versTexte(valeurActuelle(projet, d), d.type)}
-                  erreur={erreurs[d.chemin]}
-                  badge={badgePour(projet, d)}
-                  onChange={(t) => {
-                    changer(d, t);
-                  }}
-                />
-              ))}
+              {visibles.map(rendre)}
             </div>
           </Carte>
         );

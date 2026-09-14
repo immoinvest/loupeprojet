@@ -1,3 +1,4 @@
+import { prixRetenu } from '../achat';
 import { sommer } from '../commun/flux';
 import type { Regles } from '../regles/types';
 import type { Projet } from '../schema/projet';
@@ -81,9 +82,10 @@ export function calculerFinancement(
 ): ResultatFinancement {
   const { achat, pret, location, revente, revenusMensuels } = projet.hypotheses;
   const avecTaeg = options.avecTaeg ?? true;
+  const prix = prixRetenu(achat);
   const frais = fraisAcquisition(achat, projet.bien.departement, regles);
   const fraisBancaires = pret.fraisDossier + pret.fraisGarantie;
-  const besoinFinancement = achat.prix + achat.travaux + frais.total + fraisBancaires;
+  const besoinFinancement = prix + achat.travaux + frais.total + fraisBancaires;
   const montantEmprunte = Math.max(0, besoinFinancement - pret.apport);
 
   const tableau = tableauAmortissement({
@@ -127,7 +129,7 @@ export function calculerFinancement(
         loyerMensuel: location.loyerHc ?? null,
         dureeAnnees: pret.dureeAnnees,
         travaux: achat.travaux,
-        prix: achat.prix,
+        prix,
       },
       regles,
     ),

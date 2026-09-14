@@ -1,5 +1,7 @@
+import type { PrecisionDvf } from '@loupe/moteur';
+
 import type { MarcheEntree } from './marche';
-import type { ReferenceAdresse } from './contrat';
+import type { CodeGroupe, ReferenceAdresse } from './contrat';
 
 export interface VoieBan {
   /** Code de la voie (FANTOIR), le même que dans les ventes DVF. */
@@ -24,30 +26,59 @@ export interface MarcheAdresse {
   readonly provenance: Readonly<Record<string, string>>;
 }
 
-const CHAMPS_DVF = ['medianM2', 'q1M2', 'q3M2', 'nombreVentes', 'rayonMetres'] as const;
+const CHAMPS_DVF = [
+  'medianM2',
+  'q1M2',
+  'q3M2',
+  'nombreVentes',
+  'rayonMetres',
+  'ancienneteMedianeMois',
+] as const;
+
+/** Le groupe du repère dit d'où viennent ses ventes : immeuble, rue ou quartier (cercles). */
+export function precisionDuGroupe(code: CodeGroupe): PrecisionDvf {
+  switch (code) {
+    case 'meme_parcelle':
+    case 'parcelles_voisines':
+      return 'immeuble';
+    case 'meme_cote':
+    case 'en_face':
+      return 'rue';
+    case 'rayon_100':
+    case 'rayon_200':
+    case 'rayon_300':
+      return 'quartier';
+  }
+}
 
 /**
  * Repère de l'analyse d'adresse → bloc `marche.dvf` du moteur, provenance « donnée publique ». `actualiseAu` :
- * semestre auquel les prix ont été ramenés, quand la tendance locale était connue.
+ * semestre auquel les prix ont été ramenés, quand la tendance locale était connue. Période et ancienneté
+ * des ventes quand le Worker les donne.
  */
 export function marcheDepuisReference(
   reference: ReferenceAdresse,
   actualiseAu: string | null = null,
 ): MarcheAdresse {
   const { statistiques: s } = reference;
-  const provenance: Record<string, string> = {};
-  for (const champ of CHAMPS_DVF) provenance[`marche.dvf.${champ}`] = 'dvf';
-  return {
-    dvf: {
-      medianM2: s.medianeM2,
-      q1M2: s.q1M2,
-      q3M2: s.q3M2,
-      nombreVentes: s.ventes,
-      rayonMetres: reference.rayonMetres,
-      ...(actualiseAu === null ? {} : { actualiseAu }),
-    },
-    provenance,
+  const periode = reference.periode ?? null;
+  const anciennete = reference.ancienneteMedianeMois ?? null;
+  const dvf: MarcheAdresse['dvf'] = {
+    medianM2: s.medianeM2,
+    q1M2: s.q1M2,
+    q3M2: s.q3M2,
+    nombreVentes: s.ventes,
+    rayonMetres: reference.rayonMetres,
+    precision: precisionDuGroupe(reference.code),
+    ...(actualiseAu === null ? {} : { actualiseAu }),
+    ...(periode === null ? {} : { periode }),
+    ...(anciennete === null ? {} : { ancienneteMedianeMois: anciennete }),
   };
+  const provenance: Record<string, string> = {};
+  for (const champ of CHAMPS_DVF) {
+    if (champ in dvf) provenance[`marche.dvf.${champ}`] = 'dvf';
+  }
+  return { dvf, provenance };
 }
 
 /** Écart du prix au m² du bien à la médiane du repère : −0,22 = 22 % moins cher. */

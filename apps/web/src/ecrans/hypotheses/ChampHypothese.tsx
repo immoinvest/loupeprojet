@@ -8,6 +8,22 @@ export interface BadgeProvenance {
   readonly libelle: string;
 }
 
+export const BADGES: Readonly<Record<string, BadgeProvenance>> = {
+  annonce: { ton: 'neutre', libelle: 'annonce' },
+  utilisateur: { ton: 'accent', libelle: 'à toi' },
+  estime: { ton: 'surveiller', libelle: 'estimé' },
+  ademe: { ton: 'bon', libelle: 'donnée publique' },
+  anil: { ton: 'bon', libelle: 'donnée publique' },
+  dvf: { ton: 'bon', libelle: 'donnée publique' },
+  usure: { ton: 'bon', libelle: 'taux du mois' },
+};
+
+/** Le badge d'une source de provenance ; une source inconnue s'affiche telle quelle, aucune source : rien. */
+export function badgeDeSource(source: string | undefined): BadgeProvenance | null {
+  if (source === undefined) return null;
+  return BADGES[source] ?? { ton: 'neutre', libelle: source };
+}
+
 const CLASSE_SAISIE =
   'min-h-[44px] w-full min-w-0 rounded-encart border bg-surface px-3 text-[15px] font-semibold pointer-coarse:text-base';
 
@@ -68,6 +84,7 @@ export function ChampHypothese({
           ))}
         </select>
       )}
+      {d.aide !== undefined && <span className="text-xs text-encre-3">{d.aide}</span>}
       {erreur !== undefined && <span className="text-xs text-probleme">{erreur}</span>}
     </label>
   );

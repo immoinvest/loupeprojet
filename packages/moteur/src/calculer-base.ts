@@ -1,3 +1,4 @@
+import { resumerAchat, type ResumeAchat } from './achat';
 import type { ResultatCashflow } from './cashflow';
 import { estimerPrix, type EstimationPrix } from './estimation';
 import { calculerFinancement, type ResultatFinancement } from './financement';
@@ -11,6 +12,8 @@ import { calculerVerdict, type ResultatVerdict } from './verdict';
 
 /** Ce que tout rapport porte, complet ou partiel : rien ici ne dépend du loyer. */
 interface ResultatsCommuns {
+  /** Prix affiché, prix retenu après négociation, écart : le prix sur lequel tout est calculé. */
+  readonly achat: ResumeAchat;
   readonly financement: ResultatFinancement;
   /** Estimation du prix du bien ; `null` sans ventes réelles connues. */
   readonly estimation: EstimationPrix | null;
@@ -58,6 +61,7 @@ export function calculerComplet(projet: ProjetComplet, regles: Regles): Resultat
   return {
     complet: true,
     projet,
+    achat: resumerAchat(projet.hypotheses.achat),
     financement,
     cashflow: fiscalite.regimes[fiscalite.retenu].cashflow,
     fiscalite,
@@ -78,6 +82,7 @@ export function calculerPartiel(projet: Projet, regles: Regles): ResultatsBasePa
   return {
     complet: false,
     projet,
+    achat: resumerAchat(projet.hypotheses.achat),
     financement,
     cashflow: null,
     fiscalite: null,

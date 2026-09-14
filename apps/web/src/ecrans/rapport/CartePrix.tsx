@@ -2,15 +2,17 @@ import type { Resultats } from '@loupe/moteur';
 import { useLayoutEffect, useRef, useState, type JSX } from 'react';
 
 import { rangerLibelles } from '@/analyses/reperes';
-import { Carte, GrosChiffre, Pourquoi, TitreCarte } from '@/composants/ui';
+import { Info } from '@/composants/info';
+import { Carte, GrosChiffre, LienOnglet, TitreCarte } from '@/composants/ui';
 import { nombre } from '@/formatage/nombres';
-import { eurosArrondis, LIBELLES_CONFIANCE } from '@/textes/estimation';
-import { EXPLICATIONS } from '@/textes/explications';
+import { phrasePrixAffiche } from '@/textes/achat';
+import { eurosArrondis, niveauEnPhrase } from '@/textes/estimation';
+import { explicationPrix } from '@/textes/explications';
 import { reponseCourte } from '@/textes/verdict';
 
 function JaugePrix({ r }: { r: Resultats }): JSX.Element {
   const dvf = r.projet.marche.dvf;
-  const prixM2 = r.projet.hypotheses.achat.prix / r.projet.bien.surface;
+  const prixM2 = r.achat.prixRetenu / r.projet.bien.surface;
   if (dvf === undefined) {
     return (
       <p className="m-0 text-[15px] text-encre-2">
@@ -132,16 +134,16 @@ function Jauge({
   );
 }
 
-/** « Est-ce que c'est cher ? » : le feu prix, la jauge et la fourchette d'estimation. */
+const TITRE = "Est-ce que c'est cher ?";
+
+/** « Est-ce que c'est cher ? » : le feu prix, la jauge, la fourchette d'estimation et le lien vers l'onglet. */
 export function CartePrix({ r }: { r: Resultats }): JSX.Element {
   const feu = r.verdict.feux.find((f) => f.axe === 'prix')?.feu ?? 'inconnu';
   const reponse = feu === 'bon' ? 'non' : feu === 'surveiller' ? 'presque' : 'oui';
   const n = r.projet.marche.dvf?.nombreVentes ?? 0;
   return (
     <Carte>
-      <TitreCarte action={<Pourquoi texte={EXPLICATIONS.prix} />}>
-        Est-ce que c'est cher ?
-      </TitreCarte>
+      <TitreCarte info={<Info sujet={TITRE} texte={explicationPrix(r)} />}>{TITRE}</TitreCarte>
       {feu === 'inconnu' ? (
         <GrosChiffre ton="encre">On ne sait pas.</GrosChiffre>
       ) : (
@@ -149,12 +151,13 @@ export function CartePrix({ r }: { r: Resultats }): JSX.Element {
           {reponseCourte(reponse)}
         </GrosChiffre>
       )}
+      <p className="m-0 text-[15px] text-encre-2">{phrasePrixAffiche(r.achat)}</p>
       <JaugePrix r={r} />
       {r.estimation !== null && (
         <p className="m-0 text-[15px] leading-relaxed text-encre-2">
           Estimé entre <strong>{eurosArrondis(r.estimation.bas)}</strong> et{' '}
           <strong>{eurosArrondis(r.estimation.haut)}</strong> ·{' '}
-          {LIBELLES_CONFIANCE[r.estimation.confiance].toLowerCase()}.
+          {niveauEnPhrase(r.estimation.confiance.niveau)} ({r.estimation.confiance.note}/100).
         </p>
       )}
       {n > 0 && (
@@ -165,6 +168,7 @@ export function CartePrix({ r }: { r: Resultats }): JSX.Element {
             : ''}
         </p>
       )}
+      <LienOnglet vers="adresse">Voir l'estimation</LienOnglet>
     </Carte>
   );
 }

@@ -36,6 +36,7 @@ describe('defautsDuMoteur', () => {
       diagnostics: 500,
       honorairesChargeAcquereur: true,
       tmi: 0.3,
+      negociationTaux: 0,
       pno: 150,
       comptable: 420,
       cfe: 180,
@@ -96,7 +97,7 @@ describe('sectionsMethode', () => {
   });
 
   it('formate les constantes depuis les règles, jamais recopiées', () => {
-    expect(n(section('acquisition').etapes[1] ?? '')).toContain(
+    expect(n(section('acquisition').etapes[2] ?? '')).toContain(
       '5 % de droits départementaux × (1 + 2,37 %',
     );
     expect(valeurs('acquisition')).toContain(
@@ -155,8 +156,21 @@ describe('sectionsMethode', () => {
       'à rénover 25 % · à rafraîchir 37,5 % · bon état 50 % · rénové 75 % des ventes',
     );
     expect(n(section('estimation').etapes[5] ?? '')).toContain(
-      '±5 % avec au moins 10 ventes comparables dans 300 m, ±8 % avec 5 ventes dans 1 000 m, ±12 % sinon',
+      'localisation (35 points au plus), dispersion des prix (30), nombre de ventes comparables (20) et ancienneté des ventes (15)',
     );
+    expect(n(section('estimation').etapes[6] ?? '')).toBe(
+      'Fourchette : ±5 % si la confiance est élevée, ±6,5 % si la confiance est bonne, ±8 % si la confiance est moyenne, ±12 % si la confiance est faible, ±15 % si la confiance est très faible.',
+    );
+    expect(v).toContain(
+      'même immeuble 35 · même rue 30 · quartier ≤ 100 m 26, ≤ 200 m 22, ≤ 300 m 18, au-delà 12 · commune 4',
+    );
+    expect(v).toContain('3 ventes ou moins 0 · 10 ventes 12 · 30 ventes ou plus 20');
+    expect(v).toContain('10 % ou moins 30 · 45 % ou plus 0');
+    expect(v).toContain('6 mois ou moins 15 · 30 mois ou plus 0 · inconnue : 12 mois supposés');
+    expect(v).toContain(
+      'élevée dès 80 · bonne dès 65 · moyenne dès 45 · faible dès 25 · très faible dès 0',
+    );
+    expect(v).toContain('±5 % · ±6,5 % · ±8 % · ±12 % · ±15 %');
     expect(section('estimation').constantes.every((c) => c.source.length > 3)).toBe(true);
   });
 

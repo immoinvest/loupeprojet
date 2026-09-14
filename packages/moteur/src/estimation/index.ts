@@ -1,11 +1,14 @@
+import { prixRetenu } from '../achat';
 import { arrondirEuro, arrondirTaux } from '../commun/arrondi';
-import type { NiveauConfiance, Regles } from '../regles/types';
+import type { Regles } from '../regles/types';
 import type { Bien, EtatBien } from '../schema/bien';
 import type { CodeCorrection } from '../schema/estimation';
 import type { Dvf } from '../schema/marche';
 import type { Projet } from '../schema/projet';
+import { confianceEstimation, type ConfianceEstimation } from './confiance';
 
 export type { NiveauConfiance } from '../regles/types';
+export * from './confiance';
 
 export const ETATS: readonly EtatBien[] = ['a_renover', 'a_rafraichir', 'bon_etat', 'renove'];
 
@@ -40,11 +43,12 @@ export interface EstimationPrix {
   readonly haut: number;
   /** Le même bien, corrections comprises, selon chacun des quatre états. */
   readonly selonEtat: Readonly<Record<EtatBien, number>>;
-  readonly confiance: NiveauConfiance;
+  readonly confiance: ConfianceEstimation;
+  /** Demi-largeur de la fourchette, selon le niveau de confiance. */
   readonly marge: number;
   readonly charges: ChargesComparees | null;
   readonly actualiseAu: string | null;
-  /** Prix affiché ÷ estimation − 1 : négatif = affiché sous l'estimation. */
+  /** Prix retenu (négocié) ÷ estimation − 1 : négatif = sous l'estimation. */
   readonly ecartPrix: number;
 }
 
@@ -76,14 +80,6 @@ export function tauxExterieur(bien: Bien, regles: Regles): number | null {
   return bien.exterieur === true ? regles.estimation.exterieur : null;
 }
 
-export function niveauConfiance(dvf: Dvf, regles: Regles): NiveauConfiance {
-  const c = regles.estimation.confiance;
-  const rayon = dvf.rayonMetres ?? Number.POSITIVE_INFINITY;
-  if (rayon <= c.eleveeRayonMetres && dvf.nombreVentes >= c.eleveeVentes) return 'elevee';
-  if (rayon <= c.moyenneRayonMetres && dvf.nombreVentes >= c.moyenneVentes) return 'moyenne';
-  return 'faible';
-}
-
 interface EffetCharges extends ChargesComparees {
   readonly montant: number;
 }
@@ -107,7 +103,7 @@ export function effetCharges(
       ? (loyerReferenceM2 * 12) / dvf.medianM2
       : loyerHc === undefined
         ? null
-        : (loyerHc * 12) / projet.hypotheses.achat.prix;
+        : (loyerHc * 12) / prixRetenu(projet.hypotheses.achat);
   if (rendementLocal === null || rendementLocal <= 0) return null;
   const repereAnnuel = regles.estimation.charges.repereM2An * projet.bien.surface;
   const excedentAnnuel = coproAnnuel - repereAnnuel;
@@ -169,8 +165,8 @@ export function estimerPrix(projet: Projet, regles: Regles): EstimationPrix | nu
     prixSelonPosition(dvf, regles.estimation.positionsEtat[e]) * bien.surface * (1 + sommeTaux) +
     montantCharges;
   const centre = valeur(etat);
-  const confiance = niveauConfiance(dvf, regles);
-  const marge = regles.estimation.marges[confiance];
+  const confiance = confianceEstimation(dvf, regles);
+  const marge = regles.estimation.marges[confiance.niveau];
   return {
     etat,
     etatSuppose: bien.etat === undefined,
@@ -198,6 +194,6 @@ export function estimerPrix(projet: Projet, regles: Regles): EstimationPrix | nu
             borneAtteinte: charges.borneAtteinte,
           },
     actualiseAu: dvf.actualiseAu ?? null,
-    ecartPrix: arrondirTaux(projet.hypotheses.achat.prix / centre - 1),
+    ecartPrix: arrondirTaux(prixRetenu(projet.hypotheses.achat) / centre - 1),
   };
 }

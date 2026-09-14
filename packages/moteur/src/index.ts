@@ -22,6 +22,7 @@ export {
   type ResultatsComplets,
   type ResultatsPartiels,
 } from './calculer-projet';
+export * from './achat';
 export * from './cashflow';
 export * from './commun';
 export * from './estimation';

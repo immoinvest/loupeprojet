@@ -16,7 +16,7 @@ test('quatre chiffres suffisent : le rapport dit qu’il manque le loyer et se c
   await expect(feux.getByText('Cash-flow : loyer à indiquer')).toBeVisible();
   await expect(feux.getByText('Rendement net : loyer à indiquer')).toBeVisible();
   await expect(page.getByRole('heading', { level: 2, name: BANDEAU })).toBeVisible();
-  await expect(page.getByText('À compléter')).toHaveCount(3);
+  await expect(page.getByText('À compléter')).toHaveCount(4);
 
   // Fiscalité attend aussi le loyer, avec le même bandeau.
   await page

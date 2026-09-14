@@ -39,6 +39,10 @@ export const SEUIL_REFERENCE = 5;
 /** Comparable : même type de logement, surface à ±40 % de celle du bien quand elle est connue. */
 export const TOLERANCE_SURFACE = 0.4;
 export const MAX_VENTES_PROCHES = 20;
+/** La pente du prix au m² selon la surface se mesure sur au moins 30 ventes de la commune du même type. */
+export const MIN_VENTES_PENTE = 30;
+/** Garde-fou : la pente mesurée reste entre −0,5 et 0 (un grand logement ne se vend pas plus cher au m²). */
+export const PENTE_MIN = -0.5;
 
 const RAYONS: readonly (readonly [number, CodeGroupe])[] = [
   [100, 'rayon_100'],
@@ -65,6 +69,11 @@ export interface StatistiquesPrix {
   readonly maxM2: number;
 }
 
+export interface Periode {
+  readonly debut: string;
+  readonly fin: string;
+}
+
 export interface Groupe {
   readonly code: CodeGroupe;
   /** Toutes les ventes de logement du groupe. */
@@ -74,6 +83,10 @@ export interface Groupe {
   /** Prix au m² actualisés (ramenés au dernier semestre connu). */
   readonly statistiques: StatistiquesPrix | null;
   readonly distanceMaxMetres: number | null;
+  /** Date de la vente comparable médiane (la plus ancienne des deux centrales pour un nombre pair). */
+  readonly dateMediane: string | null;
+  /** Première et dernière vente comparable du groupe. */
+  readonly periode: Periode | null;
 }
 
 export interface VenteProche {
@@ -85,6 +98,10 @@ export interface VenteProche {
   /** Même prix ramené au dernier semestre connu par la tendance locale. */
   readonly prixM2Actualise: number;
   readonly coefficient: number;
+  /** (surface du bien ÷ surface de la vente) ^ pente de la commune ; 1 sans surface du bien ou sans pente. */
+  readonly correctionSurface: number;
+  /** Prix au m² actualisé et ramené à la surface du bien. */
+  readonly prixM2Corrige: number;
   readonly pieces: number;
   readonly type: TypeLogement;
   readonly adresse: string | null;
@@ -96,6 +113,8 @@ export interface Reference {
   readonly code: CodeGroupe;
   readonly rayonMetres: number;
   readonly statistiques: StatistiquesPrix;
+  readonly dateMediane: string | null;
+  readonly periode: Periode | null;
 }
 
 export interface AnalyseAdresse {
@@ -111,10 +130,20 @@ export type Actualiser = (vente: VenteDvf) => number;
 const SANS_ACTUALISATION: Actualiser = () => 1;
 
 /** Valeur à un rang d'une liste ; un rang hors liste est une erreur de programmation. */
-export function valeurAuRang(liste: readonly number[], rang: number): number {
+export function valeurAuRang<T>(liste: readonly T[], rang: number): T {
   const valeur = liste[rang];
   if (valeur === undefined) throw new RangeError(`rang ${String(rang)} hors de la liste`);
   return valeur;
+}
+
+/** Date médiane et période d'une liste de dates `AAAA-MM-JJ` ; tout `null` sans date. */
+export function periodeDe(dates: readonly string[]): Pick<Groupe, 'dateMediane' | 'periode'> {
+  if (dates.length === 0) return { dateMediane: null, periode: null };
+  const triees = [...dates].sort((a, b) => a.localeCompare(b));
+  return {
+    dateMediane: valeurAuRang(triees, Math.floor((triees.length - 1) / 2)),
+    periode: { debut: valeurAuRang(triees, 0), fin: valeurAuRang(triees, triees.length - 1) },
+  };
 }
 
 /** Quantile par interpolation linéaire (méthode 7 de Hyndman et Fan, celle de l'index DVF publié). */
@@ -138,14 +167,23 @@ export function statistiquesPrix(prixM2: readonly number[]): StatistiquesPrix | 
   };
 }
 
-/** Numérotation française : les numéros pairs d'un côté de la rue, les impairs de l'autre. */
+/**
+ * Même immeuble : même parcelle, ou même numéro dans la même rue (une résidence couvre souvent plusieurs
+ * parcelles et le point de l'adresse n'est pas toujours sur celle des ventes). Numérotation française : les
+ * numéros pairs d'un côté de la rue, les impairs de l'autre.
+ */
 export function groupesDe(
   vente: VenteDvf,
   bien: BienAdresse,
   distance: number | null,
 ): CodeGroupe[] {
   const groupes: CodeGroupe[] = [];
-  if (bien.idParcelle !== null && vente.idParcelle === bien.idParcelle)
+  const memeAdresse =
+    bien.codeVoie !== null &&
+    vente.codeVoie === bien.codeVoie &&
+    bien.numero !== null &&
+    vente.numero === bien.numero;
+  if ((bien.idParcelle !== null && vente.idParcelle === bien.idParcelle) || memeAdresse)
     groupes.push('meme_parcelle');
   if (vente.idParcelle !== null && bien.voisines.includes(vente.idParcelle)) {
     groupes.push('parcelles_voisines');
@@ -173,6 +211,28 @@ export function estComparable(vente: VenteDvf, bien: BienAdresse): boolean {
   );
 }
 
+/**
+ * Pente du prix au m² selon la surface dans la commune du bien (régression de ln(prix au m²) sur ln(surface),
+ * ventes du même type) : −0,2 veut dire qu'un logement deux fois plus grand se vend environ 13 % moins cher au m².
+ * 0 avec moins de MIN_VENTES_PENTE ventes ; bornée entre PENTE_MIN et 0.
+ */
+export function pentePrixSurface(ventes: readonly VenteDvf[], type: TypeLogement): number {
+  const points = ventes
+    .filter((v) => v.codeInsee === undefined && v.type === type)
+    .map((v) => ({ x: Math.log(v.surface), y: Math.log(v.prix / v.surface) }));
+  if (points.length < MIN_VENTES_PENTE) return 0;
+  const moyenneX = points.reduce((total, p) => total + p.x, 0) / points.length;
+  const moyenneY = points.reduce((total, p) => total + p.y, 0) / points.length;
+  let covariance = 0;
+  let variance = 0;
+  for (const p of points) {
+    covariance += (p.x - moyenneX) * (p.y - moyenneY);
+    variance += (p.x - moyenneX) ** 2;
+  }
+  if (variance < 1e-9) return 0;
+  return Math.min(0, Math.max(PENTE_MIN, covariance / variance));
+}
+
 export function adresseDe(vente: VenteDvf): string | null {
   if (vente.voie === null) return null;
   const numero = vente.numero === null ? '' : `${String(vente.numero)}${vente.suffixe ?? ''} `;
@@ -184,20 +244,30 @@ interface VenteSituee {
   readonly distance: number | null;
   readonly groupes: readonly CodeGroupe[];
   readonly comparable: boolean;
+  readonly memeType: boolean;
   readonly coefficient: number;
   readonly prixM2Actualise: number;
+  readonly correctionSurface: number;
+  /** Prix au m² actualisé puis ramené à la surface du bien : c'est lui qui fait les statistiques. */
+  readonly prixM2Corrige: number;
+}
+
+/** Dans le même immeuble, toutes les ventes du même type comptent ; ailleurs, la surface doit être proche. */
+function comparableDans(s: VenteSituee, code: CodeGroupe): boolean {
+  return s.comparable || (code === 'meme_parcelle' && s.memeType);
 }
 
 function groupe(code: CodeGroupe, situees: readonly VenteSituee[]): Groupe {
   const membres = situees.filter((s) => s.groupes.includes(code));
-  const comparables = membres.filter((s) => s.comparable);
+  const comparables = membres.filter((s) => comparableDans(s, code));
   const distances = comparables.flatMap((s) => (s.distance === null ? [] : [s.distance]));
   return {
     code,
     ventes: membres.length,
     comparables: comparables.length,
-    statistiques: statistiquesPrix(comparables.map((s) => s.prixM2Actualise)),
+    statistiques: statistiquesPrix(comparables.map((s) => s.prixM2Corrige)),
     distanceMaxMetres: distances.length === 0 ? null : Math.round(Math.max(...distances)),
+    ...periodeDe(comparables.map((s) => s.vente.date)),
   };
 }
 
@@ -211,19 +281,27 @@ export function analyserAdresse(
   bien: BienAdresse,
   actualiser: Actualiser = SANS_ACTUALISATION,
 ): AnalyseAdresse {
+  const surfaceBien = bien.surface;
+  const pente = surfaceBien === undefined ? 0 : pentePrixSurface(ventes, bien.type);
   const situees: VenteSituee[] = ventes.map((vente) => {
     const distance =
       vente.lat === null || vente.lon === null
         ? null
         : distanceMetres(bien.point, { lat: vente.lat, lon: vente.lon });
     const coefficient = actualiser(vente);
+    const prixM2Actualise = (vente.prix / vente.surface) * coefficient;
+    const correctionSurface =
+      surfaceBien === undefined ? 1 : (surfaceBien / vente.surface) ** pente;
     return {
       vente,
       distance,
       groupes: groupesDe(vente, bien, distance),
       comparable: estComparable(vente, bien),
+      memeType: vente.type === bien.type,
       coefficient,
-      prixM2Actualise: (vente.prix / vente.surface) * coefficient,
+      prixM2Actualise,
+      correctionSurface,
+      prixM2Corrige: prixM2Actualise * correctionSurface,
     };
   });
   const parCode = Object.fromEntries(
@@ -231,14 +309,20 @@ export function analyserAdresse(
   ) as Record<CodeGroupe, Groupe>;
   let reference: Reference | null = null;
   for (const code of ORDRE_REFERENCE) {
-    const { statistiques, distanceMaxMetres } = parCode[code];
+    const { statistiques, distanceMaxMetres, dateMediane, periode } = parCode[code];
     if (statistiques !== null && statistiques.ventes >= SEUIL_REFERENCE) {
-      reference = { code, rayonMetres: Math.max(10, distanceMaxMetres ?? 10), statistiques };
+      reference = {
+        code,
+        rayonMetres: Math.max(10, distanceMaxMetres ?? 10),
+        statistiques,
+        dateMediane,
+        periode,
+      };
       break;
     }
   }
   const ventesProches = situees
-    .filter((s) => s.comparable && s.groupes.length > 0)
+    .filter((s) => s.groupes.some((code) => comparableDans(s, code)))
     .sort(
       (a, b) => (a.distance ?? Number.POSITIVE_INFINITY) - (b.distance ?? Number.POSITIVE_INFINITY),
     )
@@ -250,6 +334,8 @@ export function analyserAdresse(
       prixM2: Math.round(s.vente.prix / s.vente.surface),
       prixM2Actualise: Math.round(s.prixM2Actualise),
       coefficient: Math.round(s.coefficient * 10_000) / 10_000,
+      correctionSurface: Math.round(s.correctionSurface * 10_000) / 10_000,
+      prixM2Corrige: Math.round(s.prixM2Corrige),
       pieces: s.vente.pieces,
       type: s.vente.type,
       adresse: adresseDe(s.vente),

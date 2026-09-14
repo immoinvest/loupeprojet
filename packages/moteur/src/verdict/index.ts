@@ -1,3 +1,4 @@
+import { prixRetenu } from '../achat';
 import type { EstimationPrix } from '../estimation';
 import type { ResultatFinancement } from '../financement';
 import type { ResultatFiscalite } from '../fiscalite/types';
@@ -56,7 +57,7 @@ export function calculerVerdict(
   const manques = options.manques ?? manquesDe(projet);
   const raisonLoyer = raisonParmi(manques, ['LOYER_ABSENT']);
   const prix = feuPrix(
-    projet.hypotheses.achat.prix / projet.bien.surface,
+    prixRetenu(projet.hypotheses.achat) / projet.bien.surface,
     projet.marche,
     regles,
     estimation?.prixM2Estime ?? null,

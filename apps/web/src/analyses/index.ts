@@ -14,4 +14,18 @@ export {
   type Tri,
 } from './comparaison';
 export { defautsDuMoteur, type Defauts } from './defauts';
-export { HORIZONS, variantesRevente, type VarianteRevente } from './revente';
+export { CURSEUR_NEGOCIATION, pourcentNegociation, pourcentPourViser } from './negociation';
+export {
+  impositionPlusValue,
+  seuilsExoneration,
+  type ImpositionPlusValue,
+  type SeuilsExoneration,
+} from './plus-value';
+export {
+  HORIZONS,
+  HORIZON_MAX,
+  HORIZON_MIN,
+  projetAHorizon,
+  variantesRevente,
+  type VarianteRevente,
+} from './revente';

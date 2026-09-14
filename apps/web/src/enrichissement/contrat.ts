@@ -68,6 +68,10 @@ export const ReponseMarcheSchema = z.object({
       medianeM2: z.number().positive(),
       q1M2: z.number().positive(),
       q3M2: z.number().positive(),
+      /** Fenêtre des ventes publiées, date médiane et ancienneté : absentes d'un Worker d'avant la version 0.7. */
+      fenetre: z.object({ debut: z.string(), fin: z.string() }).optional(),
+      dateMediane: z.string().nullable().optional(),
+      ancienneteMedianeMois: z.number().int().nonnegative().nullable().optional(),
     })
     .nullable(),
   loyer: z
@@ -126,6 +130,10 @@ export const ReponseAdresseSchema = z.object({
       code: CodeGroupeSchema,
       rayonMetres: z.number().positive(),
       statistiques: StatistiquesPrixSchema,
+      /** Dates des ventes comparables du repère : absentes d'un Worker d'avant la version 0.7. */
+      dateMediane: z.string().nullable().optional(),
+      periode: z.object({ debut: z.string(), fin: z.string() }).nullable().optional(),
+      ancienneteMedianeMois: z.number().int().nonnegative().nullable().optional(),
     })
     .nullable(),
   ventesProches: z.array(
@@ -137,6 +145,9 @@ export const ReponseAdresseSchema = z.object({
       /** Prix au m² ramené au dernier semestre connu ; absent dans les réponses d'avant la tendance. */
       prixM2Actualise: z.number().positive().optional(),
       coefficient: z.number().positive().optional(),
+      /** Prix au m² actualisé et ramené à la surface du bien ; absent dans les réponses plus anciennes. */
+      prixM2Corrige: z.number().positive().optional(),
+      correctionSurface: z.number().positive().optional(),
       pieces: z.number().int().nonnegative(),
       type: z.enum(['appartement', 'maison']),
       adresse: z.string().nullable(),

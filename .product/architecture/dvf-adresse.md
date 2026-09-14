@@ -39,13 +39,17 @@ Réponse `200` : `{ codeInsee, millesime, parcelle, parcellesVoisines, cadastre:
 
 - `groupes` : sept entrées `{ code, ventes, comparables, statistiques: { ventes, medianeM2, q1M2, q3M2, minM2, maxM2 } | null, distanceMaxMetres }` — `meme_parcelle`, `parcelles_voisines`, `meme_cote`, `en_face`, `rayon_100`, `rayon_200`, `rayon_300` ;
 - `reference` : `{ code, rayonMetres, statistiques }` ou `null` ;
-- `ventesProches` : jusqu'à 20 ventes comparables `{ date, prix, surface, prixM2, pieces, type, adresse, distanceMetres, groupes }`, de la plus proche à la plus lointaine (sans coordonnées en dernier).
+- `ventesProches` : jusqu'à 20 ventes comparables `{ date, prix, surface, prixM2, prixM2Actualise, coefficient, correctionSurface, prixM2Corrige, pieces, type, adresse, distanceMetres, groupes }`, de la plus proche à la plus lointaine (sans coordonnées en dernier). Les statistiques des groupes portent sur `prixM2Corrige` (contrat version 4).
 
 Erreurs : `400 PARAMETRES_INVALIDES`, `429 TROP_DE_REQUETES`.
 
 ## Décisions
 
 - **Aucun modèle de langage** : égalités (parcelle, voie), parité, distances ; le résultat est reproductible et testé à la main.
+- **Même immeuble** (`meme_parcelle`) : même parcelle **ou** même numéro dans la même voie. Une résidence couvre souvent plusieurs parcelles et le point BAN n'est pas toujours sur celle des ventes (680 avenue de Bagatelle, Aix-en-Provence : point sur MD0217, ventes sur une parcelle voisine). Sans cadastre, l'adresse suffit.
+- **Comparables** : même type et surface à ±40 % ; dans le même immeuble, toutes les ventes du même type.
+- **Correction de surface** : `pentePrixSurface` = régression de ln(prix au m²) sur ln(surface) des ventes du même type de la commune du bien (communes voisines exclues), à partir de 30 ventes, bornée entre −0,5 et 0 ; chaque prix au m² actualisé est multiplié par (surface du bien ÷ surface de la vente)^pente. Sans surface du bien ou sans pente : 1.
+- **Profondeur** : les CSV par commune gardent les cinq dossiers annuels DVF (l'index reste sur 24 mois) ; chaque vente est ramenée au dernier semestre par la tendance.
 - **Voisinage cadastral** : l'API Carto ne renvoie pas les parcelles qui touchent un contour ; on interroge une boîte élargie de 0,00015° (12 à 17 m) et on garde les contours à moins de 3 m du bien (plus courte distance sommet-segment dans les deux sens, en projection locale).
 - **Repère** : premier groupe à au moins 5 comparables, dans l'ordre immeuble, voisines, même côté, 100 m, en face, 200 m, 300 m ; `rayonMetres` = distance maximale de ses comparables (10 m au minimum), écrit dans `marche.dvf.rayonMetres`.
 - **Caches** : analyse 24 h par jeu de paramètres ; voisinage 30 jours par point arrondi au millionième ; rien n'est mis en cache si le cadastre ou R2 a échoué.

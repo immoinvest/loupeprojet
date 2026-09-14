@@ -3,7 +3,6 @@ import { describe, expect, it } from 'vitest';
 import {
   effetCharges,
   estimerPrix,
-  niveauConfiance,
   prixSelonPosition,
   tauxDpe,
   tauxEtage,
@@ -77,16 +76,6 @@ describe('corrections unitaires', () => {
     expect(tauxExterieur(bien({ exterieur: true }), regles)).toBe(0.088);
     expect(tauxExterieur(bien({ exterieur: false }), regles)).toBeNull();
     expect(tauxExterieur(bien({}), regles)).toBeNull();
-  });
-
-  it('confiance : élevée à 10 ventes dans 300 m, moyenne à 5 ventes dans 1 km, faible sinon', () => {
-    const dvf = (nombreVentes: number, rayonMetres?: number): ReturnType<typeof DvfSchema.parse> =>
-      DvfSchema.parse({ medianM2: 3000, nombreVentes, rayonMetres });
-    expect(niveauConfiance(dvf(12, 250), regles)).toBe('elevee');
-    expect(niveauConfiance(dvf(12, 800), regles)).toBe('moyenne');
-    expect(niveauConfiance(dvf(5, 1000), regles)).toBe('moyenne');
-    expect(niveauConfiance(dvf(4, 100), regles)).toBe('faible');
-    expect(niveauConfiance(dvf(500), regles)).toBe('faible');
   });
 });
 
@@ -170,7 +159,8 @@ describe('estimerPrix — T3 Marseille', () => {
   it('bon état supposé, 3e étage sans ascenseur, charges sous le repère, confiance moyenne', () => {
     const e = estimerPrix(projet(), regles);
     // Marché 3 050 €/m² × 65 m² = 198 250 € ; étage −0,9 % ; charges 610 €/an sous le repère
-    // capitalisées à 181,2 ÷ 3 050 = 5,94 % → +10 267,66 €.
+    // capitalisées à 181,2 ÷ 3 050 = 5,94 % → +10 267,66 €. Confiance : quartier à 500 m (12),
+    // 31 ventes (20), dispersion 23 % (19), ancienneté supposée 12 mois (11) = 62, moyenne, ±8 %.
     expect(e).toEqual({
       etat: 'bon_etat',
       etatSuppose: true,
@@ -184,7 +174,17 @@ describe('estimerPrix — T3 Marseille', () => {
       bas: 190_195,
       haut: 223_272,
       selonEtat: { a_renover: 184_188, a_rafraichir: 195_461, bon_etat: 206_733, renove: 229_279 },
-      confiance: 'moyenne',
+      confiance: {
+        note: 62,
+        niveau: 'moyenne',
+        precision: 'quartier',
+        composantes: [
+          { code: 'localisation', valeur: 500, points: 12, maximum: 35, supposee: false },
+          { code: 'comparables', valeur: 31, points: 20, maximum: 20, supposee: false },
+          { code: 'dispersion', valeur: 0.2295, points: 19, maximum: 30, supposee: false },
+          { code: 'anciennete', valeur: 12, points: 11, maximum: 15, supposee: true },
+        ],
+      },
       marge: 0.08,
       charges: {
         repereAnnuel: 1690,
@@ -224,12 +224,14 @@ describe('estimerPrix — T3 Marseille', () => {
       { code: 'exterieur', taux: 0.088, montant: 19_448, ignoree: true },
       { code: 'charges', taux: 0.0465, montant: 10_268, ignoree: true },
     ]);
-    // 3 400 × 65 × 1,12 = 247 520 € ; confiance élevée ±5 %.
+    // 3 400 × 65 × 1,12 = 247 520 € ; confiance : quartier à 150 m (22), 12 ventes (13),
+    // dispersion 23 % (19), ancienneté supposée (11) = 65, bonne, ±6,5 %.
     expect(e).toMatchObject({
       centre: 247_520,
-      bas: 235_144,
-      haut: 259_896,
-      confiance: 'elevee',
+      bas: 231_431,
+      haut: 263_609,
+      confiance: { note: 65, niveau: 'bonne', precision: 'quartier' },
+      marge: 0.065,
       actualiseAu: '2025-S1',
     });
     expect(e?.selonEtat.a_renover).toBe(196_560);
