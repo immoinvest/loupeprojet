@@ -207,7 +207,7 @@ describe('calculerVerdict — variantes', () => {
         {},
         { ...projetExemple.marche, plafondLoyerMensuel: 900 },
         {
-          location: { mode: 'meuble_lld', loyerHc: 8_000, vacanceSemaines: 0 },
+          location: { mode: 'meuble', loyerHc: 8_000, vacanceSemaines: 0 },
           fiscalite: { tmi: 0.3, regime: 'micro_bic' },
         },
       ),

@@ -1,18 +1,38 @@
 import { describe, expect, it } from 'vitest';
 
 import { projetExemple } from '../../src/exemples/t3-marseille';
-import { ProjetSchema, type ProjetEntree } from '../../src/schema';
+import {
+  LocationSchema,
+  MODES_LOCATION,
+  ProjetSchema,
+  regimesCompatibles,
+  type ProjetEntree,
+} from '../../src/schema';
 
 const avecPret = (pret: Partial<ProjetEntree['hypotheses']['pret']>): ProjetEntree => ({
   ...projetExemple,
   hypotheses: { ...projetExemple.hypotheses, pret: { ...projetExemple.hypotheses.pret, ...pret } },
 });
 
+const avecLocation = (
+  location: ProjetEntree['hypotheses']['location'],
+  regime: ProjetEntree['hypotheses']['fiscalite']['regime'] = 'lmnp_reel',
+): ProjetEntree => ({
+  ...projetExemple,
+  hypotheses: {
+    ...projetExemple.hypotheses,
+    location,
+    fiscalite: { ...projetExemple.hypotheses.fiscalite, regime },
+  },
+});
+
 describe('ProjetSchema', () => {
   it('accepte le projet d’exemple et applique les défauts', () => {
     const projet = ProjetSchema.parse(projetExemple);
-    expect(projet.hypotheses.location.vacanceSemaines).toBe(3);
+    expect(projet.hypotheses.location).toMatchObject({ mode: 'meuble', vacanceSemaines: 3 });
     expect(projet.hypotheses.charges.entretienTaux).toBe(0.005);
+    expect(projet.hypotheses.charges.energieMensuel).toBe(0);
+    expect(projet.hypotheses.charges.internetMensuel).toBe(0);
     expect(projet.hypotheses.fiscalite.psBic).toBe(0.186);
     expect(projet.hypotheses.fiscalite.psFoncier).toBe(0.172);
     expect(projet.hypotheses.revente.diagnostics).toBe(500);
@@ -66,33 +86,6 @@ describe('ProjetSchema', () => {
     expect(projet.hypotheses.pret.differePartielMois).toBe(6);
   });
 
-  it('exige les hypothèses de courte durée en mode courte durée', () => {
-    const resultat = ProjetSchema.safeParse({
-      ...projetExemple,
-      hypotheses: {
-        ...projetExemple.hypotheses,
-        location: { mode: 'courte_duree', loyerHc: 0 },
-      },
-    });
-    expect(resultat.success).toBe(false);
-    expect(resultat.error?.issues[0]?.path).toEqual(['hypotheses', 'location', 'courteDuree']);
-  });
-
-  it('accepte la courte durée complète', () => {
-    const projet = ProjetSchema.parse({
-      ...projetExemple,
-      hypotheses: {
-        ...projetExemple.hypotheses,
-        location: {
-          mode: 'courte_duree',
-          loyerHc: 0,
-          courteDuree: { nuitee: 75, tauxOccupation: 0.6 },
-        },
-      },
-    });
-    expect(projet.hypotheses.location.courteDuree?.fraisMenageParNuit).toBe(0);
-  });
-
   it('refuse une TMI hors barème et un département mal formé', () => {
     expect(
       ProjetSchema.safeParse({
@@ -133,5 +126,97 @@ describe('ProjetSchema', () => {
   it('refuse une version de règles inconnue', () => {
     const resultat = ProjetSchema.safeParse({ ...projetExemple, versionRegles: '2031-01' });
     expect(resultat.success).toBe(false);
+  });
+});
+
+describe('LocationSchema — cinq types d’exploitation', () => {
+  it('liste les cinq modes', () => {
+    expect(MODES_LOCATION).toEqual(['nu', 'meuble', 'colocation', 'courte_duree', 'moyenne_duree']);
+  });
+
+  it('complète chaque variante avec ses défauts', () => {
+    expect(LocationSchema.parse({ mode: 'nu', loyerHc: 800 })).toEqual({
+      mode: 'nu',
+      loyerHc: 800,
+      chargesLocataire: 0,
+      vacanceSemaines: 3,
+      gestionTaux: 0,
+    });
+    expect(LocationSchema.parse({ mode: 'colocation', chambres: 4, loyerChambre: 460 })).toEqual({
+      mode: 'colocation',
+      chambres: 4,
+      loyerChambre: 460,
+      forfaitChargesChambre: 0,
+      vacanceSemaines: 4,
+      gestionTaux: 0,
+    });
+    expect(LocationSchema.parse({ mode: 'courte_duree', nuitee: 75, nuiteesParMois: 15 })).toEqual({
+      mode: 'courte_duree',
+      nuitee: 75,
+      nuiteesParMois: 15,
+      dureeSejourNuits: 4,
+      menageFactureParSejour: 0,
+      menageCoutParSejour: 0,
+      plateformeTaux: 0,
+      conciergerieTaux: 0,
+      tourismeClasse: false,
+    });
+    expect(LocationSchema.parse({ mode: 'moyenne_duree', loyerHc: 900 })).toEqual({
+      mode: 'moyenne_duree',
+      loyerHc: 900,
+      forfaitCharges: 0,
+      dureeSejourMois: 4,
+      vacanceSemaines: 4,
+      menageCoutParSejour: 0,
+      plateformeTaux: 0,
+      gestionTaux: 0,
+    });
+  });
+
+  it('refuse un mode inconnu, l’ancien « meuble_lld » et une variante incomplète', () => {
+    expect(LocationSchema.safeParse({ mode: 'meuble_lld', loyerHc: 980 }).success).toBe(false);
+    expect(LocationSchema.safeParse({ mode: 'saisonnier', loyerHc: 980 }).success).toBe(false);
+    expect(LocationSchema.safeParse({ mode: 'courte_duree', nuitee: 75 }).success).toBe(false);
+    expect(LocationSchema.safeParse({ mode: 'colocation', loyerChambre: 460 }).success).toBe(false);
+    expect(
+      LocationSchema.safeParse({ mode: 'courte_duree', nuitee: 75, nuiteesParMois: 40 }).success,
+    ).toBe(false);
+  });
+
+  it('ignore les champs d’une autre variante (une nuitée sur une location nue)', () => {
+    const nu = LocationSchema.parse({ mode: 'nu', loyerHc: 800, nuitee: 90 });
+    expect(nu).not.toHaveProperty('nuitee');
+  });
+});
+
+describe('HypothesesSchema — régime compatible avec le type', () => {
+  it('nue et meublée acceptent les quatre régimes', () => {
+    expect(regimesCompatibles('nu')).toEqual([
+      'micro_bic',
+      'lmnp_reel',
+      'micro_foncier',
+      'nu_reel',
+    ]);
+    expect(
+      ProjetSchema.safeParse(avecLocation({ mode: 'nu', loyerHc: 800 }, 'micro_bic')).success,
+    ).toBe(true);
+    expect(
+      ProjetSchema.safeParse(avecLocation({ mode: 'meuble', loyerHc: 980 }, 'nu_reel')).success,
+    ).toBe(true);
+  });
+
+  it('colocation, courte et moyenne durée refusent un régime foncier en nommant le champ', () => {
+    expect(regimesCompatibles('colocation')).toEqual(['micro_bic', 'lmnp_reel']);
+    expect(regimesCompatibles('courte_duree')).toEqual(['micro_bic', 'lmnp_reel']);
+    expect(regimesCompatibles('moyenne_duree')).toEqual(['micro_bic', 'lmnp_reel']);
+    const refus = ProjetSchema.safeParse(
+      avecLocation({ mode: 'colocation', chambres: 3, loyerChambre: 450 }, 'micro_foncier'),
+    );
+    expect(refus.success).toBe(false);
+    expect(refus.error?.issues[0]?.path).toEqual(['hypotheses', 'fiscalite', 'regime']);
+    expect(
+      ProjetSchema.safeParse(avecLocation({ mode: 'moyenne_duree', loyerHc: 900 }, 'micro_bic'))
+        .success,
+    ).toBe(true);
   });
 });

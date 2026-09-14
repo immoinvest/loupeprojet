@@ -11,7 +11,10 @@ describe('calculerProjet — T3 Marseille', () => {
 
   it('rend un rapport complet que le schéma de sortie accepte tel quel', () => {
     expect(() => ResultatsSchema.parse(resultats)).not.toThrow();
-    expect(resultats.projet.hypotheses.location.vacanceSemaines).toBe(3);
+    expect(resultats.projet.hypotheses.location).toMatchObject({
+      mode: 'meuble',
+      vacanceSemaines: 3,
+    });
     expect(resultats.financement.montantEmprunte).toBeCloseTo(161_000, 0);
     expect(resultats.cashflow.regime).toBe('lmnp_reel');
     expect(resultats.fiscalite.retenu).toBe('lmnp_reel');

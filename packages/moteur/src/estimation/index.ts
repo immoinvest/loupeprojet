@@ -1,4 +1,5 @@
 import { arrondirEuro, arrondirTaux } from '../commun/arrondi';
+import { loyerMensuelHc } from '../location/equivalents';
 import type { NiveauConfiance, Regles } from '../regles/types';
 import type { Bien, EtatBien } from '../schema/bien';
 import type { CodeCorrection } from '../schema/estimation';
@@ -103,7 +104,7 @@ export function effetCharges(
   const { loyerReferenceM2 } = projet.marche;
   const rendementLocal =
     loyerReferenceM2 === undefined
-      ? (projet.hypotheses.location.loyerHc * 12) / projet.hypotheses.achat.prix
+      ? (loyerMensuelHc(projet.hypotheses.location) * 12) / projet.hypotheses.achat.prix
       : (loyerReferenceM2 * 12) / dvf.medianM2;
   if (rendementLocal <= 0) return null;
   const repereAnnuel = regles.estimation.charges.repereM2An * projet.bien.surface;

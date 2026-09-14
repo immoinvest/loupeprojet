@@ -4,7 +4,7 @@ import { calculerCashflow } from '../../src/cashflow';
 import { projetExemple } from '../../src/exemples/t3-marseille';
 import { calculerFinancement } from '../../src/financement';
 import { obtenirRegles } from '../../src/regles';
-import { ProjetSchema, type ProjetEntree } from '../../src/schema';
+import { ProjetSchema, type Location, type ProjetEntree } from '../../src/schema';
 
 const regles = obtenirRegles('2026-09');
 const projet = ProjetSchema.parse(projetExemple);
@@ -17,6 +17,15 @@ const variante = (
     ...projetExemple,
     hypotheses: { ...projetExemple.hypotheses, ...hypotheses },
   });
+
+/** La location meublée de l'exemple avec un autre loyer (point mort, surcharges). */
+const meubleA = (loyerHc: number, gestionTaux = 0): Location => ({
+  mode: 'meuble',
+  loyerHc,
+  chargesLocataire: 60,
+  vacanceSemaines: 3,
+  gestionTaux,
+});
 
 describe('calculerCashflow — T3 Marseille, réel meublé', () => {
   const cf = calculerCashflow(projet, financement);
@@ -43,7 +52,7 @@ describe('calculerCashflow — T3 Marseille, réel meublé', () => {
   it('le point mort équilibre exactement le cash-flow', () => {
     expect(cf.pointMort).not.toBeNull();
     expect(cf.pointMort!).toBeGreaterThan(980);
-    const equilibre = calculerCashflow(projet, financement, { loyerHc: cf.pointMort! });
+    const equilibre = calculerCashflow(projet, financement, { location: meubleA(cf.pointMort!) });
     expect(Math.abs(equilibre.mensuel)).toBeLessThan(0.5);
   });
 
@@ -60,11 +69,16 @@ describe('calculerCashflow — options et cas limites', () => {
     expect(cf.chargesAnnuelles).toBe(3_685 - 420);
   });
 
-  it('mode nu avec le loyer nu : recettes et charges du nu', () => {
+  it('une location nue avec le loyer nu : recettes et charges du nu', () => {
     const cf = calculerCashflow(projet, financement, {
       regime: 'nu_reel',
-      mode: 'nu',
-      loyerHc: 850,
+      location: {
+        mode: 'nu',
+        loyerHc: 850,
+        chargesLocataire: 0,
+        vacanceSemaines: 3,
+        gestionTaux: 0,
+      },
     });
     expect(cf.recettes.mode).toBe('nu');
     expect(cf.recettes.loyersBruts).toBe(10_200);
@@ -79,17 +93,19 @@ describe('calculerCashflow — options et cas limites', () => {
     expect(cf.mensuel).toBeLessThan(0);
   });
 
-  it('courte durée : pas de point mort, recettes issues des nuitées', () => {
+  it('courte durée : pas de point mort, recettes issues des nuitées, couverture sur les nuitées', () => {
     const p = variante({
-      location: {
-        mode: 'courte_duree',
-        loyerHc: 0,
-        courteDuree: { nuitee: 90, tauxOccupation: 0.65, conciergerieTaux: 0.2 },
-      },
+      location: { mode: 'courte_duree', nuitee: 90, nuiteesParMois: 19.5, conciergerieTaux: 0.2 },
     });
-    const cf = calculerCashflow(p, calculerFinancement(p, regles));
+    const f = calculerFinancement(p, regles);
+    const cf = calculerCashflow(p, f);
     expect(cf.pointMort).toBeNull();
-    expect(cf.recettes.courteDuree?.nuitees).toBeCloseTo(237.25, 6);
+    expect(cf.recettes.nuitees).toBe(234);
+    expect(cf.tauxCouverture).toBeCloseTo(f.mensualiteTotale / (90 * 19.5), 10);
+    expect(cf.charges.find((l) => l.code === 'conciergerie')?.annuel).toBeCloseTo(
+      90 * 234 * 0.2,
+      6,
+    );
   });
 
   it('vacance de 52 semaines : point mort impossible (null)', () => {
@@ -103,7 +119,70 @@ describe('calculerCashflow — options et cas limites', () => {
     const p = variante({ location: { mode: 'nu', loyerHc: 800, gestionTaux: 0.08 } });
     const f = calculerFinancement(p, regles);
     const cf = calculerCashflow(p, f);
-    const equilibre = calculerCashflow(p, f, { loyerHc: cf.pointMort! });
+    const equilibre = calculerCashflow(p, f, {
+      location: {
+        mode: 'nu',
+        loyerHc: cf.pointMort!,
+        chargesLocataire: 0,
+        vacanceSemaines: 3,
+        gestionTaux: 0.08,
+      },
+    });
+    expect(Math.abs(equilibre.mensuel)).toBeLessThan(0.5);
+  });
+
+  it('colocation : le point mort est le loyer total qui équilibre, forfaits déjà encaissés', () => {
+    const p = variante({
+      location: {
+        mode: 'colocation',
+        chambres: 4,
+        loyerChambre: 460,
+        forfaitChargesChambre: 55,
+        gestionTaux: 0.08,
+      },
+      charges: { ...projetExemple.hypotheses.charges, energieMensuel: 190, internetMensuel: 30 },
+    });
+    const f = calculerFinancement(p, regles);
+    const cf = calculerCashflow(p, f);
+    expect(cf.pointMort).not.toBeNull();
+    const equilibre = calculerCashflow(p, f, {
+      location: {
+        mode: 'colocation',
+        chambres: 4,
+        loyerChambre: cf.pointMort! / 4,
+        forfaitChargesChambre: 55,
+        vacanceSemaines: 4,
+        gestionTaux: 0.08,
+      },
+    });
+    expect(Math.abs(equilibre.mensuel)).toBeLessThan(0.5);
+    expect(cf.charges.find((l) => l.code === 'energie')?.annuel).toBe(2_280);
+  });
+
+  it('moyenne durée : le point mort équilibre aussi avec plateforme et ménage', () => {
+    const p = variante({
+      location: {
+        mode: 'moyenne_duree',
+        loyerHc: 900,
+        forfaitCharges: 120,
+        plateformeTaux: 0.05,
+        menageCoutParSejour: 80,
+      },
+    });
+    const f = calculerFinancement(p, regles);
+    const cf = calculerCashflow(p, f);
+    const equilibre = calculerCashflow(p, f, {
+      location: {
+        mode: 'moyenne_duree',
+        loyerHc: cf.pointMort!,
+        forfaitCharges: 120,
+        dureeSejourMois: 4,
+        vacanceSemaines: 4,
+        menageCoutParSejour: 80,
+        plateformeTaux: 0.05,
+        gestionTaux: 0,
+      },
+    });
     expect(Math.abs(equilibre.mensuel)).toBeLessThan(0.5);
   });
 

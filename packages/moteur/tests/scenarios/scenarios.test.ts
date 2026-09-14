@@ -10,6 +10,7 @@ import {
   calculerScenarios,
   indicateurs,
   prixCible,
+  type Variante,
 } from '../../src/scenarios';
 import { ProjetSchema, type ProjetEntree } from '../../src/schema';
 
@@ -18,6 +19,12 @@ const projet = ProjetSchema.parse(projetExemple);
 
 const variante = (h: Partial<ProjetEntree['hypotheses']>): ReturnType<typeof ProjetSchema.parse> =>
   ProjetSchema.parse({ ...projetExemple, hypotheses: { ...projetExemple.hypotheses, ...h } });
+
+/** La transformation n'a pas le droit de rendre `null` ici. */
+const obligatoire = (v: Variante | null): Variante => {
+  if (v === null) throw new Error('scénario absent');
+  return v;
+};
 
 describe('prixCible', () => {
   it('cash-flow nul : un prix plus bas qui équilibre exactement le cash-flow', () => {
@@ -56,7 +63,7 @@ describe('prixCible', () => {
 });
 
 describe('transformations prédéfinies', () => {
-  const variantes = TRANSFORMATIONS.map((t) => t(projet, regles));
+  const variantes = TRANSFORMATIONS.map((t) => obligatoire(t(projet, regles)));
   const par = Object.fromEntries(variantes.map((v) => [v.code, v]));
 
   it('produit six variantes aux codes attendus pour un meublé', () => {
@@ -77,58 +84,121 @@ describe('transformations prédéfinies', () => {
     expect(prix).toBeLessThan(155_000);
   });
 
-  it('colocation : 2 chambres, loyer total +35 %, vacance 4 semaines, meublé', () => {
+  it('colocation : 2 chambres, loyer total +35 %, vacance 4 semaines, forfait et abonnements des règles', () => {
     const v = par.colocation!;
     expect(v.parametres.chambres).toBe(2);
     expect(v.parametres.loyerParChambre).toBe(Math.round((980 * 1.35) / 2));
-    expect(v.projet.hypotheses.location.loyerHc).toBe(662 * 2);
-    expect(v.projet.hypotheses.location.vacanceSemaines).toBe(4);
-    expect(v.projet.hypotheses.location.mode).toBe('meuble_lld');
+    expect(v.projet.hypotheses.location).toEqual({
+      mode: 'colocation',
+      chambres: 2,
+      loyerChambre: 662,
+      forfaitChargesChambre: 110,
+      vacanceSemaines: 4,
+      gestionTaux: 0,
+    });
+    expect(v.projet.hypotheses.charges).toMatchObject({ energieMensuel: 190, internetMensuel: 30 });
+    expect(v.projet.hypotheses.fiscalite.regime).toBe('lmnp_reel');
+  });
+
+  it('colocation : garde les abonnements déjà saisis et remplace un régime nu par le réel meublé', () => {
+    const nu = variante({
+      location: { mode: 'nu', loyerHc: 800 },
+      charges: { ...projetExemple.hypotheses.charges, energieMensuel: 120, internetMensuel: 25 },
+      fiscalite: { tmi: 0.3, regime: 'nu_reel' },
+    });
+    const v = obligatoire(TRANSFORMATIONS[1]!(nu, regles));
+    expect(v.projet.hypotheses.charges).toMatchObject({ energieMensuel: 120, internetMensuel: 25 });
+    expect(v.projet.hypotheses.fiscalite.regime).toBe('lmnp_reel');
+    // Référence meublée d'une location nue : 800 × 1,15 = 920 ; × 1,35 ÷ 2 chambres.
+    expect(v.parametres.loyerParChambre).toBe(Math.round((920 * 1.35) / 2));
+  });
+
+  it('colocation : absente quand le projet est déjà une colocation', () => {
+    const coloc = variante({ location: { mode: 'colocation', chambres: 3, loyerChambre: 450 } });
+    expect(TRANSFORMATIONS[1]!(coloc, regles)).toBeNull();
+    expect(calculerScenarios(coloc, calculerBase(coloc, regles), regles).scenarios).toHaveLength(5);
   });
 
   it('durée : 20 ans (ou 15 si déjà 20) ; taux : +0,5 point', () => {
     expect(par.duree!.projet.hypotheses.pret.dureeAnnees).toBe(20);
     const deja20 = variante({ pret: { ...projetExemple.hypotheses.pret, dureeAnnees: 20 } });
-    expect(TRANSFORMATIONS[2]!(deja20, regles).parametres.dureeAnnees).toBe(15);
+    expect(obligatoire(TRANSFORMATIONS[2]!(deja20, regles)).parametres.dureeAnnees).toBe(15);
     expect(par.tauxPlus050!.projet.hypotheses.pret.tauxNominal).toBeCloseTo(0.0385, 10);
   });
 
   it('nu : loyer nu saisi et régime nu réel ; depuis le nu, bascule en meublé LMNP réel', () => {
-    expect(par.nu!.projet.hypotheses.location.mode).toBe('nu');
-    expect(par.nu!.projet.hypotheses.location.loyerHc).toBe(850);
+    expect(par.nu!.projet.hypotheses.location).toEqual({
+      mode: 'nu',
+      loyerHc: 850,
+      chargesLocataire: 60,
+      vacanceSemaines: 3,
+      gestionTaux: 0,
+    });
     expect(par.nu!.projet.hypotheses.fiscalite.regime).toBe('nu_reel');
     const enNu = variante({
       location: { mode: 'nu', loyerHc: 800 },
       fiscalite: { tmi: 0.3, regime: 'nu_reel' },
     });
-    const meuble = TRANSFORMATIONS[4]!(enNu, regles);
+    const meuble = obligatoire(TRANSFORMATIONS[4]!(enNu, regles));
     expect(meuble.code).toBe('meuble');
-    expect(meuble.projet.hypotheses.location.loyerHc).toBe(920);
+    expect(meuble.projet.hypotheses.location).toMatchObject({ mode: 'meuble', loyerHc: 920 });
     expect(meuble.projet.hypotheses.fiscalite.regime).toBe('lmnp_reel');
-    const sansLoyerNu = variante({ location: { mode: 'meuble_lld', loyerHc: 1_150 } });
-    expect(TRANSFORMATIONS[4]!(sansLoyerNu, regles).parametres.loyerHc).toBe(1_000);
+    const sansLoyerNu = variante({ location: { mode: 'meuble', loyerHc: 1_150 } });
+    expect(obligatoire(TRANSFORMATIONS[4]!(sansLoyerNu, regles)).parametres.loyerHc).toBe(1_000);
   });
 
-  it('vacance 2 mois : 8 semaines ; en courte durée, occupation −15 points', () => {
-    expect(par.vacance2Mois!.projet.hypotheses.location.vacanceSemaines).toBe(8);
-    const cd = variante({
-      location: {
-        mode: 'courte_duree',
-        loyerHc: 0,
-        courteDuree: { nuitee: 80, tauxOccupation: 0.6 },
+  it('depuis une colocation ou une moyenne durée : passer en meublé longue durée au loyer de référence', () => {
+    const coloc = variante({
+      location: { mode: 'colocation', chambres: 4, loyerChambre: 460, gestionTaux: 0.08 },
+    });
+    const v = obligatoire(TRANSFORMATIONS[4]!(coloc, regles));
+    expect(v.code).toBe('meuble');
+    expect(v.parametres.loyerHc).toBe(Math.round((460 * 4) / 1.35));
+    expect(v.projet.hypotheses.location).toMatchObject({
+      mode: 'meuble',
+      vacanceSemaines: 3,
+      gestionTaux: 0.08,
+    });
+    expect(v.projet.hypotheses.fiscalite.regime).toBe('lmnp_reel');
+    const md = variante({ location: { mode: 'moyenne_duree', loyerHc: 900 } });
+    expect(obligatoire(TRANSFORMATIONS[4]!(md, regles)).parametres.loyerHc).toBe(900);
+  });
+
+  it('depuis une courte durée : le loyer de marché quand il est connu, sinon nuitée × 30 ÷ 2', () => {
+    const avecMarche = ProjetSchema.parse({
+      ...projetExemple,
+      hypotheses: {
+        ...projetExemple.hypotheses,
+        location: { mode: 'courte_duree', nuitee: 80, nuiteesParMois: 15, conciergerieTaux: 0.2 },
       },
     });
-    const v = TRANSFORMATIONS[5]!(cd, regles);
-    expect(v.parametres.tauxOccupation).toBeCloseTo(0.45, 10);
-    expect(v.projet.hypotheses.location.courteDuree?.tauxOccupation).toBeCloseTo(0.45, 10);
-    const cdBas = variante({
-      location: {
-        mode: 'courte_duree',
-        loyerHc: 0,
-        courteDuree: { nuitee: 80, tauxOccupation: 0.1 },
-      },
+    const v = obligatoire(TRANSFORMATIONS[4]!(avecMarche, regles));
+    // Loyer ANIL 15,1 €/m² × 65 m² × 1,15 = 1 128,725 €.
+    expect(v.parametres.loyerHc).toBe(Math.round(15.1 * 65 * 1.15));
+    expect(v.projet.hypotheses.location).toMatchObject({ mode: 'meuble', gestionTaux: 0 });
+    const sansMarche = ProjetSchema.parse({
+      ...avecMarche,
+      marche: { ...projetExemple.marche, loyerReferenceM2: undefined },
     });
-    expect(TRANSFORMATIONS[5]!(cdBas, regles).parametres.tauxOccupation).toBe(0);
+    expect(obligatoire(TRANSFORMATIONS[4]!(sansMarche, regles)).parametres.loyerHc).toBe(1_200);
+    expect(obligatoire(TRANSFORMATIONS[1]!(sansMarche, regles)).parametres.loyerParChambre).toBe(
+      Math.round((1_200 * 1.35) / 2),
+    );
+  });
+
+  it('vacance 2 mois : 8 semaines ; en courte durée, deux mois de nuitées en moins', () => {
+    expect(par.vacance2Mois!.projet.hypotheses.location).toMatchObject({ vacanceSemaines: 8 });
+    const cd = variante({ location: { mode: 'courte_duree', nuitee: 80, nuiteesParMois: 18 } });
+    const v = obligatoire(TRANSFORMATIONS[5]!(cd, regles));
+    expect(v.parametres.nuiteesParMois).toBeCloseTo(15, 10);
+    expect(v.projet.hypotheses.location).toMatchObject({
+      mode: 'courte_duree',
+      nuiteesParMois: 15,
+    });
+    const coloc = variante({ location: { mode: 'colocation', chambres: 3, loyerChambre: 450 } });
+    expect(
+      obligatoire(TRANSFORMATIONS[5]!(coloc, regles)).projet.hypotheses.location,
+    ).toMatchObject({ mode: 'colocation', vacanceSemaines: 8 });
   });
 
   it('colocation sans chambres renseignées : pièces − 1, au moins 1', () => {
@@ -136,12 +206,12 @@ describe('transformations prédéfinies', () => {
       ...projetExemple,
       bien: { ...projetExemple.bien, chambres: undefined, pieces: 1 },
     });
-    expect(TRANSFORMATIONS[1]!(sansChambres, regles).parametres.chambres).toBe(1);
+    expect(obligatoire(TRANSFORMATIONS[1]!(sansChambres, regles)).parametres.chambres).toBe(1);
   });
 
   it('négocier sans prix d’équilibre : −10 % de repli', () => {
     const sansLoyer = variante({ location: { mode: 'nu', loyerHc: 0 } });
-    expect(TRANSFORMATIONS[0]!(sansLoyer, regles).parametres.prix).toBe(139_500);
+    expect(obligatoire(TRANSFORMATIONS[0]!(sansLoyer, regles)).parametres.prix).toBe(139_500);
   });
 });
 

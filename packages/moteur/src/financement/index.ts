@@ -1,4 +1,5 @@
 import { sommer } from '../commun/flux';
+import { loyerMensuelHc } from '../location/equivalents';
 import type { Regles } from '../regles/types';
 import type { Projet } from '../schema/projet';
 import {
@@ -124,7 +125,7 @@ export function calculerFinancement(
       {
         mensualiteTotale: mensualiteHorsAssurance + assurance,
         revenusMensuels,
-        loyerMensuel: location.loyerHc,
+        loyerMensuel: loyerMensuelHc(location),
         dureeAnnees: pret.dureeAnnees,
         travaux: achat.travaux,
         prix: achat.prix,

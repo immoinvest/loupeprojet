@@ -1,7 +1,9 @@
 import { estMeuble } from '../cashflow/charges';
 import type { ResultatFinancement } from '../financement';
 import type { ResultatFiscalite } from '../fiscalite/types';
+import { loyerMensuelHc } from '../location/equivalents';
 import type { Regles } from '../regles/types';
+import { ClasseEnergieSchema } from '../schema/bien';
 import type { Projet } from '../schema/projet';
 import type { FeuVerdict } from './feux';
 
@@ -19,7 +21,12 @@ export type CodeVigilance =
   | 'DUREE_PRET_HORS_HCSF'
   | 'PLAFOND_MICRO_DEPASSE'
   | 'LOYER_AU_DESSUS_PLAFOND'
-  | 'PS_BIC_A_CONFIRMER';
+  | 'PS_BIC_A_CONFIRMER'
+  | 'CHANGEMENT_USAGE_COURTE_DUREE'
+  | 'DPE_MEUBLE_TOURISME'
+  | 'REGLEMENT_COPRO_LOCATION'
+  | 'SURFACE_CHAMBRES_COLOCATION'
+  | 'BAIL_MOBILITE_CONDITIONS';
 
 /** Un code et ses paramètres ; la phrase est écrite côté interface, jamais ici. */
 export interface PointVigilance {
@@ -28,6 +35,7 @@ export interface PointVigilance {
 }
 
 const ETAGE_SANS_ASCENSEUR = 3;
+const CLASSES = ClasseEnergieSchema.options;
 
 function pointsBien(projet: Projet, regles: Regles): PointVigilance[] {
   const { bien } = projet;
@@ -59,6 +67,63 @@ function pointsBien(projet: Projet, regles: Regles): PointVigilance[] {
   return points;
 }
 
+/** Points propres au type d'exploitation : réglementation des meublés de tourisme, décence en colocation, bail mobilité. */
+function pointsLocation(projet: Projet, regles: Regles): PointVigilance[] {
+  const { bien } = projet;
+  const { location } = projet.hypotheses;
+  const { meubleTourisme, colocation, bailMobilite } = regles.exploitation;
+  const points: PointVigilance[] = [];
+  if (location.mode === 'courte_duree') {
+    points.push({
+      code: 'CHANGEMENT_USAGE_COURTE_DUREE',
+      parametres: {
+        zone: meubleTourisme.departementsChangementUsage.includes(bien.departement)
+          ? 'plein_droit'
+          : 'a_verifier',
+        joursResidencePrincipale: meubleTourisme.joursMaxResidencePrincipale,
+      },
+    });
+    if (
+      bien.dpe !== undefined &&
+      CLASSES.indexOf(bien.dpe) > CLASSES.indexOf(meubleTourisme.dpeMinTous)
+    ) {
+      points.push({
+        code: 'DPE_MEUBLE_TOURISME',
+        parametres: {
+          dpe: bien.dpe,
+          classeMinimale: meubleTourisme.dpeMinNouvelleAutorisation,
+          classeTous: meubleTourisme.dpeMinTous,
+          annee: meubleTourisme.dpeMinTousDes,
+        },
+      });
+    }
+  }
+  if (location.mode === 'colocation') {
+    points.push({
+      code: 'SURFACE_CHAMBRES_COLOCATION',
+      parametres: {
+        chambres: location.chambres,
+        surfaceParChambre: Math.round(bien.surface / location.chambres),
+        surfaceMinimale: colocation.surfaceMinChambreM2,
+        volumeMinimal: colocation.volumeMinChambreM3,
+      },
+    });
+  }
+  if (
+    (location.mode === 'courte_duree' || location.mode === 'colocation') &&
+    bien.copro !== undefined
+  ) {
+    points.push({ code: 'REGLEMENT_COPRO_LOCATION', parametres: { mode: location.mode } });
+  }
+  if (location.mode === 'moyenne_duree') {
+    points.push({
+      code: 'BAIL_MOBILITE_CONDITIONS',
+      parametres: { dureeMin: bailMobilite.dureeMinMois, dureeMax: bailMobilite.dureeMaxMois },
+    });
+  }
+  return points;
+}
+
 function pointsFinanciers(
   projet: Projet,
   financement: ResultatFinancement,
@@ -84,9 +149,11 @@ function pointsFinanciers(
     points.push({ code: 'PLAFOND_MICRO_DEPASSE', parametres: { regime: fiscalite.retenu } });
   }
   const { plafondLoyerMensuel } = projet.marche;
+  const { location } = projet.hypotheses;
   if (
     plafondLoyerMensuel !== undefined &&
-    projet.hypotheses.location.loyerHc > plafondLoyerMensuel
+    location.mode !== 'courte_duree' &&
+    loyerMensuelHc(location) > plafondLoyerMensuel
   ) {
     points.push({ code: 'LOYER_AU_DESSUS_PLAFOND', parametres: { plafond: plafondLoyerMensuel } });
   }
@@ -109,6 +176,7 @@ export function pointsDeVigilance(
 ): PointVigilance[] {
   return [
     ...pointsBien(projet, regles),
+    ...pointsLocation(projet, regles),
     ...pointsFinanciers(projet, financement, fiscalite, feuPrix),
   ];
 }
