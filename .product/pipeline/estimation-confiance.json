@@ -1,0 +1,80 @@
+{
+  "feature_slug": "estimation-confiance",
+  "title": "Estimation : note de confiance expliquée en tête d'onglet, repère visible sans adresse (PR 1) ; carte des ventes (PR 2)",
+  "started_at": "2026-09-14T12:00:00Z",
+  "current_step": "implement",
+  "scope": "packages/moteur/src/{estimation,regles,schema/marche.ts,schema/resultats.ts}, data/src/{schemas/dvf.ts,sources/dvf/statistiques.ts}, apps/worker/src/{donnees/anciennete.ts,marche,adresse}, apps/web/src/{enrichissement,textes/confiance.ts,ecrans/Adresse.tsx,ecrans/adresse,ecrans/rapport/CartePrix.tsx,textes/methode-estimation.ts}, e2e",
+  "branch": "feat/estimation-confiance",
+  "base": "master (9d38892, PR #38 fusionnée)",
+  "backlog": ".product/backlog/09-estimation-carte-confiance.md",
+  "steps": {
+    "discovery": {
+      "status": "completed",
+      "output": ".product/features/estimation-confiance-discovery.md",
+      "note": "Les CSV DVF portent déjà lat et lon par vente : la carte (PR 2) n'exige aucune republication"
+    },
+    "specs": {
+      "status": "completed",
+      "output": ".product/specs/estimation-confiance-specs.md",
+      "stories_count": 6,
+      "stories_pr2": 2
+    },
+    "architecture": {
+      "status": "completed",
+      "output": ".product/architecture/estimation-confiance.md"
+    },
+    "implement": {
+      "status": "completed",
+      "stories_completed": 6,
+      "stories_total": 6,
+      "commits": [
+        { "etape": "docs", "hash": "c5dc1c3" },
+        {
+          "etape": "US-1 moteur (+ web et Méthode adaptés)",
+          "hash": "220eb4b",
+          "tests_moteur": 233
+        },
+        {
+          "etape": "US-2 data + worker",
+          "hash": "2f4c887",
+          "tests_worker": 111,
+          "tests_data": 144
+        },
+        { "etape": "US-3 web enrichissement", "hash": "2402e49" },
+        { "etape": "US-4, US-5, US-6 écrans", "hash": "451a386" }
+      ],
+      "notes": [
+        "Le projet d'exemple (rayon 500 m, 31 ventes, sans ancienneté) note 62, moyenne : sa fourchette ±8 % ne change pas",
+        "interpolerPaliers réécrite sans branche inatteignable pour tenir la couverture à 100 %",
+        "DvfMarche du Worker redéfinit dateMediane en string | null (Omit du schéma tolérant)"
+      ]
+    },
+    "refactor": {
+      "status": "completed",
+      "note": "BADGES et badgeDeSource extraits de Hypotheses.tsx vers hypotheses/ChampHypothese.tsx pour la carte Repère ; textes de la confiance dans textes/confiance.ts (estimation.ts reste sous 300 lignes)"
+    },
+    "qa_tests": {
+      "status": "completed",
+      "tests": 1003,
+      "fichiers_de_test": 143,
+      "note": "couverture 100 % sur le moteur (confiance.ts), le Worker (anciennete.ts, assembler, analyse, routes), data/ (statistiques), enrichissement/ et textes/ du web ; sous charge, six tests d'écran dépassent leurs 30 s puis passent seuls (fait connu de la machine)"
+    },
+    "security": {
+      "status": "completed",
+      "note": "aucune donnée nouvelle vers le réseau ; les nouveaux champs des réponses sont revalidés par Zod (optionnels, nullable) ; textes rendus comme texte (aucun innerHTML) ; le lieu vient du référentiel des communes, jamais de l'adresse saisie"
+    },
+    "push": {
+      "status": "completed",
+      "pr": "https://github.com/immoinvest/loupeprojet/pull/42",
+      "note": "auto-merge armé ; master fusionné une fois (coque-fixe, PR #39) : trois conflits de docs résolus ; après la fusion : déployer le Worker 0.7.0 et relancer l'Action Référentiels (DVF, 13)"
+    }
+  },
+  "decisions": {
+    "indice": "note 0-100 en mots avec quatre composantes chiffrées (recommandation, à confirmer par Pierre) ; cinq niveaux ; marge de la fourchette selon le niveau",
+    "composantes": "localisation 35, dispersion 30, comparables 20, ancienneté 15 ; barèmes en paliers interpolés, règle datée dans regles/2026-09.ts",
+    "anciennete": "mesurée par le Worker (dates du CSV, dateMediane de l'index DVF) et rangée en mois dans marche.dvf ; supposée 12 mois quand elle manque",
+    "retrocompatibilite": "champs de marche.dvf optionnels ; précision déduite du rayon ; contrats web tolérants à l'ancien Worker",
+    "carte": "PR 2 séparée ; fond IGN Géoplateforme recommandé, décision de Pierre",
+    "etat_pipeline": "session parallèle : état dans .product/pipeline/estimation-confiance.json, pipeline-state.json réservé à la session principale"
+  }
+}

@@ -59,7 +59,14 @@ const ANALYSE = {
       distanceMaxMetres: 297,
     },
   ],
-  reference: { code: 'rayon_200', rayonMetres: 198, statistiques: STATISTIQUES },
+  reference: {
+    code: 'rayon_200',
+    rayonMetres: 198,
+    statistiques: STATISTIQUES,
+    dateMediane: '2025-04-15',
+    periode: { debut: '2025-01-15', fin: '2025-08-15' },
+    ancienneteMedianeMois: 17,
+  },
   ventesProches: Array.from({ length: 8 }, (_, i) => ({
     date: `2025-0${String(1 + i)}-15`,
     prix: 182_000 + i * 9_500,
@@ -102,7 +109,15 @@ const ANALYSE = {
 const MARCHE = {
   codeInsee: '13205',
   commune: 'Marseille 5e Arrondissement',
-  dvf: { ventes: 1_284, medianeM2: 3_520, q1M2: 3_050, q3M2: 4_010 },
+  dvf: {
+    ventes: 1_284,
+    medianeM2: 3_520,
+    q1M2: 3_050,
+    q3M2: 4_010,
+    fenetre: { debut: '2024-01-01', fin: '2025-12-31' },
+    dateMediane: '2025-01-13',
+    ancienneteMedianeMois: 20,
+  },
   loyer: { loyerM2: 14.6, basM2: 11.9, hautM2: 18.2, observations: 347 },
   zone: 'A',
   sources: [

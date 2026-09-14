@@ -87,6 +87,8 @@ describe('Nouveau projet — avec le Worker', () => {
         q1M2: 2833,
         q3M2: 4135,
         nombreVentes: 1823,
+        precision: 'commune',
+        lieu: 'Marseille 5e Arrondissement',
       });
       expect(projet?.marche.loyerReferenceM2).toBe(13.83);
       expect(projet?.provenance['marche.dvf.medianM2']).toBe('dvf');

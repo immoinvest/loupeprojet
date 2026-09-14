@@ -5,7 +5,7 @@ import { rangerLibelles } from '@/analyses/reperes';
 import { Carte, GrosChiffre, Pourquoi, TitreCarte } from '@/composants/ui';
 import { nombre } from '@/formatage/nombres';
 import { phrasePrixAffiche } from '@/textes/achat';
-import { eurosArrondis, LIBELLES_CONFIANCE } from '@/textes/estimation';
+import { eurosArrondis, niveauEnPhrase } from '@/textes/estimation';
 import { EXPLICATIONS } from '@/textes/explications';
 import { reponseCourte } from '@/textes/verdict';
 
@@ -156,7 +156,7 @@ export function CartePrix({ r }: { r: Resultats }): JSX.Element {
         <p className="m-0 text-[15px] leading-relaxed text-encre-2">
           Estimé entre <strong>{eurosArrondis(r.estimation.bas)}</strong> et{' '}
           <strong>{eurosArrondis(r.estimation.haut)}</strong> ·{' '}
-          {LIBELLES_CONFIANCE[r.estimation.confiance].toLowerCase()}.
+          {niveauEnPhrase(r.estimation.confiance.niveau)} ({r.estimation.confiance.note}/100).
         </p>
       )}
       {n > 0 && (

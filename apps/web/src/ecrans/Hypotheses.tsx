@@ -17,21 +17,16 @@ import {
 import { useProjets } from '@/stockage/ProjetsContext';
 
 import { CarteAchat } from './hypotheses/CarteAchat';
-import { ChampHypothese, type BadgeProvenance } from './hypotheses/ChampHypothese';
-
-const BADGES: Readonly<Record<string, BadgeProvenance>> = {
-  annonce: { ton: 'neutre', libelle: 'annonce' },
-  utilisateur: { ton: 'accent', libelle: 'à toi' },
-  estime: { ton: 'surveiller', libelle: 'estimé' },
-  ademe: { ton: 'bon', libelle: 'donnée publique' },
-  anil: { ton: 'bon', libelle: 'donnée publique' },
-  dvf: { ton: 'bon', libelle: 'donnée publique' },
-  usure: { ton: 'bon', libelle: 'taux du mois' },
-};
+import {
+  BADGES,
+  badgeDeSource,
+  ChampHypothese,
+  type BadgeProvenance,
+} from './hypotheses/ChampHypothese';
 
 function badgePour(projet: ProjetEntree, d: Descripteur): BadgeProvenance | null {
-  const source = projet.provenance?.[cleProvenance(d.chemin)];
-  if (source !== undefined) return BADGES[source] ?? { ton: 'neutre', libelle: source };
+  const badge = badgeDeSource(projet.provenance?.[cleProvenance(d.chemin)]);
+  if (badge !== null) return badge;
   return d.aToi === true ? (BADGES.utilisateur ?? null) : null;
 }
 

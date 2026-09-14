@@ -64,19 +64,23 @@ export function CarteAchat({
       >
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-[minmax(0,1fr)_2fr] sm:items-end">
           {rendre(NEGOCIATION)}
-          <Curseur
-            id="curseur-negociation"
-            libelle="Négociation"
-            valeur={pourcent}
-            min={CURSEUR_NEGOCIATION.min}
-            max={CURSEUR_NEGOCIATION.max}
-            pas={CURSEUR_NEGOCIATION.pas}
-            formater={libelleNegociation}
-            onChange={(v) => {
-              changer(NEGOCIATION, String(v));
-            }}
-            className="px-2 pb-2"
-          />
+          <div className="px-2 pb-2">
+            {/* Au-delà du curseur (saisie au clavier jusqu'à 30 %), le pouce reste en butée mais
+                la valeur affichée et annoncée reste la vraie. */}
+            <Curseur
+              libelle="Négociation"
+              valeur={Math.min(CURSEUR_NEGOCIATION.max, pourcent)}
+              min={CURSEUR_NEGOCIATION.min}
+              max={CURSEUR_NEGOCIATION.max}
+              pas={CURSEUR_NEGOCIATION.pas}
+              formater={() => libelleNegociation(pourcent)}
+              reperes={[0, 5, 10, 15]}
+              formaterRepere={libelleNegociation}
+              onChangement={(v) => {
+                changer(NEGOCIATION, String(v));
+              }}
+            />
+          </div>
         </div>
         <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 px-2">
           <p className="m-0 text-[15px] font-semibold">{phrasePrixRetenu(achat)}</p>

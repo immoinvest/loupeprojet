@@ -25,7 +25,7 @@
     },
     "refactor": {
       "status": "completed",
-      "note": "CarteAchat compose les descripteurs existants ; Curseur générique réutilisable (fiche 06) ; textes/achat.ts centralise les libellés du prix retenu"
+      "note": "CarteAchat compose les descripteurs existants ; Curseur de la fiche 06 (revente-curseur, fusionné sur master pendant la feature) réutilisé à la place du nôtre ; textes/achat.ts centralise les libellés du prix retenu"
     },
     "qa_tests": {
       "status": "completed",

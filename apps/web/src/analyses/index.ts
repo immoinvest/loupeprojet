@@ -15,4 +15,17 @@ export {
 } from './comparaison';
 export { defautsDuMoteur, type Defauts } from './defauts';
 export { CURSEUR_NEGOCIATION, pourcentNegociation, pourcentPourViser } from './negociation';
-export { HORIZONS, variantesRevente, type VarianteRevente } from './revente';
+export {
+  impositionPlusValue,
+  seuilsExoneration,
+  type ImpositionPlusValue,
+  type SeuilsExoneration,
+} from './plus-value';
+export {
+  HORIZONS,
+  HORIZON_MAX,
+  HORIZON_MIN,
+  projetAHorizon,
+  variantesRevente,
+  type VarianteRevente,
+} from './revente';

@@ -62,6 +62,9 @@ describe('Impression', () => {
     expect(screen.queryByRole('button', { name: 'Retenir ce régime' })).not.toBeInTheDocument();
     expect(screen.getByText(/ventes signées chez le notaire/)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Dans 20 ans/ })).toBeDisabled();
+    // Le curseur d'horizon devient un texte.
+    expect(screen.queryByRole('slider')).not.toBeInTheDocument();
+    expect(screen.getByText('Revente dans').closest('p')).toHaveTextContent('Revente dans 10 ans');
     // La coque n'est pas là : ni barre latérale, ni onglets.
     expect(screen.queryByRole('navigation', { name: 'Mes projets' })).not.toBeInTheDocument();
     expect(screen.queryByRole('navigation', { name: 'Volets du rapport' })).not.toBeInTheDocument();

@@ -28,7 +28,6 @@ packages/moteur/tests/
 └── schema/projet.test.ts            défaut 0, bornes
 
 apps/web/src/
-├── composants/Curseur.tsx           <input type="range"> accessible : libellé, valeur lue (aria-valuetext), cible 44 px ; texte seul en mode document
 ├── analyses/negociation.ts          CURSEUR_NEGOCIATION, pourcentPourViser (arrondi au pas, plafond 15 %, null si rien à négocier), libelles (prix retenu, résumé des travaux)
 ├── hypotheses/groupes-bien.ts       GROUPE_ACHAT : negociationTaux (pourcent), rénovation énergétique visibleSi nu ∧ travaux > 0, libellé et aide
 ├── hypotheses/types.ts              Descripteur.aide (phrase sous le champ)
@@ -63,7 +62,7 @@ apps/web/e2e/hypotheses.spec.ts      négociation à 5 % : en-tête et Rapport
 - **ADR-N2 : arrondi à l'euro, sauf à taux nul.** Une offre d'achat se fait en euros entiers ; mais à négociation nulle le prix affiché est rendu tel quel pour que les cas de référence (et les prix non entiers) restent strictement identiques.
 - **ADR-N3 : négociation sur le total affiché, honoraires fixes.** `baseFraisAcquisition = prixRetenu − honoraires` (si à la charge de l'acquéreur). L'inverse (honoraires proportionnels) tiendrait dans ces deux lignes.
 - **ADR-N4 : `avecPrix` remet la négociation à zéro.** Les prix cibles et le levier « Négocier » raisonnent en prix retenu exact ; l'écart affiché reste relatif au prix affiché, puisque c'est de lui que l'on négocie.
-- **ADR-N5 : carte « L'achat » dédiée.** Plutôt qu'un type de champ « curseur » générique dans le rendu des groupes, `CarteAchat` compose les descripteurs existants (`descripteurParChemin`) avec le curseur, le prix retenu, le bouton Viser et le dépliant. `GROUPE_ACHAT` reste la source des champs éditables (tests d'unicité, `appliquerSaisie`). `Curseur` est générique (fiche 06).
+- **ADR-N5 : carte « L'achat » dédiée.** Plutôt qu'un type de champ « curseur » générique dans le rendu des groupes, `CarteAchat` compose les descripteurs existants (`descripteurParChemin`) avec le curseur, le prix retenu, le bouton Viser et le dépliant. `GROUPE_ACHAT` reste la source des champs éditables (tests d'unicité, `appliquerSaisie`). Le `Curseur` est celui de la fiche 06 (`revente-curseur`), livré sur `master` pendant cette feature : la carte l'utilise tel quel, pouce en butée à 15 % quand la saisie au clavier va au-delà, valeur affichée exacte.
 - **ADR-N6 : rénovation énergétique gardée, cachée.** `visibleSi` sur le descripteur ; libellé et aide lisibles (plafonds lus dans les règles). Aucune règle fiscale retirée.
 
 ## Auto-revue

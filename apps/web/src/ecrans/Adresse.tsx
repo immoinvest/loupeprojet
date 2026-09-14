@@ -24,9 +24,11 @@ import { useProjets } from '@/stockage/ProjetsContext';
 import type { AdresseBien } from '@/stockage/projets';
 import { PHRASES_ADRESSE, phrasePrecision, phraseReference } from '@/textes/adresse';
 
+import { CarteConfiance } from './adresse/Confiance';
 import { CarteDpe } from './adresse/Dpe';
 import { CarteEstimation } from './adresse/Estimation';
 import { CarteLoyer } from './adresse/Loyer';
+import { CarteRepere } from './adresse/Repere';
 import { CarteRisques } from './adresse/Risques';
 import { TableauGroupes, TableauVentes } from './adresse/Tableaux';
 import { Tendance } from './adresse/Tendance';
@@ -182,6 +184,8 @@ export function Adresse(): JSX.Element {
         </Chapo>
       </div>
 
+      <CarteConfiance />
+
       <Carte>
         <form
           className="flex flex-wrap items-end gap-3"
@@ -217,6 +221,8 @@ export function Adresse(): JSX.Element {
           </Pastille>
         )}
       </Carte>
+
+      {etat.etape !== 'resultat' && <CarteRepere />}
 
       {etat.etape === 'resultat' && analyse !== null && (
         <Carte>

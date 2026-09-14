@@ -1,7 +1,7 @@
-import { useMemo, type JSX } from 'react';
+import { calculerProjet } from '@loupe/moteur';
+import { useCallback, useEffect, useMemo, useState, type JSX } from 'react';
 
-import { HORIZONS, variantesRevente } from '@/analyses';
-import { useModeDocument } from '@/composants/document';
+import { HORIZONS, projetAHorizon, variantesRevente } from '@/analyses';
 import { Chapo, Page, TitrePage } from '@/composants/mise-en-page';
 import { Carte, Ligne, Pastille, TitreCarte } from '@/composants/ui';
 import { useProjetCourant } from '@/coque/ProjetLayout';
@@ -9,27 +9,58 @@ import { euros, eurosSignes, pourcentage } from '@/formatage/nombres';
 import { appliquerSaisie, descripteurParChemin } from '@/hypotheses';
 import { useProjets } from '@/stockage/ProjetsContext';
 
+import { BandeauHorizons, CarteHorizon } from './revente/Horizon';
+
+/** Sans relâchement reçu, l'horizon est enregistré après ce délai sans mouvement. */
+export const DELAI_ENREGISTREMENT_MS = 150;
+
 export function Revente(): JSX.Element {
-  const { enregistre, resultats: r } = useProjetCourant();
+  const { enregistre, resultats } = useProjetCourant();
   const { mettreAJour } = useProjets();
-  const document = useModeDocument();
-  const annees = r.projet.hypotheses.revente.annees;
+  const projet = enregistre.projet;
+  const annees = resultats.projet.hypotheses.revente.annees;
+
+  // Pendant le glissement, l'horizon vit ici ; le projet n'est écrit qu'au relâchement.
+  const [brouillon, setBrouillon] = useState<number | null>(null);
+  const horizon = brouillon ?? annees;
+
+  // Chiffres en direct : recalcul sans scénarios (≈ 5 ms) ; au repos, les résultats du projet.
+  const r = useMemo(
+    () =>
+      brouillon === null || brouillon === annees
+        ? resultats
+        : calculerProjet(projetAHorizon(projet, brouillon), { avecScenarios: false }),
+    [brouillon, annees, resultats, projet],
+  );
+  const variantes = useMemo(() => variantesRevente(projet, HORIZONS), [projet]);
+
+  const enregistrer = useCallback(
+    (choisi: number): void => {
+      setBrouillon(null);
+      if (choisi === annees) return;
+      const application = appliquerSaisie(
+        projet,
+        descripteurParChemin('hypotheses.revente.annees'),
+        String(choisi),
+      );
+      if (application.ok) mettreAJour(enregistre.id, application.projet);
+    },
+    [annees, projet, enregistre.id, mettreAJour],
+  );
+
+  useEffect(() => {
+    if (brouillon === null) return;
+    const minuteur = setTimeout(() => {
+      enregistrer(brouillon);
+    }, DELAI_ENREGISTREMENT_MS);
+    return () => {
+      clearTimeout(minuteur);
+    };
+  }, [brouillon, enregistrer]);
+
   const rv = r.revente;
   const pv = rv.plusValue;
   const e = r.rendement.enrichissement;
-  const variantes = useMemo(
-    () => variantesRevente(enregistre.projet, HORIZONS),
-    [enregistre.projet],
-  );
-
-  const choisirHorizon = (horizon: number): void => {
-    const application = appliquerSaisie(
-      enregistre.projet,
-      descripteurParChemin('hypotheses.revente.annees'),
-      String(horizon),
-    );
-    if (application.ok) mettreAJour(enregistre.id, application.projet);
-  };
 
   return (
     <Page>
@@ -37,50 +68,22 @@ export function Revente(): JSX.Element {
         <TitrePage taille="volet">Qu'est-ce qu'il vous restera ?</TitrePage>
         <Chapo>
           Revente estimée à {pourcentage(r.projet.hypotheses.revente.evolutionAnnuelle)} par an,
-          crédit remboursé, agence et impôt payés. Choisissez l'horizon.
+          crédit remboursé, agence et impôt payés. Déplacez le curseur : tout suit.
         </Chapo>
       </div>
 
-      <div
-        className={`grid grid-cols-1 gap-4 sm:grid-cols-2 ${document ? 'print:grid-cols-2' : 'xl:grid-cols-4'}`}
-        role="group"
-        aria-label="Horizon de revente"
-      >
-        {variantes.map((v) => {
-          const actif = v.annees === annees;
-          return (
-            <button
-              key={v.annees}
-              type="button"
-              aria-pressed={actif}
-              disabled={document}
-              onClick={() => {
-                choisirHorizon(v.annees);
-              }}
-              className={`flex flex-col gap-1 rounded-carte border p-5 text-left ${
-                actif
-                  ? 'border-accent bg-accent-fond'
-                  : 'border-bordure bg-surface hover:bg-accent-fond'
-              }`}
-            >
-              <span className="text-xs font-bold tracking-wide text-encre-3 uppercase">
-                Dans {v.annees} ans
-              </span>
-              <span className="font-display text-[24px] leading-none font-bold sm:text-[26px] print:text-[26px]">
-                {euros(v.cashNetVendeur)}
-              </span>
-              <span className="text-sm text-encre-2">
-                en poche · TRI {v.tri === null ? '—' : pourcentage(v.tri)} ·{' '}
-                {eurosSignes(v.enrichissement)} d'enrichissement
-              </span>
-            </button>
-          );
-        })}
-      </div>
+      <CarteHorizon
+        horizon={horizon}
+        versionRegles={resultats.projet.versionRegles}
+        onChangement={setBrouillon}
+        onValidation={enregistrer}
+      />
+
+      <BandeauHorizons variantes={variantes} horizon={horizon} onChoix={enregistrer} />
 
       <div className="grid grid-cols-1 gap-5 md:grid-cols-2 print:grid-cols-2">
         <Carte>
-          <TitreCarte>Revente dans {annees} ans</TitreCarte>
+          <TitreCarte>Revente dans {horizon} ans</TitreCarte>
           <div>
             <Ligne
               libelle={`Valeur estimée (${pourcentage(r.projet.hypotheses.revente.evolutionAnnuelle)} par an)`}
@@ -101,7 +104,7 @@ export function Revente(): JSX.Element {
           <div>
             <Ligne libelle="Mise de départ" valeur={eurosSignes(-e.miseDeDepart)} />
             <Ligne
-              libelle={`Cash-flows cumulés sur ${String(annees)} ans`}
+              libelle={`Cash-flows cumulés sur ${String(horizon)} ans`}
               valeur={eurosSignes(e.cashflowsCumules)}
             />
             <Ligne
@@ -120,7 +123,7 @@ export function Revente(): JSX.Element {
               tonValeur={e.total >= 0 ? 'text-bon' : 'text-probleme'}
             />
             <Ligne
-              libelle={`TRI sur ${String(annees)} ans`}
+              libelle={`TRI sur ${String(horizon)} ans`}
               valeur={r.rendement.tri === null ? '—' : pourcentage(r.rendement.tri)}
             />
           </div>

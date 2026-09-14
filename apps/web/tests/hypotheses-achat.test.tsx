@@ -162,14 +162,13 @@ describe('Curseur', () => {
     render(
       <ModeDocument>
         <Curseur
-          id="c"
           libelle="Négociation"
           valeur={5}
           min={0}
           max={15}
           pas={0.5}
           formater={(v) => `−${String(v)} %`}
-          onChange={() => undefined}
+          onChangement={() => undefined}
         />
       </ModeDocument>,
     );
