@@ -8,7 +8,7 @@ import type {
   TypeBien,
 } from '@loupe/moteur';
 
-import { dateCourte, euros, nombre, pourcentage } from '@/formatage/nombres';
+import { euros, nombre, pourcentage } from '@/formatage/nombres';
 
 import { prixM2 } from './adresse';
 
@@ -137,11 +137,11 @@ const MOIS = [
   'décembre',
 ] as const;
 
-/** « 2024-01-01 » → « janvier 2024 ». */
+/** « 2024-01-01 » → « janvier 2024 » ; un mois inconnu laisse la date telle quelle. */
 export function moisEnLettres(dateIso: string): string {
   const mois = Number.parseInt(dateIso.slice(5, 7), 10);
   const nom = MOIS[mois - 1];
-  return nom === undefined ? dateCourte(dateIso) : `${nom} ${dateIso.slice(0, 4)}`;
+  return nom === undefined ? dateIso : `${nom} ${dateIso.slice(0, 4)}`;
 }
 
 /** « entre janvier 2024 et décembre 2025 ». */
