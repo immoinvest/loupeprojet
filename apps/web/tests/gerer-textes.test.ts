@@ -4,7 +4,6 @@ import { projetsAReprendre } from '@/ecrans/gerer/Portes';
 import { creerProjet, type StatutProjet } from '@/stockage/projets';
 import {
   avecMajuscule,
-  biensVacants,
   de,
   entreesAVenir,
   loyerRecu,
@@ -63,12 +62,8 @@ describe('textes des écrans de Gérer', () => {
     ).toBe('Entrées à venir : T2 Lices le 1er octobre 2026 ; Studio Baille le 15 novembre 2026');
   });
 
-  it('majuscule, biens vacants, statuts et tons', () => {
+  it('majuscule, statuts et tons', () => {
     expect(avecMajuscule('septembre 2026')).toBe('Septembre 2026');
-    expect(biensVacants(['Parking Prado'])).toBe('Sans locataire : Parking Prado');
-    expect(biensVacants(['Parking Prado', 'Cave Rouet'])).toBe(
-      'Sans locataire : Parking Prado, Cave Rouet',
-    );
     expect(STATUTS_LOYER.en_retard).toBe('En retard');
     expect(TONS_LOYER.recu).toBe('bon');
   });

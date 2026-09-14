@@ -154,6 +154,16 @@ describe('GestionProvider', () => {
     expect(await contexte().document(id)).toMatchObject({ ok: true, valeur: { id } });
   });
 
+  it('fin de location : la location est remplacée dans l’état ; refusée, rien ne change', async () => {
+    monter({ gestion: clientGestionMemoire({ etat: ETAT_SEPTEMBRE }) });
+    await statut('pret');
+    await act(async () => {
+      expect((await contexte().terminerLocation('location-julie', '2026-08-15')).ok).toBe(false);
+      expect((await contexte().terminerLocation('location-julie', '2026-12-31')).ok).toBe(true);
+    });
+    expect(contexte().donnees?.locations.map((l) => l.fin)).toEqual(['2026-12-31', undefined]);
+  });
+
   it('erreur de lecture : statut erreur ; une action réussie n’invente pas de données ; recharger relit', async () => {
     const base = clientGestionMemoire({ etat: ETAT_SEPTEMBRE });
     let lectures = 0;

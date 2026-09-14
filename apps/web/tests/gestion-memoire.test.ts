@@ -259,6 +259,26 @@ describe('clientGestionMemoire', () => {
     expect(await avecContenu.document(r.valeur.id)).toEqual(r);
   });
 
+  it('fin de location : date illisible, location inconnue, avant l’entrée, loyers reçus après ; puis enregistrée', async () => {
+    const client = clientGestionMemoire({ etat: ETAT_SEPTEMBRE });
+    expect(await client.terminerLocation('location-julie', '2026-02-30')).toEqual(INVALIDE);
+    expect(await client.terminerLocation('inconnue', '2026-12-31')).toEqual(INTROUVABLE);
+    expect(await client.terminerLocation('location-julie', '2025-09-30')).toEqual({
+      ok: false,
+      code: 'fin_avant_entree',
+    });
+    expect(await client.terminerLocation('location-julie', '2026-08-15')).toEqual({
+      ok: false,
+      code: 'paiements_apres_sortie',
+    });
+    const terminee = { ...LOCATION_JULIE, fin: '2026-12-31' };
+    expect(await client.terminerLocation('location-julie', '2026-12-31')).toEqual({
+      ok: true,
+      valeur: terminee,
+    });
+    expect(client.donnees().locations).toEqual([terminee, LOCATION_ANTOINE]);
+  });
+
   it('une erreur forcée remplace le résultat et l’appel est compté', async () => {
     const client = clientGestionMemoire({ erreurs: { etat: 'indisponible', payer: 'reseau' } });
     expect(await client.etat()).toEqual({ ok: false, code: 'indisponible' });

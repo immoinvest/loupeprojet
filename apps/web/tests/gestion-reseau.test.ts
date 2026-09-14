@@ -4,7 +4,13 @@ import { clientGestionMemoire } from '@/gestion/memoire';
 import { clientGestionReseau, type Recuperateur } from '@/gestion/reseau';
 import { ERREURS_GESTION } from '@/textes/gerer';
 
-import { BAILLEUR, CREATION_LOUEE, ETAT_SEPTEMBRE, PAIEMENT_JULIE } from './gestion-exemples';
+import {
+  BAILLEUR,
+  CREATION_LOUEE,
+  ETAT_SEPTEMBRE,
+  LOCATION_JULIE,
+  PAIEMENT_JULIE,
+} from './gestion-exemples';
 
 interface Appel {
   readonly url: string;
@@ -85,6 +91,23 @@ describe('clientGestionReseau', () => {
     });
     expect(prefs).toEqual({ ok: true, valeur: { analyser: false, gerer: true } });
     expect(menu.appels[0]?.init?.method).toBe('PUT');
+  });
+
+  it('termine une location par POST, identifiant encodé, et revalide la location rendue', async () => {
+    const terminee = { ...LOCATION_JULIE, fin: '2026-12-31' };
+    const { recuperer, appels } = serveur(() => json(200, terminee));
+    expect(await clientGestionReseau(recuperer).terminerLocation('l/1', '2026-12-31')).toEqual({
+      ok: true,
+      valeur: terminee,
+    });
+    expect(appels[0]).toEqual({
+      url: '/api/gestion/locations/l%2F1/fin',
+      init: {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fin: '2026-12-31' }),
+      },
+    });
   });
 
   it('annule un paiement par DELETE, identifiant encodé, réponse 204 sans corps', async () => {

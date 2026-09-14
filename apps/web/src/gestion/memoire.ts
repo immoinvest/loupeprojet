@@ -3,6 +3,7 @@ import {
   CreationLocationSchema,
   DemandeDocumentSchema,
   DocumentSchema,
+  FinLocationSchema,
   IdentiteBailleurSchema,
   loyerDuMois,
   montantAcceptable,
@@ -10,6 +11,7 @@ import {
   occupationDe,
   PREFERENCES_PAR_DEFAUT,
   PreferencesMenuSchema,
+  refusFin,
   type BienGere,
   type DocumentComplet,
   type EtatGestion,
@@ -17,6 +19,7 @@ import {
   type LocationGeree,
   type NouveauLocataire,
   type Paiement,
+  type RefusFin,
 } from '@loupe/gestion';
 
 import { cleDuDocument, documentEnMemoire } from './memoire-documents';
@@ -53,6 +56,10 @@ export const ETAT_GESTION_VIDE: EtatGestion = {
 
 const INVALIDE = { ok: false, code: 'invalide' } as const;
 const INTROUVABLE = { ok: false, code: 'introuvable' } as const;
+const CODES_REFUS_FIN: Readonly<Record<RefusFin, CodeErreurGestion>> = {
+  FIN_AVANT_ENTREE: 'fin_avant_entree',
+  PAIEMENTS_APRES_SORTIE: 'paiements_apres_sortie',
+};
 
 /** Un client de gestion sans réseau, qui applique les mêmes règles que l'API : tests et aperçu. */
 export function clientGestionMemoire(options: OptionsGestionMemoire = {}): ClientGestionMemoire {
@@ -195,5 +202,20 @@ export function clientGestionMemoire(options: OptionsGestionMemoire = {}): Clien
         return emis;
       }),
     document: (id) => executer('document', () => lireDocument(id)),
+    terminerLocation: (locationId, fin) =>
+      executer('terminerLocation', () => {
+        const lu = FinLocationSchema.safeParse({ fin });
+        if (!lu.success) return INVALIDE;
+        const location = donnees.locations.find((l) => l.id === locationId);
+        if (location === undefined) return INTROUVABLE;
+        const refus = refusFin(location, lu.data.fin, donnees.paiements);
+        if (refus !== null) return { ok: false, code: CODES_REFUS_FIN[refus] };
+        const terminee: LocationGeree = { ...location, fin: lu.data.fin };
+        donnees = {
+          ...donnees,
+          locations: donnees.locations.map((l) => (l.id === locationId ? terminee : l)),
+        };
+        return { ok: true, valeur: terminee };
+      }),
   };
 }

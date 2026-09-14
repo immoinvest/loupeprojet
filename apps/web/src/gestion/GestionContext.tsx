@@ -7,6 +7,7 @@ import {
   type DocumentComplet,
   type EtatGestion,
   type IdentiteBailleur,
+  type LocationGeree,
   type NouveauPaiement,
   type Paiement,
   type PreferencesMenu,
@@ -43,6 +44,10 @@ export interface ContexteGestion {
   /** Émet (ou retrouve) le document ; l'état liste ensuite le document, sans son contenu. */
   readonly emettreDocument: (demande: DemandeDocument) => Promise<ResultatGestion<DocumentComplet>>;
   readonly document: (id: string) => Promise<ResultatGestion<DocumentComplet>>;
+  readonly terminerLocation: (
+    locationId: string,
+    fin: string,
+  ) => Promise<ResultatGestion<LocationGeree>>;
 }
 
 const Contexte = createContext<ContexteGestion | null>(null);
@@ -172,6 +177,17 @@ export function GestionProvider({
         return r;
       },
       document: (id) => client.document(id),
+      terminerLocation: async (locationId, fin) => {
+        const r = await client.terminerLocation(locationId, fin);
+        if (r.ok) {
+          const { valeur: terminee } = r;
+          fusionner((e) => ({
+            ...e,
+            locations: e.locations.map((l) => (l.id === terminee.id ? terminee : l)),
+          }));
+        }
+        return r;
+      },
     };
   }, [client, etatCompte, chargement, donnees, erreur, preferences, store]);
 

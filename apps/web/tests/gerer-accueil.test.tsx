@@ -201,7 +201,11 @@ describe('Gérer : les loyers du mois', () => {
     expect(
       await screen.findByRole('heading', { level: 1, name: 'Aucun loyer attendu ce mois-ci.' }),
     ).toBeInTheDocument();
-    expect(screen.getByText('Sans locataire : Parking Prado')).toBeInTheDocument();
+    expect(screen.getByText(/^Sans locataire/)).toHaveTextContent('Sans locataire : Parking Prado');
+    expect(screen.getByRole('link', { name: 'Parking Prado' })).toHaveAttribute(
+      'href',
+      '/gerer/biens/parking',
+    );
     expect(screen.queryByRole('img', { name: /reçus sur/ })).toBeNull();
   });
 });

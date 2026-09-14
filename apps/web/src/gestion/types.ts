@@ -5,6 +5,7 @@ import type {
   DocumentComplet,
   EtatGestion,
   IdentiteBailleur,
+  LocationGeree,
   NouveauPaiement,
   Paiement,
   PreferencesMenu,
@@ -47,4 +48,6 @@ export interface ClientGestion {
   /** Émet la quittance d'un mois ou le reçu d'un paiement ; rend le même document s'il existe déjà. */
   emettreDocument(demande: DemandeDocument): Promise<ResultatGestion<DocumentComplet>>;
   document(id: string): Promise<ResultatGestion<DocumentComplet>>;
+  /** Enregistre (ou déplace) la date de sortie du locataire. */
+  terminerLocation(locationId: string, fin: string): Promise<ResultatGestion<LocationGeree>>;
 }

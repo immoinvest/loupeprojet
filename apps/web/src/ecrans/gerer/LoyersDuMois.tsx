@@ -1,5 +1,5 @@
 import { jourLocal, periodeDe, resumeDuMois, type EtatGestion } from '@loupe/gestion';
-import type { JSX } from 'react';
+import { Fragment, type JSX } from 'react';
 import { Link } from 'react-router';
 
 import { Page, TitrePage } from '@/composants/mise-en-page';
@@ -7,7 +7,6 @@ import { Carte, TitreCarte } from '@/composants/ui';
 import { dateEnLettres, moisEnLettres, montant } from '@/gestion/format';
 import {
   avecMajuscule,
-  biensVacants,
   entreesAVenir,
   phraseDuMois,
   TEXTES_GERER as T,
@@ -27,7 +26,7 @@ export function LoyersDuMois({ donnees }: { donnees: EtatGestion }): JSX.Element
   // Un bien est vacant sans location en cours ni à venir ; une entrée le mois prochain n'est pas une vacance.
   const enCours = donnees.locations.filter((l) => l.fin === undefined || l.fin >= aujourdhui);
   const loues = new Set(enCours.map((l) => l.bienId));
-  const vacants = donnees.biens.filter((b) => !loues.has(b.id)).map((b) => b.nom);
+  const vacants = donnees.biens.filter((b) => !loues.has(b.id));
   const aVenir = enCours
     .filter((l) => periodeDe(l.debut) > periode)
     .map((l) => ({
@@ -93,7 +92,18 @@ export function LoyersDuMois({ donnees }: { donnees: EtatGestion }): JSX.Element
         </Carte>
       )}
       {aVenir.length > 0 && <p className="m-0 text-sm text-encre-3">{entreesAVenir(aVenir)}</p>}
-      {vacants.length > 0 && <p className="m-0 text-sm text-encre-3">{biensVacants(vacants)}</p>}
+      {vacants.length > 0 && (
+        // Chaque bien vacant ouvre sa fiche, où l'on ajoute son locataire.
+        <p className="m-0 text-sm text-encre-3">
+          {T.sansLocataire}{' '}
+          {vacants.map((bien, i) => (
+            <Fragment key={bien.id}>
+              {i > 0 && ', '}
+              <Link to={`/gerer/biens/${bien.id}`}>{bien.nom}</Link>
+            </Fragment>
+          ))}
+        </p>
+      )}
     </Page>
   );
 }

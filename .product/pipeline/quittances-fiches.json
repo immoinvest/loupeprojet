@@ -25,13 +25,16 @@
     },
     "implement": {
       "status": "in_progress",
-      "stories_completed": 2,
+      "stories_completed": 5,
       "stories_total": 8,
       "commits": [
         "cc8ff40 docs : discovery, specs, architecture",
         "88b8c18 fix(web) : bail mobilité, art. 25-17 (et non 25-6)",
         "9802a44 US-1 paquet @loupe/gestion : partiel, contenus et numéros des documents, baux (91 tests, 100 %)",
-        "d424099 US-2 paiements partiels : migration 0003, insertion conditionnelle, date future refusée, annulation bloquée par un document (96 tests comptes, 100 %)"
+        "d424099 US-2 paiements partiels : migration 0003, insertion conditionnelle, date future refusée, annulation bloquée par un document (96 tests comptes, 100 %)",
+        "54118d0 US-3 identité du bailleur, documents figés et idempotents, fin de location, louer un bien, export (111 tests comptes, 100 %)",
+        "cda66fa US-8 plusieurs locataires par bien : gestion_colocataire, libellé de chambre, chevauchement au même libellé (103 tests gestion, 116 tests comptes, 100 %)",
+        "a9d092d US-4 page Loyers : mois au choix, groupes, En partie en deux clics, Quittance en un clic, identité demandée une fois, lien Loyers du menu (166 tests web de Gérer, src/gestion 100 %)"
       ],
       "ajout_de_perimetre": "Pierre, 14/09/2026 pendant US-3 : « il peut y avoir plusieurs locataires pour un bien (colocation, location à la chambre) » → US-8 P0, ADR-G13 (colocataires d'un bail unique, locations simultanées distinguées par un libellé, chevauchement refusé seulement au même libellé)",
       "incidents": [
@@ -40,7 +43,9 @@
         "tests de l'API sur l'horloge réelle (14/09) : les paiements d'octobre devenaient « futurs » ; horloge fixe au 20/10 dans les tests de paiement, montant de 1 € dans les tests de bornes de période",
         "commande PowerShell refusée à l'analyse : une apostrophe typographique (d’apps) prise pour un guillemet ; plus d'apostrophe typographique dans les commandes",
         "US-3 : ordre des paiements d'un même mois aléatoire (tri par identifiant UUID) ; tri chronologique par période, date, création, identifiant",
-        "US-3 : une branche non couverte (quittance d'une location avec date de sortie) ; test du dernier mois d'un locataire qui part"
+        "US-3 : une branche non couverte (quittance d'une location avec date de sortie) ; test du dernier mois d'un locataire qui part",
+        "US-8 : un test web du client réseau sans le nouveau champ colocataires (réponse de création) ; corrigé",
+        "US-4 : trois reprises de la vérification : lint (chaîne optionnelle inutile), typecheck (code deja_recu dans un test de textes), puis un test G1a « J'ai acheté ce bien » en délai dépassé sous charge (1 s par défaut, 10 s après une navigation) ; seul, il passait"
       ]
     },
     "qa_tests": { "status": "pending" },

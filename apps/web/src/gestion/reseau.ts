@@ -3,6 +3,7 @@ import {
   DocumentCompletSchema,
   EtatGestionSchema,
   IdentiteBailleurSchema,
+  LocationGereeSchema,
   PaiementSchema,
   PreferencesMenuSchema,
 } from '@loupe/gestion';
@@ -93,5 +94,12 @@ export function clientGestionReseau(
     emettreDocument: (demande) => appeler('POST', '/documents', demande, DocumentCompletSchema),
     document: (id) =>
       appeler('GET', `/documents/${encodeURIComponent(id)}`, undefined, DocumentCompletSchema),
+    terminerLocation: (locationId, fin) =>
+      appeler(
+        'POST',
+        `/locations/${encodeURIComponent(locationId)}/fin`,
+        { fin },
+        LocationGereeSchema,
+      ),
   };
 }

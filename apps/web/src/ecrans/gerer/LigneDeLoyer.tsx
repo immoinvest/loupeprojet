@@ -1,5 +1,6 @@
 import type { LigneLoyer } from '@loupe/gestion';
 import type { JSX } from 'react';
+import { Link } from 'react-router';
 
 import { Bouton, Pastille } from '@/composants/ui';
 import { leJour, montant } from '@/gestion/format';
@@ -36,9 +37,14 @@ export function LigneDeLoyer({ ligne, aujourdhui, actions }: PropsLigne): JSX.El
   return (
     <li className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-2 border-b border-bordure-douce py-3 last:border-b-0 sm:grid-cols-[minmax(0,1fr)_110px_90px_auto]">
       <span className="flex min-w-0 flex-col">
-        <span className="truncate font-bold">
-          {bienEtChambre(ligne.bien?.nom ?? '', ligne.location.libelle)}
-        </span>
+        <Link
+          to={`/gerer/biens/${ligne.location.bienId}`}
+          className="min-w-0 text-encre no-underline hover:underline"
+        >
+          <span className="block truncate font-bold">
+            {bienEtChambre(ligne.bien?.nom ?? '', ligne.location.libelle)}
+          </span>
+        </Link>
         <span className="truncate text-sm text-encre-3">{nomsDesLocataires(noms)}</span>
       </span>
       <span className="text-right font-bold tabular-nums">{montant(ligne.du.total)}</span>

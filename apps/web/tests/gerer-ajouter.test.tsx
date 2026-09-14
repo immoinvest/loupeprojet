@@ -128,7 +128,9 @@ describe('porte « Ajouter à la main »', () => {
     expect(
       await screen.findByRole('heading', { level: 1, name: 'Aucun loyer attendu ce mois-ci.' }),
     ).toBeInTheDocument();
-    expect(screen.getByText('Sans locataire : 8 avenue du Prado')).toBeInTheDocument();
+    expect(screen.getByText(/^Sans locataire/)).toHaveTextContent(
+      'Sans locataire : 8 avenue du Prado',
+    );
   });
 
   it('« Plus de détails » : location vide, jour, dépôt, type de bien et surface', async () => {
