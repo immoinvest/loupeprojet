@@ -2,7 +2,7 @@
   "feature_slug": "quittances-fiches",
   "title": "Quittances et fiches (G1b) : paiement partiel, quittance et reçu figés, page Loyers, fiche bien, fin de location, export des données",
   "started_at": "2026-09-14T17:40:00Z",
-  "current_step": "implement",
+  "current_step": "qa_tests",
   "scope": "packages/gestion, apps/comptes (src/gestion, migration 0003), apps/web (gestion/, ecrans/gerer, Compte)",
   "branch": "feat/quittances-fiches",
   "worktree": "C:\\Users\\errei\\Claude\\loupe-gestion",
@@ -24,8 +24,8 @@
       "output": ".product/architecture/quittances-fiches.md"
     },
     "implement": {
-      "status": "in_progress",
-      "stories_completed": 5,
+      "status": "completed",
+      "stories_completed": 8,
       "stories_total": 8,
       "commits": [
         "cc8ff40 docs : discovery, specs, architecture",
@@ -34,7 +34,10 @@
         "d424099 US-2 paiements partiels : migration 0003, insertion conditionnelle, date future refusée, annulation bloquée par un document (96 tests comptes, 100 %)",
         "54118d0 US-3 identité du bailleur, documents figés et idempotents, fin de location, louer un bien, export (111 tests comptes, 100 %)",
         "cda66fa US-8 plusieurs locataires par bien : gestion_colocataire, libellé de chambre, chevauchement au même libellé (103 tests gestion, 116 tests comptes, 100 %)",
-        "a9d092d US-4 page Loyers : mois au choix, groupes, En partie en deux clics, Quittance en un clic, identité demandée une fois, lien Loyers du menu (166 tests web de Gérer, src/gestion 100 %)"
+        "a9d092d US-4 page Loyers : mois au choix, groupes, En partie en deux clics, Quittance en un clic, identité demandée une fois, lien Loyers du menu (166 tests web de Gérer, src/gestion 100 %)",
+        "d14bb05 US-5 quittance et reçu imprimables hors coque, document introuvable, export JSON dans Mon compte (190 tests web, 100 %)",
+        "7ffbea6 US-6 fiche d'un bien : statut, une carte par location, 12 derniers mois avec Quittance, Terminer la location en deux clics, liens depuis les loyers et les biens vacants (209 tests web, 100 %)",
+        "576ae08 US-7 louer un bien depuis sa fiche en deux clics : colocataires, chambre, loyer repris ; OccupationCreeeSchema (104 tests gestion, 224 tests web, 100 %)"
       ],
       "ajout_de_perimetre": "Pierre, 14/09/2026 pendant US-3 : « il peut y avoir plusieurs locataires pour un bien (colocation, location à la chambre) » → US-8 P0, ADR-G13 (colocataires d'un bail unique, locations simultanées distinguées par un libellé, chevauchement refusé seulement au même libellé)",
       "incidents": [
@@ -45,7 +48,9 @@
         "US-3 : ordre des paiements d'un même mois aléatoire (tri par identifiant UUID) ; tri chronologique par période, date, création, identifiant",
         "US-3 : une branche non couverte (quittance d'une location avec date de sortie) ; test du dernier mois d'un locataire qui part",
         "US-8 : un test web du client réseau sans le nouveau champ colocataires (réponse de création) ; corrigé",
-        "US-4 : trois reprises de la vérification : lint (chaîne optionnelle inutile), typecheck (code deja_recu dans un test de textes), puis un test G1a « J'ai acheté ce bien » en délai dépassé sous charge (1 s par défaut, 10 s après une navigation) ; seul, il passait"
+        "US-4 : trois reprises de la vérification : lint (chaîne optionnelle inutile), typecheck (code deja_recu dans un test de textes), puis un test G1a « J'ai acheté ce bien » en délai dépassé sous charge (1 s par défaut, 10 s après une navigation) ; seul, il passait",
+        "US-6 : premier rendu du fichier de test de la fiche en délai dépassé sous charge (10 s) ; noms des biens vacants devenus des liens, tests de texte adaptés",
+        "US-7 : une branche non couverte (louer sans liste de colocataires, que l'API accepte) ; test ajouté"
       ]
     },
     "qa_tests": { "status": "pending" },
