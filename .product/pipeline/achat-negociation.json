@@ -5,14 +5,17 @@
   "current_step": "push",
   "scope": "packages/moteur/src/{schema/hypotheses.ts,achat,financement,cashflow/charges.ts,rendement,revente,estimation,verdict,scenarios,calculer-base.ts,schema/resultats.ts}, apps/web/src/{composants/Curseur.tsx,ecrans/Hypotheses.tsx,ecrans/hypotheses,ecrans/FormulaireProjet.tsx,ecrans/rapport/CartePrix.tsx,coque/ProjetLayout.tsx,ecrans/{MesProjets,Comparer,Revente,Adresse}.tsx,ecrans/document,analyses,hypotheses,textes}, apps/web/e2e",
   "branch": "feat/achat-negociation",
-  "base": "master (9d38892, après PR #38), puis fusion de master (coque fixe, PR #39)",
+  "base": "master (9d38892, après PR #38), puis fusions de master (coque fixe #39 ; revente-curseur #40, déconnexion #41, estimation-confiance #42 ; rapport-cashflow #43, déploiement #44)",
   "steps": {
     "discovery": {
       "status": "completed",
       "output": ".product/features/achat-negociation-discovery.md",
       "note": "questions de périmètre posées à Pierre avec recommandations ; avancée sur les recommandations (taux stocké, négociation sur le total affiché, curseur 0 à −15 % par 0,5 %, rénovation énergétique gardée et cachée, travaux repliés, Viser le prix estimé)"
     },
-    "specs": { "status": "completed", "output": ".product/specs/achat-negociation-specs.md" },
+    "specs": {
+      "status": "completed",
+      "output": ".product/specs/achat-negociation-specs.md"
+    },
     "architecture": {
       "status": "completed",
       "output": ".product/architecture/achat-negociation.md"
@@ -36,8 +39,9 @@
       "note": "aucune entrée nouvelle venant du réseau ; le taux est borné par Zod (0 à 0,3) et passe par appliquerSaisie ; aucun innerHTML ; le curseur est un input natif"
     },
     "push": {
-      "status": "in_progress",
-      "note": "master fusionné (coque fixe) avec un conflit résolu dans ProjetLayout ; PR à ouvrir avec auto-merge"
+      "status": "completed",
+      "pr": "https://github.com/immoinvest/loupeprojet/pull/45",
+      "note": "auto-merge armé ; master fusionné trois fois (conflits résolus : ProjetLayout, Curseur de la fiche 06 repris, imports d'Hypotheses, CartePrix et analyses, docs) ; typecheck vert, moteur 252 tests à 100 %, tests web du prix et du Rapport verts après chaque fusion"
     }
   },
   "decisions": {

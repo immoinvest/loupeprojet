@@ -1,6 +1,6 @@
 # 10 — Rapport : icônes d'information, liens vers les onglets, cash-flow au centre, rendement brut
 
-Statut : `idée` · Notée le 14/09/2026 · Dépend de : rien (la fiche 01 touche aussi le feu « effort »)
+Statut : `livrée` (PR `feat/rapport-cashflow`, 14/09/2026 ; discovery `../features/rapport-cashflow-discovery.md`, specs `../specs/rapport-cashflow-specs.md`, architecture `../architecture/rapport-cashflow.md`, maquettes `../design/rapport-cashflow-maquettes.html`) · Notée le 14/09/2026 · Dépend de : rien (la fiche 01 touche aussi le feu « effort »)
 
 ## La demande de Pierre
 
