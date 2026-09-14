@@ -73,6 +73,13 @@ export const GROUPE_LOCATION: Groupe = {
       obligatoire: true,
       aToi: true,
     },
+    // L'encadrement des loyers n'est dans aucun référentiel : à saisir, à côté du loyer visé.
+    {
+      chemin: 'marche.plafondLoyerMensuel',
+      libelle: "Plafond d'encadrement",
+      type: 'euros',
+      unite: '€/mois',
+    },
     {
       chemin: 'hypotheses.location.loyerHcNu',
       libelle: 'Loyer si loué nu',

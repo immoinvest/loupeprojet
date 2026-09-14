@@ -1,7 +1,7 @@
 import type { ProjetEntree } from '@loupe/moteur';
 
 import { lireChemin } from './chemins';
-import { GROUPE_ACHAT, GROUPE_BIEN, GROUPE_MARCHE } from './groupes-bien';
+import { GROUPE_ACHAT, GROUPE_BIEN } from './groupes-bien';
 import {
   GROUPE_CHARGES,
   GROUPE_FINANCEMENT,
@@ -10,10 +10,12 @@ import {
 } from './groupes-finances';
 import type { Descripteur, Groupe } from './types';
 
-/** Les champs éditables, dans l'ordre d'affichage de l'onglet Hypothèses. */
+/**
+ * Les champs éditables, dans l'ordre d'affichage de l'onglet Hypothèses. Le marché (ventes DVF)
+ * n'y est plus : l'onglet Estimation est la seule porte d'entrée du repère de prix.
+ */
 export const GROUPES: readonly Groupe[] = [
   GROUPE_BIEN,
-  GROUPE_MARCHE,
   GROUPE_ACHAT,
   GROUPE_FINANCEMENT,
   GROUPE_LOCATION,

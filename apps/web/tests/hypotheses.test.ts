@@ -1,4 +1,4 @@
-import { ProjetSchema, projetExemple, type ProjetEntree } from '@loupe/moteur';
+import { ProjetSchema, projetExemple } from '@loupe/moteur';
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -86,6 +86,24 @@ describe('descripteurs', () => {
     expect(cleProvenance('hypotheses.achat.prix')).toBe('achat.prix');
     expect(cleProvenance('bien.surface')).toBe('bien.surface');
   });
+
+  it('l’onglet Hypothèses n’a plus de carte Le marché : les ventes DVF viennent de l’onglet Estimation', () => {
+    expect(GROUPES.map((g) => g.titre)).not.toContain('Le marché');
+    const chemins = GROUPES.flatMap((g) => g.champs.map((c) => c.chemin));
+    expect(chemins.some((c) => c.startsWith('marche.dvf.'))).toBe(false);
+    expect(chemins).not.toContain('hypotheses.revenusMensuels');
+  });
+
+  it('le plafond d’encadrement des loyers est dans La location, juste sous le loyer visé', () => {
+    const location = GROUPES.find((g) => g.titre === 'La location');
+    const chemins = location?.champs.map((c) => c.chemin) ?? [];
+    expect(chemins.indexOf('marche.plafondLoyerMensuel')).toBe(
+      chemins.indexOf('hypotheses.location.loyerHc') + 1,
+    );
+    const r = appliquerSaisie(projetExemple, champ('marche.plafondLoyerMensuel'), '900');
+    expect(r.ok && r.projet.marche?.plafondLoyerMensuel).toBe(900);
+    expect(r.ok && ProjetSchema.safeParse(r.projet).success).toBe(true);
+  });
 });
 
 describe('appliquerSaisie', () => {
@@ -111,6 +129,12 @@ describe('appliquerSaisie', () => {
     expect(appliquerSaisie(projetExemple, champ('hypotheses.achat.prix'), 'abc').ok).toBe(false);
   });
 
+  it('crée la provenance quand le projet n’en a pas encore', () => {
+    const sansProvenance = { ...projetExemple, provenance: undefined };
+    const r = appliquerSaisie(sansProvenance, champ('hypotheses.achat.travaux'), '8000');
+    expect(r.ok && r.projet.provenance).toEqual({ 'achat.travaux': 'utilisateur' });
+  });
+
   it('passer en courte durée initialise la nuitée et l’occupation', () => {
     const r = appliquerSaisie(projetExemple, champ('hypotheses.location.mode'), 'courte_duree');
     expect(r.ok && r.projet.hypotheses.location.courteDuree).toEqual({
@@ -122,18 +146,5 @@ describe('appliquerSaisie', () => {
       ? appliquerSaisie(r.projet, champ('hypotheses.location.mode'), 'courte_duree')
       : r;
     expect(deja.ok && deja.projet.hypotheses.location.courteDuree?.nuitee).toBe(65);
-  });
-
-  it('une première valeur de marché crée le bloc DVF', () => {
-    const base: ProjetEntree = {
-      id: projetExemple.id,
-      versionRegles: projetExemple.versionRegles,
-      bien: projetExemple.bien,
-      hypotheses: projetExemple.hypotheses,
-    };
-    const r = appliquerSaisie(base, champ('marche.dvf.medianM2'), '3000');
-    expect(r.ok && r.projet.marche?.dvf).toEqual({ medianM2: 3000, nombreVentes: 0 });
-    const r2 = appliquerSaisie(projetExemple, champ('marche.dvf.q1M2'), '2500');
-    expect(r2.ok && r2.projet.marche?.dvf?.medianM2).toBe(3050);
   });
 });
