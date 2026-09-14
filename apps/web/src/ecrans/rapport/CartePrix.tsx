@@ -1,6 +1,7 @@
 import type { Resultats } from '@loupe/moteur';
-import type { JSX } from 'react';
+import { useLayoutEffect, useRef, useState, type JSX } from 'react';
 
+import { rangerLibelles } from '@/analyses/reperes';
 import { Carte, GrosChiffre, Pourquoi, TitreCarte } from '@/composants/ui';
 import { nombre } from '@/formatage/nombres';
 import { eurosArrondis, LIBELLES_CONFIANCE } from '@/textes/estimation';
@@ -23,36 +24,103 @@ function JaugePrix({ r }: { r: Resultats }): JSX.Element {
   const q1 = e === null ? (dvf.q1M2 ?? dvf.medianM2 * 0.88) : e.selonEtat.a_renover / surface;
   const q3 = e === null ? (dvf.q3M2 ?? dvf.medianM2 * 1.12) : e.selonEtat.renove / surface;
   const centre = e === null ? dvf.medianM2 : e.prixM2Estime;
-  const min = Math.min(q1, prixM2) * 0.93;
-  const max = Math.max(q3, prixM2) * 1.07;
-  const pos = (v: number): string => `${String(((v - min) / (max - min)) * 100)}%`;
-  const repere = (v: number, libelle: string): JSX.Element => (
-    <div
-      key={libelle}
-      className="absolute top-[18px] flex flex-col items-center"
-      style={{ left: pos(v), transform: 'translateX(-50%)' }}
-    >
-      <span className="h-[18px] w-0.5 bg-encre/40" />
-      <span className="mt-1 text-xs whitespace-nowrap text-encre-3">{libelle}</span>
-    </div>
-  );
   return (
-    <div
-      className="relative mx-2.5 h-[62px]"
-      role="img"
-      aria-label={
+    <Jauge
+      prixM2={prixM2}
+      reperes={[
+        { valeur: q1, libelle: e === null ? nombre(q1) : `${nombre(q1)}, à rénover` },
+        {
+          valeur: centre,
+          libelle:
+            e === null ? `${nombre(centre)} €/m², le quartier` : `${nombre(centre)} €/m², estimé`,
+        },
+        { valeur: q3, libelle: e === null ? nombre(q3) : `${nombre(q3)}, rénové` },
+      ]}
+      description={
         e === null
           ? `Prix au m² ${nombre(prixM2)} € contre une médiane de ${nombre(dvf.medianM2)} €`
           : `Prix au m² ${nombre(prixM2)} € contre un prix estimé de ${nombre(centre)} €`
       }
+    />
+  );
+}
+
+/** Hauteur d'une ligne de libellés (text-xs + interligne), en pixels. */
+const HAUTEUR_LIGNE = 16;
+
+function Jauge({
+  prixM2,
+  reperes,
+  description,
+}: {
+  prixM2: number;
+  reperes: readonly { valeur: number; libelle: string }[];
+  description: string;
+}): JSX.Element {
+  const valeurs = reperes.map((x) => x.valeur);
+  const min = Math.min(...valeurs, prixM2) * 0.93;
+  const max = Math.max(...valeurs, prixM2) * 1.07;
+  const fraction = (v: number): number => (v - min) / (max - min);
+  const pos = (v: number): string => `${String(fraction(v) * 100)}%`;
+
+  // Les libellés trop proches (bien peu décoté : « à rénover » collé à « estimé ») passent
+  // sur une ligne en dessous, d'après leur largeur réelle et celle de la jauge.
+  const jauge = useRef<HTMLDivElement>(null);
+  const libelles = useRef<(HTMLSpanElement | null)[]>([]);
+  const [lignes, setLignes] = useState<number[]>(() => reperes.map(() => 0));
+  const cle = reperes.map((x) => `${String(x.valeur)}:${x.libelle}`).join('|');
+  useLayoutEffect(() => {
+    const ranger = (): void => {
+      const largeur = jauge.current?.clientWidth ?? 0;
+      const suivantes = rangerLibelles(
+        reperes.map((x, i) => ({
+          centre: fraction(x.valeur) * largeur,
+          largeur: libelles.current[i]?.offsetWidth ?? 0,
+        })),
+      );
+      setLignes((avant) => (avant.join() === suivantes.join() ? avant : suivantes));
+    };
+    ranger();
+    window.addEventListener('resize', ranger);
+    return () => {
+      window.removeEventListener('resize', ranger);
+    };
+    // `cle` résume repères et libellés : inutile de relancer à chaque rendu.
+  }, [cle, min, max]);
+  const lignesEnPlus = Math.max(0, ...lignes);
+
+  return (
+    <div
+      ref={jauge}
+      className="relative mx-2.5"
+      style={{ height: 62 + lignesEnPlus * HAUTEUR_LIGNE }}
+      role="img"
+      aria-label={description}
     >
       <div className="absolute top-[22px] right-0 left-0 h-2.5 rounded-full bg-linear-to-r from-bon via-surveiller to-probleme opacity-35" />
-      {repere(q1, e === null ? nombre(q1) : `${nombre(q1)}, à rénover`)}
-      {repere(
-        centre,
-        e === null ? `${nombre(centre)} €/m², le quartier` : `${nombre(centre)} €/m², estimé`,
-      )}
-      {repere(q3, e === null ? nombre(q3) : `${nombre(q3)}, rénové`)}
+      {reperes.map((x, i) => {
+        const ligne = lignes[i] ?? 0;
+        return (
+          <div
+            key={x.libelle}
+            className="absolute top-[18px] flex flex-col items-center"
+            style={{ left: pos(x.valeur), transform: 'translateX(-50%)' }}
+          >
+            <span
+              className="w-0.5 bg-encre/40"
+              style={{ height: 18 + ligne * HAUTEUR_LIGNE }}
+            />
+            <span
+              ref={(el) => {
+                libelles.current[i] = el;
+              }}
+              className="mt-1 text-xs whitespace-nowrap text-encre-3"
+            >
+              {x.libelle}
+            </span>
+          </div>
+        );
+      })}
       <div
         className="absolute top-4 h-[22px] w-[22px] rounded-full border-4 border-surface bg-accent shadow-[0_0_0_2px_var(--color-accent)]"
         style={{ left: pos(prixM2), transform: 'translateX(-50%)' }}
