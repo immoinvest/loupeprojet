@@ -4,6 +4,7 @@ import type { AnnonceResolue, SaisieProjet } from '@/annonces';
 import { Bouton, Carte } from '@/composants/ui';
 
 import { Champ } from './formulaire/Champ';
+import { EstimerLoyer } from './formulaire/EstimerLoyer';
 import {
   valider,
   versSaisie,
@@ -63,6 +64,10 @@ export function FormulaireProjet({
     setProvenance((prev) => ({ ...prev, [cle]: 'utilisateur' }));
   };
   const c = { valeurs, provenance, onChange: changer };
+  const loyerEstime = (v: string): void => {
+    setValeurs((prev) => ({ ...prev, loyerHc: v }));
+    setProvenance((prev) => ({ ...prev, loyerHc: 'estime' }));
+  };
 
   return (
     <form
@@ -127,6 +132,7 @@ export function FormulaireProjet({
             erreur={erreurs.revenusMensuels}
             {...c}
           />
+          <EstimerLoyer valeurs={valeurs} onEstime={loyerEstime} />
         </div>
       </Carte>
 

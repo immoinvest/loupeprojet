@@ -93,7 +93,8 @@ export function construireProjet(
   const provenance: Record<string, string> = {
     'achat.prix': s.provenance.prix ?? 'utilisateur',
     'bien.surface': s.provenance.surface ?? 'utilisateur',
-    'location.loyerHc': 'utilisateur',
+    // Loyer proposé par « Estimer le loyer » : il vient des loyers de marché ANIL.
+    'location.loyerHc': s.provenance.loyerHc === 'estime' ? 'anil' : 'utilisateur',
     'pret.apport': 'utilisateur',
     'pret.dureeAnnees': 'utilisateur',
     'pret.tauxNominal': 'usure',
