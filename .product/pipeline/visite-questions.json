@@ -30,16 +30,27 @@
       "stories_completed": 5,
       "stories_total": 5,
       "commits": [
-        { "etape": "US-1 moteur : base, règles, questionsPourProjet, docs de la feature", "hash": "404eefd" },
-        { "etape": "US-2 stockage : ProjetEnregistre.visite, logique pure, partage", "hash": "b188e38" },
+        {
+          "etape": "US-1 moteur : base, règles, questionsPourProjet, docs de la feature",
+          "hash": "404eefd"
+        },
+        {
+          "etape": "US-2 stockage : ProjetEnregistre.visite, logique pure, partage",
+          "hash": "b188e38"
+        },
         { "etape": "US-3 écran Visite, onglet masqué", "hash": "7333ab9" },
         { "etape": "US-4 Rapport, Vérifier, impression, partage, Méthode", "hash": "e3bff77" },
-        { "etape": "US-5 preuve : Playwright, formats, perf (mémoïsation), docs communes", "hash": "à venir" }
+        {
+          "etape": "US-5 preuve : Playwright, formats, perf (mémoïsation), docs communes",
+          "hash": "6a1b735"
+        },
+        { "etape": "fusion de master (coque-fixe #39, revente-curseur #40)", "hash": "7b7f92b" },
+        { "etape": "correctif : pastille du compte rendu à sa largeur", "hash": "a377b0c" }
       ]
     },
     "qa_tests": {
       "status": "completed",
-      "note": "1 016 tests unitaires (dont 58 pour la visite : 32 moteur, 26 web) ; couverture 100 % sur packages/moteur et apps/web/src/{stockage,textes,visite} ; un test d'écran dépassait 30 s sous la charge de la suite complète : corrigé à la source (pas de revalidation Zod quand le projet ne change pas, résultats mémoïsés sur le projet, questions mémoïsées avec rappels stables)"
+      "note": "1 045 tests unitaires après fusion de master (dont 58 pour la visite : 32 moteur, 26 web) ; couverture 100 % sur packages/moteur et apps/web/src/{stockage,textes,visite} ; un test d'écran dépassait 30 s sous la charge de la suite complète : corrigé à la source (pas de revalidation Zod quand le projet ne change pas, résultats mémoïsés sur le projet, questions mémoïsées avec rappels stables). Playwright sur le build de la branche (port 5198 : le 5199 servait l'aperçu d'une autre session) : 57 sur 60 ; les trois échecs (Comparer à 320, 375 et 390 px) révèlent un défaut préexistant de master, les libellés sr-only des feux, positionnés en absolu, échappaient au tableau défilant à partir de trois projets ; corrigé par un cadre `relative`"
     },
     "security": {
       "status": "completed",

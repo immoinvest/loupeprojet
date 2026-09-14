@@ -107,7 +107,9 @@ function Tableau({
   onTrier: (code: CodeIndicateur) => void;
 }): JSX.Element {
   return (
-    <div className="overflow-x-auto rounded-carte border border-bordure bg-surface shadow-carte">
+    // `relative` : les libellés des feux réservés aux lecteurs d'écran sont positionnés en absolu ; sans
+    // ancêtre positionné, ils échappaient au défilement et élargissaient la page à partir de trois projets.
+    <div className="relative overflow-x-auto rounded-carte border border-bordure bg-surface shadow-carte">
       <table className="w-full border-collapse text-[15px]">
         <thead>
           <tr className="border-b border-bordure">
