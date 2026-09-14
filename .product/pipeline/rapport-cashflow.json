@@ -34,7 +34,7 @@
     },
     "qa_tests": {
       "status": "completed",
-      "note": "35 tests ajoutés : info (9 : souris, clavier, Échap, clic dehors, une seule bulle, mode document, décalage, TitreCarte, LienOnglet), rapport-analyses (6), explications (12), rapport (8 : cascade, repères, bulles, rendements, liens, multiple, document) ; couverture 100 % sur analyses/ et textes/ ; suite web 325 tests verts ; e2e Rapport : bulle dans l'écran (ordinateur, téléphone, tablette), Échap, une seule bulle, liens vers les trois onglets"
+      "note": "35 tests ajoutés : info (9 : souris, clavier, Échap, clic dehors, une seule bulle, mode document, décalage, TitreCarte, LienOnglet), rapport-analyses (6), explications (12), rapport (8 : cascade, repères, bulles, rendements, liens, multiple, document) ; couverture 100 % sur analyses/ et textes/ ; suite web 325 tests verts avant fusion, 1 061 tests au total après les deux fusions ; e2e Rapport : bulle dans l'écran (ordinateur, téléphone, tablette), Échap, une seule bulle, liens vers les trois onglets"
     },
     "security": {
       "status": "completed",
@@ -43,7 +43,7 @@
     "push": {
       "status": "completed",
       "pr": "https://github.com/immoinvest/loupeprojet/pull/43",
-      "note": "auto-merge armé ; master fusionné une fois (coque-fixe, conflits de docs résolus en gardant les deux côtés) ; 1 008 tests (un test Mon compte en échec sous charge, vert seul) ; e2e Rapport 6/6 sur ordinateur, téléphone et tablette"
+      "note": "auto-merge armé ; master fusionné deux fois (coque-fixe #39, puis revente-curseur #40, déconnexion #41, estimation-confiance #42 : docs et CartePrix, les deux côtés gardés) ; suite complète 1 061 tests, 1 058 verts et 3 tests de l'extension au-delà de 5 s sous charge (hors périmètre, relancés seuls) ; e2e Rapport 6/6 sur ordinateur, téléphone et tablette avant la seconde fusion, rejoué par le job e2e de la CI"
     }
   },
   "decisions": {
