@@ -15,8 +15,9 @@ import { Profil } from './Profil';
 /** Identifiant de la navigation principale, visé par le bouton de menu (`aria-controls`). */
 export const ID_NAVIGATION = 'navigation-principale';
 
+/** Liens du menu : 14 px, pour que les libellés et les noms de projets tiennent dans 224 px. */
 const lien = ({ isActive }: { isActive: boolean }): string =>
-  `flex min-h-[44px] items-center gap-3 rounded-encart px-3.5 py-2.5 text-[15px] font-semibold ${
+  `flex min-h-[44px] items-center gap-2.5 rounded-encart px-3 py-2.5 text-sm font-semibold ${
     isActive ? 'bg-accent-doux text-encre' : 'text-encre-2 hover:bg-accent-fond'
   }`;
 
@@ -37,6 +38,11 @@ function feuCashflow(p: ProjetEnregistre): 'bon' | 'surveiller' | 'probleme' | '
   );
 }
 
+/**
+ * La barre latérale tient dans la hauteur de l'écran, en trois zones : le haut (logo, « Nouveau
+ * projet ») et le bas (aide, installation, profil) ne bougent jamais ; entre les deux, la liste
+ * des projets est la seule à défiler quand elle est longue.
+ */
 export function Sidebar({
   ouvert,
   onFermer,
@@ -62,78 +68,86 @@ export function Sidebar({
     <aside
       id={ID_NAVIGATION}
       data-ouvert={ouvert}
-      className={`fixed inset-y-0 left-0 z-40 flex w-[min(20rem,85vw)] flex-col gap-5 overflow-y-auto overscroll-contain border-r border-bordure bg-surface pt-[max(1.25rem,env(safe-area-inset-top))] pr-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] pl-[max(1rem,env(safe-area-inset-left))] transition-[translate,visibility] duration-200 motion-reduce:transition-none ${
+      className={`fixed inset-y-0 left-0 z-40 flex w-[min(20rem,85vw)] flex-col gap-5 overflow-hidden border-r border-bordure bg-surface pt-[max(1.25rem,env(safe-area-inset-top))] pr-3 pb-[max(1rem,env(safe-area-inset-bottom))] pl-[max(0.75rem,env(safe-area-inset-left))] transition-[translate,visibility] duration-200 motion-reduce:transition-none ${
         ouvert ? ETAT_TIROIR.ouvert : ETAT_TIROIR.ferme
-      } lg:visible lg:static lg:z-auto lg:h-full lg:w-auto lg:translate-x-0 lg:overflow-visible lg:shadow-none lg:transition-none print:hidden`}
+      } lg:visible lg:static lg:z-auto lg:h-full lg:min-h-0 lg:w-auto lg:translate-x-0 lg:shadow-none lg:transition-none print:hidden`}
     >
-      <div className="flex items-center justify-between gap-2">
-        <NavLink to="/projets" className="flex items-center px-2.5 py-1 pointer-coarse:min-h-11">
-          <LogotypeDeklic hauteur={26} />
-        </NavLink>
+      <div className="flex shrink-0 flex-col gap-5">
+        <div className="flex items-center justify-between gap-2">
+          <NavLink to="/projets" className="flex items-center px-2 py-1 pointer-coarse:min-h-11">
+            <LogotypeDeklic hauteur={26} />
+          </NavLink>
+          <button
+            ref={fermerRef}
+            type="button"
+            onClick={onFermer}
+            aria-label="Fermer le menu"
+            className="flex h-11 w-11 items-center justify-center rounded-full text-encre-2 hover:bg-accent-fond lg:hidden"
+          >
+            <X size={22} aria-hidden="true" />
+          </button>
+        </div>
+
         <button
-          ref={fermerRef}
           type="button"
-          onClick={onFermer}
-          aria-label="Fermer le menu"
-          className="flex h-11 w-11 items-center justify-center rounded-full text-encre-2 hover:bg-accent-fond lg:hidden"
+          onClick={nouveau}
+          className="flex min-h-[44px] items-center justify-center gap-3 rounded-encart bg-accent px-3 text-[15px] font-semibold text-white hover:bg-accent-fonce"
         >
-          <X size={22} aria-hidden="true" />
+          <Plus size={18} strokeWidth={2.4} aria-hidden="true" />
+          Nouveau projet
         </button>
       </div>
 
-      <button
-        type="button"
-        onClick={nouveau}
-        className="flex min-h-[44px] items-center justify-center gap-3 rounded-encart bg-accent px-3.5 text-[15px] font-semibold text-white hover:bg-accent-fonce"
+      {/* La zone qui défile garde 4 px de marge : le cadre de focus des liens n'est pas coupé. */}
+      <div
+        data-zone="defilante"
+        className="-mx-1 flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain px-1"
       >
-        <Plus size={18} strokeWidth={2.4} aria-hidden="true" />
-        Nouveau projet
-      </button>
-
-      <nav aria-label="Mes projets" className="flex flex-col gap-1">
-        <div className="px-3.5 pb-1.5 text-xs font-bold tracking-wider text-encre-4 uppercase">
-          Mes projets
-        </div>
-        {projets.map((p) => (
-          <NavLink key={p.id} to={`/projets/${p.id}`} className={lien}>
-            <span className="flex-1 truncate">{p.nom}</span>
-            <Point feu={feuCashflow(p)} />
+        <nav aria-label="Mes projets" className="flex flex-col gap-1">
+          <div className="px-3 pb-1.5 text-xs font-bold tracking-wider text-encre-4 uppercase">
+            Mes projets
+          </div>
+          {projets.map((p) => (
+            <NavLink key={p.id} to={`/projets/${p.id}`} className={lien}>
+              <span className="flex-1 truncate">{p.nom}</span>
+              <Point feu={feuCashflow(p)} />
+            </NavLink>
+          ))}
+          <NavLink to="/comparer" className={lien}>
+            <Columns2 size={18} aria-hidden="true" />
+            Comparer
           </NavLink>
-        ))}
-        <NavLink to="/comparer" className={lien}>
-          <Columns2 size={18} aria-hidden="true" />
-          Comparer
-        </NavLink>
-      </nav>
+        </nav>
+      </div>
 
-      <nav aria-label="Aide" className="flex flex-col gap-1">
-        <NavLink to="/methode" className={lien}>
-          <Info size={18} aria-hidden="true" />
-          Comment c'est calculé
-        </NavLink>
-        <NavLink to="/extension" className={lien}>
-          <Puzzle size={18} aria-hidden="true" />
-          Extension navigateur
-        </NavLink>
-      </nav>
+      <div className="flex shrink-0 flex-col gap-5">
+        <nav aria-label="Aide" className="flex flex-col gap-1">
+          <NavLink to="/methode" className={lien}>
+            <Info size={18} className="shrink-0" aria-hidden="true" />
+            <span className="truncate">Comment c'est calculé</span>
+          </NavLink>
+          <NavLink to="/extension" className={lien}>
+            <Puzzle size={18} className="shrink-0" aria-hidden="true" />
+            <span className="truncate">Extension navigateur</span>
+          </NavLink>
+        </nav>
 
-      <div className="flex-1" />
-
-      <div className="flex flex-col gap-3">
-        {/* Seulement quand le navigateur propose l'installation (Chrome, Edge, Android). */}
-        {installation.etat === 'disponible' && (
-          <button
-            type="button"
-            onClick={() => {
-              void installation.installer();
-            }}
-            className="flex min-h-[44px] items-center justify-center gap-2 rounded-encart border border-accent-bordure bg-accent-fond px-3.5 text-[15px] font-semibold text-accent hover:bg-accent-doux"
-          >
-            <Download size={18} aria-hidden="true" />
-            {TEXTES_INSTALLATION.bouton}
-          </button>
-        )}
-        <Profil />
+        <div className="flex flex-col gap-3">
+          {/* Seulement quand le navigateur propose l'installation (Chrome, Edge, Android). */}
+          {installation.etat === 'disponible' && (
+            <button
+              type="button"
+              onClick={() => {
+                void installation.installer();
+              }}
+              className="flex min-h-[44px] items-center justify-center gap-2 rounded-encart border border-accent-bordure bg-accent-fond px-3 text-[15px] font-semibold text-accent hover:bg-accent-doux"
+            >
+              <Download size={18} aria-hidden="true" />
+              {TEXTES_INSTALLATION.bouton}
+            </button>
+          )}
+          <Profil />
+        </div>
       </div>
     </aside>
   );

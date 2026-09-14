@@ -1,0 +1,111 @@
+import { expect, test, type Page } from '@playwright/test';
+
+import {
+  NOM_EXEMPLE,
+  ouvrirExemple,
+  ouvrirMesProjets,
+  ouvrirNavigation,
+  ouvrirVolet,
+} from './aides';
+
+/*
+ * Coque fixe : la fenêtre ne défile jamais, seul le contenu (`main`) défile ; le menu et l'en-tête
+ * du projet restent en vue. Les mêmes parcours tournent sur ordinateur, téléphone et tablette.
+ */
+
+/** Largeur à partir de laquelle tout l'en-tête du projet reste collé (point de rupture `md`). */
+const LARGEUR_EN_TETE_ENTIER = 768;
+
+/** Défile le contenu jusqu'en bas et attend qu'il ait bougé. */
+async function defilerEnBas(page: Page): Promise<void> {
+  const contenu = page.getByRole('main');
+  await contenu.evaluate((el) => {
+    el.scrollTop = el.scrollHeight;
+  });
+  await expect.poll(() => contenu.evaluate((el) => el.scrollTop)).toBeGreaterThan(300);
+}
+
+function defilementDuContenu(page: Page): Promise<number> {
+  return page.getByRole('main').evaluate((el) => el.scrollTop);
+}
+
+function defilementDeLaFenetre(page: Page): Promise<number> {
+  return page.evaluate(() => window.scrollY);
+}
+
+test('menu et en-tête restent en vue quand le contenu défile ; changer de volet remet en haut', async ({
+  page,
+}) => {
+  await ouvrirExemple(page);
+  await ouvrirVolet(page, 'Hypothèses', 'Vos hypothèses');
+  await defilerEnBas(page);
+  expect(await defilementDeLaFenetre(page)).toBe(0);
+
+  // La bande des volets est collée, la synthèse juste dessous, sans la recouvrir.
+  const volets = page.getByRole('navigation', { name: 'Volets du rapport' });
+  await expect(volets).toBeInViewport({ ratio: 1 });
+  const synthese = page.getByText('Cash-flow', { exact: true }).locator('..');
+  await expect(synthese).toBeInViewport({ ratio: 1 });
+  const [bande, resume] = await Promise.all([volets.boundingBox(), synthese.boundingBox()]);
+  if (bande === null || resume === null) throw new Error('bande des volets ou synthèse sans boîte');
+  expect(resume.y).toBeGreaterThanOrEqual(bande.y + bande.height - 1);
+
+  // Le menu : barre latérale entière sur ordinateur, bouton de menu en dessous de 1 024 px.
+  const boutonMenu = page.getByRole('button', { name: 'Ouvrir le menu' });
+  if (await boutonMenu.isVisible()) {
+    await expect(boutonMenu).toBeInViewport({ ratio: 1 });
+  } else {
+    const navigation = page.getByRole('navigation', { name: 'Mes projets' });
+    await expect(navigation.getByRole('link', { name: NOM_EXEMPLE })).toBeInViewport({ ratio: 1 });
+    await expect(page.getByRole('button', { name: 'Nouveau projet' })).toBeInViewport({ ratio: 1 });
+    await expect(page.getByRole('link', { name: "Comment c'est calculé" })).toBeInViewport({
+      ratio: 1,
+    });
+    await expect(page.getByText('Gratuit · 1 projet')).toBeInViewport({ ratio: 1 });
+  }
+
+  // Sous 768 px, seule la bande reste collée : le nom et les actions ont défilé avec le contenu.
+  const filDAriane = page.getByRole('link', { name: 'Mes projets', exact: true });
+  const largeur = page.viewportSize()?.width ?? 0;
+  if (largeur < LARGEUR_EN_TETE_ENTIER) {
+    await expect(filDAriane).not.toBeInViewport();
+  } else {
+    await expect(filDAriane).toBeInViewport({ ratio: 1 });
+    await expect(page.getByLabel('Statut du projet')).toBeInViewport({ ratio: 1 });
+    await expect(page.getByRole('button', { name: 'PDF' })).toBeInViewport({ ratio: 1 });
+  }
+
+  await ouvrirVolet(page, 'Fiscalité', /Combien d'impôts, selon le régime/);
+  await expect.poll(() => defilementDuContenu(page)).toBe(0);
+  expect(await defilementDeLaFenetre(page)).toBe(0);
+});
+
+test('trente projets : la liste défile dans le menu, le profil reste en bas', async ({ page }) => {
+  await ouvrirMesProjets(page);
+  await page.evaluate(() => {
+    const cle = 'loupe.projets.v1';
+    const projets = JSON.parse(localStorage.getItem(cle) ?? '[]') as { id: string; nom: string }[];
+    const exemple = projets[0];
+    if (exemple === undefined) throw new Error("Le projet d'exemple est absent.");
+    const copies = Array.from({ length: 29 }, (_, i) => ({
+      ...exemple,
+      id: `copie-${String(i + 1)}`,
+      nom: `Copie ${String(i + 1)} · T2 · Lyon 3e`,
+    }));
+    localStorage.setItem(cle, JSON.stringify([exemple, ...copies]));
+  });
+  await page.reload();
+  await expect(page.getByRole('heading', { level: 1, name: 'Mes projets' })).toBeVisible();
+
+  const navigation = await ouvrirNavigation(page);
+  const profil = page.getByText('Gratuit · 30 projets');
+  await expect(profil).toBeInViewport({ ratio: 1 });
+
+  const dernier = navigation.getByRole('link', { name: 'Copie 29 · T2 · Lyon 3e', exact: true });
+  await expect(dernier).not.toBeInViewport();
+  await dernier.scrollIntoViewIfNeeded();
+  await expect(dernier).toBeInViewport({ ratio: 1 });
+  // Le profil n'a pas bougé : seule la liste a défilé, à l'intérieur du menu.
+  await expect(profil).toBeInViewport({ ratio: 1 });
+  expect(await defilementDeLaFenetre(page)).toBe(0);
+});
