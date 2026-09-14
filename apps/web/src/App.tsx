@@ -25,6 +25,7 @@ import { Financement } from './ecrans/Financement';
 import { Fiscalite } from './ecrans/Fiscalite';
 import { AjouterMain } from './ecrans/gerer/AjouterMain';
 import { Gerer } from './ecrans/gerer/Gerer';
+import { ImprimerDocument } from './ecrans/gerer/ImprimerDocument';
 import { Loyers } from './ecrans/gerer/Loyers';
 import { PretAGerer } from './ecrans/gerer/PretAGerer';
 import { Hypotheses } from './ecrans/Hypotheses';
@@ -42,9 +43,10 @@ import { Adresse } from './ecrans/Adresse';
 import { ProjetsProvider } from './stockage/ProjetsContext';
 
 export const routes: RouteObject[] = [
-  // Hors de la coque : la page de connexion classique, centrée, et le document imprimable.
+  // Hors de la coque : la page de connexion classique, centrée, et les documents imprimables.
   { path: 'connexion', element: <Connexion /> },
   { path: 'projets/:id/imprimer', element: <Imprimer /> },
+  { path: 'gerer/documents/:id', element: <ImprimerDocument /> },
   { path: 'simulateur-pret/imprimer', element: <SimulateurImprimer /> },
   {
     element: <AppLayout />,

@@ -36,6 +36,14 @@ export const TEXTES_MON_MENU = {
   chargement: 'Chargement de votre menu…',
 } as const;
 
+/** Carte « Mes données de gestion » de la page Mon compte (vouvoiement). */
+export const TEXTES_EXPORT = {
+  titre: 'Mes données de gestion',
+  phrase:
+    'Vos biens, locataires, loyers, quittances et reçus, dans un fichier JSON que vous gardez où vous voulez.',
+  exporter: 'Exporter',
+} as const;
+
 /** Une phrase par code d'erreur de la gestion : courte, et qui dit quoi faire. */
 export const ERREURS_GESTION: Readonly<Record<CodeErreurGestion, string>> = {
   non_connecte: 'Votre session a expiré. Reconnectez-vous.',

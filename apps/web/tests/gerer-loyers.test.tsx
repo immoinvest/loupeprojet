@@ -171,10 +171,19 @@ describe('Page Loyers : les actions', () => {
       bailleur: BAILLEUR,
       documents: [{ type: 'quittance', locationId: 'location-julie', periode: '2026-09' }],
     });
+    // Le document s'ouvre, hors coque, à la place de la page.
+    expect(
+      await screen.findByRole(
+        'heading',
+        { level: 1, name: 'Quittance de loyer' },
+        { timeout: 10_000 },
+      ),
+    ).toBeInTheDocument();
     expect(gestion.appels.filter((a) => a !== 'etat')).toEqual([
       'emettreDocument',
       'enregistrerBailleur',
       'emettreDocument',
+      'document',
     ]);
   });
 

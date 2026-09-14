@@ -9,6 +9,7 @@ import { Bouton, Carte, Ligne, Pastille, TitreCarte } from '@/composants/ui';
 import { ERREURS_COMPTE, initiales, nomAffiche, NOMS_FOURNISSEURS } from '@/textes/compte';
 import { TEXTES_MON_COMPTE as T } from '@/textes/mon-compte';
 
+import { MesDonneesGestion } from './compte/MesDonneesGestion';
 import { MonMenu } from './compte/MonMenu';
 import { CLASSE_SAISIE } from './connexion/styles';
 
@@ -153,6 +154,8 @@ export function Compte(): JSX.Element {
       </Carte>
 
       <MonMenu />
+
+      <MesDonneesGestion />
 
       <Carte>
         <TitreCarte>{T.connexion}</TitreCarte>

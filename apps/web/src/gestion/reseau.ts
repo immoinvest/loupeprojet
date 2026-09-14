@@ -13,6 +13,9 @@ import type { ClientGestion, CodeErreurGestion, ResultatGestion } from './types'
 export type Recuperateur = (url: string, init?: RequestInit) => Promise<Response>;
 
 const RACINE = '/api/gestion';
+
+/** « Exporter mes données de gestion » : un lien suffit, la réponse est une pièce jointe JSON. */
+export const CHEMIN_EXPORT = `${RACINE}/export`;
 const ErreurSchema = z.object({ code: z.string() });
 
 /** Codes de l'API de gestion (apps/comptes) vers les codes de l'interface. */
