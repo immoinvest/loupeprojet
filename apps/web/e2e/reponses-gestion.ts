@@ -16,7 +16,14 @@ export async function simulerGestion(page: Page): Promise<void> {
     creeLe,
     modifieLe: creeLe,
   };
-  const location = { type: 'meublee', debut: '2025-10-01', jourLoyer: 5, charges: 5_000, creeLe };
+  const location = {
+    type: 'meublee',
+    debut: '2025-10-01',
+    jourLoyer: 5,
+    charges: 5_000,
+    colocataireIds: [],
+    creeLe,
+  };
   await page.route('**/api/gestion/etat', (route) =>
     route.fulfill({
       json: {
@@ -58,7 +65,44 @@ export async function simulerGestion(page: Page): Promise<void> {
             creeLe,
           },
         ],
+        bailleur: null,
+        documents: [],
         preferences: { analyser: true, gerer: true },
+      },
+    }),
+  );
+
+  // La quittance du mois de Julie, telle que l'API la rend : contenu figé complet.
+  const periode = aujourdhui.slice(0, 7);
+  const numero = `Q-${periode.replace('-', '')}-LOCATION`;
+  await page.route('**/api/gestion/documents/*', (route) =>
+    route.fulfill({
+      json: {
+        id: 'document-julie',
+        type: 'quittance',
+        numero,
+        locationId: 'location-julie',
+        periode,
+        emisLe: `${aujourdhui}T09:00:00.000Z`,
+        contenu: {
+          type: 'quittance',
+          numero,
+          emisLe: aujourdhui,
+          bailleur: { nom: 'Camille Martin', adresse: '3 rue Paradis, 13006 Marseille' },
+          locataires: [{ prenom: 'Julie', nom: 'Martin' }],
+          logement: { nom: 'T2 Lices', adresse: '12 rue des Lices, Marseille 5e' },
+          periode,
+          debut: `${periode}-01`,
+          fin: `${periode}-28`,
+          loyerHorsCharges: 65_000,
+          charges: 5_000,
+          total: 70_000,
+          paiements: [{ montant: 70_000, date: aujourdhui }],
+          montantRecu: 70_000,
+          dejaRecu: 0,
+          resteDu: 0,
+          mentions: ['pour_acquit'],
+        },
       },
     }),
   );

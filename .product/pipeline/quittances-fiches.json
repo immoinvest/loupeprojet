@@ -1,0 +1,75 @@
+{
+  "feature_slug": "quittances-fiches",
+  "title": "Quittances et fiches (G1b) : paiement partiel, quittance et reçu figés, page Loyers, fiche bien, fin de location, export des données",
+  "started_at": "2026-09-14T17:40:00Z",
+  "current_step": "qa_tests",
+  "scope": "packages/gestion, apps/comptes (src/gestion, migration 0003), apps/web (gestion/, ecrans/gerer, Compte)",
+  "branch": "feat/quittances-fiches",
+  "worktree": "C:\\Users\\errei\\Claude\\loupe-gestion",
+  "base": "master (ca1d257)",
+  "consigne": "Pierre, 14/09/2026 : « allons-y pour la prochaine étape ; la connexion au compte bancaire peut être faite plus tard (validation manuelle pour le moment) » ; auto-validation des étapes",
+  "baseline": { "status": "en_cours" },
+  "steps": {
+    "discovery": {
+      "status": "completed",
+      "output": ".product/features/quittances-fiches-discovery.md"
+    },
+    "specs": {
+      "status": "completed",
+      "output": ".product/specs/quittances-fiches-specs.md",
+      "stories_count": 7
+    },
+    "architecture": {
+      "status": "completed",
+      "output": ".product/architecture/quittances-fiches.md"
+    },
+    "implement": {
+      "status": "completed",
+      "stories_completed": 8,
+      "stories_total": 8,
+      "commits": [
+        "cc8ff40 docs : discovery, specs, architecture",
+        "88b8c18 fix(web) : bail mobilité, art. 25-17 (et non 25-6)",
+        "9802a44 US-1 paquet @loupe/gestion : partiel, contenus et numéros des documents, baux (91 tests, 100 %)",
+        "d424099 US-2 paiements partiels : migration 0003, insertion conditionnelle, date future refusée, annulation bloquée par un document (96 tests comptes, 100 %)",
+        "54118d0 US-3 identité du bailleur, documents figés et idempotents, fin de location, louer un bien, export (111 tests comptes, 100 %)",
+        "cda66fa US-8 plusieurs locataires par bien : gestion_colocataire, libellé de chambre, chevauchement au même libellé (103 tests gestion, 116 tests comptes, 100 %)",
+        "a9d092d US-4 page Loyers : mois au choix, groupes, En partie en deux clics, Quittance en un clic, identité demandée une fois, lien Loyers du menu (166 tests web de Gérer, src/gestion 100 %)",
+        "d14bb05 US-5 quittance et reçu imprimables hors coque, document introuvable, export JSON dans Mon compte (190 tests web, 100 %)",
+        "7ffbea6 US-6 fiche d'un bien : statut, une carte par location, 12 derniers mois avec Quittance, Terminer la location en deux clics, liens depuis les loyers et les biens vacants (209 tests web, 100 %)",
+        "576ae08 US-7 louer un bien depuis sa fiche en deux clics : colocataires, chambre, loyer repris ; OccupationCreeeSchema (104 tests gestion, 224 tests web, 100 %)"
+      ],
+      "ajout_de_perimetre": "Pierre, 14/09/2026 pendant US-3 : « il peut y avoir plusieurs locataires pour un bien (colocation, location à la chambre) » → US-8 P0, ADR-G13 (colocataires d'un bail unique, locations simultanées distinguées par un libellé, chevauchement refusé seulement au même libellé)",
+      "incidents": [
+        "npm ci interrompu par l'arrêt de l'application puis en échec EBUSY (-4051) sur node_modules : npm install sans effacement a réparé l'installation ; socle de tests non mesuré avant le code, la suite complète le mesurera à la QA",
+        "règle « date de paiement » simplifiée à l'implémentation : seule une date future est refusée (la période reste bornée comme en G1a) ; specs corrigées",
+        "tests de l'API sur l'horloge réelle (14/09) : les paiements d'octobre devenaient « futurs » ; horloge fixe au 20/10 dans les tests de paiement, montant de 1 € dans les tests de bornes de période",
+        "commande PowerShell refusée à l'analyse : une apostrophe typographique (d’apps) prise pour un guillemet ; plus d'apostrophe typographique dans les commandes",
+        "US-3 : ordre des paiements d'un même mois aléatoire (tri par identifiant UUID) ; tri chronologique par période, date, création, identifiant",
+        "US-3 : une branche non couverte (quittance d'une location avec date de sortie) ; test du dernier mois d'un locataire qui part",
+        "US-8 : un test web du client réseau sans le nouveau champ colocataires (réponse de création) ; corrigé",
+        "US-4 : trois reprises de la vérification : lint (chaîne optionnelle inutile), typecheck (code deja_recu dans un test de textes), puis un test G1a « J'ai acheté ce bien » en délai dépassé sous charge (1 s par défaut, 10 s après une navigation) ; seul, il passait",
+        "US-6 : premier rendu du fichier de test de la fiche en délai dépassé sous charge (10 s) ; noms des biens vacants devenus des liens, tests de texte adaptés",
+        "US-7 : une branche non couverte (louer sans liste de colocataires, que l'API accepte) ; test ajouté"
+      ]
+    },
+    "qa_tests": {
+      "status": "completed",
+      "fusion": "c920c8d fusion de master (accueil-menu #67, sync-projets #68 et sa migration 0004, retrait de Méthode, correctifs e2e) : conflits résolus dans migration.ts, erreurs.ts, migration.test.ts, SectionGerer.tsx, textes/gerer.ts, menu-sections.test.tsx",
+      "verification": "comme la CI : lint, format:check, typecheck, 234 fichiers et 1 881 tests avec les seuils de couverture, build de tous les espaces",
+      "formats": "spec des formats : 32 écrans sur 9 formats (Loyers, fiche d'un bien, louer, quittance ajoutés) ; premier passage : cibles trop petites au doigt sur Gérer et Loyers (lien du bien 24 px, « Voir tous les loyers » 20 px), corrigées par pointer-coarse:min-h-11 ; second passage vert (12 formats et mesures, 4,6 min, configuration locale sur le port 5299)"
+    },
+    "migrations_production": "0002 et 0004 appliquées le 14/09/2026 ; 0003_gestion_documents.sql appliquée par Pierre le 14/09/2026 vers 22 h 30, avant la fusion (npx.cmd depuis le worktree loupe-gestion) ; vérifié en lecture seule : plus aucune migration en attente",
+    "security": {
+      "status": "completed",
+      "score": "96/100",
+      "notes": "requêtes filtrées par compte (404 hors compte), Origin exigé pour écrire, corps validés par Zod et limités à 64 Ko, contenu figé relu par Zod, React échappe tout le document, bornes (50 locations par bien, 10 colocataires, un document par clé, paiements jamais au-dessus du dû) ; restes bénins : deux locations simultanées de la même chambre peuvent passer le contrôle de chevauchement, un paiement peut s'insérer entre le contrôle et l'écriture d'une sortie (même compte, bouton désactivé pendant l'envoi)"
+    },
+    "push": { "status": "pending" }
+  },
+  "auto_revue": {
+    "specs": "sept stories (cinq P0, deux P1 détachables en G1c) ; « En partie » bouton de ligne (deux clics) ; un reçu par paiement partiel (art. 21) ; annulation bloquée après émission",
+    "architecture": "ADR-G8 à G12 : contenu figé, émission idempotente par clé, numéro déterministe, somme ≤ dû par insertion conditionnelle, PDF par impression ; gestion_paiement recréée (contrainte unique de table) ; dépôt découpé en trois fichiers",
+    "discovery": "G1b avant G2 (il faut produire la quittance avant de l'envoyer) ; colocation, APL, modification du loyer et suppression d'un bien en G1c ; PDF par impression du navigateur ; règles vérifiées sur Légifrance (art. 21 et 25-17)"
+  }
+}

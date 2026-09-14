@@ -12,11 +12,13 @@ export interface LigneLoyer extends SuiviLoyer {
   readonly location: LocationGeree;
   readonly bien: BienGere | undefined;
   readonly locataire: Locataire | undefined;
+  /** Les colocataires du bail retrouvés, dans l'ordre ; vide hors colocation. */
+  readonly colocataires: readonly Locataire[];
 }
 
 export interface ResumeMois {
   readonly periode: string;
-  /** En retard d'abord, puis attendus, à venir, reçus ; à statut égal, par date due puis par bien. */
+  /** En retard d'abord, puis partiels, attendus, à venir, reçus ; à statut égal, par date due puis par bien. */
   readonly lignes: readonly LigneLoyer[];
   readonly nombreRecus: number;
   readonly nombreEnRetard: number;
@@ -29,9 +31,10 @@ type Donnees = Pick<EtatGestion, 'biens' | 'locataires' | 'locations' | 'paiemen
 
 const ORDRE: Readonly<Record<StatutLoyer, number>> = {
   en_retard: 0,
-  attendu: 1,
-  a_venir: 2,
-  recu: 3,
+  partiel: 1,
+  attendu: 2,
+  a_venir: 3,
+  recu: 4,
 };
 
 /** Un bien introuvable (données incohérentes) se range en tête plutôt que de faire échouer le tri. */
@@ -39,11 +42,17 @@ function nomDuBien(ligne: LigneLoyer): string {
   return ligne.bien?.nom ?? '';
 }
 
+/** Le bien loué en entier (sans libellé) avant ses chambres ; « Chambre 2 » avant « Chambre 10 ». */
+function libelleDe(ligne: LigneLoyer): string {
+  return ligne.location.libelle ?? '';
+}
+
 function comparerLignes(a: LigneLoyer, b: LigneLoyer): number {
   return (
     ORDRE[a.statut] - ORDRE[b.statut] ||
     a.du.echeance.localeCompare(b.du.echeance) ||
-    nomDuBien(a).localeCompare(nomDuBien(b), 'fr')
+    nomDuBien(a).localeCompare(nomDuBien(b), 'fr') ||
+    libelleDe(a).localeCompare(libelleDe(b), 'fr', { numeric: true })
   );
 }
 
@@ -58,6 +67,9 @@ export function resumeDuMois(donnees: Donnees, periode: string, aujourdhui: stri
       location,
       bien: donnees.biens.find((b) => b.id === location.bienId),
       locataire: donnees.locataires.find((l) => l.id === location.locataireId),
+      colocataires: location.colocataireIds.flatMap((id) =>
+        donnees.locataires.filter((l) => l.id === id),
+      ),
       ...suivreLoyer(du, donnees.paiements, aujourdhui),
     });
   }

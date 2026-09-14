@@ -3,6 +3,8 @@ import type { CreationLocation, NouveauLocataire, NouvelleLocation } from './sch
 export interface Occupation {
   readonly locataire: NouveauLocataire;
   readonly location: NouvelleLocation;
+  /** Les autres locataires du bail, dans l'ordre ; vide hors colocation. */
+  readonly colocataires: readonly NouveauLocataire[];
 }
 
 /**
@@ -11,5 +13,6 @@ export interface Occupation {
  */
 export function occupationDe(creation: CreationLocation): Occupation | null {
   const { locataire, location } = creation;
-  return locataire === null || location === null ? null : { locataire, location };
+  if (locataire === null || location === null) return null;
+  return { locataire, location, colocataires: creation.colocataires ?? [] };
 }

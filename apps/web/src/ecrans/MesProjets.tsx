@@ -73,7 +73,7 @@ function CarteProjet({
       <div className="col-span-2 flex min-w-0 flex-col gap-1 sm:col-span-4 xl:col-span-1">
         <Link
           to={`/projets/${p.id}`}
-          className="font-display text-lg font-bold text-encre no-underline hover:text-accent pointer-coarse:flex pointer-coarse:min-h-11 pointer-coarse:items-center"
+          className="font-display text-lg font-bold text-encre no-underline survol-texte pointer-coarse:flex pointer-coarse:min-h-11 pointer-coarse:items-center"
         >
           {p.nom}
         </Link>
@@ -119,7 +119,7 @@ function CarteProjet({
         type="button"
         onClick={onSupprimer}
         aria-label={`Supprimer ${p.nom}`}
-        className="flex h-11 w-11 items-center justify-center justify-self-end rounded-full text-encre-3 hover:bg-probleme-fond hover:text-probleme"
+        className="flex h-11 w-11 items-center justify-center justify-self-end rounded-full text-encre-3 survol-danger"
       >
         <Trash2 size={18} aria-hidden="true" />
       </button>
@@ -157,7 +157,7 @@ export function MesProjets(): JSX.Element {
                 className={`min-h-[44px] rounded-full px-3.5 text-sm font-semibold ${
                   filtre === f.code
                     ? 'bg-accent-doux text-accent'
-                    : 'border border-bordure text-encre-2'
+                    : 'border border-bordure text-encre-2 survol-fond'
                 }`}
               >
                 {f.libelle}

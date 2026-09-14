@@ -12,6 +12,8 @@ import {
 
 export const HORODATAGE = '2026-09-01T08:00:00.000Z';
 
+export const BAILLEUR = { nom: 'Pierre Georgel', adresse: '3 rue Paradis, 13006 Marseille' };
+
 export const BIEN_LICES: BienGere = {
   id: 'bien-lices',
   nom: 'T2 Lices',
@@ -50,6 +52,7 @@ export const LOCATION_JULIE: LocationGeree = {
   id: 'location-julie',
   bienId: 'bien-lices',
   locataireId: 'locataire-julie',
+  colocataireIds: [],
   type: 'meublee',
   debut: '2025-10-01',
   jourLoyer: 5,
@@ -87,6 +90,8 @@ export const ETAT_SEPTEMBRE: EtatGestion = {
   locataires: [JULIE, ANTOINE],
   locations: [LOCATION_JULIE, LOCATION_ANTOINE],
   paiements: [PAIEMENT_JULIE],
+  bailleur: null,
+  documents: [],
   preferences: PREFERENCES_PAR_DEFAUT,
 };
 

@@ -19,12 +19,14 @@ export interface LoyerDu {
   readonly joursDuMois: number;
 }
 
-export type StatutLoyer = 'a_venir' | 'attendu' | 'en_retard' | 'recu';
+export type StatutLoyer = 'a_venir' | 'attendu' | 'en_retard' | 'partiel' | 'recu';
 
 export interface SuiviLoyer {
   readonly statut: StatutLoyer;
   /** Somme des paiements de la période pour cette location. */
   readonly recu: number;
+  /** Ce qui manque pour couvrir le loyer dû ; 0 dès qu'il est couvert. */
+  readonly resteDu: number;
   readonly paiements: readonly Paiement[];
 }
 
@@ -69,9 +71,18 @@ export function loyerDuMois(location: Occupation, periode: string): LoyerDu | nu
   };
 }
 
+function statutDuLoyer(du: LoyerDu, recu: number, aujourdhui: string): StatutLoyer {
+  if (recu >= du.total) return 'recu';
+  // Un reçu est dû au locataire dès le premier centime (loi n° 89-462, art. 21) : on le montre.
+  if (recu > 0) return 'partiel';
+  if (aujourdhui < du.debut) return 'a_venir';
+  return aujourdhui >= ajouterJours(du.echeance, DELAI_RETARD_JOURS) ? 'en_retard' : 'attendu';
+}
+
 /**
- * Où en est un loyer dû à une date : reçu dès que les paiements de la période le couvrent ;
- * sinon à venir avant le premier jour occupé, attendu jusqu'à la date due + 4 jours, en retard ensuite.
+ * Où en est un loyer dû à une date : reçu dès que les paiements de la période le couvrent, partiel
+ * s'ils en couvrent une part ; sinon à venir avant le premier jour occupé, attendu jusqu'à la date
+ * due + 4 jours, en retard ensuite.
  */
 export function suivreLoyer(
   du: LoyerDu,
@@ -80,13 +91,20 @@ export function suivreLoyer(
 ): SuiviLoyer {
   const siens = paiements.filter((p) => p.locationId === du.locationId && p.periode === du.periode);
   const recu = siens.reduce((somme, p) => somme + p.montant, 0);
-  const statut: StatutLoyer =
-    recu >= du.total
-      ? 'recu'
-      : aujourdhui < du.debut
-        ? 'a_venir'
-        : aujourdhui >= ajouterJours(du.echeance, DELAI_RETARD_JOURS)
-          ? 'en_retard'
-          : 'attendu';
-  return { statut, recu, paiements: siens };
+  return {
+    statut: statutDuLoyer(du, recu, aujourdhui),
+    recu,
+    resteDu: Math.max(0, du.total - recu),
+    paiements: siens,
+  };
+}
+
+/** Un paiement de ce montant tient-il dans ce qui reste dû ? (au moins un centime, jamais au-delà) */
+export function montantAcceptable(
+  du: LoyerDu,
+  paiements: readonly Paiement[],
+  montant: number,
+): boolean {
+  const { resteDu } = suivreLoyer(du, paiements, du.debut);
+  return Number.isInteger(montant) && montant >= 1 && montant <= resteDu;
 }

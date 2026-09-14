@@ -56,7 +56,7 @@ export function SimulateurImprimer(): JSX.Element {
       <div className="no-print z-10 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-bordure bg-surface px-4 py-3 sm:sticky sm:top-0 sm:flex-nowrap sm:px-6">
         <Link
           to={retour}
-          className="inline-flex min-h-11 items-center text-sm font-semibold no-underline"
+          className="inline-flex min-h-11 items-center text-sm font-semibold no-underline survol-texte"
         >
           ← {B.retour}
         </Link>

@@ -10,7 +10,7 @@ const ACTIF: Readonly<Record<EtatReponse, string>> = {
   sans_objet: 'border-encre-4 bg-surface text-encre-2',
 };
 
-const INACTIF = 'border-bordure bg-surface text-encre-3 hover:bg-accent-fond';
+const INACTIF = 'border-bordure bg-surface text-encre-3 survol-fond';
 
 /** Les quatre réponses possibles, en boutons radio (un seul choix, flèches du clavier, 44 px au doigt). */
 export function ChoixEtat({
