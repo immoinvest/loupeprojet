@@ -1,6 +1,12 @@
 # 09 — Estimation : carte des ventes, chiffres visibles même sans adresse, indice de confiance en tête
 
-Statut : `idée` · Notée le 14/09/2026 · Dépend de : rien
+Statut : `en cours` · Notée le 14/09/2026 · Dépend de : rien
+
+## Suivi
+
+- **PR 1 livrée le 14/09/2026** (branche `feat/estimation-confiance`) : note de confiance sur 100 expliquée en tête de l'onglet, repère visible sans adresse, Rapport et Méthode. Documents : `.product/features/estimation-confiance-discovery.md`, `.product/specs/estimation-confiance-specs.md` (US-1 à US-6), `.product/architecture/estimation-confiance.md`, état `.product/pipeline/estimation-confiance.json`.
+- **PR 2 à faire** : la carte géographique des ventes (US-7 et US-8 des specs). Les CSV DVF portent déjà la latitude et la longitude de chaque vente (question 4 : réglée, aucune republication). Reste à trancher par Pierre : le fond de carte (question 3, IGN recommandé).
+- Décisions prises : note 0-100 en mots avec quatre composantes chiffrées (question 1), pondération localisation 35 · dispersion 30 · comparables 20 · ancienneté 15 (question 2), pas de geste « Analyser à la commune » (question 5 : le repère de commune posé à la création est montré), liens vers d'autres estimateurs hors périmètre (question 6, à trancher).
 
 ## La demande de Pierre
 

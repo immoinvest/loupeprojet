@@ -101,10 +101,36 @@ describe('executerDvf', () => {
       source: { licence: 'Licence Ouverte 2.0' },
     });
     expect(index.communes).toEqual({
-      '2A004': { appartement: { ventes: 5, medianeM2: 3444, q1M2: 3000, q3M2: 3871 } },
-      '2A062': { maison: { ventes: 2, medianeM2: 2570, q1M2: 2535, q3M2: 2606 } },
-      '2A065': { appartement: { ventes: 1, medianeM2: 3804, q1M2: 3804, q3M2: 3804 } },
-      '2A247': { appartement: { ventes: 1, medianeM2: 5217, q1M2: 5217, q3M2: 5217 } },
+      '2A004': {
+        appartement: {
+          ventes: 5,
+          medianeM2: 3444,
+          q1M2: 3000,
+          q3M2: 3871,
+          dateMediane: '2025-01-13',
+        },
+      },
+      '2A062': {
+        maison: { ventes: 2, medianeM2: 2570, q1M2: 2535, q3M2: 2606, dateMediane: '2024-07-10' },
+      },
+      '2A065': {
+        appartement: {
+          ventes: 1,
+          medianeM2: 3804,
+          q1M2: 3804,
+          q3M2: 3804,
+          dateMediane: '2025-01-22',
+        },
+      },
+      '2A247': {
+        appartement: {
+          ventes: 1,
+          medianeM2: 5217,
+          q1M2: 5217,
+          q3M2: 5217,
+          dateMediane: '2025-01-20',
+        },
+      },
     });
 
     // Trop peu de ventes par semestre dans les fixtures : la tendance est publiée, vide.

@@ -1,3 +1,4 @@
+import { LogOut } from 'lucide-react';
 import { useEffect, useRef, useState, type JSX } from 'react';
 import { Navigate } from 'react-router';
 
@@ -81,17 +82,27 @@ export function Compte(): JSX.Element {
 
   return (
     <Page espacement="large" className="max-w-[760px]">
-      <div className="flex items-center gap-4">
+      {/* En haut à droite, comme sur la plupart des pages de compte : on sort sans chercher. */}
+      <div className="flex flex-wrap items-center gap-4">
         <div
           aria-hidden="true"
           className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-accent-doux font-display text-xl font-bold text-accent"
         >
           {initiales(utilisateur)}
         </div>
-        <div className="flex min-w-0 flex-col gap-1">
+        <div className="flex min-w-0 flex-1 flex-col gap-1">
           <TitrePage>{T.titre}</TitrePage>
           <span className="truncate text-[15px] text-encre-3">{nomAffiche(utilisateur)}</span>
         </div>
+        <Bouton
+          disabled={occupe}
+          onClick={() => {
+            void sortir('/projets');
+          }}
+        >
+          <LogOut size={18} aria-hidden="true" />
+          {T.deconnecter}
+        </Bouton>
       </div>
 
       {message !== null && (
@@ -154,16 +165,6 @@ export function Compte(): JSX.Element {
               {NOMS_FOURNISSEURS[m]}
             </Pastille>
           ))}
-        </div>
-        <div>
-          <Bouton
-            disabled={occupe}
-            onClick={() => {
-              void sortir('/projets');
-            }}
-          >
-            {T.deconnecter}
-          </Bouton>
         </div>
       </Carte>
 

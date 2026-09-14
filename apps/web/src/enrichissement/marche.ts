@@ -20,20 +20,30 @@ export interface MarcheEnrichi {
   readonly codeInsee: string;
 }
 
-const CHAMPS_DVF = ['medianM2', 'q1M2', 'q3M2', 'nombreVentes'] as const;
+const CHAMPS_DVF = ['medianM2', 'q1M2', 'q3M2', 'nombreVentes', 'ancienneteMedianeMois'] as const;
 
-/** Réponse /marche → bloc `marche` du moteur, avec la provenance de chaque valeur. */
+/**
+ * Réponse /marche → bloc `marche` du moteur, avec la provenance de chaque valeur. Le repère est celui de la
+ * commune ou de l'arrondissement (précision « commune ») ; période et ancienneté quand le Worker les donne.
+ */
 export function marcheDepuisReponse(r: ReponseMarche): MarcheEnrichi {
   const marche: { dvf?: MarcheEntree['dvf']; loyerReferenceM2?: number } = {};
   const provenance: Record<string, string> = {};
   if (r.dvf !== null) {
+    const anciennete = r.dvf.ancienneteMedianeMois ?? null;
     marche.dvf = {
       medianM2: r.dvf.medianeM2,
       q1M2: r.dvf.q1M2,
       q3M2: r.dvf.q3M2,
       nombreVentes: r.dvf.ventes,
+      precision: 'commune',
+      ...(r.commune === null ? {} : { lieu: r.commune }),
+      ...(r.dvf.fenetre === undefined ? {} : { periode: r.dvf.fenetre }),
+      ...(anciennete === null ? {} : { ancienneteMedianeMois: anciennete }),
     };
-    for (const champ of CHAMPS_DVF) provenance[`marche.dvf.${champ}`] = 'dvf';
+    for (const champ of CHAMPS_DVF) {
+      if (champ in marche.dvf) provenance[`marche.dvf.${champ}`] = 'dvf';
+    }
   }
   if (r.loyer !== null) {
     marche.loyerReferenceM2 = Math.round(r.loyer.loyerM2 * (1 - PART_CHARGES_LOYER) * 100) / 100;
