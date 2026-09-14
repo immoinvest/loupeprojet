@@ -34,6 +34,7 @@ L'utilisateur principal du repo pratique le **vibe coding** et ne relit pas le c
 | `.product/architecture-overview.md`       | Vue d'ensemble des modules                                                                 |
 | `.product/adr/`                           | Décisions d'architecture (stack, capture navigateur, LLM)                                  |
 | `.product/design/maquette-v1.md`          | Les 5 écrans de la maquette et leurs composants. Direction visuelle à redéfinir avant l'UI |
+| `.product/design/design-guidelines.md`    | Design guidelines : curseur et survol des éléments cliquables (recettes `survol-*`)        |
 | `marque/README.md`                        | Identité de marque Deklic : fichiers, couleurs, typographies, règles d'usage (ADR-005)     |
 | `.product/features-registry.md`           | Fonctionnalités livrées / en cours                                                         |
 | `.product/pipeline-state.json`            | État du pipeline de la feature en cours                                                    |
@@ -44,6 +45,7 @@ L'utilisateur principal du repo pratique le **vibe coding** et ne relit pas le c
 - L'ancien simulateur de comparaison de prêts (webpack, `src/`) a été **supprimé** le 13/09/2026 ; sa logique d'amortissement avec différés vit dans `packages/moteur/src/financement/amortissement.ts`, testée.
 - **Livré** : `packages/moteur` complet (feature `moteur-calcul`, 204 tests, couverture 100 %). API : `calculerProjet(projet) → Resultats`, `ProjetSchema`, `ResultatsSchema`, `projetExemple`, `obtenirRegles`.
 - **Direction visuelle** : C « Le guide » retenue (ADR-004) ; tokens dans `apps/web/src/index.css`.
+- **Survol** : tout élément cliquable prend une recette `survol-*` de `index.css` (plein, danger-plein, fond, fond-fort, danger, texte, discret) ; curseur main et transition viennent de la couche de base. Jamais de `hover:bg-…` inventé écran par écran. Guide : `.product/design/design-guidelines.md` ; test : `apps/web/e2e/survol.spec.ts`.
 - **Identité de marque** : **Deklic** (ADR-005, 13/09/2026). Source de vérité dans `marque/` (logos SVG, favicon, icônes, image de partage, palette, guide) ; l'app reprend favicon, manifeste, tokens `--color-accent*` / `--color-flash*`, composant `LogotypeDeklic` (`apps/web/src/marque/Logo.tsx`). Noms internes inchangés (`@loupe/moteur`, dépôt, clé de stockage).
 - **Livré** : `apps/web` socle (React 19 + Vite + Tailwind v4, React Router déclaratif, coque SaaS, écrans Mes projets et Rapport, stockage local Zod, config Cloudflare Pages). Textes des codes du moteur dans `apps/web/src/textes/`.
 - **Livré** : écran Nouveau projet (`apps/web/src/annonces/` : `resoudreAnnonce`, `extraireChamps` par règles, `construireProjet` avec défauts sourcés ; formulaire Vérifier). Le schéma `Projet` du moteur porte une `source` optionnelle (portail, id, URL).
