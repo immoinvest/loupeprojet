@@ -5,13 +5,14 @@
   "type": "module",
   "scripts": {
     "dev": "npm run build:favori && vite",
-    "build": "npm run build:favori && vite build",
+    "build": "npm run build:favori && vite build && npm run build:hors-ligne",
     "build:favori": "vite build -c vite.bookmarklet.config.ts",
+    "build:hors-ligne": "vite build -c vite.hors-ligne.config.ts",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
-    "test:e2e": "vite build && playwright test"
+    "test:e2e": "npm run build && playwright test"
   },
   "dependencies": {
     "@loupe/capture": "*",

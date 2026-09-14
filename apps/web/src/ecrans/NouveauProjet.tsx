@@ -2,7 +2,7 @@ import { useEffect, useState, type JSX } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router';
 
 import {
-  PORTAILS,
+  annoncePartagee,
   construireProjet,
   lireFragmentCapture,
   nomDuProjet,
@@ -11,6 +11,7 @@ import {
   type CaptureImportee,
   type SaisieProjet,
 } from '@/annonces';
+import { Chapo, Page, TitrePage } from '@/composants/mise-en-page';
 import { Bouton, Carte, Pastille } from '@/composants/ui';
 import { useClientWorker } from '@/coque/ClientWorker';
 import { completerAvecIa, enrichirSaisie, lireAnnonce, type ModeLecture } from '@/enrichissement';
@@ -18,6 +19,7 @@ import { useProjets } from '@/stockage/ProjetsContext';
 
 import { FormulaireProjet, valeursDepuisChamps } from './FormulaireProjet';
 import { EtatLectureAuto, useLectureAutomatique } from './nouveau-projet/LectureAuto';
+import { PastillesLien } from './nouveau-projet/PastillesLien';
 
 type Etape = 'lien' | 'texte' | 'verifier';
 
@@ -30,14 +32,16 @@ function pluriel(n: number, mot: string): string {
 export function NouveauProjet(): JSX.Element {
   const { creer } = useProjets();
   const naviguer = useNavigate();
-  const { hash } = useLocation();
+  const { hash, search } = useLocation();
   // Le fragment est lu une seule fois, au premier rendu, puis effacé de l'adresse (effet ci-dessous).
   const [fragment] = useState(() => lireFragmentCapture(hash));
+  // Annonce partagée depuis l'app d'un portail : lue au premier rendu, ignorée si une capture arrive.
+  const [partage] = useState(() => annoncePartagee(fragment.statut !== 'absente', search));
   const capture: CaptureImportee | null = fragment.statut === 'lue' ? fragment.capture : null;
   const [importee, setImportee] = useState<CaptureImportee | null>(capture);
-  const [url, setUrl] = useState(capture?.annonce.urlCanonique ?? '');
-  const [texte, setTexte] = useState('');
-  const [etape, setEtape] = useState<Etape>(capture === null ? 'lien' : 'verifier');
+  const [url, setUrl] = useState(capture?.annonce.urlCanonique ?? partage.lien ?? '');
+  const [texte, setTexte] = useState(partage.texte);
+  const [etape, setEtape] = useState<Etape>(capture === null ? partage.etape : 'verifier');
   const [manuel, setManuel] = useState(false);
   const [initial, setInitial] = useState(() => valeursDepuisChamps(capture?.champs ?? {}));
   const [nbChamps, setNbChamps] = useState(
@@ -67,9 +71,10 @@ export function NouveauProjet(): JSX.Element {
     appliquerCapture,
   );
 
+  // Capture ou partage lus : l'adresse redevient /projets/nouveau, rien n'en reste.
   useEffect(() => {
-    if (fragment.statut !== 'absente') void naviguer(CHEMIN, { replace: true });
-  }, [fragment.statut, naviguer]);
+    if (fragment.statut !== 'absente' || partage.recue) void naviguer(CHEMIN, { replace: true });
+  }, [fragment.statut, partage.recue, naviguer]);
 
   useEffect(() => {
     // Capture reçue par l'adresse (clic sur l'extension, favori) : l'IA complète les trous du texte.
@@ -114,15 +119,15 @@ export function NouveauProjet(): JSX.Element {
   const lectureEnCours = auto.lecture?.statut === 'en-cours';
 
   return (
-    <div className="flex flex-col gap-6 px-10 pt-8 pb-10">
+    <Page espacement="large">
       <div className="flex flex-col gap-2">
-        <h1 className="m-0 max-w-[22ch] font-display text-[40px] leading-[1.1] font-bold tracking-tight text-balance">
+        <TitrePage taille="accroche" className="max-w-[22ch]">
           Colle le lien de l'annonce, on s'occupe du reste.
-        </h1>
-        <p className="m-0 max-w-[64ch] text-[17px] text-encre-2">
+        </TitrePage>
+        <Chapo>
           Prix, surface, étage, DPE, charges : tout ce que l'annonce dit est lu pour vous. Vous
           vérifiez cinq chiffres, et le rapport est prêt.
-        </p>
+        </Chapo>
       </div>
 
       {!manuel && (
@@ -145,37 +150,13 @@ export function NouveauProjet(): JSX.Element {
               className="min-h-[52px] rounded-encart border border-bordure bg-surface px-4 text-[16px]"
             />
           </label>
-          <div className="flex flex-wrap items-center gap-2">
-            {annonce !== null ? (
-              <>
-                <Pastille ton="bon" compacte>
-                  {PORTAILS[annonce.portail]} reconnu
-                </Pastille>
-                <Pastille ton="neutre" compacte>
-                  annonce {annonce.id}
-                </Pastille>
-                {importee !== null && (
-                  <Pastille ton="accent" compacte>
-                    {importee.mode === 'bookmarklet'
-                      ? 'lue par le bouton-favori'
-                      : "lue par l'extension"}
-                  </Pastille>
-                )}
-              </>
-            ) : url.trim() !== '' ? (
-              <Pastille ton="surveiller" compacte>
-                Site non reconnu : collez le texte ci-dessous, ça marche aussi
-              </Pastille>
-            ) : fragment.statut === 'illisible' ? (
-              <Pastille ton="surveiller" compacte>
-                La capture reçue est illisible : collez le lien, puis le texte de l'annonce
-              </Pastille>
-            ) : (
-              <span className="text-sm text-encre-3">
-                LeBonCoin, SeLoger, Bien'ici, PAP, Logic-Immo.
-              </span>
-            )}
-          </div>
+          <PastillesLien
+            annonce={annonce}
+            url={url}
+            importee={importee}
+            captureIllisible={fragment.statut === 'illisible'}
+            partagee={url === partage.lien}
+          />
           {importee === null && (
             <EtatLectureAuto
               extension={auto.extension}
@@ -219,9 +200,9 @@ export function NouveauProjet(): JSX.Element {
               }}
               rows={7}
               placeholder="Appartement T3 de 65 m² au 3e étage… Prix 155 000 €… DPE D…"
-              className="rounded-encart border border-bordure bg-surface p-3 text-[15px]"
+              className="rounded-encart border border-bordure bg-surface p-3 text-[15px] pointer-coarse:text-base"
             />
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3">
               <Bouton
                 variante="primaire"
                 onClick={() => {
@@ -243,9 +224,13 @@ export function NouveauProjet(): JSX.Element {
         )}
 
       {etape !== 'verifier' && !manuel && !lectureEnCours && (
-        <div className="flex items-center gap-3 text-sm text-encre-3">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-encre-3">
           <span>Pas de lien ?</span>
-          <button type="button" onClick={passerEnManuel} className="font-bold text-accent">
+          <button
+            type="button"
+            onClick={passerEnManuel}
+            className="font-bold text-accent pointer-coarse:min-h-11"
+          >
             Je n'ai pas de lien, je saisis à la main
           </button>
         </div>
@@ -253,8 +238,8 @@ export function NouveauProjet(): JSX.Element {
 
       {etape === 'verifier' && (
         <div className="flex flex-col gap-3">
-          <div className="flex items-baseline gap-3">
-            <h2 className="m-0 font-display text-[28px] font-bold tracking-tight">
+          <div className="flex flex-wrap items-baseline gap-x-3 gap-y-2">
+            <h2 className="m-0 font-display text-2xl font-bold tracking-tight sm:text-[28px]">
               Vérifiez, corrigez, et c'est parti.
             </h2>
             <span className="text-sm text-encre-3">
@@ -283,6 +268,6 @@ export function NouveauProjet(): JSX.Element {
           )}
         </div>
       )}
-    </div>
+    </Page>
   );
 }

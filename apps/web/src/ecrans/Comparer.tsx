@@ -15,6 +15,7 @@ import {
   type Indicateur,
   type Tri,
 } from '@/analyses';
+import { Chapo, Page, TitrePage } from '@/composants/mise-en-page';
 import { Bouton, Carte, Point } from '@/composants/ui';
 import { euros } from '@/formatage/nombres';
 import { useProjets } from '@/stockage/ProjetsContext';
@@ -110,14 +111,17 @@ function Tableau({
       <table className="w-full border-collapse text-[15px]">
         <thead>
           <tr className="border-b border-bordure">
-            <th scope="col" className="px-3 py-3 text-left text-xs font-semibold text-encre-3">
+            <th
+              scope="col"
+              className="sticky left-0 z-[1] min-w-[8rem] bg-surface px-3 py-3 text-left text-xs font-semibold text-encre-3"
+            >
               Cliquez une ligne pour trier
             </th>
             {colonnes.map((c) => (
               <th key={c.id} scope="col" className="px-3 py-3 text-left align-top">
                 <Link
                   to={`/projets/${c.id}`}
-                  className="font-display text-[17px] font-bold text-encre no-underline hover:text-accent"
+                  className="font-display text-[17px] font-bold text-encre no-underline hover:text-accent pointer-coarse:inline-flex pointer-coarse:min-h-11 pointer-coarse:items-center"
                 >
                   {c.nom}
                 </Link>
@@ -143,14 +147,14 @@ function Tableau({
                 <th
                   scope="row"
                   aria-sort={sens}
-                  className="px-3 py-2.5 text-left align-top font-semibold"
+                  className="sticky left-0 z-[1] min-w-[8rem] bg-surface px-3 py-2.5 text-left align-top font-semibold"
                 >
                   <button
                     type="button"
                     onClick={() => {
                       onTrier(i.code);
                     }}
-                    className={`text-left hover:text-accent ${sens === 'none' ? '' : 'text-accent'}`}
+                    className={`text-left hover:text-accent pointer-coarse:min-h-11 pointer-coarse:w-full ${sens === 'none' ? '' : 'text-accent'}`}
                   >
                     {i.libelle}
                     {sens === 'none' ? '' : sens === 'descending' ? ' ↓' : ' ↑'}
@@ -196,19 +200,17 @@ export function Comparer(): JSX.Element {
   };
 
   return (
-    <div className="flex flex-col gap-5 px-10 pt-8 pb-10">
+    <Page>
       <div className="flex flex-col gap-2">
-        <h1 className="m-0 font-display text-[34px] leading-tight font-bold tracking-tight">
-          Comparer
-        </h1>
-        <p className="m-0 max-w-[64ch] text-[17px] text-encre-2">
+        <TitrePage>Comparer</TitrePage>
+        <Chapo>
           Deux à cinq projets côte à côte, avec leurs feux. La meilleure valeur de chaque ligne est
           en vert.
-        </p>
+        </Chapo>
       </div>
 
       {projets.length < MIN_COMPARES ? (
-        <Carte className="flex-row items-center gap-5">
+        <Carte className="sm:flex-row sm:items-center sm:gap-5">
           <span className="flex-1 text-[15px] text-encre-2">
             Il vous faut au moins deux projets pour comparer.
           </span>
@@ -233,6 +235,6 @@ export function Comparer(): JSX.Element {
           )}
         </>
       )}
-    </div>
+    </Page>
   );
 }

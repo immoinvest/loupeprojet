@@ -1,6 +1,7 @@
 import type { ProjetEntree } from '@loupe/moteur';
 import { useState, type JSX } from 'react';
 
+import { Page, TitrePage } from '@/composants/mise-en-page';
 import { Carte, Pastille } from '@/composants/ui';
 import { useProjetCourant } from '@/coque/ProjetLayout';
 import { eurosParMois, pourcentage } from '@/formatage/nombres';
@@ -46,14 +47,16 @@ function Synthese(): JSX.Element {
     },
   ];
   return (
-    <div className="sticky top-0 z-10 -mx-10 flex items-center gap-8 border-b border-bordure bg-fond/95 px-10 py-3 backdrop-blur">
+    <div className="sticky top-[var(--hauteur-barre-app)] z-10 -mx-4 grid grid-cols-2 gap-x-6 gap-y-2 border-b border-bordure bg-fond/95 px-4 py-3 backdrop-blur sm:-mx-6 sm:flex sm:items-center sm:gap-8 sm:px-6 lg:-mx-10 lg:px-10">
       {kpis.map((k) => (
         <div key={k.l} className="flex flex-col">
           <span className="text-xs text-encre-3">{k.l}</span>
-          <span className={`font-display text-xl font-bold ${k.ton}`}>{k.v}</span>
+          <span className={`font-display text-lg font-bold sm:text-xl ${k.ton}`}>{k.v}</span>
         </div>
       ))}
-      <span className="ml-auto text-sm text-encre-3">Recalculé à chaque modification.</span>
+      <span className="ml-auto hidden text-sm text-encre-3 sm:inline">
+        Recalculé à chaque modification.
+      </span>
     </div>
   );
 }
@@ -83,11 +86,11 @@ export function Hypotheses(): JSX.Element {
   };
 
   return (
-    <div className="flex flex-col gap-5 px-10 pt-4 pb-10">
+    <Page haut="serre">
       <Synthese />
-      <div className="flex items-baseline gap-3">
-        <h1 className="m-0 font-display text-[28px] font-bold tracking-tight">Vos hypothèses</h1>
-        <span className="flex items-center gap-2 text-sm text-encre-3">
+      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-2">
+        <TitrePage taille="section">Vos hypothèses</TitrePage>
+        <span className="flex flex-wrap items-center gap-2 text-sm text-encre-3">
           <Pastille ton="neutre" compacte>
             annonce
           </Pastille>
@@ -106,7 +109,7 @@ export function Hypotheses(): JSX.Element {
           <Carte key={g.titre}>
             <h2 className="m-0 font-display text-[22px] font-semibold">{g.titre}</h2>
             {g.sousTitre !== undefined && <p className="m-0 text-sm text-encre-2">{g.sousTitre}</p>}
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
               {visibles.map((d) => (
                 <ChampHypothese
                   key={d.chemin}
@@ -123,6 +126,6 @@ export function Hypotheses(): JSX.Element {
           </Carte>
         );
       })}
-    </div>
+    </Page>
   );
 }

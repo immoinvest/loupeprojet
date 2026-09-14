@@ -1,6 +1,12 @@
 import { expect, test } from '@playwright/test';
 
-import { NOM_EXEMPLE, NOM_LYON, creerProjetManuel, ouvrirMesProjets } from './aides';
+import {
+  NOM_EXEMPLE,
+  NOM_LYON,
+  creerProjetManuel,
+  ouvrirMesProjets,
+  ouvrirNavigation,
+} from './aides';
 
 test('au premier lancement, la racine mène à « Mes projets » avec le projet d’exemple', async ({
   page,
@@ -16,8 +22,9 @@ test('au premier lancement, la racine mène à « Mes projets » avec le projet 
   await expect(liste.getByText('−210 €/mois')).toBeVisible();
   await expect(liste.getByText('−25 %')).toBeVisible();
 
-  // La barre latérale liste aussi le projet et compte « 1 projet ».
-  const barre = page.getByRole('navigation', { name: 'Mes projets' });
+  // La navigation (barre latérale, ou tiroir sur téléphone et tablette) liste aussi le projet
+  // et compte « 1 projet ».
+  const barre = await ouvrirNavigation(page);
   await expect(barre.getByRole('link', { name: NOM_EXEMPLE })).toBeVisible();
   await expect(page.getByText('Gratuit · 1 projet')).toBeVisible();
 

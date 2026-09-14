@@ -74,7 +74,7 @@ export function Carte({
   return (
     <section
       id={id}
-      className={`flex flex-col gap-3 rounded-carte border ${bordure} ${fond} p-6 shadow-carte ${className}`}
+      className={`flex flex-col gap-3 rounded-carte border ${bordure} ${fond} p-4 shadow-carte sm:p-6 print:p-6 ${className}`}
     >
       {children}
     </section>
@@ -91,7 +91,13 @@ export function TitreCarte({
   // En mode document, l'action (souvent une explication dépliée) passe sous le titre.
   const document = useModeDocument();
   return (
-    <div className={document ? 'flex flex-col gap-2' : 'flex items-baseline justify-between gap-4'}>
+    <div
+      className={
+        document
+          ? 'flex flex-col gap-2'
+          : 'flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1'
+      }
+    >
       <h2 className="m-0 font-display text-[22px] font-semibold">{children}</h2>
       {action}
     </div>
@@ -114,7 +120,9 @@ export function GrosChiffre({
     surveiller: 'text-surveiller',
   }[ton];
   return (
-    <div className={`font-display text-[40px] leading-none font-bold ${couleur}`}>
+    <div
+      className={`font-display text-[32px] leading-none font-bold sm:text-[40px] print:text-[40px] ${couleur}`}
+    >
       {children}
       {complement !== undefined && (
         <span className="ml-2 text-lg font-semibold text-encre-3">{complement}</span>
@@ -140,8 +148,9 @@ export function Ligne({
         fort ? 'pt-3 text-[17px] font-bold' : ''
       }`}
     >
-      <span>{libelle}</span>
-      <span className={tonValeur}>{valeur}</span>
+      <span className="min-w-0">{libelle}</span>
+      {/* Un montant ne se coupe jamais : c'est le libellé qui passe à la ligne. */}
+      <span className={`shrink-0 text-right whitespace-nowrap ${tonValeur}`}>{valeur}</span>
     </div>
   );
 }
@@ -161,7 +170,9 @@ export function Pourquoi({
   }
   return (
     <details className="text-sm">
-      <summary className="cursor-pointer list-none font-bold text-accent">{libelle}</summary>
+      <summary className="cursor-pointer list-none font-bold text-accent pointer-coarse:min-w-11 pointer-coarse:py-3">
+        {libelle}
+      </summary>
       <p className={`mt-2 mb-0 ${CLASSE_EXPLICATION}`}>{texte}</p>
     </details>
   );

@@ -68,7 +68,10 @@ export function CarteEstimation(): JSX.Element {
           {LIBELLES_CONFIANCE[e.confiance]}
         </Pastille>
       </div>
-      <p className="m-0 font-display text-[40px] leading-none font-bold" aria-label="Prix estimé">
+      <p
+        className="m-0 font-display text-[32px] leading-none font-bold sm:text-[40px] print:text-[40px]"
+        aria-label="Prix estimé"
+      >
         {eurosArrondis(e.centre)}
       </p>
       <p className="m-0 text-[17px]">{phraseEstimation(e)}</p>
@@ -123,7 +126,7 @@ export function CarteEstimation(): JSX.Element {
                   <td className={CELLULE}>{pourcentageSigne(c.taux, 1)}</td>
                   <td className={CELLULE}>{euros(c.montant)}</td>
                   <td className={CELLULE}>
-                    <label className="inline-flex items-center gap-2 text-sm">
+                    <label className="inline-flex items-center gap-2 text-sm pointer-coarse:min-h-11">
                       <input
                         type="checkbox"
                         checked={!c.ignoree}

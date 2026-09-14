@@ -1,16 +1,17 @@
 import type { Resultats } from '@loupe/moteur';
 import type { JSX } from 'react';
 
-import { useModeDocument } from '@/composants/document';
+import { Chapo, Page, TitrePage } from '@/composants/mise-en-page';
 import { Carte, GrosChiffre, Ligne, Pastille, Pourquoi, TitreCarte } from '@/composants/ui';
-import { euros, eurosParMois, eurosSignes, nombre, pourcentage } from '@/formatage/nombres';
+import { euros, eurosSignes, nombre, pourcentage } from '@/formatage/nombres';
 import { useProjetCourant } from '@/coque/ProjetLayout';
 import { EXPLICATIONS } from '@/textes/explications';
 import { libelleFeu } from '@/textes/feux';
-import { REGIMES, SCENARIOS } from '@/textes/regimes';
+import { REGIMES } from '@/textes/regimes';
 import { reponseCourte, texteVerdict } from '@/textes/verdict';
 
 import { CartePrix } from './rapport/CartePrix';
+import { Leviers } from './rapport/Leviers';
 
 function CarteCashflow({ r }: { r: Resultats }): JSX.Element {
   const c = r.cashflow;
@@ -52,73 +53,6 @@ function CarteCashflow({ r }: { r: Resultats }): JSX.Element {
           À l'équilibre avec un loyer de <strong>{euros(c.pointMort)}</strong>.
         </p>
       )}
-    </Carte>
-  );
-}
-
-function Leviers({ r }: { r: Resultats }): JSX.Element | null {
-  // Sur papier (ou en noir et blanc), la carte pleine d'encre devient une carte claire.
-  const document = useModeDocument();
-  const s = r.scenarios;
-  if (s === null) return null;
-  const negocier = s.scenarios.find((x) => x.code === 'negocier');
-  const coloc = s.scenarios.find((x) => x.code === 'colocation');
-  const autres = s.scenarios.filter((x) => x.code !== 'negocier' && x.code !== 'colocation');
-  const separateur = document ? 'w-px bg-bordure' : 'w-px bg-white/25';
-  return (
-    <Carte
-      className={`flex-row items-stretch gap-5 ${
-        document ? 'border-accent-bordure bg-accent-fond' : 'border-accent bg-accent text-white'
-      }`}
-    >
-      {negocier !== undefined && (
-        <div className="flex flex-1 flex-col gap-1.5">
-          <span className="text-xs font-bold tracking-wide uppercase opacity-80">
-            Levier 1 · Négocier
-          </span>
-          <span className="font-display text-[32px] font-bold">
-            {euros(Number(negocier.parametres.prix ?? 0))}
-          </span>
-          <span className="text-sm leading-snug opacity-90">
-            Cash-flow {eurosParMois(negocier.indicateurs.cashflowMensuel)}
-            {negocier.indicateurs.tri !== null
-              ? `, rendement de votre argent ${pourcentage(negocier.indicateurs.tri)}`
-              : ''}
-            .
-          </span>
-        </div>
-      )}
-      <div className={separateur} />
-      {coloc !== undefined && (
-        <div className="flex flex-1 flex-col gap-1.5">
-          <span className="text-xs font-bold tracking-wide uppercase opacity-80">
-            Levier 2 · Colocation
-          </span>
-          <span className="font-display text-[32px] font-bold">
-            {eurosParMois(coloc.indicateurs.cashflowMensuel)}
-          </span>
-          <span className="text-sm leading-snug opacity-90">
-            {String(coloc.parametres.chambres ?? '')} chambres à{' '}
-            {euros(Number(coloc.parametres.loyerParChambre ?? 0))}
-            {coloc.indicateurs.tri !== null
-              ? `, rendement ${pourcentage(coloc.indicateurs.tri)}`
-              : ''}
-            . Plus de gestion.
-          </span>
-        </div>
-      )}
-      <div className={separateur} />
-      <div className="flex flex-1 flex-col gap-1.5">
-        <span className="text-xs font-bold tracking-wide uppercase opacity-80">Et si…</span>
-        <div className="flex flex-col gap-1 text-sm">
-          {autres.map((x) => (
-            <div key={x.code} className="flex justify-between gap-3">
-              <span className="opacity-85">{SCENARIOS[x.code]}</span>
-              <span>{eurosParMois(x.indicateurs.cashflowMensuel)}</span>
-            </div>
-          ))}
-        </div>
-      </div>
     </Carte>
   );
 }
@@ -196,14 +130,12 @@ export function Rapport(): JSX.Element {
   const { resultats: r } = useProjetCourant();
   const verdict = texteVerdict(r);
   return (
-    <div className="flex flex-col gap-5 px-10 pt-8 pb-10">
+    <Page>
       <div className="flex flex-col gap-3">
-        <h1 className="m-0 max-w-[24ch] font-display text-[40px] leading-[1.1] font-bold tracking-tight text-balance">
+        <TitrePage taille="accroche" className="max-w-[24ch]">
           {verdict.titre}
-        </h1>
-        <p className="m-0 max-w-[64ch] text-[17px] leading-relaxed text-encre-2">
-          {verdict.sousTitre}
-        </p>
+        </TitrePage>
+        <Chapo className="leading-relaxed">{verdict.sousTitre}</Chapo>
         <div className="flex flex-wrap gap-2.5 pt-1" aria-label="Cinq feux">
           {r.verdict.feux.map((f) => (
             <Pastille key={f.axe} ton={f.feu} feu={f.feu}>
@@ -212,18 +144,18 @@ export function Rapport(): JSX.Element {
           ))}
         </div>
       </div>
-      <div className="grid grid-cols-2 gap-5">
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-2 print:grid-cols-2">
         <CartePrix r={r} />
         <CarteCashflow r={r} />
       </div>
       <Leviers r={r} />
-      <div className="grid grid-cols-2 gap-5">
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-2 print:grid-cols-2">
         <CarteFiscalite r={r} />
         <CarteRevente r={r} />
       </div>
       <p className="m-0 text-xs text-encre-3">
         Règles fiscales {r.meta.versionRegles}. Outil d'aide à la décision, pas un conseil.
       </p>
-    </div>
+    </Page>
   );
 }

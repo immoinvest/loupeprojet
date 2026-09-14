@@ -17,7 +17,7 @@ export interface ChampProps {
 }
 
 const CLASSE_SAISIE =
-  'min-h-[44px] w-full rounded-encart border bg-surface px-3 text-[15px] font-semibold';
+  'min-h-[44px] w-full min-w-0 rounded-encart border bg-surface px-3 text-[15px] font-semibold pointer-coarse:text-base';
 
 /** Un champ du formulaire Vérifier : libellé, badge de provenance, saisie ou liste, erreur. */
 export function Champ({
@@ -63,7 +63,9 @@ export function Champ({
             inputMode="decimal"
             className={`${CLASSE_SAISIE} ${bordure}`}
           />
-          {unite !== undefined && <span className="text-xs text-encre-3">{unite}</span>}
+          {unite !== undefined && (
+            <span className="text-xs whitespace-nowrap text-encre-3">{unite}</span>
+          )}
         </span>
       ) : (
         <select

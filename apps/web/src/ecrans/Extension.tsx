@@ -2,10 +2,20 @@ import { useEffect, useRef, useState, type JSX } from 'react';
 import { Link } from 'react-router';
 
 import { NOM_FAVORI, codeFavori } from '@/bookmarklet/favori';
+import { Chapo, Page, TitrePage } from '@/composants/mise-en-page';
 import { Bouton, Carte, Pastille } from '@/composants/ui';
+
+import { CarteTelephone } from './extension/CarteTelephone';
 
 const README_EXTENSION =
   'https://github.com/immoinvest/loupeprojet/tree/master/apps/extension#charger-lextension-non-empaquetée';
+
+/**
+ * Sur écran tactile, la carte « Sur téléphone et tablette » passe en tête (ordre visuel) ; à la
+ * souris, elle suit les cartes de l'ordinateur, dans l'ordre du document.
+ */
+const APRES_AU_DOIGT = 'pointer-coarse:order-2';
+const D_ABORD_AU_DOIGT = 'pointer-coarse:order-1';
 
 type EtatCopie = 'initial' | 'copie' | 'echec';
 
@@ -35,20 +45,20 @@ export function Extension(): JSX.Element {
   };
 
   return (
-    <div className="flex flex-col gap-6 px-10 pt-8 pb-10">
+    <Page espacement="large">
       <div className="flex flex-col gap-2">
-        <h1 className="m-0 max-w-[22ch] font-display text-[40px] leading-[1.1] font-bold tracking-tight text-balance">
+        <TitrePage taille="accroche" className="max-w-[22ch]">
           Lisez une annonce en un clic.
-        </h1>
-        <p className="m-0 max-w-[64ch] text-[17px] text-encre-2">
+        </TitrePage>
+        <Chapo>
           Sur une annonce LeBonCoin, SeLoger, Bien'ici, PAP ou Logic-Immo, un clic lit la page dans
           votre navigateur et ouvre Deklic avec le formulaire pré-rempli. La page n'est jamais lue
           par nos serveurs.
-        </p>
+        </Chapo>
       </div>
 
-      <Carte>
-        <div className="flex items-baseline justify-between gap-4">
+      <Carte className={APRES_AU_DOIGT}>
+        <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
           <h2 className="m-0 font-display text-[22px] font-semibold">
             Le bouton-favori, sans rien installer
           </h2>
@@ -98,7 +108,7 @@ export function Extension(): JSX.Element {
             aria-label="Adresse du favori"
             value={href}
             rows={3}
-            className="w-full rounded-encart border border-bordure bg-surface p-3 font-mono text-xs"
+            className="w-full rounded-encart border border-bordure bg-surface p-3 font-mono text-xs pointer-coarse:text-base"
           />
         )}
         <p className="m-0 text-sm text-encre-3">
@@ -108,11 +118,11 @@ export function Extension(): JSX.Element {
         </p>
       </Carte>
 
-      <Carte>
-        <div className="flex items-baseline justify-between gap-4">
+      <Carte className={APRES_AU_DOIGT}>
+        <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
           <h2 className="m-0 font-display text-[22px] font-semibold">L'extension navigateur</h2>
           <Pastille ton="neutre" compacte>
-            Chrome · Edge · Firefox
+            ordinateur : Chrome · Edge · Firefox
           </Pastille>
         </div>
         <p className="m-0 text-[15px] text-encre-2">
@@ -126,7 +136,7 @@ export function Extension(): JSX.Element {
         </p>
       </Carte>
 
-      <Carte>
+      <Carte className={APRES_AU_DOIGT}>
         <h2 className="m-0 font-display text-[22px] font-semibold">Ce qui reste chez vous</h2>
         <ul className="m-0 flex list-disc flex-col gap-1 pl-5 text-[15px] text-encre-2">
           <li>La page de l'annonce est lue dans votre navigateur, jamais par nos serveurs.</li>
@@ -145,6 +155,8 @@ export function Extension(): JSX.Element {
           dans Nouveau projet.
         </p>
       </Carte>
-    </div>
+
+      <CarteTelephone className={D_ABORD_AU_DOIGT} />
+    </Page>
   );
 }

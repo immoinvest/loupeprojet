@@ -4,19 +4,22 @@ import {
   useContext,
   useEffect,
   useMemo,
-  useState,
+  useRef,
   type JSX,
   type ReactNode,
+  type RefObject,
 } from 'react';
-import { Link, NavLink, Outlet, useNavigate, useParams } from 'react-router';
+import { Link, NavLink, Outlet, useLocation, useNavigate, useParams } from 'react-router';
 
+import { MARGES_LATERALES, Page, TitrePage } from '@/composants/mise-en-page';
 import { Bouton } from '@/composants/ui';
 import { euros } from '@/formatage/nombres';
 import { useProjets } from '@/stockage/ProjetsContext';
-import { lienPartage } from '@/stockage/partage';
 import { STATUTS, StatutProjetSchema, type ProjetEnregistre } from '@/stockage/projets';
-import { AVERTISSEMENT_PARTAGE } from '@/textes/partage';
 import { MODES } from '@/textes/regimes';
+
+import { BoutonPartager } from './BoutonPartager';
+import { defilementPourVoir } from './defilement';
 
 export interface ContexteProjet {
   readonly enregistre: ProjetEnregistre;
@@ -45,12 +48,12 @@ export function FournisseurProjet({
 
 export function ProjetIntrouvable(): JSX.Element {
   return (
-    <div className="p-10">
-      <h1 className="font-display text-3xl font-bold">Projet introuvable</h1>
-      <p className="text-encre-2">
+    <Page espacement="serre">
+      <TitrePage>Projet introuvable</TitrePage>
+      <p className="m-0 text-[17px] text-encre-2">
         Il a peut-être été supprimé. <Link to="/projets">Retour à mes projets</Link>.
       </p>
-    </div>
+    </Page>
   );
 }
 
@@ -64,92 +67,72 @@ const ONGLETS = [
 ] as const;
 
 const onglet = ({ isActive }: { isActive: boolean }): string =>
-  `border-b-2 px-4 py-3 text-[15px] font-semibold ${
+  `shrink-0 border-b-2 px-4 py-3 text-[15px] font-semibold whitespace-nowrap ${
     isActive ? 'border-accent text-accent' : 'border-transparent text-encre-3 hover:text-encre'
   }`;
 
-type EtatPartage = 'repos' | 'copie' | 'manuel';
+/** Sous 1 536 px, la bande des volets va d'un bord à l'autre de l'en-tête et défile au doigt. */
+const BANDE_ONGLETS =
+  'defilement-discret relative order-last -mx-4 flex gap-1 overflow-x-auto px-4 sm:-mx-6 sm:px-6 md:col-span-2 lg:-mx-10 lg:px-10 2xl:order-none 2xl:mx-0 2xl:overflow-visible 2xl:px-0';
 
-const DUREE_CONFIRMATION_MS = 2_500;
-
-/** Copie le lien de partage ; si le presse-papiers refuse, le lien s'affiche à copier à la main. */
-function BoutonPartager({ enregistre }: { enregistre: ProjetEnregistre }): JSX.Element {
-  const [etat, setEtat] = useState<EtatPartage>('repos');
-  const lien = lienPartage(window.location.origin, enregistre);
+/** Ramène l'onglet actif dans la partie visible de la bande, par exemple un volet ouvert directement. */
+function useOngletActifEnVue(): RefObject<HTMLElement | null> {
+  const bandeRef = useRef<HTMLElement>(null);
+  const { pathname } = useLocation();
 
   useEffect(() => {
-    if (etat !== 'copie') return undefined;
-    const minuteur = window.setTimeout(() => {
-      setEtat('repos');
-    }, DUREE_CONFIRMATION_MS);
-    return () => {
-      window.clearTimeout(minuteur);
-    };
-  }, [etat]);
+    const bande = bandeRef.current;
+    const actif = bande?.querySelector<HTMLElement>('[aria-current="page"]') ?? null;
+    if (bande === null || actif === null) return;
+    bande.scrollLeft = defilementPourVoir(
+      { debut: actif.offsetLeft, largeur: actif.offsetWidth },
+      { defilement: bande.scrollLeft, largeurVisible: bande.clientWidth },
+    );
+  }, [pathname]);
 
-  const partager = async (): Promise<void> => {
-    try {
-      await navigator.clipboard.writeText(lien);
-      setEtat('copie');
-    } catch {
-      setEtat('manuel');
-    }
-  };
-
-  return (
-    <>
-      {etat === 'manuel' && (
-        <input
-          readOnly
-          aria-label="Lien de partage"
-          value={lien}
-          onFocus={(e) => {
-            e.currentTarget.select();
-          }}
-          className="min-h-[44px] w-64 rounded-full border border-bordure bg-surface px-3 text-xs"
-        />
-      )}
-      <Bouton
-        title={AVERTISSEMENT_PARTAGE}
-        onClick={() => {
-          void partager();
-        }}
-      >
-        {etat === 'copie' ? 'Lien copié' : 'Partager'}
-      </Bouton>
-    </>
-  );
+  return bandeRef;
 }
 
+/**
+ * Téléphone : nom et prix, puis les actions qui passent à la ligne, puis la bande des volets.
+ * De 768 à 1 535 px : nom et actions sur une rangée, volets dessous. À partir de 1 536 px : une
+ * seule rangée ; en dessous, elle écraserait le nom du projet sur quelques mots par ligne.
+ */
 function EnTete(): JSX.Element {
   const { enregistre } = useProjetCourant();
   const { changerStatut } = useProjets();
   const naviguer = useNavigate();
+  const bandeRef = useOngletActifEnVue();
   const { achat, location } = enregistre.projet.hypotheses;
 
   return (
-    <header className="flex items-end gap-4 border-b border-bordure bg-surface px-10 pt-4 print:hidden">
-      <div className="flex flex-col gap-1 pb-3.5">
-        <span className="text-[13px] text-encre-3">
-          <Link to="/projets" className="text-encre-3 no-underline hover:text-accent">
+    <header
+      className={`grid gap-x-4 gap-y-2 border-b border-bordure bg-surface pt-3 md:grid-cols-[minmax(0,1fr)_auto] md:items-end 2xl:flex 2xl:pt-4 ${MARGES_LATERALES} print:hidden`}
+    >
+      <div className="flex min-w-0 flex-col gap-1 2xl:pb-3.5">
+        <span className="text-[13px] break-words text-encre-3">
+          <Link
+            to="/projets"
+            className="text-encre-3 no-underline hover:text-accent pointer-coarse:inline-flex pointer-coarse:min-h-11 pointer-coarse:items-center"
+          >
             Mes projets
           </Link>{' '}
           / {enregistre.nom}
         </span>
-        <span className="font-display text-xl font-bold">
+        <span className="font-display text-lg font-bold sm:text-xl">
           {euros(achat.prix)} · {MODES[location.mode]}
         </span>
       </div>
-      <div className="flex-1" />
-      <nav aria-label="Volets du rapport" className="flex gap-1">
+      <div className="hidden 2xl:block 2xl:flex-1" />
+      <nav ref={bandeRef} aria-label="Volets du rapport" className={BANDE_ONGLETS}>
         {ONGLETS.map((o) => (
           <NavLink key={o.to} to={o.to} end={o.to === ''} className={onglet}>
             {o.libelle}
           </NavLink>
         ))}
       </nav>
-      <div className="flex-1" />
-      <div className="flex gap-2 pb-3">
+      <div className="hidden 2xl:block 2xl:flex-1" />
+      <div className="flex flex-wrap items-center gap-2 md:justify-end 2xl:flex-nowrap 2xl:pb-3">
         <label className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-bordure bg-surface px-3.5 text-sm font-semibold text-encre-2">
           <span className="sr-only">Statut du projet</span>
           <select
@@ -157,7 +140,7 @@ function EnTete(): JSX.Element {
             onChange={(e) => {
               changerStatut(enregistre.id, StatutProjetSchema.parse(e.target.value));
             }}
-            className="bg-transparent font-semibold outline-none"
+            className="bg-transparent font-semibold outline-none pointer-coarse:text-base"
           >
             {StatutProjetSchema.options.map((s) => (
               <option key={s} value={s}>

@@ -9,6 +9,9 @@ const CELLULE = 'border-b border-bordure-douce px-3 py-2 text-left align-top';
 const ENTETE =
   'border-b border-bordure px-3 py-2 text-left text-xs font-bold text-encre-3 uppercase';
 
+/** Première colonne collante : elle reste visible quand le tableau défile au doigt. */
+const COLLANTE = 'sticky left-0 z-[1]';
+
 /** Une ligne par groupe : du même immeuble au cercle de 300 m. */
 export function TableauGroupes({ analyse }: { analyse: ReponseAdresse }): JSX.Element {
   return (
@@ -20,7 +23,7 @@ export function TableauGroupes({ analyse }: { analyse: ReponseAdresse }): JSX.El
         <table className="w-full border-collapse text-[15px]">
           <thead>
             <tr>
-              <th className={ENTETE}>Où</th>
+              <th className={`${ENTETE} ${COLLANTE} bg-surface`}>Où</th>
               <th className={ENTETE}>Ventes</th>
               <th className={ENTETE}>Comparables</th>
               <th className={ENTETE}>Médiane</th>
@@ -28,26 +31,31 @@ export function TableauGroupes({ analyse }: { analyse: ReponseAdresse }): JSX.El
             </tr>
           </thead>
           <tbody>
-            {analyse.groupes.map((g) => (
-              <tr
-                key={g.code}
-                className={analyse.reference?.code === g.code ? 'bg-accent-fond' : ''}
-              >
-                <th scope="row" className={`${CELLULE} font-semibold`}>
-                  {LIBELLES_GROUPES[g.code]}
-                </th>
-                <td className={CELLULE}>{g.ventes}</td>
-                <td className={CELLULE}>{g.comparables}</td>
-                <td className={CELLULE}>
-                  {g.statistiques === null ? '—' : prixM2(g.statistiques.medianeM2)}
-                </td>
-                <td className={CELLULE}>
-                  {g.statistiques === null
-                    ? '—'
-                    : `${prixM2(g.statistiques.q1M2)} et ${prixM2(g.statistiques.q3M2)}`}
-                </td>
-              </tr>
-            ))}
+            {analyse.groupes.map((g) => {
+              const reference = analyse.reference?.code === g.code;
+              return (
+                <tr key={g.code} className={reference ? 'bg-accent-fond' : ''}>
+                  <th
+                    scope="row"
+                    className={`${CELLULE} ${COLLANTE} font-semibold ${
+                      reference ? 'bg-accent-fond' : 'bg-surface'
+                    }`}
+                  >
+                    {LIBELLES_GROUPES[g.code]}
+                  </th>
+                  <td className={CELLULE}>{g.ventes}</td>
+                  <td className={CELLULE}>{g.comparables}</td>
+                  <td className={CELLULE}>
+                    {g.statistiques === null ? '—' : prixM2(g.statistiques.medianeM2)}
+                  </td>
+                  <td className={CELLULE}>
+                    {g.statistiques === null
+                      ? '—'
+                      : `${prixM2(g.statistiques.q1M2)} et ${prixM2(g.statistiques.q3M2)}`}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
@@ -71,7 +79,7 @@ export function TableauVentes({ analyse }: { analyse: ReponseAdresse }): JSX.Ele
         <table className="w-full border-collapse text-[15px]">
           <thead>
             <tr>
-              <th className={ENTETE}>Date</th>
+              <th className={`${ENTETE} ${COLLANTE} bg-surface`}>Date</th>
               <th className={ENTETE}>Adresse</th>
               <th className={ENTETE}>Surface</th>
               <th className={ENTETE}>Prix</th>
@@ -84,7 +92,7 @@ export function TableauVentes({ analyse }: { analyse: ReponseAdresse }): JSX.Ele
           <tbody>
             {analyse.ventesProches.map((v, i) => (
               <tr key={`${v.date}-${String(i)}`}>
-                <td className={CELLULE}>{dateCourte(v.date)}</td>
+                <td className={`${CELLULE} ${COLLANTE} bg-surface`}>{dateCourte(v.date)}</td>
                 <td className={CELLULE}>{v.adresse ?? '—'}</td>
                 <td className={CELLULE}>{nombre(v.surface)} m²</td>
                 <td className={CELLULE}>{euros(v.prix)}</td>

@@ -65,7 +65,7 @@ export function EstimerLoyer({
   };
 
   return (
-    <div className="col-span-3 flex flex-wrap items-center gap-3 px-2">
+    <div className="col-span-full flex flex-wrap items-center gap-3 px-2">
       <Bouton
         disabled={enCours}
         onClick={() => {

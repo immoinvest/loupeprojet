@@ -8,6 +8,8 @@ import { existsSync } from 'node:fs';
 const PORT = 5199;
 const URL_BASE = `http://127.0.0.1:${String(PORT)}`;
 const enCi = process.env.CI !== undefined;
+/** Spec des 16 écrans sur 9 formats (US-10). */
+const SPEC_FORMATS = /responsive\.spec\.ts$/;
 
 // On teste l'artefact déployé : `npm run test:e2e` construit `dist/` puis le sert avec vite preview.
 if (!existsSync(new URL('./dist/index.html', import.meta.url))) {
@@ -34,7 +36,23 @@ export default defineConfig({
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
   },
-  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+  // Les parcours tournent sur trois appareils ; la spec des formats ouvre ses propres contextes
+  // (neuf formats, impression) et ne tourne qu'une fois.
+  projects: [
+    { name: 'ordinateur', testIgnore: SPEC_FORMATS, use: { ...devices['Desktop Chrome'] } },
+    { name: 'telephone', testIgnore: SPEC_FORMATS, use: { ...devices['Pixel 7'] } },
+    {
+      name: 'tablette',
+      testIgnore: SPEC_FORMATS,
+      use: {
+        ...devices['Desktop Chrome'],
+        viewport: { width: 768, height: 1024 },
+        isMobile: true,
+        hasTouch: true,
+      },
+    },
+    { name: 'formats', testMatch: SPEC_FORMATS, use: { ...devices['Desktop Chrome'] } },
+  ],
   webServer: {
     command: `npx vite preview --host 127.0.0.1 --port ${String(PORT)} --strictPort`,
     url: URL_BASE,

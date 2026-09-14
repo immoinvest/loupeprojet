@@ -1,6 +1,7 @@
 import { useMemo, type JSX } from 'react';
 import { BrowserRouter, MemoryRouter, Navigate, useRoutes, type RouteObject } from 'react-router';
 
+import { creerSuiviInstallation, suiviIndisponible, type SuiviInstallation } from '@/application';
 import { clientHorsLigne, clientWorker, urlWorker, type ClientWorker } from '@/enrichissement';
 
 import { CompteProvider } from './compte/CompteContext';
@@ -9,6 +10,7 @@ import { clientReseau } from './compte/reseau';
 import type { ClientCompte } from './compte/types';
 import { AppLayout } from './coque/AppLayout';
 import { ClientWorkerProvider } from './coque/ClientWorker';
+import { InstallationProvider } from './coque/Installation';
 import { ProjetLayout } from './coque/ProjetLayout';
 import { Bientot } from './ecrans/Bientot';
 import { Comparer } from './ecrans/Comparer';
@@ -80,14 +82,19 @@ const CLIENT_WORKER = clientWorker(urlWorker(import.meta.env.VITE_WORKER_URL), (
 /** Le client des comptes de production : l'API /api/* servie par le worker Pages, même origine. */
 const CLIENT_COMPTE = clientReseau();
 
+/** Invite d'installation et mode application, écoutés dès le chargement, avant le premier rendu. */
+const SUIVI_INSTALLATION = creerSuiviInstallation(window);
+
 export function App(): JSX.Element {
   return (
     <ProjetsProvider>
       <ClientWorkerProvider client={CLIENT_WORKER}>
         <CompteProvider client={CLIENT_COMPTE}>
-          <BrowserRouter>
-            <Racine />
-          </BrowserRouter>
+          <InstallationProvider suivi={SUIVI_INSTALLATION}>
+            <BrowserRouter>
+              <Racine />
+            </BrowserRouter>
+          </InstallationProvider>
         </CompteProvider>
       </ClientWorkerProvider>
     </ProjetsProvider>
@@ -95,28 +102,32 @@ export function App(): JSX.Element {
 }
 
 /**
- * Pour les tests : même arbre de routes, en mémoire ; Worker hors ligne et compte anonyme en mémoire,
- * sauf clients fournis.
+ * Pour les tests : même arbre de routes, en mémoire ; Worker hors ligne, compte anonyme en mémoire
+ * et rien à installer, sauf clients fournis.
  */
 export function AppEnMemoire({
   chemin = '/',
   stockage,
   client = clientHorsLigne,
   compte,
+  installation = suiviIndisponible,
 }: {
   chemin?: string;
   stockage?: Storage;
   client?: ClientWorker;
   compte?: ClientCompte;
+  installation?: SuiviInstallation;
 }): JSX.Element {
   const clientCompte = useMemo(() => compte ?? clientMemoire(), [compte]);
   return (
     <ProjetsProvider stockage={stockage}>
       <ClientWorkerProvider client={client}>
         <CompteProvider client={clientCompte}>
-          <MemoryRouter initialEntries={[chemin]}>
-            <Racine />
-          </MemoryRouter>
+          <InstallationProvider suivi={installation}>
+            <MemoryRouter initialEntries={[chemin]}>
+              <Racine />
+            </MemoryRouter>
+          </InstallationProvider>
         </CompteProvider>
       </ClientWorkerProvider>
     </ProjetsProvider>

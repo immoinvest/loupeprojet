@@ -1,0 +1,219 @@
+{
+  "feature_slug": "responsive",
+  "title": "Responsive et application mobile : Deklic utilisable de 320 à 1 920 px, installable, hors ligne, cible de partage",
+  "started_at": "2026-09-13T22:00:00Z",
+  "current_step": "push",
+  "scope": "apps/web (coque, écrans, composants, index.css, index.html, manifeste, icônes, service worker), marque/ (icône adaptative), e2e Playwright, job CI e2e, docs",
+  "branch": "feat/responsive",
+  "base": "master (73c46dd)",
+  "baseline": {
+    "e2e_passed": 8,
+    "e2e_failed": 0,
+    "unit_tests_passed": 636,
+    "unit_test_files": 89,
+    "unit_tests_failed": 0,
+    "audit": "375 px : débordement 832 px sur les volets d'un projet, 482 px sur Mes projets, bouton « saisir à la main » non cliquable ; 768 px : 439 px ; 1 024 px : 183 px ; 0 px à 1 280 px et plus"
+  },
+  "steps": {
+    "discovery": {
+      "status": "completed",
+      "output": ".product/features/responsive-discovery.md"
+    },
+    "specs": {
+      "status": "completed",
+      "output": ".product/specs/responsive-specs.md",
+      "stories_count": 11
+    },
+    "architecture": {
+      "status": "completed",
+      "output": ".product/architecture/responsive.md",
+      "adr": ".product/adr/007-application-mobile.md"
+    },
+    "implement": {
+      "status": "completed",
+      "stories_completed": 11,
+      "stories_total": 11,
+      "commits": [
+        {
+          "etape": "docs",
+          "hash": "9c06b16"
+        },
+        {
+          "etape": "docs (Prettier)",
+          "hash": "3ed6e26"
+        },
+        {
+          "etape": "US-1",
+          "hash": "9ad8a69",
+          "tests": 645,
+          "fichiers_de_test": 91
+        },
+        {
+          "etape": "US-2",
+          "hash": "7fad103",
+          "tests": 645,
+          "fichiers_de_test": 91
+        },
+        {
+          "etape": "refactor Rapport (300 lignes)",
+          "hash": "e2fb7bf"
+        },
+        {
+          "etape": "US-3a",
+          "hash": "61b4539",
+          "tests": 645,
+          "fichiers_de_test": 91
+        },
+        {
+          "etape": "US-3b",
+          "hash": "2619e1f",
+          "tests": 645,
+          "fichiers_de_test": 91
+        },
+        {
+          "etape": "US-4",
+          "hash": "097ab49",
+          "tests": 645,
+          "fichiers_de_test": 91
+        },
+        {
+          "etape": "US-4 (cibles restantes)",
+          "hash": "7cac872"
+        },
+        {
+          "etape": "US-10",
+          "hash": "e0b3a4c",
+          "e2e": 36,
+          "duree_e2e_locale_s": 72
+        },
+        {
+          "etape": "US-5",
+          "hash": "7801133",
+          "tests": 658,
+          "fichiers_de_test": 94
+        },
+        {
+          "etape": "US-6",
+          "hash": "7858182",
+          "e2e_hors_ligne": 3
+        },
+        {
+          "etape": "US-6 (API des comptes ignorée)",
+          "hash": "4db7fa6",
+          "tests": 900,
+          "fichiers_de_test": 126
+        },
+        {
+          "etape": "US-3c",
+          "hash": "cb43752",
+          "e2e_formats": 12
+        },
+        {
+          "etape": "refactor Nouveau projet (pastilles du lien)",
+          "hash": "643fb87"
+        },
+        {
+          "etape": "US-7",
+          "hash": "86e9c30"
+        },
+        {
+          "etape": "fusion de master (marché complet)",
+          "hash": "857777d",
+          "tests": 946,
+          "fichiers_de_test": 135
+        },
+        {
+          "etape": "US-3d",
+          "hash": "8344d5a"
+        },
+        {
+          "etape": "US-8",
+          "hash": "aa6834f"
+        },
+        {
+          "etape": "US-9",
+          "hash": "1938e93"
+        },
+        {
+          "etape": "QA : propriétés et lien vide",
+          "hash": "47cab96"
+        },
+        {
+          "etape": "sécurité : coque HTML seulement",
+          "hash": "5cbb16c"
+        }
+      ],
+      "notes": [
+        "Audit temporaire déplacé dans le scratchpad ; il devient e2e/formats.ts et responsive.spec.ts en US-10",
+        "US-1 vérifiée dans le navigateur : focus dans le tiroir, retour au bouton après Échap, focus au contenu après navigation, ordinateur inchangé à 1 280 px",
+        "Styles globaux non « layered » dans index.css (a, :focus-visible) : ils l'emportent sur les utilitaires Tailwind ; hors périmètre, contournés localement",
+        "US-6 : Vary: Origin de vite preview rendait le cache introuvable hors ligne ; lectures du cache avec ignoreVary",
+        "Fusion de origin/master (comptes, lecture automatique, DVF à l'adresse, estimation) : 8 conflits résolus, ADR responsive renuméroté 007 ; écrans Estimation, Compte et Connexion à adapter (US-3c) ; /api/* à ignorer par le service worker",
+        "US-3c : 16 écrans × 9 formats verts ; au premier passage le serveur vite preview est tombé (connexions refusées), relancé seul sans erreur",
+        "Seconde fusion de origin/master (marché complet : DPE, risques, loyer, Estimer le loyer) : conflit dans Adresse.tsx résolu (logique de master, mise en page US-3c) ; « Estimer le loyer » en col-span-3 cassait la grille à une colonne (US-3d)"
+      ]
+    },
+    "refactor": {
+      "status": "completed",
+      "details": "Rapport découpé (e2fb7bf) ; pastilles du lien extraites de NouveauProjet (643fb87) avant US-7 ; aucun fichier source modifié au-delà de 300 lignes ; textes du partage d'un projet regroupés dans textes/partage.ts"
+    },
+    "qa_tests": {
+      "status": "completed",
+      "tests": 961,
+      "fichiers_de_test": 138,
+      "e2e": 54,
+      "duree_e2e_locale_s": 129,
+      "details": [
+        "Scénarios Gherkin des US-1 à US-10 relus contre les tests ; ajouts : texte partagé démesuré (écran), SeLoger reconnu, ordre des cartes Extension (Playwright)",
+        "Tests de propriétés sans dépendance (tirages mulberry32 à graine fixe) : 500 partages reçus, 500 requêtes du service worker",
+        "Spec des formats : 16 écrans × 9 formats, onglet Estimation rempli par un Worker simulé",
+        "Défaut trouvé par les propriétés et corrigé : « http:// » sans adresse pris pour le lien partagé (estUneAdresse)"
+      ]
+    },
+    "security": {
+      "status": "completed",
+      "score_avant": 97,
+      "score": 100,
+      "grade": "A",
+      "constats": [
+        "FAIBLE (corrigé) : une navigation de même origine vers un fichier remplaçait la coque hors ligne → estUnePage"
+      ],
+      "recommandations_hors_perimetre": [
+        "En-têtes de sécurité (_headers : CSP, Referrer-Policy, Permissions-Policy)",
+        "npm audit sur les dépendances existantes",
+        "Projet Playwright WebKit pour Safari iPhone"
+      ]
+    },
+    "push": {
+      "status": "completed",
+      "branch": "feat/responsive"
+    }
+  },
+  "decisions": {
+    "application_mobile": "PWA installable (spec : pas d'app native en v1) ; applications de boutique hors périmètre, décision de Pierre",
+    "etat_pipeline": "session parallèle : état dans .product/pipeline/responsive.json, pipeline-state.json réservé à la session principale"
+  },
+  "post_mortem": {
+    "blockers_encountered": [
+      "Deux fusions de master pendant la feature (comptes, estimation, marché complet) : écrans à adapter (US-3c, US-3d), /api/* à laisser passer par le service worker",
+      "vite preview de Playwright tombé sous charge pendant la spec des formats ; tests d’écran Vitest à 30 s dépassés sous charge",
+      "Outil Bash : échappements décodés dans les paramètres (séquences Unicode), grande commande heredoc refusée par le shell"
+    ],
+    "retries": {
+      "US-6": "Vary: Origin rendait le cache introuvable hors ligne → lectures avec ignoreVary",
+      "US-3c": "Cible « Se connecter » du profil à 20 px sur tablette 1 024 → pointer-coarse:min-h-11",
+      "fix API": "Trois tests Vitest en délai dépassé sous charge, verts seuls puis en relance complète",
+      "QA": "Un test de propriétés a trouvé « http:// » pris pour le lien partagé → estUneAdresse et test de non-régression"
+    },
+    "patterns_discovered": [
+      "Décisions du service worker en fonctions pures (strategiePour, estUnePage), colle courte prouvée par Playwright",
+      "Preuve négative réseau : écouter request.serviceWorker() avec un témoin positif pour ne jamais passer à vide",
+      "Spec des formats : cible effective (label englobant), liens au fil d’une phrase exemptés, Worker et comptes simulés par page.route"
+    ],
+    "improvements_for_next_time": [
+      "Fusionner master avant chaque story qui touche un écran partagé",
+      "Écrire les brouillons avec des scripts à ancres vérifiées plutôt que des remplacements à la main",
+      "Ajouter chaque nouvel écran à ecransDeReference dès sa création"
+    ]
+  }
+}

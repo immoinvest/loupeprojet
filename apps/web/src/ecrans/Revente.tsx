@@ -2,6 +2,7 @@ import { useMemo, type JSX } from 'react';
 
 import { HORIZONS, variantesRevente } from '@/analyses';
 import { useModeDocument } from '@/composants/document';
+import { Chapo, Page, TitrePage } from '@/composants/mise-en-page';
 import { Carte, Ligne, Pastille, TitreCarte } from '@/composants/ui';
 import { useProjetCourant } from '@/coque/ProjetLayout';
 import { euros, eurosSignes, pourcentage } from '@/formatage/nombres';
@@ -31,19 +32,17 @@ export function Revente(): JSX.Element {
   };
 
   return (
-    <div className="flex flex-col gap-5 px-10 pt-8 pb-10">
+    <Page>
       <div className="flex flex-col gap-2">
-        <h1 className="m-0 font-display text-[32px] leading-tight font-bold tracking-tight">
-          Qu'est-ce qu'il vous restera ?
-        </h1>
-        <p className="m-0 max-w-[64ch] text-[17px] text-encre-2">
+        <TitrePage taille="volet">Qu'est-ce qu'il vous restera ?</TitrePage>
+        <Chapo>
           Revente estimée à {pourcentage(r.projet.hypotheses.revente.evolutionAnnuelle)} par an,
           crédit remboursé, agence et impôt payés. Choisissez l'horizon.
-        </p>
+        </Chapo>
       </div>
 
       <div
-        className={`grid gap-4 ${document ? 'grid-cols-2' : 'grid-cols-4'}`}
+        className={`grid grid-cols-1 gap-4 sm:grid-cols-2 ${document ? 'print:grid-cols-2' : 'xl:grid-cols-4'}`}
         role="group"
         aria-label="Horizon de revente"
       >
@@ -67,7 +66,7 @@ export function Revente(): JSX.Element {
               <span className="text-xs font-bold tracking-wide text-encre-3 uppercase">
                 Dans {v.annees} ans
               </span>
-              <span className="font-display text-[26px] leading-none font-bold">
+              <span className="font-display text-[24px] leading-none font-bold sm:text-[26px] print:text-[26px]">
                 {euros(v.cashNetVendeur)}
               </span>
               <span className="text-sm text-encre-2">
@@ -79,7 +78,7 @@ export function Revente(): JSX.Element {
         })}
       </div>
 
-      <div className="grid grid-cols-2 gap-5">
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-2 print:grid-cols-2">
         <Carte>
           <TitreCarte>Revente dans {annees} ans</TitreCarte>
           <div>
@@ -129,7 +128,7 @@ export function Revente(): JSX.Element {
       </div>
 
       <Carte>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
           <TitreCarte>La plus-value, en détail</TitreCarte>
           {pv.plusValueBrute > 0 && pv.reintegration > 0 && (
             <Pastille ton="surveiller" compacte>
@@ -143,7 +142,7 @@ export function Revente(): JSX.Element {
             pas le prix d'acquisition majoré ({euros(pv.prixAcquisitionMajore)}).
           </p>
         ) : (
-          <div className="grid grid-cols-2 gap-x-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 md:gap-x-10 print:grid-cols-2 print:gap-x-10">
             <div>
               <Ligne libelle="Prix de cession, frais déduits" valeur={euros(pv.prixCession)} />
               <Ligne libelle="Prix d'achat" valeur={euros(r.projet.hypotheses.achat.prix)} />
@@ -174,6 +173,6 @@ export function Revente(): JSX.Element {
           </div>
         )}
       </Carte>
-    </div>
+    </Page>
   );
 }

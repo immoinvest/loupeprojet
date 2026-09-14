@@ -16,4 +16,12 @@ export {
   type LectureFragment,
 } from './capture';
 export { extraireChamps, type ChampsExtraits } from './extraire';
+export {
+  LONGUEUR_MAX_TEXTE_PARTAGE,
+  PARAMETRES_PARTAGE,
+  annoncePartagee,
+  lirePartageRecu,
+  type AnnoncePartagee,
+  type PartageRecu,
+} from './partage-recu';
 export { PORTAILS, resoudreAnnonce, type AnnonceResolue, type Portail } from './resoudre';

@@ -4,6 +4,7 @@ import { useMemo, useState, type JSX } from 'react';
 import { Link, useNavigate } from 'react-router';
 
 import { useCompte } from '@/compte/CompteContext';
+import { Page, TitrePage } from '@/composants/mise-en-page';
 import { Bouton, Carte, Pastille, Point } from '@/composants/ui';
 import {
   dateCourte,
@@ -24,6 +25,14 @@ const FILTRES: readonly { code: Filtre; libelle: string }[] = [
   { code: 'en_cours', libelle: 'En cours' },
   { code: 'ecartes', libelle: 'Écartés' },
 ];
+
+/**
+ * Carte d'un projet. Téléphone : le nom, les quatre métriques en deux colonnes, puis les feux et
+ * « Supprimer ». À partir de 640 px, les métriques sur une rangée ; à partir de 1 280 px, tout sur
+ * une rangée.
+ */
+const GRILLE_CARTE =
+  'grid grid-cols-2 items-center gap-x-4 gap-y-3 sm:grid-cols-4 xl:grid-cols-[minmax(0,2fr)_repeat(4,minmax(0,1fr))_120px_44px] xl:gap-5';
 
 function garder(p: ProjetEnregistre, filtre: Filtre): boolean {
   if (filtre === 'tous') return true;
@@ -58,13 +67,11 @@ function CarteProjet({
   const prix = r.verdict.feux.find((f) => f.axe === 'prix');
   const ecarte = p.statut === 'ecarte';
   return (
-    <Carte
-      className={`grid grid-cols-[minmax(0,2fr)_repeat(4,minmax(0,1fr))_120px_44px] items-center gap-5 ${ecarte ? 'opacity-70' : ''}`}
-    >
-      <div className="flex flex-col gap-1">
+    <Carte className={`${GRILLE_CARTE} ${ecarte ? 'opacity-70' : ''}`}>
+      <div className="col-span-2 flex min-w-0 flex-col gap-1 sm:col-span-4 xl:col-span-1">
         <Link
           to={`/projets/${p.id}`}
-          className="font-display text-lg font-bold text-encre no-underline hover:text-accent"
+          className="font-display text-lg font-bold text-encre no-underline hover:text-accent pointer-coarse:flex pointer-coarse:min-h-11 pointer-coarse:items-center"
         >
           {p.nom}
         </Link>
@@ -98,7 +105,7 @@ function CarteProjet({
         libelle="TRI 10 ans"
         valeur={r.rendement.tri === null ? '—' : pourcentage(r.rendement.tri)}
       />
-      <div className="flex gap-1.5" aria-label="Cinq feux">
+      <div className="flex gap-1.5 sm:col-span-3 xl:col-span-1" aria-label="Cinq feux">
         {r.verdict.feux.map((f) => (
           <Point key={f.axe} feu={f.feu} taille={12} />
         ))}
@@ -107,7 +114,7 @@ function CarteProjet({
         type="button"
         onClick={onSupprimer}
         aria-label={`Supprimer ${p.nom}`}
-        className="flex h-11 w-11 items-center justify-center rounded-full text-encre-3 hover:bg-probleme-fond hover:text-probleme"
+        className="flex h-11 w-11 items-center justify-center justify-self-end rounded-full text-encre-3 hover:bg-probleme-fond hover:text-probleme"
       >
         <Trash2 size={18} aria-hidden="true" />
       </button>
@@ -123,52 +130,51 @@ export function MesProjets(): JSX.Element {
   const visibles = projets.filter((p) => garder(p, filtre));
 
   return (
-    <div className="flex flex-col gap-6 p-10">
-      <div className="flex items-end gap-4">
+    <Page espacement="large">
+      <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-3">
         <div className="flex flex-col gap-1.5">
-          <h1 className="m-0 font-display text-[34px] leading-tight font-bold tracking-tight">
-            Mes projets
-          </h1>
+          <TitrePage>Mes projets</TitrePage>
           <span className="text-[15px] text-encre-3">
             {projets.length} {projets.length > 1 ? 'projets' : 'projet'} · sauvegardés sur cet
             appareil
           </span>
         </div>
-        <div className="flex-1" />
-        <div className="flex gap-2" role="group" aria-label="Filtrer">
-          {FILTRES.map((f) => (
-            <button
-              key={f.code}
-              type="button"
-              aria-pressed={filtre === f.code}
-              onClick={() => {
-                setFiltre(f.code);
-              }}
-              className={`min-h-[44px] rounded-full px-3.5 text-sm font-semibold ${
-                filtre === f.code
-                  ? 'bg-accent-doux text-accent'
-                  : 'border border-bordure text-encre-2'
-              }`}
-            >
-              {f.libelle}
-            </button>
-          ))}
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap gap-2" role="group" aria-label="Filtrer">
+            {FILTRES.map((f) => (
+              <button
+                key={f.code}
+                type="button"
+                aria-pressed={filtre === f.code}
+                onClick={() => {
+                  setFiltre(f.code);
+                }}
+                className={`min-h-[44px] rounded-full px-3.5 text-sm font-semibold ${
+                  filtre === f.code
+                    ? 'bg-accent-doux text-accent'
+                    : 'border border-bordure text-encre-2'
+                }`}
+              >
+                {f.libelle}
+              </button>
+            ))}
+          </div>
+          <Bouton
+            onClick={() => {
+              void naviguer('/comparer');
+            }}
+          >
+            Comparer
+          </Bouton>
+          <Bouton
+            variante="primaire"
+            onClick={() => {
+              void naviguer('/projets/nouveau');
+            }}
+          >
+            Nouveau projet
+          </Bouton>
         </div>
-        <Bouton
-          onClick={() => {
-            void naviguer('/comparer');
-          }}
-        >
-          Comparer
-        </Bouton>
-        <Bouton
-          variante="primaire"
-          onClick={() => {
-            void naviguer('/projets/nouveau');
-          }}
-        >
-          Nouveau projet
-        </Bouton>
       </div>
 
       {visibles.length === 0 ? (
@@ -189,7 +195,7 @@ export function MesProjets(): JSX.Element {
         </div>
       )}
 
-      <Carte className="flex-row items-center gap-5 border-accent-bordure bg-accent-fond">
+      <Carte className="border-accent-bordure bg-accent-fond sm:flex-row sm:items-center sm:gap-5">
         <div className="flex flex-1 flex-col gap-1">
           <span className="font-display text-[17px] font-bold">
             {connecte ? TEXTES_MON_COMPTE.carteTitreConnecte : TEXTES_MON_COMPTE.carteTitre}
@@ -214,6 +220,6 @@ export function MesProjets(): JSX.Element {
         Les cinq points reprennent les feux du rapport : prix · rendement · cash-flow · effort ·
         risques.
       </p>
-    </div>
+    </Page>
   );
 }

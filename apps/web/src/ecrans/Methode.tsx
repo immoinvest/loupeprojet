@@ -3,9 +3,19 @@ import { useMemo, type JSX } from 'react';
 import { Link } from 'react-router';
 
 import { defautsDuMoteur } from '@/analyses';
+import { Chapo, Page, TitrePage } from '@/composants/mise-en-page';
 import { Carte, Pastille } from '@/composants/ui';
 import { dateCourte } from '@/formatage/nombres';
 import { sectionsMethode, type SectionMethode } from '@/textes/methode';
+
+/** Sous 768 px, chaque constante devient un bloc (libellé, valeur, source) : même tableau, autre affichage. */
+const EN_BLOCS = {
+  table: 'max-md:block',
+  entete: 'max-md:hidden',
+  corps: 'max-md:flex max-md:flex-col',
+  ligne: 'max-md:flex max-md:flex-col max-md:gap-0.5 max-md:py-2',
+  cellule: 'max-md:p-0',
+} as const;
 
 function Section({ s }: { s: SectionMethode }): JSX.Element {
   return (
@@ -20,19 +30,22 @@ function Section({ s }: { s: SectionMethode }): JSX.Element {
         </ol>
       )}
       {s.constantes.length > 0 && (
-        <table className="w-full border-collapse text-sm">
-          <thead>
+        <table className={`w-full border-collapse text-sm ${EN_BLOCS.table}`}>
+          <thead className={EN_BLOCS.entete}>
             <tr className="text-left text-xs text-encre-3">
               <th className="py-1.5 pr-3 font-semibold">Constante</th>
               <th className="py-1.5 pr-3 font-semibold">Valeur</th>
               <th className="py-1.5 font-semibold">Source</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className={EN_BLOCS.corps}>
             {s.constantes.map((c) => (
-              <tr key={c.libelle} className="border-t border-bordure-douce align-top">
-                <td className="py-2 pr-3">{c.libelle}</td>
-                <td className="py-2 pr-3 font-semibold">
+              <tr
+                key={c.libelle}
+                className={`border-t border-bordure-douce align-top ${EN_BLOCS.ligne}`}
+              >
+                <td className={`py-2 pr-3 ${EN_BLOCS.cellule}`}>{c.libelle}</td>
+                <td className={`py-2 pr-3 font-semibold ${EN_BLOCS.cellule}`}>
                   {c.valeur}
                   {c.aConfirmer === true && (
                     <>
@@ -43,7 +56,9 @@ function Section({ s }: { s: SectionMethode }): JSX.Element {
                     </>
                   )}
                 </td>
-                <td className="py-2 text-encre-3">{c.source}</td>
+                <td className={`py-2 text-encre-3 max-md:text-xs ${EN_BLOCS.cellule}`}>
+                  {c.source}
+                </td>
               </tr>
             ))}
           </tbody>
@@ -61,16 +76,14 @@ export function Methode(): JSX.Element {
   );
 
   return (
-    <div className="flex flex-col gap-5 px-10 pt-8 pb-10">
+    <Page>
       <div className="flex flex-col gap-2">
-        <h1 className="m-0 font-display text-[34px] leading-tight font-bold tracking-tight">
-          Comment c'est calculé
-        </h1>
-        <p className="m-0 max-w-[64ch] text-[17px] text-encre-2">
+        <TitrePage>Comment c'est calculé</TitrePage>
+        <Chapo>
           Règles du {dateCourte(regles.dateReference)} (version {regles.version}). Tout se calcule
           dans votre navigateur, à partir des textes officiels et de barèmes écrits une fois ; l'IA
           ne calcule jamais. Chaque valeur se change dans l'onglet Hypothèses d'un projet.
-        </p>
+        </Chapo>
       </div>
 
       <nav aria-label="Sommaire" className="flex flex-wrap gap-2">
@@ -78,7 +91,7 @@ export function Methode(): JSX.Element {
           <a
             key={s.code}
             href={`#${s.code}`}
-            className="min-h-[36px] rounded-full border border-bordure bg-surface px-3 py-1.5 text-sm font-semibold text-encre-2 no-underline hover:bg-accent-fond"
+            className="inline-flex min-h-[36px] items-center rounded-full border border-bordure bg-surface px-3 py-1.5 text-sm font-semibold text-encre-2 no-underline hover:bg-accent-fond pointer-coarse:min-h-11"
           >
             {s.titre}
           </a>
@@ -111,6 +124,6 @@ export function Methode(): JSX.Element {
         Outil d'aide à la décision, pas un conseil en investissement ni un conseil fiscal.{' '}
         <Link to="/projets">Retour à mes projets</Link>.
       </p>
-    </div>
+    </Page>
   );
 }
