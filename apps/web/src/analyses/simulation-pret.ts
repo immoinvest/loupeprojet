@@ -1,4 +1,4 @@
-import { VersionReglesSchema, type Resultats } from '@loupe/moteur';
+import { VersionReglesSchema, arrondirCentime, type Resultats } from '@loupe/moteur';
 import { z } from 'zod';
 
 import { decoderJson, encoderJson } from '@/stockage/base64url';
@@ -57,7 +57,8 @@ export function simulationDepuisResultats(r: Resultats): SimulationPretEntree {
       prix: achat.prix,
       ...(honoraires > 0 ? { honorairesAgence: honoraires } : {}),
       ...(achat.travaux > 0 ? { travaux: achat.travaux } : {}),
-      fraisNotaire: r.financement.fraisAcquisition.total,
+      // Frontière d'affichage : le lien porte des centimes, pas le bruit du calcul en flottant.
+      fraisNotaire: arrondirCentime(r.financement.fraisAcquisition.total),
       departement: r.projet.bien.departement,
     },
     offres: [

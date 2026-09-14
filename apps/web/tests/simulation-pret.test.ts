@@ -1,4 +1,4 @@
-import { calculerProjet, projetExemple, type ProjetEntree } from '@loupe/moteur';
+import { arrondirCentime, calculerProjet, projetExemple, type ProjetEntree } from '@loupe/moteur';
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -27,7 +27,7 @@ describe('simulationDepuisResultats', () => {
         prix: 155_000,
         honorairesAgence: 7_000,
         travaux: 6_000,
-        fraisNotaire: r.financement.fraisAcquisition.total,
+        fraisNotaire: arrondirCentime(r.financement.fraisAcquisition.total),
         departement: '13',
       },
       offres: [

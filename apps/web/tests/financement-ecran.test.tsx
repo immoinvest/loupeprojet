@@ -73,8 +73,9 @@ describe('Financement', () => {
     expect(href.startsWith('/simulateur-pret#s=')).toBe(true);
     const decodage = decoderSimulation(lireFragmentSimulation(href.slice(href.indexOf('#'))) ?? '');
     expect(decodage.ok && decodage.simulation.offres[0]?.dureeAnnees).toBe(25);
-    expect(decodage.ok && decodage.simulation.projet.fraisNotaire).toBe(
+    expect(decodage.ok && decodage.simulation.projet.fraisNotaire).toBeCloseTo(
       r.financement.fraisAcquisition.total,
+      2,
     );
   });
 
