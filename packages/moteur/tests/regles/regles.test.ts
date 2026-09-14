@@ -50,6 +50,15 @@ describe('règles 2026-09', () => {
     }
   });
 
+  it('porte les seuils datés de la liste de visite', () => {
+    expect(regles.visite.amianteAvantAnnee).toBe(1997);
+    expect(regles.visite.plombAvantAnnee).toBe(1949);
+    expect(regles.visite.plombAvantAnnee).toBeLessThan(regles.visite.amianteAvantAnnee);
+    expect(regles.visite.installationsAnciennesAns).toBe(15);
+    expect(regles.visite.etageSansAscenseur).toBe(3);
+    expect(regles.visite.chambreColocationM2).toBe(9);
+  });
+
   it('a des barèmes de confiance cohérents : 100 points, paliers triés, niveaux jusqu’à zéro, marges croissantes', () => {
     const c = regles.estimation.confiance;
     const maximum = (paliers: readonly { points: number }[]): number =>
