@@ -92,7 +92,6 @@ describe('Nouveau projet — coller le lien suffit (extension installée)', () =
 
       await utilisateur.type(screen.getByLabelText(/Loyer visé/), '980');
       await utilisateur.type(screen.getByLabelText(/^Apport/), '15000');
-      await utilisateur.type(screen.getByLabelText(/Vos revenus/), '2600');
       await utilisateur.click(screen.getByRole('button', { name: /Créer le projet/ }));
 
       // Le rapport se calcule à l'ouverture : sous charge (suite complète), cela peut prendre plusieurs secondes.

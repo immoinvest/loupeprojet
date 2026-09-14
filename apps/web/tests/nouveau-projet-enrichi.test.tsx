@@ -74,7 +74,6 @@ describe('Nouveau projet — avec le Worker', () => {
 
       await utilisateur.type(screen.getByLabelText(/Loyer visé/), '980');
       await utilisateur.type(screen.getByLabelText(/^Apport/), '15000');
-      await utilisateur.type(screen.getByLabelText(/Vos revenus/), '2600');
       await utilisateur.click(screen.getByRole('button', { name: /Créer le projet/ }));
 
       // 155 000 € / 65 m² = 2 385 €/m², sous la médiane de 3 423 €/m² : le prix est bon.

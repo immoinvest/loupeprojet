@@ -65,7 +65,6 @@ export async function creerProjetManuel(page: Page): Promise<void> {
   await page.getByLabel('Ville').fill('Lyon');
   await page.getByLabel('Loyer visé, hors charges').fill('700');
   await page.getByLabel('Apport').fill('10000');
-  await page.getByLabel('Vos revenus nets').fill('2400');
   await page.getByRole('button', { name: 'Créer le projet et voir le rapport' }).click();
 
   await expect(

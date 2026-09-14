@@ -49,7 +49,6 @@ describe('Mes projets', () => {
     await utilisateur.type(screen.getByLabelText(/^Ville/), 'Lyon');
     await utilisateur.type(screen.getByLabelText(/Loyer visé/), '700');
     await utilisateur.type(screen.getByLabelText(/^Apport/), '10000');
-    await utilisateur.type(screen.getByLabelText(/Vos revenus/), '2400');
     await utilisateur.click(screen.getByRole('button', { name: /Créer le projet/ }));
     expect(
       await screen.findByRole(
