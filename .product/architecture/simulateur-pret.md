@@ -165,3 +165,4 @@ Ouverture de la page : `#s=` s'il existe (sinon stockage local, sinon `saisieDef
 - **Onglets des tableaux** : `aria-label` explicite sur « Voir les mois de l'année N » (le texte visible reste « Voir les mois »).
 - **Impression** : `SimulateurImprimer` recalcule depuis le fragment (défauts sans fragment) ; `DocumentSimulation` ajoute une carte « Les hypothèses » (projet, puis les offres en colonnes) avant les résultats.
 - **e2e** : `simulateur.spec.ts` (menu → saisie A et B → comparaison → année dépliée → CSV téléchargé et lu octet par octet → rechargement → lien rouvert dans un contexte neuf ; impression) et deux écrans dans `formats.ts` (18 au total).
+- **Téléchargement** : `telecharger.ts` révoque l'adresse du Blob 10 secondes après le clic, pas dans la foulée. Révoquée immédiatement, Chromium annulait parfois le téléchargement sur une machine chargée (parcours e2e rouge après la fusion de master, alors que le contenu du CSV était juste).
