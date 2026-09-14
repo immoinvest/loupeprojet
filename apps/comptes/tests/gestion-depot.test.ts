@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 
 import { d1SurSqlite } from '../scripts/d1-sqlite';
 import { appliquerMigrations } from '../scripts/migration';
-import { ErreurGestion, estDoublon, estTableAbsente } from '../src/gestion/depot';
+import { ErreurGestion, estTableAbsente } from '../src/gestion/depot';
 import { depotD1 } from '../src/gestion/depot-d1';
 import { valeurSql, versBien, versPreferences } from '../src/gestion/lignes';
 import { compter } from './aide';
@@ -77,16 +77,13 @@ describe('lignes SQL ↔ objets', () => {
 });
 
 describe('erreurs du dépôt', () => {
-  it('reconnaît une table absente et un doublon, pas le reste', () => {
+  it('reconnaît une table de gestion absente, pas le reste', () => {
     expect(estTableAbsente(new Error('D1_ERROR: no such table: gestion_bien: SQLITE_ERROR'))).toBe(
       true,
     );
+    expect(estTableAbsente(new Error('no such table: gestion_document'))).toBe(true);
     expect(estTableAbsente(new Error('no such table: user'))).toBe(false);
     expect(estTableAbsente('no such table: gestion_bien')).toBe(false);
-    expect(estDoublon(new Error('UNIQUE constraint failed: gestion_paiement.locationId'))).toBe(
-      true,
-    );
-    expect(estDoublon(undefined)).toBe(false);
     const erreur = new ErreurGestion('INTROUVABLE');
     expect(erreur).toMatchObject({
       name: 'ErreurGestion',
@@ -175,12 +172,47 @@ describe('depotD1', () => {
           : d1.prepare(sql),
     } as unknown as D1Database;
     await expect(
-      depotD1(enPanne).payer('u1', {
+      depotD1(enPanne, { maintenant: () => '2026-10-20T10:00:00.000Z' }).payer('u1', {
         locationId: location?.id ?? '',
         periode: '2026-10',
         montant: 70_000,
         date: '2026-10-05',
       }),
     ).rejects.toThrow('disque plein');
+  });
+
+  it('deux paiements lancés ensemble ne dépassent jamais le dû (insertion conditionnelle)', async () => {
+    const sqlite = baseAvecCompte();
+    const depot = depotD1(d1SurSqlite(sqlite).base, {
+      maintenant: () => '2026-10-20T10:00:00.000Z',
+    });
+    const { location } = await depot.creer('u1', {
+      bien: { nom: 'T2 Lices', adresse: '12 rue des Lices', type: 'appartement', meuble: true },
+      locataire: { prenom: 'Julie', nom: 'Martin' },
+      location: {
+        type: 'meublee',
+        debut: '2026-10-01',
+        jourLoyer: 5,
+        loyerHorsCharges: 65_000,
+        charges: 5_000,
+        depot: 130_000,
+      },
+    });
+    const moitie = {
+      locationId: location?.id ?? '',
+      periode: '2026-10',
+      montant: 40_000,
+      date: '2026-10-06',
+    };
+    const resultats = await Promise.allSettled([
+      depot.payer('u1', moitie),
+      depot.payer('u1', moitie),
+    ]);
+    expect(resultats.map((r) => r.status).sort()).toEqual(['fulfilled', 'rejected']);
+    const refus = resultats.find((r) => r.status === 'rejected');
+    expect(refus?.status === 'rejected' ? refus.reason : null).toMatchObject({
+      code: 'MONTANT_DEPASSE',
+    });
+    expect(compter(sqlite, 'gestion_paiement')).toBe(1);
   });
 });

@@ -10,11 +10,16 @@ import type {
 /** Les erreurs métier que les routes traduisent en réponses ; toute autre erreur est interne. */
 export type CodeErreurGestion =
   | 'INTROUVABLE'
-  | 'PERIODE_DEJA_RECUE'
   /** Un loyer marqué reçu avant l'entrée, après la sortie ou plus d'un an à l'avance. */
   | 'HORS_LOCATION'
   /** Le compte a atteint le nombre maximal de biens (borne contre l'abus du quota D1). */
-  | 'LIMITE_ATTEINTE';
+  | 'LIMITE_ATTEINTE'
+  /** Ce paiement ferait dépasser ce qui est dû pour le mois. */
+  | 'MONTANT_DEPASSE'
+  /** Un paiement daté dans le futur. */
+  | 'DATE_INVALIDE'
+  /** Une quittance ou un reçu atteste ce paiement : il ne s'annule plus. */
+  | 'DOCUMENT_EMIS';
 
 export class ErreurGestion extends Error {
   readonly code: CodeErreurGestion;
@@ -34,26 +39,23 @@ export interface DepotGestion {
   etat(userId: string): Promise<EtatGestion>;
   /** Le bien, et s'il est loué son locataire et sa location, écrits ensemble ou pas du tout. */
   creer(userId: string, creation: CreationLocation): Promise<CreationReponse>;
-  /** Lève INTROUVABLE (location d'un autre compte) ou PERIODE_DEJA_RECUE. */
+  /**
+   * Lève INTROUVABLE (location d'un autre compte), HORS_LOCATION, DATE_INVALIDE ou MONTANT_DEPASSE
+   * (la somme des paiements du mois ne dépasse jamais le dû, garanti à l'insertion).
+   */
   payer(userId: string, paiement: NouveauPaiement): Promise<Paiement>;
-  /** Lève INTROUVABLE si le paiement n'existe pas pour ce compte. */
+  /** Lève INTROUVABLE si le paiement n'existe pas pour ce compte, DOCUMENT_EMIS s'il est attesté. */
   annulerPaiement(userId: string, paiementId: string): Promise<void>;
   enregistrerPreferences(userId: string, preferences: PreferencesMenu): Promise<PreferencesMenu>;
 }
 
 const TABLE_ABSENTE = 'no such table: gestion_';
-const DOUBLON = 'UNIQUE constraint failed';
 
 function message(erreur: unknown): string {
   return erreur instanceof Error ? erreur.message : '';
 }
 
-/** La base n'a pas encore reçu la migration 0002 (production pas encore migrée). */
+/** La base n'a pas encore reçu une migration de gestion (0002 ou 0003 pas encore appliquée). */
 export function estTableAbsente(erreur: unknown): boolean {
   return message(erreur).includes(TABLE_ABSENTE);
-}
-
-/** Une contrainte d'unicité a refusé l'écriture (même période payée deux fois). */
-export function estDoublon(erreur: unknown): boolean {
-  return message(erreur).includes(DOUBLON);
 }

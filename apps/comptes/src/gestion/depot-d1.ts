@@ -1,7 +1,9 @@
 import type { D1Database, D1PreparedStatement } from '@cloudflare/workers-types';
 import {
   ajouterJours,
+  cleDocument,
   CreationReponseSchema,
+  loyerDuMois,
   occupationDe,
   PaiementSchema,
   periodeDe,
@@ -11,7 +13,7 @@ import {
   type Paiement,
 } from '@loupe/gestion';
 
-import { ErreurGestion, estDoublon, type DepotGestion } from './depot';
+import { ErreurGestion, type DepotGestion } from './depot';
 import {
   valeurSql,
   versBien,
@@ -39,17 +41,19 @@ export const LIMITE_BIENS = 200;
 /** Un loyer ne se marque pas reçu plus d'un an à l'avance. */
 const JOURS_D_AVANCE_MAX = 366;
 
-interface BornesLocation {
+/** Ce que `payer` relit de la location : ses bornes et ses montants, pour recalculer le dû. */
+interface LigneLocationPayee {
+  readonly id: string;
   readonly debut: string;
   readonly fin: string | null;
+  readonly jourLoyer: number;
+  readonly loyerHorsCharges: number;
+  readonly charges: number;
 }
 
-/** La période payée tombe dans la location : pas avant l'entrée, pas après la sortie, pas trop tôt. */
-function periodeAcceptee(periode: string, location: BornesLocation, aujourdhui: string): boolean {
-  const avantEntree = periode < periodeDe(location.debut);
-  const apresSortie = location.fin !== null && periode > periodeDe(location.fin);
-  const tropEnAvance = periode > periodeDe(ajouterJours(aujourdhui, JOURS_D_AVANCE_MAX));
-  return !avantEntree && !apresSortie && !tropEnAvance;
+/** Un loyer ne se marque pas reçu plus d'un an à l'avance. */
+function tropEnAvance(periode: string, aujourdhui: string): boolean {
+  return periode > periodeDe(ajouterJours(aujourdhui, JOURS_D_AVANCE_MAX));
 }
 
 type Lier = (
@@ -63,7 +67,11 @@ const SQL = {
   locations: 'select * from gestion_location where userId = ? order by debut, id',
   paiements: 'select * from gestion_paiement where userId = ? order by periode, id',
   preferences: 'select * from gestion_preference where userId = ?',
-  locationDuCompte: 'select debut, fin from gestion_location where id = ? and userId = ?',
+  locationDuCompte:
+    'select id, debut, fin, jourLoyer, loyerHorsCharges, charges from gestion_location where id = ? and userId = ?',
+  paiementDuCompte: 'select locationId, periode from gestion_paiement where id = ? and userId = ?',
+  documentsDuPaiement:
+    'select count(*) as n from gestion_document where userId = ? and (cle = ? or cle = ?)',
   nombreDeBiens: 'select count(*) as n from gestion_bien where userId = ?',
   insererBien:
     'insert into gestion_bien (id, userId, nom, adresse, codePostal, ville, type, surface, meuble, projetId, projet, creeLe, modifieLe) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
@@ -71,8 +79,9 @@ const SQL = {
     'insert into gestion_locataire (id, userId, prenom, nom, email, creeLe) values (?, ?, ?, ?, ?, ?)',
   insererLocation:
     'insert into gestion_location (id, userId, bienId, locataireId, type, debut, fin, jourLoyer, loyerHorsCharges, charges, depot, creeLe) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+  // Insertion conditionnelle (ADR-G11) : atomique, la somme du mois ne dépasse jamais le dû.
   insererPaiement:
-    'insert into gestion_paiement (id, userId, locationId, periode, montant, date, source, creeLe) values (?, ?, ?, ?, ?, ?, ?, ?)',
+    'insert into gestion_paiement (id, userId, locationId, periode, montant, date, source, creeLe) select ?, ?, ?, ?, ?, ?, ?, ? where (select coalesce(sum(montant), 0) from gestion_paiement where userId = ? and locationId = ? and periode = ?) + ? <= ?',
   supprimerPaiement: 'delete from gestion_paiement where id = ? and userId = ?',
   enregistrerPreferences:
     'insert into gestion_preference (userId, analyser, gerer, modifieLe) values (?, ?, ?, ?) on conflict (userId) do update set analyser = excluded.analyser, gerer = excluded.gerer, modifieLe = excluded.modifieLe',
@@ -120,7 +129,8 @@ function insererLocation(lier: Lier, userId: string, l: LocationGeree): D1Prepar
   );
 }
 
-function insererPaiement(lier: Lier, userId: string, p: Paiement): D1PreparedStatement {
+/** L'écriture d'un paiement, qui n'a lieu que si le mois reçu reste ≤ `du` (centimes). */
+function insererPaiement(lier: Lier, userId: string, p: Paiement, du: number): D1PreparedStatement {
   return lier(
     SQL.insererPaiement,
     p.id,
@@ -131,6 +141,11 @@ function insererPaiement(lier: Lier, userId: string, p: Paiement): D1PreparedSta
     p.date,
     p.source,
     p.creeLe,
+    userId,
+    p.locationId,
+    p.periode,
+    p.montant,
+    du,
   );
 }
 
@@ -199,30 +214,49 @@ export function depotD1(base: D1Database, options: OptionsDepot = {}): DepotGest
         SQL.locationDuCompte,
         nouveau.locationId,
         userId,
-      ).all<BornesLocation>();
+      ).all<LigneLocationPayee>();
       const [location] = results;
       if (location === undefined) throw new ErreurGestion('INTROUVABLE');
-      if (!periodeAcceptee(nouveau.periode, location, maintenant().slice(0, 10))) {
+      const aujourdhui = maintenant().slice(0, 10);
+      // Le dû est recalculé ici, jamais lu dans la requête ; aucun dû = période hors de la location.
+      const { fin, ...bornes } = location;
+      const du = loyerDuMois(fin === null ? bornes : { ...bornes, fin }, nouveau.periode);
+      if (du === null || tropEnAvance(nouveau.periode, aujourdhui)) {
         throw new ErreurGestion('HORS_LOCATION');
       }
+      if (nouveau.date > aujourdhui) throw new ErreurGestion('DATE_INVALIDE');
       const paiement = PaiementSchema.parse({
         id: genererId(),
         ...nouveau,
         source: 'manuel',
         creeLe: maintenant(),
       });
-      try {
-        await insererPaiement(lier, userId, paiement).run();
-      } catch (erreur) {
-        if (estDoublon(erreur)) throw new ErreurGestion('PERIODE_DEJA_RECUE');
-        throw erreur;
-      }
+      const resultat = await insererPaiement(lier, userId, paiement, du.total).run();
+      if (resultat.meta.changes === 0) throw new ErreurGestion('MONTANT_DEPASSE');
       return paiement;
     },
 
     async annulerPaiement(userId, paiementId) {
-      const resultat = await lier(SQL.supprimerPaiement, paiementId, userId).run();
-      if (resultat.meta.changes === 0) throw new ErreurGestion('INTROUVABLE');
+      const { results } = await lier(SQL.paiementDuCompte, paiementId, userId).all<{
+        locationId: string;
+        periode: string;
+      }>();
+      const [paiement] = results;
+      if (paiement === undefined) throw new ErreurGestion('INTROUVABLE');
+      const { results: emis } = await lier(
+        SQL.documentsDuPaiement,
+        userId,
+        cleDocument({ type: 'recu', paiementId }),
+        cleDocument({
+          type: 'quittance',
+          locationId: paiement.locationId,
+          periode: paiement.periode,
+        }),
+      ).all<{ n: number }>();
+      if (emis.reduce((somme, ligne) => somme + ligne.n, 0) > 0) {
+        throw new ErreurGestion('DOCUMENT_EMIS');
+      }
+      await lier(SQL.supprimerPaiement, paiementId, userId).run();
     },
 
     async enregistrerPreferences(userId, preferences) {

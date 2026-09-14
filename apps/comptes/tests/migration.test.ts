@@ -80,7 +80,7 @@ describe('migration D1', () => {
 describe('migration 0002 : gestion locative', () => {
   it('s’applique après 0001 : cinq tables gestion_* et leurs index', () => {
     const base = new DatabaseSync(':memory:');
-    appliquerMigrations(base);
+    appliquerMigrations(base, 2);
     expect(noms(base, 'table')).toEqual([
       'account',
       'gestion_bien',
@@ -111,7 +111,11 @@ describe('migration 0002 : gestion locative', () => {
     appliquerMigrations(base);
     appliquerMigrations(base);
     expect(noms(base, 'table')).toContain('gestion_bien');
-    expect(MIGRATIONS.map((m) => m.fichier)).toEqual(['0001_comptes.sql', '0002_gestion.sql']);
+    expect(MIGRATIONS.map((m) => m.fichier)).toEqual([
+      '0001_comptes.sql',
+      '0002_gestion.sql',
+      '0003_gestion_documents.sql',
+    ]);
   });
 
   it('les clés étrangères sont appliquées : pas de bien sans compte', () => {
@@ -124,5 +128,108 @@ describe('migration 0002 : gestion locative', () => {
         )
         .run('b1', 'inconnu', 'T2', '12 rue des Lices', 'appartement', 1, 'x', 'x'),
     ).toThrow(/FOREIGN KEY constraint failed/);
+  });
+});
+
+describe('migration 0003 : paiements partiels, bailleur, documents', () => {
+  const H = '2026-10-06T08:00:00.000Z';
+  const SQL = {
+    compte:
+      'insert into "user" (id, name, email, emailVerified, createdAt, updatedAt) values (?, ?, ?, ?, ?, ?)',
+    bien: 'insert into gestion_bien (id, userId, nom, adresse, type, meuble, creeLe, modifieLe) values (?, ?, ?, ?, ?, ?, ?, ?)',
+    locataire:
+      'insert into gestion_locataire (id, userId, prenom, nom, creeLe) values (?, ?, ?, ?, ?)',
+    location:
+      'insert into gestion_location (id, userId, bienId, locataireId, type, debut, jourLoyer, loyerHorsCharges, charges, depot, creeLe) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+    paiement:
+      'insert into gestion_paiement (id, userId, locationId, periode, montant, date, source, creeLe) values (?, ?, ?, ?, ?, ?, ?, ?)',
+    bailleur: 'insert into gestion_bailleur (userId, nom, adresse, modifieLe) values (?, ?, ?, ?)',
+    document:
+      'insert into gestion_document (id, userId, cle, type, numero, locationId, periode, contenu, emisLe) values (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+  } as const;
+
+  /** Une base de G1a (0001 et 0002) avec un compte, un bien loué et un paiement d'octobre. */
+  function baseDeG1a(): DatabaseSync {
+    const base = new DatabaseSync(':memory:');
+    appliquerMigrations(base, 2);
+    base.prepare(SQL.compte).run('u1', 'Camille', EMAIL, 1, H, H);
+    base.prepare(SQL.bien).run('b1', 'u1', 'T2 Lices', '12 rue des Lices', 'appartement', 1, H, H);
+    base.prepare(SQL.locataire).run('t1', 'u1', 'Julie', 'Martin', H);
+    base
+      .prepare(SQL.location)
+      .run('l1', 'u1', 'b1', 't1', 'meublee', '2026-10-01', 5, 65_000, 5_000, 130_000, H);
+    base.prepare(SQL.paiement).run('p1', 'u1', 'l1', '2026-10', 30_000, '2026-10-06', 'manuel', H);
+    return base;
+  }
+
+  it('les paiements de G1a restent identiques ; un second paiement du même mois devient possible', () => {
+    const base = baseDeG1a();
+    expect(() =>
+      base
+        .prepare(SQL.paiement)
+        .run('p2', 'u1', 'l1', '2026-10', 40_000, '2026-10-20', 'manuel', H),
+    ).toThrow(/UNIQUE constraint failed/);
+    const avant = base.prepare('select * from gestion_paiement order by id').all();
+
+    appliquerMigrations(base);
+    expect(base.prepare('select * from gestion_paiement order by id').all()).toEqual(avant);
+    base.prepare(SQL.paiement).run('p2', 'u1', 'l1', '2026-10', 40_000, '2026-10-20', 'manuel', H);
+    expect(base.prepare('select count(*) as n from gestion_paiement').get()).toEqual({ n: 2 });
+    // Les clés étrangères de la table recréée tiennent toujours.
+    expect(() =>
+      base
+        .prepare(SQL.paiement)
+        .run('p3', 'u1', 'inconnue', '2026-10', 1, '2026-10-21', 'manuel', H),
+    ).toThrow(/FOREIGN KEY constraint failed/);
+  });
+
+  it('tables et index après 0003', () => {
+    const base = baseDeG1a();
+    appliquerMigrations(base);
+    expect(noms(base, 'table')).toEqual([
+      'account',
+      'gestion_bailleur',
+      'gestion_bien',
+      'gestion_document',
+      'gestion_locataire',
+      'gestion_location',
+      'gestion_paiement',
+      'gestion_preference',
+      'session',
+      'user',
+      'verification',
+    ]);
+    expect(noms(base, 'index')).toEqual([
+      'account_userId_idx',
+      'gestion_bien_userId_idx',
+      'gestion_document_userId_idx',
+      'gestion_locataire_userId_idx',
+      'gestion_location_bienId_idx',
+      'gestion_location_userId_idx',
+      'gestion_paiement_location_periode_idx',
+      'gestion_paiement_userId_idx',
+      'session_userId_idx',
+      'verification_identifier_idx',
+    ]);
+  });
+
+  it('un document est unique par compte et par clé ; bailleur et documents partent avec le compte', () => {
+    const base = baseDeG1a();
+    appliquerMigrations(base);
+    base.prepare(SQL.bailleur).run('u1', 'Pierre Georgel', '3 rue Paradis', H);
+    const cle = 'quittance:l1:2026-10';
+    base
+      .prepare(SQL.document)
+      .run('d1', 'u1', cle, 'quittance', 'Q-202610-L1', 'l1', '2026-10', '{}', H);
+    expect(() =>
+      base
+        .prepare(SQL.document)
+        .run('d2', 'u1', cle, 'quittance', 'Q-202610-L1', 'l1', '2026-10', '{}', H),
+    ).toThrow(/UNIQUE constraint failed/);
+
+    base.prepare('delete from "user" where id = ?').run('u1');
+    expect(base.prepare('select count(*) as n from gestion_document').get()).toEqual({ n: 0 });
+    expect(base.prepare('select count(*) as n from gestion_bailleur').get()).toEqual({ n: 0 });
+    expect(base.prepare('select count(*) as n from gestion_paiement').get()).toEqual({ n: 0 });
   });
 });

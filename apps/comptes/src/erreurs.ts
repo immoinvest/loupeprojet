@@ -11,9 +11,11 @@ export type CodeErreur =
   | 'ERREUR_INTERNE'
   | 'NON_CONNECTE'
   | 'CORPS_TROP_GROS'
-  | 'PERIODE_DEJA_RECUE'
   | 'HORS_LOCATION'
   | 'LIMITE_ATTEINTE'
+  | 'MONTANT_DEPASSE'
+  | 'DATE_INVALIDE'
+  | 'DOCUMENT_EMIS'
   | 'GESTION_INDISPONIBLE';
 
 /** Réponse JSON d'erreur, indépendante du contexte Hono (utilisable dans notFound, onError et index). */

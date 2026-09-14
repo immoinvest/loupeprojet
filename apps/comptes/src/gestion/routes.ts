@@ -18,9 +18,11 @@ export const TAILLE_MAX_OCTETS = 64 * 1024;
 
 const STATUTS_METIER = {
   INTROUVABLE: 404,
-  PERIODE_DEJA_RECUE: 409,
   HORS_LOCATION: 400,
   LIMITE_ATTEINTE: 409,
+  MONTANT_DEPASSE: 409,
+  DATE_INVALIDE: 400,
+  DOCUMENT_EMIS: 409,
 } as const;
 
 /** Le corps JSON validé par le schéma, ou `null` s'il est illisible ou invalide. */
