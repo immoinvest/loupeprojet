@@ -1,0 +1,625 @@
+<title>Maquettes du Rapport Deklic</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700&family=Nunito+Sans:wght@400;600;700&display=swap">
+<style>
+  /* Tokens Deklic : direction « Le guide » (ADR-004) et identité (ADR-005), copiés de apps/web/src/index.css. */
+  :root {
+    --fond: #fffdf9;
+    --surface: #ffffff;
+    --bordure: #ece8e0;
+    --bordure-douce: #f1ede5;
+    --encre: #23272f;
+    --encre-2: #4b5563;
+    --encre-3: #6b7280;
+    --encre-4: #9ca3af;
+    --accent: #2b4bf2;
+    --accent-fonce: #1f38c4;
+    --accent-doux: #e8ecff;
+    --accent-fond: #f5f7ff;
+    --accent-bordure: #d9dfff;
+    --bon: #2e9e6b;
+    --bon-texte: #1f7a4d;
+    --bon-fond: #e3f4ea;
+    --surveiller: #d98a1e;
+    --surveiller-texte: #9a5b0f;
+    --surveiller-fond: #fbeeda;
+    --probleme: #d9453d;
+    --probleme-texte: #a3302a;
+    --probleme-fond: #fbe5e3;
+    --display: 'Outfit', 'Segoe UI', system-ui, sans-serif;
+    --sans: 'Nunito Sans', 'Segoe UI', system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--fond);
+    color: var(--encre);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.5;
+    font-variant-numeric: tabular-nums;
+    padding-block: 32px 64px;
+    padding-inline: 16px;
+  }
+  h1, h2, h3 { margin: 0; font-family: var(--display); font-weight: 700; text-wrap: balance; }
+  p { margin: 0; }
+  .doc { max-width: 1080px; margin: 0 auto; display: flex; flex-direction: column; gap: 40px; }
+  .doc > header { display: flex; flex-direction: column; gap: 10px; max-width: 68ch; }
+  .doc > header h1 { font-size: 34px; line-height: 1.1; letter-spacing: -0.01em; }
+  .doc > header p { font-size: 17px; color: var(--encre-2); }
+  .doc > header .eyebrow { font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+  .question { display: flex; flex-direction: column; gap: 6px; padding: 14px 18px; border: 1px solid var(--accent-bordure); background: var(--accent-fond); border-radius: 12px; max-width: 68ch; }
+  .question strong { font-family: var(--display); font-size: 16px; }
+  .question ul { margin: 0; padding-left: 20px; color: var(--encre-2); }
+
+  /* Une maquette = un cadre qui simule la zone de contenu de l'application. */
+  .maquette { display: flex; flex-direction: column; gap: 14px; }
+  .maquette > .titre { display: flex; flex-wrap: wrap; align-items: baseline; gap: 12px 16px; }
+  .maquette > .titre h2 { font-size: 24px; }
+  .maquette > .titre .verdict-maquette { font-size: 13px; font-weight: 700; padding: 4px 10px; border-radius: 999px; }
+  .maquette > .titre .verdict-maquette.retenue { background: var(--bon-fond); color: var(--bon-texte); }
+  .maquette > .titre .verdict-maquette.variante { background: var(--bordure-douce); color: var(--encre-3); }
+  .maquette > .titre p { flex-basis: 100%; color: var(--encre-2); max-width: 78ch; }
+  .ecran { border: 1px solid var(--bordure); border-radius: 12px; background: var(--fond); padding: 28px 32px 36px; display: flex; flex-direction: column; gap: 20px; overflow: hidden; }
+  .ecran.telephone { width: 375px; max-width: 100%; padding: 20px 16px 28px; gap: 16px; }
+
+  /* Reprise des composants de apps/web : verdict, feux, carte, gros chiffre, lignes. */
+  .verdict { display: flex; flex-direction: column; gap: 10px; }
+  .verdict h3 { font-size: 34px; line-height: 1.12; max-width: 24ch; letter-spacing: -0.01em; }
+  .telephone .verdict h3 { font-size: 28px; }
+  .verdict .chapo { font-size: 16px; color: var(--encre-2); max-width: 64ch; line-height: 1.55; }
+  .feux { display: flex; flex-wrap: wrap; gap: 10px; padding-top: 4px; }
+  .pastille { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 8px 14px; border-radius: 999px; font-size: 14px; font-weight: 600; }
+  .pastille.compacte { min-height: 30px; padding: 4px 10px; font-size: 12px; border: 1px solid var(--bordure); background: var(--surface); color: var(--encre-2); }
+  .pastille .point { width: 10px; height: 10px; border-radius: 999px; }
+  .bon { background: var(--bon-fond); color: var(--bon-texte); } .bon .point { background: var(--bon); }
+  .surveiller { background: var(--surveiller-fond); color: var(--surveiller-texte); } .surveiller .point { background: var(--surveiller); }
+  .probleme { background: var(--probleme-fond); color: var(--probleme-texte); } .probleme .point { background: var(--probleme); }
+
+  .grille { display: grid; grid-template-columns: 1fr; gap: 20px; }
+  @media (min-width: 760px) { .ecran:not(.telephone) .grille.deux { grid-template-columns: 1fr 1fr; } .ecran:not(.telephone) .grille.deux-tiers { grid-template-columns: 2fr 1fr; } }
+  .carte { display: flex; flex-direction: column; gap: 12px; background: var(--surface); border: 1px solid var(--bordure); border-radius: 20px; padding: 24px; box-shadow: 0 6px 24px rgba(35, 39, 47, 0.05); }
+  .telephone .carte { padding: 16px; }
+  .carte.principale { border-color: var(--accent-bordure); box-shadow: 0 10px 32px rgba(43, 75, 242, 0.08); }
+  .titre-carte { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px 16px; }
+  .titre-carte .avec-info { display: flex; align-items: center; gap: 2px; min-width: 0; }
+  .titre-carte h3 { font-size: 22px; font-weight: 600; }
+  .gros { font-family: var(--display); font-size: 40px; line-height: 1; font-weight: 700; }
+  .telephone .gros { font-size: 32px; }
+  .gros .complement { margin-left: 8px; font-size: 18px; font-weight: 600; color: var(--encre-3); }
+  .gros.rouge { color: var(--probleme); } .gros.vert { color: var(--bon); }
+  .lignes { display: flex; flex-direction: column; }
+  .ligne { display: flex; justify-content: space-between; gap: 16px; padding: 8px 0; border-bottom: 1px solid var(--bordure-douce); font-size: 15px; }
+  .ligne:last-child { border-bottom: 0; }
+  .ligne .valeur { flex-shrink: 0; white-space: nowrap; text-align: right; }
+  .ligne.sous-total { font-weight: 700; padding-top: 10px; }
+  .ligne.sous-total .libelle::before { content: '= '; color: var(--encre-3); font-weight: 400; }
+  .ligne.fort { font-size: 17px; font-weight: 700; padding-top: 12px; }
+  .ligne .libelle .note { display: block; font-size: 12px; font-weight: 400; color: var(--encre-3); }
+  .txt-bon { color: var(--bon); } .txt-probleme { color: var(--probleme); } .txt-encre-2 { color: var(--encre-2); }
+  .phrase { font-size: 15px; color: var(--encre-2); line-height: 1.55; }
+
+  /* L'icône ⓘ : bouton de 44 px, icône de 20 px, marges négatives pour ne pas élargir la ligne du titre. */
+  .info { position: relative; display: inline-flex; }
+  .info > button { width: 44px; height: 44px; margin: -10px -6px -10px -4px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border: 0; background: transparent; border-radius: 999px; color: var(--encre-3); cursor: pointer; }
+  .info > button:hover, .info > button[aria-expanded="true"] { color: var(--accent); }
+  .info > button:focus-visible { outline: 2px solid var(--accent); outline-offset: -4px; }
+  .info > button svg { width: 20px; height: 20px; }
+  .bulle { position: absolute; top: calc(100% - 4px); left: -4px; z-index: 20; width: min(320px, calc(100vw - 32px)); padding: 12px 14px; background: var(--surface); border: 1px solid var(--accent-bordure); border-radius: 12px; box-shadow: 0 10px 30px rgba(35, 39, 47, 0.12); font-size: 14px; font-weight: 400; line-height: 1.5; color: var(--encre-2); text-align: left; white-space: normal; }
+  .bulle.droite { left: auto; right: -4px; }
+  .bulle b { color: var(--encre); font-weight: 700; }
+  .bulle[hidden] { display: none; }
+
+  /* Le lien vers l'onglet : un vrai lien, en bas de carte, cible de 44 px. */
+  .lien-onglet { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; margin-top: auto; align-self: flex-start; font-weight: 700; font-size: 15px; color: var(--accent); text-decoration: none; }
+  .lien-onglet:hover { color: var(--accent-fonce); text-decoration: underline; }
+  .lien-onglet svg { width: 18px; height: 18px; }
+
+  /* Carte autofinancement : cascade à gauche, repères à droite. */
+  .autofinancement { display: grid; grid-template-columns: 1fr; gap: 20px; }
+  @media (min-width: 760px) { .ecran:not(.telephone) .autofinancement { grid-template-columns: minmax(0, 3fr) minmax(220px, 2fr); gap: 32px; } }
+  .reperes { display: grid; grid-template-columns: 1fr; gap: 10px; align-content: start; }
+  .telephone .reperes { grid-template-columns: 1fr 1fr; }
+  .repere { display: flex; flex-direction: column; gap: 2px; padding: 12px 14px; border-radius: 12px; background: var(--accent-fond); border: 1px solid var(--accent-bordure); }
+  .repere .etiquette { display: flex; align-items: center; gap: 2px; font-size: 12px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--encre-3); }
+  .repere .chiffre { font-family: var(--display); font-size: 26px; font-weight: 700; line-height: 1.1; }
+  .repere .sous { font-size: 13px; color: var(--encre-2); }
+  .telephone .repere.large { grid-column: 1 / -1; }
+
+  /* Carte rendements : trois colonnes, chacune avec son ⓘ. */
+  .rendements { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .rendements.empiles { grid-template-columns: 1fr; gap: 8px; }
+  .rendement { display: flex; flex-direction: column; gap: 2px; }
+  .rendements.empiles .rendement { flex-direction: row; align-items: baseline; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--bordure-douce); }
+  .rendements.empiles .rendement:last-child { border-bottom: 0; }
+  .rendement .etiquette { display: flex; align-items: center; gap: 2px; font-size: 13px; font-weight: 700; color: var(--encre-3); }
+  .rendement .chiffre { font-family: var(--display); font-size: 30px; font-weight: 700; line-height: 1.1; }
+  .telephone .rendement .chiffre { font-size: 24px; }
+  .rendement .sous { font-size: 12px; color: var(--encre-3); }
+
+  /* Jauge de prix (reprise simplifiée). */
+  .jauge { position: relative; height: 66px; margin: 6px 10px 0; }
+  .jauge .barre { position: absolute; top: 22px; left: 0; right: 0; height: 10px; border-radius: 999px; background: linear-gradient(90deg, var(--bon), var(--surveiller), var(--probleme)); opacity: 0.35; }
+  .jauge .repere-j { position: absolute; top: 18px; display: flex; flex-direction: column; align-items: center; transform: translateX(-50%); }
+  .jauge .repere-j span:first-child { width: 2px; height: 18px; background: rgba(35, 39, 47, 0.4); }
+  .jauge .repere-j span:last-child { margin-top: 4px; font-size: 12px; white-space: nowrap; color: var(--encre-3); }
+  .jauge .curseur { position: absolute; top: 16px; width: 22px; height: 22px; border-radius: 999px; background: var(--accent); border: 4px solid var(--surface); box-shadow: 0 0 0 2px var(--accent); transform: translateX(-50%); }
+  .jauge .prix { position: absolute; top: -8px; transform: translateX(-50%); font-size: 13px; font-weight: 700; color: var(--accent); white-space: nowrap; }
+
+  /* Bandeau Leviers, inchangé. */
+  .leviers { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .leviers .cols { display: flex; flex-direction: column; gap: 20px; }
+  @media (min-width: 760px) { .ecran:not(.telephone) .leviers .cols { flex-direction: row; } .ecran:not(.telephone) .leviers .sep { width: 1px; height: auto; } }
+  .leviers .col { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+  .leviers .sep { height: 1px; background: rgba(255, 255, 255, 0.25); }
+  .leviers .etiquette { font-size: 12px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; opacity: 0.8; }
+  .leviers .chiffre { font-family: var(--display); font-size: 32px; font-weight: 700; }
+  .leviers .sous { font-size: 14px; opacity: 0.9; line-height: 1.4; }
+  .leviers .etsi { display: flex; flex-direction: column; gap: 4px; font-size: 14px; }
+  .leviers .etsi div { display: flex; justify-content: space-between; gap: 12px; }
+  .leviers .etsi div span:first-child { opacity: 0.85; }
+
+  .pied { font-size: 12px; color: var(--encre-3); }
+  .comparatif { display: grid; grid-template-columns: 1fr; gap: 16px; }
+  @media (min-width: 760px) { .comparatif { grid-template-columns: 1fr 1fr; } }
+  .comparatif .bloc { display: flex; flex-direction: column; gap: 8px; padding: 16px 18px; border: 1px solid var(--bordure); border-radius: 12px; background: var(--surface); }
+  .comparatif h3 { font-size: 17px; }
+  .comparatif ul { margin: 0; padding-left: 18px; color: var(--encre-2); display: flex; flex-direction: column; gap: 4px; }
+  .legende { display: flex; flex-direction: column; gap: 6px; color: var(--encre-2); max-width: 78ch; }
+  .legende ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; }
+  @media (prefers-reduced-motion: no-preference) { .bulle { animation: apparaitre 120ms ease-out; } }
+  @keyframes apparaitre { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+</style>
+
+<div class="doc">
+  <header>
+    <span class="eyebrow">Fiche 10 · Rapport : icônes et cash-flow · 14/09/2026</span>
+    <h1>Deux dispositions pour le Rapport, avec les chiffres du T3 de Marseille</h1>
+    <p>Même contenu dans les deux : l'autofinancement en carte principale avec sa cascade et ses trois repères, une carte Rendements (brut · net · net-net), une icône ⓘ par titre et par indicateur, et un lien « Voir … → » vers l'onglet qui détaille. Seule la place des cartes change. Les ⓘ se cliquent ici aussi.</p>
+  </header>
+
+  <div class="question">
+    <strong>À trancher : A ou B ?</strong>
+    <ul>
+      <li><b>A</b> (retenue par défaut) : l'autofinancement occupe toute la largeur ; en dessous, le prix et les rendements côte à côte, puis les leviers, les impôts et la revente.</li>
+      <li><b>B</b> : l'autofinancement et les rendements partagent la première rangée (2/3 · 1/3), le prix passe en pleine largeur avec une jauge plus longue.</li>
+      <li>Sans réponse, la session avance avec A.</li>
+    </ul>
+  </div>
+
+  <!-- ============================ MAQUETTE A ============================ -->
+  <section class="maquette" id="a">
+    <div class="titre">
+      <h2>A · Autofinancement pleine largeur, puis prix et rendements</h2>
+      <span class="verdict-maquette retenue">retenue par défaut</span>
+      <p>La cascade se lit de haut en bas : ce que le loyer laisse après le crédit, après les charges (le chiffre du feu), après l'impôt. À droite, les trois repères qui répondent à « est-ce que le loyer porte le crédit ? ».</p>
+    </div>
+    <div class="ecran">
+      <div class="verdict">
+        <h3>Le prix est bon. Le loyer ne couvre pas tout.</h3>
+        <p class="chapo">−25 % par rapport au prix estimé, banque d'accord (effort 25 %), 210 € à sortir chaque mois.</p>
+        <div class="feux" aria-label="Cinq feux">
+          <span class="pastille bon"><span class="point"></span>Prix −25 %</span>
+          <span class="pastille surveiller"><span class="point"></span>Rendement net 4,3 %</span>
+          <span class="pastille probleme"><span class="point"></span>Cash-flow −210 €/mois</span>
+          <span class="pastille bon"><span class="point"></span>Effort 25 %</span>
+          <span class="pastille bon"><span class="point"></span>Risques : aucun</span>
+        </div>
+      </div>
+
+      <section class="carte principale">
+        <div class="titre-carte">
+          <div class="avec-info">
+            <h3>Est-ce que ça s'autofinance ?</h3>
+            <span class="info">
+              <button type="button" aria-label="Explication : Est-ce que ça s'autofinance ?" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></button>
+              <p class="bulle" role="tooltip" hidden>Chaque mois, le loyer de <b>980 €</b> paie d'abord le crédit et l'assurance (<b>827 €</b>), puis les charges : taxe foncière, copropriété, assurance propriétaire, comptable, CFE, provision d'entretien (<b>307 €</b>) et 3 semaines sans locataire (<b>57 €</b>). Il manque <b>210 €</b> avant impôt. Au meublé au réel, l'impôt est nul sur 10 ans. C'est ce que les annonces oublient.</p>
+            </span>
+          </div>
+        </div>
+        <div class="gros rouge">Non.</div>
+        <div class="autofinancement">
+          <div class="lignes">
+            <div class="ligne"><span class="libelle">Loyer</span><span class="valeur txt-bon" style="font-weight:700">+980 €</span></div>
+            <div class="ligne"><span class="libelle">Crédit et assurance</span><span class="valeur">−827 €</span></div>
+            <div class="ligne sous-total"><span class="libelle">Après le crédit</span><span class="valeur txt-bon">+153 €</span></div>
+            <div class="ligne"><span class="libelle">Charges, impôts locaux, entretien</span><span class="valeur">−307 €</span></div>
+            <div class="ligne"><span class="libelle">3 semaines vides par an</span><span class="valeur">−57 €</span></div>
+            <div class="ligne fort"><span class="libelle">Reste chaque mois</span><span class="valeur txt-probleme">−210 €</span></div>
+            <div class="ligne"><span class="libelle">Impôt<span class="note">Meublé au réel, moyenne sur 10 ans</span></span><span class="valeur">−0 €</span></div>
+            <div class="ligne sous-total"><span class="libelle">Après l'impôt</span><span class="valeur txt-probleme">−210 €</span></div>
+          </div>
+          <div class="reperes">
+            <div class="repere">
+              <span class="etiquette">Part du loyer prise par le crédit
+                <span class="info">
+                  <button type="button" aria-label="Explication : part du loyer prise par le crédit" aria-expanded="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></button>
+                  <p class="bulle" role="tooltip">Taux de couverture : la mensualité, assurance comprise (<b>827 €</b>), représente <b>84 %</b> du loyer (<b>980 €</b>). Sous 100 %, le loyer paie le crédit ; restent ensuite les charges et l'impôt.</p>
+                </span>
+              </span>
+              <span class="chiffre">84 %</span>
+              <span class="sous">827 € de mensualité pour 980 € de loyer</span>
+            </div>
+            <div class="repere">
+              <span class="etiquette">Effort d'épargne
+                <span class="info">
+                  <button type="button" aria-label="Explication : effort d'épargne" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></button>
+                  <p class="bulle" role="tooltip" hidden>Ce que vous sortez de votre poche chaque mois pour tenir le projet : <b>210 €</b>, soit <b>2 523 €</b> par an. Quand le cash-flow devient positif, cette case devient un excédent.</p>
+                </span>
+              </span>
+              <span class="chiffre txt-probleme">210 €<span style="font-size:15px;color:var(--encre-3);font-weight:600">/mois</span></span>
+              <span class="sous">à sortir de votre poche</span>
+            </div>
+            <div class="repere">
+              <span class="etiquette">Loyer d'équilibre
+                <span class="info">
+                  <button type="button" aria-label="Explication : loyer d'équilibre" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></button>
+                  <p class="bulle" role="tooltip" hidden>Point mort : le loyer hors charges à partir duquel le projet ne coûte plus rien chaque mois, vacance et charges comprises : <b>1 203 €</b>, contre <b>980 €</b> visés aujourd'hui.</p>
+                </span>
+              </span>
+              <span class="chiffre">1 203 €</span>
+              <span class="sous">pour un cash-flow à zéro (980 € visés)</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="grille deux">
+        <section class="carte">
+          <div class="titre-carte">
+            <div class="avec-info">
+              <h3>Est-ce que c'est cher ?</h3>
+              <span class="info">
+                <button type="button" aria-label="Explication : Est-ce que c'est cher ?" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></button>
+                <p class="bulle" role="tooltip" hidden>Le bien est affiché <b>2 385 €/m²</b> contre un prix estimé de <b>3 181 €/m²</b>, soit <b>−25 %</b>. L'estimation vient de <b>31</b> ventes signées chez le notaire (base DVF) ramenées à aujourd'hui, pas des prix d'annonces, 5 à 10 % au-dessus du prix final ; l'état, l'étage, le DPE, le balcon et les charges l'ajustent.</p>
+              </span>
+            </div>
+          </div>
+          <div class="gros vert">Non.</div>
+          <div class="jauge" role="img" aria-label="Prix au m² 2 385 € contre un prix estimé de 3 181 €">
+            <div class="barre"></div>
+            <div class="repere-j" style="left: 38%"><span></span><span>2 926, à rénover</span></div>
+            <div class="repere-j" style="left: 62%"><span></span><span>3 181 €/m², estimé</span></div>
+            <div class="repere-j" style="left: 86%"><span></span><span>3 435, rénové</span></div>
+            <div class="curseur" style="left: 10%"></div>
+            <div class="prix" style="left: 10%">2 385 €/m²</div>
+          </div>
+          <p class="phrase">Estimé entre <b>190 000 €</b> et <b>223 000 €</b> · confiance moyenne.</p>
+          <p class="phrase">31 ventes réelles autour du bien. Un prix aussi bas se vérifie en visite : pourquoi le vendeur baisse ?</p>
+          <a class="lien-onglet" href="#a">Voir l'estimation <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a>
+        </section>
+
+        <section class="carte">
+          <div class="titre-carte">
+            <div class="avec-info"><h3>Combien ça rapporte ?</h3></div>
+          </div>
+          <div class="rendements">
+            <div class="rendement">
+              <span class="etiquette">Brut
+                <span class="info">
+                  <button type="button" aria-label="Explication : rendement brut" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></button>
+                  <p class="bulle" role="tooltip" hidden>Loyers annuels hors charges ÷ coût total (prix + travaux + frais d'acquisition) : <b>11 760 €</b> ÷ <b>172 987 €</b> = <b>6,8 %</b>. C'est le chiffre des annonces et des sites : il ignore la vacance et toutes les charges.</p>
+                </span>
+              </span>
+              <span class="chiffre">6,8 %</span>
+              <span class="sous">loyers ÷ coût total</span>
+            </div>
+            <div class="rendement">
+              <span class="etiquette">Net
+                <span class="info">
+                  <button type="button" aria-label="Explication : rendement net" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></button>
+                  <p class="bulle" role="tooltip" hidden>Loyers moins 3 semaines vides (<b>678 €</b>) et toutes les charges (<b>3 685 €</b> : taxe foncière, copropriété, assurance propriétaire, comptable, CFE, gestion, entretien), ÷ coût total : <b>7 397 €</b> ÷ <b>172 987 €</b> = <b>4,3 %</b>. C'est lui que juge le feu « Rendement ».</p>
+                </span>
+              </span>
+              <span class="chiffre" style="color: var(--surveiller-texte)">4,3 %</span>
+              <span class="sous">charges et vacance déduites</span>
+            </div>
+            <div class="rendement">
+              <span class="etiquette">Net-net
+                <span class="info">
+                  <button type="button" aria-label="Explication : rendement net-net" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></button>
+                  <p class="bulle" role="tooltip" hidden>Le net, moins les intérêts et l'assurance de la première année (<b>5 732 €</b>) et l'impôt de la première année (<b>0 €</b>, meublé au réel) : <b>1 665 €</b> ÷ <b>172 987 €</b> = <b>1,0 %</b>. Ce qu'il reste vraiment, une fois la banque et le fisc servis.</p>
+                </span>
+              </span>
+              <span class="chiffre">1,0 %</span>
+              <span class="sous">après intérêts, assurance et impôt</span>
+            </div>
+          </div>
+          <p class="phrase">Le brut est le chiffre des annonces ; le net est celui du feu ; le net-net, celui qui vous reste.</p>
+        </section>
+      </div>
+
+      <section class="carte leviers">
+        <div class="cols">
+          <div class="col"><span class="etiquette">Levier 1 · Négocier</span><span class="chiffre">119 663 €</span><span class="sous">Cash-flow 0 €/mois, rendement de votre argent 5,6 %.</span></div>
+          <div class="sep"></div>
+          <div class="col"><span class="etiquette">Levier 2 · Colocation</span><span class="chiffre">+88 €/mois</span><span class="sous">2 chambres à 662 €, rendement 6,1 %. Plus de gestion.</span></div>
+          <div class="sep"></div>
+          <div class="col"><span class="etiquette">Et si…</span>
+            <div class="etsi">
+              <div><span>Changer la durée du prêt</span><span>−339 €/mois</span></div>
+              <div><span>Taux +0,5 point</span><span>−254 €/mois</span></div>
+              <div><span>Passer en location nue</span><span>−283 €/mois</span></div>
+              <div><span>Deux mois vides par an</span><span>−305 €/mois</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="grille deux">
+        <section class="carte">
+          <div class="titre-carte">
+            <div class="avec-info">
+              <h3>Combien d'impôts ?</h3>
+              <span class="info">
+                <button type="button" aria-label="Explication : Combien d'impôts ?" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></button>
+                <p class="bulle" role="tooltip" hidden>Sur 10 ans, le meublé au réel ne coûte <b>0 €</b> d'impôt : les amortissements du bien et du mobilier effacent le bénéfice, et l'excédent (<b>50 807 €</b>) reste en réserve. Chaque régime est projeté année par année avec ses déficits et amortissements reportés ; le moins cher des trois autres est le nu au réel (<b>4 235 €</b>).</p>
+              </span>
+            </div>
+          </div>
+          <div class="gros vert">0 €<span class="complement">sur 10 ans</span></div>
+          <p class="phrase">Meublé au réel : aucun impôt sur la période.</p>
+          <div style="display:flex;flex-wrap:wrap;gap:8px">
+            <span class="pastille compacte">Nu au réel 4 235 €</span>
+            <span class="pastille compacte">Meublé micro-BIC 26 928 €</span>
+            <span class="pastille compacte">Nu micro-foncier 31 757 €</span>
+          </div>
+          <a class="lien-onglet" href="#a">Voir la fiscalité <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a>
+        </section>
+
+        <section class="carte">
+          <div class="titre-carte">
+            <div class="avec-info">
+              <h3>Qu'est-ce qu'il vous restera ?</h3>
+              <span class="info">
+                <button type="button" aria-label="Explication : Qu'est-ce qu'il vous restera ?" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></button>
+                <p class="bulle" role="tooltip" hidden>Revente estimée à <b>179 884 €</b> dans 10 ans (+1,5 % par an), moins l'agence et les diagnostics (<b>7 695 €</b>), le capital restant dû (<b>112 094 €</b>), l'indemnité de remboursement anticipé (<b>1 878 €</b>) et l'impôt sur la plus-value (<b>0 €</b>) : <b>58 217 €</b> net vendeur. Depuis 2025, les amortissements du meublé au réel sont réintégrés dans la plus-value.</p>
+              </span>
+            </div>
+          </div>
+          <div class="gros">58 217 €<span class="complement">dans 10 ans</span></div>
+          <div class="lignes">
+            <div class="ligne"><span class="libelle">Le locataire aura remboursé</span><span class="valeur txt-bon" style="font-weight:700">+48 906 €</span></div>
+            <div class="ligne"><span class="libelle">Vous aurez mis</span><span class="valeur">−44 570 €</span></div>
+            <div class="ligne fort"><span class="libelle">Enrichissement · TRI 3,8 %</span><span class="valeur">+13 647 €</span></div>
+            <div class="ligne"><span class="libelle" style="display:flex;align-items:center;gap:2px">Multiple sur apport
+              <span class="info">
+                <button type="button" aria-label="Explication : multiple sur apport" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></button>
+                <p class="bulle" role="tooltip" hidden>Gain total ÷ mise de départ : <b>13 647 €</b> ÷ <b>19 337 €</b> = <b>× 0,7</b>. Pour chaque euro mis au départ, le projet en rend 0,7 en plus de le restituer, sur 10 ans. Au-dessus de × 1, l'argent a doublé.</p>
+              </span></span><span class="valeur" style="font-weight:700">× 0,7</span></div>
+          </div>
+          <a class="lien-onglet" href="#a">Voir la revente <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a>
+        </section>
+      </div>
+      <p class="pied">Règles fiscales 2026-09. Outil d'aide à la décision, pas un conseil.</p>
+    </div>
+  </section>
+
+  <!-- ============================ MAQUETTE B ============================ -->
+  <section class="maquette" id="b">
+    <div class="titre">
+      <h2>B · Autofinancement et rendements sur la même rangée, prix en pleine largeur</h2>
+      <span class="verdict-maquette variante">variante</span>
+      <p>Les rendements s'empilent à droite de la cascade (2/3 · 1/3) : tout ce qui parle d'argent qui rentre se lit d'un seul regard. Le prix descend en pleine largeur avec une jauge plus longue, donc des libellés plus à l'aise. En contrepartie, les repères (couverture, effort, équilibre) passent sous la cascade.</p>
+    </div>
+    <div class="ecran">
+      <div class="verdict">
+        <h3>Le prix est bon. Le loyer ne couvre pas tout.</h3>
+        <p class="chapo">−25 % par rapport au prix estimé, banque d'accord (effort 25 %), 210 € à sortir chaque mois.</p>
+        <div class="feux" aria-label="Cinq feux">
+          <span class="pastille bon"><span class="point"></span>Prix −25 %</span>
+          <span class="pastille surveiller"><span class="point"></span>Rendement net 4,3 %</span>
+          <span class="pastille probleme"><span class="point"></span>Cash-flow −210 €/mois</span>
+          <span class="pastille bon"><span class="point"></span>Effort 25 %</span>
+          <span class="pastille bon"><span class="point"></span>Risques : aucun</span>
+        </div>
+      </div>
+
+      <div class="grille deux-tiers">
+        <section class="carte principale">
+          <div class="titre-carte">
+            <div class="avec-info">
+              <h3>Est-ce que ça s'autofinance ?</h3>
+              <span class="info">
+                <button type="button" aria-label="Explication : Est-ce que ça s'autofinance ?" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></button>
+                <p class="bulle" role="tooltip" hidden>Chaque mois, le loyer de <b>980 €</b> paie d'abord le crédit et l'assurance (<b>827 €</b>), puis les charges (<b>307 €</b>) et 3 semaines sans locataire (<b>57 €</b>). Il manque <b>210 €</b> avant impôt ; au meublé au réel, l'impôt est nul sur 10 ans.</p>
+              </span>
+            </div>
+          </div>
+          <div class="gros rouge">Non.</div>
+          <div class="lignes">
+            <div class="ligne"><span class="libelle">Loyer</span><span class="valeur txt-bon" style="font-weight:700">+980 €</span></div>
+            <div class="ligne"><span class="libelle">Crédit et assurance</span><span class="valeur">−827 €</span></div>
+            <div class="ligne sous-total"><span class="libelle">Après le crédit</span><span class="valeur txt-bon">+153 €</span></div>
+            <div class="ligne"><span class="libelle">Charges, impôts locaux, entretien</span><span class="valeur">−307 €</span></div>
+            <div class="ligne"><span class="libelle">3 semaines vides par an</span><span class="valeur">−57 €</span></div>
+            <div class="ligne fort"><span class="libelle">Reste chaque mois</span><span class="valeur txt-probleme">−210 €</span></div>
+            <div class="ligne"><span class="libelle">Impôt<span class="note">Meublé au réel, moyenne sur 10 ans</span></span><span class="valeur">−0 €</span></div>
+            <div class="ligne sous-total"><span class="libelle">Après l'impôt</span><span class="valeur txt-probleme">−210 €</span></div>
+          </div>
+          <div class="reperes" style="grid-template-columns: repeat(3, 1fr)">
+            <div class="repere"><span class="etiquette">Crédit ÷ loyer <span class="info"><button type="button" aria-label="Explication : part du loyer prise par le crédit" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></button><p class="bulle" role="tooltip" hidden>La mensualité, assurance comprise (<b>827 €</b>), représente <b>84 %</b> du loyer (<b>980 €</b>).</p></span></span><span class="chiffre">84 %</span></div>
+            <div class="repere"><span class="etiquette">Effort d'épargne <span class="info"><button type="button" aria-label="Explication : effort d'épargne" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></button><p class="bulle" role="tooltip" hidden>Ce que vous sortez de votre poche chaque mois : <b>210 €</b>, soit <b>2 523 €</b> par an.</p></span></span><span class="chiffre txt-probleme">210 €</span></div>
+            <div class="repere"><span class="etiquette">Loyer d'équilibre <span class="info"><button type="button" aria-label="Explication : loyer d'équilibre" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></button><p class="bulle droite" role="tooltip" hidden>Le loyer hors charges à partir duquel le projet ne coûte plus rien chaque mois : <b>1 203 €</b>, contre <b>980 €</b> visés.</p></span></span><span class="chiffre">1 203 €</span></div>
+          </div>
+        </section>
+
+        <section class="carte">
+          <div class="titre-carte"><div class="avec-info"><h3>Combien ça rapporte ?</h3></div></div>
+          <div class="rendements empiles">
+            <div class="rendement"><span class="etiquette">Brut <span class="info"><button type="button" aria-label="Explication : rendement brut" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></button><p class="bulle" role="tooltip" hidden><b>11 760 €</b> de loyers ÷ <b>172 987 €</b> de coût total = <b>6,8 %</b>.</p></span></span><span class="chiffre">6,8 %</span></div>
+            <div class="rendement"><span class="etiquette">Net <span class="info"><button type="button" aria-label="Explication : rendement net" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></button><p class="bulle" role="tooltip" hidden>Loyers moins vacance et charges : <b>7 397 €</b> ÷ <b>172 987 €</b> = <b>4,3 %</b>.</p></span></span><span class="chiffre" style="color: var(--surveiller-texte)">4,3 %</span></div>
+            <div class="rendement"><span class="etiquette">Net-net <span class="info"><button type="button" aria-label="Explication : rendement net-net" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></button><p class="bulle" role="tooltip" hidden>Après intérêts, assurance et impôt de l'année 1 : <b>1 665 €</b> ÷ <b>172 987 €</b> = <b>1,0 %</b>.</p></span></span><span class="chiffre">1,0 %</span></div>
+          </div>
+          <p class="phrase">Le brut est le chiffre des annonces ; le net, celui du feu ; le net-net, ce qui vous reste.</p>
+        </section>
+      </div>
+
+      <section class="carte">
+        <div class="titre-carte">
+          <div class="avec-info">
+            <h3>Est-ce que c'est cher ?</h3>
+            <span class="info"><button type="button" aria-label="Explication : Est-ce que c'est cher ?" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></button><p class="bulle" role="tooltip" hidden>Affiché <b>2 385 €/m²</b> contre un prix estimé de <b>3 181 €/m²</b> (<b>−25 %</b>), d'après <b>31</b> ventes signées chez le notaire.</p></span>
+          </div>
+        </div>
+        <div class="grille deux" style="align-items:center">
+          <div class="gros vert">Non.</div>
+          <div class="jauge" role="img" aria-label="Prix au m² 2 385 € contre un prix estimé de 3 181 €">
+            <div class="barre"></div>
+            <div class="repere-j" style="left: 38%"><span></span><span>2 926, à rénover</span></div>
+            <div class="repere-j" style="left: 62%"><span></span><span>3 181 €/m², estimé</span></div>
+            <div class="repere-j" style="left: 86%"><span></span><span>3 435, rénové</span></div>
+            <div class="curseur" style="left: 10%"></div>
+            <div class="prix" style="left: 10%">2 385 €/m²</div>
+          </div>
+        </div>
+        <p class="phrase">Estimé entre <b>190 000 €</b> et <b>223 000 €</b> · confiance moyenne. 31 ventes réelles autour du bien.</p>
+        <a class="lien-onglet" href="#b">Voir l'estimation <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a>
+      </section>
+
+      <section class="carte leviers">
+        <div class="cols">
+          <div class="col"><span class="etiquette">Levier 1 · Négocier</span><span class="chiffre">119 663 €</span><span class="sous">Cash-flow 0 €/mois, rendement de votre argent 5,6 %.</span></div>
+          <div class="sep"></div>
+          <div class="col"><span class="etiquette">Levier 2 · Colocation</span><span class="chiffre">+88 €/mois</span><span class="sous">2 chambres à 662 €, rendement 6,1 %. Plus de gestion.</span></div>
+          <div class="sep"></div>
+          <div class="col"><span class="etiquette">Et si…</span>
+            <div class="etsi">
+              <div><span>Changer la durée du prêt</span><span>−339 €/mois</span></div>
+              <div><span>Taux +0,5 point</span><span>−254 €/mois</span></div>
+              <div><span>Passer en location nue</span><span>−283 €/mois</span></div>
+              <div><span>Deux mois vides par an</span><span>−305 €/mois</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="grille deux">
+        <section class="carte">
+          <div class="titre-carte"><div class="avec-info"><h3>Combien d'impôts ?</h3><span class="info"><button type="button" aria-label="Explication : Combien d'impôts ?" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></button><p class="bulle" role="tooltip" hidden>Sur 10 ans, le meublé au réel ne coûte <b>0 €</b> d'impôt ; le moins cher des autres est le nu au réel (<b>4 235 €</b>).</p></span></div></div>
+          <div class="gros vert">0 €<span class="complement">sur 10 ans</span></div>
+          <p class="phrase">Meublé au réel : aucun impôt sur la période.</p>
+          <div style="display:flex;flex-wrap:wrap;gap:8px"><span class="pastille compacte">Nu au réel 4 235 €</span><span class="pastille compacte">Meublé micro-BIC 26 928 €</span><span class="pastille compacte">Nu micro-foncier 31 757 €</span></div>
+          <a class="lien-onglet" href="#b">Voir la fiscalité <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a>
+        </section>
+        <section class="carte">
+          <div class="titre-carte"><div class="avec-info"><h3>Qu'est-ce qu'il vous restera ?</h3><span class="info"><button type="button" aria-label="Explication : Qu'est-ce qu'il vous restera ?" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></button><p class="bulle" role="tooltip" hidden>Revente <b>179 884 €</b> dans 10 ans, moins agence, capital restant dû, IRA et impôt de plus-value : <b>58 217 €</b> net vendeur.</p></span></div></div>
+          <div class="gros">58 217 €<span class="complement">dans 10 ans</span></div>
+          <div class="lignes">
+            <div class="ligne"><span class="libelle">Le locataire aura remboursé</span><span class="valeur txt-bon" style="font-weight:700">+48 906 €</span></div>
+            <div class="ligne"><span class="libelle">Vous aurez mis</span><span class="valeur">−44 570 €</span></div>
+            <div class="ligne fort"><span class="libelle">Enrichissement · TRI 3,8 %</span><span class="valeur">+13 647 €</span></div>
+            <div class="ligne"><span class="libelle">Multiple sur apport</span><span class="valeur" style="font-weight:700">× 0,7</span></div>
+          </div>
+          <a class="lien-onglet" href="#b">Voir la revente <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a>
+        </section>
+      </div>
+      <p class="pied">Règles fiscales 2026-09. Outil d'aide à la décision, pas un conseil.</p>
+    </div>
+  </section>
+
+  <!-- ============================ TÉLÉPHONE (A) ============================ -->
+  <section class="maquette" id="telephone">
+    <div class="titre">
+      <h2>Sur téléphone (disposition A, 375 px)</h2>
+      <p>Tout s'empile : la cascade, puis les trois repères sur deux colonnes, puis les cartes une par une. Les ⓘ gardent leur cible de 44 px ; une bulle ne dépasse jamais la largeur de l'écran.</p>
+    </div>
+    <div class="ecran telephone">
+      <div class="verdict">
+        <h3>Le prix est bon. Le loyer ne couvre pas tout.</h3>
+        <div class="feux" aria-label="Cinq feux">
+          <span class="pastille bon"><span class="point"></span>Prix −25 %</span>
+          <span class="pastille surveiller"><span class="point"></span>Rendement net 4,3 %</span>
+          <span class="pastille probleme"><span class="point"></span>Cash-flow −210 €/mois</span>
+        </div>
+      </div>
+      <section class="carte principale">
+        <div class="titre-carte"><div class="avec-info"><h3 style="font-size:20px">Est-ce que ça s'autofinance ?</h3><span class="info"><button type="button" aria-label="Explication : Est-ce que ça s'autofinance ?" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></button><p class="bulle droite" role="tooltip" hidden>Chaque mois, le loyer de <b>980 €</b> paie le crédit (<b>827 €</b>), puis les charges (<b>307 €</b>) et la vacance (<b>57 €</b>) : il manque <b>210 €</b>.</p></span></div></div>
+        <div class="gros rouge">Non.</div>
+        <div class="autofinancement">
+          <div class="lignes">
+            <div class="ligne"><span class="libelle">Loyer</span><span class="valeur txt-bon" style="font-weight:700">+980 €</span></div>
+            <div class="ligne"><span class="libelle">Crédit et assurance</span><span class="valeur">−827 €</span></div>
+            <div class="ligne sous-total"><span class="libelle">Après le crédit</span><span class="valeur txt-bon">+153 €</span></div>
+            <div class="ligne"><span class="libelle">Charges, impôts locaux, entretien</span><span class="valeur">−307 €</span></div>
+            <div class="ligne"><span class="libelle">3 semaines vides par an</span><span class="valeur">−57 €</span></div>
+            <div class="ligne fort"><span class="libelle">Reste chaque mois</span><span class="valeur txt-probleme">−210 €</span></div>
+            <div class="ligne"><span class="libelle">Impôt<span class="note">Meublé au réel, moyenne sur 10 ans</span></span><span class="valeur">−0 €</span></div>
+            <div class="ligne sous-total"><span class="libelle">Après l'impôt</span><span class="valeur txt-probleme">−210 €</span></div>
+          </div>
+          <div class="reperes">
+            <div class="repere"><span class="etiquette">Crédit ÷ loyer <span class="info"><button type="button" aria-label="Explication : part du loyer prise par le crédit" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></button><p class="bulle" role="tooltip" hidden>La mensualité (<b>827 €</b>) représente <b>84 %</b> du loyer (<b>980 €</b>).</p></span></span><span class="chiffre">84 %</span></div>
+            <div class="repere"><span class="etiquette">Effort <span class="info"><button type="button" aria-label="Explication : effort d'épargne" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></button><p class="bulle droite" role="tooltip" hidden><b>210 €</b> par mois de votre poche, <b>2 523 €</b> par an.</p></span></span><span class="chiffre txt-probleme">210 €</span></div>
+            <div class="repere large"><span class="etiquette">Loyer d'équilibre <span class="info"><button type="button" aria-label="Explication : loyer d'équilibre" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></button><p class="bulle" role="tooltip" hidden>Le loyer à partir duquel le projet ne coûte plus rien : <b>1 203 €</b>, contre <b>980 €</b> visés.</p></span></span><span class="chiffre">1 203 €</span><span class="sous">pour un cash-flow à zéro</span></div>
+          </div>
+        </div>
+      </section>
+      <section class="carte">
+        <div class="titre-carte"><div class="avec-info"><h3 style="font-size:20px">Combien ça rapporte ?</h3></div></div>
+        <div class="rendements">
+          <div class="rendement"><span class="etiquette">Brut <span class="info"><button type="button" aria-label="Explication : rendement brut" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></button><p class="bulle" role="tooltip" hidden><b>11 760 €</b> ÷ <b>172 987 €</b> = <b>6,8 %</b>.</p></span></span><span class="chiffre">6,8 %</span></div>
+          <div class="rendement"><span class="etiquette">Net <span class="info"><button type="button" aria-label="Explication : rendement net" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></button><p class="bulle" role="tooltip" hidden><b>7 397 €</b> ÷ <b>172 987 €</b> = <b>4,3 %</b>.</p></span></span><span class="chiffre" style="color: var(--surveiller-texte)">4,3 %</span></div>
+          <div class="rendement"><span class="etiquette">Net-net <span class="info"><button type="button" aria-label="Explication : rendement net-net" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></button><p class="bulle droite" role="tooltip" hidden><b>1 665 €</b> ÷ <b>172 987 €</b> = <b>1,0 %</b>.</p></span></span><span class="chiffre">1,0 %</span></div>
+        </div>
+      </section>
+      <section class="carte">
+        <div class="titre-carte"><div class="avec-info"><h3 style="font-size:20px">Est-ce que c'est cher ?</h3><span class="info"><button type="button" aria-label="Explication : Est-ce que c'est cher ?" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></button><p class="bulle droite" role="tooltip" hidden><b>2 385 €/m²</b> contre <b>3 181 €/m²</b> estimés : <b>−25 %</b>.</p></span></div></div>
+        <div class="gros vert">Non.</div>
+        <p class="phrase">Estimé entre <b>190 000 €</b> et <b>223 000 €</b> · confiance moyenne.</p>
+        <a class="lien-onglet" href="#telephone">Voir l'estimation <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a>
+      </section>
+    </div>
+  </section>
+
+  <section class="comparatif">
+    <div class="bloc">
+      <h3>Ce que A fait mieux</h3>
+      <ul>
+        <li>La carte principale est vraiment principale : une seule chose à lire en premier.</li>
+        <li>Cascade et repères côte à côte : « il manque 210 € » et « le crédit prend 84 % du loyer » se répondent.</li>
+        <li>Prix et rendements de même hauteur, sur une même rangée : le brut et le feu prix se lisent ensemble.</li>
+      </ul>
+    </div>
+    <div class="bloc">
+      <h3>Ce que B fait mieux</h3>
+      <ul>
+        <li>Les rendements restent au-dessus de la ligne de flottaison sur ordinateur.</li>
+        <li>La jauge de prix en pleine largeur : libellés jamais serrés, même avec un bien peu décoté.</li>
+        <li>Une rangée de moins avant les leviers.</li>
+      </ul>
+    </div>
+  </section>
+
+  <div class="legende">
+    <strong>Commun aux deux, quel que soit le choix</strong>
+    <ul>
+      <li>ⓘ = toujours une bulle (clic, focus clavier ; Échap ou clic ailleurs pour fermer) ; « Voir … → » = toujours un changement d'onglet. Jamais l'un pour l'autre.</li>
+      <li>Les chiffres des bulles viennent des résultats du moteur et sont formatés à l'affichage, jamais recopiés.</li>
+      <li>Sur papier (PDF), chaque bulle s'imprime en petit texte sous son titre ; les liens vers les onglets disparaissent.</li>
+      <li>« Reste chaque mois » reste le cash-flow avant impôt, celui du feu et du verdict ; « Après l'impôt » vient en dessous avec le régime et la période.</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+  // Démonstration de l'infobulle : un clic ouvre, Échap ou un clic ailleurs ferme, une seule ouverte à la fois.
+  (function () {
+    var boutons = document.querySelectorAll('.info > button');
+    function fermerTout(sauf) {
+      boutons.forEach(function (b) {
+        if (b !== sauf) { b.setAttribute('aria-expanded', 'false'); b.nextElementSibling.hidden = true; }
+      });
+    }
+    boutons.forEach(function (b) {
+      b.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var ouvert = b.getAttribute('aria-expanded') === 'true';
+        fermerTout(b);
+        b.setAttribute('aria-expanded', ouvert ? 'false' : 'true');
+        b.nextElementSibling.hidden = ouvert;
+      });
+    });
+    document.addEventListener('click', function () { fermerTout(null); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') fermerTout(null); });
+  })();
+</script>
