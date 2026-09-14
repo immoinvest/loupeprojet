@@ -1,6 +1,10 @@
 # 06 — Revente : un curseur d'horizon de 1 à 30 ans
 
-Statut : `idée` · Notée le 14/09/2026 · Dépend de : rien
+Statut : `livrée` (branche `feat/revente-curseur`, 14/09/2026) · Notée le 14/09/2026 · Dépend de : rien
+
+## Livraison
+
+Discovery `../features/revente-curseur-discovery.md`, specs `../specs/revente-curseur-specs.md`, architecture `../architecture/revente-curseur.md`, état `../pipeline/revente-curseur.json`. Décisions prises : curseur de **1** à 30 ans (zéro impossible), les quatre cartes 5/10/15/20 gardées en bandeau compact, pas de graphique en v1, taux global d'imposition de l'année choisie affiché sous le curseur et calculé depuis les règles du moteur, seuils 22 et 30 ans déduits des règles. Le composant `Curseur` (`apps/web/src/composants/Curseur.tsx`) est générique : la fiche 04 (négociation) le réutilise tel quel.
 
 ## La demande de Pierre
 

@@ -9,7 +9,7 @@ export const TEXTES_MON_COMPTE = {
   nomEnregistre: "C'est enregistré.",
   connexion: 'Connexion',
   methodeEmail: 'Code par e-mail',
-  deconnecter: 'Me déconnecter',
+  deconnecter: 'Se déconnecter',
   supprimer: 'Supprimer mon compte',
   explicationSuppression:
     'Votre compte et vos sessions sont effacés. Les projets enregistrés sur cet appareil restent là.',

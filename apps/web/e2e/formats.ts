@@ -151,6 +151,8 @@ export function ecransDeReference({
         ).toBeVisible();
       },
     },
+    // Le projet d'exemple n'a pas d'adresse : confiance et repère de commune, sans appel au Worker.
+    { nom: 'Estimation sans adresse', chemin: `${projet}/adresse` },
     { nom: 'Hypothèses', chemin: `${projet}/hypotheses` },
     { nom: 'Fiscalité', chemin: `${projet}/fiscalite` },
     { nom: 'Revente', chemin: `${projet}/revente` },
@@ -183,6 +185,11 @@ export function mesurer(page: Page): Promise<Mesure> {
   return page.evaluate(
     ({ cibleMin, policeMin }) => {
       const largeur = document.documentElement.clientWidth;
+      // La coque tient dans la fenêtre : `main` est le conteneur qui défile. Il compte comme la
+      // page : son débordement horizontal est mesuré, et il n'excuse pas un élément qui déborde.
+      const contenu = document.querySelector('main');
+      const estLaPage = (el: Element): boolean =>
+        el === document.body || el === document.documentElement || el === contenu;
       const decrire = (el: Element): string => {
         const libelle = el.getAttribute('aria-label') ?? el.textContent;
         const texte = libelle.replace(/\s+/g, ' ').trim().slice(0, 40);
@@ -191,7 +198,7 @@ export function mesurer(page: Page): Promise<Mesure> {
         return `${el.tagName.toLowerCase()} « ${texte} » ${taille}, bord droit ${String(Math.round(r.right))} px`;
       };
       const dansUnDefilement = (el: Element): boolean => {
-        for (let p = el.parentElement; p !== null && p !== document.body; p = p.parentElement) {
+        for (let p = el.parentElement; p !== null && !estLaPage(p); p = p.parentElement) {
           const coupe = getComputedStyle(p).overflowX !== 'visible';
           if (coupe && p.getBoundingClientRect().right <= largeur + 1) return true;
         }
@@ -228,8 +235,9 @@ export function mesurer(page: Page): Promise<Mesure> {
         .filter((el) => parseFloat(getComputedStyle(el).fontSize) < policeMin)
         .map(decrire);
 
+      const debordementDuContenu = contenu === null ? 0 : contenu.scrollWidth - contenu.clientWidth;
       return {
-        debordement: document.documentElement.scrollWidth - largeur,
+        debordement: Math.max(document.documentElement.scrollWidth - largeur, debordementDuContenu),
         quiDebordent: quiDebordent.slice(0, 10),
         ciblesTropPetites,
         champsTropPetits,

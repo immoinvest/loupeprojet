@@ -15,21 +15,16 @@ import {
 } from '@/hypotheses';
 import { useProjets } from '@/stockage/ProjetsContext';
 
-import { ChampHypothese, type BadgeProvenance } from './hypotheses/ChampHypothese';
-
-const BADGES: Readonly<Record<string, BadgeProvenance>> = {
-  annonce: { ton: 'neutre', libelle: 'annonce' },
-  utilisateur: { ton: 'accent', libelle: 'à toi' },
-  estime: { ton: 'surveiller', libelle: 'estimé' },
-  ademe: { ton: 'bon', libelle: 'donnée publique' },
-  anil: { ton: 'bon', libelle: 'donnée publique' },
-  dvf: { ton: 'bon', libelle: 'donnée publique' },
-  usure: { ton: 'bon', libelle: 'taux du mois' },
-};
+import {
+  BADGES,
+  badgeDeSource,
+  ChampHypothese,
+  type BadgeProvenance,
+} from './hypotheses/ChampHypothese';
 
 function badgePour(projet: ProjetEntree, d: Descripteur): BadgeProvenance | null {
-  const source = projet.provenance?.[cleProvenance(d.chemin)];
-  if (source !== undefined) return BADGES[source] ?? { ton: 'neutre', libelle: source };
+  const badge = badgeDeSource(projet.provenance?.[cleProvenance(d.chemin)]);
+  if (badge !== null) return badge;
   return d.aToi === true ? (BADGES.utilisateur ?? null) : null;
 }
 
@@ -47,7 +42,7 @@ function Synthese(): JSX.Element {
     },
   ];
   return (
-    <div className="sticky top-[var(--hauteur-barre-app)] z-10 -mx-4 grid grid-cols-2 gap-x-6 gap-y-2 border-b border-bordure bg-fond/95 px-4 py-3 backdrop-blur sm:-mx-6 sm:flex sm:items-center sm:gap-8 sm:px-6 lg:-mx-10 lg:px-10">
+    <div className="sticky top-[var(--hauteur-entete-projet,0px)] z-10 -mx-4 grid grid-cols-2 gap-x-6 gap-y-2 border-b border-bordure bg-fond/95 px-4 py-3 backdrop-blur sm:-mx-6 sm:flex sm:items-center sm:gap-8 sm:px-6 lg:-mx-10 lg:px-10">
       {kpis.map((k) => (
         <div key={k.l} className="flex flex-col">
           <span className="text-xs text-encre-3">{k.l}</span>
