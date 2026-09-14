@@ -33,7 +33,7 @@ export function sectionVerdict(regles: Regles): SectionMethode {
       `Cash-flow mensuel : bon dès ${euros(v.cashflowMensuel.bonDes)}, à surveiller dès ${euros(v.cashflowMensuel.surveillerDes)}, problème en dessous.`,
       `Effort bancaire : bon jusqu'à ${pct(v.effort.bonJusqua)}, à surveiller jusqu'à ${pct(v.effort.surveillerJusqua)}, problème au-delà ; inconnu sans revenus.`,
       `Risques : DPE F ou G = problème (location interdite dès ${String(dpe.G)} pour G, ${String(dpe.F)} pour F) ; DPE E (interdit dès ${String(dpe.E)}), copropriété en procédure ou risque naturel fort = à surveiller.`,
-      "Les points de vigilance de l'onglet Visite sortent des mêmes règles : copropriété, DPE, étage sans ascenseur, prix sous le marché, effort, plafonds des régimes, loyer encadré.",
+      "Sous les feux, le rapport liste ce qui se règle avant l'offre : effort au-dessus du seuil, prêt trop long, plafond du micro dépassé, loyer au-dessus de l'encadrement, prélèvements sociaux à confirmer. L'onglet Visite tire ses questions d'une base sourcée (ANIL, Notaires de France, Service-public.fr, textes de loi) filtrée par le bien : copropriété, année de construction, DPE, étage, mode d'exploitation, risques, travaux, prix.",
     ],
     constantes: [
       {

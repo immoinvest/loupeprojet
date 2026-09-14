@@ -189,20 +189,24 @@ describe('Revente', () => {
 });
 
 describe('Visite', () => {
-  it('liste les points par catégorie et compte les cases cochées', async () => {
+  it('liste les questions par catégorie et enregistre une réponse avec le projet', async () => {
     await ouvrir('visite');
     await screen.findByRole('heading', { name: 'Préparer la visite' });
     expect(screen.getByRole('heading', { name: 'Documents à demander' })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'À vérifier sur place' })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: "À régler avant l'offre" })).toBeInTheDocument();
-    const cases = screen.getAllByRole('checkbox');
-    expect(cases).toHaveLength(7);
-    expect(screen.getByText(/0 sur 7 vérifiés/)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Sur place, le logement' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Exploitation locative' })).toBeInTheDocument();
+    expect(
+      screen.queryByRole('heading', { name: "À régler avant l'offre" }),
+    ).not.toBeInTheDocument();
+    const ok = screen.getAllByRole('radio', { name: 'OK' });
+    expect(ok.length).toBeGreaterThanOrEqual(40);
+    expect(screen.getByText(/0 sur \d+ répondues/)).toBeInTheDocument();
     const utilisateur = userEvent.setup();
-    await utilisateur.click(cases[0]!);
-    expect(screen.getByText(/1 sur 7 vérifiés/)).toBeInTheDocument();
-    await utilisateur.click(cases[0]!);
-    expect(screen.getByText(/0 sur 7 vérifiés/)).toBeInTheDocument();
+    await utilisateur.click(ok[0]!);
+    expect(screen.getByText(/^1 sur \d+ répondue$/)).toBeInTheDocument();
+    expect(Object.keys(lireProjets(window.localStorage)[0]?.visite?.reponses ?? {})).toHaveLength(
+      1,
+    );
     expect(screen.getByRole('link', { name: 'vos hypothèses' })).toBeInTheDocument();
   });
 });

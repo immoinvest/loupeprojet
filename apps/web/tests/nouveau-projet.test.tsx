@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 
@@ -59,6 +59,45 @@ describe('Nouveau projet — depuis un lien', () => {
       });
       expect(cree?.projet.hypotheses.charges.taxeFonciere).toBe(1_050);
       expect(cree?.projet.provenance['achat.prix']).toBe('annonce');
+    },
+  );
+
+  it(
+    '« J’ai déjà visité ce bien » crée le projet avec la visite faite, sans onglet Visite',
+    { timeout: 30_000 },
+    async () => {
+      const utilisateur = userEvent.setup();
+      render(<AppEnMemoire chemin="/projets/nouveau" />);
+      await screen.findByRole('heading', { name: /Colle le lien/ });
+      await utilisateur.click(screen.getByRole('button', { name: /je saisis à la main/ }));
+
+      await utilisateur.type(screen.getByLabelText(/Prix affiché/), '120000');
+      await utilisateur.type(screen.getByLabelText(/^Surface/), '40');
+      await utilisateur.type(screen.getByLabelText(/Code postal/), '69003');
+      await utilisateur.type(screen.getByLabelText(/^Ville/), 'Lyon');
+      await utilisateur.type(screen.getByLabelText(/Loyer visé/), '700');
+      await utilisateur.type(screen.getByLabelText(/^Apport/), '10000');
+      await utilisateur.type(screen.getByLabelText(/Vos revenus/), '2400');
+      const deja = screen.getByRole('checkbox', { name: /J'ai déjà visité ce bien/ });
+      expect(deja).not.toBeChecked();
+      await utilisateur.click(deja);
+      expect(deja).toBeChecked();
+      await utilisateur.click(screen.getByRole('button', { name: /Créer le projet/ }));
+
+      expect(
+        await screen.findByRole(
+          'heading',
+          { name: /Prix sans repère de marché/ },
+          { timeout: 10_000 },
+        ),
+      ).toBeInTheDocument();
+      const cree = lireProjets(window.localStorage)[0];
+      expect(cree?.visite?.faite).toBe(true);
+      expect(cree?.visite?.date).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+      expect(cree?.visite?.reponses).toEqual({});
+      const volets = screen.getByRole('navigation', { name: 'Volets du rapport' });
+      expect(within(volets).queryByRole('link', { name: 'Visite' })).not.toBeInTheDocument();
+      expect(screen.getByText(/Visite faite le .* · aucun problème relevé/)).toBeInTheDocument();
     },
   );
 

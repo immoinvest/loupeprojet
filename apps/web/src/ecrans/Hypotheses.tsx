@@ -9,7 +9,6 @@ import {
   GROUPES,
   GROUPE_ACHAT,
   appliquerSaisie,
-  cleProvenance,
   valeurActuelle,
   versTexte,
   type Descripteur,
@@ -20,18 +19,8 @@ import { TYPES_LOCATION } from '@/textes/regimes';
 
 import { CarteAchat } from './hypotheses/CarteAchat';
 import { SelecteurMode } from './hypotheses/SelecteurMode';
-import {
-  BADGES,
-  badgeDeSource,
-  ChampHypothese,
-  type BadgeProvenance,
-} from './hypotheses/ChampHypothese';
-
-function badgePour(projet: ProjetEntree, d: Descripteur): BadgeProvenance | null {
-  const badge = badgeDeSource(projet.provenance?.[cleProvenance(d.chemin)]);
-  if (badge !== null) return badge;
-  return d.aToi === true ? (BADGES.utilisateur ?? null) : null;
-}
+import { ChampHypothese } from './hypotheses/ChampHypothese';
+import { badgePour } from './hypotheses/badges';
 
 function Synthese(): JSX.Element {
   const { resultats: r } = useProjetCourant();

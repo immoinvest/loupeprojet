@@ -213,6 +213,20 @@ export interface Regles {
     readonly effort: { readonly bonJusqua: number; readonly surveillerJusqua: number };
   };
 
+  /** Seuils qui décident des questions de la liste de visite. */
+  readonly visite: {
+    /** Permis de construire déposé avant cette année : diagnostic amiante obligatoire. */
+    readonly amianteAvantAnnee: number;
+    /** Logement construit avant cette année : constat de risque d'exposition au plomb. */
+    readonly plombAvantAnnee: number;
+    /** Installations électrique et gaz plus vieilles que ce nombre d'années : diagnostics obligatoires. */
+    readonly installationsAnciennesAns: number;
+    /** Premier étage à partir duquel l'absence d'ascenseur pèse sur la location. */
+    readonly etageSansAscenseur: number;
+    /** Surface minimale d'une chambre en colocation (décence). */
+    readonly chambreColocationM2: number;
+  };
+
   readonly estimation: {
     /** Quantile des ventes comparables où se place un bien selon son état (0,25 = premier quartile). */
     readonly positionsEtat: Readonly<Record<EtatBien, number>>;

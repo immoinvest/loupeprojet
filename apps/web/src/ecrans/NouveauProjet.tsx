@@ -17,7 +17,7 @@ import { useClientWorker } from '@/coque/ClientWorker';
 import { completerAvecIa, enrichirSaisie, lireAnnonce, type ModeLecture } from '@/enrichissement';
 import { useProjets } from '@/stockage/ProjetsContext';
 
-import { FormulaireProjet, valeursDepuisChamps } from './FormulaireProjet';
+import { FormulaireProjet, valeursDepuisChamps, type OptionsFormulaire } from './FormulaireProjet';
 import { EtatLectureAuto, useLectureAutomatique } from './nouveau-projet/LectureAuto';
 import { PastillesLien } from './nouveau-projet/PastillesLien';
 
@@ -106,13 +106,19 @@ export function NouveauProjet(): JSX.Element {
     setEtape('verifier');
   };
 
-  const creerProjet = async (saisie: SaisieProjet): Promise<void> => {
+  const creerProjet = async (saisie: SaisieProjet, options: OptionsFormulaire): Promise<void> => {
     setEnCours('creation');
     // Ventes réelles et loyers de la commune ; sans réponse, le projet est créé sans repère de marché.
     const enrichi = await enrichirSaisie(saisie, client);
     const nom = nomDuProjet(saisie);
     const source = construireProjet(saisie, 'a-remplacer', enrichi);
-    const enregistre = creer({ nom, source });
+    const enregistre = creer({
+      nom,
+      source,
+      ...(options.visiteFaite
+        ? { visite: { faite: true, date: new Date().toISOString(), reponses: {} } }
+        : {}),
+    });
     void naviguer(`/projets/${enregistre.id}`);
   };
 
@@ -257,8 +263,8 @@ export function NouveauProjet(): JSX.Element {
             key={`${String(manuel)}-${String(version)}`}
             initial={initial}
             annonce={manuel ? null : annonce}
-            onCreer={(saisie) => {
-              if (enCours === null) void creerProjet(saisie);
+            onCreer={(saisie, options) => {
+              if (enCours === null) void creerProjet(saisie, options);
             }}
           />
           {enCours === 'creation' && (

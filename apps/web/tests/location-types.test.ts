@@ -37,7 +37,6 @@ import {
   migrerEnregistre,
   type ProjetEnregistre,
 } from '@/stockage/projets';
-import { phraseVigilance } from '@/textes/vigilance';
 
 const DATE = '2026-09-13T10:00:00.000Z';
 
@@ -140,39 +139,6 @@ describe('loyer de marché par type', () => {
     expect(md.hypotheses.location).toMatchObject({ mode: 'moyenne_duree', loyerHc: 1032 });
     const cd = avec({ mode: 'courte_duree', nuitee: 80, nuiteesParMois: 15 });
     expect(appliquerLoyerVise(cd, loyer)).toBe(cd);
-  });
-});
-
-describe('phrases de vigilance par type', () => {
-  it('distingue le changement d’usage de plein droit et à vérifier', () => {
-    const base = { joursResidencePrincipale: 120 };
-    expect(
-      phraseVigilance({
-        code: 'CHANGEMENT_USAGE_COURTE_DUREE',
-        parametres: { ...base, zone: 'plein_droit' },
-      }),
-    ).toContain('obligatoire ici');
-    expect(
-      phraseVigilance({
-        code: 'CHANGEMENT_USAGE_COURTE_DUREE',
-        parametres: { ...base, zone: 'a_verifier' },
-      }),
-    ).toContain('vérifier en mairie');
-  });
-
-  it('adapte le règlement de copropriété au type', () => {
-    expect(
-      phraseVigilance({ code: 'REGLEMENT_COPRO_LOCATION', parametres: { mode: 'courte_duree' } }),
-    ).toContain('courte durée');
-    expect(
-      phraseVigilance({ code: 'REGLEMENT_COPRO_LOCATION', parametres: { mode: 'colocation' } }),
-    ).toContain('colocation');
-    expect(
-      phraseVigilance({
-        code: 'SURFACE_CHAMBRES_COLOCATION',
-        parametres: { chambres: 3, surfaceParChambre: 22, surfaceMinimale: 9, volumeMinimal: 20 },
-      }),
-    ).toContain('9 m² et 20 m³');
   });
 });
 

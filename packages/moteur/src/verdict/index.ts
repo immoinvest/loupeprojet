@@ -64,7 +64,7 @@ export function calculerVerdict(
       problemes: compter(feux, 'probleme'),
       inconnus: compter(feux, 'inconnu'),
     },
-    vigilance: pointsDeVigilance(projet, financement, fiscalite, prix, regles),
+    vigilance: pointsDeVigilance(projet, financement, fiscalite),
   };
 }
 
