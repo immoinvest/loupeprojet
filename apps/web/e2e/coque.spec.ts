@@ -3,6 +3,7 @@ import { expect, test, type Page } from '@playwright/test';
 import {
   NOM_EXEMPLE,
   ouvrirExemple,
+  ouvrirGroupe,
   ouvrirMesProjets,
   ouvrirNavigation,
   ouvrirVolet,
@@ -91,6 +92,10 @@ test('formulaire Vérifier : les choix réservés aux lecteurs d’écran ne fon
   await expect(
     page.getByRole('button', { name: 'Créer le projet et voir le rapport' }),
   ).toBeVisible();
+  // Le strict minimum tient presque sans défiler : on déplie les groupes pleins de tuiles et d'échelles.
+  await ouvrirGroupe(page, /^Estimé pour vous/);
+  await ouvrirGroupe(page, /^Préciser pour une analyse plus juste/);
+  await expect(page.getByRole('radiogroup', { name: 'DPE' })).toBeVisible();
 
   // Le document tient dans la fenêtre : aucun élément ne dépasse de la coque.
   const depassement = await page.evaluate(
