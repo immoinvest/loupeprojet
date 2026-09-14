@@ -210,8 +210,11 @@ export const HypothesesSchema = z
     charges: ChargesSchema.prefault({}),
     fiscalite: FiscaliteSchema,
     revente: ReventeSchema.prefault({}),
-    /** Revenus nets mensuels du ménage, pour le taux d'effort. */
-    revenusMensuels: montant(),
+    /**
+     * Revenus nets mensuels du ménage, pour le taux d'effort HCSF. Deklic ne les demande plus ;
+     * les projets enregistrés qui les portent restent lisibles.
+     */
+    revenusMensuels: montant().optional(),
   })
   .refine((h) => regimesCompatibles(h.location.mode).includes(h.fiscalite.regime), {
     message: 'Ce régime fiscal ne s’applique pas à ce type de location',

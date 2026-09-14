@@ -39,8 +39,14 @@ describe('explications fixes', () => {
       'fiscalite',
       'revente',
       'leviers',
+      'financement',
+      'couverture',
     ]);
     expect(EXPLICATIONS.prix).toContain('ventes signées chez le notaire');
+    // Onglet Financement : le TAEG comparé au taux d'usure, et la couverture sans les revenus.
+    expect(EXPLICATIONS.financement).toContain("taux d'usure");
+    expect(EXPLICATIONS.couverture).toContain('70 % des loyers');
+    expect(EXPLICATIONS.couverture).toContain('ne demande pas vos revenus');
   });
 });
 

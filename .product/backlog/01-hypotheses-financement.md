@@ -1,6 +1,8 @@
 # 01 — Hypothèses : le financement
 
-Statut : `idée` · Notée le 14/09/2026 · Dépend de : 08 (le bouton y mène, l'outil n'est pas développé maintenant)
+Statut : `livrée` (14/09/2026, feature `hypotheses-financement`, PR `feat/hypotheses-financement`) · Notée le 14/09/2026 · Dépend de : 08 (le bouton y mène, l'outil n'est pas développé maintenant)
+
+Décisions et livraison : `.product/features/hypotheses-financement-discovery.md`, `.product/specs/hypotheses-financement-specs.md`, `.product/architecture/hypotheses-financement.md`. Réponses aux questions ouvertes : (1) un vrai onglet Financement ; (2) le feu devient la couverture (crédit ÷ loyer, 70 % / 100 %), l'effort HCSF ne reste que pour les projets anciens qui portent des revenus ; (3) page « Bientôt » à `/simulateur-pret`, le lien porte déjà le prêt ; (4) Comparer et le partage ne parlent plus de revenus, le PDF gagne le volet Financement.
 
 ## La demande de Pierre
 

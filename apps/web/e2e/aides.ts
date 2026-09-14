@@ -3,7 +3,8 @@ import { expect, type Locator, type Page } from '@playwright/test';
 /** Nom du projet créé au premier lancement (voir `ProjetsProvider`). */
 export const NOM_EXEMPLE = 'T3 · 65 m² · Marseille 5e';
 
-export type Volet = 'Rapport' | 'Hypothèses' | 'Fiscalité' | 'Revente' | 'Visite';
+export type Volet =
+  'Rapport' | 'Estimation' | 'Financement' | 'Hypothèses' | 'Fiscalité' | 'Revente' | 'Visite';
 
 /** Ouvre la liste « Mes projets » et attend son titre. */
 export async function ouvrirMesProjets(page: Page): Promise<void> {
@@ -65,7 +66,6 @@ export async function creerProjetManuel(page: Page): Promise<void> {
   await page.getByLabel('Ville').fill('Lyon');
   await page.getByLabel('Loyer visé, hors charges').fill('700');
   await page.getByLabel('Apport').fill('10000');
-  await page.getByLabel('Vos revenus nets').fill('2400');
   await page.getByRole('button', { name: 'Créer le projet et voir le rapport' }).click();
 
   await expect(

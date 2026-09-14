@@ -29,3 +29,14 @@ export {
   variantesRevente,
   type VarianteRevente,
 } from './revente';
+export {
+  CHEMIN_SIMULATEUR,
+  SimulationPretEntreeSchema,
+  decoderSimulation,
+  encoderSimulation,
+  lienSimulateurPret,
+  lireFragmentSimulation,
+  simulationDepuisResultats,
+  type DecodageSimulation,
+  type SimulationPretEntree,
+} from './simulation-pret';

@@ -1,3 +1,4 @@
+import { decoderJson, encoderJson } from './base64url';
 import { ProjetEnregistreSchema, migrerEnregistre, type ProjetEnregistre } from './projets';
 
 /**
@@ -12,35 +13,18 @@ export type Decodage =
   | { readonly ok: true; readonly enregistre: ProjetEnregistre }
   | { readonly ok: false; readonly raison: 'vide' | 'illisible' | 'invalide' };
 
-function versBase64Url(octets: Uint8Array): string {
-  let binaire = '';
-  for (const octet of octets) binaire += String.fromCharCode(octet);
-  return btoa(binaire).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-}
-
-function depuisBase64Url(texte: string): Uint8Array {
-  const base64 = texte.replace(/-/g, '+').replace(/_/g, '/');
-  const complement = '='.repeat((4 - (base64.length % 4)) % 4);
-  const binaire = atob(base64 + complement);
-  return Uint8Array.from(binaire, (c) => c.charCodeAt(0));
-}
-
 /** `ProjetEnregistre` → texte sûr pour une URL (base64url d'un JSON UTF-8). */
 export function encoderPartage(enregistre: ProjetEnregistre): string {
-  return versBase64Url(new TextEncoder().encode(JSON.stringify(enregistre)));
+  return encoderJson(enregistre);
 }
 
 /** Texte d'un lien → projet validé par Zod ; jamais d'exception. */
 export function decoderPartage(texte: string): Decodage {
   const nettoye = texte.trim();
   if (nettoye === '') return { ok: false, raison: 'vide' };
-  let brut: unknown;
-  try {
-    brut = JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(depuisBase64Url(nettoye)));
-  } catch {
-    return { ok: false, raison: 'illisible' };
-  }
-  const resultat = ProjetEnregistreSchema.safeParse(migrerEnregistre(brut));
+  const lecture = decoderJson(nettoye);
+  if (!lecture.ok) return { ok: false, raison: 'illisible' };
+  const resultat = ProjetEnregistreSchema.safeParse(migrerEnregistre(lecture.valeur));
   return resultat.success
     ? { ok: true, enregistre: resultat.data }
     : { ok: false, raison: 'invalide' };

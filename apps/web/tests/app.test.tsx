@@ -49,7 +49,6 @@ describe('Mes projets', () => {
     await utilisateur.type(screen.getByLabelText(/^Ville/), 'Lyon');
     await utilisateur.type(screen.getByLabelText(/Loyer visé/), '700');
     await utilisateur.type(screen.getByLabelText(/^Apport/), '10000');
-    await utilisateur.type(screen.getByLabelText(/Vos revenus/), '2400');
     await utilisateur.click(screen.getByRole('button', { name: /Créer le projet/ }));
     expect(
       await screen.findByRole(
@@ -84,7 +83,7 @@ describe('Rapport', () => {
     ).toBeInTheDocument();
     const feux = screen.getAllByLabelText('Cinq feux').at(-1);
     expect(feux).toBeDefined();
-    expect(within(feux!).getAllByText(/Prix|Rendement|Cash-flow|Effort|Risques/)).toHaveLength(5);
+    expect(within(feux!).getAllByText(/Prix|Rendement|Cash-flow|Crédit|Risques/)).toHaveLength(5);
 
     expect(screen.getByRole('heading', { name: "Est-ce que c'est cher ?" })).toBeInTheDocument();
     // « Non. » deux fois : ce n'est pas cher, et ça ne s'autofinance pas (−210 €/mois).
@@ -138,13 +137,9 @@ describe('Rapport', () => {
       expect(screen.queryByText('Cette valeur est nécessaire au calcul.')).not.toBeInTheDocument();
       expect(lireProjets(window.localStorage)[0]?.projet.hypotheses.achat.prix).toBe(150_000);
 
-      // « 4 » puis « 40 » sont valides et enregistrés ; « 400 » dépasse la durée du prêt et
-      // est refusé : la dernière valeur valide (40) reste en vigueur.
-      const differe = screen.getByLabelText(/Différé total/);
-      await utilisateur.clear(differe);
-      await utilisateur.type(differe, '400');
-      expect(screen.getByText(/différé doit être plus court/)).toBeInTheDocument();
-      expect(lireProjets(window.localStorage)[0]?.projet.hypotheses.pret.differeTotalMois).toBe(40);
+      // Le prêt n'est plus dans Hypothèses : il se règle dans Financement.
+      expect(screen.queryByLabelText(/Différé total/)).not.toBeInTheDocument();
+      expect(screen.queryByRole('heading', { name: 'Le marché' })).not.toBeInTheDocument();
 
       await utilisateur.selectOptions(screen.getByLabelText(/Type de location/), 'courte_duree');
       // 1 300 € / 30 nuits × 2 = 86,7 → 87 € ; 15 nuits par mois par défaut (règles 2026-09).

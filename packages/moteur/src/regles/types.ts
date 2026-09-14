@@ -210,7 +210,8 @@ export interface Regles {
     readonly prix: { readonly bonJusqua: number; readonly surveillerJusqua: number };
     readonly rendementNet: { readonly bonDes: number; readonly surveillerDes: number };
     readonly cashflowMensuel: { readonly bonDes: number; readonly surveillerDes: number };
-    readonly effort: { readonly bonJusqua: number; readonly surveillerJusqua: number };
+    /** Mensualité assurance comprise ÷ loyer hors charges : le loyer porte-t-il le crédit ? */
+    readonly couverture: { readonly bonJusqua: number; readonly surveillerJusqua: number };
   };
 
   /** Seuils qui décident des questions de la liste de visite. */

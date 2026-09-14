@@ -194,7 +194,7 @@ export const VerdictSchema = z.strictObject({
   feux: z
     .array(
       z.strictObject({
-        axe: z.enum(['prix', 'rendement', 'cashflow', 'effort', 'risques']),
+        axe: z.enum(['prix', 'rendement', 'cashflow', 'couverture', 'risques']),
         feu: FeuSchema,
         valeur: nOuNull,
       }),

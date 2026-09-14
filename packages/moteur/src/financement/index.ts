@@ -126,7 +126,7 @@ export function calculerFinancement(
     effort: tauxEffort(
       {
         mensualiteTotale: mensualiteHorsAssurance + assurance,
-        revenusMensuels,
+        revenusMensuels: revenusMensuels ?? null,
         loyerMensuel: loyerMensuelHc(location),
         dureeAnnees: pret.dureeAnnees,
         travaux: achat.travaux,
