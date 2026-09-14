@@ -165,11 +165,11 @@ npm run migration:generer -w apps/comptes   # après une montée de version de B
 
 Tant que ces étapes ne sont pas faites, le site se déploie comme avant et la page de connexion indique que la connexion n'est pas disponible.
 
-1. **Base D1** : `cd apps/comptes`, `npx wrangler d1 create deklic-comptes --location weur`, reporter l'identifiant dans `apps/comptes/wrangler.toml`, puis `npx wrangler d1 migrations apply deklic-comptes --remote`.
-2. **Projet Pages `loupeprojet`** (tableau de bord Cloudflare, Workers & Pages, loupeprojet, Settings), pour Production et Preview :
+1. **Base D1** : fait le 14/09/2026. La base `deklic-comptes` est créée dans la juridiction UE (`npx wrangler d1 create deklic-comptes --jurisdiction eu`), son identifiant est dans `apps/comptes/wrangler.toml` et la migration 0001 est appliquée. Nouvelle migration : `npx wrangler d1 migrations apply deklic-comptes --remote` depuis `apps/comptes`.
+2. **Projet Pages `deklic`** (adresse loupeprojet.pages.dev ; tableau de bord Cloudflare, Workers & Pages, deklic, Settings), en Production (Preview facultatif) :
    - Bindings : D1 database, nom de variable `DB`, base `deklic-comptes` ;
    - Runtime : Compatibility flags, `nodejs_compat` ;
-   - Variables and Secrets : `DEKLIC_COMPTES` = `1` (variable de build), `BETTER_AUTH_SECRET` (secret de 32 caractères ou plus, par exemple `openssl rand -base64 32`), et `ENVIRONNEMENT` = `preview` pour Preview uniquement ;
+   - Variables and Secrets : `DEKLIC_COMPTES` = `1` (type Text, lu au build), `BETTER_AUTH_SECRET` (type Secret, 32 caractères ou plus, par exemple `node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"`) ;
    - puis relancer un déploiement.
 3. **E-mails (Resend)** : une clé API en secret `RESEND_API_KEY`, l'expéditeur en variable `COURRIEL_EXPEDITEUR` (par exemple `Deklic <bonjour@deklic.io>`). Tant que le domaine n'est pas vérifié chez Resend, seuls les e-mails vers l'adresse du compte Resend partent.
 4. **Google** : console.cloud.google.com, API et services, Identifiants, ID client OAuth « Application Web » ; URI de redirection autorisés `https://loupeprojet.pages.dev/api/auth/callback/google` et `http://localhost:5173/api/auth/callback/google` ; écran de consentement publié. Secrets `GOOGLE_CLIENT_ID` et `GOOGLE_CLIENT_SECRET`.
