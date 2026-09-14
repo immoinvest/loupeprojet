@@ -1,17 +1,39 @@
-import { FicheAnnonceSchema, PhotosCaptureSchema } from '@loupe/capture';
-import { ProjetSchema, migrerProjet, projetExemple, type ProjetEntree } from '@loupe/moteur';
+import { ProjetSchema, projetExemple, type ProjetEntree } from '@loupe/moteur';
+import {
+  migrerEnregistre,
+  NOM_EXEMPLE,
+  ProjetEnregistreSchema,
+  AnnonceEnregistreeSchema,
+  type AdresseBien,
+  type AnnonceEnregistree,
+  type ProjetEnregistre,
+  type StatutProjet,
+  type Visite,
+} from '@loupe/projets';
 import { z } from 'zod';
 
-export const StatutProjetSchema = z.enum([
-  'analyse',
-  'visite',
-  'offre',
-  'ecarte',
-  'scenario',
-  // Posé par la porte « J'ai acheté ce bien » de Gérer.
-  'achete',
-]);
-export type StatutProjet = z.infer<typeof StatutProjetSchema>;
+// Les schémas d'un projet enregistré sont partagés avec l'API des comptes (synchronisation).
+export {
+  AdresseBienSchema,
+  AnnonceEnregistreeSchema,
+  EtatReponseSchema,
+  LONGUEUR_MAX_NOTE,
+  migrerEnregistre,
+  NOM_EXEMPLE,
+  ProjetEnregistreSchema,
+  ReponseVisiteSchema,
+  StatutProjetSchema,
+  VisiteSchema,
+} from '@loupe/projets';
+export type {
+  AdresseBien,
+  AnnonceEnregistree,
+  EtatReponse,
+  ProjetEnregistre,
+  ReponseVisite,
+  StatutProjet,
+  Visite,
+} from '@loupe/projets';
 
 export const STATUTS: Readonly<Record<StatutProjet, string>> = {
   analyse: 'En analyse',
@@ -22,89 +44,12 @@ export const STATUTS: Readonly<Record<StatutProjet, string>> = {
   achete: 'Acheté',
 };
 
-/** Adresse exacte du bien, précisée par l'utilisateur (agence, diagnostics) : sert à l'analyse DVF à l'adresse. */
-export const AdresseBienSchema = z.object({
-  libelle: z.string().min(1),
-  lat: z.number().min(-90).max(90),
-  lon: z.number().min(-180).max(180),
-  codeInsee: z.string().regex(/^(\d{5}|2[AB]\d{3})$/),
-  codeVoie: z.string().nullable(),
-  numero: z.number().int().nonnegative().nullable(),
-  /** Code postal de l'adresse géocodée : désigne l'arrondissement pour le loyer de marché. */
-  codePostal: z
-    .string()
-    .regex(/^\d{5}$/)
-    .optional(),
-});
-export type AdresseBien = z.infer<typeof AdresseBienSchema>;
-
-export const EtatReponseSchema = z.enum(['a_verifier', 'ok', 'probleme', 'sans_objet']);
-export type EtatReponse = z.infer<typeof EtatReponseSchema>;
-
-/** Une note reste courte : elle voyage dans le lien de partage avec tout le projet. */
-export const LONGUEUR_MAX_NOTE = 300;
-
-export const ReponseVisiteSchema = z.object({
-  etat: EtatReponseSchema,
-  note: z.string().max(LONGUEUR_MAX_NOTE).optional(),
-});
-export type ReponseVisite = z.infer<typeof ReponseVisiteSchema>;
-
-/**
- * La visite du bien : faite ou non, et les réponses données, par identifiant de question de la
- * base du moteur. Une réponse dont l'identifiant n'existe plus est ignorée à l'affichage.
- */
-export const VisiteSchema = z.object({
-  faite: z.boolean(),
-  /** Date ISO du jour où la visite a été marquée faite. */
-  date: z.string().optional(),
-  reponses: z.record(z.string(), ReponseVisiteSchema).default({}),
-});
-export type Visite = z.infer<typeof VisiteSchema>;
-
-/**
- * L'annonce lue quand le projet a été créé depuis un lien : adresses des photos (sur le portail,
- * jamais copiées), fiche du bien et date de lecture. Ni texte, ni donnée sur le vendeur.
- */
-export const AnnonceEnregistreeSchema = z.object({
-  photos: PhotosCaptureSchema.optional(),
-  fiche: FicheAnnonceSchema,
-  lueLe: z.string(),
-});
-export type AnnonceEnregistree = z.infer<typeof AnnonceEnregistreeSchema>;
-
-export const ProjetEnregistreSchema = z.object({
-  id: z.string().min(1),
-  nom: z.string().min(1),
-  statut: StatutProjetSchema,
-  creeLe: z.string(),
-  modifieLe: z.string(),
-  adresse: AdresseBienSchema.optional(),
-  /** Absente : visite non faite, aucune réponse (projets enregistrés avant cette feature). */
-  visite: VisiteSchema.optional(),
-  /** Absente : projet saisi à la main, ou créé avant la lecture enrichie des annonces. */
-  annonce: AnnonceEnregistreeSchema.optional(),
-  projet: ProjetSchema,
-});
-export type ProjetEnregistre = z.infer<typeof ProjetEnregistreSchema>;
-
 const ListeSchema = z.array(ProjetEnregistreSchema);
 
 export const CLE_STOCKAGE = 'loupe.projets.v1';
 
-/** Nom du projet d'exemple amorcé au premier lancement. */
-export const NOM_PROJET_EXEMPLE = 'T3 · 65 m² · Marseille 5e';
-
-/**
- * Un projet enregistré dans un format antérieur est migré avant validation (types d'exploitation de
- * septembre 2026) : les projets déjà enregistrés et les liens de partage continuent de se charger.
- */
-export function migrerEnregistre(brut: unknown): unknown {
-  if (typeof brut !== 'object' || brut === null || Array.isArray(brut) || !('projet' in brut)) {
-    return brut;
-  }
-  return { ...brut, projet: migrerProjet(brut.projet) };
-}
+/** Nom du projet d'exemple amorcé au premier lancement (défini avec les schémas partagés). */
+export const NOM_PROJET_EXEMPLE = NOM_EXEMPLE;
 
 /** Lit la liste ; un contenu absent ou invalide donne une liste vide (jamais d'exception). */
 export function lireProjets(stockage: Storage): ProjetEnregistre[] {

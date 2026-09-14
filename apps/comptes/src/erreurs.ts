@@ -14,7 +14,8 @@ export type CodeErreur =
   | 'PERIODE_DEJA_RECUE'
   | 'HORS_LOCATION'
   | 'LIMITE_ATTEINTE'
-  | 'GESTION_INDISPONIBLE';
+  | 'GESTION_INDISPONIBLE'
+  | 'PROJETS_INDISPONIBLE';
 
 /** Réponse JSON d'erreur, indépendante du contexte Hono (utilisable dans notFound, onError et index). */
 export function reponseErreur(statut: ContentfulStatusCode, code: CodeErreur): Response {

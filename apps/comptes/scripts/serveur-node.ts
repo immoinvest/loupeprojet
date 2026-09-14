@@ -13,6 +13,7 @@ import {
   SECRET_DEV,
 } from '../src/dependances';
 import { journalConsole } from '../src/journal';
+import { depotProjetsD1 } from '../src/projets/depot-d1';
 import { d1SurSqlite } from './d1-sqlite';
 import { appliquerMigrations } from './migration';
 
@@ -38,6 +39,7 @@ const app = creerApp({
   secret: SECRET_DEV,
   base,
   gestion: depotD1(d1SurSqlite(base).base),
+  projets: depotProjetsD1(d1SurSqlite(base).base),
   courriel: envoyeurJournal(journalConsole),
   fournisseurs: {},
   origines: [

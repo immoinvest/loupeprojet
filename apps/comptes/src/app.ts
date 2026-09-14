@@ -6,8 +6,9 @@ import { reponseErreur } from './erreurs';
 import { disponibles } from './fournisseurs';
 import { garde } from './garde';
 import { routeurGestion } from './gestion/routes';
+import { routeurProjets } from './projets/routes';
 
-export const VERSION_COMPTES = '0.2.0';
+export const VERSION_COMPTES = '0.3.0';
 
 /** L'application Hono des comptes, construite à partir de dépendances injectées (réelles en production, doubles en test). */
 export function creerApp(deps: Dependances): Hono {
@@ -30,6 +31,9 @@ export function creerApp(deps: Dependances): Hono {
 
   // Gestion locative : même origine, même session, même base (ADR-G1).
   app.route('/api/gestion', routeurGestion(deps, auth));
+
+  // Projets d'analyse synchronisés avec le compte : même garde, même base (feature sync-projets).
+  app.route('/api/projets', routeurProjets(deps, auth));
 
   app.notFound(() => reponseErreur(404, 'INTROUVABLE'));
   app.onError((erreur, c) => {
