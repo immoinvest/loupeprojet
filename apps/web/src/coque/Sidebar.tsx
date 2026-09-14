@@ -1,4 +1,4 @@
-import { Calculator, Download, Info, Puzzle, X } from 'lucide-react';
+import { Calculator, Download, Puzzle, X } from 'lucide-react';
 import { useEffect, useRef, type JSX } from 'react';
 import { NavLink } from 'react-router';
 
@@ -89,10 +89,6 @@ export function Sidebar({
           </NavLink>
         </nav>
         <nav aria-label="Aide" className="flex flex-col gap-1">
-          <NavLink to="/methode" className={lien}>
-            <Info size={18} className="shrink-0" aria-hidden="true" />
-            <span className="truncate">Comment c'est calculé</span>
-          </NavLink>
           <NavLink to="/extension" className={lien}>
             <Puzzle size={18} className="shrink-0" aria-hidden="true" />
             <span className="truncate">Extension navigateur</span>

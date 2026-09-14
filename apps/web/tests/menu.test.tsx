@@ -86,12 +86,12 @@ describe('Menu des petits écrans', () => {
     expect(contenu()).toHaveFocus();
 
     // Tiroir fermé (barre latérale d'ordinateur) : naviguer ne déplace pas le focus.
-    const lienMethode = within(tiroir()).getByRole('link', { name: "Comment c'est calculé" });
-    await utilisateur.click(lienMethode);
+    const lienExtension = within(tiroir()).getByRole('link', { name: 'Extension navigateur' });
+    await utilisateur.click(lienExtension);
     expect(
-      await screen.findByRole('heading', { level: 1, name: "Comment c'est calculé" }),
+      await screen.findByRole('heading', { level: 1, name: 'Lisez une annonce en un clic.' }),
     ).toBeInTheDocument();
-    expect(lienMethode).toHaveFocus();
+    expect(lienExtension).toHaveFocus();
   });
 
   it('se referme quand l’écran devient large, et ignore un écran resté étroit', async () => {
