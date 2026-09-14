@@ -58,7 +58,9 @@ export function SupprimerBien({ bien }: { readonly bien: BienGere }): JSX.Elemen
       <h2 className="m-0 font-display text-lg font-bold text-probleme-texte">{T.titre}</h2>
       <p className="m-0 text-sm text-encre-2">{T.explication}</p>
       <p className="m-0 text-sm">
-        <a href={CHEMIN_EXPORT}>{T.exporter}</a>
+        <a href={CHEMIN_EXPORT} className="inline-flex items-center pointer-coarse:min-h-11">
+          {T.exporter}
+        </a>
       </p>
       <ChampGerer
         id="confirmation-suppression"
