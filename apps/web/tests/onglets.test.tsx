@@ -1,6 +1,6 @@
-import { render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { AppEnMemoire } from '@/App';
 import { lireProjets } from '@/stockage/projets';
@@ -52,30 +52,119 @@ describe('Fiscalité', () => {
 });
 
 describe('Revente', () => {
-  it('propose quatre horizons, détaille la revente et la plus-value', async () => {
+  const anneesEnregistrees = (): number | undefined =>
+    lireProjets(window.localStorage)[0]?.projet.hypotheses.revente.annees;
+
+  it('ouvre sur le curseur à 10 ans, le taux de la plus-value, quatre repères et le détail', async () => {
     await ouvrir('revente');
     await screen.findByRole('heading', { name: /Qu'est-ce qu'il vous restera/ });
-    const horizons = within(screen.getByRole('group', { name: 'Horizon de revente' })).getAllByRole(
+    const curseur = screen.getByRole('slider', { name: 'Revente dans' });
+    expect(curseur).toHaveValue('10');
+    expect(curseur).toHaveAttribute('min', '1');
+    expect(curseur).toHaveAttribute('max', '30');
+    expect(curseur).toHaveAttribute('aria-valuetext', 'Dans 10 ans');
+    expect(screen.getByText('10 ans')).toBeInTheDocument();
+    // Taux global lu dans les règles : IR après 30 % d'abattement, PS après 8,25 %.
+    expect(n(screen.getByText(/Plus-value imposée à/).textContent)).toContain(
+      "29,1 % à 10 ans : impôt sur le revenu après 30 % d'abattement, prélèvements sociaux après 8,25 %",
+    );
+    expect(
+      screen.getByText(
+        "22 ans : plus d'impôt sur le revenu · 30 ans : plus de prélèvements sociaux",
+      ),
+    ).toBeInTheDocument();
+    const reperes = within(screen.getByRole('group', { name: 'Horizons repères' })).getAllByRole(
       'button',
     );
-    expect(horizons).toHaveLength(4);
-    expect(horizons[1]).toHaveAttribute('aria-pressed', 'true');
+    expect(reperes.map((b) => /^Dans \d+ ans/.exec(b.textContent)?.[0])).toEqual([
+      'Dans 5 ans',
+      'Dans 10 ans',
+      'Dans 15 ans',
+      'Dans 20 ans',
+    ]);
+    expect(reperes[1]).toHaveAttribute('aria-pressed', 'true');
     expect(n(screen.getAllByText(/58 217 €/)[0]?.textContent)).toContain('58 217 €');
+    expect(screen.getByRole('heading', { name: 'Revente dans 10 ans' })).toBeInTheDocument();
     expect(screen.getByText(/Pas de plus-value imposable/)).toBeInTheDocument();
     expect(screen.getByText(/Ce qu'il vous reste en poche/)).toBeInTheDocument();
   });
 
-  it('cliquer un horizon enregistre la durée de détention et recalcule', async () => {
+  it('pendant le glissement les chiffres suivent sans écrire ; le relâchement enregistre', async () => {
     await ouvrir('revente');
     await screen.findByRole('heading', { name: /Qu'est-ce qu'il vous restera/ });
-    const utilisateur = userEvent.setup();
-    await utilisateur.click(screen.getByRole('button', { name: /Dans 20 ans/ }));
-    expect(lireProjets(window.localStorage)[0]?.projet.hypotheses.revente.annees).toBe(20);
+    const curseur = screen.getByRole('slider', { name: 'Revente dans' });
+
+    fireEvent.input(curseur, { target: { value: '20' } });
+    expect(curseur).toHaveValue('20');
     expect(screen.getByRole('heading', { name: 'Revente dans 20 ans' })).toBeInTheDocument();
+    expect(screen.getByText('Cash-flows cumulés sur 20 ans')).toBeInTheDocument();
+    expect(n(screen.getAllByText(/147 662 €/)[0]?.textContent)).toContain('147 662 €');
     expect(screen.getByRole('button', { name: /Dans 20 ans/ })).toHaveAttribute(
       'aria-pressed',
       'true',
     );
+    expect(anneesEnregistrees()).toBe(10);
+
+    fireEvent(curseur, new Event('change', { bubbles: true }));
+    expect(anneesEnregistrees()).toBe(20);
+    expect(lireProjets(window.localStorage)[0]?.projet.provenance['revente.annees']).toBe(
+      'utilisateur',
+    );
+    expect(screen.getByRole('heading', { name: 'Revente dans 20 ans' })).toBeInTheDocument();
+    expect(curseur).toHaveValue('20');
+  });
+
+  it('sans relâchement, enregistre 150 ms après le dernier mouvement', async () => {
+    await ouvrir('revente');
+    await screen.findByRole('heading', { name: /Qu'est-ce qu'il vous restera/ });
+    const curseur = screen.getByRole('slider', { name: 'Revente dans' });
+    fireEvent.input(curseur, { target: { value: '14' } });
+    fireEvent.input(curseur, { target: { value: '15' } });
+    expect(anneesEnregistrees()).toBe(10);
+    await waitFor(() => {
+      expect(anneesEnregistrees()).toBe(15);
+    });
+    expect(screen.getByRole('heading', { name: 'Revente dans 15 ans' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Dans 15 ans/ })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+  });
+
+  it('se règle au clavier, et un horizon hors des repères ne marque aucune carte', async () => {
+    await ouvrir('revente');
+    await screen.findByRole('heading', { name: /Qu'est-ce qu'il vous restera/ });
+    const utilisateur = userEvent.setup();
+    const curseur = screen.getByRole('slider', { name: 'Revente dans' });
+    curseur.focus();
+    await utilisateur.keyboard('{ArrowRight}{ArrowRight}');
+    expect(curseur).toHaveValue('12');
+    expect(anneesEnregistrees()).toBe(12);
+    expect(screen.getByRole('heading', { name: 'Revente dans 12 ans' })).toBeInTheDocument();
+    expect(screen.getByText('TRI sur 12 ans')).toBeInTheDocument();
+    for (const bouton of screen.getAllByRole('button', { pressed: true })) {
+      expect(bouton).not.toHaveTextContent(/Dans \d+ ans/);
+    }
+    expect(n(screen.getByText(/Plus-value imposée à/).textContent)).toContain('à 12 ans');
+  });
+
+  it('cliquer un repère enregistre la durée de détention et règle le curseur', async () => {
+    await ouvrir('revente');
+    await screen.findByRole('heading', { name: /Qu'est-ce qu'il vous restera/ });
+    const utilisateur = userEvent.setup();
+    await utilisateur.click(screen.getByRole('button', { name: /Dans 20 ans/ }));
+    expect(anneesEnregistrees()).toBe(20);
+    expect(screen.getByRole('heading', { name: 'Revente dans 20 ans' })).toBeInTheDocument();
+    expect(screen.getByRole('slider', { name: 'Revente dans' })).toHaveValue('20');
+    expect(screen.getByRole('button', { name: /Dans 20 ans/ })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+    // Recliquer l'horizon courant n'écrit rien de plus.
+    const ecriture = vi.spyOn(Storage.prototype, 'setItem');
+    await utilisateur.click(screen.getByRole('button', { name: /Dans 20 ans/ }));
+    expect(ecriture).not.toHaveBeenCalled();
+    ecriture.mockRestore();
   });
 
   it('affiche le détail quand il y a une plus-value imposable', async () => {

@@ -31,7 +31,7 @@ function Synthese(): JSX.Element {
     },
   ];
   return (
-    <div className="sticky top-[var(--hauteur-barre-app)] z-10 -mx-4 grid grid-cols-2 gap-x-6 gap-y-2 border-b border-bordure bg-fond/95 px-4 py-3 backdrop-blur sm:-mx-6 sm:flex sm:items-center sm:gap-8 sm:px-6 lg:-mx-10 lg:px-10">
+    <div className="sticky top-[var(--hauteur-entete-projet,0px)] z-10 -mx-4 grid grid-cols-2 gap-x-6 gap-y-2 border-b border-bordure bg-fond/95 px-4 py-3 backdrop-blur sm:-mx-6 sm:flex sm:items-center sm:gap-8 sm:px-6 lg:-mx-10 lg:px-10">
       {kpis.map((k) => (
         <div key={k.l} className="flex flex-col">
           <span className="text-xs text-encre-3">{k.l}</span>
