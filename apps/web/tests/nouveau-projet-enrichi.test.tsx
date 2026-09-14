@@ -72,13 +72,16 @@ describe('Nouveau projet — avec le Worker', () => {
       expect(screen.getByLabelText(/Charges de copropriété/)).toHaveValue('150');
       expect(screen.getByLabelText(/Taxe foncière/)).toHaveValue('980');
 
-      await utilisateur.type(screen.getByLabelText(/Loyer visé/), '980');
-      await utilisateur.type(screen.getByLabelText(/^Apport/), '15000');
+      // Ni loyer ni apport : le loyer vient des loyers de marché de la commune.
       await utilisateur.click(screen.getByRole('button', { name: /Créer le projet/ }));
 
       // 155 000 € / 65 m² = 2 385 €/m², sous la médiane de 3 423 €/m² : le prix est bon.
       expect(
-        await screen.findByRole('heading', { name: /Le prix est bon/ }, { timeout: 10_000 }),
+        await screen.findByRole(
+          'heading',
+          { name: /Le prix est bon\. Le loyer/ },
+          { timeout: 10_000 },
+        ),
       ).toBeInTheDocument();
       const projet = lireProjets(window.localStorage)[0]?.projet;
       expect(projet?.marche.dvf).toEqual({
@@ -91,6 +94,12 @@ describe('Nouveau projet — avec le Worker', () => {
       });
       expect(projet?.marche.loyerReferenceM2).toBe(13.83);
       expect(projet?.provenance['marche.dvf.medianM2']).toBe('dvf');
+      // 13,83 €/m² × 65 m² × 1,15 (meublé) = 1 034 €, provenance « anil » ; taxe foncière lue dans l'annonce.
+      expect(projet?.hypotheses.location).toMatchObject({ loyerHc: 1_034 });
+      expect(projet?.provenance['location.loyerHc']).toBe('anil');
+      expect(projet?.hypotheses.charges.taxeFonciere).toBe(980);
+      expect(projet?.hypotheses.pret.apport).toBe(0);
+      expect(projet?.hypotheses.revenusMensuels).toBeUndefined();
     },
   );
 });

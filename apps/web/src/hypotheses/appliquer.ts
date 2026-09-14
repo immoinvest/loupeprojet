@@ -1,10 +1,14 @@
 import {
+  CHAMP_LOYER_PAR_MODE,
   LocationSchema,
   ModeLocationSchema,
   defautsPourMode,
+  loyerConnu,
   loyerMensuelReference,
   obtenirRegles,
   regimesCompatibles,
+  type LocationComplete,
+  type LocationEntree,
   type ModeLocation,
   type ProjetEntree,
 } from '@loupe/moteur';
@@ -36,6 +40,12 @@ function provenanceDuType(
   return { ...conservee, ...estimee, 'location.mode': 'utilisateur' };
 }
 
+/** La variante sans son champ de loyer (loyer, loyer par chambre ou nuitée). */
+function sansLoyer(location: LocationComplete): LocationEntree {
+  const cle = CHAMP_LOYER_PAR_MODE[location.mode];
+  return Object.fromEntries(Object.entries(location).filter(([k]) => k !== cle)) as LocationEntree;
+}
+
 /**
  * Changer de type d'exploitation reconstruit la location avec les défauts du type, à partir du loyer
  * de référence de l'ancienne ; les abonnements du propriétaire suivent le type sauf s'ils sont à toi ;
@@ -44,9 +54,14 @@ function provenanceDuType(
 function changerDeType(projet: ProjetEntree, mode: ModeLocation): ProjetEntree {
   const regles = obtenirRegles(projet.versionRegles);
   const actuelle = LocationSchema.safeParse(projet.hypotheses.location);
-  const loyerMensuel = actuelle.success ? loyerMensuelReference(actuelle.data, regles) : 0;
+  // Sans loyer connu, le nouveau type n'en reçoit pas non plus : le rapport le demandera.
+  const loyerMensuel =
+    actuelle.success && loyerConnu(actuelle.data)
+      ? loyerMensuelReference(actuelle.data, regles)
+      : null;
   const chambres = projet.bien.chambres ?? Math.max(1, projet.bien.pieces - 1);
-  const defauts = defautsPourMode(mode, regles, { loyerMensuel, chambres });
+  const defauts = defautsPourMode(mode, regles, { loyerMensuel: loyerMensuel ?? 0, chambres });
+  const location = loyerMensuel === null ? sansLoyer(defauts.location) : defauts.location;
   const charges = projet.hypotheses.charges ?? {};
   const provenance: Provenance = { ...(projet.provenance ?? {}) };
   const abonnement = (cle: 'energieMensuel' | 'internetMensuel'): number => {
@@ -59,7 +74,7 @@ function changerDeType(projet: ProjetEntree, mode: ModeLocation): ProjetEntree {
     ...projet,
     hypotheses: {
       ...projet.hypotheses,
-      location: defauts.location,
+      location,
       charges: {
         ...charges,
         energieMensuel: abonnement('energieMensuel'),
@@ -70,7 +85,7 @@ function changerDeType(projet: ProjetEntree, mode: ModeLocation): ProjetEntree {
         regime: regimesCompatibles(mode).includes(regime) ? regime : 'lmnp_reel',
       },
     },
-    provenance: provenanceDuType(provenance, defauts.location),
+    provenance: provenanceDuType(provenance, location),
   };
 }
 

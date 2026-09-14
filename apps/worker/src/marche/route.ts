@@ -24,6 +24,7 @@ import { millesimesDvfAEssayer } from './millesime';
 /** Les référentiels changent au mieux une fois par mois : une réponse vaut 24 heures. */
 export const TTL_MARCHE_SECONDES = 24 * 3600;
 /** À incrémenter quand le contrat de réponse change : les réponses en cache en dépendent. */
+// Monter aussi `CONTRAT_MARCHE` dans apps/web/src/enrichissement/client.ts (cache HTTP du navigateur).
 const VERSION_CONTRAT = 2;
 
 export const ParametresMarcheSchema = z.object({

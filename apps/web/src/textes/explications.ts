@@ -1,4 +1,10 @@
-import { loyerMensuelHc, vacanceSemaines, type CodeCharge, type Resultats } from '@loupe/moteur';
+import {
+  loyerMensuelHc,
+  vacanceSemaines,
+  type CodeCharge,
+  type Resultats,
+  type ResultatsComplets,
+} from '@loupe/moteur';
 
 import { cascadeAutofinancement, multipleSurApport } from '@/analyses/rapport';
 import { euros, nombre, pourcentage, pourcentageSigne } from '@/formatage/nombres';
@@ -39,7 +45,7 @@ const CHARGES_DU_TYPE: readonly (readonly [CodeCharge, string])[] = [
   ['internet', 'internet'],
 ];
 
-function charges(r: Resultats): string {
+function charges(r: ResultatsComplets): string {
   const payees = CHARGES_DU_TYPE.filter(([code]) =>
     r.cashflow.charges.some((l) => l.code === code && l.annuel > 0),
   ).map(([, libelle]) => libelle);
@@ -50,7 +56,7 @@ function charges(r: Resultats): string {
 function enMinuscule(libelle: string): string {
   return libelle.charAt(0).toLowerCase() + libelle.slice(1);
 }
-const regime = (r: Resultats): string => enMinuscule(REGIMES[r.fiscalite.retenu]);
+const regime = (r: ResultatsComplets): string => enMinuscule(REGIMES[r.fiscalite.retenu]);
 const annees = (r: Resultats): string => String(r.projet.hypotheses.revente.annees);
 
 /** Le feu prix porte l'écart déjà jugé (décimal) ; `null` sans ventes réelles. */
@@ -79,7 +85,7 @@ export function explicationPrix(r: Resultats): string {
   return `Le bien est affiché ${prixM2} €/m² ${repere}, soit ${pourcentageSigne(ecart)}. Les prix d'annonces, eux, sont 5 à 10 % au-dessus du prix final ; l'état, l'étage, le DPE, le balcon et les charges ajustent l'estimation.`;
 }
 
-export function explicationAutofinancement(r: Resultats): string {
+export function explicationAutofinancement(r: ResultatsComplets): string {
   const c = cascadeAutofinancement(r);
   const semaines = vacanceSemaines(r.projet.hypotheses.location);
   const recuperees =
@@ -97,7 +103,7 @@ export function explicationAutofinancement(r: Resultats): string {
   return `Chaque mois, le loyer de ${euros(c.loyer)}${recuperees} paie d'abord le crédit et l'assurance (${euros(c.credit)}), puis les charges : ${charges(r)} (${euros(c.charges)})${enPlus}. ${reste} ${impot} C'est ce que les annonces oublient.`;
 }
 
-export function explicationCouverture(r: Resultats): string {
+export function explicationCouverture(r: ResultatsComplets): string {
   const t = r.cashflow.tauxCouverture;
   if (t === null) return 'Sans loyer, pas de taux de couverture : rien ne porte le crédit.';
   const suite =
@@ -107,7 +113,7 @@ export function explicationCouverture(r: Resultats): string {
   return `Taux de couverture : la mensualité, assurance comprise (${euros(r.financement.mensualiteTotale)}), représente ${pourcentage(t, 0)} du loyer (${euros(loyerMensuelHc(r.projet.hypotheses.location))}). ${suite}`;
 }
 
-export function explicationEffort(r: Resultats): string {
+export function explicationEffort(r: ResultatsComplets): string {
   const cf = r.cashflow.mensuel;
   if (cf < 0) {
     return `Ce que vous sortez de votre poche chaque mois pour tenir le projet : ${euros(-cf)}, soit ${euros(-cf * 12)} par an. Quand le cash-flow devient positif, cette case devient un excédent.`;
@@ -115,7 +121,7 @@ export function explicationEffort(r: Resultats): string {
   return `Ce que le projet vous laisse chaque mois, avant impôt : ${euros(cf)}, soit ${euros(cf * 12)} par an. Un excédent finance d'abord les imprévus avant de finir dans votre poche.`;
 }
 
-export function explicationPointMort(r: Resultats): string {
+export function explicationPointMort(r: ResultatsComplets): string {
   const pm = r.cashflow.pointMort;
   if (pm === null) {
     return "En courte durée, pas de loyer d'équilibre : ce sont le prix de la nuit et les nuits louées par mois qui font le cash-flow.";
@@ -139,7 +145,10 @@ function annee1<T extends { readonly annee: number }>(
   return total;
 }
 
-export function explicationRendement(r: Resultats, quel: 'brut' | 'net' | 'netNet'): string {
+export function explicationRendement(
+  r: ResultatsComplets,
+  quel: 'brut' | 'net' | 'netNet',
+): string {
   const { coutTotal, brut, net, netNet } = r.rendement.rendements;
   const c = r.cashflow;
   const cout = euros(coutTotal);
@@ -162,7 +171,7 @@ export function explicationRendement(r: Resultats, quel: 'brut' | 'net' | 'netNe
   }
 }
 
-export function explicationFiscalite(r: Resultats): string {
+export function explicationFiscalite(r: ResultatsComplets): string {
   const f = r.fiscalite;
   const retenu = f.regimes[f.retenu];
   const n = annees(r);
@@ -181,13 +190,13 @@ export function explicationFiscalite(r: Resultats): string {
   return `${total} ${explicationRegime(retenu, r.projet.hypotheses.revente.annees)} ${autres.length === 1 ? "L'autre régime possible est le" : 'Le moins cher des trois autres régimes est le'} ${enMinuscule(REGIMES[moinsCher.regime])} (${euros(moinsCher.impotTotal)}) ; l'onglet Fiscalité les compare année par année.`;
 }
 
-export function explicationRevente(r: Resultats): string {
+export function explicationRevente(r: ResultatsComplets): string {
   const v = r.revente;
   const evolution = pourcentageSigne(r.projet.hypotheses.revente.evolutionAnnuelle, 1);
   return `Revente estimée à ${euros(v.valeur)} dans ${annees(r)} ans (${evolution} par an), moins l'agence et les diagnostics (${euros(v.fraisVente.total)}), le capital restant dû (${euros(v.crd)}), l'indemnité de remboursement anticipé (${euros(v.ira)}) et l'impôt sur la plus-value (${euros(v.plusValue.impotTotal)}) : ${euros(v.cashNetVendeur)} net vendeur. Depuis 2025, les amortissements du meublé au réel sont réintégrés dans la plus-value.`;
 }
 
-export function explicationMultiple(r: Resultats): string {
+export function explicationMultiple(r: ResultatsComplets): string {
   const m = multipleSurApport(r);
   if (m === null) {
     return "Sans mise de départ, le multiple n'a pas de sens : tout le gain vient de l'argent de la banque.";

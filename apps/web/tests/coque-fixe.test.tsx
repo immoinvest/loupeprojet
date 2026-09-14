@@ -102,7 +102,7 @@ describe('Coque fixe : seul le contenu défile', () => {
     expect(contenu().scrollTop).toBe(120);
   });
 
-  it('le menu : la liste des projets défile dans sa zone, le logo, « Nouveau projet », l’aide et le profil restent en dehors', async () => {
+  it('le menu : les sections Analyser et Gérer défilent dans leur zone, le logo, l’aide et le profil restent en dehors', async () => {
     await ouvrirMesProjets();
     const barre = barreLaterale();
     expect(barre).toHaveClass('overflow-hidden');
@@ -110,13 +110,16 @@ describe('Coque fixe : seul le contenu défile', () => {
     expect(zone).not.toBeNull();
     expect(zone).toHaveClass('overflow-y-auto', 'min-h-0', 'flex-1');
 
-    const projets = within(barre).getByRole('navigation', { name: 'Mes projets' });
-    expect(zone).toContainElement(projets);
-    expect(within(projets).getByRole('link', { name: NOM_EXEMPLE })).toBeInTheDocument();
-    expect(within(projets).getByRole('link', { name: 'Comparer' })).toBeInTheDocument();
+    const analyser = within(barre).getByRole('navigation', { name: 'Analyser' });
+    const gerer = within(barre).getByRole('navigation', { name: 'Gérer' });
+    expect(zone).toContainElement(analyser);
+    expect(zone).toContainElement(gerer);
+    // Chaque section commence par son action de création : plus de grand bouton au-dessus.
+    expect(within(analyser).getByRole('link', { name: 'Nouveau projet' })).toBeInTheDocument();
+    expect(within(analyser).getByRole('link', { name: NOM_EXEMPLE })).toBeInTheDocument();
+    expect(within(analyser).getByRole('link', { name: 'Comparer' })).toBeInTheDocument();
 
     const horsZone = [
-      within(barre).getByRole('button', { name: 'Nouveau projet' }),
       within(barre).getByRole('button', { name: 'Fermer le menu' }),
       within(barre).getByRole('navigation', { name: 'Aide' }),
       within(barre).getByText('Gratuit · 1 projet'),

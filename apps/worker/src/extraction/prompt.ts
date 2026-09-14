@@ -1,7 +1,7 @@
 import { NOMS_CHAMPS } from './contrat';
 
 /** À incrémenter à chaque changement d'instructions : les réponses en cache en dépendent. */
-export const VERSION_PROMPT = 2;
+export const VERSION_PROMPT = 3;
 
 export interface Message {
   readonly role: 'system' | 'user';
@@ -19,6 +19,7 @@ const INSTRUCTIONS = [
   'chargesCoproMois : charges de copropriété par mois (divise par 12 si elles sont annuelles). taxeFonciere : par an. honorairesAgence : en euros, seulement s’ils sont à la charge de l’acquéreur.',
   'loyerActuel : loyer mensuel hors charges si le bien est actuellement loué. lotsCopro : nombre de lots de la copropriété. chauffage : "individuel" ou "collectif".',
   'etat : "a_renover" (à rénover, travaux à prévoir), "a_rafraichir", "bon_etat" ou "renove" (rénové, refait à neuf), seulement si le texte le dit. exterieur : true s’il y a un balcon, une terrasse ou une loggia, false si le texte dit qu’il n’y en a pas.',
+  'typeLocation : la location que l’annonce décrit ou propose, seulement si le texte le dit : "colocation" (colocation, chambres louées séparément), "courte_duree" (location saisonnière, Airbnb, meublé de tourisme, idéal location courte durée), "moyenne_duree" (bail mobilité, location de quelques mois), "meuble" (loué meublé, location meublée à l’année), "nu" (loué vide ou non meublé). Sinon null.',
 ].join('\n');
 
 /** Espaces et sauts de ligne ramenés à un seul espace : même texte, même empreinte de cache. */

@@ -285,4 +285,115 @@ describe('construireProjet', () => {
     expect(tauxPourDuree(20)).toBe(0.0327);
     expect(tauxPourDuree(25)).toBe(0.0335);
   });
+
+  const minimale: SaisieProjet = {
+    prix: 155_000,
+    surface: 65,
+    codePostal: '13005',
+    ville: 'Marseille',
+    mode: 'meuble',
+    provenance: {},
+  };
+  const enrichi = {
+    marche: { loyerReferenceM2: 13.83 },
+    provenance: { 'marche.loyerReferenceM2': 'anil' },
+    codeInsee: '13205',
+  };
+
+  it('saisie minimale avec les loyers de la commune : loyer ANIL, défauts « estimé », pas de revenus', () => {
+    const projet = ProjetSchema.parse(construireProjet(minimale, 'p5', enrichi));
+    // 13,83 €/m² × 65 m² × 1,15 (meublé) = 1 034 € ; taxe foncière = un mois de ce loyer.
+    expect(projet.hypotheses.location).toMatchObject({ loyerHc: 1_034 });
+    expect(projet.hypotheses.charges.taxeFonciere).toBe(1_034);
+    expect(projet.hypotheses.pret).toMatchObject({
+      apport: 0,
+      dureeAnnees: 25,
+      tauxNominal: 0.0335,
+    });
+    expect(projet.hypotheses.fiscalite.tmi).toBe(0.3);
+    expect(projet.hypotheses.revenusMensuels).toBeUndefined();
+    expect(projet.provenance).toMatchObject({
+      'location.loyerHc': 'anil',
+      'pret.apport': 'estime',
+      'pret.dureeAnnees': 'estime',
+      'fiscalite.tmi': 'estime',
+      'charges.taxeFonciere': 'estime',
+      'marche.loyerReferenceM2': 'anil',
+    });
+    expect(projet.provenance).not.toHaveProperty('revenusMensuels');
+    expect(calculerProjet(projet).complet).toBe(true);
+    // En location nue, le loyer de marché sans la prime meublé.
+    const nu = ProjetSchema.parse(construireProjet({ ...minimale, mode: 'nu' }, 'p6', enrichi));
+    expect(nu.hypotheses.location).toMatchObject({ loyerHc: 899 });
+    // En colocation, le loyer de marché meublé × 1,35 (prime colocation) : 1 034 × 1,35 = 1 396 € pour une chambre.
+    const coloc = ProjetSchema.parse(
+      construireProjet({ ...minimale, mode: 'colocation' }, 'p6b', enrichi),
+    );
+    expect(coloc.hypotheses.location).toMatchObject({ chambres: 1, loyerChambre: 1_396 });
+    expect(coloc.provenance['location.loyerChambre']).toBe('anil');
+  });
+
+  it('sans donnée de marché : pas de loyer, taxe foncière au m², rien d’inventé non plus pour les autres types', () => {
+    const projet = ProjetSchema.parse(construireProjet(minimale, 'p7'));
+    expect(projet.hypotheses.location).not.toHaveProperty('loyerHc');
+    expect(projet.provenance).not.toHaveProperty('location.loyerHc');
+    expect(projet.hypotheses.charges.taxeFonciere).toBe(65 * 14);
+    expect(calculerProjet(projet).complet).toBe(false);
+    // Courte durée : la nuitée ne s'invente pas non plus ; les autres défauts du type sont posés.
+    const cd = ProjetSchema.parse(construireProjet({ ...minimale, mode: 'courte_duree' }, 'p8'));
+    expect(cd.hypotheses.location).toMatchObject({ mode: 'courte_duree', nuiteesParMois: 15 });
+    expect(cd.hypotheses.location).not.toHaveProperty('nuitee');
+    expect(cd.provenance).not.toHaveProperty(['location.nuitee']);
+    expect(calculerProjet(cd).manques).toEqual([
+      { code: 'LOYER_ABSENT', champ: 'hypotheses.location.nuitee' },
+    ]);
+    // Colocation et moyenne durée : pas de loyer par chambre ni de loyer mensuel inventé.
+    const coloc = ProjetSchema.parse(construireProjet({ ...minimale, mode: 'colocation' }, 'p8b'));
+    expect(coloc.hypotheses.location).toMatchObject({ mode: 'colocation', chambres: 1 });
+    expect(coloc.hypotheses.location).not.toHaveProperty('loyerChambre');
+    const md = ProjetSchema.parse(construireProjet({ ...minimale, mode: 'moyenne_duree' }, 'p8c'));
+    expect(md.hypotheses.location).toMatchObject({ mode: 'moyenne_duree', dureeSejourMois: 4 });
+    expect(md.hypotheses.location).not.toHaveProperty('loyerHc');
+  });
+
+  it('un loyer saisi prime sur le loyer de marché ; chaque valeur donnée porte sa provenance', () => {
+    const saisi = ProjetSchema.parse(
+      construireProjet({ ...minimale, loyerHc: 700 }, 'p9', enrichi),
+    );
+    expect(saisi.hypotheses.location).toMatchObject({ loyerHc: 700 });
+    expect(saisi.provenance['location.loyerHc']).toBe('utilisateur');
+    expect(saisi.hypotheses.charges.taxeFonciere).toBe(700);
+    // « Estimer le loyer » du formulaire : provenance « estime » dans la saisie, « anil » dans le projet.
+    const estime = construireProjet(
+      { ...minimale, loyerHc: 1_034, provenance: { loyerHc: 'estime' } },
+      'p10',
+    );
+    expect(estime.provenance?.['location.loyerHc']).toBe('anil');
+    const complet = construireProjet(
+      { ...minimale, apport: 10_000, dureeAnnees: 20, tmi: 0.11 },
+      'p11',
+    );
+    expect(complet.provenance).toMatchObject({
+      'pret.apport': 'utilisateur',
+      'pret.dureeAnnees': 'utilisateur',
+      'fiscalite.tmi': 'utilisateur',
+    });
+    expect(complet.hypotheses.pret.tauxNominal).toBe(0.0327);
+    // Défauts pré-remplis par le formulaire : leur provenance « estime » est conservée.
+    const prerempli = construireProjet(
+      {
+        ...minimale,
+        apport: 0,
+        dureeAnnees: 25,
+        tmi: 0.3,
+        provenance: { apport: 'estime', dureeAnnees: 'estime', tmi: 'estime' },
+      },
+      'p12',
+    );
+    expect(prerempli.provenance).toMatchObject({
+      'pret.apport': 'estime',
+      'pret.dureeAnnees': 'estime',
+      'fiscalite.tmi': 'estime',
+    });
+  });
 });

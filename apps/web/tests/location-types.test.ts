@@ -1,9 +1,34 @@
 import { ProjetSchema, projetExemple, type ProjetEntree } from '@loupe/moteur';
 import { describe, expect, it } from 'vitest';
 
-import { construireProjet, type SaisieProjet } from '@/annonces';
-import { appliquerLoyerVise, loyerParChambre, loyerPourBien } from '@/enrichissement';
+import { construireProjet, extraireChamps, type SaisieProjet } from '@/annonces';
+import { valider, valeursDepuisChamps, versSaisie } from '@/ecrans/formulaire/valeurs';
+import {
+  appliquerLoyerVise,
+  fusionnerChamps,
+  loyerParChambre,
+  loyerPourBien,
+  type ChampsIa,
+} from '@/enrichissement';
 import { appliquerSaisie, descripteurParChemin } from '@/hypotheses';
+
+/** Une réponse du modèle qui n'a rien trouvé. */
+const CHAMPS_IA_VIDES: ChampsIa = {
+  prix: null,
+  surface: null,
+  pieces: null,
+  chambres: null,
+  etage: null,
+  ascenseur: null,
+  dpe: null,
+  codePostal: null,
+  ville: null,
+  annee: null,
+  chargesCoproMois: null,
+  taxeFonciere: null,
+  honorairesAgence: null,
+  meuble: null,
+};
 import { decoderPartage, encoderPartage } from '@/stockage/partage';
 import {
   CLE_STOCKAGE,
@@ -178,5 +203,127 @@ describe('lecture et construction : cas limites', () => {
       provenance: { mode: 'annonce' },
     };
     expect(construireProjet(saisie, 'p').provenance?.['location.mode']).toBe('annonce');
+  });
+});
+
+describe('lecture du type de location dans l’annonce', () => {
+  it('par règles : du plus précis au plus général', () => {
+    expect(extraireChamps('T4 meublé idéal colocation, 3 chambres').mode).toBe('colocation');
+    expect(extraireChamps('Studio meublé loué en bail mobilité à des étudiants').mode).toBe(
+      'moyenne_duree',
+    );
+    expect(extraireChamps('Studio meublé, idéal Airbnb, proche plage').mode).toBe('courte_duree');
+    expect(extraireChamps('Appartement vendu loué en location saisonnière').mode).toBe(
+      'courte_duree',
+    );
+    expect(extraireChamps('T2 loué meublé à l’année').mode).toBe('meuble');
+    expect(extraireChamps('T2 vendu libre, lumineux').mode).toBeUndefined();
+  });
+
+  it('par l’IA : le type du modèle remplace celui des règles ; absent ou null, les règles restent', () => {
+    const base = { ...CHAMPS_IA_VIDES, typeLocation: 'courte_duree' as const };
+    expect(fusionnerChamps({ mode: 'meuble' }, base).mode).toBe('courte_duree');
+    expect(fusionnerChamps({ mode: 'meuble' }, { ...base, typeLocation: null }).mode).toBe(
+      'meuble',
+    );
+    // Réponse mise en cache avant le prompt v3 : pas de typeLocation du tout.
+    expect(fusionnerChamps({ mode: 'colocation' }, CHAMPS_IA_VIDES).mode).toBe('colocation');
+  });
+
+  it('pré-remplit le type de Vérifier, « meublé » seul donnant une location meublée', () => {
+    expect(valeursDepuisChamps({ mode: 'colocation' })).toMatchObject({
+      valeurs: { mode: 'colocation' },
+      provenance: { mode: 'annonce' },
+    });
+    expect(valeursDepuisChamps({ meuble: true }).valeurs.mode).toBe('meuble');
+    expect(valeursDepuisChamps({ meuble: false }).provenance.mode).toBeUndefined();
+  });
+});
+
+describe('formulaire Vérifier : champs et saisie par type', () => {
+  const base = {
+    ...valeursDepuisChamps({}).valeurs,
+    prix: '120000',
+    surface: '60',
+    codePostal: '13002',
+    ville: 'Marseille',
+    apport: '10000',
+  };
+
+  it('valide les champs de loyer du type choisi : vides permis, mal remplis signalés', () => {
+    expect(valider({ ...base, mode: 'meuble' })).toEqual({});
+    expect(valider({ ...base, mode: 'meuble', loyerHc: 'abc' })).toEqual({
+      loyerHc: 'Nombre attendu.',
+    });
+    expect(
+      valider({ ...base, mode: 'colocation', chambresLouees: '0', loyerChambre: '-5' }),
+    ).toEqual({
+      chambresLouees: 'Entre 1 et 20 chambres, ou rien.',
+      loyerChambre: 'Un montant positif, ou rien.',
+    });
+    expect(valider({ ...base, mode: 'colocation', chambresLouees: '', loyerChambre: '' })).toEqual(
+      {},
+    );
+    expect(valider({ ...base, mode: 'courte_duree', nuitee: '0', nuiteesParMois: '32' })).toEqual({
+      nuitee: 'Un prix positif, ou rien.',
+      nuiteesParMois: 'Entre 0 et 31 nuits, ou rien.',
+    });
+    expect(
+      valider({ ...base, mode: 'courte_duree', nuitee: '70', nuiteesParMois: '16', loyerHc: '' }),
+    ).toEqual({});
+  });
+
+  it('colocation : loyer du logement = chambres × loyer par chambre ; courte durée : nuitée × 30 ÷ 2', () => {
+    const coloc = versSaisie(
+      { ...base, mode: 'colocation', chambresLouees: '3', loyerChambre: '450', nuitee: '99' },
+      {},
+      null,
+    );
+    expect(coloc).toMatchObject({
+      mode: 'colocation',
+      loyerHc: 1_350,
+      chambresLouees: 3,
+      loyerChambre: 450,
+    });
+    expect(coloc.nuitee).toBeUndefined();
+    const cd = versSaisie(
+      { ...base, mode: 'courte_duree', nuitee: '70', nuiteesParMois: '16' },
+      {},
+      null,
+    );
+    expect(cd).toMatchObject({
+      mode: 'courte_duree',
+      loyerHc: 1_050,
+      nuitee: 70,
+      nuiteesParMois: 16,
+    });
+    expect(cd.loyerChambre).toBeUndefined();
+    const md = versSaisie({ ...base, mode: 'moyenne_duree', loyerHc: '900' }, {}, null);
+    expect(md).toMatchObject({ mode: 'moyenne_duree', loyerHc: 900 });
+    const vide = versSaisie({ ...base, mode: 'colocation' }, {}, null);
+    // Rien de saisi : pas de loyer, construireProjet prend le loyer de marché s'il le connaît.
+    expect(vide.loyerHc).toBeUndefined();
+    expect(
+      versSaisie({ ...base, mode: 'colocation', chambresLouees: '3' }, {}, null).loyerHc,
+    ).toBeUndefined();
+    expect(versSaisie({ ...base, mode: 'courte_duree' }, {}, null).loyerHc).toBeUndefined();
+    expect(versSaisie({ ...base, mode: 'nu' }, {}, null).loyerHc).toBeUndefined();
+  });
+});
+
+describe('régimes proposés selon le type', () => {
+  it('nue et meublée : les quatre régimes ; colocation, courte et moyenne durée : ceux du meublé', () => {
+    const d = descripteurParChemin('hypotheses.fiscalite.regime');
+    const garder = d.optionVisibleSi;
+    if (garder === undefined) throw new Error('filtre attendu');
+    const proposes = (mode: ProjetEntree['hypotheses']['location']['mode']): string[] => {
+      const projet = { hypotheses: { location: { mode } } } as unknown as ProjetEntree;
+      return (d.options ?? []).filter((o) => garder(o.v, projet)).map((o) => o.v);
+    };
+    expect(proposes('nu')).toEqual(['lmnp_reel', 'micro_bic', 'nu_reel', 'micro_foncier']);
+    expect(proposes('meuble')).toHaveLength(4);
+    for (const mode of ['colocation', 'courte_duree', 'moyenne_duree'] as const) {
+      expect(proposes(mode)).toEqual(['lmnp_reel', 'micro_bic']);
+    }
   });
 });

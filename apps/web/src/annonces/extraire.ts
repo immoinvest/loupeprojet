@@ -1,4 +1,4 @@
-import type { ClasseEnergie, EtatBien, TypeBien } from '@loupe/moteur';
+import type { ClasseEnergie, EtatBien, ModeLocation, TypeBien } from '@loupe/moteur';
 
 /**
  * Champs lus dans une annonce (texte par règles, IA, ou données de la page lues par l'extension).
@@ -26,6 +26,8 @@ export interface ChampsExtraits {
   readonly etat?: EtatBien;
   /** Balcon, terrasse ou loggia. */
   readonly exterieur?: boolean;
+  /** Type de location que l'annonce décrit ou propose (colocation, « idéal Airbnb », bail mobilité…). */
+  readonly mode?: ModeLocation;
 }
 
 const PRIX_MINIMUM = 20_000;
@@ -128,6 +130,20 @@ function exterieur(texte: string): boolean | undefined {
   return /(?<![\p{L}])(?:balcons?|terrasses?|loggias?)(?![\p{L}])/iu.test(texte) ? true : undefined;
 }
 
+/** Le type de location, du plus précis au plus général : « colocation » l'emporte sur « meublé ». */
+function typeLocation(texte: string): ModeLocation | undefined {
+  if (/colocation|coloc(?![\p{L}])/iu.test(texte)) return 'colocation';
+  if (/bail\s+mobilit[ée]|moyenne\s+dur[ée]e/i.test(texte)) return 'moyenne_duree';
+  if (
+    /airbnb|saisonni[eè]re?|meubl[ée]\s+de\s+tourisme|courte\s+dur[ée]e|location\s+touristique/i.test(
+      texte,
+    )
+  ) {
+    return 'courte_duree';
+  }
+  return /meubl[ée]/i.test(texte) ? 'meuble' : undefined;
+}
+
 /** Extraction par règles : sans réseau, sans LLM. Chaque champ absent reste absent. */
 export function extraireChamps(texte: string): ChampsExtraits {
   const bruts: Record<string, unknown> = {
@@ -146,6 +162,7 @@ export function extraireChamps(texte: string): ChampsExtraits {
     meuble: /meubl[ée]/i.test(texte) ? true : undefined,
     etat: etat(texte),
     exterieur: exterieur(texte),
+    mode: typeLocation(texte),
   };
   const champs: Record<string, unknown> = {};
   for (const [cle, valeur] of Object.entries(bruts)) {

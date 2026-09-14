@@ -1,4 +1,4 @@
-import type { Resultats } from '@loupe/moteur';
+import type { ResultatsComplets } from '@loupe/moteur';
 import type { JSX } from 'react';
 
 import { useModeDocument } from '@/composants/document';
@@ -7,7 +7,7 @@ import { euros, eurosParMois, pourcentage } from '@/formatage/nombres';
 import { SCENARIOS } from '@/textes/regimes';
 
 /** Les leviers du rapport : négocier le prix, passer en colocation, et les scénarios « et si ». */
-export function Leviers({ r }: { r: Resultats }): JSX.Element | null {
+export function Leviers({ r }: { r: ResultatsComplets }): JSX.Element | null {
   // Sur papier (ou en noir et blanc), la carte pleine d'encre devient une carte claire.
   const document = useModeDocument();
   const s = r.scenarios;
@@ -42,11 +42,11 @@ export function Leviers({ r }: { r: Resultats }): JSX.Element | null {
           </span>
         </div>
       )}
-      <div className={separateur} />
+      {coloc !== undefined && <div className={separateur} />}
       {coloc !== undefined && (
         <div className="flex flex-1 flex-col gap-1.5">
           <span className="text-xs font-bold tracking-wide uppercase opacity-80">
-            Levier 2 · Colocation
+            Levier 2 · Et si je passais en colocation
           </span>
           <span className="font-display text-[28px] font-bold sm:text-[32px] print:text-[32px]">
             {eurosParMois(coloc.indicateurs.cashflowMensuel)}

@@ -11,7 +11,7 @@ import {
 import type { ProjetEnregistre, StatutProjet } from '@/stockage/projets';
 import { libelleTauxNegociation } from '@/textes/achat';
 import { libelleRisques } from '@/textes/feux';
-import { REGIMES } from '@/textes/regimes';
+import { MODES, REGIMES } from '@/textes/regimes';
 
 export type CodeIndicateur =
   | 'prix'
@@ -93,8 +93,10 @@ export const INDICATEURS: readonly Indicateur[] = [
     libelle: 'Loyer mensuel hors charges',
     sens: 'haut',
     meilleur: false,
-    extraire: (r) => r.cashflow.recettes.loyersBruts / 12,
+    extraire: (r) => (r.complet ? r.cashflow.recettes.loyersBruts / 12 : null),
     formater: euros,
+    // Un loyer de colocation ou de courte durée ne se lit qu'avec son type.
+    detail: (r) => MODES[r.projet.hypotheses.location.mode],
   },
   {
     code: 'cashflow',
@@ -102,7 +104,7 @@ export const INDICATEURS: readonly Indicateur[] = [
     sens: 'haut',
     meilleur: true,
     axe: 'cashflow',
-    extraire: (r) => r.cashflow.mensuel,
+    extraire: (r) => (r.complet ? r.cashflow.mensuel : null),
     formater: eurosParMois,
   },
   {
@@ -110,7 +112,7 @@ export const INDICATEURS: readonly Indicateur[] = [
     libelle: 'Rendement brut',
     sens: 'haut',
     meilleur: true,
-    extraire: (r) => r.rendement.rendements.brut,
+    extraire: (r) => (r.complet ? r.rendement.rendements.brut : null),
     formater: (v) => pourcentage(v),
   },
   {
@@ -119,7 +121,7 @@ export const INDICATEURS: readonly Indicateur[] = [
     sens: 'haut',
     meilleur: true,
     axe: 'rendement',
-    extraire: (r) => r.rendement.rendements.net,
+    extraire: (r) => (r.complet ? r.rendement.rendements.net : null),
     formater: (v) => pourcentage(v),
   },
   {
@@ -136,16 +138,17 @@ export const INDICATEURS: readonly Indicateur[] = [
     libelle: 'Impôt du régime retenu',
     sens: 'bas',
     meilleur: true,
-    extraire: (r) => r.fiscalite.regimes[r.fiscalite.retenu].impotTotal,
+    extraire: (r) => (r.complet ? r.fiscalite.regimes[r.fiscalite.retenu].impotTotal : null),
     formater: euros,
-    detail: (r) => `${REGIMES[r.fiscalite.retenu]} · ${String(r.revente.annees)} ans`,
+    detail: (r) =>
+      `${REGIMES[r.projet.hypotheses.fiscalite.regime]} · ${String(r.projet.hypotheses.revente.annees)} ans`,
   },
   {
     code: 'horizon',
     libelle: 'Horizon de revente',
     sens: 'haut',
     meilleur: false,
-    extraire: (r) => r.revente.annees,
+    extraire: (r) => r.projet.hypotheses.revente.annees,
     formater: (v) => `${String(v)} ans`,
   },
   {
@@ -153,7 +156,7 @@ export const INDICATEURS: readonly Indicateur[] = [
     libelle: 'Cash net à la revente',
     sens: 'haut',
     meilleur: true,
-    extraire: (r) => r.revente.cashNetVendeur,
+    extraire: (r) => (r.complet ? r.revente.cashNetVendeur : null),
     formater: euros,
   },
   {
@@ -161,7 +164,7 @@ export const INDICATEURS: readonly Indicateur[] = [
     libelle: 'TRI',
     sens: 'haut',
     meilleur: true,
-    extraire: (r) => r.rendement.tri,
+    extraire: (r) => (r.complet ? r.rendement.tri : null),
     formater: (v) => pourcentage(v),
   },
   {
@@ -169,7 +172,7 @@ export const INDICATEURS: readonly Indicateur[] = [
     libelle: 'Enrichissement',
     sens: 'haut',
     meilleur: true,
-    extraire: (r) => r.rendement.enrichissement.total,
+    extraire: (r) => (r.complet ? r.rendement.enrichissement.total : null),
     formater: eurosSignes,
   },
   {

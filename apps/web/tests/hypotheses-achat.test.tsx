@@ -124,10 +124,7 @@ describe('carte « L’achat » : travaux repliés', () => {
     expect(screen.queryByRole('combobox', { name: /classes E, F ou G/ })).toBeNull();
 
     const utilisateur = userEvent.setup();
-    await utilisateur.selectOptions(
-      screen.getByRole('combobox', { name: /^Type de location/ }),
-      'nu',
-    );
+    await utilisateur.click(screen.getByRole('radio', { name: 'Nue' }));
     const renovation = screen.getByRole('combobox', { name: /classes E, F ou G/ });
     expect(screen.getByText(/porté de 10 700 € à 21 400 €/)).toBeInTheDocument();
     await utilisateur.selectOptions(renovation, 'oui');

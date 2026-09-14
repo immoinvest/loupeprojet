@@ -11,13 +11,20 @@ import {
   type Descripteur,
   type Groupe,
 } from '@/hypotheses';
+import { CHEMIN_MODE } from '@/hypotheses/groupes-location';
 import { useProjets } from '@/stockage/ProjetsContext';
 
 import { badgePour } from './badges';
 import { ChampHypothese } from './ChampHypothese';
 
 export function champsVisibles(groupe: Groupe, projet: ProjetEntree): readonly Descripteur[] {
-  return groupe.champs.filter((d) => d.visibleSi === undefined || d.visibleSi(projet));
+  return groupe.champs
+    .filter((d) => d.visibleSi === undefined || d.visibleSi(projet))
+    .map((d) => {
+      const { optionVisibleSi: garder, options } = d;
+      if (garder === undefined || options === undefined) return d;
+      return { ...d, options: options.filter((o) => garder(o.v, projet)) };
+    });
 }
 
 export interface SaisieHypotheses {
@@ -79,7 +86,10 @@ export function GrilleHypotheses({ groupe }: { groupe: Groupe }): JSX.Element {
   const { projet, rendre } = useSaisieHypotheses();
   return (
     <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
-      {champsVisibles(groupe, projet).map(rendre)}
+      {/* Le type d'exploitation se choisit par les boutons en tête de sa carte, jamais dans la grille. */}
+      {champsVisibles(groupe, projet)
+        .filter((d) => d.chemin !== CHEMIN_MODE)
+        .map(rendre)}
     </div>
   );
 }

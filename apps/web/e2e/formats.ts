@@ -1,5 +1,6 @@
 import { expect, type Browser, type BrowserContext, type Page } from '@playwright/test';
 
+import { simulerGestion } from './reponses-gestion';
 import { ADRESSE_SIMULEE, simulerWorker } from './reponses-worker';
 
 /** Un format d'écran de la spec (largeur × hauteur, en px CSS). */
@@ -57,6 +58,8 @@ export interface DonneesDeTest {
   readonly id: string;
   /** La copie du projet d'exemple, avec une adresse. */
   readonly idAvecAdresse: string;
+  /** La copie du projet d'exemple sans loyer visé : le rapport « à compléter ». */
+  readonly idSansLoyer: string;
   /** La copie dont la visite est faite, avec des réponses : son onglet est un compte rendu. */
   readonly idVisiteFaite: string;
   readonly lienPartage: string;
@@ -76,6 +79,17 @@ export async function preparerDonnees(page: Page): Promise<DonneesDeTest> {
     const exemple = projets[0];
     if (exemple === undefined) throw new Error("Le projet d'exemple est absent.");
     const copie = { ...exemple, id: 'copie-formats', nom: 'Copie · T3 · Marseille', adresse };
+    // Même projet sans loyer visé : le bandeau et les cartes « à compléter » sont mesurés aussi.
+    const sansLoyer = JSON.parse(JSON.stringify(exemple)) as {
+      id: string;
+      nom: string;
+      projet: { hypotheses: { location: Record<string, unknown> } };
+    };
+    sansLoyer.id = 'sans-loyer-formats';
+    sansLoyer.nom = 'Sans loyer · T3 · Marseille';
+    sansLoyer.projet.hypotheses.location = Object.fromEntries(
+      Object.entries(sansLoyer.projet.hypotheses.location).filter(([k]) => k !== 'loyerHc'),
+    );
     const visitee = {
       ...exemple,
       id: 'visite-faite',
@@ -90,7 +104,7 @@ export async function preparerDonnees(page: Page): Promise<DonneesDeTest> {
         },
       },
     };
-    localStorage.setItem(cle, JSON.stringify([exemple, copie, visitee]));
+    localStorage.setItem(cle, JSON.stringify([exemple, copie, visitee, sansLoyer]));
     // Même encodage que stockage/partage.ts : base64url du JSON UTF-8 du projet enregistré.
     const octets = new TextEncoder().encode(JSON.stringify(exemple));
     let binaire = '';
@@ -99,6 +113,7 @@ export async function preparerDonnees(page: Page): Promise<DonneesDeTest> {
     return {
       id: exemple.id,
       idAvecAdresse: copie.id,
+      idSansLoyer: sansLoyer.id,
       idVisiteFaite: visitee.id,
       lienPartage: `/partage#p=${encode}`,
     };
@@ -131,6 +146,12 @@ async function simulerSession(page: Page): Promise<void> {
   );
 }
 
+/** Une personne connectée qui gère trois biens (voir `reponses-gestion.ts`). */
+async function simulerSessionEtGestion(page: Page): Promise<void> {
+  await simulerSession(page);
+  await simulerGestion(page);
+}
+
 export interface Ecran {
   readonly nom: string;
   readonly chemin: string;
@@ -140,15 +161,31 @@ export interface Ecran {
   readonly ouvrir?: (page: Page) => Promise<void>;
 }
 
-/** Les écrans de référence ; la session simulée de « Mon compte » reste active : il vient en dernier. */
+/**
+ * Les écrans de référence. Une session simulée reste active jusqu'à la fin : les écrans sans compte
+ * passent d'abord, ceux de Gérer avec un compte ensuite, « Mon compte » en dernier.
+ */
 export function ecransDeReference({
   id,
   idAvecAdresse,
+  idSansLoyer,
   idVisiteFaite,
   lienPartage,
 }: DonneesDeTest): readonly Ecran[] {
   const projet = `/projets/${id}`;
   return [
+    {
+      nom: 'Rapport à compléter (sans loyer)',
+      chemin: `/projets/${idSansLoyer}`,
+      ouvrir: async (page) => {
+        await expect(
+          page.getByRole('heading', {
+            level: 2,
+            name: 'Il manque le loyer visé pour cette analyse',
+          }),
+        ).toBeVisible();
+      },
+    },
     { nom: 'Mes projets', chemin: '/projets' },
     { nom: 'Nouveau projet', chemin: '/projets/nouveau' },
     {
@@ -198,8 +235,19 @@ export function ecransDeReference({
     { nom: 'Simulation imprimée', chemin: '/simulateur-pret/imprimer' },
     { nom: 'Projet partagé', chemin: lienPartage },
     { nom: "Aperçu d'impression", chemin: `${projet}/imprimer` },
+    { nom: 'Gérer (sans compte)', chemin: '/gerer' },
     { nom: 'Connexion', chemin: '/connexion', avant: simulerFournisseurs },
-    { nom: 'Mon compte', chemin: '/compte', avant: simulerSession },
+    {
+      nom: 'Gérer (loyers du mois)',
+      chemin: '/gerer',
+      avant: simulerSessionEtGestion,
+      ouvrir: async (page) => {
+        await expect(page.getByRole('main').getByText('Studio Baille').first()).toBeVisible();
+      },
+    },
+    { nom: 'Ajouter un bien', chemin: '/gerer/ajouter' },
+    { nom: 'Prêt à gérer', chemin: `/gerer/pret/${id}` },
+    { nom: 'Mon compte', chemin: '/compte' },
   ];
 }
 

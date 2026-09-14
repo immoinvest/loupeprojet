@@ -1,4 +1,16 @@
-import { projetExemple, type ProjetEntree } from '@loupe/moteur';
+import {
+  calculerProjet,
+  projetExemple,
+  type ProjetEntree,
+  type ResultatsComplets,
+} from '@loupe/moteur';
+
+/** Le rapport d'un projet qui a un loyer : complet, ou le test s'arrête net. */
+export function rapportComplet(projet: ProjetEntree): ResultatsComplets {
+  const r = calculerProjet(projet);
+  if (!r.complet) throw new Error('rapport partiel inattendu');
+  return r;
+}
 
 /** Le projet d'exemple avec d'autres hypothèses (et, au besoin, un autre marché). */
 export const variante = (

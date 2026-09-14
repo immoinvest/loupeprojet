@@ -41,7 +41,13 @@ export default function CarteVentes({
     const auDoigt =
       typeof window.matchMedia === 'function' && window.matchMedia('(pointer: coarse)').matches;
     const centre = L.latLng(lat, lon);
-    const carte = L.map(element, { scrollWheelZoom: false, dragging: !auDoigt });
+    // Zoom par quarts de niveau : au niveau entier inférieur, le cercle de 300 m n'occupait que 45 % de la carte.
+    const carte = L.map(element, {
+      scrollWheelZoom: false,
+      dragging: !auDoigt,
+      zoomSnap: 0.25,
+      zoomDelta: 0.5,
+    });
     carte.attributionControl.setPrefix('Leaflet');
     L.tileLayer(URL_TUILES_IGN, { maxZoom: ZOOM_MAX_IGN, attribution: ATTRIBUTION_IGN }).addTo(
       carte,
@@ -72,7 +78,7 @@ export default function CarteVentes({
       ref={conteneur}
       role="img"
       aria-label={libelle}
-      className="h-[280px] w-full overflow-hidden rounded-encart border border-bordure sm:h-[380px]"
+      className="carte-quartier h-[280px] w-full overflow-hidden rounded-encart border border-bordure sm:h-[380px]"
     />
   );
 }

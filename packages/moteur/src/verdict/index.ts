@@ -4,6 +4,7 @@ import type { ResultatFinancement } from '../financement';
 import type { ResultatFiscalite } from '../fiscalite/types';
 import type { Regles } from '../regles/types';
 import type { ResultatRendement } from '../rendement';
+import { manquesDe, raisonParmi, type Manque } from '../schema/manques';
 import type { Projet } from '../schema/projet';
 import {
   feuCashflow,
@@ -34,15 +35,28 @@ function compter(feux: readonly FeuVerdict[], feu: Feu): number {
   return feux.filter((f) => f.feu === feu).length;
 }
 
+export interface OptionsVerdict {
+  readonly estimation?: EstimationPrix | null;
+  /** Données absentes du projet (défaut : lues dans le projet). */
+  readonly manques?: readonly Manque[];
+}
+
+/**
+ * Les cinq feux et les points de vigilance. Fiscalité et rendement sont `null` quand le loyer manque :
+ * les feux rendement, cash-flow et couverture sont alors « inconnu » avec cette raison.
+ */
 export function calculerVerdict(
   projet: Projet,
   financement: ResultatFinancement,
-  fiscalite: ResultatFiscalite,
-  rendement: ResultatRendement,
+  fiscalite: ResultatFiscalite | null,
+  rendement: ResultatRendement | null,
   regles: Regles,
-  estimation: EstimationPrix | null = null,
+  options: OptionsVerdict = {},
 ): ResultatVerdict {
-  const retenu = fiscalite.regimes[fiscalite.retenu];
+  const estimation = options.estimation ?? null;
+  const manques = options.manques ?? manquesDe(projet);
+  const raisonLoyer = raisonParmi(manques, ['LOYER_ABSENT']);
+  const retenu = fiscalite === null ? null : fiscalite.regimes[fiscalite.retenu];
   const prix = feuPrix(
     prixRetenu(projet.hypotheses.achat) / projet.bien.surface,
     projet.marche,
@@ -51,9 +65,9 @@ export function calculerVerdict(
   );
   const feux: readonly FeuVerdict[] = [
     prix,
-    feuRendement(rendement.rendements.net, regles),
-    feuCashflow(retenu.cashflow.mensuel, regles),
-    feuCouverture(retenu.cashflow.tauxCouverture, regles),
+    feuRendement(rendement === null ? null : rendement.rendements.net, regles, raisonLoyer),
+    feuCashflow(retenu === null ? null : retenu.cashflow.mensuel, regles, raisonLoyer),
+    feuCouverture(retenu === null ? null : retenu.cashflow.tauxCouverture, regles, raisonLoyer),
     feuRisques(projet.bien, projet.marche),
   ];
   return {

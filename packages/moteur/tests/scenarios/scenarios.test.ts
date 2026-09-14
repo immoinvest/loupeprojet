@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { calculerBase } from '../../src/calculer-base';
+import { calculerComplet } from '../../src/calculer-base';
 import { calculerProjet } from '../../src/calculer-projet';
 import { projetExemple } from '../../src/exemples/t3-marseille';
 import { obtenirRegles } from '../../src/regles';
@@ -12,13 +12,13 @@ import {
   prixCible,
   type Variante,
 } from '../../src/scenarios';
-import { ProjetSchema, type ProjetEntree } from '../../src/schema';
+import { parserComplet, type ProjetComplet, type ProjetEntree } from '../../src/schema';
 
 const regles = obtenirRegles('2026-09');
-const projet = ProjetSchema.parse(projetExemple);
+const projet = parserComplet(projetExemple);
 
-const variante = (h: Partial<ProjetEntree['hypotheses']>): ReturnType<typeof ProjetSchema.parse> =>
-  ProjetSchema.parse({ ...projetExemple, hypotheses: { ...projetExemple.hypotheses, ...h } });
+const variante = (h: Partial<ProjetEntree['hypotheses']>): ProjetComplet =>
+  parserComplet({ ...projetExemple, hypotheses: { ...projetExemple.hypotheses, ...h } });
 
 /** La transformation n'a pas le droit de rendre `null` ici. */
 const obligatoire = (v: Variante | null): Variante => {
@@ -32,19 +32,18 @@ describe('prixCible', () => {
     expect(cible.prix).not.toBeNull();
     expect(cible.prix!).toBeLessThan(155_000);
     expect(cible.ecart!).toBeLessThan(0);
-    const recalcul = calculerBase(avecPrix(projet, cible.prix!), regles);
+    const recalcul = calculerComplet(avecPrix(projet, cible.prix!), regles);
     expect(Math.abs(recalcul.cashflow.mensuel)).toBeLessThan(1);
   });
 
   it('net 6 % et brut 8 % : le rendement recalculé atteint la cible', () => {
     const net = prixCible(projet, 'net_6', regles);
     const brut = prixCible(projet, 'brut_8', regles);
-    expect(calculerBase(avecPrix(projet, net.prix!), regles).rendement.rendements.net).toBeCloseTo(
-      0.06,
-      4,
-    );
     expect(
-      calculerBase(avecPrix(projet, brut.prix!), regles).rendement.rendements.brut,
+      calculerComplet(avecPrix(projet, net.prix!), regles).rendement.rendements.net,
+    ).toBeCloseTo(0.06, 4);
+    expect(
+      calculerComplet(avecPrix(projet, brut.prix!), regles).rendement.rendements.brut,
     ).toBeCloseTo(0.08, 4);
   });
 
@@ -116,7 +115,9 @@ describe('transformations prédéfinies', () => {
   it('colocation : absente quand le projet est déjà une colocation', () => {
     const coloc = variante({ location: { mode: 'colocation', chambres: 3, loyerChambre: 450 } });
     expect(TRANSFORMATIONS[1]!(coloc, regles)).toBeNull();
-    expect(calculerScenarios(coloc, calculerBase(coloc, regles), regles).scenarios).toHaveLength(5);
+    expect(calculerScenarios(coloc, calculerComplet(coloc, regles), regles).scenarios).toHaveLength(
+      5,
+    );
   });
 
   it('durée : 20 ans (ou 15 si déjà 20) ; taux : +0,5 point', () => {
@@ -165,7 +166,7 @@ describe('transformations prédéfinies', () => {
   });
 
   it('depuis une courte durée : le loyer de marché quand il est connu, sinon nuitée × 30 ÷ 2', () => {
-    const avecMarche = ProjetSchema.parse({
+    const avecMarche = parserComplet({
       ...projetExemple,
       hypotheses: {
         ...projetExemple.hypotheses,
@@ -176,7 +177,7 @@ describe('transformations prédéfinies', () => {
     // Loyer ANIL 15,1 €/m² × 65 m² × 1,15 = 1 128,725 €.
     expect(v.parametres.loyerHc).toBe(Math.round(15.1 * 65 * 1.15));
     expect(v.projet.hypotheses.location).toMatchObject({ mode: 'meuble', gestionTaux: 0 });
-    const sansMarche = ProjetSchema.parse({
+    const sansMarche = parserComplet({
       ...avecMarche,
       marche: { ...projetExemple.marche, loyerReferenceM2: undefined },
     });
@@ -202,7 +203,7 @@ describe('transformations prédéfinies', () => {
   });
 
   it('colocation sans chambres renseignées : pièces − 1, au moins 1', () => {
-    const sansChambres = ProjetSchema.parse({
+    const sansChambres = parserComplet({
       ...projetExemple,
       bien: { ...projetExemple.bien, chambres: undefined, pieces: 1 },
     });
@@ -216,7 +217,7 @@ describe('transformations prédéfinies', () => {
 });
 
 describe('calculerScenarios et deltas', () => {
-  const base = calculerBase(projet, regles);
+  const base = calculerComplet(projet, regles);
   const r = calculerScenarios(projet, base, regles);
 
   it('chaque scénario compare ses indicateurs à la référence', () => {
@@ -242,7 +243,7 @@ describe('calculerScenarios et deltas', () => {
       revente: { annees: 1, evolutionAnnuelle: -0.2 },
     });
     const rr = calculerProjet(perte);
-    expect(rr.rendement.tri).toBeNull();
+    expect(rr.complet && rr.rendement.tri).toBeNull();
     expect(rr.scenarios!.scenarios.every((s) => s.deltas.tri === null)).toBe(true);
   });
 });
@@ -254,7 +255,7 @@ describe('négociation du prix', () => {
   it('avecPrix fixe un prix retenu exact : la négociation est remise à zéro', () => {
     const v = avecPrix(negocie, 80_000);
     expect(v.hypotheses.achat).toMatchObject({ prix: 80_000, negociationTaux: 0 });
-    expect(calculerBase(v, regles).achat.prixRetenu).toBe(80_000);
+    expect(calculerComplet(v, regles).achat.prixRetenu).toBe(80_000);
   });
 
   it("l'écart d'un prix cible se lit depuis le prix affiché, celui que l'on négocie", () => {

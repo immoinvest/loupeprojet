@@ -25,7 +25,7 @@ Concurrents : Horiz.io (8–20 €/mois, complet, saisie manuelle), Lybox (9–4
 1. **Coller le lien** — portail reconnu, id extrait ; extension / bookmarklet / texte collé / saisie manuelle.
 2. **Lire** — données structurées de la page, puis LLM (JSON strict) pour les champs manquants, repli regex. 0 ou 1 appel, ~2 s.
 3. **Enrichir** — géocodage puis en parallèle : DVF 500 m, DPE ADEME, loyers ANIL, taux TF (REI), Géorisques, zonage ABC, population. Zéro LLM.
-4. **Vérifier** — un écran, quatre blocs (bien, financement, location, fiscalité), badges `annonce` / `donnée publique` / `estimé` / `à toi`. Cinq confirmations max : loyer visé, apport, durée, TMI, mode de location.
+4. **Vérifier** — un écran, badges `annonce` / `donnée publique` / `estimé` / `à toi`. Seuls prix, surface, code postal et ville sont exigés (feature `hypotheses-optionnelles`, 14/09/2026) : apport 0 €, durée 25 ans et tranche 30 % sont pré-remplis et marqués « estimé » ; un loyer vide est pris dans les loyers de marché ANIL de la commune, sinon le projet est créé sans loyer (loyer, loyer par chambre ou nuitée selon le type) ; les revenus ne sont jamais demandés. Sans loyer, le rapport est partiel : prix, financement, estimation et risques sont calculés ; cash-flow, impôts, revente, rendement et scénarios affichent « Il manque le loyer visé pour cette analyse » avec le champ sur place. Les feux rendement, cash-flow et couverture disent « loyer à indiquer » ; l'onglet Financement garde le crédit et attend le loyer pour la couverture.
 5. **Le rapport** — verdict + cinq feux, puis l'autofinancement en carte principale (cascade loyer → après le crédit → après les charges → après l'impôt, part du loyer prise par le crédit, effort d'épargne ou excédent, loyer d'équilibre), le prix vs ventes réelles, les rendements brut · net · net-net, les leviers, la fiscalité (4 régimes) et la revente (multiple sur apport). Chaque titre et chaque repère porte une icône ⓘ qui ouvre une bulle chiffrée ; un lien « Voir … → » mène à l'onglet qui détaille (Estimation, Fiscalité, Revente). Tout modifiable dans Hypothèses, recalcul instantané. Après les leviers, la carte « Avant de faire une offre » : les points financiers (effort, durée du prêt, plafond du micro, loyer encadré, prélèvements sociaux à confirmer) et l'état de la visite. L'onglet **Visite** (livré le 14/09/2026, feature `visite-questions`, fiche 07) tire sa liste d'une base de 74 questions sourcées filtrée par le bien (copropriété, année de construction avec amiante avant 1997 et plomb avant 1949, DPE, étage sans ascenseur, mode d'exploitation, risques, travaux, prix), en sept groupes ; chaque réponse (à vérifier, OK, problème, sans objet) et chaque note sont conservées avec le projet ; neuf questions à valeur écrivent une hypothèse ; « Marquer la visite comme faite » retire l'onglet, le compte rendu reste dans le dossier imprimé et le lien de partage ; « J'ai déjà visité ce bien » à la création. L'onglet **Financement** règle le prêt et le lit : mensualité, TAEG, coût du crédit, tableau par année, bouton « Simuler un prêt ».
 6. **Garder** — sauvegarde locale, PDF via impression, lien de partage (projet encodé dans l'URL), compte optionnel par Google, Apple ou code à 6 chiffres reçu par e-mail (livré le 13/09/2026, ADR-006 ; synchronisation des projets à venir). Livré le 13/09/2026 (feature `garder`) : dossier imprimable `/projets/:id/imprimer`, lien `/partage#p=…` en lecture seule avec « Ajouter à mes projets », comparaison de 2 à 5 projets sans compte (`/comparer`, avancée de la v1.5) et page « Comment c'est calculé » (`/methode`).
 7. **Simulateur de prêt** — livré le 14/09/2026 (feature `simulateur-pret`, fiche de backlog 08) : outil indépendant des projets (`/simulateur-pret`, rubrique « Outils »). Le projet financé (prix, honoraires, travaux, frais de notaire estimés par la formule des frais d'acquisition et modifiables, département, revenus facultatifs) et une ou deux offres (banque, apport, taux nominal, durée, assurance, frais de dossier et de garantie payés à la signature ou financés, différés). Pour chaque offre : montant emprunté, mensualité hors et avec assurance, TAEG hors et avec assurance (résolus numériquement, frais compris), totaux, coût total du crédit, échéancier par phase, alerte au-dessus du taux d'usure, taux d'endettement (mensualité ÷ revenus, distinct de l'effort HCSF). Comparaison sur neuf critères (la plus petite valeur est la meilleure ; durée et montant informatifs) avec une phrase de synthèse ; tableaux d'amortissement par année, chaque année dépliable en douze mois ; CSV mensuel par offre ; impression ; lien `#s=` (fragment validé par Zod, jamais envoyé au serveur) ; dernière simulation retrouvée. Mêmes formules que le rapport d'un projet (test de cohérence au centime).
@@ -59,8 +59,14 @@ Concurrents : Horiz.io (8–20 €/mois, complet, saisie manuelle), Lybox (9–4
 
 ### Cash-flow
 
-- Trois modes : meublé longue durée, nu, courte durée (nuitée × occupation − ménage/conciergerie).
-- Sorties : crédit, assurance, TF, copro, PNO, énergie/internet si inclus, CFE, comptable, gestion (%), **vacance** (3 sem/an LLD, 1 mois colocation), **entretien** (0,5 %/an du prix).
+- Cinq types d'exploitation (feature `location-types`, fiche 05), choisis en tête de la carte « La location » :
+  - **Nue** : loyer × 12 − vacance (3 semaines).
+  - **Meublée longue durée** : loyer × 12 − vacance (3 semaines ; 8 à 10 pour un logement étudiant, à saisir) ; loyer nu déduit par ÷ 1,15 pour comparer les régimes nus.
+  - **Colocation** : chambres louées × loyer par chambre × 12 + forfait de charges par chambre ; vacance par chambre (4 semaines) ; énergie et internet payés par le propriétaire. Décence : 9 m² et 20 m³ par chambre en baux individuels (loi 89-462 art. 8-1, décret 2002-120).
+  - **Courte durée** : nuitée × nuits louées par mois × 12 + ménage facturé par séjour ; séjours = nuits ÷ durée moyenne d'un séjour ; ménage payé par séjour, commission de plateforme (3 %, Airbnb, à confirmer) et conciergerie en charges. Changement d'usage, enregistrement et DPE des meublés de tourisme (loi Le Meur du 19/11/2024) en points de vigilance.
+  - **Moyenne durée** (bail mobilité, 1 à 10 mois, loi ELAN) : loyer et forfait de charges × 12, vacance entre deux séjours (4 semaines, à confirmer), ménage par séjour.
+- Valeurs de départ par type dans `regles/2026-09.ts` (`exploitation.parType`), badgées « estimé » ; celles qui viennent de l'Excel « Projet 92K » ou d'un choix Deklic sont « à confirmer ».
+- Sorties : crédit, assurance, TF, copro, PNO, énergie/internet payés par le propriétaire, CFE, comptable, gestion (%), conciergerie et plateforme (% des recettes), ménage par séjour, **vacance**, **entretien** (0,5 %/an du prix retenu). Forfaits de charges et ménage facturé sont des recettes (imposables).
 - Résultats : cash-flow mensuel, effort d'épargne, point mort (loyer d'équilibre), taux de couverture.
 
 ### Fiscalité — quatre régimes côte à côte
@@ -74,6 +80,8 @@ Concurrents : Horiz.io (8–20 €/mois, complet, saisie manuelle), Lybox (9–4
 
 Projection année par année sur la durée de détention avec stocks de déficits/amortissements ; afficher **l'année où l'on commence à payer**.
 
+Régimes compatibles avec le type : nue et meublée comparent les quatre régimes ; colocation, courte et moyenne durée n'ont que les deux régimes du meublé (le moteur projette toujours les quatre, `ResultatFiscalite.compatibles` guide l'affichage et le choix du meilleur ; un régime incompatible est refusé). Micro-BIC d'un meublé de tourisme non classé : abattement 30 %, plafond 15 000 € ; classé : 50 %, plafond général.
+
 ### Revente
 
 - Prix = valeur × (1 + évolution)^n − agence − diagnostics − IRA − CRD → **cash net vendeur**.
@@ -86,7 +94,7 @@ Projection année par année sur la durée de détention avec stocks de déficit
 - **TRI réel** sur flux annuels (apport + mobilier en année 0, cash-flows après impôt, cash net de revente en N).
 - Enrichissement = capital remboursé + plus-value nette + cash-flows cumulés − apport.
 - **Verdict cinq feux** (bon / à surveiller / problème) : prix vs DVF, rendement net, cash-flow, couverture (crédit ÷ loyer), risques (DPE F/G, copro en procédure, zone à risque). Pas de note globale.
-- **Scénarios** : négocier (prix cible pour cash-flow 0, net 6 %, brut 8 % ; à défaut −10 % du prix retenu), colocation, durée, taux +0,5 pt, nu, vacance.
+- **Scénarios** : négocier (prix cible pour cash-flow 0, net 6 %, brut 8 % ; à défaut −10 % du prix retenu), « et si je passais en colocation » (chambres du bien, loyer meublé de référence × 1,35 ÷ chambres, forfait et abonnements ; absent pour une colocation), durée, taux +0,5 pt, nu ou meublé (depuis colocation, courte ou moyenne durée : meublé longue durée au loyer de référence), vacance (8 semaines ; en courte durée, deux mois de nuits en moins).
 
 ## Cas de référence : « Ton Excel → Loupe » (projet 92K, prix 155 000 €)
 
@@ -136,7 +144,8 @@ Page de l'annonce (structuré) · texte (LLM) · Géoplateforme (géocodage) · 
 - **v1 (8–10 sem.)** : extension + bookmarklet (LBC, SeLoger, Bien'ici, PAP, Logic-Immo) ; pipeline complet ; texte collé et saisie manuelle ; 5 volets, verdict, scénarios ; sauvegarde locale, PDF, partage ; test réel Marseille/Lyon/Aix.
 - **v1.5 (+4)** : compte (livré : code e-mail, Google, Apple), sync ; comparaison 2–5 projets, statuts ; Safari iOS, partage mobile (livré en avance : application installable et hors ligne, « Partager → Deklic » sur Android, partage natif d'un projet ; iPhone : installation par Safari, sans cible de partage) ; portails supplémentaires.
 - **v2 (+6)** : historique de prix (extension), loyers infra-communaux, registre copro, DPE PDF, photos → travaux (option).
-- **v3** : suivi après achat, liasse LMNP, monétisation (affiliation, export premium).
+- **Gérer (gestion locative après l'achat, épic G1 à G5, `specs/gestion-locative-specs.md`)** : commencé le 14/09/2026 avec le socle G1a (menu Analyser et Gérer, « Mon menu », biens, locataires, locations, loyers du mois, « Ajouter à la main » et « J'ai acheté ce bien » en deux clics, compte requis) ; ensuite G3 banque (détection des virements de loyer par les API bancaires, comme Rentila), G1b fiches et paiements partiels, G2 quittances automatiques, G4 vie du bail, G5 bilan et déclaration.
+- **v3** : liasse LMNP, monétisation (affiliation, export premium).
 - **Pas en v1** : recherche/alertes d'annonces, chat IA, SCI IS, carte au-delà des DVF, app native.
 
 ## Risques

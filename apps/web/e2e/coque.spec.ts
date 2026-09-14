@@ -55,9 +55,11 @@ test('menu et en-tête restent en vue quand le contenu défile ; changer de vole
   if (await boutonMenu.isVisible()) {
     await expect(boutonMenu).toBeInViewport({ ratio: 1 });
   } else {
-    const navigation = page.getByRole('navigation', { name: 'Mes projets' });
+    const navigation = page.getByRole('navigation', { name: 'Analyser' });
     await expect(navigation.getByRole('link', { name: NOM_EXEMPLE })).toBeInViewport({ ratio: 1 });
-    await expect(page.getByRole('button', { name: 'Nouveau projet' })).toBeInViewport({ ratio: 1 });
+    await expect(navigation.getByRole('link', { name: 'Nouveau projet' })).toBeInViewport({
+      ratio: 1,
+    });
     await expect(page.getByRole('link', { name: "Comment c'est calculé" })).toBeInViewport({
       ratio: 1,
     });
@@ -80,7 +82,9 @@ test('menu et en-tête restent en vue quand le contenu défile ; changer de vole
   expect(await defilementDeLaFenetre(page)).toBe(0);
 });
 
-test('trente projets : la liste défile dans le menu, le profil reste en bas', async ({ page }) => {
+test('trente projets : le menu en montre cinq puis « Tous mes projets », le profil reste en bas', async ({
+  page,
+}) => {
   await ouvrirMesProjets(page);
   await page.evaluate(() => {
     const cle = 'loupe.projets.v1';
@@ -101,11 +105,15 @@ test('trente projets : la liste défile dans le menu, le profil reste en bas', a
   const profil = page.getByText('Gratuit · 30 projets');
   await expect(profil).toBeInViewport({ ratio: 1 });
 
-  const dernier = navigation.getByRole('link', { name: 'Copie 29 · T2 · Lyon 3e', exact: true });
-  await expect(dernier).not.toBeInViewport();
-  await dernier.scrollIntoViewIfNeeded();
-  await expect(dernier).toBeInViewport({ ratio: 1 });
-  // Le profil n'a pas bougé : seule la liste a défilé, à l'intérieur du menu.
+  // Les cinq plus récents seulement (l'exemple puis les copies 1 à 4), puis le lien vers la liste.
+  const lien = (nom: string): ReturnType<Page['getByRole']> =>
+    navigation.getByRole('link', { name: nom, exact: true });
+  await expect(lien('Copie 4 · T2 · Lyon 3e')).toBeVisible();
+  await expect(lien('Copie 5 · T2 · Lyon 3e')).toHaveCount(0);
+  const tous = lien('Tous mes projets · 30');
+  await tous.scrollIntoViewIfNeeded();
+  await expect(tous).toBeInViewport({ ratio: 1 });
+  // Le profil n'a pas bougé : seul le menu a défilé, à l'intérieur de sa zone.
   await expect(profil).toBeInViewport({ ratio: 1 });
   expect(await defilementDeLaFenetre(page)).toBe(0);
 });

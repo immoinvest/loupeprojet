@@ -48,6 +48,8 @@ describe('champsDepuisCapture', () => {
       chargesCoproMois: 90,
       taxeFonciere: 1_050,
       meuble: true,
+      // « Loué meublé » dans la description : le type de location lu par règles.
+      mode: 'meuble',
       // Les honoraires ne sont pas dans le contrat de capture : ils viennent du texte.
       honorairesAgence: 7_000,
     });

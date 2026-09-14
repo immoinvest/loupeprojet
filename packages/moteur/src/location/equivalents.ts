@@ -1,5 +1,5 @@
 import type { Regles } from '../regles/types';
-import type { Location, ModeLocation } from '../schema/hypotheses';
+import type { Location, LocationComplete, ModeLocation } from '../schema/hypotheses';
 
 /** Jours retenus pour passer d'un loyer mensuel à un loyer journalier. */
 export const JOURS_PAR_MOIS = 30;
@@ -13,7 +13,7 @@ export function estModeMeuble(mode: ModeLocation): boolean {
  * Loyer mensuel hors charges équivalent, quel que soit le type : sert au taux de couverture,
  * à l'effort HCSF et au plafond d'encadrement. En courte durée : nuitée × nuitées par mois.
  */
-export function loyerMensuelHc(location: Location): number {
+export function loyerMensuelHc(location: LocationComplete): number {
   switch (location.mode) {
     case 'nu':
     case 'meuble':
@@ -30,7 +30,7 @@ export function loyerMensuelHc(location: Location): number {
  * Loyer mensuel d'une location meublée longue durée équivalente : le pivot commun à tous les
  * types (défauts d'un type, scénarios de changement de type, régimes nus). Inverse de `defautsPourMode`.
  */
-export function loyerMensuelReference(location: Location, regles: Regles): number {
+export function loyerMensuelReference(location: LocationComplete, regles: Regles): number {
   const { primeMeuble, primeColocation, parType } = regles.exploitation;
   switch (location.mode) {
     case 'nu':

@@ -8,7 +8,13 @@ import { useProjetCourant } from '@/coque/ProjetLayout';
 import { euros, eurosSignes, pourcentage } from '@/formatage/nombres';
 import { appliquerSaisie, descripteurParChemin } from '@/hypotheses';
 import { useProjets } from '@/stockage/ProjetsContext';
+import { manquesBloquants, TEXTES_TRANCHE } from '@/textes/manques';
 import { MODES, ORDRE_REGIMES, REGIMES, explicationRegime } from '@/textes/regimes';
+
+import { ChampHypothese } from './hypotheses/ChampHypothese';
+import { AnalyseIncomplete } from './projet/AnalyseIncomplete';
+
+const TITRE = "Combien d'impôts, selon le régime ?";
 
 function CarteRegime({
   r,
@@ -109,11 +115,7 @@ export function Fiscalite(): JSX.Element {
   const { enregistre, resultats: r } = useProjetCourant();
   const { mettreAJour } = useProjets();
   const document = useModeDocument();
-  const f = r.fiscalite;
   const annees = r.projet.hypotheses.revente.annees;
-  const retenu = f.regimes[f.retenu];
-  const meuble = f.retenu === 'micro_bic' || f.retenu === 'lmnp_reel';
-  const psAConfirmer = meuble && r.meta.aConfirmer.includes('fiscalite.prelevementsSociaux.bic');
 
   const retenir = (regime: Regime): void => {
     const application = appliquerSaisie(
@@ -124,22 +126,67 @@ export function Fiscalite(): JSX.Element {
     if (application.ok) mettreAJour(enregistre.id, application.projet);
   };
 
+  if (!r.complet) {
+    return (
+      <Page>
+        <div className="flex flex-col gap-2">
+          <TitrePage taille="volet">{TITRE}</TitrePage>
+          <Chapo>Les quatre régimes se comparent à partir du loyer visé.</Chapo>
+        </div>
+        {manquesBloquants(r.manques).map((m) => (
+          <AnalyseIncomplete key={m.code} manque={m} />
+        ))}
+      </Page>
+    );
+  }
+
+  const f = r.fiscalite;
+  const retenu = f.regimes[f.retenu];
+  const meuble = f.retenu === 'micro_bic' || f.retenu === 'lmnp_reel';
+  const trancheEstimee = r.projet.provenance['fiscalite.tmi'] === 'estime';
+  const descripteurTmi = descripteurParChemin('hypotheses.fiscalite.tmi');
+  const psAConfirmer = meuble && r.meta.aConfirmer.includes('fiscalite.prelevementsSociaux.bic');
+  // Seuls les régimes qui ont un sens pour ce type de location : les deux du meublé en colocation,
+  // courte et moyenne durée ; les quatre en location nue ou meublée.
+  const affiches = ORDRE_REGIMES.filter((regime) => f.compatibles.includes(regime));
+
   return (
     <Page>
       <div className="flex flex-col gap-2">
-        <TitrePage taille="volet">Combien d'impôts, selon le régime ?</TitrePage>
+        <TitrePage taille="volet">{TITRE}</TitrePage>
         <Chapo>
-          Les quatre régimes avec votre tranche à{' '}
+          {affiches.length === 4
+            ? 'Les quatre régimes'
+            : `Les deux régimes du meublé (${MODES[r.projet.hypotheses.location.mode]})`}{' '}
+          avec {trancheEstimee ? TEXTES_TRANCHE.supposee : TEXTES_TRANCHE.choisie}{' '}
           {pourcentage(r.projet.hypotheses.fiscalite.tmi, 0)}, projetés sur {annees} ans. Le régime
           retenu alimente le rapport ; changez-le ici.
         </Chapo>
       </div>
 
+      {trancheEstimee && !document && (
+        <Carte className="border-accent-bordure bg-accent-fond">
+          <h2 className="m-0 font-display text-[22px] font-semibold">{TEXTES_TRANCHE.titre}</h2>
+          <p className="m-0 text-[15px] text-encre-2">{TEXTES_TRANCHE.phrase}</p>
+          <div className="sm:w-[320px] sm:max-w-full">
+            <ChampHypothese
+              descripteur={descripteurTmi}
+              texte={String(r.projet.hypotheses.fiscalite.tmi)}
+              badge={{ ton: 'surveiller', libelle: 'estimé' }}
+              onChange={(texte) => {
+                const application = appliquerSaisie(enregistre.projet, descripteurTmi, texte);
+                if (application.ok) mettreAJour(enregistre.id, application.projet);
+              }}
+            />
+          </div>
+        </Carte>
+      )}
+
       {/* Une colonne sur téléphone, deux à partir de 640 px et sur papier, quatre à l'écran à partir de 1 280 px. */}
       <div
         className={`grid grid-cols-1 gap-4 sm:grid-cols-2 ${document ? 'print:grid-cols-2' : 'xl:grid-cols-4'}`}
       >
-        {ORDRE_REGIMES.map((regime) => (
+        {affiches.map((regime) => (
           <CarteRegime
             key={regime}
             r={f.regimes[regime]}

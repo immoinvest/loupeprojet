@@ -9,6 +9,10 @@ import { clientMemoire } from './compte/memoire';
 import { clientReseau } from './compte/reseau';
 import type { ClientCompte } from './compte/types';
 import { AppLayout } from './coque/AppLayout';
+import { GestionProvider } from './gestion/GestionContext';
+import { clientGestionMemoire } from './gestion/memoire';
+import { clientGestionReseau } from './gestion/reseau';
+import type { ClientGestion } from './gestion/types';
 import { ClientWorkerProvider } from './coque/ClientWorker';
 import { InstallationProvider } from './coque/Installation';
 import { ProjetLayout } from './coque/ProjetLayout';
@@ -19,6 +23,9 @@ import { Connexion } from './ecrans/Connexion';
 import { Extension } from './ecrans/Extension';
 import { Financement } from './ecrans/Financement';
 import { Fiscalite } from './ecrans/Fiscalite';
+import { AjouterMain } from './ecrans/gerer/AjouterMain';
+import { Gerer } from './ecrans/gerer/Gerer';
+import { PretAGerer } from './ecrans/gerer/PretAGerer';
 import { Hypotheses } from './ecrans/Hypotheses';
 import { Imprimer } from './ecrans/Imprimer';
 import { MesProjets } from './ecrans/MesProjets';
@@ -57,6 +64,9 @@ export const routes: RouteObject[] = [
           { path: 'adresse', element: <Adresse /> },
         ],
       },
+      { path: 'gerer', element: <Gerer /> },
+      { path: 'gerer/ajouter', element: <AjouterMain /> },
+      { path: 'gerer/pret/:id', element: <PretAGerer /> },
       { path: 'compte', element: <Compte /> },
       { path: 'partage', element: <Partage /> },
       { path: 'comparer', element: <Comparer /> },
@@ -88,6 +98,9 @@ const CLIENT_WORKER = clientWorker(urlWorker(import.meta.env.VITE_WORKER_URL), (
 /** Le client des comptes de production : l'API /api/* servie par le worker Pages, même origine. */
 const CLIENT_COMPTE = clientReseau();
 
+/** Le client de la gestion locative : l'API /api/gestion du même worker, même origine. */
+const CLIENT_GESTION = clientGestionReseau();
+
 /** Invite d'installation et mode application, écoutés dès le chargement, avant le premier rendu. */
 const SUIVI_INSTALLATION = creerSuiviInstallation(window);
 
@@ -96,11 +109,13 @@ export function App(): JSX.Element {
     <ProjetsProvider>
       <ClientWorkerProvider client={CLIENT_WORKER}>
         <CompteProvider client={CLIENT_COMPTE}>
-          <InstallationProvider suivi={SUIVI_INSTALLATION}>
-            <BrowserRouter>
-              <Racine />
-            </BrowserRouter>
-          </InstallationProvider>
+          <GestionProvider client={CLIENT_GESTION}>
+            <InstallationProvider suivi={SUIVI_INSTALLATION}>
+              <BrowserRouter>
+                <Racine />
+              </BrowserRouter>
+            </InstallationProvider>
+          </GestionProvider>
         </CompteProvider>
       </ClientWorkerProvider>
     </ProjetsProvider>
@@ -116,24 +131,29 @@ export function AppEnMemoire({
   stockage,
   client = clientHorsLigne,
   compte,
+  gestion,
   installation = suiviIndisponible,
 }: {
   chemin?: string;
   stockage?: Storage;
   client?: ClientWorker;
   compte?: ClientCompte;
+  gestion?: ClientGestion;
   installation?: SuiviInstallation;
 }): JSX.Element {
   const clientCompte = useMemo(() => compte ?? clientMemoire(), [compte]);
+  const clientGestion = useMemo(() => gestion ?? clientGestionMemoire(), [gestion]);
   return (
     <ProjetsProvider stockage={stockage}>
       <ClientWorkerProvider client={client}>
         <CompteProvider client={clientCompte}>
-          <InstallationProvider suivi={installation}>
-            <MemoryRouter initialEntries={[chemin]}>
-              <Racine />
-            </MemoryRouter>
-          </InstallationProvider>
+          <GestionProvider client={clientGestion} stockage={stockage}>
+            <InstallationProvider suivi={installation}>
+              <MemoryRouter initialEntries={[chemin]}>
+                <Racine />
+              </MemoryRouter>
+            </InstallationProvider>
+          </GestionProvider>
         </CompteProvider>
       </ClientWorkerProvider>
     </ProjetsProvider>

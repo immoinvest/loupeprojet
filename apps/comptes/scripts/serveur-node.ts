@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 
 import { creerApp } from '../src/app';
 import { envoyeurJournal } from '../src/courriel';
+import { depotD1 } from '../src/gestion/depot-d1';
 import {
   lireOriginesSupplementaires,
   ORIGINES_DEV,
@@ -12,7 +13,8 @@ import {
   SECRET_DEV,
 } from '../src/dependances';
 import { journalConsole } from '../src/journal';
-import { lireMigration } from './migration';
+import { d1SurSqlite } from './d1-sqlite';
+import { appliquerMigrations } from './migration';
 
 /**
  * L'API des comptes sur Node, pour le développement sur une machine où `wrangler dev` ne démarre pas
@@ -25,17 +27,17 @@ const DOSSIER = new URL('../.wrangler/node/', import.meta.url);
 function ouvrirBase(): DatabaseSync {
   mkdirSync(DOSSIER, { recursive: true });
   const base = new DatabaseSync(fileURLToPath(new URL('comptes.sqlite', DOSSIER)));
-  const existe = base
-    .prepare("select count(*) as n from sqlite_master where type = 'table' and name = 'user'")
-    .get();
-  if (Number(existe?.n ?? 0) === 0) base.exec(lireMigration());
+  appliquerMigrations(base);
   return base;
 }
+
+const base = ouvrirBase();
 
 const app = creerApp({
   environnement: 'dev',
   secret: SECRET_DEV,
-  base: ouvrirBase(),
+  base,
+  gestion: depotD1(d1SurSqlite(base).base),
   courriel: envoyeurJournal(journalConsole),
   fournisseurs: {},
   origines: [

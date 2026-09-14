@@ -13,7 +13,7 @@ import {
   tauxSurtaxe,
   valeurRevente,
 } from '../../src/revente';
-import { ProjetSchema, ReventeSchema, type ProjetEntree } from '../../src/schema';
+import { ReventeSchema, parserComplet, type ProjetEntree } from '../../src/schema';
 
 const regles = obtenirRegles('2026-09');
 
@@ -130,7 +130,7 @@ describe('plusValueImposable', () => {
 });
 
 describe('calculerRevente — T3 Marseille', () => {
-  const projet = ProjetSchema.parse(projetExemple);
+  const projet = parserComplet(projetExemple);
   const financement = calculerFinancement(projet, regles);
   const fiscalite = calculerFiscalite(projet, financement, regles);
   const r = calculerRevente(projet, financement, fiscalite, regles);
@@ -163,7 +163,7 @@ describe('calculerRevente — T3 Marseille', () => {
         fiscalite: { ...projetExemple.hypotheses.fiscalite, regime: 'micro_bic' },
       },
     };
-    const p = ProjetSchema.parse(enMicro);
+    const p = parserComplet(enMicro);
     const f = calculerFiscalite(p, calculerFinancement(p, regles), regles);
     expect(amortissementsAReintegrer(f)).toBe(0);
     expect(

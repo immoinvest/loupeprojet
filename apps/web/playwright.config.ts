@@ -8,7 +8,11 @@ import { existsSync } from 'node:fs';
 const PORT = 5199;
 const URL_BASE = `http://127.0.0.1:${String(PORT)}`;
 const enCi = process.env.CI !== undefined;
-/** Spec des 21 écrans sur 9 formats (US-10 de responsive, plus l’estimation sans adresse, le compte rendu de visite, le financement et les deux écrans du simulateur de prêt). */
+/**
+ * Spec des 25 écrans sur 9 formats (US-10 de responsive, plus l’estimation sans adresse, le compte
+ * rendu de visite, le financement, les deux écrans du simulateur de prêt et les quatre écrans de
+ * Gérer).
+ */
 const SPEC_FORMATS = /responsive\.spec\.ts$/;
 
 // On teste l'artefact déployé : `npm run test:e2e` construit `dist/` puis le sert avec vite preview.

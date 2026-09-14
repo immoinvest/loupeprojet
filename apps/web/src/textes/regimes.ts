@@ -6,7 +6,7 @@ import type {
   ResultatRegime,
 } from '@loupe/moteur';
 
-import { euros } from '@/formatage/nombres';
+import { euros, pourcentage } from '@/formatage/nombres';
 
 export const REGIMES: Readonly<Record<Regime, string>> = {
   micro_bic: 'Meublé micro-BIC',
@@ -72,8 +72,16 @@ export function explicationRegime(r: ResultatRegime, annees: number): string {
         ? `Les amortissements effacent le résultat : aucun impôt sur ${String(annees)} ans, et ${euros(reserve)} restent en réserve. Comptable obligatoire, déjà compté.`
         : `Amortissements et déficits repoussent l'impôt jusqu'à l'année ${String(premiere)}. Comptable obligatoire, déjà compté.`;
     }
-    case 'micro_bic':
-      return 'Abattement de 50 % sur les recettes, sans comptable, mais imposé dès la première année.';
+    case 'micro_bic': {
+      // L'abattement appliqué par le moteur (50 %, ou 30 % en meublé de tourisme non classé), lu sur
+      // la première année plutôt que recopié.
+      const a = r.annees[0];
+      const abattement =
+        a === undefined || a.recettes === 0
+          ? 'Abattement forfaitaire'
+          : `Abattement de ${pourcentage(1 - a.baseImposable / a.recettes, 0)}`;
+      return `${abattement} sur les recettes, sans comptable, mais imposé dès la première année.`;
+    }
     case 'nu_reel':
       return premiere === null
         ? `Charges et intérêts déductibles, déficit foncier imputable : aucun impôt sur ${String(annees)} ans.`

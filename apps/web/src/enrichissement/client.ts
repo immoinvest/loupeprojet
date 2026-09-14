@@ -53,6 +53,14 @@ export interface ClientWorker {
 
 export type Fetch = (url: string, init: RequestInit) => Promise<Response>;
 
+/**
+ * Versions des contrats de réponse du Worker, ajoutées aux URL : une nouvelle version change l’URL, donc
+ * le navigateur ne ressert pas depuis son cache HTTP une réponse d’avant (champ absent, carte invisible).
+ * À monter avec `VERSION_CONTRAT` de `apps/worker/src/marche/route.ts` et `apps/worker/src/adresse/route.ts`.
+ */
+export const CONTRAT_MARCHE = 2;
+export const CONTRAT_ADRESSE = 6;
+
 export const URL_WORKER_DEFAUT = 'https://loupe-worker.erreip-gorguel.workers.dev';
 /** Le modèle a 25 s côté Worker : on lui laisse un peu de marge. */
 export const DELAI_EXTRACTION_MS = 30_000;
@@ -137,6 +145,7 @@ export function clientWorker(base: string, fetcher: Fetch): ClientWorker {
         type: p.type,
       });
       if (p.pieces !== undefined) q.set('pieces', String(p.pieces));
+      q.set('contrat', String(CONTRAT_MARCHE));
       return appeler(
         fetcher,
         `${base}/marche?${q.toString()}`,
@@ -155,6 +164,7 @@ export function clientWorker(base: string, fetcher: Fetch): ClientWorker {
       });
       if (p.numero !== null) q.set('numero', String(p.numero));
       if (p.codeVoie !== null) q.set('codeVoie', p.codeVoie);
+      q.set('contrat', String(CONTRAT_ADRESSE));
       return appeler(
         fetcher,
         `${base}/marche/adresse?${q.toString()}`,
