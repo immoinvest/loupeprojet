@@ -14,6 +14,10 @@ test('comparer deux offres, déplier une année, télécharger le CSV, rouvrir p
   page,
   browser,
 }) => {
+  // Sur le PC Windows de développement, l'enregistrement du fichier téléchargé a pris jusqu'à une
+  // minute (trace : clic à 3 s, `download.path()` résolu vers 58 s ; analyse antivirus probable).
+  // Au-delà des 60 s par défaut, Playwright ferme la page et signale le téléchargement « canceled ».
+  test.setTimeout(120_000);
   await ouvrirMesProjets(page);
   await ouvrirNavigation(page);
   await page

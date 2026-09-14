@@ -47,13 +47,24 @@
     },
     "qa_tests": {
       "status": "completed",
-      "note": "moteur 37 tests ; web : modules purs (saisie, lien, mémoire, csv, calcul, textes, base64url), écran, impression, Méthode ; e2e simulateur.spec.ts + 2 écrans dans formats.ts"
+      "note": "moteur 37 tests ; web : modules purs, écran, impression, Méthode (1 205 tests au total après fusion) ; couverture 100 % sur packages/moteur et apps/web/src/simulateur ; e2e simulateur.spec.ts sur trois appareils (6/6) ; formats 320, 375, 768, 1 024, 1 280 px verts ; 19 écrans de référence"
     },
     "security": {
       "status": "completed",
       "note": "fragment et mémoire validés par Zod avec bornes ; nom affiché comme texte ; aucun réseau ; téléchargement isolé dans telecharger.ts"
     },
-    "push": { "status": "in_progress" }
+    "push": {
+      "status": "in_progress",
+      "fusions": [
+        "origin/master n°1 (coque-fixe, revente-curseur, estimation-confiance, déconnexion) : rubrique Outils placée dans la zone fixe du bas du menu",
+        "origin/master n°2 (achat-negociation, rapport-cashflow, correctifs) : fraisNotaireEstimes passe negociationTaux à 0 (champ devenu obligatoire, frais à NaN sinon)"
+      ],
+      "correctifs": [
+        "320 px : conteneurs de tableaux en position relative (légendes masquées hors page)",
+        "e2e : parcours à 120 s, l’enregistrement du fichier téléchargé prenant jusqu’à une minute sur le PC Windows (trace) ; adresse du Blob libérée 10 s après le clic par précaution"
+      ],
+      "verification_csv": "fichier produit par csvAmortissement lu octet par octet (BOM EF BB BF, en-tête, 1re ligne 1;1;Amortissement;155000,00;426,25;333,19;759,44;47,79;807,23;154666,81, CRLF, totaux) ; e2e télécharge et relit le fichier ; pas encore ouvert dans Excel"
+    }
   },
   "decisions": {
     "moteur": "simulerPret dans packages/moteur/src/pret/ réutilise tableauAmortissement, taeg, echeancier ; test de cohérence au centime avec calculerFinancement sur projetExemple",
