@@ -77,7 +77,7 @@ const ONGLETS = [
 /** Un volet occupe toute la hauteur de sa bande : son trait actif se pose sur celui de l'en-tête. */
 const onglet = ({ isActive }: { isActive: boolean }): string =>
   `flex h-full shrink-0 items-center border-b-2 px-4 text-[15px] font-semibold whitespace-nowrap ${
-    isActive ? 'border-accent text-accent' : 'border-transparent text-encre-3 hover:text-encre'
+    isActive ? 'border-accent text-accent' : 'border-transparent text-encre-3 survol-discret'
   }`;
 
 /** Sous 1 536 px, la bande des volets va d'un bord à l'autre de l'en-tête et défile au doigt. */
@@ -135,7 +135,7 @@ function EnTete(): JSX.Element {
         <span className="min-w-0 text-[13px] break-words text-encre-3 md:truncate">
           <Link
             to="/projets"
-            className="text-encre-3 no-underline hover:text-accent pointer-coarse:inline-flex pointer-coarse:min-h-11 pointer-coarse:items-center"
+            className="text-encre-3 no-underline survol-texte pointer-coarse:inline-flex pointer-coarse:min-h-11 pointer-coarse:items-center"
           >
             Mes projets
           </Link>

@@ -44,7 +44,7 @@ export function Profil(): JSX.Element {
       <div className="flex items-center gap-1 border-t border-bordure pt-3">
         <NavLink
           to="/compte"
-          className="flex min-w-0 flex-1 items-center gap-3 rounded-encart px-2 py-1 text-encre no-underline hover:bg-accent-fond hover:text-accent"
+          className="flex min-w-0 flex-1 items-center gap-3 rounded-encart px-2 py-1 text-encre no-underline survol-fond"
         >
           <Pastille texte={initiales(utilisateur)} />
           <span className="flex min-w-0 flex-1 flex-col">
@@ -62,7 +62,7 @@ export function Profil(): JSX.Element {
           }}
           aria-label={TEXTES_MON_COMPTE.deconnecter}
           title={TEXTES_MON_COMPTE.deconnecter}
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-encre-2 hover:bg-probleme-fond hover:text-probleme-texte disabled:opacity-50"
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-encre-2 survol-danger disabled:opacity-50"
         >
           <LogOut size={20} aria-hidden="true" />
         </button>
@@ -83,7 +83,7 @@ export function Profil(): JSX.Element {
       </div>
       <NavLink
         to="/connexion"
-        className="flex min-h-[44px] items-center justify-center gap-2 rounded-encart border border-bordure bg-surface px-3 text-sm font-semibold text-encre-2 no-underline hover:bg-accent-fond hover:text-accent"
+        className="flex min-h-[44px] items-center justify-center gap-2 rounded-encart border border-bordure bg-surface px-3 text-sm font-semibold text-encre-2 no-underline survol-fond"
       >
         <LogIn size={18} aria-hidden="true" />
         {TEXTES_MON_COMPTE.seConnecter}

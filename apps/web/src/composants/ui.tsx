@@ -137,7 +137,7 @@ export function LienOnglet({
   return (
     <Link
       to={vers}
-      className="mt-auto inline-flex min-h-11 items-center gap-1.5 self-start text-[15px] font-bold no-underline hover:underline"
+      className="mt-auto inline-flex min-h-11 items-center gap-1.5 self-start text-[15px] font-bold no-underline survol-texte"
     >
       {children}
       <ArrowRight size={18} aria-hidden="true" />
@@ -201,8 +201,8 @@ type VarianteBouton = 'primaire' | 'secondaire';
 function classeBouton(variante: VarianteBouton): string {
   const style =
     variante === 'primaire'
-      ? 'bg-accent text-white hover:bg-accent-fonce'
-      : 'border border-bordure bg-surface text-encre-2 hover:bg-accent-fond';
+      ? 'bg-accent text-white survol-plein'
+      : 'border border-bordure bg-surface text-encre-2 survol-fond';
   return `inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full px-4 text-sm font-semibold ${style}`;
 }
 

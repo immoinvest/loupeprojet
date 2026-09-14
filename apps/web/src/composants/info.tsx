@@ -82,7 +82,7 @@ export function Info({ sujet, texte }: { sujet: string; texte: string }): JSX.El
         onBlur={() => {
           setOuvert(false);
         }}
-        className="-m-2.5 inline-flex h-11 w-11 items-center justify-center rounded-full text-encre-3 hover:text-accent aria-expanded:text-accent"
+        className="-m-2.5 inline-flex h-11 w-11 items-center justify-center rounded-full text-encre-3 survol-fond hover:text-accent aria-expanded:text-accent"
       >
         <IconeInfo size={20} aria-hidden="true" />
       </button>

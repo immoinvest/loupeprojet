@@ -26,7 +26,7 @@ export function Explications(): JSX.Element {
   if (document) return liste;
   return (
     <details className="text-sm">
-      <summary className="cursor-pointer list-none font-bold text-accent pointer-coarse:min-h-11 pointer-coarse:py-3">
+      <summary className="cursor-pointer list-none font-bold text-accent survol-texte pointer-coarse:min-h-11 pointer-coarse:py-3">
         Comment c'est calculé ?
       </summary>
       <div className="mt-2">{liste}</div>
