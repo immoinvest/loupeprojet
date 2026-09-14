@@ -6,8 +6,11 @@ import { useCompte } from '@/compte/CompteContext';
 import type { CodeErreurCompte, FournisseurSocial, Resultat } from '@/compte/types';
 import { Page, TitrePage } from '@/composants/mise-en-page';
 import { Bouton, Carte, Ligne, Pastille, TitreCarte } from '@/composants/ui';
+import { useProjets } from '@/stockage/ProjetsContext';
+import { useSynchro } from '@/stockage/synchro/SynchroContext';
 import { ERREURS_COMPTE, initiales, nomAffiche, NOMS_FOURNISSEURS } from '@/textes/compte';
 import { TEXTES_MON_COMPTE as T } from '@/textes/mon-compte';
+import { ligneSauvegarde } from '@/textes/synchro';
 
 import { MonMenu } from './compte/MonMenu';
 import { CLASSE_SAISIE } from './connexion/styles';
@@ -22,6 +25,8 @@ const ALLER_A_LA_CONNEXION = '/connexion?retour=/compte';
 /** La page « Mon compte » : profil, méthodes de connexion, déconnexion, suppression du compte. */
 export function Compte(): JSX.Element {
   const compte = useCompte();
+  const { projets } = useProjets();
+  const { statut } = useSynchro();
   const [nom, setNom] = useState<string | null>(null);
   const [methodes, setMethodes] = useState<readonly FournisseurSocial[]>([]);
   const [message, setMessage] = useState<Message | null>(null);
@@ -150,6 +155,14 @@ export function Compte(): JSX.Element {
             {T.enregistrer}
           </Bouton>
         </form>
+      </Carte>
+
+      <Carte>
+        <TitreCarte>{T.projetsTitre}</TitreCarte>
+        <p className="m-0 text-sm text-encre-2">{T.projetsTexte}</p>
+        <p className="m-0 text-sm font-semibold text-encre-2">
+          {ligneSauvegarde(projets.length, statut)}
+        </p>
       </Carte>
 
       <MonMenu />

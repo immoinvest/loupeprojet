@@ -144,6 +144,31 @@ async function simulerSession(page: Page): Promise<void> {
   await page.route('**/api/auth/list-accounts', (route) =>
     route.fulfill({ json: [{ providerId: 'google' }] }),
   );
+  await simulerCompteDesProjets(page);
+}
+
+/**
+ * Le compte des projets, vide au départ : il garde ce que l'appareil lui envoie et renvoie à chaque
+ * échange la liste complète des projets actifs, comme l'API (sinon l'appareil retirerait ses projets).
+ */
+async function simulerCompteDesProjets(page: Page): Promise<void> {
+  const actifs = new Set<string>();
+  let revision = 0;
+  await page.route('**/api/projets/synchroniser', (route) => {
+    const demande = route.request().postDataJSON() as {
+      changements: (
+        { type: 'enregistrer'; projet: { id: string } } | { type: 'supprimer'; id: string }
+      )[];
+    };
+    for (const changement of demande.changements) {
+      revision += 1;
+      if (changement.type === 'enregistrer') actifs.add(changement.projet.id);
+      else actifs.delete(changement.id);
+    }
+    return route.fulfill({
+      json: { curseur: revision, suite: false, ids: [...actifs], refuses: [], projets: [] },
+    });
+  });
 }
 
 /** Une personne connectée qui gère trois biens (voir `reponses-gestion.ts`). */
