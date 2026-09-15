@@ -1,4 +1,5 @@
 import {
+  depotTropEleve,
   JOUR_LOYER_MAX,
   montantsDuMois,
   periodeDe,
@@ -83,6 +84,12 @@ export function modificationDepuisSaisie(
   const jour = Number(s.jourLoyer);
   if (!Number.isInteger(jour) || jour < 1 || jour > JOUR_LOYER_MAX) erreurs.push('jourLoyer');
   const depot = lireMontant(s.depot, 'depot', null);
+  // Plafond légal (art. 22, 25-6), sur le loyer en vigueur : un dépôt déjà enregistré au-dessus ne
+  // change pas tout seul, mais on n'en enregistre pas de nouveau.
+  const loyerDepot = enVigueur === null ? location.loyerHorsCharges : loyer;
+  if (depot !== location.depot && depotTropEleve(location.type, 'classique', loyerDepot, depot)) {
+    erreurs.push('depot');
+  }
   const libelle = s.libelle.trim();
   if (libelle.length > LONGUEUR_LIBELLE) erreurs.push('libelle');
   if (erreurs.length > 0) return { ok: false, erreurs };

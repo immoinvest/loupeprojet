@@ -25,6 +25,8 @@ import { BailleurDuBien } from './envois/BailleurDuBien';
 import { FilAriane } from './FilAriane';
 import { CarteLocation } from './fiche/CarteLocation';
 import { FriseMois } from './fiche/FriseMois';
+import { CarteCharges } from './fin-bail/CarteCharges';
+import { LocationsTerminees } from './fin-bail/LocationsTerminees';
 import { SupprimerBien } from './fiche/SupprimerBien';
 import { LocationCreee } from './LocationCreee';
 import { RetoursLoyer } from './RetoursLoyer';
@@ -101,9 +103,14 @@ function Fiche({
               aujourdhui={aujourdhui}
               retour={lienFicheBien(bien.id)}
             />
+            {/* Régularisation annuelle des charges (B2) ; absente sans la migration 0011. */}
+            <CarteCharges location={location} donnees={donnees} aujourdhui={aujourdhui} />
           </Fragment>
         ))
       )}
+
+      {/* Locations terminées qu'il reste à solder : dépôt à rendre, charges à régulariser (B2). */}
+      <LocationsTerminees bien={bien} donnees={donnees} aujourdhui={aujourdhui} />
 
       <CarteConformite bien={bien} donnees={donnees} aujourdhui={aujourdhui} />
 

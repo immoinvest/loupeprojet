@@ -9,6 +9,7 @@ import {
 
 import type { ActionBail } from './bail/vue';
 import { SANS_ACTIONS_ENVOIS, type ActionsEnvois } from './envois/logique';
+import { cleActionFinBail, type ActionFinBail } from './fin-bail/vue';
 import { etatDuBien } from './fiche';
 import { groupesDeLocataires } from './locataires';
 
@@ -26,7 +27,9 @@ export type ActionAFaire =
   /** Invité à recevoir ses quittances par e-mail, sans réponse ; montré tant que sa fiche n'est pas ouverte. */
   | { readonly type: 'accord'; readonly locataire: Locataire }
   /** Vie du bail (B1) : alertes de conformité urgentes, puis révisions à valider. */
-  | ActionBail;
+  | ActionBail
+  /** Fin du bail (B2) : dépôts à rendre, charges à régulariser puis à régler. */
+  | ActionFinBail;
 
 /** Les lignes montrées avant « Voir les N autres ». */
 export const A_FAIRE_VISIBLES = 3;
@@ -44,6 +47,7 @@ export function actionsAFaire(
   pretsAEnregistrer: readonly BienGere[] = [],
   bail: readonly ActionBail[] = [],
   envois: ActionsEnvois = SANS_ACTIONS_ENVOIS,
+  finBail: readonly ActionFinBail[] = [],
 ): readonly ActionAFaire[] {
   const retards = resumeDuMois(donnees, periodeDe(aujourdhui), aujourdhui)
     .lignes.filter((ligne) => ligne.statut === 'en_retard')
@@ -66,7 +70,16 @@ export function actionsAFaire(
     .enCeMoment.filter((ligne) => ligne.locataire.email === undefined)
     .map((ligne): ActionAFaire => ({ type: 'email', locataire: ligne.locataire }));
   const prets = pretsAEnregistrer.map((bien): ActionAFaire => ({ type: 'pret', bien }));
-  return [...retards, ...aVerifier, ...vacants, ...prets, ...emails, ...accords, ...bail];
+  return [
+    ...retards,
+    ...aVerifier,
+    ...vacants,
+    ...prets,
+    ...emails,
+    ...accords,
+    ...bail,
+    ...finBail,
+  ];
 }
 
 /** Une clé stable par action (un même locataire peut être en retard et sans e-mail). */
@@ -91,5 +104,9 @@ export function cleAction(action: ActionAFaire): string {
     }
     case 'revision':
       return `revision-${action.location.id}`;
+    case 'depot':
+    case 'regularisation':
+    case 'charges_a_regler':
+      return cleActionFinBail(action);
   }
 }

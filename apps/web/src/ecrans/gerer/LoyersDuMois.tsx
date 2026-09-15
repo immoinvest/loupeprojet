@@ -12,6 +12,8 @@ import { useBail } from '@/gestion/bail/BailContext';
 import { actionsBail } from '@/gestion/bail/vue';
 import { useEnvois } from '@/gestion/envois/EnvoisContext';
 import { actionsEnvois, lireAccordsVus, stockageLocal } from '@/gestion/envois/logique';
+import { useFinBail } from '@/gestion/fin-bail/FinBailContext';
+import { actionsFinBail } from '@/gestion/fin-bail/vue';
 import {
   avecMajuscule,
   entreesAVenir,
@@ -38,12 +40,16 @@ export function LoyersDuMois({ donnees }: { donnees: EtatGestion }): JSX.Element
   const prets = argent === null ? [] : pretsAEnregistrer(donnees.biens, argent);
   const bail = useBail();
   const { donnees: envois } = useEnvois();
+  const finBail = useFinBail();
   const aFaire = actionsAFaire(
     donnees,
     aujourdhui,
     prets.map((p) => p.bien),
     bail.donnees === null ? [] : actionsBail(donnees, bail.donnees, aujourdhui),
     actionsEnvois(envois, lireAccordsVus(stockageLocal())),
+    finBail.donnees === null
+      ? []
+      : actionsFinBail(donnees, finBail.donnees, argent?.depenses ?? [], aujourdhui),
   );
   const enCours = donnees.locations.filter((l) => l.fin === undefined || l.fin >= aujourdhui);
   const aVenir = enCours

@@ -56,7 +56,8 @@ export const ERREURS_SAISIE: Readonly<Record<ChampSaisie, string>> = {
   email: 'Cette adresse e-mail ne semble pas valide.',
   entree: 'Choisis la date d’entrée.',
   jourLoyer: 'Un jour entre 1 et 28.',
-  depot: 'Le dépôt est un montant, par exemple 650.',
+  depot:
+    'Le dépôt est un montant, au plus 1 mois de loyer en location vide et 2 mois en meublé (loi du 6 juillet 1989).',
   apl: 'L’APL est un montant par mois, au plus le loyer charges comprises, par exemple 180.',
   surface: 'Une surface en m², par exemple 38.',
 };

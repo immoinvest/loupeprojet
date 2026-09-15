@@ -16,6 +16,7 @@ import { ERREURS_GESTION } from '@/textes/gerer';
 import { depuisLe, loyerAPartirDe, TEXTES_MODIFIER as M } from '@/textes/gerer-biens';
 import { TEXTES_FICHE as F, titreLocation } from '@/textes/gerer-fiche';
 
+import { ActionsLocation } from '../fin-bail/ActionsLocation';
 import { NomsDeLocataires } from '../NomsDeLocataires';
 import { ModifierLocation } from './ModifierLocation';
 import { TerminerLocation } from './TerminerLocation';
@@ -121,6 +122,8 @@ export function CarteLocation({
           onFermer={fermer}
         />
       )}
+      {/* Préavis et changement de colocataire (B2) ; absent tant que la migration 0011 manque. */}
+      <ActionsLocation location={location} donnees={donnees} aujourdhui={aujourdhui} />
       {ouvert === null && (
         <div className="flex flex-wrap gap-2">
           <Bouton

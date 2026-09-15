@@ -1,0 +1,41 @@
+{
+  "feature_slug": "gerer-bail-fin",
+  "title": "Gérer, vie du bail (B2) : préavis (G4-2), dépôt de garantie (G4-3), régularisation des charges (G4-4), changement de colocataire (G4-6)",
+  "started_at": "2026-09-16T00:30:00Z",
+  "current_step": "implement",
+  "scope": "packages/gestion, apps/comptes (migration 0011, sous-routeur /api/gestion/fin-bail), apps/web (gestion/fin-bail, ecrans/gerer/fin-bail, carte de la location, fiche du bien, À faire, décompte imprimable)",
+  "branch": "feat/gerer-bail-fin",
+  "worktree": "C:\\Users\\errei\\Claude\\loupeprojet\\.claude\\worktrees\\intelligent-hugle-19ebae",
+  "base": "master (e4c4cfcf)",
+  "prerequis": "feat/gerer-bail-revision (PR #106) et feat/gerer-depenses-argent (PR #104), fusionnées",
+  "decisions_pierre": "15/09/2026 22 h : migrations fusionnées sans application (règle « migration sans risque »), auto-validation, aucune question ; migration réservée 0011",
+  "baseline": { "status": "completed", "source": "npm run typecheck vert sur e4c4cfcf" },
+  "steps": {
+    "discovery": { "status": "completed", "output": ".product/architecture/gerer-bail-fin.md § 1" },
+    "specs": {
+      "status": "completed",
+      "output": ".product/architecture/gerer-bail-fin.md § 4",
+      "stories_count": 6
+    },
+    "architecture": { "status": "completed", "output": ".product/architecture/gerer-bail-fin.md" },
+    "implement": {
+      "status": "in_progress",
+      "stories_completed": 5,
+      "stories_total": 6,
+      "commits": [
+        "60e498bd US-1 calcul pur (préavis, dépôt, régularisation, colocation, décomptes)",
+        "675e9d3b US-2 migration 0011 et /api/gestion/fin-bail",
+        "8dcc9c9b US-3 web : client, contexte, vue, saisies, plafond du dépôt",
+        "US-4 et US-5 écrans : préavis, colocataire, dépôt, charges, décompte, « À faire »"
+      ]
+    },
+    "qa_tests": { "status": "pending" },
+    "security": { "status": "pending" },
+    "push": { "status": "pending" }
+  },
+  "auto_revue": {
+    "discovery": "quatre objectifs de la fiche couverts ; états des lieux hors épic ; répartition des charges entre chambres = choix Deklic dit à l'écran",
+    "specs": "six stories, cas pièges testables, deux clics comptés",
+    "architecture": "ADR-G34 à G39 ; six tables latérales et sous-routeur ; sortie gardée dans la colonne existante écrite dans le même lot que le congé ; régularisation hors du dû des loyers ; lecture gardée des mouvements pour les quittances"
+  }
+}

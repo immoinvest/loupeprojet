@@ -115,6 +115,20 @@ export function lienLettre(id: string, retour: string): string {
   return avecRecherche(`/gerer/lettres/${encodeURIComponent(id)}`, { retour });
 }
 
+/** Un décompte de fin de bail (dépôt, charges), avec la page où revenir (B2). */
+export function lienDecompte(id: string, retour: string): string {
+  return avecRecherche(`/gerer/decomptes/${encodeURIComponent(id)}`, { retour });
+}
+
+/** Le bloc de la fin du bail d'une location, sur la fiche de son bien. */
+export function ancreFinBail(locationId: string): string {
+  return `fin-bail-${locationId}`;
+}
+
+export function lienFinBail(bienId: string, locationId: string): string {
+  return `${lienFicheBien(bienId)}#${ancreFinBail(locationId)}`;
+}
+
 /** La carte « Conformité » de la fiche d'un bien. */
 export function lienConformite(bienId: string): string {
   return `${lienFicheBien(bienId)}#${ANCRE_CONFORMITE}`;

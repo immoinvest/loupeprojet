@@ -10,6 +10,8 @@ import type { DepotArgent } from './gestion/argent/depot';
 import { depotArgentD1 } from './gestion/argent/depot-d1';
 import type { DepotBail } from './gestion/bail/depot';
 import { depotBailD1 } from './gestion/bail/depot-d1';
+import type { DepotFinBail } from './gestion/fin-bail/depot';
+import { depotFinBailD1 } from './gestion/fin-bail/depot-d1';
 import type { DepotGestion } from './gestion/depot';
 import { depotD1 } from './gestion/depot-d1';
 import type { DepotEnvois } from './gestion/envois/depot';
@@ -58,6 +60,8 @@ export interface Dependances {
   readonly argent: DepotArgent;
   /** DPE, révision et lettres (vie du bail) : les tables de la migration 0008 de la même base D1. */
   readonly bail: DepotBail;
+  /** Congé, dépôt, régularisation, colocataires (fin du bail) : les tables de la migration 0011. */
+  readonly finBail: DepotFinBail;
   /** Les projets d'analyse synchronisés : la table projet de la même base D1. */
   readonly projets: DepotProjets;
   /** Les liens de partage courts, sans compte : la table partage de la même base D1 (ADR-009). */
@@ -181,6 +185,7 @@ export function dependancesDepuisEnv(env: Bindings): Dependances {
     gestion: depotD1(base),
     argent: depotArgentD1(base),
     bail: depotBailD1(base),
+    finBail: depotFinBailD1(base),
     projets: depotProjetsD1(base),
     partages: depotPartagesD1(base, secret),
     envois: depotEnvoisD1(base),
