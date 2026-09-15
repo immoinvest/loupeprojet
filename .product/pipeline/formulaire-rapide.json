@@ -21,13 +21,19 @@
       "output": ".product/architecture/formulaire-rapide.md"
     },
     "implement": {
-      "status": "in_progress",
-      "stories_completed": 5,
+      "status": "completed",
+      "stories_completed": 8,
       "stories_total": 8,
-      "note": "US-1 Worker communes, US-2 client, US-3 commandes, US-4 Combobox et Commune, US-5 glossaire commités ; US-6 à US-8 (formulaire, strict minimum, tests) en cours"
+      "note": "US-1 Worker communes, US-2 client, US-3 commandes, US-4 Combobox et Commune, US-5 glossaire, US-6 à US-8 formulaire, strict minimum et tests : un commit par étape"
     },
-    "qa_tests": { "status": "pending" },
-    "security": { "status": "pending" },
+    "qa_tests": {
+      "status": "completed",
+      "note": "lint, format, typecheck et build verts ; 2172 tests Vitest verts après correction de 4 écrans (baseline 2044) ; couverture 100 % sur composants/saisie/*.ts, verifier/, textes/glossaire.ts, enrichissement/communes.ts, worker services/communes.ts ; e2e Playwright : 105 verts au premier passage, la spec de la coque corrigée (groupes dépliés avant de mesurer le défilement) passe sur ordinateur, téléphone et tablette ; survol et formats verts ; capture du formulaire à 1 280 px conforme"
+    },
+    "security": {
+      "status": "completed",
+      "note": "seule entrée nouvelle côté serveur : /proxy/communes, paramètres validés par Zod (code postal à 5 chiffres xor nom de 2 à 60 caractères), réponse amont validée, limite de débit existante, recherche par nom jamais mise en cache ; côté web, réponses revalidées par Zod, aucun innerHTML, aucune donnée persistée en plus"
+    },
     "push": { "status": "pending" }
   }
 }
