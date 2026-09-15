@@ -24,12 +24,19 @@
       "output": ".product/architecture/gerer-reel-declaration.md"
     },
     "implement": {
-      "status": "in_progress",
-      "stories_completed": 0,
+      "status": "completed",
+      "stories_completed": 7,
       "stories_total": 7,
-      "commits": []
+      "commits": [
+        "c3dc7c10 US-1 export avant suppression du compte",
+        "d501edd1 US-2 réel contre prévu (calcul)",
+        "4d01e61f US-4 déclaration et lignes de l'export (calcul)",
+        "f6d3d4ee US-3 carte réel contre prévu, Analyser ce bien",
+        "853ca8ef US-5, US-6 page Déclaration, CSV, récapitulatif ; US-7 écrans e2e",
+        "45ab2ee7 fusion de master (B1, C1)"
+      ]
     },
-    "qa_tests": { "status": "pending" },
+    "qa_tests": { "status": "in_progress" },
     "security": { "status": "pending" },
     "push": { "status": "pending" }
   }
