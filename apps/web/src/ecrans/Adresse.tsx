@@ -166,6 +166,7 @@ export function Adresse(): JSX.Element {
       setEtat({ etape: 'recherche' });
     },
     montrerTexte: setTexte,
+    adresseConnue: enregistre.adresse,
   });
 
   // Une adresse déjà enregistrée est réanalysée une seule fois, à l'ouverture de l'onglet : c'est

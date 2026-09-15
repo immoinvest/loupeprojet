@@ -292,6 +292,13 @@ describe('Onglet Adresse', () => {
         PHRASES_ADRESSE.sansVentes,
       ];
       for (const message of attendus) {
+        // Une adresse trouvée remplace le texte du champ, et « Analyser » la reprendrait sans géocoder :
+        // on retape la recherche pour que chaque clic interroge le géocodage.
+        const saisie = screen.getByLabelText('Adresse du bien');
+        if (saisie instanceof HTMLInputElement && saisie.value !== 'Marseille') {
+          await u.clear(saisie);
+          await u.type(saisie, 'Marseille');
+        }
         await u.click(screen.getByRole('button', { name: 'Analyser' }));
         expect(await screen.findByText(message, {}, { timeout: 10_000 })).toBeInTheDocument();
       }

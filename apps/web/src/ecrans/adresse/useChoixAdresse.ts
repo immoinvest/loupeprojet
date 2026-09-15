@@ -24,6 +24,8 @@ export interface ReglagesChoix {
   /** Une recherche commence (géocodage). */
   readonly patienter: () => void;
   readonly montrerTexte: (texte: string) => void;
+  /** L'adresse déjà enregistrée du projet : « Analyser » la reprend telle quelle si le champ la montre. */
+  readonly adresseConnue?: AdresseBien | undefined;
 }
 
 export interface ChoixAdresse {
@@ -70,17 +72,28 @@ export function useChoixAdresse({
   erreur,
   patienter,
   montrerTexte,
+  adresseConnue,
 }: ReglagesChoix): ChoixAdresse {
   const [rue, setRue] = useState<SuggestionAdresse | null>(null);
   const [note, setNote] = useState<string | null>(null);
+  /** La dernière adresse analysée (suggestion, cadastre, rue avec ou sans numéro), sinon celle du projet. */
+  const [retenue, setRetenue] = useState<AdresseBien | null>(adresseConnue ?? null);
 
   const analyser = async (adresse: AdresseBien, remarque: string | null): Promise<void> => {
     setRue(null);
     setNote(remarque);
+    setRetenue(adresse);
     await retenir(adresse);
   };
 
   const chercher = async (texte: string): Promise<void> => {
+    // Le champ montre l'adresse déjà choisie : on la réanalyse. La géocoder à nouveau perdrait une adresse du
+    // cadastre (9001 Res Galice…), que la BAN ne connaît pas.
+    if (retenue !== null && texte.trim() === retenue.libelle.trim()) {
+      setRue(null);
+      await retenir(retenue);
+      return;
+    }
     setRue(null);
     setNote(null);
     patienter();
