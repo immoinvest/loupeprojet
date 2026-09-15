@@ -89,7 +89,7 @@ export type Fetch = (url: string, init: RequestInit) => Promise<Response>;
  * À monter avec `VERSION_CONTRAT` de `apps/worker/src/marche/route.ts` et `apps/worker/src/adresse/route.ts`.
  */
 export const CONTRAT_MARCHE = 2;
-export const CONTRAT_ADRESSE = 6;
+export const CONTRAT_ADRESSE = 7;
 /** Version de la liste des adresses du cadastre (`VERSION_LISTE` de `apps/worker/src/adresse/route-adresses-dvf.ts`). */
 export const CONTRAT_ADRESSES_DVF = 1;
 /** Suggestions pendant la frappe : court, une autre frappe suit. */
