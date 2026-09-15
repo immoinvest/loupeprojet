@@ -179,6 +179,14 @@ describe('Onglet Estimation : suggestions d’adresse', () => {
         codePostal: '13090',
       });
       expect(champ()).toHaveValue('9001 Cite Valcros, 13090 Aix-en-Provence');
+
+      // « Analyser » après le choix : la même adresse du cadastre est réanalysée, sans géocodage (la BAN ne la
+      // connaît pas) et sans le message « Ce numéro vient du cadastre ».
+      await u.click(screen.getByRole('button', { name: 'Analyser' }));
+      await attendreAnalyse(espion, 2);
+      expect(espion.analyses[1]).toEqual(espion.analyses[0]);
+      expect(espion.geocodages).toEqual([]);
+      expect(screen.queryByText(PHRASES_ADRESSE.numeroCadastre)).not.toBeInTheDocument();
     },
   );
 
