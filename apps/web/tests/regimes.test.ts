@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   LIGNES_REVENTE,
+  TEXTES_FISCALITE_RAPPORT,
   anneeRepriseDeficit,
   avertissementRepriseDeficit,
   explicationRegime,
@@ -16,6 +17,14 @@ function complet(): ResultatsComplets {
   if (!r.complet) throw new Error('projet d’exemple incomplet');
   return r;
 }
+
+describe('TEXTES_FISCALITE_RAPPORT', () => {
+  it('nomme la liste des autres régimes selon leur nombre', () => {
+    // Colocation, courte ou moyenne durée : un seul autre régime possible (le meublé).
+    expect(TEXTES_FISCALITE_RAPPORT.totalAutres(1)).toBe("Impôt total de l'autre régime possible");
+    expect(TEXTES_FISCALITE_RAPPORT.totalAutres(3)).toBe('Impôt total des autres régimes');
+  });
+});
 
 describe('impotDuAuxAmortissements', () => {
   it('écart d’impôt à la revente entre le meublé au réel et le micro-BIC', () => {

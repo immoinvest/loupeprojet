@@ -176,18 +176,27 @@ export function explicationFiscalite(r: ResultatsComplets): string {
   const retenu = f.regimes[f.retenu];
   const n = annees(r);
   let moinsCher = retenu;
-  // Seuls les régimes possibles pour ce type de location se comparent.
+  // Seuls les régimes possibles pour ce type de location se comparent, et sur l'impôt total (location
+  // et revente) : l'impôt de la location seul avantagerait à tort le meublé au réel.
   const autres = Object.values(f.regimes).filter(
     (x) => x.regime !== f.retenu && f.compatibles.includes(x.regime),
   );
   for (const x of autres) {
-    if (moinsCher === retenu || x.impotTotal < moinsCher.impotTotal) moinsCher = x;
+    if (moinsCher === retenu || x.impotGlobal < moinsCher.impotGlobal) moinsCher = x;
   }
-  const total =
+  const location =
     retenu.impotTotal === 0
-      ? `Sur ${n} ans, le ${regime(r)} ne coûte aucun impôt.`
-      : `Sur ${n} ans, le ${regime(r)} coûte ${euros(retenu.impotTotal)} d'impôt.`;
-  return `${total} ${explicationRegime(retenu, r.projet.hypotheses.revente.annees)} ${autres.length === 1 ? "L'autre régime possible est le" : 'Le moins cher des trois autres régimes est le'} ${enMinuscule(REGIMES[moinsCher.regime])} (${euros(moinsCher.impotTotal)}) ; l'onglet Fiscalité les compare année par année.`;
+      ? `Sur ${n} ans de location, le ${regime(r)} ne coûte aucun impôt.`
+      : `Sur ${n} ans de location, le ${regime(r)} coûte ${euros(retenu.impotTotal)} d'impôt.`;
+  const total =
+    retenu.impotRevente === 0
+      ? `Aucun impôt à la revente : impôt total ${euros(retenu.impotGlobal)}.`
+      : `Avec ${euros(retenu.impotRevente)} d'impôt à la revente, l'impôt total est de ${euros(retenu.impotGlobal)}.`;
+  const comparaison =
+    autres.length === 1
+      ? "L'autre régime possible est le"
+      : 'Le moins cher des trois autres régimes, revente comprise, est le';
+  return `${location} ${explicationRegime(retenu, r.projet.hypotheses.revente.annees)} ${total} ${comparaison} ${enMinuscule(REGIMES[moinsCher.regime])} (${euros(moinsCher.impotGlobal)} d'impôt total) ; l'onglet Fiscalité les compare année par année.`;
 }
 
 export function explicationRevente(r: ResultatsComplets): string {

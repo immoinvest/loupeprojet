@@ -1,3 +1,4 @@
+import { projetExemple } from '@loupe/moteur';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
@@ -192,6 +193,48 @@ describe('Rapport : prix, impôts et revente', () => {
       within(revente).getByRole('button', { name: "Explication : Qu'est-ce qu'il vous restera ?" }),
     );
     expect(n(within(revente).getByRole('tooltip').textContent)).toContain('59 864 € net vendeur');
+  });
+
+  it('les impôts : la location du régime retenu, puis les régimes comparés sur l’impôt total', async () => {
+    await ouvrirRapport();
+    const impots = carte("Combien d'impôts ?");
+    // Le montant et son complément sont deux éléments séparés par une marge : pas d'espace entre eux.
+    expect(n(impots.textContent)).toMatch(/0 € ?sur 10 ans de location/);
+    // Meublé au réel : rien pendant la location, 1 695 € à la revente (amortissements réintégrés).
+    expect(n(impots.textContent)).toContain('Impôt total, revente comprise : 1 695 €');
+    const autres = within(impots).getByRole('list', { name: 'Impôt total des autres régimes' });
+    expect(
+      within(autres)
+        .getAllByRole('listitem')
+        .map((li) => n(li.textContent)),
+    ).toEqual(['Nu au réel 4 426 €', 'Meublé micro-BIC 26 928 €', 'Nu micro-foncier 31 757 €']);
+  });
+
+  it('en micro-BIC, le meublé au réel se compare avec son impôt à la revente', async () => {
+    const p = creerProjet({
+      nom: 'Micro-BIC',
+      genererId: () => 'micro',
+      source: {
+        ...projetExemple,
+        hypotheses: {
+          ...projetExemple.hypotheses,
+          fiscalite: { ...projetExemple.hypotheses.fiscalite, regime: 'micro_bic' },
+        },
+      },
+    });
+    ecrireProjets(window.localStorage, [p]);
+    render(<AppEnMemoire chemin="/projets/micro" />);
+    await screen.findByRole('heading', { level: 1, name: /Le prix est bon/ });
+    const impots = carte("Combien d'impôts ?");
+    expect(n(impots.textContent)).toMatch(/26 928 € ?sur 10 ans de location/);
+    expect(n(impots.textContent)).toContain('Impôt total, revente comprise : 26 928 €');
+    const autres = within(impots).getByRole('list', { name: 'Impôt total des autres régimes' });
+    // Trié sur l'impôt total : 1 695 € (et non 0 €) pour le meublé au réel, toujours le moins cher.
+    expect(
+      within(autres)
+        .getAllByRole('listitem')
+        .map((li) => n(li.textContent)),
+    ).toEqual(['Meublé au réel 1 695 €', 'Nu au réel 4 426 €', 'Nu micro-foncier 31 757 €']);
   });
 
   it('la revente affiche le multiple sur apport avec sa bulle', async () => {

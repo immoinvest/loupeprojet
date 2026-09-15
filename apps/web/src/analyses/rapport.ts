@@ -22,7 +22,7 @@ export interface CascadeAutofinancement {
   readonly recuperees: number;
   /** = `r.cashflow.mensuel` : le « reste chaque mois », avant impôt. */
   readonly apresCharges: number;
-  /** Impôt total du régime retenu ÷ années de détention ÷ 12. */
+  /** Impôt pendant la location du régime retenu (`impotTotal`, sans la revente) ÷ années de détention ÷ 12. */
   readonly impot: number;
   readonly apresImpot: number;
 }
