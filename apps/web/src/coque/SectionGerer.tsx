@@ -1,12 +1,12 @@
 import { jourLocal } from '@loupe/gestion';
-import { Building2, CalendarCheck, Receipt, Users, Wallet } from 'lucide-react';
+import { Building2, CalendarCheck, Landmark, Receipt, Users, Wallet } from 'lucide-react';
 import type { JSX } from 'react';
 import { NavLink } from 'react-router';
 
 import { useCompte } from '@/compte/CompteContext';
 import { useGestion } from '@/gestion/GestionContext';
 import { retardsDuMois } from '@/gestion/menu';
-import { CHEMIN_ARGENT } from '@/gestion/parcours';
+import { CHEMIN_ARGENT, CHEMIN_DECLARATION } from '@/gestion/parcours';
 import { loyersEnRetard, TEXTES_MENU } from '@/textes/gerer';
 
 import { LigneAvecAjout } from './LigneAvecAjout';
@@ -60,6 +60,10 @@ export function SectionGerer(): JSX.Element {
           <NavLink to={CHEMIN_ARGENT} className={classeLien}>
             <Wallet size={18} aria-hidden="true" />
             {TEXTES_MENU.argent}
+          </NavLink>
+          <NavLink to={CHEMIN_DECLARATION} className={classeLien}>
+            <Landmark size={18} aria-hidden="true" />
+            {TEXTES_MENU.declaration}
           </NavLink>
         </>
       ) : (

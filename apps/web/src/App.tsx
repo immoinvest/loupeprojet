@@ -31,6 +31,8 @@ import { Fiscalite } from './ecrans/Fiscalite';
 import { AjouterMain } from './ecrans/gerer/AjouterMain';
 import { Argent } from './ecrans/gerer/argent/Argent';
 import { ModifierDepense, NouvelleDepense } from './ecrans/gerer/argent/PagesDepense';
+import { Declaration } from './ecrans/gerer/declaration/Declaration';
+import { RecapitulatifAnnee } from './ecrans/gerer/declaration/RecapitulatifAnnee';
 import { FicheBien } from './ecrans/gerer/FicheBien';
 import { FicheLocataire } from './ecrans/gerer/FicheLocataire';
 import { Gerer } from './ecrans/gerer/Gerer';
@@ -71,6 +73,7 @@ export const routes: RouteObject[] = [
   { path: 'connexion', element: <Connexion /> },
   { path: 'projets/:id/imprimer', element: <Imprimer /> },
   { path: 'gerer/documents/:id', element: <ImprimerDocument /> },
+  { path: 'gerer/declaration/imprimer', element: <RecapitulatifAnnee /> },
   { path: 'simulateur-pret/imprimer', element: <SimulateurImprimer /> },
   {
     element: <AppLayout />,
@@ -103,6 +106,7 @@ export const routes: RouteObject[] = [
       { path: 'gerer/argent', element: <Argent /> },
       { path: 'gerer/depenses/nouvelle', element: <NouvelleDepense /> },
       { path: 'gerer/depenses/:id', element: <ModifierDepense /> },
+      { path: 'gerer/declaration', element: <Declaration /> },
       { path: 'compte', element: <Compte /> },
       { path: 'partage', element: <Partage /> },
       { path: 'p/:id', element: <PartageCourt /> },
