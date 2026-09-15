@@ -41,8 +41,11 @@
       ],
       "notes": "sources vérifiées le 15/09/2026 : INSEE Informations rapides n° 167 et tableau de l'ANIL (IRL), Légifrance art. 17-1, art. 6 (recherche), ministère de la Transition écologique (validité du DPE, calendrier) ; projet de loi « relance logement » signalé à suivre"
     },
-    "qa_tests": { "status": "in_progress" },
-    "security": { "status": "pending" },
+    "qa_tests": {
+      "status": "completed",
+      "verification": "15/09/2026 : lint, format, typecheck, 338 fichiers et 2 834 tests avec couverture (racine), build ; master (#103) fusionnée ensuite"
+    },
+    "security": { "status": "completed", "score": "97/100" },
     "push": { "status": "pending" }
   },
   "auto_revue": {

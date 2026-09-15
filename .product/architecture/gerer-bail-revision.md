@@ -92,6 +92,20 @@ BailContext met à jour ses révisions et lettres ; GestionContext.integrerLocat
 - [x] Journaux : chemin et code seulement, jamais de montant, nom ni adresse.
 - [x] Fichiers ≤ 300 lignes ; calcul pur à 100 %.
 
+## Audit de sécurité (B1)
+
+| Contrôle              | Constat                                                                                                                                                                                          | État |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---- |
+| Authentification      | Sous-routeur monté sous `routeurGestion` : hôte connu, session Better Auth, `no-store` hérités                                                                                                   | OK   |
+| CSRF                  | Écritures (`PUT`, `POST`) : en-tête `Origin` connu exigé (testé : 403 sans)                                                                                                                      | OK   |
+| Isolement des comptes | Chaque requête filtre par `userId` ; bien, location ou lettre d'un autre compte : 404 (testé)                                                                                                    | OK   |
+| Validation            | Corps par Zod (`LegalBienSaisieSchema`, `RevisionSaisieSchema`, `DemandeRevisionSchema`), 64 Ko ; le navigateur n'envoie que l'anniversaire, le serveur recalcule loyer, indices et mois d'effet | OK   |
+| Intégrité             | Lot D1 conditionné (aucun paiement du mois d'effet ni après) : pas de révision rétroactive, même en course (testé) ; lettre unique par clé, relue par Zod                                        | OK   |
+| XSS                   | React échappe tout ; lien externe INSEE en `rel="noreferrer"` ; retour de la lettre validé par `destinationRetour`                                                                               | OK   |
+| Données personnelles  | Aucun champ sensible ; journaux : chemin et code seulement (testé sans nom, adresse ni montant) ; cascade avec le bien, la location et le compte (testé)                                         | OK   |
+
+Score : 97/100 (reste bénin : l'IRL doit être complété à la main chaque trimestre, sinon la révision reste « attendue »).
+
 ## Auto-revue (checkpoints validés par Claude, sur autorisation de Pierre)
 
 - **Discovery** : les trois objectifs de la fiche sont couverts ; la zone tendue sans liste de communes est un retrait assumé (source non vérifiable en une nuit), sans effet sur B1 (le préavis est dans B2).
