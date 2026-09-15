@@ -1,0 +1,32 @@
+{
+  "feature_slug": "travaux-etat",
+  "started_at": "2026-09-15T00:05:00+02:00",
+  "current_step": "implement",
+  "scope": "moteur_et_web",
+  "backlog": ["19"],
+  "prerequisites": ["feat/audit-calculs", "feat/formulaire-rapide"],
+  "baseline": { "moteur_couverture": "100 %" },
+  "steps": {
+    "discovery": {
+      "status": "completed",
+      "output": ".product/features/travaux-etat-discovery.md",
+      "validation": "auto-validée (session de nuit)"
+    },
+    "specs": {
+      "status": "completed",
+      "output": ".product/specs/travaux-etat-specs.md",
+      "stories_count": 6
+    },
+    "architecture": { "status": "completed", "output": ".product/architecture/travaux-etat.md" },
+    "implement": {
+      "status": "in_progress",
+      "stories_completed": 5,
+      "stories_total": 6,
+      "note": "US-6 (formulaire Vérifier) attend la fusion de feat/formulaire-rapide",
+      "commits": []
+    },
+    "qa_tests": { "status": "pending" },
+    "security": { "status": "pending" },
+    "push": { "status": "pending" }
+  }
+}
