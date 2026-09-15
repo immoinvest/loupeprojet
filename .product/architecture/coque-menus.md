@@ -17,28 +17,32 @@ Specs : `../specs/coque-menus-specs.md`.
 | `apps/web/src/coque/SelecteurStatut.tsx` | Pastille = contenu du bouton de `MenuChoix` ; options avec point de couleur ; chevron `print:hidden`                                                      |
 | `apps/web/src/index.css`                 | Une animation `--animate-apparition` (100 ms) utilisée par `motion-safe:`                                                                                 |
 
-`composants/menu-choix.ts` et `textes/statut.ts` sont sous des globs à 100 % (`textes/**`) ou testés à 100 % par `tests/menu-choix.test.ts`.
+`textes/statut.ts` est sous le glob à 100 % (`textes/**`) ; `composants/menu-choix.ts` est couvert entièrement par `tests/menu-choix.test.ts` (branches comprises), le composant par `tests/selecteur-statut.test.tsx`.
 
 ## Contrat de `MenuChoix`
 
 ```ts
-type OptionChoix<T extends string> = { valeur: T; libelle: string; precision?: string };
+interface OptionChoix<T extends string> { valeur: T; libelle: string; precision?: string }
+interface GroupeChoix<T extends string> { nom: string; options: readonly OptionChoix<T>[] } // role="group", trait entre deux groupes
 props: {
-  libelle: string;                         // nom de la liste (« Statut du projet »), lu avant la valeur
+  libelle: string;                          // nom de la liste (« Statut du projet »), lu avant la valeur
   valeur: T;
-  groupes: readonly (readonly OptionChoix<T>[])[];  // séparateur entre deux groupes
-  onChoix: (valeur: T) => void;            // jamais appelé pour la valeur déjà choisie
-  classeBouton: string;
-  contenuBouton: ReactNode;                // la pastille
-  decorOption?: (valeur: T) => ReactNode;  // le point de couleur
+  groupes: readonly GroupeChoix<T>[];
+  onChoix: (valeur: T) => void;             // jamais appelé pour la valeur déjà choisie
+  classeBouton: string;                     // la pastille
+  avantValeur?: ReactNode;                  // point de couleur
+  apresValeur?: ReactNode;                  // chevron
+  decorOption?: (valeur: T) => ReactNode;   // point de couleur de chaque option
 }
 ```
+
+Structure : `div[role=listbox][tabIndex=-1]` > `div[role=group][aria-label]` > `div[role=option][aria-selected]`.
 
 Nom accessible du bouton : `aria-labelledby` = libellé (sr-only) + valeur affichée → « Statut du projet En analyse » ; `getByLabelText('Statut du projet')` et `getByLabel` le trouvent.
 
 ## Flux clavier
 
-Bouton : Entrée / Espace (clic natif), flèche bas / haut → ouvre. Liste (focus sur l'`ul`, `tabIndex=-1`) : flèches, Début, Fin, lettre, Entrée / Espace (choisit), Échap (ferme, focus au bouton), Tab (ferme). `pointerdown` hors de la racine → ferme. L'option active défile en vue (`scrollIntoView` si disponible).
+Bouton : Entrée / Espace (clic natif), flèche bas / haut → ouvre. Liste (focus sur la liste, `tabIndex=-1`) : flèches, Début, Fin, lettre (sans Ctrl, Alt ni Méta), Entrée / Espace (choisit), Échap et Tab (ferment, focus au bouton). `pointerdown` hors de la racine → ferme. L'option active défile en vue (`scrollIntoView` si disponible).
 
 ## Placement
 
