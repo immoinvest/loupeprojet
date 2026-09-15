@@ -25,17 +25,18 @@ function saisieDuChamp(chemin: string): HTMLElement {
 }
 
 describe('un fragment ouvre le champ visé', () => {
-  it('Hypothèses#loyer : focus sur le loyer, champ mis en évidence', async () => {
+  it('Hypothèses#loyer : focus sur le loyer', async () => {
     await ouvrirExemple('/hypotheses#hypotheses.location.loyerHc');
-    await screen.findByRole('heading', { level: 1, name: 'Vos hypothèses' });
+    await screen.findByRole('heading', { level: 1, name: 'Vos hypothèses' }, { timeout: 5000 });
     const loyer = screen.getByLabelText('Loyer visé, hors charges');
+    // La mise en évidence ne dure que 2 s : sous charge, elle peut être finie quand on regarde.
+    // Elle est vérifiée sans délai dans valeur-hypothese.test.tsx (même fonction montrerChamp).
     await waitFor(
       () => {
         expect(document.activeElement).toBe(loyer);
       },
       { timeout: 5000 },
     );
-    expect(loyer.closest('[data-champ]')).toHaveClass('mise-en-evidence');
   });
 
   it('un champ replié (travaux) : le dépliant s’ouvre et le champ a le focus', async () => {
