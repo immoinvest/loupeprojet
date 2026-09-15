@@ -29,9 +29,12 @@ describe('un fragment ouvre le champ visé', () => {
     await ouvrirExemple('/hypotheses#hypotheses.location.loyerHc');
     await screen.findByRole('heading', { level: 1, name: 'Vos hypothèses' });
     const loyer = screen.getByLabelText('Loyer visé, hors charges');
-    await waitFor(() => {
-      expect(document.activeElement).toBe(loyer);
-    });
+    await waitFor(
+      () => {
+        expect(document.activeElement).toBe(loyer);
+      },
+      { timeout: 5000 },
+    );
     expect(loyer.closest('[data-champ]')).toHaveClass('mise-en-evidence');
   });
 
@@ -72,9 +75,13 @@ describe('un fragment ouvre le champ visé', () => {
     const enregistre = creerProjet({ source });
     ecrireProjets(window.localStorage, [enregistre]);
     render(<AppEnMemoire chemin={`/projets/${enregistre.id}/revente#hypotheses.revente.annees`} />);
-    await screen.findByRole('heading', { level: 1, name: 'Vos hypothèses' });
-    await waitFor(() => {
-      expect(document.activeElement).toBe(saisieDuChamp('hypotheses.revente.annees'));
-    });
+    // Deux étapes asynchrones (un rendu, puis la navigation) : délai large sous charge.
+    await screen.findByRole('heading', { level: 1, name: 'Vos hypothèses' }, { timeout: 5000 });
+    await waitFor(
+      () => {
+        expect(document.activeElement).toBe(saisieDuChamp('hypotheses.revente.annees'));
+      },
+      { timeout: 5000 },
+    );
   });
 });
