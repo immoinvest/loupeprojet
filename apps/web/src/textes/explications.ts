@@ -193,7 +193,14 @@ export function explicationFiscalite(r: ResultatsComplets): string {
 export function explicationRevente(r: ResultatsComplets): string {
   const v = r.revente;
   const evolution = pourcentageSigne(r.projet.hypotheses.revente.evolutionAnnuelle, 1);
-  return `Revente estimée à ${euros(v.valeur)} dans ${annees(r)} ans (${evolution} par an), moins l'agence et les diagnostics (${euros(v.fraisVente.total)}), le capital restant dû (${euros(v.crd)}), l'indemnité de remboursement anticipé (${euros(v.ira)}) et l'impôt sur la plus-value (${euros(v.plusValue.impotTotal)}) : ${euros(v.cashNetVendeur)} net vendeur. Depuis 2025, les amortissements du meublé au réel sont réintégrés dans la plus-value.`;
+  const travaux =
+    v.valorisationTravaux.montant > 0
+      ? `, dont ${euros(v.valorisationTravaux.montant)} de valeur ajoutée par les travaux`
+      : '';
+  const prix = v.valeurSaisie
+    ? `Revente au prix que vous avez saisi, ${euros(v.valeur)}, dans ${annees(r)} ans`
+    : `Revente estimée à ${euros(v.valeur)} dans ${annees(r)} ans (${evolution} par an${travaux})`;
+  return `${prix}, moins l'agence et les diagnostics (${euros(v.fraisVente.total)}), le capital restant dû (${euros(v.crd)}), l'indemnité de remboursement anticipé (${euros(v.ira)}) et l'impôt sur la plus-value (${euros(v.plusValue.impotTotal)}) : ${euros(v.cashNetVendeur)} net vendeur. Depuis 2025, les amortissements du meublé au réel sont réintégrés dans la plus-value.`;
 }
 
 export function explicationMultiple(r: ResultatsComplets): string {

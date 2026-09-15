@@ -216,6 +216,11 @@ export const ReventeSchema = z.object({
   evolutionAnnuelle: z.number().min(-0.2).max(0.2).default(0.015),
   fraisAgenceTaux: taux(0.15).default(0.04),
   diagnostics: montant().default(500),
+  /**
+   * Prix de vente saisi par l'utilisateur, frais de vente compris : remplace la valeur estimée quel que
+   * soit l'horizon. Absent = valeur estimée (prix retenu + valorisation des travaux, puis évolution).
+   */
+  prixVente: montant().optional(),
 });
 
 export const HypothesesSchema = z

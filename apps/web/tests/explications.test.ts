@@ -182,21 +182,33 @@ describe('impôts et revente', () => {
 
   it('revente : valeur, frais, capital restant dû, IRA, impôt, net vendeur', () => {
     const t = n(explicationRevente(exemple));
-    expect(t).toContain('179 884 € dans 10 ans (+1,5 % par an)');
-    expect(t).toContain('diagnostics (7 695 €)');
+    expect(t).toContain(
+      '183 365 € dans 10 ans (+1,5 % par an, dont 3 000 € de valeur ajoutée par les travaux)',
+    );
+    expect(t).toContain('diagnostics (7 835 €)');
     expect(t).toContain('capital restant dû (112 094 €)');
     expect(t).toContain('anticipé (1 878 €)');
     // 19 486 € d'amortissements du bâti réintégrés : plus-value 1 436,87 € × 29,081 % = 418 €.
     // Prix de l'acte 148 000 € (honoraires 7 000 € dans les frais, forfait travaux 22 200 €) : plus-value
-    // 1 436,87 + 1 050 = 2 486,87 € × 29,081 % = 723 € (BOI-RFPI-PVI-20-10-20-20 § 40 et 70).
-    expect(t).toContain('plus-value (723 €)');
-    expect(t).toContain('57 493 € net vendeur');
+    // 1 436,87 + 1 050 = 2 486,87 € (BOI-RFPI-PVI-20-10-20-20 § 40 et 70) ; valeur de revente +3 000 €
+    // de travaux capitalisés (+3 481,62 €), frais de vente −139,26 € : 5 829,23 € × 29,081 % = 1 695 €.
+    expect(t).toContain('plus-value (1 695 €)');
+    expect(t).toContain('59 864 € net vendeur');
+  });
+
+  it('revente au prix saisi : le prix de l’utilisateur, sans évolution ni travaux', () => {
+    const saisi = rapportComplet(
+      variante({ revente: { ...projetExemple.hypotheses.revente, prixVente: 200_000 } }),
+    );
+    const t = n(explicationRevente(saisi));
+    expect(t).toContain('Revente au prix que vous avez saisi, 200 000 €, dans 10 ans, moins');
+    expect(t).not.toContain('par an');
   });
 
   it('multiple sur apport : exemple, perte, sans mise', () => {
     const t = n(explicationMultiple(exemple));
-    expect(t).toContain('12 924 € ÷ 19 337 € = × 0,7.');
-    expect(t).toContain('en rend 0,7');
+    expect(t).toContain('15 294 € ÷ 19 337 € = × 0,8.');
+    expect(t).toContain('en rend 0,8');
 
     const perte = {
       rendement: { enrichissement: { miseDeDepart: 10_000, total: -5_000 } },

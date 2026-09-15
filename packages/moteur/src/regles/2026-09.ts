@@ -275,7 +275,16 @@ export const regles202609: Regles = {
     arrondi: 100,
   },
 
+  // Aucune statistique publique ne chiffre ce que des travaux ajoutent au prix de revente. Avec l'état
+  // du bien et des ventes comparables, la valorisation = écart entre l'estimation à l'état actuel et
+  // l'estimation « rénové », au prorata des travaux estimés et jamais au-dessus de leur montant. Sans
+  // ces données : la moitié du montant des travaux (choix Deklic du 15/09/2026, à confirmer).
+  revente: {
+    valorisationTravauxRepli: 0.5,
+  },
+
   aConfirmer: [
+    'revente.valorisationTravauxRepli',
     'travaux.parEtat',
     'travaux.renovationEnergetique',
     'fiscalite.prelevementsSociaux.bic',
