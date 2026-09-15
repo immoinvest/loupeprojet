@@ -57,11 +57,12 @@ describe('amortissementsAReintegrer', () => {
  * diagnostics 1 100 €.
  *
  * - Valeur : 155 000 × 1,02¹⁰ = 188 944,14 € ; prix de cession : × 0,955 − 1 100 = 179 341,65 €.
- * - Prix d'acquisition majoré sans réintégration : 155 000 + max(11 831,56 ; 7,5 % = 11 625)
- *   + forfait travaux 15 % (≥ 5 ans) 23 250 = 190 081,56 € > prix de cession : aucune plus-value.
+ * - Prix d'acquisition majoré sans réintégration (prix de l'acte, BOI-RFPI-PVI-20-10-20-20 § 40 et 70) :
+ *   146 000 + max(11 831,56 + honoraires 9 000 ; 7,5 % × 146 000 = 10 950) + forfait travaux 15 % (≥ 5 ans)
+ *   21 900 = 188 731,56 € > prix de cession : aucune plus-value.
  * - Micro-BIC (et nu) : rien à réintégrer, impôt à la revente nul.
  * - LMNP réel : les amortissements du bâti déduits R (au plus 10 × 4 157,35 = 41 573,50 €) réduisent
- *   le prix majoré ; plus-value brute = R − 10 739,91 €. À 10 ans, abattements IR 30 % et PS 8,25 % :
+ *   le prix majoré ; plus-value brute = R − 9 389,91 €. À 10 ans, abattements IR 30 % et PS 8,25 % :
  *   impôt = PV × (0,70 × 19 % + 0,9175 × 17,2 %) ; base IR sous 50 000 € : pas de surtaxe.
  */
 describe('reventeParRegime — projet 92K revendu à 10 ans (calcul à la main)', () => {
@@ -70,7 +71,7 @@ describe('reventeParRegime — projet 92K revendu à 10 ans (calcul à la main)'
   const micro = fiscalite.regimes.micro_bic;
   const valeur = 155_000 * 1.02 ** 10;
   const prixCession = valeur * 0.955 - 1_100;
-  const majoreSansReintegration = 155_000 + 11_831.56 + 23_250;
+  const majoreSansReintegration = 146_000 + (11_831.56 + 9_000) + 21_900;
 
   it('frais réels et prix de cession conformes au calcul à la main', () => {
     expect(financement.fraisAcquisition.total).toBeCloseTo(11_831.56, 2);

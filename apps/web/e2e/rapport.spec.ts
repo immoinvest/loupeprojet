@@ -49,8 +49,8 @@ test('le rapport affiche le verdict, les cinq feux et les chiffres clés', async
   await expect(carte(page, "Combien d'impôts ?")).toContainText('Meublé au réel.');
 
   const revente = carte(page, "Qu'est-ce qu'il vous restera ?");
-  // 58 217 € avant impôt de plus-value, moins 418 € sur les amortissements réintégrés.
-  await expect(revente).toContainText(/57\s799\s€\s*dans 10 ans/);
+  // 58 217 € avant impôt de plus-value, moins 723 € (amortissements réintégrés, prix de l'acte).
+  await expect(revente).toContainText(/57\s493\s€\s*dans 10 ans/);
   await expect(revente).toContainText('Multiple sur apport');
   await expect(revente).toContainText(/×\s0,7/);
 });
