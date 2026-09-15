@@ -118,6 +118,9 @@ describe('Rapport : prix, impôts et revente', () => {
       'href',
       '/projets/exemple/revente',
     );
+    // Prix jugé bon : la carte ne s'allonge plus d'une phrase sur la visite (la question reste dans Visite).
+    expect(within(carte("Est-ce que c'est cher ?")).getByText('Non.')).toBeInTheDocument();
+    expect(screen.queryByText(/Un prix aussi bas/)).not.toBeInTheDocument();
     // Les faux liens d'avant ont disparu.
     expect(screen.queryByText('Pourquoi ?')).not.toBeInTheDocument();
     expect(screen.queryByText('Comparer les 4 régimes')).not.toBeInTheDocument();

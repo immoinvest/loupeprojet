@@ -166,11 +166,6 @@ export function CartePrix({ r }: { r: Resultats }): JSX.Element {
           {niveauEnPhrase(r.estimation.confiance.niveau)} ({r.estimation.confiance.note}/100).
         </p>
       )}
-      {feu === 'bon' && (
-        <p className="m-0 text-[15px] leading-relaxed text-encre-2">
-          Un prix aussi bas se vérifie en visite : pourquoi le vendeur baisse ?
-        </p>
-      )}
       <LienOnglet vers="adresse">Voir l'estimation</LienOnglet>
     </Carte>
   );
