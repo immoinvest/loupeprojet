@@ -1,24 +1,43 @@
 import type { Journal } from './journal';
 
+/** Une pièce jointe : contenu en base64 (la quittance en PDF). */
+export interface PieceJointe {
+  readonly nom: string;
+  readonly type: string;
+  readonly base64: string;
+}
+
 export interface Message {
   /** Destinataire. Jamais journalisé. */
   readonly a: string;
   readonly sujet: string;
   readonly texte: string;
   readonly html: string;
+  readonly pieces?: readonly PieceJointe[];
+  /** Adresse de réponse (celle du bailleur pour un e-mail au locataire). Jamais journalisée. */
+  readonly repondreA?: string;
 }
 
+/** L'envoyeur partagé par les codes de connexion et les envois de Gérer. */
 export interface Envoyeur {
   envoyer(message: Message): Promise<void>;
+  /** `journal` : développement, rien ne part (l'écran le dit). Absent : un vrai envoi. */
+  readonly mode?: 'journal';
 }
+
+export type EnvoyeurCourriel = Envoyeur;
 
 export type Fetcher = (url: string, init: RequestInit) => Promise<Response>;
 
 /** Resend a refusé ou n'a pas répondu ; le statut suffit, jamais le corps (il pourrait citer l'adresse). */
 export class ErreurCourriel extends Error {
-  constructor(message: string) {
+  /** Statut HTTP de Resend, 0 sans réponse. */
+  readonly statut: number;
+
+  constructor(message: string, statut = 0) {
     super(message);
     this.name = 'ErreurCourriel';
+    this.statut = statut;
   }
 }
 
@@ -41,18 +60,40 @@ export function envoyeurResend(
           subject: message.sujet,
           text: message.texte,
           html: message.html,
+          ...(message.repondreA === undefined ? {} : { reply_to: message.repondreA }),
+          ...(message.pieces === undefined
+            ? {}
+            : {
+                attachments: message.pieces.map((p) => ({
+                  filename: p.nom,
+                  content: p.base64,
+                  content_type: p.type,
+                })),
+              }),
         }),
+      }).catch(() => {
+        throw new ErreurCourriel('Resend injoignable');
       });
-      if (!reponse.ok) throw new ErreurCourriel(`Resend a répondu ${String(reponse.status)}`);
+      if (!reponse.ok) {
+        throw new ErreurCourriel(`Resend a répondu ${String(reponse.status)}`, reponse.status);
+      }
     },
   };
 }
 
-/** Développement : le message est écrit dans le journal au lieu d'être envoyé (sans le destinataire). */
+/**
+ * Développement : le message est écrit dans le journal au lieu d'être envoyé (sans le destinataire ni
+ * les pièces jointes). Le texte reste lisible pour suivre un lien d'accord : jamais hors dev.
+ */
 export function envoyeurJournal(journal: Journal): Envoyeur {
   return {
+    mode: 'journal',
     envoyer(message) {
-      journal.info('courriel.dev', { sujet: message.sujet, texte: message.texte });
+      journal.info('courriel.dev', {
+        sujet: message.sujet,
+        texte: message.texte,
+        ...(message.pieces === undefined ? {} : { pieces: message.pieces.length }),
+      });
       return Promise.resolve();
     },
   };

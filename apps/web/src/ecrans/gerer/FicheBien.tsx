@@ -20,6 +20,7 @@ import { CarteArgent } from './argent/CarteArgent';
 import { CarteConformite } from './bail/CarteConformite';
 import { CarteRevision } from './bail/CarteRevision';
 import { EcranAttente } from './EcranAttente';
+import { BailleurDuBien } from './envois/BailleurDuBien';
 import { FilAriane } from './FilAriane';
 import { CarteLocation } from './fiche/CarteLocation';
 import { FriseMois } from './fiche/FriseMois';
@@ -118,6 +119,8 @@ function Fiche({
         actions={actions}
         bienId={bien.id}
       />
+
+      <BailleurDuBien bien={bien} bailleurCompte={donnees.bailleur} />
 
       <SupprimerBien bien={bien} />
     </Page>

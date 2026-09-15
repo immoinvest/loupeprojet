@@ -1,0 +1,33 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`gabarits des e-mails au locataire (instantanés) > invitation : vouvoiement, bailleur, logement, bouton, validité et article 21 1`] = `
+{
+  "html": "<div style="font-family:system-ui,sans-serif;color:#23272f;max-width:36em;line-height:1.5"><p>Bonjour Julie,</p><p>Pierre Georgel vous propose de recevoir vos quittances de loyer par e-mail pour le logement T2 Lices, 12 rue des Lices.</p><p><a href="https://loupeprojet.pages.dev/accord#abc.123.sig" style="display:inline-block;background:#4338ca;color:#ffffff;text-decoration:none;font-weight:700;padding:12px 20px;border-radius:999px">Oui, recevoir mes quittances par e-mail</a></p><p style="color:#6b7280;font-size:14px">Le lien est valable 30 jours. Sans réponse, rien ne change : vos quittances restent disponibles auprès de votre bailleur. La loi prévoit l’envoi par e-mail seulement avec votre accord, et la quittance est toujours gratuite (loi du 6 juillet 1989, article 21).</p><p style="color:#6b7280;font-size:14px">Deklic, pour le compte de votre bailleur.</p></div>",
+  "sujet": "Vos quittances de loyer par e-mail",
+  "texte": "Bonjour Julie,
+
+Pierre Georgel vous propose de recevoir vos quittances de loyer par e-mail pour le logement T2 Lices, 12 rue des Lices.
+
+Pour accepter, ouvrez ce lien puis confirmez : https://loupeprojet.pages.dev/accord#abc.123.sig
+
+Le lien est valable 30 jours. Sans réponse, rien ne change : vos quittances restent disponibles auprès de votre bailleur.
+La loi prévoit l’envoi par e-mail seulement avec votre accord, et la quittance est toujours gratuite (loi du 6 juillet 1989, article 21).
+
+Deklic, pour le compte de votre bailleur.",
+}
+`;
+
+exports[`gabarits des e-mails au locataire (instantanés) > quittance : sujet du mois, montant, logement, numéro 1`] = `
+{
+  "html": "<div style="font-family:system-ui,sans-serif;color:#23272f;max-width:36em;line-height:1.5"><p>Bonjour Julie,</p><p>Vous trouverez ci-joint la quittance de loyer d’octobre 2026 (700 €) pour le logement T2 Lices · Chambre 2, 12 rue des Lices, établie par Pierre Georgel.<br>N° Q-202610-L1.</p><p style="color:#6b7280;font-size:14px">Vous recevez ce message parce que vous avez accepté de recevoir vos quittances par e-mail. Pour ne plus les recevoir, répondez à ce message.</p><p style="color:#6b7280;font-size:14px">Deklic, pour le compte de votre bailleur.</p></div>",
+  "sujet": "Votre quittance de loyer – octobre 2026",
+  "texte": "Bonjour Julie,
+
+Vous trouverez ci-joint la quittance de loyer d’octobre 2026 (700 €) pour le logement T2 Lices · Chambre 2, 12 rue des Lices, établie par Pierre Georgel.
+N° Q-202610-L1.
+
+Vous recevez ce message parce que vous avez accepté de recevoir vos quittances par e-mail. Pour ne plus les recevoir, répondez à ce message.
+
+Deklic, pour le compte de votre bailleur.",
+}
+`;

@@ -5,12 +5,15 @@ import { Link, useParams, useSearchParams } from 'react-router';
 import { Chapo, Page, TitrePage } from '@/composants/mise-en-page';
 import { Bouton, Carte, Pastille } from '@/composants/ui';
 import { ficheDuLocataire, type FicheLocataire as DonneesFiche } from '@/gestion/fiche-locataire';
+import { useEnvois } from '@/gestion/envois/EnvoisContext';
+import { telephoneDe } from '@/gestion/envois/logique';
 import { useGestion } from '@/gestion/GestionContext';
 import { CHEMIN_GERER, CHEMIN_MES_LOCATAIRES } from '@/gestion/parcours';
 import { TEXTES_FICHE_LOCATAIRE as T } from '@/textes/gerer-locataire';
 import { TEXTES_PARCOURS as P } from '@/textes/gerer-parcours';
 
 import { EcranAttente } from './EcranAttente';
+import { CarteAccord } from './envois/CarteAccord';
 import { FilAriane } from './FilAriane';
 import { FriseMois } from './fiche/FriseMois';
 import { CarteOccupation } from './locataire/CarteOccupation';
@@ -34,6 +37,7 @@ function Fiche({
   const { locataire } = fiche;
   const nom = `${locataire.prenom} ${locataire.nom}`;
   const sansEmail = locataire.email === undefined;
+  const telephone = telephoneDe(useEnvois().donnees, locataire.id);
 
   return (
     <Page espacement="large" className="max-w-[900px]">
@@ -54,6 +58,14 @@ function Fiche({
               </Pastille>
             ) : (
               <Chapo className="break-all">{locataire.email}</Chapo>
+            )}
+            {telephone !== undefined && (
+              <a
+                href={`tel:${telephone.replace(/[^+0-9]/g, '')}`}
+                className="text-[15px] text-encre-2 survol-texte pointer-coarse:inline-flex pointer-coarse:min-h-11 pointer-coarse:items-center"
+              >
+                {telephone}
+              </a>
             )}
           </div>
           {!modifier && (
@@ -80,6 +92,8 @@ function Fiche({
           }}
         />
       )}
+
+      <CarteAccord locataire={locataire} />
 
       <RetoursLoyer actions={actions} bailleur={donnees.bailleur} />
 

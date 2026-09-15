@@ -17,6 +17,7 @@ import {
 import { modifierLaLocation } from '@/textes/gerer-parcours';
 
 import { EnPartie } from './EnPartie';
+import { TraceEnvoi } from './envois/TraceEnvoi';
 import { NomsDeLocataires } from './NomsDeLocataires';
 import type { ActionsLoyer } from './useActionsLoyer';
 
@@ -126,6 +127,7 @@ export function LigneDeLoyer({
           </>
         )}
       </span>
+      <TraceEnvoi ligne={ligne} />
       {ouvert && (
         <EnPartie
           ligne={ligne}

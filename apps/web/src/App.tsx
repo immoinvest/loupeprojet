@@ -18,6 +18,11 @@ import { clientBailIndisponible } from './gestion/bail/memoire';
 import { clientBailReseau } from './gestion/bail/reseau';
 import type { ClientBail } from './gestion/bail/types';
 import { GestionProvider } from './gestion/GestionContext';
+import { EnvoisProvider } from './gestion/envois/EnvoisContext';
+import { clientAccordMemoire, clientEnvoisMemoire } from './gestion/envois/memoire';
+import { clientAccordReseau, clientEnvoisReseau } from './gestion/envois/reseau';
+import type { ClientAccord, ClientEnvois } from './gestion/envois/types';
+import { Accord } from './ecrans/accord/Accord';
 import { clientGestionMemoire } from './gestion/memoire';
 import { clientGestionReseau } from './gestion/reseau';
 import type { ClientGestion } from './gestion/types';
@@ -76,6 +81,7 @@ export const routes: RouteObject[] = [
   { path: 'connexion', element: <Connexion /> },
   { path: 'projets/:id/imprimer', element: <Imprimer /> },
   { path: 'gerer/documents/:id', element: <ImprimerDocument /> },
+  { path: 'accord', element: <Accord /> },
   { path: 'gerer/lettres/:id', element: <ImprimerLettre /> },
   { path: 'simulateur-pret/imprimer', element: <SimulateurImprimer /> },
   {
@@ -155,6 +161,10 @@ const CLIENT_PROJETS = clientProjetsReseau();
 /** Les liens de partage courts : l'API /api/partage du même worker, même origine (ADR-009). */
 const CLIENT_PARTAGE = clientPartageReseau();
 
+/** Les quittances envoyées par e-mail : /api/gestion/envois et la page publique /api/accord. */
+const CLIENT_ENVOIS = clientEnvoisReseau();
+const CLIENT_ACCORD = clientAccordReseau();
+
 /** Invite d'installation et mode application, écoutés dès le chargement, avant le premier rendu. */
 const SUIVI_INSTALLATION = creerSuiviInstallation(window);
 
@@ -168,13 +178,15 @@ export function App(): JSX.Element {
             <SynchroProvider client={CLIENT_PROJETS}>
               <GestionProvider client={CLIENT_GESTION}>
                 <ArgentProvider client={CLIENT_ARGENT}>
-                  <BailProvider client={CLIENT_BAIL}>
-                    <InstallationProvider suivi={SUIVI_INSTALLATION}>
-                      <BrowserRouter>
-                        <Racine />
-                      </BrowserRouter>
-                    </InstallationProvider>
-                  </BailProvider>
+                  <EnvoisProvider client={CLIENT_ENVOIS} accord={CLIENT_ACCORD}>
+                    <BailProvider client={CLIENT_BAIL}>
+                      <InstallationProvider suivi={SUIVI_INSTALLATION}>
+                        <BrowserRouter>
+                          <Racine />
+                        </BrowserRouter>
+                      </InstallationProvider>
+                    </BailProvider>
+                  </EnvoisProvider>
                 </ArgentProvider>
               </GestionProvider>
             </SynchroProvider>
@@ -200,6 +212,8 @@ export function AppEnMemoire({
   bail = clientBailIndisponible,
   projets,
   partage,
+  envois,
+  accord,
   installation = suiviIndisponible,
 }: {
   chemin?: string;
@@ -211,8 +225,12 @@ export function AppEnMemoire({
   bail?: ClientBail;
   projets?: ClientProjets;
   partage?: ClientPartage;
+  envois?: ClientEnvois;
+  accord?: ClientAccord;
   installation?: SuiviInstallation;
 }): JSX.Element {
+  const clientEnvois = useMemo(() => envois ?? clientEnvoisMemoire(), [envois]);
+  const clientAccord = useMemo(() => accord ?? clientAccordMemoire(), [accord]);
   const clientCompte = useMemo(() => compte ?? clientMemoire(), [compte]);
   const clientGestion = useMemo(() => gestion ?? clientGestionMemoire(), [gestion]);
   const clientArgent = useMemo(() => argent ?? clientArgentMemoire(), [argent]);
@@ -226,13 +244,15 @@ export function AppEnMemoire({
             <SynchroProvider client={clientProjets} delaiMs={0}>
               <GestionProvider client={clientGestion} stockage={stockage}>
                 <ArgentProvider client={clientArgent}>
-                  <BailProvider client={bail}>
-                    <InstallationProvider suivi={installation}>
-                      <MemoryRouter initialEntries={[chemin]}>
-                        <Racine />
-                      </MemoryRouter>
-                    </InstallationProvider>
-                  </BailProvider>
+                  <EnvoisProvider client={clientEnvois} accord={clientAccord}>
+                    <BailProvider client={bail}>
+                      <InstallationProvider suivi={installation}>
+                        <MemoryRouter initialEntries={[chemin]}>
+                          <Racine />
+                        </MemoryRouter>
+                      </InstallationProvider>
+                    </BailProvider>
+                  </EnvoisProvider>
                 </ArgentProvider>
               </GestionProvider>
             </SynchroProvider>

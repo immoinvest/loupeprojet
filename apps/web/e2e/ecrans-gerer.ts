@@ -122,6 +122,34 @@ export const ECRANS_GERER_ARGENT: readonly Ecran[] = [
   },
 ];
 
+/** Les écrans ajoutés par `quittances-auto` (G2-1, G2-2) : accord du locataire, bailleur d'un bien. */
+export const ECRANS_QUITTANCES_AUTO: readonly Ecran[] = [
+  {
+    nom: 'Accord du locataire (page publique)',
+    chemin: `/accord#${'a'.repeat(43)}.1790000000.${'b'.repeat(43)}`,
+    ouvrir: async (page) => {
+      await expect(
+        page.getByRole('button', { name: 'Oui, recevoir mes quittances par e-mail' }),
+      ).toBeVisible();
+    },
+  },
+  {
+    nom: 'Quittances par e-mail (fiche du locataire)',
+    chemin: '/gerer/locataires/julie',
+    ouvrir: async (page) => {
+      await expect(page.getByRole('heading', { name: 'Quittances par e-mail' })).toBeVisible();
+    },
+  },
+  {
+    nom: 'Bailleur d’un bien',
+    chemin: '/gerer/biens/bien-lices',
+    ouvrir: async (page) => {
+      await page.getByRole('button', { name: 'Indiquer un autre bailleur' }).click();
+      await expect(page.getByRole('form', { name: 'Bailleur de ce bien' })).toBeVisible();
+    },
+  },
+];
+
 /** Les écrans ajoutés par `gerer-bail-revision` (B1) : réglages de la révision, conformité, lettre. */
 export const ECRANS_GERER_BAIL: readonly Ecran[] = [
   {
@@ -151,4 +179,5 @@ export const ECRANS_GERER: readonly Ecran[] = [
   ...ECRANS_GERER_PARCOURS,
   ...ECRANS_GERER_ARGENT,
   ...ECRANS_GERER_BAIL,
+  ...ECRANS_QUITTANCES_AUTO,
 ];

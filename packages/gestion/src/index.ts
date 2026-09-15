@@ -9,6 +9,7 @@ export * from './creation';
 export * from './dates';
 export * from './depenses';
 export * from './documents';
+export * from './envois';
 export * from './loyers';
 export * from './mois';
 export * from './montants';

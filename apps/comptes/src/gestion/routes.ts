@@ -20,6 +20,8 @@ import { acces, type EnvGestion } from './acces';
 import { routeurArgent } from './argent/routes';
 import { routeurBail } from './bail/routes';
 import { ErreurGestion, estTableAbsente } from './depot';
+import { declencheursEnvois } from './envois/declencheurs';
+import { routeurEnvois } from './envois/routes';
 
 /** Un corps de requête plus gros est refusé avant d'être lu (l'instantané d'un projet pèse quelques Ko). */
 export const TAILLE_MAX_OCTETS = 64 * 1024;
@@ -61,6 +63,9 @@ export function routeurGestion(
       onError: () => reponseErreur(413, 'CORPS_TROP_GROS'),
     }),
   );
+  // Quittances envoyées par e-mail (quittances-auto) : déclencheurs et routes, sans toucher aux routes ci-dessous.
+  app.use('*', declencheursEnvois(deps));
+  app.route('/envois', routeurEnvois(deps));
 
   app.get('/etat', async (c) => c.json(await deps.gestion.etat(c.get('userId'))));
 

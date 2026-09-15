@@ -6,6 +6,9 @@ BETTER_AUTH_SECRET=
 # Sans domaine vérifié chez Resend, seul le propriétaire du compte Resend reçoit les e-mails.
 RESEND_API_KEY=
 COURRIEL_EXPEDITEUR=Deklic <onboarding@resend.dev>
+# Signature des liens d'accord envoyés aux locataires (32 caractères ou plus). Vide en dev : un secret fixe.
+# Absent hors dev : aucune demande d'accord ne part (les quittances partent aux accords déclarés).
+JETON_COURRIEL_SECRET=
 # Bouton Google : console.cloud.google.com → Identifiants → ID client OAuth (application Web),
 # URL de redirection autorisée : http://localhost:5173/api/auth/callback/google (et la production).
 GOOGLE_CLIENT_ID=

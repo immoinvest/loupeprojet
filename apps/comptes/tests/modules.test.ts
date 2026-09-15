@@ -196,7 +196,7 @@ describe('courriel', () => {
       Promise.resolve(new Response('{"message":"camille@example.org refusé"}', { status: 422 })),
     );
     await expect(envoyeur.envoyer(MESSAGE)).rejects.toThrow(
-      new ErreurCourriel('Resend a répondu 422'),
+      new ErreurCourriel('Resend a répondu 422', 422),
     );
   });
 
