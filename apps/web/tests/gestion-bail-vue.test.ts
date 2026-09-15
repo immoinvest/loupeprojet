@@ -174,7 +174,9 @@ describe('alertes et actions de la vie du bail', () => {
 
 describe('adresses de la vie du bail', () => {
   it('lettre avec retour, carte Conformité et carte Révision de la fiche', () => {
-    expect(lienLettre('v/1', '/gerer/biens/b1')).toBe('/gerer/lettres/v%2F1?retour=%2Fgerer%2Fbiens%2Fb1');
+    expect(lienLettre('v/1', '/gerer/biens/b1')).toBe(
+      '/gerer/lettres/v%2F1?retour=%2Fgerer%2Fbiens%2Fb1',
+    );
     expect(lienConformite('b1')).toBe('/gerer/biens/b1#conformite');
     expect(lienRevision('b1', 'l1')).toBe('/gerer/biens/b1#revision-l1');
   });

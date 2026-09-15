@@ -117,7 +117,11 @@ describe('BailProvider', () => {
     await statut('erreur');
     // Une écriture qui réussit sans état chargé ne fabrique pas d'état.
     await act(async () => {
-      const r = await contexte().enregistrerBien('b1', { dpeClasse: 'D', dpeDate: null, zoneTendue: null });
+      const r = await contexte().enregistrerBien('b1', {
+        dpeClasse: 'D',
+        dpeDate: null,
+        zoneTendue: null,
+      });
       expect(r.ok).toBe(true);
     });
     expect(contexte().donnees).toBeNull();
