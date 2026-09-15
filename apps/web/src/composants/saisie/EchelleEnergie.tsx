@@ -44,7 +44,9 @@ export function EchelleEnergie({
       role="radiogroup"
       aria-labelledby={idLibelle}
       aria-describedby={decritPar}
-      className="grid grid-cols-7 gap-1"
+      // Sept lettres de 44 px au moins : dans une colonne étroite (téléphone, liste de visite), l'échelle passe
+      // sur deux lignes plutôt que de rétrécir ses cibles.
+      className="grid grid-cols-[repeat(auto-fit,minmax(2.75rem,1fr))] gap-1"
     >
       {LETTRES_ENERGIE.map((lettre) => {
         const choisi = lettre === choisie;

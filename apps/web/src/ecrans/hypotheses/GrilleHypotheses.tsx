@@ -75,6 +75,7 @@ export function useSaisieHypotheses(): SaisieHypotheses {
       badge={badgePour(projet, d)}
       aide={d.aideSelon?.(projet) ?? d.aide}
       utilisePar={<UtilisePar chemin={d.chemin} />}
+      projet={projet}
       onChange={(t) => {
         changer(d, t);
       }}

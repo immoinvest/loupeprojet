@@ -14,9 +14,9 @@ test('financement : la durée change la mensualité ; « Simuler un prêt » ouv
   await expect(carte(page, 'Le loyer porte-t-il le crédit ?')).toContainText('84 %');
   await expect(page.getByRole('table').getByRole('row')).toHaveCount(26);
 
-  const duree = page.getByLabel('Durée du prêt');
-  await expect(duree).toHaveValue('25');
-  await duree.fill('20');
+  // La durée se choisit en tuiles, comme dans le formulaire Vérifier.
+  await expect(page.getByRole('radio', { name: '25 ans' })).toBeChecked();
+  await page.getByText('20 ans', { exact: true }).click();
   await expect(cout).toContainText(/95[45]\s€/);
   await expect(page.getByRole('table').getByRole('row')).toHaveCount(21);
 
@@ -25,7 +25,7 @@ test('financement : la durée change la mensualité ; « Simuler un prêt » ouv
   await expect(
     page.getByRole('heading', { level: 1, name: "Comment se finance l'achat ?" }),
   ).toBeVisible();
-  await expect(page.getByLabel('Durée du prêt')).toHaveValue('20');
+  await expect(page.getByRole('radio', { name: '20 ans' })).toBeChecked();
   await expect(cout).toContainText(/95[45]\s€/);
 
   // Le lien porte le prêt dans son fragment et ouvre le simulateur avec ce prêt, en offre A seule.

@@ -188,14 +188,17 @@ describe('impôts et revente', () => {
     expect(t).toContain('diagnostics (7 835 €)');
     expect(t).toContain('capital restant dû (112 094 €)');
     expect(t).toContain('anticipé (1 878 €)');
-    // 19 486 € d'amortissements du bâti réintégrés : plus-value 4 779,23 € × 29,081 % = 1 390 €.
-    expect(t).toContain('plus-value (1 390 €)');
-    expect(t).toContain('60 169 € net vendeur');
+    // 19 486 € d'amortissements du bâti réintégrés : plus-value 1 436,87 € × 29,081 % = 418 €.
+    // Prix de l'acte 148 000 € (honoraires 7 000 € dans les frais, forfait travaux 22 200 €) : plus-value
+    // 1 436,87 + 1 050 = 2 486,87 € (BOI-RFPI-PVI-20-10-20-20 § 40 et 70) ; valeur de revente +3 000 €
+    // de travaux capitalisés (+3 481,62 €), frais de vente −139,26 € : 5 829,23 € × 29,081 % = 1 695 €.
+    expect(t).toContain('plus-value (1 695 €)');
+    expect(t).toContain('59 864 € net vendeur');
   });
 
   it('multiple sur apport : exemple, perte, sans mise', () => {
     const t = n(explicationMultiple(exemple));
-    expect(t).toContain('15 599 € ÷ 19 337 € = × 0,8.');
+    expect(t).toContain('15 294 € ÷ 19 337 € = × 0,8.');
     expect(t).toContain('en rend 0,8');
 
     const perte = {

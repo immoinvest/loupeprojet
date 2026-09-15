@@ -20,6 +20,9 @@ import { telechargerTexte } from '@/ecrans/simulateur/telecharger';
 
 const regles = obtenirRegles('2026-09');
 const n = (s: string | null): string => (s ?? '').replace(/\s/g, ' ');
+/** Un montant saisi, sans les espaces des milliers : « 150 000 » → 150000. */
+const montant = (champ: HTMLElement): number =>
+  Number((champ as HTMLInputElement).value.replace(/\s/g, ''));
 
 /**
  * La carte (section) dont le titre de niveau 2 est `titre`. Le formulaire d'une offre et ses
@@ -61,7 +64,7 @@ describe('Simulateur de prêt — page', () => {
     expect(within(a).getByLabelText(/Taux nominal/)).toHaveValue('3.27');
     expect(within(a).getByText('taux du mois')).toBeInTheDocument();
     expect(within(b).getByLabelText(/Durée/)).toHaveValue('20');
-    expect(screen.getByLabelText(/Prix affiché/)).toHaveValue('150000');
+    expect(montant(screen.getByLabelText(/Prix affiché/))).toBe(150_000);
     expect(within(carte('Le projet financé')).getByText('estimé')).toBeInTheDocument();
     expect(screen.getByText('Les deux offres sont identiques.')).toBeInTheDocument();
     // Deux cartes de résultats : le montant emprunté y figure deux fois.
@@ -127,11 +130,11 @@ describe('Simulateur de prêt — page', () => {
     const utilisateur = await ouvrir();
     const projet = carte('Le projet financé');
     const frais = within(projet).getByLabelText(/Frais de notaire/);
-    const estimes = frais.getAttribute('value') ?? '';
+    const estimes = montant(frais);
     await utilisateur.clear(screen.getByLabelText(/Prix affiché/));
     await utilisateur.type(screen.getByLabelText(/Prix affiché/), '200000');
-    const suivis = frais.getAttribute('value') ?? '';
-    expect(Number(suivis)).toBeGreaterThan(Number(estimes));
+    const suivis = montant(frais);
+    expect(suivis).toBeGreaterThan(estimes);
 
     // « Vos revenus nets » est toujours « à toi » ; les frais modifiés le deviennent aussi.
     expect(within(projet).getAllByText('à toi')).toHaveLength(1);
@@ -140,15 +143,15 @@ describe('Simulateur de prêt — page', () => {
     expect(within(projet).getAllByText('à toi')).toHaveLength(2);
     expect(within(projet).queryByText('estimé')).not.toBeInTheDocument();
     await utilisateur.type(screen.getByLabelText(/Prix affiché/), '0');
-    expect(frais).toHaveValue('9000');
+    expect(montant(frais)).toBe(9000);
     await utilisateur.click(within(projet).getByRole('button', { name: 'Ré-estimer' }));
-    expect(Number(frais.getAttribute('value'))).toBeGreaterThan(Number(suivis));
+    expect(montant(frais)).toBeGreaterThan(suivis);
     expect(within(projet).getByText('estimé')).toBeInTheDocument();
     expect(within(projet).queryByRole('button', { name: 'Ré-estimer' })).not.toBeInTheDocument();
 
-    const avantDepartement = frais.getAttribute('value') ?? '';
+    const avantDepartement = montant(frais);
     await utilisateur.type(within(projet).getByLabelText(/Département/), '36');
-    expect(Number(frais.getAttribute('value'))).toBeLessThan(Number(avantDepartement));
+    expect(montant(frais)).toBeLessThan(avantDepartement);
   });
 
   it('rien à emprunter quand l’apport couvre tout ; usure et endettement signalés', async () => {
@@ -208,7 +211,7 @@ describe('Simulateur de prêt — page', () => {
     expect(
       screen.getByText('Lien illisible : simulation par défaut affichée.'),
     ).toBeInTheDocument();
-    expect(screen.getByLabelText(/Prix affiché/)).toHaveValue('150000');
+    expect(montant(screen.getByLabelText(/Prix affiché/))).toBe(150_000);
     await new Promise((resoudre) => setTimeout(resoudre, 400));
     expect(window.localStorage.getItem(CLE_SIMULATEUR)).toBeNull();
   });

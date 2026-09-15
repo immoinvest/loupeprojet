@@ -49,8 +49,8 @@ test('le rapport affiche le verdict, les cinq feux et les chiffres clés', async
   await expect(carte(page, "Combien d'impôts ?")).toContainText('Meublé au réel.');
 
   const revente = carte(page, "Qu'est-ce qu'il vous restera ?");
-  // 58 217 € avant impôt de plus-value, moins 418 € sur les amortissements réintégrés.
-  await expect(revente).toContainText(/60\s169\s€\s*dans 10 ans/);
+  // Prix de l'acte dans la plus-value et 3 000 € de valeur ajoutée par les travaux : 1 695 € d'impôt.
+  await expect(revente).toContainText(/59\s864\s€\s*dans 10 ans/);
   await expect(revente).toContainText('Multiple sur apport');
   await expect(revente).toContainText(/×\s0,8/);
 });

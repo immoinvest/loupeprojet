@@ -1,19 +1,11 @@
-import { useId, type JSX, type ReactNode } from 'react';
+import type { JSX, ReactNode } from 'react';
 
 import type { Provenance } from '@/annonces';
-import { Info } from '@/composants/info';
+import { EnveloppeChamp, type IdsChamp } from '@/composants/saisie/EnveloppeChamp';
 import { Pastille } from '@/composants/ui';
-import { texteDuTerme, type CodeTerme } from '@/textes/glossaire';
+import type { CodeTerme } from '@/textes/glossaire';
 
-/** Ce que l'enveloppe donne à sa commande pour la relier au libellé, à l'aide et à l'erreur. */
-export interface IdsChamp {
-  /** Id de la saisie, nommée par le `<label htmlFor>`. */
-  readonly id: string;
-  /** Id du libellé, pour nommer un groupe (tuiles, échelle) par `aria-labelledby`. */
-  readonly idLibelle: string;
-  readonly decritPar: string | undefined;
-  readonly invalide: boolean;
-}
+export type { IdsChamp };
 
 export interface ChampProps {
   readonly libelle: string;
@@ -62,55 +54,11 @@ function Badge({
 }
 
 /**
- * L'enveloppe d'un champ du formulaire Vérifier : libellé, icône ⓘ du terme, badge de provenance
- * (« annonce », « estimé » pour un défaut affiché, « à toi »), commande, erreur ou indication.
+ * Un champ du formulaire Vérifier : l'enveloppe commune avec le badge tiré de la provenance du formulaire
+ * (« annonce », « estimé » pour un défaut affiché, « à toi »).
  */
-export function Champ({
-  libelle,
-  provenance,
-  aToi = false,
-  erreur,
-  indication,
-  terme,
-  groupe = false,
-  large = false,
-  children,
-}: ChampProps): JSX.Element {
-  const id = useId();
-  const idLibelle = `${id}-libelle`;
-  const idAide = `${id}-aide`;
-  const aide = erreur ?? indication;
+export function Champ({ provenance, aToi = false, ...props }: ChampProps): JSX.Element {
   return (
-    <div
-      className={`flex min-w-0 flex-col gap-1 rounded-encart p-2 ${aToi ? 'bg-accent-fond' : ''} ${large ? 'col-span-full' : ''}`}
-    >
-      <span className="flex min-h-6 items-center justify-between gap-2 text-xs text-encre-3">
-        <span className="inline-flex items-center gap-1">
-          {groupe ? (
-            <span id={idLibelle}>{libelle}</span>
-          ) : (
-            <label id={idLibelle} htmlFor={id}>
-              {libelle}
-            </label>
-          )}
-          {terme !== undefined && <Info sujet={libelle} texte={texteDuTerme(terme)} />}
-        </span>
-        <Badge provenance={provenance} aToi={aToi} />
-      </span>
-      {children({
-        id,
-        idLibelle,
-        decritPar: aide === undefined ? undefined : idAide,
-        invalide: erreur !== undefined,
-      })}
-      {aide !== undefined && (
-        <span
-          id={idAide}
-          className={`text-xs ${erreur === undefined ? 'text-encre-3' : 'text-probleme'}`}
-        >
-          {aide}
-        </span>
-      )}
-    </div>
+    <EnveloppeChamp {...props} aToi={aToi} badge={<Badge provenance={provenance} aToi={aToi} />} />
   );
 }

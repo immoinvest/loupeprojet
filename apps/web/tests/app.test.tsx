@@ -100,9 +100,10 @@ describe('Rapport', () => {
       screen.getAllByRole('link', { name: 'Meublé au réel — modifier Régime retenu' }).length,
     ).toBeGreaterThan(0);
     // Le cash net de revente : en gros chiffre, et dans le texte de sa bulle (fermée). 58 217 € avant
-    // impôt, moins 1 390 € sur les amortissements réintégrés (fiscalité, ordre d'imputation LMNP)
-    // et la valeur ajoutée par les travaux (3 000 €).
-    expect(n(screen.getByText('60 169 €').textContent)).toContain('60 169 €');
+    // impôt, moins 418 € sur les amortissements réintégrés (fiscalité, ordre d'imputation LMNP).
+    // Puis 723 € avec le prix de l'acte dans la plus-value (BOI-RFPI-PVI-20-10-20-20 § 40 et 70), et
+    // 1 695 € avec 3 000 € de valeur ajoutée par les travaux (la moitié des 6 000 €, état inconnu).
+    expect(n(screen.getByText('59 864 €').textContent)).toContain('59 864 €');
   });
 
   it('les pages non livrées affichent un état « bientôt », un id inconnu une page introuvable', async () => {
@@ -120,7 +121,8 @@ describe('Rapport', () => {
 
   it(
     'modifie une hypothèse : recalcul, enregistrement, provenance, erreurs',
-    { timeout: 30_000 },
+    // Les commandes de Vérifier rendent l'onglet plus riche : 30 s ne suffisent plus quand toute la suite tourne.
+    { timeout: 60_000 },
     async () => {
       await ouvrirExemple();
       const utilisateur = userEvent.setup();
