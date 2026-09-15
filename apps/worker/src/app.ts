@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 
-import { creerAnalyseAdresse } from './adresse';
+import { creerAdressesDvf, creerAnalyseAdresse } from './adresse';
 import { origineAutorisee } from './cors';
 import type { Dependances } from './dependances';
 import { reponseErreur } from './erreurs';
@@ -11,7 +11,7 @@ import { creerLecture } from './lecture';
 import { creerMarche } from './marche';
 import { creerProxy } from './proxy/proxy';
 
-export const VERSION_WORKER = '0.11.0';
+export const VERSION_WORKER = '0.12.0';
 
 /** L'application Hono, construite à partir de dépendances injectées (réelles en production, doubles en test). */
 export function creerApp(deps: Dependances): Hono {
@@ -37,13 +37,22 @@ export function creerApp(deps: Dependances): Hono {
     }),
   );
 
-  app.use('/proxy/*', limiterDebit(deps.limiteur, deps.journal));
+  // Les suggestions d'adresse suivent la frappe : leur limite est à part, plus large.
+  app.use(
+    '/proxy/*',
+    limiterDebit(
+      (chemin) => (chemin === '/proxy/adresses' ? deps.limiteurSuggestions : deps.limiteur),
+      deps.journal,
+    ),
+  );
   app.get('/proxy/:service', creerProxy(deps));
 
   app.use('/marche', limiterDebit(deps.limiteur, deps.journal));
   app.get('/marche', creerMarche(deps));
   app.use('/marche/adresse', limiterDebit(deps.limiteur, deps.journal));
   app.get('/marche/adresse', creerAnalyseAdresse(deps));
+  app.use('/marche/adresses-dvf', limiterDebit(deps.limiteur, deps.journal));
+  app.get('/marche/adresses-dvf', creerAdressesDvf(deps));
 
   app.use('/extract', limiterDebit(deps.limiteurExtraction, deps.journal));
   app.post('/extract', creerExtraction(deps));

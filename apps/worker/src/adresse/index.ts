@@ -49,7 +49,23 @@ export {
   SOURCE_DVF,
   TTL_ADRESSE_SECONDES,
   TTL_CADASTRE_SECONDES,
+  ventesCommune,
+  type VentesCommune,
 } from './route';
+export {
+  filtrerAdresses,
+  lireRecherche,
+  normaliserTexte,
+  regrouperAdresses,
+  type AdresseDvf,
+  type RechercheAdresse,
+} from './adresses-dvf';
+export {
+  creerAdressesDvf,
+  LIMITE_ADRESSES_DVF,
+  ParametresAdressesDvfSchema,
+  TTL_ADRESSES_DVF_SECONDES,
+} from './route-adresses-dvf';
 export {
   coefficientPour,
   lireTendance,

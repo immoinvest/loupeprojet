@@ -2,6 +2,10 @@ import type { z } from 'zod';
 
 import {
   ErreurWorkerSchema,
+  ReponseAdressesDvfSchema,
+  ReponseSuggestionsSchema,
+  type AdresseDvf,
+  type SuggestionAdresse,
   ReponseCommunesSchema,
   ReponseAdresseSchema,
   ReponseDpeSchema,
@@ -61,6 +65,18 @@ export interface ClientWorker {
     recherche: RechercheCommunes,
     signal?: AbortSignal,
   ): Promise<Resultat<readonly Commune[]>>;
+  /** Adresses proposées pendant la frappe, près de `position` d'abord quand on la connaît. */
+  suggererAdresses(
+    texte: string,
+    position: Position | null,
+    signal?: AbortSignal,
+  ): Promise<Resultat<readonly SuggestionAdresse[]>>;
+  /** Adresses du cadastre de la commune (numéros fiscaux, résidences) qui répondent au texte. */
+  adressesDvf(
+    codeInsee: string,
+    texte: string,
+    signal?: AbortSignal,
+  ): Promise<Resultat<readonly AdresseDvf[]>>;
   /** La page d'une annonce, lue par le Worker ; `signal` permet d'abandonner l'attente. */
   lirePage(url: string, signal?: AbortSignal): Promise<Resultat<PageLue>>;
 }
@@ -74,6 +90,11 @@ export type Fetch = (url: string, init: RequestInit) => Promise<Response>;
  */
 export const CONTRAT_MARCHE = 2;
 export const CONTRAT_ADRESSE = 6;
+/** Version de la liste des adresses du cadastre (`VERSION_LISTE` de `apps/worker/src/adresse/route-adresses-dvf.ts`). */
+export const CONTRAT_ADRESSES_DVF = 1;
+/** Suggestions pendant la frappe : court, une autre frappe suit. */
+export const DELAI_SUGGESTIONS_MS = 6_000;
+export const LIMITE_SUGGESTIONS = 6;
 
 export const URL_WORKER_DEFAUT = 'https://loupe-worker.erreip-gorguel.workers.dev';
 /** Le modèle a 25 s côté Worker : on lui laisse un peu de marge. */
@@ -238,6 +259,38 @@ export function clientWorker(base: string, fetcher: Fetch): ClientWorker {
       );
       return r.ok ? { ok: true, valeur: r.valeur.donnees.communes } : r;
     },
+    async suggererAdresses(texte, lieu, signal) {
+      const q = new URLSearchParams({ q: texte, limit: String(LIMITE_SUGGESTIONS) });
+      if (lieu !== null) {
+        q.set('lat', String(lieu.lat));
+        q.set('lon', String(lieu.lon));
+      }
+      const r = await appeler(
+        fetcher,
+        `${base}/proxy/adresses?${q.toString()}`,
+        { method: 'GET' },
+        ReponseSuggestionsSchema,
+        DELAI_SUGGESTIONS_MS,
+        signal,
+      );
+      return r.ok ? { ok: true, valeur: r.valeur.donnees.suggestions } : r;
+    },
+    async adressesDvf(codeInsee, texte, signal) {
+      const q = new URLSearchParams({
+        codeInsee,
+        texte,
+        contrat: String(CONTRAT_ADRESSES_DVF),
+      });
+      const r = await appeler(
+        fetcher,
+        `${base}/marche/adresses-dvf?${q.toString()}`,
+        { method: 'GET' },
+        ReponseAdressesDvfSchema,
+        DELAI_SUGGESTIONS_MS,
+        signal,
+      );
+      return r.ok ? { ok: true, valeur: r.valeur.adresses } : r;
+    },
     lirePage(url, signal) {
       return appeler(
         fetcher,
@@ -266,5 +319,7 @@ export const clientHorsLigne: ClientWorker = {
   dpe: () => horsLigne(),
   risques: () => horsLigne(),
   communes: () => horsLigne(),
+  suggererAdresses: () => horsLigne(),
+  adressesDvf: () => horsLigne(),
   lirePage: () => horsLigne(),
 };
