@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 
-import { creerAnalyseAdresse } from './adresse';
+import { creerAdressesDvf, creerAnalyseAdresse } from './adresse';
 import { origineAutorisee } from './cors';
 import type { Dependances } from './dependances';
 import { reponseErreur } from './erreurs';
@@ -44,6 +44,8 @@ export function creerApp(deps: Dependances): Hono {
   app.get('/marche', creerMarche(deps));
   app.use('/marche/adresse', limiterDebit(deps.limiteur, deps.journal));
   app.get('/marche/adresse', creerAnalyseAdresse(deps));
+  app.use('/marche/adresses-dvf', limiterDebit(deps.limiteur, deps.journal));
+  app.get('/marche/adresses-dvf', creerAdressesDvf(deps));
 
   app.use('/extract', limiterDebit(deps.limiteurExtraction, deps.journal));
   app.post('/extract', creerExtraction(deps));
