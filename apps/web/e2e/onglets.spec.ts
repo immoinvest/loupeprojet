@@ -11,7 +11,7 @@ test('fiscalité : « Retenir ce régime » change le régime retenu et le rappo
   const reel = carte(page, 'Meublé au réel');
   const microBic = carte(page, 'Meublé micro-BIC');
   await expect(reel.getByText('retenu', { exact: true })).toBeVisible();
-  await expect(microBic).toContainText(/26\s928\s€\s*d'impôt sur 10 ans/);
+  await expect(microBic).toContainText(/26\s928\s€\s*d'impôt au total/);
   await expect(page.getByRole('button', { name: 'Retenir ce régime' })).toHaveCount(3);
 
   await microBic.getByRole('button', { name: 'Retenir ce régime' }).click();
@@ -25,12 +25,44 @@ test('fiscalité : « Retenir ce régime » change le régime retenu et le rappo
       name: 'Quand commencez-vous à payer, en meublé micro-BIC ?',
     }),
   ).toBeVisible();
-  await expect(page.getByRole('img', { name: '10 années imposées sur 10' })).toBeVisible();
+  await expect(
+    page.getByRole('img', { name: '10 années imposées sur 10, sans impôt à la revente' }),
+  ).toBeVisible();
   await expect(page.getByText(/Premier impôt l'année 1\./)).toBeVisible();
 
   await ouvrirVolet(page, 'Rapport', /Le prix est bon\./);
   await expect(carte(page, "Combien d'impôts ?")).toContainText(/26\s928\s€\s*sur 10 ans/);
   await expect(carte(page, "Combien d'impôts ?")).toContainText('Meublé micro-BIC.');
+});
+
+test('fiscalité : l’impôt à la revente suit l’horizon choisi dans l’onglet Revente', async ({
+  page,
+}) => {
+  await ouvrirExemple(page);
+  await ouvrirVolet(page, 'Fiscalité', /Combien d'impôts, selon le régime/);
+
+  // Deuxième ligne de la carte : « À la revente ». À 10 ans, pas encore de plus-value imposable.
+  const reel = carte(page, 'Meublé au réel');
+  const aLaRevente = reel.getByRole('definition').nth(1);
+  await expect(aLaRevente).toHaveText(/^0\s€$/);
+  await expect(carte(page, 'La revente selon le régime').getByRole('table')).toBeVisible();
+
+  await page.getByRole('link', { name: "Changer l'horizon" }).click();
+  await expect(
+    page.getByRole('heading', { level: 1, name: "Qu'est-ce qu'il vous restera ?" }),
+  ).toBeVisible();
+  await page.getByRole('slider', { name: 'Revente dans' }).fill('20');
+  await expect(page.getByRole('heading', { level: 2, name: 'Revente dans 20 ans' })).toBeVisible();
+
+  // À 20 ans, 42 598 € d'amortissements réintégrés : 7 759 € d'impôt à la revente au réel,
+  // dont 6 323 € de plus que le micro-BIC (1 436 €).
+  await ouvrirVolet(page, 'Fiscalité', /Combien d'impôts, selon le régime/);
+  await expect(page.getByText(/à la revente dans\s*20 ans/)).toBeVisible();
+  await expect(aLaRevente).toHaveText(/^7\s759\s€$/);
+  await expect(reel).toContainText(/dont\s6\s323\s€\sdus aux amortissements réintégrés/);
+  await expect(carte(page, 'Meublé micro-BIC').getByRole('definition').nth(1)).toHaveText(
+    /^1\s436\s€$/,
+  );
 });
 
 test('revente : le curseur, le clavier et les repères changent l’horizon', async ({ page }) => {

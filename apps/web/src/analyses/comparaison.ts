@@ -24,6 +24,7 @@ export type CodeIndicateur =
   | 'net'
   | 'couverture'
   | 'impot'
+  | 'impotGlobal'
   | 'horizon'
   | 'cashNet'
   | 'tri'
@@ -139,6 +140,16 @@ export const INDICATEURS: readonly Indicateur[] = [
     sens: 'bas',
     meilleur: true,
     extraire: (r) => (r.complet ? r.fiscalite.regimes[r.fiscalite.retenu].impotTotal : null),
+    formater: euros,
+    detail: (r) =>
+      `${REGIMES[r.projet.hypotheses.fiscalite.regime]} · ${String(r.projet.hypotheses.revente.annees)} ans`,
+  },
+  {
+    code: 'impotGlobal',
+    libelle: 'Impôt total (exploitation + revente)',
+    sens: 'bas',
+    meilleur: true,
+    extraire: (r) => (r.complet ? r.fiscalite.regimes[r.fiscalite.retenu].impotGlobal : null),
     formater: euros,
     detail: (r) =>
       `${REGIMES[r.projet.hypotheses.fiscalite.regime]} · ${String(r.projet.hypotheses.revente.annees)} ans`,

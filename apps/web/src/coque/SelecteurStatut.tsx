@@ -1,7 +1,9 @@
 import { ChevronDown } from 'lucide-react';
 import type { JSX } from 'react';
 
-import { STATUTS, StatutProjetSchema, type StatutProjet } from '@/stockage/projets';
+import { MenuChoix, type GroupeChoix } from '@/composants/MenuChoix';
+import { STATUTS, type StatutProjet } from '@/stockage/projets';
+import { ORDRE_STATUTS, PRECISIONS_STATUT, TEXTES_STATUT } from '@/textes/statut';
 
 /** Chaque statut a sa couleur : on voit d'un coup d'œil où en est le projet. */
 const COULEURS: Readonly<Record<StatutProjet, { pastille: string; point: string }>> = {
@@ -16,7 +18,28 @@ const COULEURS: Readonly<Record<StatutProjet, { pastille: string; point: string 
   scenario: { pastille: 'border-bordure bg-surface text-encre-2', point: 'bg-encre-3' },
 };
 
-/** Le statut du projet, en pastille colorée : une liste native, lisible au clavier et au doigt. */
+const GROUPES: readonly GroupeChoix<StatutProjet>[] = ORDRE_STATUTS.map((groupe) => ({
+  nom: groupe.nom,
+  options: groupe.statuts.map((s) => ({
+    valeur: s,
+    libelle: STATUTS[s],
+    precision: PRECISIONS_STATUT[s],
+  })),
+}));
+
+function PointStatut({ statut }: { statut: StatutProjet }): JSX.Element {
+  return (
+    <span
+      aria-hidden="true"
+      className={`size-2.5 shrink-0 rounded-full ${COULEURS[statut].point}`}
+    />
+  );
+}
+
+/**
+ * Le statut du projet, en pastille colorée ; la liste ouverte suit l'ordre du parcours (En analyse →
+ * Acheté), puis Scénario et Écarté à part. À l'impression, la pastille seule, sans chevron.
+ */
 export function SelecteurStatut({
   statut,
   onChange,
@@ -24,34 +47,16 @@ export function SelecteurStatut({
   statut: StatutProjet;
   onChange: (statut: StatutProjet) => void;
 }): JSX.Element {
-  const couleur = COULEURS[statut];
   return (
-    <label
-      className={`relative inline-flex min-h-[44px] items-center rounded-full border font-semibold survol-pastille ${couleur.pastille}`}
-    >
-      <span className="sr-only">Statut du projet</span>
-      <span
-        aria-hidden="true"
-        className={`pointer-events-none absolute left-3.5 size-2.5 rounded-full ${couleur.point}`}
-      />
-      <select
-        value={statut}
-        onChange={(e) => {
-          onChange(StatutProjetSchema.parse(e.target.value));
-        }}
-        className="min-h-[44px] cursor-pointer appearance-none rounded-full bg-transparent pr-9 pl-8 text-sm font-bold outline-none pointer-coarse:text-base"
-      >
-        {StatutProjetSchema.options.map((s) => (
-          <option key={s} value={s}>
-            {STATUTS[s]}
-          </option>
-        ))}
-      </select>
-      <ChevronDown
-        size={16}
-        aria-hidden="true"
-        className="pointer-events-none absolute right-3 shrink-0"
-      />
-    </label>
+    <MenuChoix
+      libelle={TEXTES_STATUT.libelle}
+      valeur={statut}
+      groupes={GROUPES}
+      onChoix={onChange}
+      classeBouton={`inline-flex min-h-[44px] items-center gap-2 rounded-full border pr-3 pl-3.5 text-sm font-bold survol-pastille pointer-coarse:text-base ${COULEURS[statut].pastille}`}
+      avantValeur={<PointStatut statut={statut} />}
+      apresValeur={<ChevronDown size={16} aria-hidden="true" className="shrink-0 print:hidden" />}
+      decorOption={(s) => <PointStatut statut={s} />}
+    />
   );
 }

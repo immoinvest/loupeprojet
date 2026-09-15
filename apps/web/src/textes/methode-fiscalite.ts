@@ -187,6 +187,7 @@ export function sectionRevente(regles: Regles, defauts: Defauts): SectionMethode
       `Prix d'acquisition majoré = prix + max(frais réels, ${pct(pv.forfaitFrais)}) + max(travaux réels, ${pct(pv.forfaitTravaux)} à partir de ${String(pv.forfaitTravauxDesAnnee)} ans de détention) − amortissements du bâti déduits en LMNP réel.`,
       `Abattements pour durée de détention : impôt sur le revenu ${abattementsIr} ; prélèvements sociaux ${abattementsPs}.`,
       `Impôt = base IR × ${pct(pv.tauxIr)} + base PS × ${pct(ps.plusValue)} + surtaxe (${surtaxe}) quand la base dépasse ${euros(pv.surtaxeSeuil)}.`,
+      "Impôt total d'un régime (onglet Fiscalité) = impôt pendant la location + impôt sur la plus-value calculé pour ce régime : seul le meublé au réel réintègre ses amortissements, ce qui peut effacer l'avantage gagné pendant la location.",
     ],
     constantes: [
       {

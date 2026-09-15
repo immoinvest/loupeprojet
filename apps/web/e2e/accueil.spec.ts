@@ -4,7 +4,7 @@ import { NOM_EXEMPLE, ouvrirNavigation } from './aides';
 
 /*
  * L'accueil : la racine du site, rejointe par le logo ; sans compte, un bloc Analyser et un bloc Gérer.
- * Depuis l'accueil, « Tous mes projets » mène à la liste, qui garde Comparer.
+ * Depuis le menu, « Mes projets » mène à la liste, qui garde Comparer.
  */
 
 test('le logo mène à l’accueil ; ses deux blocs lancent l’analyse et la liste des projets', async ({
@@ -22,7 +22,7 @@ test('le logo mène à l’accueil ; ses deux blocs lancent l’analyse et la li
   const navigation = await ouvrirNavigation(page);
   await expect(navigation.getByRole('link', { name: NOM_EXEMPLE })).toBeVisible();
   await expect(navigation.getByRole('link', { name: 'Comparer' })).toHaveCount(0);
-  await navigation.getByRole('link', { name: 'Tous mes projets · 1' }).click();
+  await navigation.getByRole('link', { name: 'Mes projets · 1' }).click();
   await expect(page.getByRole('heading', { level: 1, name: 'Mes projets' })).toBeVisible();
   await contenu.getByRole('button', { name: 'Comparer' }).click();
   await expect(page.getByRole('heading', { level: 1, name: 'Comparer' })).toBeVisible();

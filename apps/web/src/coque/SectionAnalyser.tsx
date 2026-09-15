@@ -1,14 +1,14 @@
 import { calculerProjet } from '@loupe/moteur';
-import { List, Plus } from 'lucide-react';
 import type { JSX } from 'react';
 import { NavLink } from 'react-router';
 
 import { Point } from '@/composants/ui';
 import { useProjets } from '@/stockage/ProjetsContext';
 import type { ProjetEnregistre } from '@/stockage/projets';
-import { PROJETS_DANS_LE_MENU, TEXTES_MENU, tousMesProjets } from '@/textes/gerer';
+import { mesProjets, PROJETS_DANS_LE_MENU, TEXTES_MENU } from '@/textes/gerer';
 
-import { CLASSE_ETIQUETTE, classeLien, classeLienCreation } from './liens';
+import { LigneAvecAjout } from './LigneAvecAjout';
+import { CLASSE_ETIQUETTE, classeLien } from './liens';
 
 function feuCashflow(p: ProjetEnregistre): 'bon' | 'surveiller' | 'probleme' | 'inconnu' {
   return (
@@ -19,8 +19,8 @@ function feuCashflow(p: ProjetEnregistre): 'bon' | 'surveiller' | 'probleme' | '
 }
 
 /**
- * Section « Analyser » : nouveau projet, les trois projets les plus récents, puis « Tous mes
- * projets », toujours affiché (Comparer est dans cette page).
+ * Section « Analyser » : « Mes projets · N » et son « + » sur une ligne (la liste garde Comparer),
+ * puis les trois projets les plus récents.
  */
 export function SectionAnalyser(): JSX.Element {
   const { projets } = useProjets();
@@ -29,20 +29,18 @@ export function SectionAnalyser(): JSX.Element {
   return (
     <nav aria-label={TEXTES_MENU.analyser} className="flex flex-col gap-1">
       <div className={CLASSE_ETIQUETTE}>{TEXTES_MENU.analyser}</div>
-      <NavLink to="/projets/nouveau" className={classeLienCreation}>
-        <Plus size={18} strokeWidth={2.4} aria-hidden="true" />
-        {TEXTES_MENU.nouveauProjet}
-      </NavLink>
+      <LigneAvecAjout
+        vers="/projets"
+        libelle={mesProjets(projets.length)}
+        versAjout="/projets/nouveau"
+        libelleAjout={TEXTES_MENU.nouveauProjet}
+      />
       {recents.map((p) => (
         <NavLink key={p.id} to={`/projets/${p.id}`} className={classeLien}>
           <span className="flex-1 truncate">{p.nom}</span>
           <Point feu={feuCashflow(p)} />
         </NavLink>
       ))}
-      <NavLink to="/projets" end className={classeLien}>
-        <List size={18} className="shrink-0" aria-hidden="true" />
-        <span className="flex-1 truncate">{tousMesProjets(projets.length)}</span>
-      </NavLink>
     </nav>
   );
 }

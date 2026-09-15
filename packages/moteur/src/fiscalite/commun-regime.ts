@@ -3,7 +3,7 @@ import type {
   AnneeFiscale,
   ContexteFiscal,
   MotifIneligibilite,
-  ResultatRegime,
+  ProjectionRegime,
   StocksFiscaux,
 } from './types';
 
@@ -63,7 +63,7 @@ export function finaliserRegime(
   ctx: ContexteFiscal,
   annees: readonly AnneeFiscale[],
   options: OptionsFinalisation,
-): ResultatRegime {
+): ProjectionRegime {
   return {
     regime,
     mode: ctx.cashflow.recettes.mode,

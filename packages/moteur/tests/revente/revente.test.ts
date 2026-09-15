@@ -165,7 +165,7 @@ describe('calculerRevente — T3 Marseille', () => {
     };
     const p = parserComplet(enMicro);
     const f = calculerFiscalite(p, calculerFinancement(p, regles), regles);
-    expect(amortissementsAReintegrer(f)).toBe(0);
+    expect(amortissementsAReintegrer(f.regimes[f.retenu])).toBe(0);
     expect(
       calculerRevente(p, calculerFinancement(p, regles), f, regles).plusValue.reintegration,
     ).toBe(0);
