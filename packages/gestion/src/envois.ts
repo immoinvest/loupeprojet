@@ -87,22 +87,20 @@ export interface LocataireJoignable {
   readonly email?: string | undefined;
 }
 
-export interface Destinataire {
-  readonly locataireId: string;
-  readonly email: string;
-}
-
-/** Les locataires du bail (en titre puis colocataires) qui ont un e-mail et un accord valide. */
-export function destinatairesQuittance(
+/**
+ * Les locataires du bail (en titre puis colocataires) qui ont un e-mail et un accord valide, tels
+ * qu'ils ont été passés, l'e-mail garanti.
+ */
+export function destinatairesQuittance<T extends LocataireJoignable>(
   location: { readonly locataireId: string; readonly colocataireIds: readonly string[] },
-  locataires: readonly LocataireJoignable[],
+  locataires: readonly T[],
   statuts: ReadonlyMap<string, StatutAccordEffectif>,
-): Destinataire[] {
+): (T & { readonly email: string })[] {
   return [location.locataireId, ...location.colocataireIds].flatMap((id) => {
     const locataire = locataires.find((l) => l.id === id);
     const statut = statuts.get(id) ?? 'non_demande';
     if (locataire?.email === undefined || !accordValide(statut)) return [];
-    return [{ locataireId: id, email: locataire.email }];
+    return [{ ...locataire, email: locataire.email }];
   });
 }
 

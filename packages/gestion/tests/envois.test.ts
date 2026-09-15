@@ -82,8 +82,8 @@ describe('destinataires d’une quittance', () => {
         statuts,
       ),
     ).toEqual([
-      { locataireId: 'julie', email: 'julie@exemple.fr' },
-      { locataireId: 'lea', email: 'lea@exemple.fr' },
+      { id: 'julie', email: 'julie@exemple.fr' },
+      { id: 'lea', email: 'lea@exemple.fr' },
     ]);
   });
 });

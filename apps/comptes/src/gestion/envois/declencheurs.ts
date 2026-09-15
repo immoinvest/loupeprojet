@@ -10,8 +10,8 @@ import { envoyerQuittanceDuMois } from './quittances';
 import { inviterLocataires, type ContexteEnvois } from './taches';
 
 const AvecId = z.object({ id: z.string().min(1) });
-const CreationLue = z.object({ locataire: AvecId.nullable(), colocataires: z.array(AvecId) });
-const OccupationLue = z.object({ locataire: AvecId, colocataires: z.array(AvecId) });
+/** La réponse de `POST /locations` (locataire éventuel) et de `POST /biens/:id/locations` (locataire). */
+const LocationCreeeLue = z.object({ locataire: AvecId.nullable(), colocataires: z.array(AvecId) });
 const PaiementLu = z.object({ locationId: z.string().min(1), periode: z.string().min(1) });
 
 type Tache = () => Promise<void>;
@@ -37,8 +37,8 @@ async function tacheApres(c: Context<EnvGestion>, deps: Dependances): Promise<Ta
       : () => envoyerQuittanceDuMois(ctx, paiement.locationId, paiement.periode);
   }
   if (/^POST \/api\/gestion\/(locations|biens\/[^/]+\/locations)$/.test(route)) {
-    const creee = (await reponseLue(c, OccupationLue)) ?? (await reponseLue(c, CreationLue));
-    if (creee?.locataire === undefined || creee.locataire === null) return null;
+    const creee = await reponseLue(c, LocationCreeeLue);
+    if (creee?.locataire == null) return null;
     const ids = [creee.locataire.id, ...creee.colocataires.map((l) => l.id)];
     return () => inviterLocataires(ctx, ids);
   }

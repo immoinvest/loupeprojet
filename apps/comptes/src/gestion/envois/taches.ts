@@ -63,8 +63,6 @@ function versAccordLocataire(locataireId: string, { statut, accord }: Statut): A
   };
 }
 
-const statutVide: Statut = { statut: 'sans_email', accord: undefined };
-
 /** `GET /api/gestion/envois` : tout ce que les écrans de Gérer montrent de ce module. */
 export async function etatEnvois({ deps, userId }: ContexteEnvois): Promise<EtatEnvois> {
   const [locataires, accords, envois, contacts, bailleursBiens] = await Promise.all([
@@ -74,11 +72,12 @@ export async function etatEnvois({ deps, userId }: ContexteEnvois): Promise<Etat
     deps.envois.contacts(userId),
     deps.envois.bailleursBiens(userId),
   ]);
-  const statuts = await Promise.all(locataires.map((l) => statutDe(l, accords)));
   return {
     mode: modeEnvoi(deps),
     invitations: deps.courriel !== null && deps.jetons !== null,
-    accords: locataires.map((l, rang) => versAccordLocataire(l.id, statuts[rang] ?? statutVide)),
+    accords: await Promise.all(
+      locataires.map(async (l) => versAccordLocataire(l.id, await statutDe(l, accords))),
+    ),
     envois,
     contacts,
     bailleursBiens,

@@ -3,7 +3,6 @@ import {
   masquerEmail,
   REGLES_ENVOIS,
   renvoiPossible,
-  type Destinataire,
   type DocumentComplet,
   type Envoi,
   type StatutAccordEffectif,
@@ -13,12 +12,12 @@ import type { Envoyeur, Message } from '../../courriel';
 import { messageQuittance, nomFichierQuittance } from '../../courriels/gabarits';
 import { pdfDocument } from '../../courriels/pdf-quittance';
 import { ErreurGestion } from '../depot';
-import { ErreurEnvois } from './depot';
+import { ErreurEnvois, type LocataireContact } from './depot';
 import { envoyerAvecTentative, horodatage, statutDe, type ContexteEnvois } from './taches';
 
 /** La quittance envoyée par e-mail (G2-2) : au paiement qui solde le mois, et « Renvoyer ». */
 
-type DestinataireNomme = Destinataire & { readonly prenom: string };
+type DestinataireNomme = LocataireContact & { readonly email: string };
 
 async function destinatairesValides(
   { deps, userId }: ContexteEnvois,
@@ -31,10 +30,7 @@ async function destinatairesValides(
   for (const locataire of lieu.locataires) {
     statuts.set(locataire.id, (await statutDe(locataire, accords)).statut);
   }
-  return destinatairesQuittance(lieu.location, lieu.locataires, statuts).map((d) => ({
-    ...d,
-    prenom: lieu.locataires.find((l) => l.id === d.locataireId)?.prenom ?? '',
-  }));
+  return destinatairesQuittance(lieu.location, lieu.locataires, statuts);
 }
 
 async function envoyerQuittance(
@@ -59,7 +55,7 @@ async function envoyerQuittance(
   const resultat = await envoyerAvecTentative(deps, courriel, message, 'quittance');
   await deps.envois.enregistrerEnvoi(userId, {
     documentId: document.id,
-    locataireId: destinataire.locataireId,
+    locataireId: destinataire.id,
     destinataire: masquerEmail(destinataire.email),
     statut: resultat.ok ? 'envoye' : 'echec',
     tentatives: resultat.tentatives,
@@ -100,7 +96,7 @@ export async function envoyerQuittanceDuMois(
   const traces = await deps.envois.envoisDuDocument(userId, document.id);
   for (const destinataire of destinataires) {
     const dejaEnvoye = traces.some(
-      (t) => t.locataireId === destinataire.locataireId && t.statut === 'envoye',
+      (t) => t.locataireId === destinataire.id && t.statut === 'envoye',
     );
     if (!dejaEnvoye) await envoyerQuittance(ctx, courriel, document, destinataire);
   }
