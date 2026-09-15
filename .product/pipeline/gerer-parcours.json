@@ -28,18 +28,32 @@
       "output": ".product/architecture/gerer-parcours.md"
     },
     "implement": {
-      "status": "in_progress",
-      "stories_completed": 2,
+      "status": "completed",
+      "stories_completed": 5,
       "stories_total": 5,
       "commits": [
         "df9a64cf docs : discovery, specs, architecture",
         "fdd6aab1 US-1 fiche d'un locataire, noms en liens, fil d'Ariane",
-        "41782470 US-2 formulaire unique Nouveau locataire, retour à l'origine"
+        "41782470 US-2 formulaire unique Nouveau locataire, retour à l'origine",
+        "baec9453 US-3 raccourcis : retour des quittances, mois de la frise, montant d'un loyer",
+        "db86feeb docs communes (CLAUDE.md, README, specs, registre)",
+        "dbcea373 US-4 « À faire » en haut des loyers du mois",
+        "bce9d113 US-5 écrans de référence et parcours Playwright",
+        "315409cb fusion de master (PR #96 compte-appareils, #98 rapport-espaces) : conflit du registre résolu en gardant les trois entrées"
+      ],
+      "ecarts": [
+        "choix du bien dans gestion/saisie-nouveau-locataire.ts plutôt que saisie-louer.ts",
+        "précision d'une ligne de « À faire » en small : un span dans un li se confondait avec la ligne du loyer du même bien",
+        "focus de l'e-mail par useLayoutEffect : le formulaire ouvert par ?modifier=1 apparaît après le chargement des données"
       ],
       "notes": "machine chargée (autre session Vitest, CPU 100 %) : tests d'écran lancés fichier par fichier sur un seul processus ; délais de 10 s ajoutés aux premiers rendus des tests Fiche et Loyers ; vrai défaut trouvé par les tests : nom accessible du lien « Louer » de Mes biens (espace perdue avant le sr-only)"
     },
     "qa_tests": { "status": "pending" },
-    "security": { "status": "pending" },
+    "security": {
+      "status": "completed",
+      "score": "98/100",
+      "notes": "web seul ; retour validé (redirections ouvertes testées), identifiants encodés, aucun HTML injecté, paramètres limités aux données du compte, écriture existante de G1b réutilisée ; restes bénins : retour vers n'importe quelle page de Gérer, message réaffiché en revenant dans l'historique"
+    },
     "push": { "status": "pending" }
   },
   "auto_revue": {

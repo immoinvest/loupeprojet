@@ -120,6 +120,24 @@ Un commit par story ; `master` fusionnée avant la QA et juste avant la PR.
 - **Textes de « À faire »** dans `textes/gerer-a-faire.ts` ; `cleAction` dans `gestion/a-faire.ts`.
 - **Montant d'un loyer** : le nom accessible vient de `textes/gerer-parcours.ts` (`modifierLaLocation`).
 
+## Audit de sécurité (G1d)
+
+Périmètre : écrans et modules web de la feature (32 fichiers de `apps/web/src`). Aucune route d'API, aucune écriture nouvelle, aucune donnée nouvelle.
+
+- **Redirection ouverte** : les trois navigations vers une valeur venue de l'adresse passent par `retourValide` (`NouveauLocataire`, `ImprimerDocument` par `destinationRetour`) ou sont construites depuis des identifiants de l'état (`FicheBien`, `useActionsLoyer`). Refusés et testés : `https://…`, `//…`, `/\…`, `/gerer//…`, `/gererx`, `/projets`, `/gerer/../projets`, `javascript:`, caractères de contrôle, plus de 300 caractères. Constat : OK.
+- **Injection dans les adresses** : identifiants encodés par `encodeURIComponent`, paramètres par `URLSearchParams` ; un segment mal encodé (`%E0`) retombe sur le retour par défaut. Constat : OK.
+- **XSS** : aucun `dangerouslySetInnerHTML`, `innerHTML`, `eval` ; noms, biens et libellés rendus en texte par React ; noms accessibles passés en attribut. Constat : OK.
+- **Accès aux données** : `?bien=`, `?modifier=`, `?mois=` ne font que choisir parmi les données du compte déjà chargées ; un identifiant inconnu ne fait rien (testé). Constat : OK.
+- **Écritures** : « Nouveau locataire » réutilise `POST /api/gestion/biens/:id/locations` de G1b (session, `Origin` exigé, Zod, 404 hors compte), inchangé. Constat : OK.
+- **Message après création** : lu dans l'état de navigation, qu'un lien extérieur ne peut pas poser ; affiché en texte. Constat : OK.
+
+Restes bénins, documentés :
+
+- `retour` accepte toute page de Gérer, y compris un document ou « Nouveau locataire » lui-même : la navigation reste dans l'application, sans effet.
+- Le message « … loue … » reste dans l'historique : revenir en arrière sur la page d'origine le réaffiche, comme « … a été supprimé » de G1c.
+
+Score : 98/100.
+
 ## Auto-revue (checkpoint validé par Claude, sur autorisation de Pierre)
 
 - **Un module d'adresses (G19)** : sans lui, cinq écrans construiraient `retour` à la main ; la validation serait contournable par un seul oubli.
