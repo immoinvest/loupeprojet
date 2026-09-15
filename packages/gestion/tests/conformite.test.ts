@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   alertesConformite,
+  classeDpeDuProjet,
   dateInterdiction,
   estOutreMer,
   estUrgente,
@@ -20,6 +21,16 @@ function entrees(surcharges: Partial<EntreesConformite> = {}): EntreesConformite
     ...surcharges,
   };
 }
+
+describe('classeDpeDuProjet', () => {
+  it('la classe de l’analyse, sinon rien (instantané absent, sans bien, abîmé)', () => {
+    expect(classeDpeDuProjet({ bien: { dpe: 'E', surface: 38 } })).toBe('E');
+    expect(classeDpeDuProjet(undefined)).toBeNull();
+    expect(classeDpeDuProjet({})).toBeNull();
+    expect(classeDpeDuProjet({ bien: null })).toBeNull();
+    expect(classeDpeDuProjet({ bien: { dpe: 'H' } })).toBeNull();
+  });
+});
 
 describe('validité du DPE', () => {
   it('2013-2017 : jusqu’au 31/12/2022 ; 2018 à juin 2021 : jusqu’au 31/12/2024 ; sinon dix ans', () => {

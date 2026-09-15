@@ -1,4 +1,4 @@
-import { ajouterAnnees } from './bail';
+import { ajouterAnnees, ClasseDpeSchema } from './bail';
 import { ajouterJours } from './dates';
 import {
   CLASSES_DPE,
@@ -33,6 +33,19 @@ export type AlerteConformite =
       readonly forme: Exclude<FormeBail, 'classique'>;
       readonly fin: string;
     };
+
+/**
+ * La classe DPE de l'instantané du projet d'analyse (`projet.bien.dpe`), reprise tant que le bailleur
+ * n'a rien enregistré (ADR-G28) ; `null` si l'instantané n'en a pas ou s'il est abîmé.
+ */
+export function classeDpeDuProjet(
+  projet: Readonly<Record<string, unknown>> | undefined,
+): ClasseDpe | null {
+  const bien = projet?.bien;
+  if (typeof bien !== 'object' || bien === null) return null;
+  const lu = ClasseDpeSchema.safeParse((bien as Record<string, unknown>).dpe);
+  return lu.success ? lu.data : null;
+}
 
 /** Le dernier jour de validité d'un DPE réalisé ce jour-là. */
 export function finValiditeDpe(date: string): string {

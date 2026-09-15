@@ -119,6 +119,7 @@ describe('migration 0002 : gestion locative', () => {
       '0004_projets.sql',
       '0005_gestion_changements.sql',
       '0006_partage.sql',
+      '0008_gestion_bail.sql',
     ]);
   });
 
@@ -220,13 +221,16 @@ describe('migration 0003 : paiements partiels, bailleur, documents', () => {
     appliquerMigrations(base);
     expect(noms(base, 'table')).toEqual([
       'account',
+      'gestion_bail_lettre',
       'gestion_bailleur',
       'gestion_bien',
+      'gestion_bien_legal',
       'gestion_changement',
       'gestion_colocataire',
       'gestion_document',
       'gestion_locataire',
       'gestion_location',
+      'gestion_location_revision',
       'gestion_paiement',
       'gestion_preference',
       'partage',
@@ -237,12 +241,15 @@ describe('migration 0003 : paiements partiels, bailleur, documents', () => {
     ]);
     expect(noms(base, 'index')).toEqual([
       'account_userId_idx',
+      'gestion_bail_lettre_locationId_idx',
+      'gestion_bien_legal_userId_idx',
       'gestion_bien_userId_idx',
       'gestion_changement_userId_idx',
       'gestion_colocataire_userId_idx',
       'gestion_document_userId_idx',
       'gestion_locataire_userId_idx',
       'gestion_location_bienId_idx',
+      'gestion_location_revision_userId_idx',
       'gestion_location_userId_idx',
       'gestion_paiement_location_periode_idx',
       'gestion_paiement_userId_idx',

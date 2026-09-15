@@ -17,6 +17,7 @@ import type { Auth } from '../auth';
 import type { Dependances } from '../dependances';
 import { messageDe, reponseErreur } from '../erreurs';
 import { acces, type EnvGestion } from './acces';
+import { routeurBail } from './bail/routes';
 import { ErreurGestion, estTableAbsente } from './depot';
 
 /** Un corps de requête plus gros est refusé avant d'être lu (l'instantané d'un projet pèse quelques Ko). */
@@ -144,6 +145,9 @@ export function routeurGestion(
     c.header('Content-Disposition', `attachment; filename="deklic-gestion-${jour}.json"`);
     return c.json(exporte);
   });
+
+  // Vie du bail (B1) : DPE, révision, lettres, dans leurs propres tables (migration 0008).
+  app.route('/bail', routeurBail(deps));
 
   app.onError((erreur, c) => {
     if (erreur instanceof ErreurGestion) {
