@@ -28,7 +28,6 @@ export const TEXTES_GERER = {
   recu: 'Reçu',
   annuler: 'Annuler',
   tonLocataire: 'ton locataire',
-  sansLocataire: 'Sans locataire :',
 } as const;
 
 export const STATUTS_LOYER: Readonly<Record<StatutLoyer, string>> = {

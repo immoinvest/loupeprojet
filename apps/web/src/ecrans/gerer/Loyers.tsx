@@ -32,6 +32,8 @@ function MoisDeLoyers({ donnees }: { readonly donnees: EtatGestion }): JSX.Eleme
   const actions = useActionsLoyer(aujourdhui);
   const periode = periodeDepuisRecherche(recherche.get('mois'), aujourdhui);
   const groupes = groupesDuMois(resumeDuMois(donnees, periode, aujourdhui).lignes);
+  // `?bien=` (un mois de la frise d'un bien) : les lignes de ce bien sont mises en évidence.
+  const enEvidence = recherche.get('bien');
 
   return (
     <Page espacement="large">
@@ -54,7 +56,12 @@ function MoisDeLoyers({ donnees }: { readonly donnees: EtatGestion }): JSX.Eleme
         groupes.map((g) => (
           <Carte key={g.groupe}>
             <TitreCarte>{GROUPES_LOYERS_TEXTES[g.groupe]}</TitreCarte>
-            <ListeDeLoyers lignes={g.lignes} aujourdhui={aujourdhui} actions={actions} />
+            <ListeDeLoyers
+              lignes={g.lignes}
+              aujourdhui={aujourdhui}
+              actions={actions}
+              enEvidence={enEvidence}
+            />
           </Carte>
         ))
       )}

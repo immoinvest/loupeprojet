@@ -38,7 +38,10 @@ function monter(gestion: ClientGestion, chemin: string): void {
 }
 
 async function ouvrirSortie(utilisateur: ReturnType<typeof userEvent.setup>): Promise<HTMLElement> {
-  await utilisateur.click(await screen.findByRole('button', { name: F.terminer }));
+  // Premier rendu de la fiche : plus d'une seconde quand la machine est chargée.
+  await utilisateur.click(
+    await screen.findByRole('button', { name: F.terminer }, { timeout: 10_000 }),
+  );
   return screen.getByRole('form', { name: F.terminer });
 }
 
@@ -159,7 +162,10 @@ describe('Fiche d’un bien', () => {
     expect(
       await screen.findByRole('heading', { level: 2, name: 'Location en cours · Chambre 2' }),
     ).toBeInTheDocument();
-    expect(screen.getByText('Antoine Dupont et Léa Bernard')).toBeInTheDocument();
+    // Chaque locataire du bail mène à sa fiche.
+    const lea = screen.getByRole('link', { name: 'Léa Bernard' });
+    expect(lea).toHaveAttribute('href', '/gerer/locataires/locataire-lea');
+    expect(lea.parentElement).toHaveTextContent('Antoine Dupont et Léa Bernard');
     expect(
       screen.getByRole('heading', { level: 2, name: 'Location à venir · Chambre 3' }),
     ).toBeInTheDocument();

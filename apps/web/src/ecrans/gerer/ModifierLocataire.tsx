@@ -1,5 +1,5 @@
 import type { Locataire } from '@loupe/gestion';
-import { useState, type JSX } from 'react';
+import { useLayoutEffect, useState, type JSX } from 'react';
 
 import { Bouton } from '@/composants/ui';
 import { useGestion } from '@/gestion/GestionContext';
@@ -13,9 +13,12 @@ import { ChampGerer } from './ChampGerer';
 /** « Modifier » (clic 1) ouvre ce formulaire prérempli ; « Enregistrer » (clic 2) corrige nom et e-mail. */
 export function ModifierLocataire({
   locataire,
+  focusEmail = false,
   onFermer,
 }: {
   readonly locataire: Locataire;
+  /** Ouvert pour compléter l'e-mail (fiche du locataire) : le curseur y est déjà. */
+  readonly focusEmail?: boolean;
   readonly onFermer: () => void;
 }): JSX.Element {
   const { modifierLocataire } = useGestion();
@@ -24,6 +27,12 @@ export function ModifierLocataire({
   const [echec, setEchec] = useState<string | null>(null);
   const [occupe, setOccupe] = useState(false);
   const id = (champ: ChampLocataire): string => `locataire-${locataire.id}-${champ}`;
+
+  // Dans la même passe que l'affichage : le curseur est dans l'e-mail dès que le formulaire se voit,
+  // même quand il apparaît après le chargement des données (`?modifier=1`).
+  useLayoutEffect(() => {
+    if (focusEmail) document.getElementById(`locataire-${locataire.id}-email`)?.focus();
+  }, [focusEmail, locataire.id]);
   const erreur = (champ: ChampLocataire): string | undefined =>
     erreurs.includes(champ) ? ERREURS_LOCATAIRE[champ] : undefined;
 

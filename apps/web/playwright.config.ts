@@ -9,10 +9,11 @@ const PORT = 5199;
 const URL_BASE = `http://127.0.0.1:${String(PORT)}`;
 const enCi = process.env.CI !== undefined;
 /**
- * Spec des 36 écrans de référence (`ecransDeReference`) sur 9 formats : ceux de responsive (US-10),
+ * Spec des 38 écrans de référence (`ecransDeReference`) sur 9 formats : ceux de responsive (US-10),
  * l’accueil, l’estimation sans adresse, le compte rendu de visite, le financement, les deux écrans
- * du simulateur de prêt et les douze écrans de Gérer (loyers, fiche d’un bien, location, quittance,
- * mes biens, mes locataires, modifier une location, supprimer un bien).
+ * du simulateur de prêt et les quatorze écrans de Gérer (loyers, fiche d’un bien, location, quittance,
+ * mes biens, mes locataires, modifier une location, supprimer un bien, fiche d’un locataire,
+ * nouveau locataire).
  */
 const SPEC_FORMATS = /responsive\.spec\.ts$/;
 
