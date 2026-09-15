@@ -1,0 +1,42 @@
+{
+  "feature_slug": "gerer-bail-revision",
+  "title": "Gérer, vie du bail (B1) : caractéristiques légales du bien, alertes de conformité (G4-5), révision annuelle du loyer (G4-1)",
+  "started_at": "2026-09-15T22:30:00Z",
+  "current_step": "implement",
+  "scope": "packages/gestion, apps/comptes (migration 0008, sous-routeur /api/gestion/bail), apps/web (gestion/bail, ecrans/gerer/bail, À faire, fiche du bien, lettre imprimable)",
+  "branch": "feat/gerer-bail-revision",
+  "worktree": "C:\\Users\\errei\\Claude\\loupeprojet\\.claude\\worktrees\\hungry-murdock-2b84cb",
+  "base": "master (12642727)",
+  "prerequis": "aucun (fiche B1)",
+  "decisions_pierre": "15/09/2026 22 h : migrations fusionnées sans application (règle « migration sans risque »), auto-validation, aucune question ; migration réservée 0008",
+  "baseline": { "status": "completed", "source": "npm run typecheck vert sur 12642727" },
+  "steps": {
+    "discovery": {
+      "status": "completed",
+      "output": ".product/architecture/gerer-bail-revision.md § 1"
+    },
+    "specs": {
+      "status": "completed",
+      "output": ".product/architecture/gerer-bail-revision.md § 4",
+      "stories_count": 5
+    },
+    "architecture": {
+      "status": "completed",
+      "output": ".product/architecture/gerer-bail-revision.md"
+    },
+    "implement": {
+      "status": "in_progress",
+      "stories_completed": 0,
+      "stories_total": 5,
+      "commits": []
+    },
+    "qa_tests": { "status": "pending" },
+    "security": { "status": "pending" },
+    "push": { "status": "pending" }
+  },
+  "auto_revue": {
+    "discovery": "trois objectifs de la fiche couverts ; zone tendue en saisie seule (source non vérifiable cette nuit), sans effet sur B1",
+    "specs": "cinq stories Must, cas pièges testables (gel, indice attendu, demande tardive, mois payé, double clic), deux clics comptés",
+    "architecture": "ADR-G24 à G28 ; tables latérales et sous-routeur ; lot D1 conditionné ; une seule année d'IRL comparée (renonciation art. 17-1 I, à relire par Pierre)"
+  }
+}
