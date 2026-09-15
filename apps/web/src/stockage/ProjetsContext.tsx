@@ -18,6 +18,7 @@ import {
 } from 'react';
 
 import { ecrireJournal, lireJournal } from './journal';
+import { fusionnerTransfert } from './transfert';
 import {
   creerProjet,
   ecrireProjets,
@@ -41,6 +42,8 @@ export interface ContexteProjets {
   readonly supprimer: (id: string) => void;
   readonly changerStatut: (id: string, statut: StatutProjet) => void;
   readonly trouver: (id: string | undefined) => ProjetEnregistre | undefined;
+  /** Importe des projets arrivés d'une autre adresse, sans écraser une version plus récente. */
+  readonly importer: (recus: readonly ProjetEnregistre[]) => BilanImport;
   /**
    * Remplace le projet après validation Zod ; une entrée invalide n'est pas enregistrée.
    * Le complément (adresse exacte, visite) est enregistré dans la même écriture, pour ne rien écraser.
@@ -50,6 +53,12 @@ export interface ContexteProjets {
     projet: ProjetEntree,
     complement?: ComplementProjet,
   ) => MiseAJour;
+}
+
+export interface BilanImport {
+  readonly ajoutes: number;
+  readonly remplaces: number;
+  readonly gardes: number;
 }
 
 export type MiseAJour =
@@ -157,6 +166,20 @@ export function ProjetsProvider({ stockage, children }: ProjetsProviderProps): R
         );
       },
       trouver: (id) => etat.projets.find((p) => p.id === id),
+      importer: (recus) => {
+        const fusion = fusionnerTransfert(courant.current.projets, recus);
+        if (fusion.ecrits.length > 0 || fusion.retires.length > 0) {
+          modifier((e) => {
+            let journal = e.journal;
+            for (const id of fusion.ecrits) journal = noterEnregistrement(journal, id);
+            for (const p of fusion.retires) {
+              journal = noterSuppression(journal, p.id, dateDeModification(p.modifieLe));
+            }
+            return { projets: fusion.projets, journal };
+          });
+        }
+        return { ajoutes: fusion.ajoutes, remplaces: fusion.remplaces, gardes: fusion.gardes };
+      },
       mettreAJour: (id, projet, complement = {}) => {
         const actuel = courant.current.projets.find((p) => p.id === id)?.projet;
         // Le projet déjà enregistré, inchangé (seul le complément bouge) : rien à revalider, et son
