@@ -123,7 +123,7 @@ describe('ChampHypothese : les commandes du formulaire Vérifier', () => {
   it('apport sans projet : pas de parts, un montant', () => {
     banc('hypotheses.pret.apport', '14337');
     expect(screen.queryByRole('radiogroup', { name: 'Part du coût total' })).toBeNull();
-    expect(n((screen.getByLabelText('Apport')).value)).toBe('14 337');
+    expect(n(screen.getByLabelText<HTMLInputElement>('Apport').value)).toBe('14 337');
   });
 
   it('apport d’un projet invalide : les parts calculées sont indisponibles', () => {
@@ -206,7 +206,7 @@ describe('onglet Hypothèses', () => {
     await u.click(
       within(screen.getByRole('radiogroup', { name: 'DPE' })).getByRole('radio', { name: 'C' }),
     );
-    const champPieces = document.querySelector('[data-champ="bien.pieces"]')!;
+    const champPieces = document.querySelector<HTMLElement>('[data-champ="bien.pieces"]')!;
     await u.click(within(champPieces).getByRole('button', { name: 'Un de plus' }));
 
     const bien = lireProjets(window.localStorage)[0]?.projet.bien;

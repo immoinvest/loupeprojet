@@ -45,7 +45,7 @@ describe('Financement', () => {
     // Les commandes du formulaire Vérifier : durée en tuiles, apport en parts et en montant.
     expect(screen.getByRole('radio', { name: '25 ans' })).toBeChecked();
     expect(screen.getByLabelText(/Taux nominal/)).toHaveValue('3.35');
-    expect(n((screen.getByLabelText(/^Apport/)).value)).toBe('14 337');
+    expect(n(screen.getByLabelText<HTMLInputElement>(/^Apport/).value)).toBe('14 337');
     expect(
       within(screen.getByRole('radiogroup', { name: 'Part du coût total' })).getByRole('radio', {
         name: 'Autre',

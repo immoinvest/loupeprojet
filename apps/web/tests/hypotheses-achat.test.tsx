@@ -119,7 +119,7 @@ describe('carte « L’achat » : travaux repliés', () => {
     expect(n(depliant.textContent)).toBe('Travaux 6 000 € · mobilier 5 000 €');
     expect(depliant).toHaveAttribute('aria-expanded', 'true');
     const valeur = (nom: RegExp): string =>
-      (screen.getByRole('textbox', { name: nom })).value.replace(/\s/g, ' ');
+      screen.getByRole<HTMLInputElement>('textbox', { name: nom }).value.replace(/\s/g, ' ');
     expect(valeur(/^Travaux/)).toBe('6 000');
     expect(valeur(/^Mobilier/)).toBe('5 000');
     // Meublé : la case de rénovation énergétique ne joue pas.
