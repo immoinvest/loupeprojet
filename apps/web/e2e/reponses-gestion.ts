@@ -114,6 +114,55 @@ export async function simulerGestion(page: Page): Promise<void> {
     }),
   );
 
+  // Vie du bail (B1) : DPE du T2 Lices et une lettre de révision déjà émise pour Julie.
+  const bailleur = { nom: 'Camille Martin', adresse: '3 rue Paradis, 13006 Marseille' };
+  const lettre = {
+    id: 'lettre-julie',
+    locationId: 'location-julie',
+    numero: 'V-202610-LOCATION',
+    anniversaire: '2026-10-01',
+    emisLe: '2026-09-14T09:00:00.000Z',
+  };
+  await page.route('**/api/gestion/bail', (route) =>
+    route.fulfill({
+      json: {
+        biens: [
+          {
+            bienId: 'bien-lices',
+            dpeClasse: 'D',
+            dpeDate: '2024-03-01',
+            zoneTendue: true,
+            modifieLe: creeLe,
+          },
+        ],
+        revisions: [],
+        lettres: [lettre],
+      },
+    }),
+  );
+  await page.route('**/api/gestion/bail/lettres/*', (route) =>
+    route.fulfill({
+      json: {
+        ...lettre,
+        contenu: {
+          numero: lettre.numero,
+          emisLe: '2026-09-14',
+          bailleur,
+          locataires: [{ prenom: 'Julie', nom: 'Martin' }],
+          logement: { nom: 'T2 Lices', adresse: '12 rue des Lices, Marseille 5e' },
+          anniversaire: '2026-10-01',
+          aPartirDe: '2026-10',
+          loyerActuel: 65_000,
+          nouveauLoyer: 65_749,
+          charges: 5_000,
+          indiceAncien: { trimestre: '2025-T2', valeur: 14_668 },
+          indiceNouveau: { trimestre: '2026-T2', valeur: 14_837, publieLe: '2026-07-10' },
+          variationPourcent: 1.15,
+        },
+      },
+    }),
+  );
+
   // La quittance du mois de Julie, telle que l'API la rend : contenu figé complet.
   const periode = aujourdhui.slice(0, 7);
   const numero = `Q-${periode.replace('-', '')}-LOCATION`;

@@ -5,10 +5,13 @@ import { Bouton, Carte, TitreCarte } from '@/composants/ui';
 import { A_FAIRE_VISIBLES, cleAction, type ActionAFaire } from '@/gestion/a-faire';
 import {
   CHEMIN_GERER,
+  lienConformite,
   lienFicheBien,
   lienFicheLocataire,
   lienNouveauLocataire,
+  lienRevision,
 } from '@/gestion/parcours';
+import { alerteAFaire, revisionAFaire } from '@/textes/gerer-bail';
 import {
   ajouterEmailDe,
   louerLeBien,
@@ -63,6 +66,22 @@ function ligneDe(action: ActionAFaire): Ligne {
         point: 'bg-surveiller',
       };
     }
+    case 'alerte':
+      return {
+        vers: lienConformite(action.bien.id),
+        libelle: alerteAFaire(action.alerte, action.bien.nom),
+        point: action.alerte.code === 'fin_bail_court' ? 'bg-surveiller' : 'bg-probleme',
+      };
+    case 'revision':
+      return {
+        vers: lienRevision(action.bien.id, action.location.id),
+        libelle: revisionAFaire(
+          action.locataire?.prenom ?? TEXTES_GERER.tonLocataire,
+          action.proposition,
+        ),
+        precision: bienEtChambre(action.bien.nom, action.location.libelle),
+        point: 'bg-accent',
+      };
   }
 }
 

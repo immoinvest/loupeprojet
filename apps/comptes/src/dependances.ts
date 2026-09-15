@@ -8,6 +8,8 @@ import { ErreurConfiguration } from './erreurs';
 import { lireConfigFournisseurs, type ConfigFournisseurs } from './fournisseurs';
 import type { DepotArgent } from './gestion/argent/depot';
 import { depotArgentD1 } from './gestion/argent/depot-d1';
+import type { DepotBail } from './gestion/bail/depot';
+import { depotBailD1 } from './gestion/bail/depot-d1';
 import type { DepotGestion } from './gestion/depot';
 import { depotD1 } from './gestion/depot-d1';
 import { journalConsole, type Journal } from './journal';
@@ -50,6 +52,8 @@ export interface Dependances {
   readonly gestion: DepotGestion;
   /** Dépenses et prêts des biens gérés : les tables de la migration 0007, lues par leurs seules routes. */
   readonly argent: DepotArgent;
+  /** DPE, révision et lettres (vie du bail) : les tables de la migration 0008 de la même base D1. */
+  readonly bail: DepotBail;
   /** Les projets d'analyse synchronisés : la table projet de la même base D1. */
   readonly projets: DepotProjets;
   /** Les liens de partage courts, sans compte : la table partage de la même base D1 (ADR-009). */
@@ -153,6 +157,7 @@ export function dependancesDepuisEnv(env: Bindings): Dependances {
     base,
     gestion: depotD1(base),
     argent: depotArgentD1(base),
+    bail: depotBailD1(base),
     projets: depotProjetsD1(base),
     partages: depotPartagesD1(base, secret),
     courriel: lireCourriel(v, journalConsole),

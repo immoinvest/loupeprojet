@@ -94,6 +94,27 @@ export function lienDocument(id: string, retour: string): string {
   return avecRecherche(`/gerer/documents/${encodeURIComponent(id)}`, { retour });
 }
 
+/** Une lettre de révision du loyer (B1), avec la page où revenir. */
+export function lienLettre(id: string, retour: string): string {
+  return avecRecherche(`/gerer/lettres/${encodeURIComponent(id)}`, { retour });
+}
+
+/** La carte « Conformité » de la fiche d'un bien. */
+export function lienConformite(bienId: string): string {
+  return `${lienFicheBien(bienId)}#${ANCRE_CONFORMITE}`;
+}
+
+/** La carte « Révision du loyer » d'une location, sur la fiche de son bien. */
+export function lienRevision(bienId: string, locationId: string): string {
+  return `${lienFicheBien(bienId)}#${ancreRevision(locationId)}`;
+}
+
+export const ANCRE_CONFORMITE = 'conformite';
+
+export function ancreRevision(locationId: string): string {
+  return `revision-${locationId}`;
+}
+
 /** La page affichée, telle qu'on la passe en `retour`. */
 export function cheminDe(location: { readonly pathname: string; readonly search: string }): string {
   return `${location.pathname}${location.search}`;
