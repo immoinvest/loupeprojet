@@ -1,4 +1,5 @@
 import { captureDepuisHash } from '@loupe/capture';
+import { ORIGINE_PRODUCTION_DEFAUT } from '@loupe/capture/origines';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import {
@@ -10,7 +11,7 @@ import {
 } from '@/bookmarklet/lancer';
 
 const URL_PAP = 'https://www.pap.fr/annonces/appartement-marseille-5e-13005-r456789012';
-const BASE = 'https://loupeprojet.pages.dev';
+const BASE = ORIGINE_PRODUCTION_DEFAUT;
 
 const PAGE_PAP = `<!doctype html><html><head>
 <script type="application/ld+json">{"@type":"Product","offers":{"@type":"Offer","price":"155000"},"address":{"@type":"PostalAddress","addressLocality":"Marseille 5e","postalCode":"13005"},"additionalProperty":[{"@type":"PropertyValue","name":"Surface","value":"65.00"}]}</script>

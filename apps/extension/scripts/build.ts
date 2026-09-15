@@ -17,6 +17,13 @@ const racine = dirname(dirname(fileURLToPath(import.meta.url)));
 const dev = process.argv.includes('--dev');
 const surveiller = process.argv.includes('--watch');
 const BASE_URL_DEV = 'http://localhost:5173';
+/** Adresse de production injectée au build (`DEKLIC_ORIGINE`, bascule vers app.deklic.pro) ; défaut dans src/config.ts. */
+const origineBuild = process.env.DEKLIC_ORIGINE?.trim() ?? '';
+const baseInjectee = dev
+  ? BASE_URL_DEV
+  : /^https:\/\/[a-z0-9.-]+$/.test(origineBuild)
+    ? origineBuild
+    : undefined;
 const dossierChrome = join(racine, 'dist', 'chrome');
 const dossierFirefox = join(racine, 'dist', 'firefox');
 
@@ -40,7 +47,9 @@ function options(entree: string, complement: BuildOptions): BuildOptions {
 const contenu = options('contenu.ts', { footer: { js: 'globalThis.__loupeCapture;' } });
 const popup = options(
   'popup.ts',
-  dev ? { banner: { js: `globalThis.LOUPE_BASE_URL = ${JSON.stringify(BASE_URL_DEV)};` } } : {},
+  baseInjectee === undefined
+    ? {}
+    : { banner: { js: `globalThis.LOUPE_BASE_URL = ${JSON.stringify(baseInjectee)};` } },
 );
 const pont = options('pont.ts', {});
 const arrierePlan = options('arriere-plan.ts', {});

@@ -14,6 +14,14 @@ export {
   type ResultatDecodage,
 } from './encodage';
 export {
+  MOTIF_APERCUS,
+  ORIGINE_DEKLIC,
+  ORIGINE_HISTORIQUE,
+  ORIGINE_PRODUCTION_DEFAUT,
+  ORIGINES_SITE,
+  origineProduction,
+} from './origines';
+export {
   MessageExtensionSchema,
   MessageWebSchema,
   RaisonEchecLectureSchema,

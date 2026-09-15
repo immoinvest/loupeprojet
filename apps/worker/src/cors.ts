@@ -1,6 +1,9 @@
-/** Origines autorisées par défaut : la production et le poste de développement. */
+import { ORIGINE_DEKLIC, ORIGINE_HISTORIQUE } from '@loupe/capture/origines';
+
+/** Origines autorisées par défaut : les deux adresses du site et le poste de développement. */
 export const ORIGINES_DEFAUT: readonly string[] = [
-  'https://loupeprojet.pages.dev',
+  ORIGINE_HISTORIQUE,
+  ORIGINE_DEKLIC,
   'http://localhost:5173',
 ];
 

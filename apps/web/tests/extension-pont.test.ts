@@ -1,4 +1,5 @@
 import { SOURCE_EXTENSION, SOURCE_WEB, type MessageWeb } from '@loupe/capture';
+import { ORIGINE_PRODUCTION_DEFAUT } from '@loupe/capture/origines';
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -10,7 +11,7 @@ import {
 } from '@/annonces/extension';
 import { texteEchecLecture } from '@/textes/lecture-auto';
 
-const ORIGINE = 'https://loupeprojet.pages.dev';
+const ORIGINE = ORIGINE_PRODUCTION_DEFAUT;
 const URL_PAP = 'https://www.pap.fr/annonces/appartement-marseille-13005-r456789012';
 const CAPTURE = { version: 1, portail: 'pap', url: URL_PAP, captureLe: '2026-09-13T10:41:00.000Z' };
 

@@ -82,6 +82,9 @@ describe('limiteur mémoire', () => {
 describe('origines', () => {
   it('reconnaît la production, localhost, les previews Pages ; refuse le reste', () => {
     expect(origineAutorisee('https://loupeprojet.pages.dev', ORIGINES_DEFAUT)).toBe(true);
+    expect(origineAutorisee('https://app.deklic.pro', ORIGINES_DEFAUT)).toBe(true);
+    expect(origineAutorisee('https://app.deklic.pro.pirate.example', ORIGINES_DEFAUT)).toBe(false);
+    expect(origineAutorisee('http://app.deklic.pro', ORIGINES_DEFAUT)).toBe(false);
     expect(origineAutorisee('http://localhost:5173', ORIGINES_DEFAUT)).toBe(true);
     expect(origineAutorisee('https://abc123.loupeprojet.pages.dev', ORIGINES_DEFAUT)).toBe(true);
     expect(origineAutorisee('https://loupeprojet.pages.dev.pirate.example', ORIGINES_DEFAUT)).toBe(
