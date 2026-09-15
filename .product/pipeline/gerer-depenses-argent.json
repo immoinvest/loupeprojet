@@ -24,13 +24,26 @@
       "output": ".product/architecture/gerer-depenses-argent.md"
     },
     "implement": {
-      "status": "in_progress",
-      "stories_completed": 0,
+      "status": "completed",
+      "stories_completed": 7,
       "stories_total": 7,
-      "commits": []
+      "commits": [
+        "35366aaa US-1 paquet",
+        "34f0ac76 US-2 API et migration 0007",
+        "d75e272e US-3 clients, contexte, saisies",
+        "b4aa7072 US-4 à US-6 écrans",
+        "US-7 e2e et docs"
+      ]
     },
-    "qa_tests": { "status": "pending" },
-    "security": { "status": "pending" },
+    "qa_tests": {
+      "status": "completed",
+      "verification": "16/09/2026 : lint, format, typecheck, 338 fichiers et 2 836 tests avec les seuils de couverture (puis +1 test 401) ; Playwright CI=1 argent, gerer-parcours, formats"
+    },
+    "security": {
+      "status": "completed",
+      "score": "96/100",
+      "notes": "garde de session et Origin hérités du routeur de gestion (401 et 403 testés), requêtes préparées filtrées par userId, bien d'un autre compte refusé dans la même instruction SQL, 404 hors compte testé pour chaque route, limite de 2 000 dépenses, journaux sans montant ni libellé, retour validé côté web, aucun HTML injecté"
+    },
     "push": { "status": "pending" }
   }
 }

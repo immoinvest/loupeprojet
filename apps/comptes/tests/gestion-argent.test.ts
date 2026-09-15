@@ -329,6 +329,14 @@ describe('cascade, export et migration sans risque', () => {
     expect((await b.requete('/api/gestion/export')).status).toBe(500);
   });
 
+  it('sans session : 401 NON_CONNECTE sur les routes Argent', async () => {
+    const b = bancD1();
+    const r = await b.requete('/api/gestion/argent');
+    expect(r.status).toBe(401);
+    expect(await r.json()).toEqual({ code: 'NON_CONNECTE' });
+    expect((await ajouter(b, taxe(undefined))).status).toBe(401);
+  });
+
   it('une ligne abîmée dans la base : l’export rend 500, jamais un export faux', async () => {
     const b = await connecte();
     const { bien } = await creerBien(b);

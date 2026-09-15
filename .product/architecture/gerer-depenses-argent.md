@@ -138,6 +138,28 @@ Argent / CarteArgent ─ argentDuMois(donnees de gestion + dépenses + prêts, p
 - [x] Journaux : chemin seulement, jamais de montant ni de libellé.
 - [x] Fichiers ≤ 300 lignes ; calcul pur à 100 % ; `@loupe/moteur` sans I/O.
 
+## Écarts avec la fiche de session
+
+- `occurrencesDuMois` s'appelle `occurrenceDuMois` : au plus une occurrence par mois, la fonction rend sa date ou `null`.
+- `GET /argent` ajouté (dépenses et prêts en une requête) ; `GET /depenses` gardé.
+- « À faire » ne propose que le prêt à enregistrer ; pas de ligne « dépense » (rien ne manque au calcul sans dépense).
+- Le prêt proposé ignore les différés du projet (le prêt du bien n'en a pas) ; première échéance supposée le mois qui suit « J'ai acheté ce bien », modifiable par « Ajuster avant ».
+
+## Audit de sécurité
+
+| Contrôle              | Constat                                                                                                                               | État |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ---- |
+| Authentification      | Routes montées sous `routeurGestion` : garde `acces` (hôte connu, session) avant elles ; 401 sans session testé                       | OK   |
+| CSRF                  | Écritures avec `Origin` connu exigé (403 testé), cookie `SameSite=Lax`                                                                | OK   |
+| Isolement des comptes | Chaque requête filtre par `userId` ; bien d'un autre compte refusé dans la même instruction SQL (pas de course) ; 404 testé partout   | OK   |
+| Validation            | Zod (`NouvelleDepenseSchema`, `PretBienSchema`), corps ≤ 64 Ko hérité, bornes du prêt et du montant                                   | OK   |
+| Injection             | Requêtes préparées uniquement                                                                                                         | OK   |
+| Abus                  | 2 000 dépenses par compte (insertion conditionnelle) ; un prêt par bien (clé primaire)                                                | OK   |
+| Données personnelles  | Aucun champ nouveau sur le locataire ; journaux avec le chemin seulement (testé : ni montant ni libellé) ; cascade du compte (testée) | OK   |
+| Web                   | `retour` validé par `retourValide`, `?bien=` vérifié contre les biens chargés, aucun HTML injecté, réponses revalidées par Zod        | OK   |
+
+Reste bénin : le client mémoire (tests) ne vérifie pas que le bien appartient au compte ; l'API le fait. Score : 96/100.
+
 ## Auto-revue (checkpoints validés par Claude, Pierre dort)
 
 - **Découverte** : périmètre de la fiche repris tel quel ; différés de prêt écartés (non demandés, le prêt proposé les ignore et le dit dans le rapport) ; « À faire » limité au prêt à enregistrer, seule chose qui manque vraiment au calcul.
