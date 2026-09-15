@@ -1,7 +1,7 @@
 {
   "feature_slug": "travaux-etat",
   "started_at": "2026-09-15T00:05:00+02:00",
-  "current_step": "implement",
+  "current_step": "push",
   "scope": "moteur_et_web",
   "backlog": ["19"],
   "prerequisites": ["feat/audit-calculs", "feat/formulaire-rapide"],
@@ -19,14 +19,27 @@
     },
     "architecture": { "status": "completed", "output": ".product/architecture/travaux-etat.md" },
     "implement": {
-      "status": "in_progress",
-      "stories_completed": 5,
+      "status": "completed",
+      "stories_completed": 6,
       "stories_total": 6,
-      "note": "US-6 (formulaire Vérifier) attend la fusion de feat/formulaire-rapide",
-      "commits": []
+      "commits": [
+        "feat(moteur): US-1 à US-3 — travaux estimés selon l'état du bien",
+        "feat(web): US-4 et US-5 — travaux estimés dans Hypothèses, Estimation et Financement",
+        "feat(web): US-6 — travaux estimés dans le formulaire Vérifier",
+        "docs(docs): travaux-etat — discovery, specs, architecture, pipeline, fiche 19 livrée",
+        "docs(docs): travaux-etat — CLAUDE.md, README, registre, specs fonctionnelle et technique, vue d'ensemble"
+      ]
     },
-    "qa_tests": { "status": "pending" },
-    "security": { "status": "pending" },
-    "push": { "status": "pending" }
+    "qa_tests": {
+      "status": "completed",
+      "moteur": "446 tests, couverture 100 %",
+      "web": "tests travaux, formulaire, carte Achat, Méthode verts ; 3 dépassements de délai sous charge dans la suite complète, verts relancés seuls",
+      "e2e": "110 passés"
+    },
+    "security": {
+      "status": "completed",
+      "note": "aucun réseau, aucune donnée persistée nouvelle hors travauxChoix validé par Zod, aucun texte d'annonce"
+    },
+    "push": { "status": "in_progress", "note": "attente de la file GitHub vide (PR #84)" }
   }
 }
