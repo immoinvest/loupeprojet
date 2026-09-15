@@ -1,8 +1,8 @@
 import { SANS_STOCKS, construireAnnee, eligibiliteMicro, finaliserRegime } from './commun-regime';
-import type { ContexteFiscal, ResultatRegime } from './types';
+import type { ContexteFiscal, ProjectionRegime } from './types';
 
 /** Micro-foncier : abattement de 30 %, plafond de loyers, aucun déficit possible. */
-export function projeterMicroFoncier(ctx: ContexteFiscal): ResultatRegime {
+export function projeterMicroFoncier(ctx: ContexteFiscal): ProjectionRegime {
   const { projet, cashflow, regles } = ctx;
   const { microFoncier } = regles.fiscalite;
   const { tmi, psFoncier } = projet.hypotheses.fiscalite;
