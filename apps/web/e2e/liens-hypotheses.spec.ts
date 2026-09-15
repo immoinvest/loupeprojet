@@ -49,8 +49,9 @@ test('Fiscalité → tranche d’imposition : Hypothèses au champ ; le lien dir
   await ouvrirVolet(page, 'Fiscalité', /Combien d'impôts/);
   await page.getByRole('link', { name: /modifier Tranche d'imposition$/ }).click();
   await expect(page.getByRole('heading', { level: 1, name: 'Vos hypothèses' })).toBeVisible();
-  const tranche = page.getByLabel("Tranche d'imposition", { exact: true });
-  await expect(tranche).toBeFocused();
+  // La tranche se choisit en tuiles, comme dans Vérifier : le focus va sur la tuile cochée.
+  const tranche = page.getByRole('radiogroup', { name: "Tranche d'imposition", exact: true });
+  await expect(tranche.locator('input:checked')).toBeFocused();
   await sousLEnTete(page, tranche);
   await expect(page.getByRole('button', { name: 'Revenir à Fiscalité' })).toBeVisible();
 
