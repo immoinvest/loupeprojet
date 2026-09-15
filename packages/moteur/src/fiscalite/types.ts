@@ -1,6 +1,7 @@
 import type { ResultatCashflow } from '../cashflow';
 import type { ResultatFinancement } from '../financement';
 import type { Regles } from '../regles/types';
+import type { ResultatRevente } from '../revente/par-regime';
 import type { ModeLocation, Regime } from '../schema/hypotheses';
 import type { Projet } from '../schema/projet';
 
@@ -32,7 +33,8 @@ export interface AnneeFiscale {
   readonly stocks: StocksFiscaux;
 }
 
-export interface ResultatRegime {
+/** Ce que chaque projecteur de régime calcule : l'exploitation, année par année. */
+export interface ProjectionRegime {
   readonly regime: Regime;
   readonly mode: ModeLocation;
   readonly eligible: boolean;
@@ -45,6 +47,18 @@ export interface ResultatRegime {
   readonly premiereAnneeImposable: number | null;
   /** Dotations sur l'immeuble (bâti + travaux) effectivement déduites : réintégrées à la plus-value. */
   readonly amortissementsImmeubleDeduits: number;
+}
+
+/** Un régime de bout en bout : l'exploitation, puis la revente à l'horizon du projet. */
+export interface ResultatRegime extends ProjectionRegime {
+  /** Revente si ce régime était retenu (seule la réintégration des amortissements varie). */
+  readonly revente: ResultatRevente;
+  /** Impôt sur la plus-value (impôt sur le revenu, prélèvements sociaux, surtaxe). */
+  readonly impotRevente: number;
+  /** Impôt pendant l'exploitation (`impotTotal`) + impôt à la revente. */
+  readonly impotGlobal: number;
+  /** Cash-flow après impôt cumulé + cash net de revente : ce qu'il reste au total. */
+  readonly enrichissementFinal: number;
 }
 
 export interface ContexteFiscal {
@@ -64,4 +78,6 @@ export interface ResultatFiscalite {
   readonly meilleur: Regime;
   /** Régime éligible à l'impôt cumulé le plus faible (peut différer : les loyers nus sont plus bas). */
   readonly meilleurImpot: Regime;
+  /** Régime éligible qui laisse le plus d'argent au total (cash-flow après impôt + cash net de revente). */
+  readonly meilleurAuTotal: Regime;
 }

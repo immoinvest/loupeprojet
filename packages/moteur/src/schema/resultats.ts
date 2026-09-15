@@ -126,32 +126,6 @@ const AnneeFiscaleSchema = z.strictObject({
   stocks: z.strictObject({ deficitReportable: n, amortissementsReportes: n }),
 });
 
-const RegimeResultatSchema = z.strictObject({
-  regime: RegimeSchema,
-  mode: ModeLocationSchema,
-  eligible: z.boolean(),
-  motifIneligibilite: z.enum(['PLAFOND_MICRO_DEPASSE']).nullable(),
-  cashflow: CashflowSchema,
-  annees: z.array(AnneeFiscaleSchema),
-  impotTotal: n,
-  cashflowApresImpotTotal: n,
-  premiereAnneeImposable: nOuNull,
-  amortissementsImmeubleDeduits: n,
-});
-
-export const FiscaliteResultatSchema = z.strictObject({
-  regimes: z.strictObject({
-    micro_bic: RegimeResultatSchema,
-    lmnp_reel: RegimeResultatSchema,
-    micro_foncier: RegimeResultatSchema,
-    nu_reel: RegimeResultatSchema,
-  }),
-  compatibles: z.array(RegimeSchema),
-  retenu: RegimeSchema,
-  meilleur: RegimeSchema,
-  meilleurImpot: RegimeSchema,
-});
-
 export const ReventeResultatSchema = z.strictObject({
   annees: n,
   valeur: n,
@@ -174,6 +148,37 @@ export const ReventeResultatSchema = z.strictObject({
     impotTotal: n,
   }),
   cashNetVendeur: n,
+});
+
+const RegimeResultatSchema = z.strictObject({
+  regime: RegimeSchema,
+  mode: ModeLocationSchema,
+  eligible: z.boolean(),
+  motifIneligibilite: z.enum(['PLAFOND_MICRO_DEPASSE']).nullable(),
+  cashflow: CashflowSchema,
+  annees: z.array(AnneeFiscaleSchema),
+  impotTotal: n,
+  cashflowApresImpotTotal: n,
+  premiereAnneeImposable: nOuNull,
+  amortissementsImmeubleDeduits: n,
+  revente: ReventeResultatSchema,
+  impotRevente: n,
+  impotGlobal: n,
+  enrichissementFinal: n,
+});
+
+export const FiscaliteResultatSchema = z.strictObject({
+  regimes: z.strictObject({
+    micro_bic: RegimeResultatSchema,
+    lmnp_reel: RegimeResultatSchema,
+    micro_foncier: RegimeResultatSchema,
+    nu_reel: RegimeResultatSchema,
+  }),
+  compatibles: z.array(RegimeSchema),
+  retenu: RegimeSchema,
+  meilleur: RegimeSchema,
+  meilleurImpot: RegimeSchema,
+  meilleurAuTotal: RegimeSchema,
 });
 
 export const RendementSchema = z.strictObject({

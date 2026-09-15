@@ -8,7 +8,7 @@ import {
   type StockDeficits,
 } from './deficits';
 import { assuranceAnnee, interetsPayesAnnee } from './interets';
-import type { AnneeFiscale, ContexteFiscal, ResultatRegime } from './types';
+import type { AnneeFiscale, ContexteFiscal, ProjectionRegime } from './types';
 
 interface EtatLmnp {
   readonly deficits: StockDeficits;
@@ -111,7 +111,7 @@ function anneeLmnp(
   };
 }
 
-export function projeterLmnpReel(ctx: ContexteFiscal): ResultatRegime {
+export function projeterLmnpReel(ctx: ContexteFiscal): ProjectionRegime {
   let etat = ETAT_INITIAL;
   const annees: AnneeFiscale[] = [];
   for (const a of ctx.cashflow.parAnnee) {

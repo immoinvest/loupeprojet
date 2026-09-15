@@ -1,0 +1,39 @@
+{
+  "feature_slug": "impot-total-revente",
+  "title": "Fiscalité : impôt pendant l'exploitation + impôt à la revente = impôt total, par régime (fiche de backlog 16)",
+  "started_at": "2026-09-15T00:30:00Z",
+  "current_step": "implement",
+  "scope": "packages/moteur/src/{revente,fiscalite}/, schema/resultats.ts ; apps/web/src/ecrans/Fiscalite.tsx et ecrans/fiscalite/, textes/regimes.ts, textes/methode-fiscalite.ts, analyses/comparaison.ts ; tests",
+  "branch": "feat/impot-total-revente",
+  "base": "master (97269048, après la PR #79 audit-calculs)",
+  "baseline": { "moteur_tests_passed": 419, "tests_failed": 0 },
+  "steps": {
+    "discovery": {
+      "status": "completed",
+      "output": ".product/features/impot-total-revente-discovery.md"
+    },
+    "specs": {
+      "status": "completed",
+      "output": ".product/specs/impot-total-revente-specs.md",
+      "stories_count": 5
+    },
+    "architecture": {
+      "status": "completed",
+      "output": ".product/architecture/impot-total-revente.md"
+    },
+    "implement": { "status": "in_progress", "stories_completed": 1, "stories_total": 5 },
+    "qa_tests": { "status": "pending" },
+    "security": { "status": "pending" },
+    "push": { "status": "pending" }
+  },
+  "decisions": {
+    "plus_avantageux": "régime compatible et éligible au plus grand cash-flow après impôt cumulé + cash net de revente (proposition de la fiche, question 1)",
+    "meilleur_cashflow": "pastille gardée à côté de « le plus avantageux au total » (question 2)",
+    "residences_services": "hors v1, mentionnées dans l'explication du meublé au réel (question 3)",
+    "deficit_foncier": "avertissement sur la carte du nu au réel si la revente précède la fin de la 3e année qui suit un déficit imputé sur le revenu global (question 4)",
+    "comparer": "indicateur « Impôt total (exploitation + revente) » ; Rapport hors périmètre S4 (question 5)",
+    "lmp": "hors périmètre (question 6)",
+    "graphique": "barres HTML/CSS au lieu de Recharts, bibliothèque absente de apps/web",
+    "modele": "revente portée par chaque ResultatRegime ; projecteurs renommés ProjectionRegime ; revente importe seulement des types de la fiscalité"
+  }
+}
