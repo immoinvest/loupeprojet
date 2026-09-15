@@ -6,7 +6,8 @@ import type { Dependances } from '../../dependances';
 import { messageDe } from '../../erreurs';
 import type { EnvGestion } from '../acces';
 import { estTableEnvoisAbsente } from './depot';
-import { envoyerQuittanceDuMois, inviterLocataires, type ContexteEnvois } from './taches';
+import { envoyerQuittanceDuMois } from './quittances';
+import { inviterLocataires, type ContexteEnvois } from './taches';
 
 const AvecId = z.object({ id: z.string().min(1) });
 const CreationLue = z.object({ locataire: AvecId.nullable(), colocataires: z.array(AvecId) });

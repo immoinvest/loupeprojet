@@ -14,7 +14,8 @@ import { appliquerMigrations, MIGRATIONS } from '../scripts/migration';
 import { ErreurCourriel, type Envoyeur, type Message } from '../src/courriel';
 import { envoyeurJournal } from '../src/courriel';
 import { signatureJetons } from '../src/gestion/envois/jetons';
-import { modeEnvoi, renvoyerDocument } from '../src/gestion/envois/taches';
+import { renvoyerDocument } from '../src/gestion/envois/quittances';
+import { modeEnvoi } from '../src/gestion/envois/taches';
 import { journalMemoire } from '../src/journal';
 import {
   bancD1,

@@ -7,18 +7,21 @@
     "discovery": "valide (auto-revue)",
     "specs": "valide (auto-revue)",
     "architecture": "valide (auto-revue) : .product/architecture/quittances-auto.md",
-    "implement": "en cours",
-    "qa": "a faire",
+    "implement": "fait (5 stories commitées)",
+    "qa": "en cours : suite complète avec couverture, puis build et Playwright",
     "securite": "a faire",
     "cleanup": "a faire",
     "pr": "a faire"
   },
   "stories": {
-    "US-1": "a faire",
-    "US-2": "a faire",
-    "US-3": "a faire",
-    "US-4": "a faire",
-    "US-5": "a faire"
+    "US-1": "fait — 2cf75ede (règles pures, 100 % de couverture, article 21 vérifié sur Légifrance)",
+    "US-2": "fait — 777ec64c (migration 0009 additive, preuve sans migration)",
+    "US-3": "fait — 49e11ec8 (envoyeur, gabarits par instantané, PDF sans bibliothèque, jetons HMAC)",
+    "US-4": "fait — 777ec64c (API des envois, page publique, déclencheurs, bailleur par bien ; 13 tests d'API)",
+    "US-5": "fait — 98e6aa16 (écrans web, 29 tests, 3 écrans e2e)"
+  },
+  "mesures": {
+    "bundleComptes": "2660 Kio bruts, 468 Kio compressés (limite Workers : 3 Mio compressés)"
   },
   "decisions": [
     "ADR-G40 PDF sans bibliotheque",

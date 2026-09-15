@@ -6,13 +6,8 @@ import { messageDe, reponseErreur } from '../../erreurs';
 import type { EnvGestion } from '../acces';
 import { ErreurGestion } from '../depot';
 import { ErreurEnvois, estTableEnvoisAbsente, STATUTS_ERREUR_ENVOIS } from './depot';
-import {
-  declarerAccord,
-  etatEnvois,
-  inviterDeNouveau,
-  renvoyerDocument,
-  type ContexteEnvois,
-} from './taches';
+import { renvoyerDocument } from './quittances';
+import { declarerAccord, etatEnvois, inviterDeNouveau, type ContexteEnvois } from './taches';
 
 /** Une réponse d'erreur des envois, ou `null` pour une erreur que ce module ne connaît pas. */
 export function reponseErreurEnvois(deps: Dependances, erreur: unknown, chemin: string): Response {
