@@ -109,7 +109,10 @@ describe('nu réel — déficit foncier imputable sur le revenu global', () => {
       850,
     );
     const a1 = projeterNuReel(ctx).annees[0]!;
-    const horsInterets = a1.chargesDeductibles - a1.recettes; // ≈ 13 876 € − 9 611 € > 0, < 10 700 ?
+    // Autres charges 3 085 + travaux 20 000 = 23 085 € ; les loyers compensent d'abord intérêts,
+    // assurance et frais d'emprunt (§ 110), le reste des autres charges est plafonné à 10 700 €.
+    const financier = a1.interetsDeductibles + ctx.financement.assuranceMensuelle * 12 + 2_350;
+    const horsInterets = 23_085 - Math.max(0, a1.recettes - financier);
     const attendu = Math.min(horsInterets, 10_700);
     expect(a1.deficitImputeRevenuGlobal).toBeCloseTo(attendu, 6);
     expect(a1.impotRevenu).toBeCloseTo(-attendu * 0.3, 6);
