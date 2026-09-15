@@ -41,7 +41,10 @@ describe('Écran Visite', () => {
     for (const titre of Object.values(CATEGORIES_VISITE)) {
       expect(screen.getByRole('heading', { level: 2, name: titre })).toBeInTheDocument();
     }
-    expect(screen.getAllByRole('radio')).toHaveLength(N * 4);
+    // Quatre réponses par question (les champs à valeur ont aussi leurs tuiles, comptées à part).
+    const reponses = screen.getAllByRole('group', { name: /^Réponse : / });
+    expect(reponses).toHaveLength(N);
+    for (const groupe of reponses) expect(within(groupe).getAllByRole('radio')).toHaveLength(4);
     expect(screen.getAllByText(/^Source : /)).toHaveLength(N);
     expect(screen.getByText(`0 sur ${String(N)} répondues`)).toBeInTheDocument();
     expect(screen.getByRole('progressbar', { name: 'Questions répondues' })).toHaveAttribute(
@@ -121,7 +124,7 @@ describe('Écran Visite', () => {
     await screen.findByRole('heading', { name: 'Préparer la visite' });
 
     const charges = screen.getByLabelText(/^Copropriété \(part propriétaire\)/);
-    expect(charges).toHaveValue('1080');
+    expect((charges as HTMLInputElement).value.replace(/\s/g, ' ')).toBe('1 080');
     await utilisateur.clear(charges);
     await utilisateur.type(charges, '1450');
     expect(enregistre()?.projet.hypotheses.charges.coproAnnuel).toBe(1_450);
@@ -130,15 +133,18 @@ describe('Écran Visite', () => {
     expect(screen.getByText(`1 sur ${String(N)} répondue`)).toBeInTheDocument();
 
     await utilisateur.clear(charges);
+    // Un montant ne prend que des chiffres : les lettres sont ignorées.
     await utilisateur.type(charges, 'abc');
-    expect(screen.getByText('Nombre attendu.')).toBeInTheDocument();
+    expect(charges).toHaveValue('');
     expect(enregistre()?.projet.hypotheses.charges.coproAnnuel).toBe(0);
 
     // Corriger le DPE change la liste : G fait apparaître la rénovation obligatoire.
     expect(
       screen.queryByText(/location interdite à partir de/, { selector: 'p' }),
     ).not.toBeInTheDocument();
-    await utilisateur.selectOptions(screen.getByLabelText(/^DPE/), 'G');
+    await utilisateur.click(
+      within(screen.getByRole('radiogroup', { name: /^DPE/ })).getByRole('radio', { name: 'G' }),
+    );
     expect(enregistre()?.projet.bien.dpe).toBe('G');
     expect(
       screen.getByText(/DPE G : location interdite à partir de 2025/, { selector: 'p' }),

@@ -1,5 +1,5 @@
 import { calculerProjet, projetExemple } from '@loupe/moteur';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 
@@ -118,22 +118,24 @@ describe('carte « L’achat » : travaux repliés', () => {
     const depliant = screen.getByRole('button', { name: /^Travaux 6/ });
     expect(n(depliant.textContent)).toBe('Travaux 6 000 € · mobilier 5 000 €');
     expect(depliant).toHaveAttribute('aria-expanded', 'true');
-    expect(screen.getByRole('textbox', { name: /^Travaux/ })).toHaveValue('6000');
-    expect(screen.getByRole('textbox', { name: /^Mobilier/ })).toHaveValue('5000');
+    const valeur = (nom: RegExp): string =>
+      (screen.getByRole('textbox', { name: nom })).value.replace(/\s/g, ' ');
+    expect(valeur(/^Travaux/)).toBe('6 000');
+    expect(valeur(/^Mobilier/)).toBe('5 000');
     // Meublé : la case de rénovation énergétique ne joue pas.
-    expect(screen.queryByRole('combobox', { name: /classes E, F ou G/ })).toBeNull();
+    expect(screen.queryByRole('radiogroup', { name: /classes E, F ou G/ })).toBeNull();
 
     const utilisateur = userEvent.setup();
     await utilisateur.click(screen.getByRole('radio', { name: 'Nue' }));
-    const renovation = screen.getByRole('combobox', { name: /classes E, F ou G/ });
+    const renovation = screen.getByRole('radiogroup', { name: /classes E, F ou G/ });
     expect(screen.getByText(/porté de 10 700 € à 21 400 €/)).toBeInTheDocument();
-    await utilisateur.selectOptions(renovation, 'oui');
+    await utilisateur.click(within(renovation).getByRole('radio', { name: 'Oui' }));
     expect(projetEnregistre().hypotheses.achat.travauxRenovationEnergetique).toBe(true);
 
     // Sans travaux, la case disparaît et le dépliant se résume à « + Ajouter des travaux ».
     await utilisateur.clear(screen.getByRole('textbox', { name: /^Travaux/ }));
     expect(projetEnregistre().hypotheses.achat.travaux).toBe(0);
-    expect(screen.queryByRole('combobox', { name: /classes E, F ou G/ })).toBeNull();
+    expect(screen.queryByRole('radiogroup', { name: /classes E, F ou G/ })).toBeNull();
     const ferme = screen.getByRole('button', { name: /^\+ Ajouter des travaux/ });
     expect(n(ferme.textContent)).toBe('+ Ajouter des travaux · mobilier 5 000 €');
     await utilisateur.click(ferme);

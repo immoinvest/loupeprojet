@@ -96,9 +96,13 @@ describe('Rapport sans loyer', () => {
     const utilisateur = userEvent.setup();
     render(<AppEnMemoire chemin={`/projets/${id}`} />);
     await screen.findByRole('heading', { name: 'Il manque le loyer visé pour cette analyse' });
+    // Le montant ne prend que des chiffres : « abc » ne laisse rien à appliquer.
     await utilisateur.type(screen.getByLabelText(/Loyer visé, hors charges/), 'abc{Enter}');
-    expect(screen.getByText('Nombre attendu.')).toBeInTheDocument();
+    expect(screen.getByLabelText(/Loyer visé, hors charges/)).toHaveValue('');
     expect(loyerEnregistre()).toBeUndefined();
+    expect(
+      screen.getByRole('heading', { name: 'Il manque le loyer visé pour cette analyse' }),
+    ).toBeInTheDocument();
   });
 
   it('propose le loyer de marché de la commune quand le projet en a un', async () => {

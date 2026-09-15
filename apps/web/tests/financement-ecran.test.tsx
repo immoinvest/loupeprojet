@@ -42,9 +42,15 @@ describe('Financement', () => {
     const r = calculerProjet(projetExemple);
 
     // Les hypothèses du prêt, éditables, avec leurs badges.
-    expect(screen.getByLabelText(/Durée du prêt/)).toHaveValue('25');
+    // Les commandes du formulaire Vérifier : durée en tuiles, apport en parts et en montant.
+    expect(screen.getByRole('radio', { name: '25 ans' })).toBeChecked();
     expect(screen.getByLabelText(/Taux nominal/)).toHaveValue('3.35');
-    expect(screen.getByLabelText(/^Apport/)).toHaveValue('14337');
+    expect(n((screen.getByLabelText(/^Apport/)).value)).toBe('14 337');
+    expect(
+      within(screen.getByRole('radiogroup', { name: 'Part du coût total' })).getByRole('radio', {
+        name: 'Autre',
+      }),
+    ).toBeChecked();
     expect(within(carte('Votre prêt')).getByText('taux du mois')).toBeInTheDocument();
 
     const cout = n(carte('Ce que ça coûte').textContent);
@@ -83,9 +89,7 @@ describe('Financement', () => {
     await ouvrirFinancement();
     const utilisateur = userEvent.setup();
 
-    const duree = screen.getByLabelText(/Durée du prêt/);
-    await utilisateur.clear(duree);
-    await utilisateur.type(duree, '20');
+    await utilisateur.click(screen.getByRole('radio', { name: '20 ans' }));
     const enregistre = lireProjets(window.localStorage)[0]?.projet;
     expect(enregistre?.hypotheses.pret.dureeAnnees).toBe(20);
     expect(enregistre?.provenance['pret.dureeAnnees']).toBe('utilisateur');

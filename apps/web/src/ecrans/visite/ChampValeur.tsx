@@ -56,6 +56,7 @@ export function ChampValeur({
         texte={texte ?? versTexte(valeurActuelle(projet, descripteur), descripteur.type)}
         erreur={erreur}
         badge={badgePour(projet, descripteur)}
+        projet={projet}
         onChange={changer}
       />
     </div>

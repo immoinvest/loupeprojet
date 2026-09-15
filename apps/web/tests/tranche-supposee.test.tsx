@@ -1,5 +1,5 @@
 import { projetExemple } from '@loupe/moteur';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 
@@ -34,7 +34,11 @@ describe('tranche d’imposition supposée', () => {
     expect(screen.getByRole('heading', { name: "Votre tranche d'imposition" })).toBeInTheDocument();
     expect(n(screen.getAllByText(/26 928 €/)[0]?.textContent)).toContain('26 928 €');
 
-    await utilisateur.selectOptions(screen.getByLabelText(/Tranche d'imposition/), '0.41');
+    await utilisateur.click(
+      within(screen.getByRole('radiogroup', { name: /Tranche d'imposition/ })).getByRole('radio', {
+        name: '41 %',
+      }),
+    );
 
     const enregistre = lireProjets(window.localStorage)[0]?.projet;
     expect(enregistre?.hypotheses.fiscalite.tmi).toBe(0.41);

@@ -1,10 +1,12 @@
+import type { ProjetEntree } from '@loupe/moteur';
 import { useId, type JSX, type ReactNode } from 'react';
 
-import { useModeDocument } from '@/composants/document';
-import { Info } from '@/composants/info';
+import { EnveloppeChamp } from '@/composants/saisie/EnveloppeChamp';
 import { Pastille, type TonPastille } from '@/composants/ui';
 import type { Descripteur } from '@/hypotheses';
-import { texteDuTerme } from '@/textes/glossaire';
+import { commandeDe, type TypeCommande } from '@/hypotheses/commandes';
+
+import { CommandeHypothese } from './CommandeHypothese';
 
 export interface BadgeProvenance {
   readonly ton: TonPastille;
@@ -27,9 +29,21 @@ export function badgeDeSource(source: string | undefined): BadgeProvenance | nul
   return BADGES[source] ?? { ton: 'neutre', libelle: source };
 }
 
-const CLASSE_SAISIE =
-  'min-h-[44px] w-full min-w-0 rounded-encart border bg-surface px-3 text-[15px] font-semibold pointer-coarse:text-base';
+/** Commandes nommées par le libellé comme un groupe (boutons radio), sans `<label htmlFor>`. */
+const EN_GROUPE: ReadonlySet<TypeCommande> = new Set([
+  'ouiNon',
+  'tuiles',
+  'energie',
+  'annee',
+  'duree',
+]);
+/** Commandes qui prennent toute la largeur de la grille, comme dans Vérifier. */
+const LARGES: ReadonlySet<TypeCommande> = new Set(['energie', 'annee', 'duree', 'apport']);
 
+/**
+ * Un champ d'hypothèse : l'enveloppe du formulaire Vérifier et la commande de sa nature (montant,
+ * compteur, tuiles, échelle…). La commande écrit le texte qu'`appliquerSaisie` lit.
+ */
 export function ChampHypothese({
   descripteur: d,
   texte,
@@ -38,6 +52,7 @@ export function ChampHypothese({
   onChange,
   aide = d.aide,
   utilisePar,
+  projet,
 }: {
   descripteur: Descripteur;
   texte: string;
@@ -48,67 +63,46 @@ export function ChampHypothese({
   aide?: string | undefined;
   /** Les volets qui reprennent ce chiffre (« Utilisé par »), sous le champ. */
   utilisePar?: ReactNode;
+  /** Le projet, pour les commandes qui en dépendent (apport) ; sans lui, l'apport est un montant. */
+  projet?: ProjetEntree | undefined;
 }): JSX.Element {
-  const id = useId();
-  const document = useModeDocument();
-  const bordure = erreur === undefined ? 'border-bordure' : 'border-probleme';
-  const aToi = badge?.libelle === 'à toi';
+  const nom = `${d.chemin}${useId()}`;
+  const declare = commandeDe(d);
+  const reglage =
+    declare.type === 'apport' && projet === undefined
+      ? commandeDe({ ...d, commande: 'montant' })
+      : declare;
   return (
-    <div
-      data-champ={d.chemin}
-      className={`flex flex-col gap-1 rounded-encart p-2 ${aToi ? 'bg-accent-fond' : ''}`}
-    >
-      <span className="flex items-center justify-between gap-2 text-xs text-encre-3">
-        {/* L'icône ⓘ reste hors du libellé : la toucher n'active pas la saisie. */}
-        <span className="inline-flex items-center gap-1">
-          <label htmlFor={id}>{d.libelle}</label>
-          {d.terme !== undefined && !document && (
-            <Info sujet={d.libelle} texte={texteDuTerme(d.terme)} />
-          )}
-        </span>
-        {badge !== null && (
+    <EnveloppeChamp
+      champ={d.chemin}
+      libelle={d.libelle}
+      terme={d.terme}
+      aToi={badge?.libelle === 'à toi'}
+      badge={
+        badge === null ? undefined : (
           <Pastille ton={badge.ton} compacte>
             {badge.libelle}
           </Pastille>
-        )}
-      </span>
-      {d.options === undefined ? (
-        <span className="flex items-center gap-2">
-          <input
-            id={id}
-            name={d.chemin}
-            value={texte}
-            inputMode={d.type === 'texte' ? 'text' : 'decimal'}
-            onChange={(e) => {
-              onChange(e.target.value);
-            }}
-            className={`${CLASSE_SAISIE} ${bordure}`}
-          />
-          {d.unite !== undefined && (
-            <span className="text-xs whitespace-nowrap text-encre-3">{d.unite}</span>
-          )}
-        </span>
-      ) : (
-        <select
-          id={id}
-          name={d.chemin}
-          value={texte}
-          onChange={(e) => {
-            onChange(e.target.value);
-          }}
-          className={`${CLASSE_SAISIE} ${bordure}`}
-        >
-          {d.obligatoire !== true && <option value="">?</option>}
-          {d.options.map((o) => (
-            <option key={o.v} value={o.v}>
-              {o.l}
-            </option>
-          ))}
-        </select>
+        )
+      }
+      groupe={EN_GROUPE.has(reglage.type)}
+      libelleMasque={reglage.type === 'curseur'}
+      large={LARGES.has(reglage.type)}
+      erreur={erreur}
+      indication={aide}
+      pied={utilisePar}
+    >
+      {(ids) => (
+        <CommandeHypothese
+          descripteur={d}
+          reglage={reglage}
+          ids={ids}
+          nom={nom}
+          texte={texte}
+          onChange={onChange}
+          projet={projet}
+        />
       )}
-      {aide !== undefined && <span className="text-xs text-encre-3">{aide}</span>}
-      {erreur !== undefined && <span className="text-xs text-probleme">{erreur}</span>}
-      {utilisePar}
-    </div>
+    </EnveloppeChamp>
   );
 }
