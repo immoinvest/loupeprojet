@@ -1,0 +1,49 @@
+{
+  "feature_slug": "gerer-depenses-argent",
+  "title": "Gérer : dépenses (G5-4), prêt du bien, Argent (G5-1)",
+  "started_at": "2026-09-15T22:30:00Z",
+  "current_step": "implement",
+  "scope": "packages/gestion, apps/comptes (migration 0007, sous-routeur argent), apps/web (gestion/argent, ecrans/gerer/argent, fiche, menu, À faire), e2e",
+  "branch": "feat/gerer-depenses-argent",
+  "worktree": "C:\\Users\\errei\\Claude\\loupeprojet\\.claude\\worktrees\\admiring-stonebraker-eb756d",
+  "base": "master (12642727)",
+  "prerequis": "aucun",
+  "migration": "0007_gestion_depenses.sql (réservée), fusionnée sans application en production",
+  "steps": {
+    "discovery": {
+      "status": "completed",
+      "output": ".product/architecture/gerer-depenses-argent.md § 1"
+    },
+    "specs": {
+      "status": "completed",
+      "output": ".product/architecture/gerer-depenses-argent.md § 2",
+      "stories_count": 7
+    },
+    "architecture": {
+      "status": "completed",
+      "output": ".product/architecture/gerer-depenses-argent.md"
+    },
+    "implement": {
+      "status": "completed",
+      "stories_completed": 7,
+      "stories_total": 7,
+      "commits": [
+        "35366aaa US-1 paquet",
+        "34f0ac76 US-2 API et migration 0007",
+        "d75e272e US-3 clients, contexte, saisies",
+        "b4aa7072 US-4 à US-6 écrans",
+        "US-7 e2e et docs"
+      ]
+    },
+    "qa_tests": {
+      "status": "completed",
+      "verification": "16/09/2026 : lint, format, typecheck, 338 fichiers et 2 836 tests avec les seuils de couverture (puis +1 test 401) ; Playwright CI=1 argent, gerer-parcours, formats"
+    },
+    "security": {
+      "status": "completed",
+      "score": "96/100",
+      "notes": "garde de session et Origin hérités du routeur de gestion (401 et 403 testés), requêtes préparées filtrées par userId, bien d'un autre compte refusé dans la même instruction SQL, 404 hors compte testé pour chaque route, limite de 2 000 dépenses, journaux sans montant ni libellé, retour validé côté web, aucun HTML injecté"
+    },
+    "push": { "status": "pending" }
+  }
+}

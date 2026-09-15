@@ -84,6 +84,21 @@ describe('actionsAFaire', () => {
     ]);
   });
 
+  it('les prêts à enregistrer viennent après les biens vacants, avant les e-mails', () => {
+    const donnees: EtatGestion = {
+      ...ETAT_SEPTEMBRE,
+      biens: [...ETAT_SEPTEMBRE.biens, { ...BIEN_LICES, id: 'parking', nom: 'Parking Prado' }],
+    };
+    const actions = actionsAFaire(donnees, AUJOURDHUI, [BIEN_LICES]);
+    expect(actions.map(cleAction)).toEqual([
+      'retard-location-antoine',
+      'vacant-parking',
+      'pret-bien-lices',
+      'email-locataire-antoine',
+    ]);
+    expect(actions[2]).toEqual({ type: 'pret', bien: BIEN_LICES });
+  });
+
   it('tout va bien : rien à faire', () => {
     const donnees: EtatGestion = {
       ...ETAT_SEPTEMBRE,

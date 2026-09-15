@@ -16,6 +16,7 @@ import {
   TEXTES_A_FAIRE as T,
   voirLesAutres,
 } from '@/textes/gerer-a-faire';
+import { enregistrerLePretDe } from '@/textes/gerer-argent';
 import { TEXTES_GERER } from '@/textes/gerer-ecrans';
 import { bienEtChambre } from '@/textes/gerer-loyers';
 
@@ -45,6 +46,13 @@ function ligneDe(action: ActionAFaire): Ligne {
       return {
         vers: lienNouveauLocataire({ bienId: action.bien.id, retour: CHEMIN_GERER }),
         libelle: louerLeBien(action.bien.nom),
+        point: 'bg-accent',
+      };
+    case 'pret':
+      // La carte Argent de la fiche propose « Enregistrer ce prêt » (clic 2).
+      return {
+        vers: lienFicheBien(action.bien.id),
+        libelle: enregistrerLePretDe(action.bien.nom),
         point: 'bg-accent',
       };
     case 'email': {

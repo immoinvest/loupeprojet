@@ -17,6 +17,8 @@ export const TEXTES_MENU = {
   /** La page Loyers, mois par mois. */
   tousLesLoyers: 'Tous les loyers',
   mesLocataires: 'Mes locataires',
+  /** Loyers encaissés, dépenses, prêts et cash-flow réel (G5-1). */
+  argent: 'Argent',
   gererSansCompte: 'Gérer mes biens loués',
 } as const;
 
