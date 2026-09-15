@@ -29,6 +29,8 @@ export interface Bindings {
   readonly LIMITEUR: LimiteurDebit;
   readonly LIMITEUR_EXTRACTION: LimiteurDebit;
   readonly LIMITEUR_LECTURE: LimiteurDebit;
+  /** Suggestions d'adresse pendant la frappe ; absent (Worker d'avant) : la limite du proxy s'applique. */
+  readonly LIMITEUR_SUGGESTIONS?: LimiteurDebit | undefined;
   /** Bucket R2 `deklic-data` (juridiction UE) : référentiels publiés par `data/`. */
   readonly DONNEES: R2Minimal;
   readonly ENVIRONNEMENT?: string | undefined;
@@ -61,6 +63,8 @@ export interface Dependances {
   readonly limiteur: LimiteurDebit;
   readonly limiteurExtraction: LimiteurDebit;
   readonly limiteurLecture: LimiteurDebit;
+  /** Limite de `/proxy/adresses`, plus large : une frappe normale ne doit pas être refusée. */
+  readonly limiteurSuggestions: LimiteurDebit;
   readonly extracteur: Extracteur | null;
   /** `null` sans clé Bright Data : seules les annonces Bien'ici se lisent. */
   readonly lecteurPages: LecteurPages | null;
@@ -136,6 +140,7 @@ export function dependancesDepuisEnv(env: Bindings): Dependances {
     limiteur: env.LIMITEUR,
     limiteurExtraction: env.LIMITEUR_EXTRACTION,
     limiteurLecture: env.LIMITEUR_LECTURE,
+    limiteurSuggestions: env.LIMITEUR_SUGGESTIONS ?? env.LIMITEUR,
     extracteur,
     lecteurPages,
     donnees: lecteurR2(env.DONNEES),

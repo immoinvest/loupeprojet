@@ -145,6 +145,7 @@ export function banc(surcharges: Partial<Dependances> = {}, limite = 60): Banc {
     limiteur: limiteurMemoire(limite, 60, maintenant),
     limiteurExtraction: limiteurMemoire(limite, 60, maintenant),
     limiteurLecture: limiteurMemoire(limite, 60, maintenant),
+    limiteurSuggestions: limiteurMemoire(limite * 2, 60, maintenant),
     extracteur: extracteurFixe(),
     lecteurPages: null,
     donnees: lecteurMemoire({}),

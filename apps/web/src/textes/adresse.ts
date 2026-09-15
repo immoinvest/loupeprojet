@@ -19,7 +19,41 @@ export const PHRASES_ADRESSE = {
   introuvable: 'Adresse introuvable : vérifiez le numéro, la rue et la ville.',
   indisponible: "L'analyse est indisponible pour le moment. Réessayez dans un instant.",
   repereUtilise: 'Repère utilisé par le rapport.',
+  numeroCadastre:
+    "Ce numéro vient du cadastre : choisissez l'adresse dans la liste des suggestions, ou tapez le nom de la résidence.",
+  aucuneSuggestion:
+    "Aucune suggestion : vérifiez l'orthographe, ou tapez seulement la rue et la ville.",
+  suggestionsIndisponibles:
+    "Suggestions indisponibles pour le moment : tapez l'adresse complète puis « Analyser ».",
+  sansNumero:
+    'Analyse sans numéro : les ventes du même immeuble et du même côté de la rue ne sont pas comparées.',
+  adresseCadastre:
+    "Adresse du cadastre : les ventes de l'immeuble sont retrouvées par son numéro fiscal.",
+  numeroInvalide: 'Tapez un numéro, par exemple 144 ou 144 bis.',
 } as const;
+
+/** « Suggestions d'abord dans le département 13. » ; rien sans département. */
+export function phraseContexte(departement: string): string | null {
+  const d = departement.trim();
+  return d === '' ? null : `Suggestions d'abord dans le département ${d}.`;
+}
+
+/** Précision d'une suggestion, à droite de son libellé. */
+export function detailSuggestion(precision: string): string | undefined {
+  if (precision === 'rue') return 'rue, sans numéro';
+  if (precision === 'lieu_dit') return 'lieu-dit';
+  return undefined;
+}
+
+/** « adresse du cadastre, 3 ventes connues ». */
+export function detailCadastre(ventes: number): string {
+  return `adresse du cadastre, ${String(ventes)} vente${ventes > 1 ? 's' : ''} connue${ventes > 1 ? 's' : ''}`;
+}
+
+/** « Numéro dans Rue de l'Olivier 13005 Marseille ? ». */
+export function questionNumero(libelle: string): string {
+  return `Numéro dans ${libelle} ?`;
+}
 
 /** Le géocodage doit trouver le numéro : à la rue près, les groupes « même côté » et « en face » n'ont pas de sens. */
 export function phrasePrecision(precision: string): string | null {

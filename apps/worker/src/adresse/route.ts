@@ -79,12 +79,16 @@ async function voisinageEnCache(
   return voisinage;
 }
 
-interface VentesCommune {
+export interface VentesCommune {
   readonly millesime: string;
   readonly ventes: VenteDvf[];
 }
 
-async function ventesCommune(passe: Passe, codeInsee: string): Promise<VentesCommune | null> {
+/** Les ventes de la commune dans le millésime le plus récent publié ; `null` si la commune n'y est pas. */
+export async function ventesCommune(
+  passe: Passe,
+  codeInsee: string,
+): Promise<VentesCommune | null> {
   for (const millesime of await millesimesDvfAEssayer(passe)) {
     const texte = await lireTexte(passe, `dvf/${millesime}/${codeInsee}.csv`);
     if (texte !== null) return { millesime, ventes: lireVentes(texte) };

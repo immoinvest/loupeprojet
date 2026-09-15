@@ -1,3 +1,4 @@
+import { adresses } from './adresses';
 import { communes } from './communes';
 import { dpe } from './dpe';
 import { geocodage } from './geocodage';
@@ -10,9 +11,16 @@ export const SERVICES: Readonly<Record<string, Service>> = {
   dpe,
   risques,
   communes,
+  adresses,
 };
 
 export { definirService, type Service } from './types';
+export {
+  LIMITE_SUGGESTIONS,
+  URL_AUTOCOMPLETION,
+  type ReponseSuggestions,
+  type SuggestionAdresse,
+} from './adresses';
 export {
   LIMITE_RECHERCHE_NOM,
   URL_API_GEO_COMMUNES,

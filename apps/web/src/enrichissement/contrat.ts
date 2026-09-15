@@ -75,6 +75,46 @@ export const ReponseGeocodageSchema = z.object({
   donnees: z.object({ resultats: z.array(ResultatGeocodageSchema) }),
 });
 
+/** GET /proxy/adresses : une adresse proposée pendant la frappe (autocomplétion de la Géoplateforme). */
+export const SuggestionAdresseSchema = z.object({
+  libelle: z.string(),
+  /** `adresse` (numéro), `rue`, `lieu_dit` ou `inconnue`. */
+  precision: z.string(),
+  numero: z.string().nullable(),
+  rue: z.string().nullable(),
+  codePostal: z.string().nullable(),
+  commune: z.string().nullable(),
+  codeInsee: z.string().nullable(),
+  lat: z.number(),
+  lon: z.number(),
+  cleBan: z.string().nullable(),
+});
+export type SuggestionAdresse = z.infer<typeof SuggestionAdresseSchema>;
+
+export const ReponseSuggestionsSchema = z.object({
+  donnees: z.object({ suggestions: z.array(SuggestionAdresseSchema) }),
+});
+
+/** GET /marche/adresses-dvf : une adresse du cadastre (numéro fiscal, voie « ensemble ») lue dans les ventes. */
+export const AdresseDvfSchema = z.object({
+  libelle: z.string(),
+  numero: z.number().int().nonnegative(),
+  suffixe: z.string().nullable(),
+  codeVoie: z.string(),
+  voie: z.string(),
+  parcelles: z.array(z.string()),
+  lat: z.number(),
+  lon: z.number(),
+  ventes: z.number().int().positive(),
+});
+export type AdresseDvf = z.infer<typeof AdresseDvfSchema>;
+
+export const ReponseAdressesDvfSchema = z.object({
+  codeInsee: z.string(),
+  millesime: z.string().nullable(),
+  adresses: z.array(AdresseDvfSchema),
+});
+
 /** Une commune de l'API Géo : Paris, Lyon et Marseille entières (l'arrondissement suit le code postal). */
 export const CommuneSchema = z.object({
   nom: z.string(),
