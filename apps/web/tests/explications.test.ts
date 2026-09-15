@@ -163,7 +163,8 @@ describe('impôts et revente', () => {
   it('fiscalité : régime retenu, réserve, le moins cher des autres', () => {
     const t = n(explicationFiscalite(exemple));
     expect(t).toContain('Sur 10 ans, le meublé au réel ne coûte aucun impôt.');
-    expect(t).toContain('50 807 € restent en réserve');
+    // Amortissements déduits avant le déficit antérieur (CE, 15/04/2015) : 31 134 € en réserve.
+    expect(t).toContain('31 134 € restent en réserve');
     expect(t).toContain('Le moins cher des trois autres régimes est le nu au réel (4 235 €)');
 
     const m = n(explicationFiscalite(microBic));
@@ -183,13 +184,14 @@ describe('impôts et revente', () => {
     expect(t).toContain('diagnostics (7 695 €)');
     expect(t).toContain('capital restant dû (112 094 €)');
     expect(t).toContain('anticipé (1 878 €)');
-    expect(t).toContain('plus-value (0 €)');
-    expect(t).toContain('58 217 € net vendeur');
+    // 19 486 € d'amortissements du bâti réintégrés : plus-value 1 436,87 € × 29,081 % = 418 €.
+    expect(t).toContain('plus-value (418 €)');
+    expect(t).toContain('57 799 € net vendeur');
   });
 
   it('multiple sur apport : exemple, perte, sans mise', () => {
     const t = n(explicationMultiple(exemple));
-    expect(t).toContain('13 647 € ÷ 19 337 € = × 0,7.');
+    expect(t).toContain('13 229 € ÷ 19 337 € = × 0,7.');
     expect(t).toContain('en rend 0,7');
 
     const perte = {

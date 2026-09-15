@@ -131,7 +131,7 @@ describe('régimes : explications et ordre', () => {
 
   it('LMNP réel sans impôt : réserve d’amortissements ; nu réel : première année imposable', () => {
     expect(n(explicationRegime(r.fiscalite!.regimes.lmnp_reel, dix))).toContain(
-      'aucun impôt sur 10 ans, et 50 807 € restent en réserve',
+      'aucun impôt sur 10 ans, et 31 134 € restent en réserve',
     );
     expect(explicationRegime(r.fiscalite!.regimes.nu_reel, dix)).toContain("à partir de l'année 6");
     expect(explicationRegime(r.fiscalite!.regimes.micro_bic, dix)).toContain('50 %');

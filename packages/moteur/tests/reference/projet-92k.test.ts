@@ -203,6 +203,8 @@ describe('Projet 92K — imposition', () => {
     expect(lmnp.premiereAnneeImposable).toBe(4);
     expect(lmnp.annees[3]!.baseImposable).toBeCloseTo(168.21, 2);
     expect(lmnp.annees[4]!.impot).toBeCloseTo(3_074.29, 2);
+    // Inchangé après la correction de l'ordre d'imputation (CE, 15/04/2015) : le déficit de l'année 1
+    // (12 627,45 €) et les amortissements différés sont épuisés avant l'année 4 dans les deux ordres.
     expect(lmnp.impotTotal).toBeCloseTo(3_156.04, 2);
     expect(r.fiscalite.meilleur).toBe('lmnp_reel');
   });
