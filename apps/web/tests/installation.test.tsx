@@ -1,4 +1,4 @@
-import { act, render, screen, within } from '@testing-library/react';
+import { act, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -77,7 +77,10 @@ describe('Mon compte : Deklic sur vos appareils', () => {
       '/extension',
     );
     expect(within(appareils).queryByText(T.installee)).toBeNull();
-    expect(detecterExtension).toHaveBeenCalledWith(window);
+    // La détection part dans un effet : sous charge, elle peut n'avoir pas encore eu lieu.
+    await waitFor(() => {
+      expect(detecterExtension).toHaveBeenCalledWith(window);
+    });
     menuSansAppareils();
   });
 
