@@ -4,7 +4,10 @@ import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 
 import { AppEnMemoire } from '@/App';
+import { ESPACE_MILLIERS } from '@/composants/saisie/montant';
 import { lireProjets } from '@/stockage/projets';
+
+import { LUS, ouvrirGroupe, radioDans, saisirApport } from './aides-verifier';
 
 const CAPTURE: Capture = {
   version: 1,
@@ -46,19 +49,20 @@ describe('Nouveau projet — depuis l’extension', () => {
       expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
       expect(screen.queryByRole('alert')).not.toBeInTheDocument();
 
-      expect(screen.getByLabelText(/Prix affiché/)).toHaveValue('155000');
+      // Tout ce que l'annonce donne est replié ; seul le loyer visé reste à indiquer en haut.
+      expect(screen.queryByLabelText(/Prix affiché/)).not.toBeInTheDocument();
+      await ouvrirGroupe(utilisateur, LUS);
+      expect(screen.getByLabelText(/Prix affiché/)).toHaveValue(`155${ESPACE_MILLIERS}000`);
       expect(screen.getByLabelText(/Surface/)).toHaveValue('65');
-      expect(screen.getByLabelText(/Code postal/)).toHaveValue('13005');
-      expect(screen.getByLabelText(/^Ville/)).toHaveValue('Marseille 5e');
-      expect(screen.getByLabelText(/^DPE/)).toHaveValue('D');
-      expect(screen.getByLabelText(/Ascenseur/)).toHaveValue('non');
+      expect(screen.getByRole('combobox', { name: 'Commune' })).toHaveValue('13005 Marseille 5e');
+      expect(radioDans('DPE', 'D')).toBeChecked();
+      expect(radioDans('Ascenseur', 'Non')).toBeChecked();
       expect(screen.getByLabelText(/Charges de copropriété/)).toHaveValue('90');
       // Les honoraires ne sont pas dans la capture : lus dans la description.
-      expect(screen.getByLabelText(/honoraires d'agence/)).toHaveValue('7000');
+      expect(screen.getByLabelText(/honoraires d'agence/)).toHaveValue(`7${ESPACE_MILLIERS}000`);
 
       await utilisateur.type(screen.getByLabelText(/Loyer visé/), '980');
-      await utilisateur.clear(screen.getByLabelText(/^Apport/));
-      await utilisateur.type(screen.getByLabelText(/^Apport/), '15000');
+      await saisirApport(utilisateur, '15000');
       await utilisateur.click(screen.getByRole('button', { name: /Créer le projet/ }));
 
       await screen.findByRole(

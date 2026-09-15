@@ -1,5 +1,7 @@
 import type { ProjetEntree } from '@loupe/moteur';
 
+import type { CodeTerme } from '@/textes/glossaire';
+
 import type { TypeChamp } from './conversion';
 
 export interface Option {
@@ -24,6 +26,8 @@ export interface Descripteur {
   readonly aide?: string;
   /** Phrase d'aide composée avec le projet (« soit 10 % du coût total ») ; l'emporte sur `aide`. */
   readonly aideSelon?: (projet: ProjetEntree) => string;
+  /** Terme technique expliqué par une icône ⓘ à côté du libellé (glossaire). */
+  readonly terme?: CodeTerme;
 }
 
 export interface Groupe {

@@ -11,7 +11,7 @@ import { creerLecture } from './lecture';
 import { creerMarche } from './marche';
 import { creerProxy } from './proxy/proxy';
 
-export const VERSION_WORKER = '0.10.0';
+export const VERSION_WORKER = '0.11.0';
 
 /** L'application Hono, construite à partir de dépendances injectées (réelles en production, doubles en test). */
 export function creerApp(deps: Dependances): Hono {

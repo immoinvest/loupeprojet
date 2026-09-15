@@ -1,12 +1,27 @@
-import type { ModeLocation } from '@loupe/moteur';
-import { useState, type JSX } from 'react';
+import { VERSION_REGLES_COURANTE, obtenirRegles, type ModeLocation } from '@loupe/moteur';
+import { useEffect, useRef, useState, type JSX } from 'react';
 
-import type { AnnonceResolue, SaisieProjet } from '@/annonces';
-import { Bouton, Carte, Pastille } from '@/composants/ui';
-import { TYPES_LOCATION } from '@/textes/regimes';
+import type { AnnonceResolue, Provenance, SaisieProjet } from '@/annonces';
+import { Bouton, Carte } from '@/composants/ui';
+import { avecChambresEstimees } from '@/verifier/deductions';
+import {
+  groupeDeItem,
+  grouperChamps,
+  itemsVisibles,
+  provenanceEnvoyee,
+  resumeEstimes,
+  resumeLus,
+  resumePreciser,
+  sansValeursMasquees,
+  type NomGroupe,
+} from '@/verifier/groupes';
+import { itemDeCle, type Item } from '@/verifier/items';
+import { periodesConstruction } from '@/verifier/periodes';
 
-import { Champ } from './formulaire/Champ';
-import { EstimerLoyer, type CleLoyerEstime } from './formulaire/EstimerLoyer';
+import { Commande } from './formulaire/Commande';
+import { GRILLE, type ContexteFormulaire } from './formulaire/contexte';
+import type { CleLoyerEstime } from './formulaire/EstimerLoyer';
+import { GroupeReplie } from './formulaire/Groupe';
 import {
   apercuApport,
   nombre,
@@ -14,37 +29,12 @@ import {
   versSaisie,
   type Cle,
   type Erreurs,
+  type ProvenanceValeurs,
   type ValeursInitiales,
   type Valeurs,
 } from './formulaire/valeurs';
-import { SelecteurMode } from './hypotheses/SelecteurMode';
 
 export { valeursDepuisChamps } from './formulaire/valeurs';
-
-const OUI_NON = [
-  { v: '', l: '?' },
-  { v: 'oui', l: 'oui' },
-  { v: 'non', l: 'non' },
-];
-const DPE = [{ v: '', l: '?' }, ...['A', 'B', 'C', 'D', 'E', 'F', 'G'].map((l) => ({ v: l, l }))];
-const ETATS = [
-  { v: '', l: '?' },
-  { v: 'a_renover', l: 'À rénover' },
-  { v: 'a_rafraichir', l: 'À rafraîchir' },
-  { v: 'bon_etat', l: 'Bon état' },
-  { v: 'renove', l: 'Rénové' },
-];
-const TYPES = [
-  { v: 'appartement', l: 'Appartement' },
-  { v: 'maison', l: 'Maison' },
-];
-const TMI = [
-  { v: '0', l: '0 %' },
-  { v: '0.11', l: '11 %' },
-  { v: '0.3', l: '30 %' },
-  { v: '0.41', l: '41 %' },
-  { v: '0.45', l: '45 %' },
-];
 
 /** Ce que le formulaire dit du projet sans passer par le moteur. */
 export interface OptionsFormulaire {
@@ -52,8 +42,16 @@ export interface OptionsFormulaire {
   readonly visiteFaite: boolean;
 }
 
-const GRILLE = 'grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3';
+const PERIODES = periodesConstruction(obtenirRegles(VERSION_REGLES_COURANTE));
+const REPLIABLES = ['lus', 'estimes', 'preciser'] as const;
 
+/** Le nom de la saisie qui reçoit le focus pour une clé en erreur (code postal et ville : la commune). */
+const nomSaisie = (cle: Cle): string => (cle === 'codePostal' || cle === 'ville' ? 'commune' : cle);
+
+/**
+ * L'étape « Vérifier » : le strict minimum d'abord. Ce qui manque parmi l'essentiel est en haut ; ce que
+ * l'annonce a donné, ce qui est estimé et le facultatif sont repliés en une ligne chacun.
+ */
 export function FormulaireProjet({
   initial,
   annonce,
@@ -63,25 +61,44 @@ export function FormulaireProjet({
   annonce: AnnonceResolue | null;
   onCreer: (saisie: SaisieProjet, options: OptionsFormulaire) => void;
 }): JSX.Element {
-  const [valeurs, setValeurs] = useState<Valeurs>(initial.valeurs);
-  const [provenance, setProvenance] = useState(initial.provenance);
+  const [depart] = useState(() => avecChambresEstimees(initial.valeurs, initial.provenance));
+  const [valeurs, setValeurs] = useState<Valeurs>(depart.valeurs);
+  const [provenance, setProvenance] = useState<ProvenanceValeurs>(depart.provenance);
+  // Figé à l'ouverture : un champ ne change pas de groupe pendant qu'on le remplit.
+  const [groupes] = useState(() => grouperChamps(depart.valeurs, depart.provenance));
+  const [ouverts, setOuverts] = useState<ReadonlySet<NomGroupe>>(new Set());
   const [erreurs, setErreurs] = useState<Erreurs>({});
   const [visiteFaite, setVisiteFaite] = useState(false);
+  const [aFocaliser, setAFocaliser] = useState<Cle | null>(null);
+  const formulaire = useRef<HTMLFormElement>(null);
 
-  // Les travaux sont facultatifs : le champ n'apparaît que si l'on en prévoit.
-  const [travauxOuverts, setTravauxOuverts] = useState((nombre(initial.valeurs.travaux) ?? 0) > 0);
+  useEffect(() => {
+    if (aFocaliser === null) return;
+    formulaire.current?.querySelector<HTMLElement>(`[name="${nomSaisie(aFocaliser)}"]`)?.focus();
+    setAFocaliser(null);
+  }, [aFocaliser]);
 
   const changer = (cle: Cle, v: string): void => {
     setValeurs((prev) => ({ ...prev, [cle]: v }));
     setProvenance((prev) => ({ ...prev, [cle]: 'utilisateur' }));
   };
-  const c = { valeurs, provenance, onChange: changer };
-  const loyerEstime = (cle: CleLoyerEstime, v: string): void => {
-    setValeurs((prev) => ({ ...prev, [cle]: v }));
-    setProvenance((prev) => ({ ...prev, [cle]: 'estime' }));
+  const poser: ContexteFormulaire['poser'] = (maj, sources) => {
+    setValeurs((prev) => ({ ...prev, ...maj }));
+    setProvenance((prev) => {
+      const suivante: Partial<Record<Cle, Provenance | undefined>> = { ...prev, ...sources };
+      return Object.fromEntries(
+        Object.entries(suivante).filter(([, source]) => source !== undefined),
+      );
+    });
   };
-  const mode = valeurs.mode as ModeLocation;
-  const apport = apercuApport(valeurs, provenance);
+  const changerPieces = (v: string): void => {
+    const suivant = avecChambresEstimees(
+      { ...valeurs, pieces: v },
+      { ...provenance, pieces: 'utilisateur' },
+    );
+    setValeurs(suivant.valeurs);
+    setProvenance(suivant.provenance);
+  };
   const changerMode = (m: ModeLocation): void => {
     changer('mode', m);
     // En colocation, les chambres du bien sont une bonne première valeur des chambres louées.
@@ -89,177 +106,105 @@ export function FormulaireProjet({
       setValeurs((prev) => ({ ...prev, chambresLouees: prev.chambres }));
     }
   };
-  const basculerTravaux = (): void => {
-    if (travauxOuverts) setValeurs((prev) => ({ ...prev, travaux: '' }));
-    setTravauxOuverts(!travauxOuverts);
+  const loyerEstime = (cle: CleLoyerEstime, v: string): void => {
+    poser({ [cle]: v }, { [cle]: 'estime' });
+  };
+
+  const apport = apercuApport(valeurs, provenance);
+  const c: ContexteFormulaire = {
+    valeurs,
+    provenance,
+    erreurs,
+    apport,
+    periodes: PERIODES,
+    changer,
+    poser,
+    changerPieces,
+    changerMode,
+    loyerEstime,
+  };
+
+  const basculer = (nom: NomGroupe): void => {
+    setOuverts((prev) => {
+      const suivants = new Set(prev);
+      if (suivants.has(nom)) suivants.delete(nom);
+      else suivants.add(nom);
+      return suivants;
+    });
+  };
+
+  const creer = (): void => {
+    const envoyees = sansValeursMasquees(valeurs);
+    const trouvees = valider(envoyees);
+    setErreurs(trouvees);
+    const enErreur = Object.keys(trouvees) as Cle[];
+    const [premiere] = enErreur;
+    if (premiere === undefined) {
+      const sources = provenanceEnvoyee(valeurs, envoyees, provenance);
+      onCreer(versSaisie(envoyees, sources, annonce), { visiteFaite });
+      return;
+    }
+    // Un champ en erreur dans un groupe replié : le groupe s'ouvre et le champ prend le focus.
+    setOuverts(
+      (prev) => new Set([...prev, ...enErreur.map((cle) => groupeDeItem(groupes, itemDeCle(cle)))]),
+    );
+    setAFocaliser(premiere);
+  };
+
+  const coutTotal = apport.coutTotal;
+  const partApport =
+    coutTotal === null || coutTotal <= 0 ? null : (nombre(apport.texte) ?? 0) / coutTotal;
+  const resume = (nom: (typeof REPLIABLES)[number], items: readonly Item[]): string => {
+    if (nom === 'lus') return resumeLus(items);
+    return nom === 'estimes' ? resumeEstimes(items, valeurs, partApport) : resumePreciser(items);
   };
 
   return (
     <form
+      ref={formulaire}
       noValidate
       onSubmit={(e) => {
         e.preventDefault();
-        const trouvees = valider(valeurs);
-        setErreurs(trouvees);
-        if (Object.keys(trouvees).length === 0) {
-          onCreer(versSaisie(valeurs, provenance, annonce), { visiteFaite });
-        }
+        creer();
       }}
-      className="flex flex-col gap-5"
+      className="flex flex-col gap-4"
     >
       <Carte>
-        <h2 className="m-0 font-display text-[22px] font-semibold">Le bien</h2>
+        <h2 className="m-0 font-display text-[22px] font-semibold">L'essentiel</h2>
         <div className={GRILLE}>
-          <Champ cle="typeBien" libelle="Type de bien" options={TYPES} {...c} />
-
-          <Champ cle="prix" libelle="Prix affiché" unite="€" erreur={erreurs.prix} {...c} />
-          <Champ cle="honorairesAgence" libelle="dont honoraires d'agence" unite="€" {...c} />
-          <Champ cle="surface" libelle="Surface" unite="m²" erreur={erreurs.surface} {...c} />
-          <Champ cle="pieces" libelle="Pièces" {...c} />
-          <Champ cle="chambres" libelle="Chambres" {...c} />
-          <Champ cle="etage" libelle="Étage" {...c} />
-          <Champ cle="ascenseur" libelle="Ascenseur" options={OUI_NON} {...c} />
-          <Champ cle="annee" libelle="Année de construction" {...c} />
-          <Champ cle="dpe" libelle="DPE" options={DPE} {...c} />
-          <Champ cle="ges" libelle="GES" options={DPE} {...c} />
-          <Champ cle="etat" libelle="État" options={ETATS} {...c} />
-          <Champ cle="exterieur" libelle="Balcon ou terrasse" options={OUI_NON} {...c} />
-          <Champ cle="venduLoue" libelle="Vendu loué" options={OUI_NON} {...c} />
-          <Champ cle="codePostal" libelle="Code postal" erreur={erreurs.codePostal} {...c} />
-          <Champ cle="ville" libelle="Ville" erreur={erreurs.ville} {...c} />
-        </div>
-        <div className="flex flex-col gap-2">
-          <button
-            type="button"
-            aria-expanded={travauxOuverts}
-            aria-controls="champ-travaux"
-            onClick={basculerTravaux}
-            className="inline-flex min-h-[44px] items-center gap-2 self-start rounded-full border border-bordure bg-surface px-4 text-sm font-semibold text-encre-2 survol-fond"
-          >
-            {travauxOuverts ? '− Retirer les travaux' : '+ Ajouter des travaux'}
-          </button>
-          {travauxOuverts && (
-            <div id="champ-travaux" className={GRILLE}>
-              <Champ cle="travaux" libelle="Travaux prévus" unite="€" {...c} />
-            </div>
-          )}
+          {itemsVisibles(groupes.essentiel, valeurs).map((item) => (
+            <Commande key={item} item={item} c={c} />
+          ))}
         </div>
       </Carte>
 
-      <Carte>
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-          <h2 className="m-0 font-display text-[22px] font-semibold">
-            La location — {TYPES_LOCATION[mode]}
-          </h2>
-          {provenance.mode === 'annonce' && (
-            <Pastille ton="neutre" compacte>
-              annonce
-            </Pastille>
-          )}
-        </div>
-        <SelecteurMode nom="type-location-verifier" valeur={mode} onChange={changerMode} />
-        <div className={GRILLE}>
-          {(mode === 'nu' || mode === 'meuble' || mode === 'moyenne_duree') && (
-            <Champ
-              cle="loyerHc"
-              libelle="Loyer visé, hors charges"
-              unite="€/mois"
-              aToi
-              erreur={erreurs.loyerHc}
-              {...c}
-            />
-          )}
-          {mode === 'colocation' && (
-            <>
-              <Champ
-                cle="chambresLouees"
-                libelle="Chambres louées"
-                aToi
-                erreur={erreurs.chambresLouees}
-                {...c}
-              />
-              <Champ
-                cle="loyerChambre"
-                libelle="Loyer par chambre, hors charges"
-                unite="€/mois"
-                aToi
-                erreur={erreurs.loyerChambre}
-                {...c}
-              />
-            </>
-          )}
-          {mode === 'courte_duree' && (
-            <>
-              <Champ
-                cle="nuitee"
-                libelle="Prix de la nuitée, hors ménage"
-                unite="€"
-                aToi
-                erreur={erreurs.nuitee}
-                {...c}
-              />
-              <Champ
-                cle="nuiteesParMois"
-                libelle="Nuits louées par mois"
-                unite="nuits"
-                aToi
-                erreur={erreurs.nuiteesParMois}
-                {...c}
-              />
-            </>
-          )}
-          <EstimerLoyer valeurs={valeurs} onEstime={loyerEstime} />
-        </div>
-      </Carte>
-
-      <Carte>
-        <h2 className="m-0 font-display text-[22px] font-semibold">Vous</h2>
-        <div className={GRILLE}>
-          <Champ
-            cle="apport"
-            libelle="Apport"
-            unite="€"
-            aToi
-            erreur={erreurs.apport}
-            indication={apport.indication}
-            {...c}
-            valeurs={{ ...valeurs, apport: apport.texte }}
+      {REPLIABLES.map((nom) => {
+        const items = itemsVisibles(groupes[nom], valeurs);
+        if (items.length === 0) return null;
+        return (
+          <GroupeReplie
+            key={nom}
+            nom={nom}
+            resume={resume(nom, items)}
+            items={items}
+            ouvert={ouverts.has(nom)}
+            onBasculer={() => {
+              basculer(nom);
+            }}
+            c={c}
           />
-          <Champ
-            cle="dureeAnnees"
-            libelle="Durée du prêt"
-            unite="ans"
-            aToi
-            erreur={erreurs.dureeAnnees}
-            {...c}
-          />
-          <Champ cle="tmi" libelle="Tranche d'imposition" options={TMI} aToi {...c} />
-        </div>
-      </Carte>
-
-      <Carte>
-        <h2 className="m-0 font-display text-[22px] font-semibold">Charges connues</h2>
-        <div className={GRILLE}>
-          <Champ cle="chargesCoproMois" libelle="Charges de copropriété" unite="€/mois" {...c} />
-          <Champ cle="taxeFonciere" libelle="Taxe foncière" unite="€/an" {...c} />
-          <Champ cle="lotsCopro" libelle="Lots de copropriété" {...c} />
-          <Champ
-            cle="coproEnProcedure"
-            libelle="Copropriété en procédure"
-            options={OUI_NON}
-            {...c}
-          />
-        </div>
-      </Carte>
+        );
+      })}
 
       <label className="flex min-h-[44px] w-fit cursor-pointer items-center gap-3 rounded-encart px-2 text-[15px] survol-fond">
         <input
           type="checkbox"
+          role="switch"
           checked={visiteFaite}
           onChange={(e) => {
             setVisiteFaite(e.target.checked);
           }}
-          className="h-5 w-5 accent-accent"
+          className="relative h-6 w-11 shrink-0 cursor-pointer appearance-none rounded-full bg-encre-4 transition-colors before:absolute before:top-0.5 before:left-0.5 before:h-5 before:w-5 before:rounded-full before:bg-white before:transition-transform checked:bg-accent checked:before:translate-x-5"
         />
         <span>
           J'ai déjà visité ce bien{' '}

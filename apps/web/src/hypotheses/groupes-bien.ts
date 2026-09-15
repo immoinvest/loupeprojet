@@ -26,13 +26,29 @@ export const GROUPE_BIEN: Groupe = {
     { chemin: 'bien.chambres', libelle: 'Chambres', type: 'entier' },
     { chemin: 'bien.etage', libelle: 'Étage', type: 'entier' },
     { chemin: 'bien.ascenseur', libelle: 'Ascenseur', type: 'bool', options: OUI_NON },
-    { chemin: 'bien.annee', libelle: 'Année de construction', type: 'entier' },
-    { chemin: 'bien.dpe', libelle: 'DPE', type: 'enum', options: DPE },
+    {
+      chemin: 'bien.annee',
+      libelle: 'Année de construction',
+      type: 'entier',
+      terme: 'anneeConstruction',
+    },
+    { chemin: 'bien.dpe', libelle: 'DPE', type: 'enum', options: DPE, terme: 'dpe' },
     { chemin: 'bien.etat', libelle: 'État', type: 'enum', options: ETATS },
     { chemin: 'bien.exterieur', libelle: 'Balcon ou terrasse', type: 'bool', options: OUI_NON },
-    { chemin: 'bien.venduLoue', libelle: 'Vendu loué', type: 'bool', options: OUI_NON },
+    {
+      chemin: 'bien.venduLoue',
+      libelle: 'Vendu loué',
+      type: 'bool',
+      options: OUI_NON,
+      terme: 'venduLoue',
+    },
     { chemin: 'bien.departement', libelle: 'Département', type: 'texte', obligatoire: true },
-    { chemin: 'bien.copro.lots', libelle: 'Lots de copropriété', type: 'entier' },
+    {
+      chemin: 'bien.copro.lots',
+      libelle: 'Lots de copropriété',
+      type: 'entier',
+      terme: 'lotsCopro',
+    },
   ],
 };
 
@@ -63,6 +79,7 @@ export const GROUPE_ACHAT: Groupe = {
       libelle: 'Honoraires à la charge de l’acquéreur',
       type: 'bool',
       options: OUI_NON,
+      terme: 'honorairesAcquereur',
     },
     {
       chemin: 'hypotheses.achat.negociationTaux',
@@ -70,6 +87,7 @@ export const GROUPE_ACHAT: Groupe = {
       type: 'pourcent',
       unite: '%',
       aToi: true,
+      terme: 'negociation',
     },
     { chemin: 'hypotheses.achat.travaux', libelle: 'Travaux', type: 'euros', unite: '€' },
     {
@@ -79,8 +97,15 @@ export const GROUPE_ACHAT: Groupe = {
       options: OUI_NON,
       visibleSi: locationNueAvecTravaux,
       aide: `Déficit foncier imputable sur le revenu global porté de ${euros(DEFICIT_FONCIER.plafondRevenuGlobal)} à ${euros(DEFICIT_FONCIER.plafondRenovationEnergetique)} (nu au réel, jusqu'au 31/12/2027).`,
+      terme: 'renovationEnergetique',
     },
-    { chemin: 'hypotheses.achat.mobilier', libelle: 'Mobilier', type: 'euros', unite: '€' },
+    {
+      chemin: 'hypotheses.achat.mobilier',
+      libelle: 'Mobilier',
+      type: 'euros',
+      unite: '€',
+      terme: 'mobilier',
+    },
   ],
 };
 

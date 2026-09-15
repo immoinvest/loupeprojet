@@ -2,6 +2,7 @@ import type { z } from 'zod';
 
 import {
   ErreurWorkerSchema,
+  ReponseCommunesSchema,
   ReponseAdresseSchema,
   ReponseDpeSchema,
   ReponseExtractionSchema,
@@ -10,6 +11,7 @@ import {
   ReponseMarcheSchema,
   ReponseRisquesSchema,
   type ChampsIa,
+  type Commune,
   type DpeAdresse,
   type PageLue,
   type ReponseAdresse,
@@ -43,6 +45,9 @@ export interface Position {
   readonly lon: number;
 }
 
+/** Les communes d'un code postal à cinq chiffres, ou celles dont le nom commence par `nom`. */
+export type RechercheCommunes = { readonly codePostal: string } | { readonly nom: string };
+
 /** Ce que l'application demande au Worker. Chaque échec devient un code : l'écran décide quoi en faire. */
 export interface ClientWorker {
   extraire(texte: string): Promise<Resultat<ChampsIa>>;
@@ -51,6 +56,11 @@ export interface ClientWorker {
   analyserAdresse(parametres: ParametresAdresse): Promise<Resultat<ReponseAdresse>>;
   dpe(position: Position): Promise<Resultat<readonly DpeAdresse[]>>;
   risques(position: Position): Promise<Resultat<ReponseRisques>>;
+  /** Communes proposées pendant la saisie ; `signal` abandonne une recherche dépassée par la frappe. */
+  communes(
+    recherche: RechercheCommunes,
+    signal?: AbortSignal,
+  ): Promise<Resultat<readonly Commune[]>>;
   /** La page d'une annonce, lue par le Worker ; `signal` permet d'abandonner l'attente. */
   lirePage(url: string, signal?: AbortSignal): Promise<Resultat<PageLue>>;
 }
@@ -214,6 +224,20 @@ export function clientWorker(base: string, fetcher: Fetch): ClientWorker {
       );
       return r.ok ? { ok: true, valeur: r.valeur.donnees } : r;
     },
+    async communes(recherche, signal) {
+      const q = new URLSearchParams(
+        'codePostal' in recherche ? { codePostal: recherche.codePostal } : { nom: recherche.nom },
+      );
+      const r = await appeler(
+        fetcher,
+        `${base}/proxy/communes?${q.toString()}`,
+        { method: 'GET' },
+        ReponseCommunesSchema,
+        DELAI_DONNEES_MS,
+        signal,
+      );
+      return r.ok ? { ok: true, valeur: r.valeur.donnees.communes } : r;
+    },
     lirePage(url, signal) {
       return appeler(
         fetcher,
@@ -241,5 +265,6 @@ export const clientHorsLigne: ClientWorker = {
   analyserAdresse: () => horsLigne(),
   dpe: () => horsLigne(),
   risques: () => horsLigne(),
+  communes: () => horsLigne(),
   lirePage: () => horsLigne(),
 };

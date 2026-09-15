@@ -19,7 +19,10 @@ export interface SeuilCurseur {
 export interface PropsCurseur {
   /** Libellé visible, qui nomme aussi le curseur pour les lecteurs d'écran. */
   readonly libelle: string;
-  readonly valeur: number;
+  /** `null` : pas encore de valeur ; le pouce reste au minimum et le texte dit `texteSansValeur`. */
+  readonly valeur: number | null;
+  /** Texte d'un curseur sans valeur (défaut « Je ne sais pas »). */
+  readonly texteSansValeur?: string;
   readonly min: number;
   readonly max: number;
   /** Pas du curseur et des flèches du clavier (défaut 1). */
@@ -107,6 +110,7 @@ const DEMI_POUCE_BORDS = 'inset-x-3';
 export function Curseur({
   libelle,
   valeur,
+  texteSansValeur = 'Je ne sais pas',
   min,
   max,
   pas = 1,
@@ -136,24 +140,25 @@ export function Curseur({
     };
   }, [onValidation]);
 
+  const texte = valeur === null ? texteSansValeur : formater(valeur);
   if (document) {
     return (
       <p className="m-0 text-[15px]">
-        {libelle} <span className="font-bold">{formater(valeur)}</span>
+        {libelle} <span className="font-bold">{texte}</span>
       </p>
     );
   }
 
   const position = (v: number): string => `${String(((v - min) / (max - min)) * 100)}%`;
   const style: CSSProperties & { '--curseur-part': string } = {
-    '--curseur-part': position(valeur),
+    '--curseur-part': position(valeur ?? min),
   };
 
   const bouger = (e: ChangeEvent<HTMLInputElement>): void => {
     onChangement(Number(e.currentTarget.value));
   };
   const toucher = (e: KeyboardEvent<HTMLInputElement>): void => {
-    const visee = valeurApresTouche(e.key, valeur, min, max, pas);
+    const visee = valeurApresTouche(e.key, valeur ?? min, min, max, pas);
     if (visee === null) return;
     e.preventDefault();
     const suivante = bornerAuPas(visee, min, max, pas);
@@ -170,7 +175,7 @@ export function Curseur({
           {libelle}
         </label>
         <span className="font-display text-[26px] leading-none font-bold sm:text-[30px]">
-          {formater(valeur)}
+          {texte}
         </span>
       </div>
       <div className="relative">
@@ -198,8 +203,8 @@ export function Curseur({
           min={min}
           max={max}
           step={pas}
-          value={valeur}
-          aria-valuetext={texteValeur(valeur)}
+          value={valeur ?? min}
+          aria-valuetext={valeur === null ? texteSansValeur : texteValeur(valeur)}
           className="curseur relative"
           style={style}
           onChange={bouger}

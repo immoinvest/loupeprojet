@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-import { ouvrirExemple, ouvrirMesProjets, ouvrirVolet } from './aides';
+import { ouvrirExemple, ouvrirGroupe, ouvrirMesProjets, ouvrirVolet } from './aides';
 
 test('hypothèses : passer en colocation montre les champs du type et limite les régimes', async ({
   page,
@@ -47,8 +47,7 @@ test('vérifier : créer une courte durée à la main, nuitée et nuits par mois
 
   await page.getByLabel('Prix affiché').fill('120000');
   await page.getByLabel('Surface').fill('32');
-  await page.getByLabel('Code postal').fill('13002');
-  await page.getByLabel('Ville').fill('Marseille');
+  await page.getByLabel('Commune').fill('13002 Marseille');
 
   const types = page.getByRole('radiogroup', { name: 'Type de location' });
   // Le bouton radio est masqué (sr-only) : on clique son libellé visible, comme l'utilisateur ;
@@ -57,7 +56,8 @@ test('vérifier : créer une courte durée à la main, nuitée et nuits par mois
   await expect(page.getByLabel('Loyer visé, hors charges')).toHaveCount(0);
   await page.getByLabel('Prix de la nuitée, hors ménage').fill('70');
   await page.getByLabel('Nuits louées par mois').fill('16');
-  await page.getByLabel('Apport').fill('10000');
+  await ouvrirGroupe(page, /^Estimé pour vous/);
+  await page.getByLabel('Apport', { exact: true }).fill('10000');
   await page.getByRole('button', { name: 'Créer le projet et voir le rapport' }).click();
 
   await expect(

@@ -13,6 +13,8 @@ import {
 } from '@/textes/application';
 import { TEXTES_PARTAGE_PROJET } from '@/textes/partage';
 
+import { LUS, ouvrirGroupe } from './aides-verifier';
+
 const LEBONCOIN = 'https://www.leboncoin.fr/ad/ventes_immobilieres/2214738851';
 
 afterEach(() => {
@@ -141,7 +143,8 @@ describe('Recevoir une annonce partagée', () => {
     render(<AppEnMemoire chemin={`/projets/nouveau?texte=${encodeURIComponent(annonce)}`} />);
     await screen.findByRole('heading', { name: /Vérifiez, corrigez/ });
 
-    expect(screen.getByLabelText(/Prix affiché/)).toHaveValue('155000');
+    await ouvrirGroupe(userEvent.setup(), LUS);
+    expect(screen.getByLabelText(/Prix affiché/)).toHaveValue('155 000');
     expect(screen.getByLabelText(/^Surface/)).toHaveValue('65');
     expect(screen.queryByText(TEXTES_PARTAGE_RECU.pastille)).toBeNull();
   });

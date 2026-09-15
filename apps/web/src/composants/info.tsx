@@ -65,7 +65,6 @@ export function Info({ sujet, texte }: { sujet: string; texte: string }): JSX.El
     <span ref={racine} className="relative inline-flex shrink-0">
       <button
         type="button"
-        aria-label={`Explication : ${sujet}`}
         aria-expanded={ouvert}
         aria-controls={id}
         aria-describedby={id}
@@ -85,6 +84,8 @@ export function Info({ sujet, texte }: { sujet: string; texte: string }): JSX.El
         className="-m-2.5 inline-flex h-11 w-11 items-center justify-center rounded-full text-encre-3 survol-fond hover:text-accent aria-expanded:text-accent"
       >
         <IconeInfo size={20} aria-hidden="true" />
+        {/* Nom par le contenu, pas par aria-label : le bouton ne se fait pas passer pour le libellé du champ voisin. */}
+        <span className="sr-only">{`Explication : ${sujet}`}</span>
       </button>
       <span
         role="tooltip"
