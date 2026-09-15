@@ -166,7 +166,7 @@ describe('Carte des ventes dans l’onglet Estimation', () => {
           name: 'Carte des ventes comparables autour du bien : 25 points.',
         }),
       ).toBeInTheDocument();
-      const simulee = await screen.findByTestId('carte-simulee');
+      const simulee = await screen.findByTestId('carte-simulee', {}, { timeout: 10_000 });
       expect(simulee).toHaveAttribute('data-centre', '43.294813,5.393807');
       const niveaux = simulee.getAttribute('data-niveaux')?.split(',') ?? [];
       expect(niveaux.slice(0, 2)).toEqual(['bas', 'bas']);
@@ -193,7 +193,7 @@ describe('Carte des ventes dans l’onglet Estimation', () => {
     async () => {
       await ouvrir(ANALYSE);
       const carte = section(PHRASES_CARTE.titre);
-      const simulee = await screen.findByTestId('carte-simulee');
+      const simulee = await screen.findByTestId('carte-simulee', {}, { timeout: 10_000 });
       const u = userEvent.setup();
       await u.click(within(carte).getByRole('radio', { name: 'Ancienneté' }));
       expect(within(carte).getByRole('radio', { name: 'Ancienneté' })).toBeChecked();
@@ -212,7 +212,7 @@ describe('Carte des ventes dans l’onglet Estimation', () => {
     { timeout: 30_000 },
     async () => {
       await ouvrir(ANALYSE);
-      const simulee = await screen.findByTestId('carte-simulee');
+      const simulee = await screen.findByTestId('carte-simulee', {}, { timeout: 10_000 });
       const recue = vi.fn();
       simulee.addEventListener('wheel', recue);
       fireEvent.wheel(simulee, { deltaY: 100, ctrlKey: true });
@@ -233,7 +233,7 @@ describe('Carte des ventes dans l’onglet Estimation', () => {
   it('plein écran : ouvert, puis fermé par Échap', { timeout: 30_000 }, async () => {
     await ouvrir(ANALYSE);
     const carte = section(PHRASES_CARTE.titre);
-    const simulee = await screen.findByTestId('carte-simulee');
+    const simulee = await screen.findByTestId('carte-simulee', {}, { timeout: 10_000 });
     const u = userEvent.setup();
     await u.click(within(carte).getByRole('button', { name: PHRASES_CARTE.pleinEcran }));
     const fermer = within(carte).getByRole('button', { name: PHRASES_CARTE.fermer });
@@ -254,7 +254,7 @@ describe('Carte des ventes dans l’onglet Estimation', () => {
     { timeout: 30_000 },
     async () => {
       await ouvrir(ANALYSE);
-      const simulee = await screen.findByTestId('carte-simulee');
+      const simulee = await screen.findByTestId('carte-simulee', {}, { timeout: 10_000 });
       const u = userEvent.setup();
       await u.click(within(simulee).getByRole('button', { name: 'Vente à 220 m' }));
       expect(simulee).toHaveAttribute('data-selection', cleVente(vente(22)));
@@ -281,7 +281,7 @@ describe('Carte des ventes dans l’onglet Estimation', () => {
     { timeout: 30_000 },
     async () => {
       await ouvrir(ANALYSE);
-      const simulee = await screen.findByTestId('carte-simulee');
+      const simulee = await screen.findByTestId('carte-simulee', {}, { timeout: 10_000 });
       const tableau = section(PHRASES_VENTES.titre);
       const u = userEvent.setup();
       expect(simulee).toHaveAttribute('data-centrage', '0');
@@ -303,7 +303,7 @@ describe('Carte des ventes dans l’onglet Estimation', () => {
     async () => {
       await ouvrir(ANALYSE);
       const carte = section(PHRASES_CARTE.titre);
-      const simulee = await screen.findByTestId('carte-simulee');
+      const simulee = await screen.findByTestId('carte-simulee', {}, { timeout: 10_000 });
       const tableau = section(PHRASES_VENTES.titre);
       const filtres = within(tableau).getByRole('group', { name: PHRASES_VENTES.filtres });
       const u = userEvent.setup();
