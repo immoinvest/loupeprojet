@@ -6,6 +6,7 @@ import { Carte, GrosChiffre, Ligne, Pastille, TitreCarte } from '@/composants/ui
 import { euros, eurosSignes, pourcentage } from '@/formatage/nombres';
 import { EXPLICATIONS } from '@/textes/explications';
 import { TEXTES_FINANCEMENT as T, phraseCouverture } from '@/textes/financement';
+import { libelleTravauxCout } from '@/textes/travaux';
 
 const taux = (valeur: number | null): string => (valeur === null ? '—' : pourcentage(valeur, 2));
 
@@ -63,7 +64,9 @@ export function CarteOrigine({ r }: { r: Resultats }): JSX.Element {
       <TitreCarte>{T.origine}</TitreCarte>
       <div>
         <Ligne libelle="Prix affiché" valeur={euros(achat.prix)} />
-        {achat.travaux > 0 && <Ligne libelle="Travaux" valeur={euros(achat.travaux)} />}
+        {achat.travaux > 0 && (
+          <Ligne libelle={libelleTravauxCout(achat.travauxChoix)} valeur={euros(achat.travaux)} />
+        )}
         <Ligne
           libelle="Frais d'acquisition (droits, notaire)"
           valeur={euros(f.fraisAcquisition.total)}

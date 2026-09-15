@@ -36,6 +36,7 @@ export {
   CHAMP_LOYER_PAR_MODE,
   TMI_PAR_DEFAUT,
   TmiSchema,
+  TravauxChoixSchema,
   loyerConnu,
   regimesCompatibles,
   type Hypotheses,
@@ -51,6 +52,7 @@ export {
   type LocationNue,
   type ModeLocation,
   type Regime,
+  type TravauxChoix,
 } from './hypotheses';
 export {
   CHAMP_LOYER,
