@@ -1,0 +1,46 @@
+{
+  "feature_slug": "liens-courts-domaine",
+  "started_at": "2026-09-15T00:00:00+02:00",
+  "current_step": "push",
+  "scope": "fullstack",
+  "session": "S10 (nuit du 14-15/09/2026), auto-validation des points de contrôle",
+  "backlog": ".product/backlog/23-liens-courts-domaine.md",
+  "baseline": { "tests_passed": 2109, "tests_failed": 0 },
+  "steps": {
+    "discovery": {
+      "status": "completed",
+      "output": ".product/features/liens-courts-domaine-discovery.md"
+    },
+    "specs": {
+      "status": "completed",
+      "output": ".product/specs/liens-courts-domaine-specs.md",
+      "stories_count": 6
+    },
+    "architecture": {
+      "status": "completed",
+      "output": ".product/architecture/liens-courts-domaine.md",
+      "adr": ".product/adr/009-liens-de-partage-courts.md"
+    },
+    "implement": {
+      "status": "completed",
+      "stories_completed": 6,
+      "stories_total": 6,
+      "commits": [
+        "471bd29c US-1 origines partagées",
+        "9be509cb US-2 API /api/partage, migration 0006",
+        "8e758dda US-3 et US-4 lien court, lien compressé, bouton Partager",
+        "cddcfb68 US-5 transfert des projets, bascule",
+        "d9b66b9f docs discovery, specs, architecture, ADR-009"
+      ]
+    },
+    "qa_tests": {
+      "status": "completed",
+      "notes": "nouveaux modules à 100 % ; parcours Playwright partage-court (4) ; migration renumérotée 0006 (0005 prise par gerer-biens)"
+    },
+    "security": { "status": "completed", "score": 92 },
+    "push": {
+      "status": "in_progress",
+      "merge": "manuel, après la migration 0006 en production (Pierre) ; PR sans fusion automatique"
+    }
+  }
+}

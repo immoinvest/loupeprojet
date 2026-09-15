@@ -1,3 +1,4 @@
+import { ORIGINE_PRODUCTION_DEFAUT } from '@loupe/capture/origines';
 import { describe, expect, it, vi } from 'vitest';
 
 import {
@@ -12,7 +13,7 @@ import {
   strategiePour,
 } from '@/hors-ligne';
 
-const ORIGINE = 'https://loupeprojet.pages.dev';
+const ORIGINE = ORIGINE_PRODUCTION_DEFAUT;
 
 function requete(
   chemin: string,

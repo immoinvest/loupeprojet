@@ -1,5 +1,7 @@
-/** Adresse de Deklic en production (projet Cloudflare Pages `loupeprojet`, nom technique inchangé, ADR-005). */
-export const BASE_URL_PRODUCTION = 'https://loupeprojet.pages.dev';
+import { ORIGINE_PRODUCTION_DEFAUT } from '@loupe/capture/origines';
+
+/** Adresse de Deklic en production, sauf autre adresse injectée au build (`DEKLIC_ORIGINE`). */
+export const BASE_URL_PRODUCTION = ORIGINE_PRODUCTION_DEFAUT;
 
 interface GlobalAvecBase {
   LOUPE_BASE_URL?: string;

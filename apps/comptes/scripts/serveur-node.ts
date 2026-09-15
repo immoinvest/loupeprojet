@@ -13,6 +13,7 @@ import {
   SECRET_DEV,
 } from '../src/dependances';
 import { journalConsole } from '../src/journal';
+import { depotPartagesD1 } from '../src/partage/depot-d1';
 import { depotProjetsD1 } from '../src/projets/depot-d1';
 import { d1SurSqlite } from './d1-sqlite';
 import { appliquerMigrations } from './migration';
@@ -40,6 +41,7 @@ const app = creerApp({
   base,
   gestion: depotD1(d1SurSqlite(base).base),
   projets: depotProjetsD1(d1SurSqlite(base).base),
+  partages: depotPartagesD1(d1SurSqlite(base).base, SECRET_DEV),
   courriel: envoyeurJournal(journalConsole),
   fournisseurs: {},
   origines: [

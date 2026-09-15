@@ -1,15 +1,18 @@
 import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vite';
 
+import { origineProduction } from '@loupe/capture/origines';
+
 /**
  * Adresse de Deklic que le bouton-favori ouvrira : LOUPE_BASE_URL si fournie ; sur un aperçu
- * Cloudflare Pages (branche autre que master), l'URL de l'aperçu ; sinon la production.
+ * Cloudflare Pages (branche autre que master), l'URL de l'aperçu ; sinon la production
+ * (`DEKLIC_ORIGINE` si c'est une origine https, l'adresse historique sinon).
  */
 function baseUrl(env: NodeJS.ProcessEnv): string {
   if (env.LOUPE_BASE_URL !== undefined && env.LOUPE_BASE_URL !== '') return env.LOUPE_BASE_URL;
   const apercu = env.CF_PAGES_BRANCH !== undefined && env.CF_PAGES_BRANCH !== 'master';
   if (apercu && env.CF_PAGES_URL !== undefined && env.CF_PAGES_URL !== '') return env.CF_PAGES_URL;
-  return 'https://loupeprojet.pages.dev';
+  return origineProduction(env.DEKLIC_ORIGINE);
 }
 
 /** Construit `public/capture.js` : le bouton-favori, en un seul fichier IIFE, règles incluses. */

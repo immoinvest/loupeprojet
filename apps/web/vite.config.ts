@@ -6,7 +6,10 @@ import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { origineProduction } from '@loupe/capture/origines';
 import { defineConfig, type Plugin } from 'vite';
+
+import { drapeauLeve, remplacerOrigine } from './src/application/build';
 
 const DOSSIER_COMPTES = fileURLToPath(new URL('../comptes', import.meta.url));
 
@@ -60,8 +63,25 @@ function workerDesComptes(): Plugin {
   };
 }
 
+/** L'adresse de production (`DEKLIC_ORIGINE`) écrite dans `index.html` : l'image de partage `og:image`. */
+function origineDansLaPage(origine: string): Plugin {
+  return {
+    name: 'deklic-origine-production',
+    transformIndexHtml: (html) => remplacerOrigine(html, origine),
+  };
+}
+
+const ORIGINE = origineProduction(process.env.DEKLIC_ORIGINE);
+
 export default defineConfig({
-  plugins: [react(), tailwindcss(), workerDesComptes()],
+  plugins: [react(), tailwindcss(), workerDesComptes(), origineDansLaPage(ORIGINE)],
+  // Réglages de la bascule vers app.deklic.pro, lus par src/application/origine.ts.
+  define: {
+    'import.meta.env.DEKLIC_ORIGINE': JSON.stringify(ORIGINE),
+    'import.meta.env.DEKLIC_TRANSFERT': JSON.stringify(
+      drapeauLeve(process.env.DEKLIC_TRANSFERT) ? '1' : '',
+    ),
+  },
   resolve: {
     alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
   },

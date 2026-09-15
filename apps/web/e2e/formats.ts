@@ -260,6 +260,7 @@ export function ecransDeReference({
     { nom: 'Simulateur de prêt', chemin: '/simulateur-pret' },
     { nom: 'Simulation imprimée', chemin: '/simulateur-pret/imprimer' },
     { nom: 'Projet partagé', chemin: lienPartage },
+    { nom: 'Transfert des projets', chemin: '/transfert' },
     { nom: "Aperçu d'impression", chemin: `${projet}/imprimer` },
     { nom: 'Gérer (sans compte)', chemin: '/gerer' },
     { nom: 'Connexion', chemin: '/connexion', avant: simulerFournisseurs },

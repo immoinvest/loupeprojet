@@ -36,13 +36,22 @@ import { Hypotheses } from './ecrans/Hypotheses';
 import { Imprimer } from './ecrans/Imprimer';
 import { MesProjets } from './ecrans/MesProjets';
 import { NouveauProjet } from './ecrans/NouveauProjet';
-import { Partage } from './ecrans/Partage';
+import { Partage, PartageCourt } from './ecrans/Partage';
+import { Transfert } from './ecrans/Transfert';
+import { ORIGINE_PRODUCTION, TRANSFERT_ACTIF } from './application/origine';
+import { Bascule } from './coque/Bascule';
 import { Rapport } from './ecrans/Rapport';
 import { Revente } from './ecrans/Revente';
 import { SimulateurImprimer } from './ecrans/SimulateurImprimer';
 import { SimulateurPret } from './ecrans/SimulateurPret';
 import { Visite } from './ecrans/Visite';
 import { Adresse } from './ecrans/Adresse';
+import {
+  clientPartageMemoire,
+  clientPartageReseau,
+  type ClientPartage,
+} from './stockage/partage-client';
+import { PartageProvider } from './stockage/PartageContext';
 import { ProjetsProvider } from './stockage/ProjetsContext';
 import { clientProjetsMemoire } from './stockage/synchro/memoire';
 import { clientProjetsReseau } from './stockage/synchro/reseau';
@@ -83,6 +92,8 @@ export const routes: RouteObject[] = [
       { path: 'gerer/pret/:id', element: <PretAGerer /> },
       { path: 'compte', element: <Compte /> },
       { path: 'partage', element: <Partage /> },
+      { path: 'p/:id', element: <PartageCourt /> },
+      { path: 'transfert', element: <Transfert /> },
       { path: 'comparer', element: <Comparer /> },
       { path: 'simulateur-pret', element: <SimulateurPret /> },
       { path: 'extension', element: <Extension /> },
@@ -117,25 +128,31 @@ const CLIENT_GESTION = clientGestionReseau();
 /** La synchronisation des projets avec le compte : l'API /api/projets du même worker, même origine. */
 const CLIENT_PROJETS = clientProjetsReseau();
 
+/** Les liens de partage courts : l'API /api/partage du même worker, même origine (ADR-009). */
+const CLIENT_PARTAGE = clientPartageReseau();
+
 /** Invite d'installation et mode application, écoutés dès le chargement, avant le premier rendu. */
 const SUIVI_INSTALLATION = creerSuiviInstallation(window);
 
 export function App(): JSX.Element {
   return (
     <ProjetsProvider>
-      <ClientWorkerProvider client={CLIENT_WORKER}>
-        <CompteProvider client={CLIENT_COMPTE}>
-          <SynchroProvider client={CLIENT_PROJETS}>
-            <GestionProvider client={CLIENT_GESTION}>
-              <InstallationProvider suivi={SUIVI_INSTALLATION}>
-                <BrowserRouter>
-                  <Racine />
-                </BrowserRouter>
-              </InstallationProvider>
-            </GestionProvider>
-          </SynchroProvider>
-        </CompteProvider>
-      </ClientWorkerProvider>
+      <Bascule actif={TRANSFERT_ACTIF} origineCible={ORIGINE_PRODUCTION} />
+      <PartageProvider client={CLIENT_PARTAGE}>
+        <ClientWorkerProvider client={CLIENT_WORKER}>
+          <CompteProvider client={CLIENT_COMPTE}>
+            <SynchroProvider client={CLIENT_PROJETS}>
+              <GestionProvider client={CLIENT_GESTION}>
+                <InstallationProvider suivi={SUIVI_INSTALLATION}>
+                  <BrowserRouter>
+                    <Racine />
+                  </BrowserRouter>
+                </InstallationProvider>
+              </GestionProvider>
+            </SynchroProvider>
+          </CompteProvider>
+        </ClientWorkerProvider>
+      </PartageProvider>
     </ProjetsProvider>
   );
 }
@@ -151,6 +168,7 @@ export function AppEnMemoire({
   compte,
   gestion,
   projets,
+  partage,
   installation = suiviIndisponible,
 }: {
   chemin?: string;
@@ -159,26 +177,30 @@ export function AppEnMemoire({
   compte?: ClientCompte;
   gestion?: ClientGestion;
   projets?: ClientProjets;
+  partage?: ClientPartage;
   installation?: SuiviInstallation;
 }): JSX.Element {
   const clientCompte = useMemo(() => compte ?? clientMemoire(), [compte]);
   const clientGestion = useMemo(() => gestion ?? clientGestionMemoire(), [gestion]);
   const clientProjets = useMemo(() => projets ?? clientProjetsMemoire(), [projets]);
+  const clientPartage = useMemo(() => partage ?? clientPartageMemoire(), [partage]);
   return (
     <ProjetsProvider stockage={stockage}>
-      <ClientWorkerProvider client={client}>
-        <CompteProvider client={clientCompte}>
-          <SynchroProvider client={clientProjets} delaiMs={0}>
-            <GestionProvider client={clientGestion} stockage={stockage}>
-              <InstallationProvider suivi={installation}>
-                <MemoryRouter initialEntries={[chemin]}>
-                  <Racine />
-                </MemoryRouter>
-              </InstallationProvider>
-            </GestionProvider>
-          </SynchroProvider>
-        </CompteProvider>
-      </ClientWorkerProvider>
+      <PartageProvider client={clientPartage} stockage={stockage}>
+        <ClientWorkerProvider client={client}>
+          <CompteProvider client={clientCompte}>
+            <SynchroProvider client={clientProjets} delaiMs={0}>
+              <GestionProvider client={clientGestion} stockage={stockage}>
+                <InstallationProvider suivi={installation}>
+                  <MemoryRouter initialEntries={[chemin]}>
+                    <Racine />
+                  </MemoryRouter>
+                </InstallationProvider>
+              </GestionProvider>
+            </SynchroProvider>
+          </CompteProvider>
+        </ClientWorkerProvider>
+      </PartageProvider>
     </ProjetsProvider>
   );
 }

@@ -1,4 +1,5 @@
 import type { D1Database } from '@cloudflare/workers-types';
+import { ORIGINES_SITE as ORIGINES_DU_SITE } from '@loupe/capture/origines';
 import type { BetterAuthOptions } from 'better-auth';
 import { z } from 'zod';
 
@@ -8,6 +9,8 @@ import { lireConfigFournisseurs, type ConfigFournisseurs } from './fournisseurs'
 import type { DepotGestion } from './gestion/depot';
 import { depotD1 } from './gestion/depot-d1';
 import { journalConsole, type Journal } from './journal';
+import type { DepotPartages } from './partage/depot';
+import { depotPartagesD1 } from './partage/depot-d1';
 import type { DepotProjets } from './projets/depot';
 import { depotProjetsD1 } from './projets/depot-d1';
 
@@ -45,6 +48,8 @@ export interface Dependances {
   readonly gestion: DepotGestion;
   /** Les projets d'analyse synchronisés : la table projet de la même base D1. */
   readonly projets: DepotProjets;
+  /** Les liens de partage courts, sans compte : la table partage de la même base D1 (ADR-009). */
+  readonly partages: DepotPartages;
   /** Envoi des codes : Resend avec une clé, le journal en dev, sinon null (l'e-mail n'est pas proposé). */
   readonly courriel: Envoyeur | null;
   readonly fournisseurs: ConfigFournisseurs;
@@ -57,11 +62,11 @@ export interface Dependances {
 /** Secret de développement : jamais hors dev (le worker refuse de démarrer sans BETTER_AUTH_SECRET). */
 export const SECRET_DEV = 'deklic-dev-secret-ne-jamais-utiliser-en-production';
 
-/** Le site en production et ses previews (https://<branche ou empreinte>.loupeprojet.pages.dev). */
-export const ORIGINES_SITE: readonly string[] = [
-  'https://loupeprojet.pages.dev',
-  'https://*.loupeprojet.pages.dev',
-];
+/**
+ * Le site : l'adresse historique, app.deklic.pro (prête avant la bascule) et les previews
+ * (https://<branche ou empreinte>.loupeprojet.pages.dev).
+ */
+export const ORIGINES_SITE: readonly string[] = ORIGINES_DU_SITE;
 
 /** Le poste de développement : Vite (5173) et wrangler dev (8787). */
 export const ORIGINES_DEV: readonly string[] = ['http://localhost:5173', 'http://localhost:8787'];
@@ -137,12 +142,14 @@ export function dependancesDepuisEnv(env: Bindings): Dependances {
   const v = lireVariables(env);
   const locales = v.ENVIRONNEMENT === 'dev' ? ORIGINES_DEV : [];
   const base = lireBase(env);
+  const secret = lireSecret(v);
   return {
     environnement: v.ENVIRONNEMENT,
-    secret: lireSecret(v),
+    secret,
     base,
     gestion: depotD1(base),
     projets: depotProjetsD1(base),
+    partages: depotPartagesD1(base, secret),
     courriel: lireCourriel(v, journalConsole),
     fournisseurs: lireConfigFournisseurs(v),
     origines: [...ORIGINES_SITE, ...locales, ...lireOriginesSupplementaires(v.ORIGINES_AUTORISEES)],
