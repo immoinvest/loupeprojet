@@ -1,0 +1,32 @@
+{
+  "feature": "quittances-auto",
+  "session": "C1, nuit du 15-16/09/2026",
+  "branche": "feat/quittances-auto",
+  "migration": "0009_gestion_envois.sql",
+  "etapes": {
+    "discovery": "valide (auto-revue)",
+    "specs": "valide (auto-revue)",
+    "architecture": "valide (auto-revue) : .product/architecture/quittances-auto.md",
+    "implement": "en cours",
+    "qa": "a faire",
+    "securite": "a faire",
+    "cleanup": "a faire",
+    "pr": "a faire"
+  },
+  "stories": {
+    "US-1": "a faire",
+    "US-2": "a faire",
+    "US-3": "a faire",
+    "US-4": "a faire",
+    "US-5": "a faire"
+  },
+  "decisions": [
+    "ADR-G40 PDF sans bibliotheque",
+    "ADR-G41 jetons HMAC",
+    "ADR-G42 accord lie a l'adresse",
+    "ADR-G43 envoi differe 12 s",
+    "ADR-G44 declencheurs en intergiciel",
+    "ADR-G45 traces minimales",
+    "ADR-G46 donnees laterales et bailleur par bien"
+  ]
+}
