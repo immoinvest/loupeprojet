@@ -122,6 +122,26 @@ export const ECRANS_GERER_ARGENT: readonly Ecran[] = [
   },
 ];
 
+/** Les écrans ajoutés par `gerer-reel-declaration` (G5-3, G5-5) : Déclaration et récapitulatif imprimable. */
+export const ECRANS_GERER_DECLARATION: readonly Ecran[] = [
+  {
+    nom: 'Déclaration',
+    chemin: '/gerer/declaration',
+    ouvrir: async (page) => {
+      await expect(page.getByRole('region', { name: 'Micro-BIC' })).toBeVisible();
+    },
+  },
+  {
+    nom: 'Récapitulatif de l’année',
+    chemin: '/gerer/declaration/imprimer',
+    ouvrir: async (page) => {
+      await expect(
+        page.getByRole('heading', { level: 1, name: /^Récapitulatif de l’année/ }),
+      ).toBeVisible();
+    },
+  },
+];
+
 /** Les écrans ajoutés par `quittances-auto` (G2-1, G2-2) : accord du locataire, bailleur d'un bien. */
 export const ECRANS_QUITTANCES_AUTO: readonly Ecran[] = [
   {
@@ -180,4 +200,5 @@ export const ECRANS_GERER: readonly Ecran[] = [
   ...ECRANS_GERER_ARGENT,
   ...ECRANS_GERER_BAIL,
   ...ECRANS_QUITTANCES_AUTO,
+  ...ECRANS_GERER_DECLARATION,
 ];

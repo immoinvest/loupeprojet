@@ -5,8 +5,11 @@ import { describe, expect, it } from 'vitest';
 import { AppEnMemoire } from '@/App';
 import { clientMemoire } from '@/compte/memoire';
 import type { ClientCompte, Utilisateur } from '@/compte/types';
+import { clientGestionMemoire } from '@/gestion/memoire';
 import { ERREURS_COMPTE } from '@/textes/compte';
 import { TEXTES_MON_COMPTE } from '@/textes/mon-compte';
+
+import { ETAT_SEPTEMBRE } from './gestion-exemples';
 
 const CAMILLE: Utilisateur = {
   id: 'u_1',
@@ -151,6 +154,49 @@ describe('page Mon compte', () => {
 
     await utilisateur.click(screen.getByRole('button', { name: 'Supprimer mon compte' }));
     await utilisateur.click(screen.getByRole('button', { name: 'Oui, supprimer mon compte' }));
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Bienvenue sur Deklic' }),
+    ).toBeInTheDocument();
+    expect(await compte.session()).toBeNull();
+  });
+
+  it('sans bien géré : la confirmation ne propose pas d’export', async () => {
+    const utilisateur = userEvent.setup();
+    render(<AppEnMemoire chemin="/compte" compte={clientMemoire({ utilisateur: CAMILLE })} />);
+    await utilisateur.click(await screen.findByRole('button', { name: 'Supprimer mon compte' }));
+    expect(screen.getByRole('button', { name: 'Oui, supprimer mon compte' })).toBeInTheDocument();
+    expect(
+      screen.queryByRole('link', { name: TEXTES_MON_COMPTE.exporterGestion }),
+    ).not.toBeInTheDocument();
+    expect(screen.getByText(TEXTES_MON_COMPTE.explicationSuppression)).toBeInTheDocument();
+  });
+
+  it('avec des biens gérés (G1-9) : l’export est proposé avant « Oui, supprimer », la suppression reste à deux clics', async () => {
+    const utilisateur = userEvent.setup();
+    const compte = clientMemoire({ utilisateur: CAMILLE });
+    render(
+      <AppEnMemoire
+        chemin="/compte"
+        compte={compte}
+        gestion={clientGestionMemoire({ etat: ETAT_SEPTEMBRE })}
+      />,
+    );
+    expect(
+      await screen.findByText(
+        TEXTES_MON_COMPTE.explicationSuppressionGestion,
+        {},
+        { timeout: 10_000 },
+      ),
+    ).toBeInTheDocument();
+    await utilisateur.click(screen.getByRole('button', { name: 'Supprimer mon compte' }));
+    const exporter = screen.getByRole('link', { name: TEXTES_MON_COMPTE.exporterGestion });
+    expect(exporter).toHaveAttribute('href', '/api/gestion/export');
+    const confirmer = screen.getByRole('button', { name: 'Oui, supprimer mon compte' });
+    // L'export vient avant la confirmation dans l'ordre de lecture.
+    expect(exporter.compareDocumentPosition(confirmer) & Node.DOCUMENT_POSITION_FOLLOWING).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING,
+    );
+    await utilisateur.click(confirmer);
     expect(
       await screen.findByRole('heading', { level: 1, name: 'Bienvenue sur Deklic' }),
     ).toBeInTheDocument();

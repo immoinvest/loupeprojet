@@ -11,6 +11,11 @@ export const TEXTES_MON_COMPTE = {
   supprimer: 'Supprimer mon compte',
   explicationSuppression:
     'Votre compte, vos sessions et les projets enregistrés sur le compte sont effacés. Les projets de cet appareil restent là.',
+  explicationSuppressionGestion:
+    'Votre compte, vos sessions, les projets enregistrés sur le compte et toute votre gestion locative (biens, locataires, loyers, quittances et reçus) sont effacés. Les projets de cet appareil restent là.',
+  exporterAvant:
+    'Les quittances et reçus émis sont des pièces à conserver : exportez vos données de gestion avant de supprimer le compte.',
+  exporterGestion: 'Exporter mes données de gestion',
   confirmerSuppression: 'Oui, supprimer mon compte',
   annuler: 'Annuler',
   seReconnecter: 'Me reconnecter',
