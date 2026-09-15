@@ -13,7 +13,14 @@ import { progression, visiteDe } from '@/visite';
  * Sous les feux : les points financiers à régler avant l'offre (ils ne se vérifient pas en
  * visite), et l'état de la visite avec le lien vers sa liste ou son compte rendu.
  */
-export function CarteVigilance({ r }: { r: Resultats }): JSX.Element {
+export function CarteVigilance({
+  r,
+  className = '',
+}: {
+  r: Resultats;
+  /** Classes de la carte, par exemple `flex-1` pour finir à la hauteur de sa voisine. */
+  className?: string;
+}): JSX.Element {
   const { enregistre } = useProjetCourant();
   const document = useModeDocument();
   const visite = visiteDe(enregistre);
@@ -21,7 +28,7 @@ export function CarteVigilance({ r }: { r: Resultats }): JSX.Element {
   const phrase = phraseVisite(visite, progression(questions, visite));
   const points = r.verdict.vigilance;
   return (
-    <Carte>
+    <Carte className={className}>
       <TitreCarte>Avant de faire une offre</TitreCarte>
       {points.length === 0 ? (
         <p className="m-0 text-[15px] text-encre-2">
@@ -34,7 +41,8 @@ export function CarteVigilance({ r }: { r: Resultats }): JSX.Element {
           ))}
         </ul>
       )}
-      <p className="m-0 text-[15px]">
+      {/* En bas de la carte quand elle s'étire, comme les liens « Voir … » des autres cartes. */}
+      <p className="m-0 mt-auto text-[15px]">
         {document ? (
           <span className="font-semibold text-encre-2">{phrase}</span>
         ) : (

@@ -102,7 +102,7 @@ describe('Coque fixe : seul le contenu défile', () => {
     expect(contenu().scrollTop).toBe(120);
   });
 
-  it('le menu : les sections Analyser et Gérer défilent dans leur zone, le logo, l’aide et le profil restent en dehors', async () => {
+  it('le menu : les sections Analyser et Gérer défilent dans leur zone, le logo, les outils et le profil restent en dehors', async () => {
     await ouvrirMesProjets();
     const barre = barreLaterale();
     expect(barre).toHaveClass('overflow-hidden');
@@ -121,7 +121,7 @@ describe('Coque fixe : seul le contenu défile', () => {
 
     const horsZone = [
       within(barre).getByRole('button', { name: 'Fermer le menu' }),
-      within(barre).getByRole('navigation', { name: 'Aide' }),
+      within(barre).getByRole('navigation', { name: 'Outils' }),
       within(barre).getByText('Gratuit · 1 projet'),
     ];
     for (const element of horsZone) {
