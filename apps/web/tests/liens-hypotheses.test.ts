@@ -4,10 +4,12 @@ import { describe, expect, it } from 'vitest';
 import { appliquerSaisie, descripteurParChemin } from '@/hypotheses';
 import { effetsDe, indicateursLies } from '@/hypotheses/effet';
 import {
+  CHEMIN_CORRECTION,
   CHIFFRES_COMPARER,
   CHIFFRES_PAR_VOLET,
   VOLETS,
   adresseDansProjet,
+  cheminLoyer,
   cheminDepuisFragment,
   descripteurLie,
   lienHypothese,
@@ -30,7 +32,11 @@ function avec(projet: ProjetEntree, chemin: string, texte: string): ProjetEntree
 
 describe('tables des chiffres liés', () => {
   it('chaque chemin lié a un descripteur éditable', () => {
-    const chemins = [...VOLETS.flatMap((v) => CHIFFRES_PAR_VOLET[v]), ...CHIFFRES_COMPARER];
+    const chemins = [
+      ...VOLETS.flatMap((v) => CHIFFRES_PAR_VOLET[v]),
+      ...CHIFFRES_COMPARER,
+      ...Object.values(CHEMIN_CORRECTION),
+    ];
     for (const chemin of chemins) expect(descripteurLie(chemin), chemin).not.toBeNull();
   });
 
@@ -108,6 +114,12 @@ describe('lienHypothese', () => {
     expect(lireDepuis({ depuis: { ...bon, chemin: undefined } })).toBeNull();
     expect(lireDepuis({ depuis: { ...bon, origine: 'ailleurs' } })).toBeNull();
     expect(lireDepuis({ depuis: { ...bon, origine: 4 } })).toBeNull();
+  });
+
+  it('le champ du loyer suit le type de location', () => {
+    expect(cheminLoyer('nu')).toBe('hypotheses.location.loyerHc');
+    expect(cheminLoyer('colocation')).toBe('hypotheses.location.loyerChambre');
+    expect(cheminLoyer('courte_duree')).toBe('hypotheses.location.nuitee');
   });
 
   it('adresse d’un autre volet du même projet', () => {

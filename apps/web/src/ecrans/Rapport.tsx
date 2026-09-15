@@ -6,6 +6,7 @@ import { useModeDocument } from '@/composants/document';
 import { Info } from '@/composants/info';
 import { Page, TitrePage } from '@/composants/mise-en-page';
 import { Carte, GrosChiffre, Ligne, LienOnglet, Pastille, TitreCarte } from '@/composants/ui';
+import { ValeurHypothese } from '@/composants/ValeurHypothese';
 import { euros, eurosSignes, nombre, pourcentage } from '@/formatage/nombres';
 import { useProjetCourant } from '@/coque/ProjetLayout';
 import {
@@ -48,15 +49,27 @@ function CarteFiscalite({ r }: { r: ResultatsComplets }): JSX.Element {
       </TitreCarte>
       <GrosChiffre
         ton={retenu.impotTotal === 0 ? 'bon' : 'encre'}
-        complement={`sur ${String(annees)} ans`}
+        complement={
+          <>
+            sur{' '}
+            <ValeurHypothese chemin="hypotheses.revente.annees">{`${String(annees)} ans`}</ValeurHypothese>
+          </>
+        }
       >
         {euros(retenu.impotTotal)}
       </GrosChiffre>
       <p className="m-0 text-[15px] text-encre-2">
-        {REGIMES[f.retenu]}.{!retenu.eligible ? ' Plafond du régime dépassé.' : ''}
-        {r.projet.provenance['fiscalite.tmi'] === 'estime'
-          ? ` ${TEXTES_TRANCHE.mentionRapport} ${pourcentage(r.projet.hypotheses.fiscalite.tmi, 0)}.`
-          : ''}
+        <ValeurHypothese chemin="hypotheses.fiscalite.regime">{REGIMES[f.retenu]}</ValeurHypothese>.
+        {!retenu.eligible ? ' Plafond du régime dépassé.' : ''}
+        {r.projet.provenance['fiscalite.tmi'] === 'estime' && (
+          <>
+            {` ${TEXTES_TRANCHE.mentionRapport} `}
+            <ValeurHypothese chemin="hypotheses.fiscalite.tmi">
+              {pourcentage(r.projet.hypotheses.fiscalite.tmi, 0)}
+            </ValeurHypothese>
+            .
+          </>
+        )}
       </p>
       <div className="flex flex-wrap gap-2">
         {autres.map((x) => (
@@ -82,7 +95,14 @@ function CarteRevente({ r }: { r: ResultatsComplets }): JSX.Element {
       <TitreCarte info={<Info sujet={TITRE_REVENTE} texte={explicationRevente(r)} />}>
         {TITRE_REVENTE}
       </TitreCarte>
-      <GrosChiffre complement={`dans ${String(annees)} ans`}>
+      <GrosChiffre
+        complement={
+          <>
+            dans{' '}
+            <ValeurHypothese chemin="hypotheses.revente.annees">{`${String(annees)} ans`}</ValeurHypothese>
+          </>
+        }
+      >
         {euros(r.revente.cashNetVendeur)}
       </GrosChiffre>
       <div>

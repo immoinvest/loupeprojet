@@ -1,3 +1,5 @@
+import { CHAMP_LOYER_PAR_MODE, type CodeCorrection, type ModeLocation } from '@loupe/moteur';
+
 import { GROUPES, TOUS_LES_GROUPES } from './descripteurs';
 import type { Descripteur } from './types';
 
@@ -76,11 +78,24 @@ export const CHIFFRES_COMPARER = [
   'hypotheses.location.loyerChambre',
   'hypotheses.location.nuitee',
   'hypotheses.revente.annees',
-  'hypotheses.fiscalite.regime',
 ] as const;
+
+/** L'hypothèse derrière chaque correction de l'estimation (onglet Estimation). */
+export const CHEMIN_CORRECTION: Readonly<Record<CodeCorrection, CheminLie>> = {
+  dpe: 'bien.dpe',
+  etage: 'bien.etage',
+  exterieur: 'bien.exterieur',
+  occupation: 'bien.venduLoue',
+  charges: 'hypotheses.charges.coproAnnuel',
+};
 
 export type CheminLie =
   (typeof CHIFFRES_PAR_VOLET)[Volet][number] | (typeof CHIFFRES_COMPARER)[number];
+
+/** Le champ du loyer selon le type de location : par chambre en colocation, la nuitée en courte durée. */
+export function cheminLoyer(mode: ModeLocation): CheminLie {
+  return `hypotheses.location.${CHAMP_LOYER_PAR_MODE[mode]}`;
+}
 
 /** Le descripteur d'un champ éditable, ou `null` : jamais d'exception sur une adresse forgée. */
 export function descripteurLie(chemin: string): Descripteur | null {

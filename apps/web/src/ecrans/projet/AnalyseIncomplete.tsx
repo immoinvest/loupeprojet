@@ -1,5 +1,6 @@
 import type { Manque } from '@loupe/moteur';
 import { useState, type JSX } from 'react';
+import { Link, useLocation } from 'react-router';
 
 import { useModeDocument } from '@/composants/document';
 import { Bouton, Carte } from '@/composants/ui';
@@ -8,6 +9,8 @@ import { ChampHypothese } from '@/ecrans/hypotheses/ChampHypothese';
 import { appliquerLoyerDeReference, loyerDeReference } from '@/enrichissement';
 import { euros } from '@/formatage/nombres';
 import { appliquerSaisie, descripteurParChemin } from '@/hypotheses';
+import { lienHypothese, origineDepuisChemin } from '@/hypotheses/liens';
+import { TEXTES_LIENS } from '@/textes/liens';
 import { useProjets } from '@/stockage/ProjetsContext';
 import { MANQUES, TEXTES_A_COMPLETER } from '@/textes/manques';
 
@@ -26,6 +29,14 @@ export function AnalyseIncomplete({ manque }: { manque: Manque }): JSX.Element {
   const t = MANQUES[manque.code];
   const descripteur = descripteurParChemin(manque.champ);
   const reference = loyerDeReference(enregistre.projet);
+  // « Voir toutes les hypothèses » : Hypothèses au champ manquant, avec le retour vers ce volet.
+  const { pathname } = useLocation();
+  const origine = origineDepuisChemin(pathname);
+  const lien = lienHypothese(
+    enregistre.id,
+    manque.champ,
+    origine === null ? undefined : { pathname, origine },
+  );
 
   const appliquer = (): void => {
     const application = appliquerSaisie(enregistre.projet, descripteur, texte);
@@ -68,7 +79,7 @@ export function AnalyseIncomplete({ manque }: { manque: Manque }): JSX.Element {
               }}
             />
           </div>
-          <div className="flex flex-wrap gap-2 pb-2">
+          <div className="flex flex-wrap items-center gap-2 pb-2">
             <Bouton variante="primaire" type="submit">
               {TEXTES_A_COMPLETER.appliquer}
             </Bouton>
@@ -84,6 +95,13 @@ export function AnalyseIncomplete({ manque }: { manque: Manque }): JSX.Element {
                 {TEXTES_A_COMPLETER.boutonLoyerMarche} {euros(reference)}
               </Bouton>
             )}
+            <Link
+              to={{ pathname: lien.pathname, hash: lien.hash }}
+              state={lien.state}
+              className="inline-flex min-h-11 items-center px-2 text-[15px] font-bold no-underline survol-texte"
+            >
+              {TEXTES_LIENS.voirHypotheses}
+            </Link>
           </div>
         </form>
       )}

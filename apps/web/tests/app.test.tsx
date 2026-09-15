@@ -95,7 +95,10 @@ describe('Rapport', () => {
     expect(n(screen.getByText('1 203 €', { selector: 'span' }).textContent)).toBe('1 203 €');
     expect(screen.getByText('Levier 1 · Négocier')).toBeInTheDocument();
     expect(n(screen.getByText(/119 663 €/).textContent)).toContain('119 663 €');
-    expect(screen.getByText(/Meublé au réel\./)).toBeInTheDocument();
+    // Le régime retenu mène à son champ (lien d'hypothèse) : carte de l'impôt et cascade.
+    expect(
+      screen.getAllByRole('link', { name: 'Meublé au réel — modifier Régime retenu' }).length,
+    ).toBeGreaterThan(0);
     // Le cash net de revente : en gros chiffre, et dans le texte de sa bulle (fermée).
     expect(n(screen.getByText('58 217 €').textContent)).toContain('58 217 €');
   });

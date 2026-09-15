@@ -1,10 +1,11 @@
 import type { Regime } from '@loupe/moteur';
 import type { JSX } from 'react';
-import { Link } from 'react-router';
 
 import { useModeDocument } from '@/composants/document';
 import { Page, TitrePage } from '@/composants/mise-en-page';
 import { Carte } from '@/composants/ui';
+import { ValeurHypothese } from '@/composants/ValeurHypothese';
+import { pourcentage } from '@/formatage/nombres';
 import { useProjetCourant } from '@/coque/ProjetLayout';
 import { appliquerSaisie, descripteurParChemin } from '@/hypotheses';
 import { useProjets } from '@/stockage/ProjetsContext';
@@ -81,18 +82,21 @@ export function Fiscalite(): JSX.Element {
         </Carte>
       )}
 
-      <p className="m-0 flex flex-wrap items-center gap-x-3 text-[15px] text-encre-2">
-        <span>
-          Pendant la location, puis à la revente dans <strong>{annees} ans</strong>.
-        </span>
-        {!document && (
-          <Link
-            to="../revente"
-            relative="path"
-            className="inline-flex min-h-11 items-center font-bold no-underline survol-texte"
-          >
-            Changer l'horizon
-          </Link>
+      <p className="m-0 text-[15px] text-encre-2">
+        Pendant la location, puis à la revente dans{' '}
+        <strong>
+          <ValeurHypothese chemin="hypotheses.revente.annees">{`${String(annees)} ans`}</ValeurHypothese>
+        </strong>
+        .
+        {!trancheEstimee && (
+          <>
+            {' '}
+            {TEXTES_TRANCHE.titre} :{' '}
+            <ValeurHypothese chemin="hypotheses.fiscalite.tmi">
+              {pourcentage(r.projet.hypotheses.fiscalite.tmi, 0)}
+            </ValeurHypothese>
+            .
+          </>
         )}
       </p>
 

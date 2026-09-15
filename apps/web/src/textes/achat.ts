@@ -16,9 +16,13 @@ export function libelleTauxNegociation(taux: number): string {
 
 /** « Prix affiché 155 000 € », ou « Prix affiché 155 000 € · retenu 147 250 € (−5 %) ». */
 export function phrasePrixAffiche(achat: ResumeAchat): string {
-  const affiche = `Prix affiché ${euros(achat.prixAffiche)}`;
-  if (achat.negociationTaux === 0) return affiche;
-  return `${affiche} · retenu ${euros(achat.prixRetenu)} (${libelleTauxNegociation(achat.negociationTaux)})`;
+  return `Prix affiché ${euros(achat.prixAffiche)}${suitePrixAffiche(achat)}`;
+}
+
+/** Ce qui suit le prix affiché : « · retenu 147 250 € (négocié −5 %) », ou rien sans négociation. */
+export function suitePrixAffiche(achat: ResumeAchat): string {
+  if (achat.negociationTaux === 0) return '';
+  return ` · retenu ${euros(achat.prixRetenu)} (${libelleTauxNegociation(achat.negociationTaux)})`;
 }
 
 /** « Prix retenu 155 000 € », ou « Prix retenu 147 250 € · −7 750 € (−5 %) ». */
