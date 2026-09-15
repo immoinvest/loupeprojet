@@ -6,6 +6,7 @@ import { reponseErreur } from './erreurs';
 import { disponibles } from './fournisseurs';
 import { garde } from './garde';
 import { routeurGestion } from './gestion/routes';
+import { routeurPartage } from './partage/routes';
 import { routeurProjets } from './projets/routes';
 
 export const VERSION_COMPTES = '0.3.0';
@@ -34,6 +35,9 @@ export function creerApp(deps: Dependances): Hono {
 
   // Projets d'analyse synchronisés avec le compte : même garde, même base (feature sync-projets).
   app.route('/api/projets', routeurProjets(deps, auth));
+
+  // Liens de partage courts, sans compte (ADR-009) : même base, sans garde de session.
+  app.route('/api/partage', routeurPartage(deps));
 
   app.notFound(() => reponseErreur(404, 'INTROUVABLE'));
   app.onError((erreur, c) => {

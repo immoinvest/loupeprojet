@@ -7,6 +7,7 @@ import { optionsAuth } from '../src/auth';
 import type { Dependances } from '../src/dependances';
 import { depotD1 } from '../src/gestion/depot-d1';
 import { journalMemoire } from '../src/journal';
+import { depotPartagesD1 } from '../src/partage/depot-d1';
 import { depotProjetsD1 } from '../src/projets/depot-d1';
 import { d1SurSqlite } from './d1-sqlite';
 
@@ -23,6 +24,7 @@ export const MIGRATIONS: readonly { readonly fichier: string; readonly table: st
   { fichier: '0003_gestion_documents.sql', table: 'gestion_document' },
   { fichier: '0004_projets.sql', table: 'projet' },
   { fichier: '0005_gestion_changements.sql', table: 'gestion_changement' },
+  { fichier: '0006_partage.sql', table: 'partage' },
 ];
 
 export function lireMigrationNommee(fichier: string): string {
@@ -53,6 +55,7 @@ export async function compilerMigration(): Promise<string> {
     base: new DatabaseSync(':memory:'),
     gestion: depotD1(d1SurSqlite(new DatabaseSync(':memory:')).base),
     projets: depotProjetsD1(d1SurSqlite(new DatabaseSync(':memory:')).base),
+    partages: depotPartagesD1(d1SurSqlite(new DatabaseSync(':memory:')).base, ''),
     courriel: null,
     fournisseurs: {},
     origines: [],

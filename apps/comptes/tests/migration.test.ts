@@ -118,7 +118,25 @@ describe('migration 0002 : gestion locative', () => {
       '0003_gestion_documents.sql',
       '0004_projets.sql',
       '0005_gestion_changements.sql',
+      '0006_partage.sql',
     ]);
+  });
+
+  it('migration 0006 : un identifiant de lien unique, sans compte ni clé étrangère', () => {
+    const base = new DatabaseSync(':memory:');
+    appliquerMigrations(base);
+    const inserer = base.prepare(
+      'insert into partage (id, contenu, creeLe, expireLe, jetonHash, ipHash) values (?, ?, ?, ?, ?, ?)',
+    );
+    inserer.run('7fK2qA9x', '{}', 'a', 'b', 'h', null);
+    expect(() => inserer.run('7fK2qA9x', '{}', 'a', 'b', 'h', null)).toThrow(
+      /UNIQUE constraint failed/,
+    );
+    expect(() =>
+      base
+        .prepare('insert into partage (id, contenu, creeLe, expireLe) values (?, ?, ?, ?)')
+        .run('x', '{}', 'a', 'b'),
+    ).toThrow(/NOT NULL constraint failed/);
   });
 
   it('migration 0004 : pas de projet sans compte, un même identifiant par compte', () => {
@@ -211,6 +229,7 @@ describe('migration 0003 : paiements partiels, bailleur, documents', () => {
       'gestion_location',
       'gestion_paiement',
       'gestion_preference',
+      'partage',
       'projet',
       'session',
       'user',
@@ -227,6 +246,8 @@ describe('migration 0003 : paiements partiels, bailleur, documents', () => {
       'gestion_location_userId_idx',
       'gestion_paiement_location_periode_idx',
       'gestion_paiement_userId_idx',
+      'partage_expireLe_idx',
+      'partage_ipHash_creeLe_idx',
       'projet_userId_revision_idx',
       'session_userId_idx',
       'verification_identifier_idx',

@@ -13,6 +13,7 @@
     "migration:generer": "vite-node scripts/generer-migration.ts"
   },
   "dependencies": {
+    "@loupe/capture": "*",
     "@loupe/gestion": "*",
     "@loupe/projets": "*",
     "better-auth": "^1.7.4",

@@ -141,6 +141,24 @@ describe('origines connues', () => {
       false,
     );
   });
+
+  it('le site est connu à ses deux adresses et sur ses previews, jamais par imitation', () => {
+    for (const origine of [
+      'https://loupeprojet.pages.dev',
+      'https://app.deklic.pro',
+      'https://feat-partage.loupeprojet.pages.dev',
+    ]) {
+      expect(origineConnue(origine, ORIGINES_SITE)).toBe(true);
+    }
+    for (const origine of [
+      'https://app.deklic.pro.pirate.example',
+      'http://app.deklic.pro',
+      'https://x.app.deklic.pro',
+      'http://localhost:5173',
+    ]) {
+      expect(origineConnue(origine, ORIGINES_SITE)).toBe(false);
+    }
+  });
 });
 
 describe('courriel', () => {
