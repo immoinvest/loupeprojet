@@ -1,0 +1,46 @@
+{
+  "feature_slug": "adresse-suggestions",
+  "title": "Estimation : adresses du cadastre (numéros fiscaux 9xxx) et suggestions d'adresse pendant la frappe",
+  "started_at": "2026-09-15T03:20:00Z",
+  "current_step": "implement",
+  "scope": "apps/worker/src/{adresse,services,app.ts,dependances.ts}, wrangler.toml, apps/web/src/{enrichissement,composants/saisie/ChampAdresse.tsx,ecrans/Adresse.tsx,ecrans/adresse/NumeroRue.tsx,textes/adresse.ts}, tests Worker et web, e2e",
+  "branch": "feat/adresse-suggestions",
+  "base": "master (a52a721, PR #81 formulaire-rapide fusionnée)",
+  "backlog": ".product/backlog/21-adresse-autocompletion.md",
+  "session": "session de nuit S6 : auto-validation des points de contrôle",
+  "steps": {
+    "discovery": {
+      "status": "completed",
+      "output": ".product/features/adresse-suggestions-discovery.md"
+    },
+    "specs": {
+      "status": "completed",
+      "output": ".product/specs/adresse-suggestions-specs.md",
+      "stories_count": 5
+    },
+    "architecture": {
+      "status": "completed",
+      "output": ".product/architecture/adresse-suggestions.md"
+    },
+    "implement": {
+      "status": "in_progress",
+      "stories_completed": 1,
+      "stories_total": 5,
+      "commits": []
+    },
+    "qa_tests": { "status": "pending" },
+    "security": { "status": "pending" },
+    "push": { "status": "pending" }
+  },
+  "prerequis": {
+    "feat/formulaire-rapide": "PR #81 fusionnée (Combobox, service communes, option enCache des services)",
+    "fix/meme-adresse-dvf": "PR #50 fusionnée avant le début de la session"
+  },
+  "decisions": {
+    "proxy": "suggestions par le Worker (décision 1 de la fiche), service adresses avec enCache = false : aucune lecture ni écriture KV",
+    "debit": "limiteur dédié LIMITEUR_SUGGESTIONS 120/min/IP sur /proxy/adresses",
+    "cadastre": "liste des adresses DVF regroupée par commune, en KV 24 h (une écriture par commune)",
+    "choix": "choisir une suggestion lance l'analyse (décision 2) ; rue sans numéro : « Numéro ? » avec « Je ne connais pas le numéro » (décision 3)",
+    "carte": "placer le bien sur la carte : laissé à la fiche 15 (proposition de la fiche)"
+  }
+}
