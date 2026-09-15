@@ -94,9 +94,32 @@ export const ECRANS_GERER_BIENS: readonly Ecran[] = [
   },
 ];
 
+/** Les écrans ajoutés par `gerer-bail-revision` (B1) : réglages de la révision, conformité, lettre. */
+export const ECRANS_GERER_BAIL: readonly Ecran[] = [
+  {
+    nom: 'Conformité et révision (réglages ouverts)',
+    chemin: '/gerer/biens/bien-lices',
+    ouvrir: async (page) => {
+      await expect(page.getByRole('heading', { level: 2, name: 'Conformité' })).toBeVisible();
+      await page.getByRole('button', { name: 'Réglages', exact: true }).click();
+      await expect(page.getByRole('form', { name: 'Réglages de la révision' })).toBeVisible();
+    },
+  },
+  {
+    nom: 'Lettre de révision imprimable',
+    chemin: '/gerer/lettres/lettre-julie',
+    ouvrir: async (page) => {
+      await expect(
+        page.getByRole('heading', { level: 1, name: 'Révision annuelle du loyer' }),
+      ).toBeVisible();
+    },
+  },
+];
+
 /** Tous les écrans de Gérer mesurés après « Gérer (loyers du mois) », feature par feature. */
 export const ECRANS_GERER: readonly Ecran[] = [
   ...ECRANS_QUITTANCES_FICHES,
   ...ECRANS_GERER_BIENS,
   ...ECRANS_GERER_PARCOURS,
+  ...ECRANS_GERER_BAIL,
 ];

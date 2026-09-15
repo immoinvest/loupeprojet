@@ -6,6 +6,8 @@ import { Page, TitrePage } from '@/composants/mise-en-page';
 import { Carte, TitreCarte } from '@/composants/ui';
 import { dateEnLettres, moisEnLettres, montant } from '@/gestion/format';
 import { actionsAFaire } from '@/gestion/a-faire';
+import { useBail } from '@/gestion/bail/BailContext';
+import { actionsBail } from '@/gestion/bail/vue';
 import {
   avecMajuscule,
   entreesAVenir,
@@ -27,7 +29,12 @@ export function LoyersDuMois({ donnees }: { donnees: EtatGestion }): JSX.Element
   const periode = periodeDe(aujourdhui);
   const resume = resumeDuMois(donnees, periode, aujourdhui);
   // Retards, biens vacants, e-mails manquants : déduits des données, jamais stockés (ADR-G22).
-  const aFaire = actionsAFaire(donnees, aujourdhui);
+  const bail = useBail();
+  const aFaire = actionsAFaire(
+    donnees,
+    aujourdhui,
+    bail.donnees === null ? [] : actionsBail(donnees, bail.donnees, aujourdhui),
+  );
   const enCours = donnees.locations.filter((l) => l.fin === undefined || l.fin >= aujourdhui);
   const aVenir = enCours
     .filter((l) => periodeDe(l.debut) > periode)

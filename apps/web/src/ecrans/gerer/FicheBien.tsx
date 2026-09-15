@@ -1,6 +1,6 @@
 import { jourLocal, type BienGere, type EtatGestion } from '@loupe/gestion';
-import type { JSX } from 'react';
-import { Link, Navigate, useParams, useSearchParams } from 'react-router';
+import { Fragment, useEffect, type JSX } from 'react';
+import { Link, Navigate, useLocation, useParams, useSearchParams } from 'react-router';
 
 import { Chapo, Page, TitrePage } from '@/composants/mise-en-page';
 import { Carte, LienBouton, Pastille } from '@/composants/ui';
@@ -16,6 +16,8 @@ import { statutDuBien, TEXTES_FICHE as F, TONS_BIEN } from '@/textes/gerer-fiche
 import { titreLouer } from '@/textes/gerer-louer';
 import { TEXTES_PARCOURS as P } from '@/textes/gerer-parcours';
 
+import { CarteConformite } from './bail/CarteConformite';
+import { CarteRevision } from './bail/CarteRevision';
 import { EcranAttente } from './EcranAttente';
 import { FilAriane } from './FilAriane';
 import { CarteLocation } from './fiche/CarteLocation';
@@ -33,7 +35,14 @@ function Fiche({
   readonly bien: BienGere;
 }): JSX.Element {
   const [recherche] = useSearchParams();
+  const { hash } = useLocation();
   const aujourdhui = jourLocal(new Date());
+  // Arrivée depuis « À faire » (#conformite, #revision-…) : la carte visée vient en vue.
+  useEffect(() => {
+    if (hash === '') return;
+    const cible = document.getElementById(decodeURIComponent(hash.slice(1)));
+    if (typeof cible?.scrollIntoView === 'function') cible.scrollIntoView({ block: 'start' });
+  }, [hash]);
   const actions = useActionsLoyer(aujourdhui);
   const etat = etatDuBien(donnees, bien.id, aujourdhui);
   const vacant = etat.statut === 'vacant';
@@ -75,16 +84,25 @@ function Fiche({
         </Carte>
       ) : (
         etat.locations.map((location) => (
-          <CarteLocation
-            key={location.id}
-            location={location}
-            donnees={donnees}
-            aujourdhui={aujourdhui}
-            // `?modifier=<location>` (montant d'une ligne de loyer) : « Modifier » déjà ouvert.
-            modifierOuvert={recherche.get('modifier') === location.id}
-          />
+          <Fragment key={location.id}>
+            <CarteLocation
+              location={location}
+              donnees={donnees}
+              aujourdhui={aujourdhui}
+              // `?modifier=<location>` (montant d'une ligne de loyer) : « Modifier » déjà ouvert.
+              modifierOuvert={recherche.get('modifier') === location.id}
+            />
+            <CarteRevision
+              location={location}
+              donnees={donnees}
+              aujourdhui={aujourdhui}
+              retour={lienFicheBien(bien.id)}
+            />
+          </Fragment>
         ))
       )}
+
+      <CarteConformite bien={bien} donnees={donnees} aujourdhui={aujourdhui} />
 
       <div>
         <LienBouton to={louer} variante={vacant ? 'primaire' : 'secondaire'}>

@@ -9,6 +9,10 @@ import { clientMemoire } from './compte/memoire';
 import { clientReseau } from './compte/reseau';
 import type { ClientCompte } from './compte/types';
 import { AppLayout } from './coque/AppLayout';
+import { BailProvider } from './gestion/bail/BailContext';
+import { clientBailIndisponible } from './gestion/bail/memoire';
+import { clientBailReseau } from './gestion/bail/reseau';
+import type { ClientBail } from './gestion/bail/types';
 import { GestionProvider } from './gestion/GestionContext';
 import { clientGestionMemoire } from './gestion/memoire';
 import { clientGestionReseau } from './gestion/reseau';
@@ -25,6 +29,7 @@ import { Extension } from './ecrans/Extension';
 import { Financement } from './ecrans/Financement';
 import { Fiscalite } from './ecrans/Fiscalite';
 import { AjouterMain } from './ecrans/gerer/AjouterMain';
+import { ImprimerLettre } from './ecrans/gerer/bail/ImprimerLettre';
 import { FicheBien } from './ecrans/gerer/FicheBien';
 import { FicheLocataire } from './ecrans/gerer/FicheLocataire';
 import { Gerer } from './ecrans/gerer/Gerer';
@@ -65,6 +70,7 @@ export const routes: RouteObject[] = [
   { path: 'connexion', element: <Connexion /> },
   { path: 'projets/:id/imprimer', element: <Imprimer /> },
   { path: 'gerer/documents/:id', element: <ImprimerDocument /> },
+  { path: 'gerer/lettres/:id', element: <ImprimerLettre /> },
   { path: 'simulateur-pret/imprimer', element: <SimulateurImprimer /> },
   {
     element: <AppLayout />,
@@ -129,6 +135,9 @@ const CLIENT_COMPTE = clientReseau();
 /** Le client de la gestion locative : l'API /api/gestion du même worker, même origine. */
 const CLIENT_GESTION = clientGestionReseau();
 
+/** La vie du bail (DPE, révision, lettres) : l'API /api/gestion/bail du même worker, même origine. */
+const CLIENT_BAIL = clientBailReseau();
+
 /** La synchronisation des projets avec le compte : l'API /api/projets du même worker, même origine. */
 const CLIENT_PROJETS = clientProjetsReseau();
 
@@ -147,11 +156,13 @@ export function App(): JSX.Element {
           <CompteProvider client={CLIENT_COMPTE}>
             <SynchroProvider client={CLIENT_PROJETS}>
               <GestionProvider client={CLIENT_GESTION}>
-                <InstallationProvider suivi={SUIVI_INSTALLATION}>
-                  <BrowserRouter>
-                    <Racine />
-                  </BrowserRouter>
-                </InstallationProvider>
+                <BailProvider client={CLIENT_BAIL}>
+                  <InstallationProvider suivi={SUIVI_INSTALLATION}>
+                    <BrowserRouter>
+                      <Racine />
+                    </BrowserRouter>
+                  </InstallationProvider>
+                </BailProvider>
               </GestionProvider>
             </SynchroProvider>
           </CompteProvider>
@@ -171,6 +182,8 @@ export function AppEnMemoire({
   client = clientHorsLigne,
   compte,
   gestion,
+  // Comme en production sans la migration 0008 : les écrans existants de Gérer restent inchangés.
+  bail = clientBailIndisponible,
   projets,
   partage,
   installation = suiviIndisponible,
@@ -180,6 +193,7 @@ export function AppEnMemoire({
   client?: ClientWorker;
   compte?: ClientCompte;
   gestion?: ClientGestion;
+  bail?: ClientBail;
   projets?: ClientProjets;
   partage?: ClientPartage;
   installation?: SuiviInstallation;
@@ -195,11 +209,13 @@ export function AppEnMemoire({
           <CompteProvider client={clientCompte}>
             <SynchroProvider client={clientProjets} delaiMs={0}>
               <GestionProvider client={clientGestion} stockage={stockage}>
-                <InstallationProvider suivi={installation}>
-                  <MemoryRouter initialEntries={[chemin]}>
-                    <Racine />
-                  </MemoryRouter>
-                </InstallationProvider>
+                <BailProvider client={bail}>
+                  <InstallationProvider suivi={installation}>
+                    <MemoryRouter initialEntries={[chemin]}>
+                      <Racine />
+                    </MemoryRouter>
+                  </InstallationProvider>
+                </BailProvider>
               </GestionProvider>
             </SynchroProvider>
           </CompteProvider>
