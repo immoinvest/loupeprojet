@@ -21,9 +21,24 @@
       "status": "completed",
       "output": ".product/architecture/impot-total-revente.md"
     },
-    "implement": { "status": "in_progress", "stories_completed": 1, "stories_total": 5 },
-    "qa_tests": { "status": "pending" },
-    "security": { "status": "pending" },
+    "implement": {
+      "status": "completed",
+      "stories_completed": 5,
+      "stories_total": 5,
+      "note": "US-1 moteur, US-2 et US-3 écran Fiscalité, US-4 Comparer et Méthode, US-5 docs ; correctif d'arrondi de l'abattement (8,25 %) vu dans le navigateur"
+    },
+    "refactor": {
+      "status": "completed",
+      "note": "Fiscalite.tsx découpé en ecrans/fiscalite/{CarteRegime,ImpotsEmpiles,Frise,TableauRevente,TableauAnnees}.tsx ; projecteurs renommés ProjectionRegime ; logique pure du moteur hors des index (bilan.ts, par-regime.ts) pour être mesurée par la couverture"
+    },
+    "qa_tests": {
+      "status": "completed",
+      "note": "moteur : 13 tests de revente par régime (92K à 10 ans calculé à la main, non-régression de la revente retenue pour les quatre régimes, revente à perte, 22 et 30 ans), schéma Zod ; web : regimes.test.ts (impôt dû aux amortissements, reprise du déficit, lignes du tableau, explication), écran Fiscalité (trois lignes, pastilles, deux tableaux, lien), Comparer (16 indicateurs) ; e2e : l'impôt à la revente suit l'horizon (0 € à 10 ans, 7 759 € à 20 ans au réel dont 6 323 € dus aux amortissements, 1 436 € en micro-BIC) ; vérifié dans le navigateur (aperçu du worktree)"
+    },
+    "security": {
+      "status": "completed",
+      "note": "aucune donnée nouvelle ni appel réseau ; calcul pur dans le navigateur ; l'horizon passe toujours par appliquerSaisie et le schéma Zod ; aucun innerHTML ; pastille factuelle, pas de conseil"
+    },
     "push": { "status": "pending" }
   },
   "decisions": {
