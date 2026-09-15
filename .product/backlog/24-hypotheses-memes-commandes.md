@@ -18,18 +18,18 @@ Documents : [discovery](../features/hypotheses-commandes-discovery.md) · [specs
 
 Dans Hypothèses et Financement, chaque champ utilise **la même commande que dans Vérifier** :
 
-| Nature du champ                                                               | Commande                                             |
-| ----------------------------------------------------------------------------- | ---------------------------------------------------- |
-| Montants (prix, loyers, charges, taxe foncière, travaux, mobilier, frais)     | `ChampMontant` : « 155 000 », pavé numérique, unité  |
-| Nombres entiers (pièces, chambres, étage « RDC », lots, chambres louées)      | `Compteur` − / +                                     |
-| Oui / non (ascenseur, balcon, copro en procédure, meublé de tourisme classé…) | `Tuiles` Oui / Non (effaçables)                      |
-| Choix courts (état, tranche d'imposition, régime)                             | `Tuiles`                                             |
-| DPE                                                                           | `EchelleEnergie`                                     |
-| Année de construction                                                         | périodes ou année exacte                             |
-| Durée du prêt                                                                 | tuiles 15 · 20 · 25 ans · Autre                      |
-| Apport                                                                        | tuiles 0 · 10 · 20 % · Autre + montant               |
-| Nuits louées par mois                                                         | curseur avec taux d'occupation                       |
-| Taux (nominal, assurance, vacance, gestion, évolution du prix…)               | saisie texte (négatif et centièmes acceptés)         |
+| Nature du champ                                                               | Commande                                            |
+| ----------------------------------------------------------------------------- | --------------------------------------------------- |
+| Montants (prix, loyers, charges, taxe foncière, travaux, mobilier, frais)     | `ChampMontant` : « 155 000 », pavé numérique, unité |
+| Nombres entiers (pièces, chambres, étage « RDC », lots, chambres louées)      | `Compteur` − / +                                    |
+| Oui / non (ascenseur, balcon, copro en procédure, meublé de tourisme classé…) | `Tuiles` Oui / Non (effaçables)                     |
+| Choix courts (état, tranche d'imposition, régime)                             | `Tuiles`                                            |
+| DPE                                                                           | `EchelleEnergie`                                    |
+| Année de construction                                                         | périodes ou année exacte                            |
+| Durée du prêt                                                                 | tuiles 15 · 20 · 25 ans · Autre                     |
+| Apport                                                                        | tuiles 0 · 10 · 20 % · Autre + montant              |
+| Nuits louées par mois                                                         | curseur avec taux d'occupation                      |
+| Taux (nominal, assurance, vacance, gestion, évolution du prix…)               | saisie texte (négatif et centièmes acceptés)        |
 
 Rien ne change dans les calculs ni dans les projets enregistrés. Mode document : valeur lisible, aucune commande.
 

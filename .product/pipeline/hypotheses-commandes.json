@@ -1,7 +1,7 @@
 {
   "feature_slug": "hypotheses-commandes",
   "started_at": "2026-09-15T08:00:00Z",
-  "current_step": "implement",
+  "current_step": "push",
   "scope": "frontend_only",
   "backlog": "24",
   "steps": {
@@ -20,13 +20,19 @@
       "output": ".product/architecture/hypotheses-commandes.md"
     },
     "implement": {
-      "status": "in_progress",
-      "stories_completed": 0,
+      "status": "completed",
+      "stories_completed": 6,
       "stories_total": 6,
-      "commits": []
+      "commits": ["1b75e1d0", "55276813", "5f256d8d", "f2087b27", "93cf5e00", "a6d03030"]
     },
-    "qa_tests": { "status": "pending" },
-    "security": { "status": "pending" },
-    "push": { "status": "pending" }
+    "qa_tests": {
+      "status": "completed",
+      "notes": "Suite complète : 2 572 tests, 7 dépassements de 30 s sous charge ; les 5 fichiers concernés passent relancés seuls. 25 nouveaux tests ; commandes.ts couvert par le glob hypotheses/**."
+    },
+    "security": {
+      "status": "completed",
+      "notes": "Aucune entrée réseau, stockage ni dépendance nouveaux ; saisies toujours validées par appliquerSaisie et Zod ; pas de dangerouslySetInnerHTML."
+    },
+    "push": { "status": "in_progress" }
   }
 }
