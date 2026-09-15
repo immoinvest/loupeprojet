@@ -64,7 +64,7 @@ test('menu et en-tête restent en vue quand le contenu défile ; changer de vole
     await expect(navigation.getByRole('link', { name: 'Nouveau projet' })).toBeInViewport({
       ratio: 1,
     });
-    await expect(page.getByRole('link', { name: 'Extension navigateur' })).toBeInViewport({
+    await expect(page.getByRole('link', { name: 'Simulateur de prêt' })).toBeInViewport({
       ratio: 1,
     });
     await expect(page.getByText('Gratuit · 1 projet')).toBeInViewport({ ratio: 1 });
