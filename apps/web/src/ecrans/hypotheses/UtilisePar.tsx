@@ -30,7 +30,7 @@ export function UtilisePar({ chemin }: { chemin: string }): JSX.Element | null {
           {i > 0 && <span aria-hidden="true">·</span>}
           <Link
             to={adresse}
-            className="font-semibold no-underline survol-texte pointer-coarse:inline-flex pointer-coarse:min-h-11 pointer-coarse:items-center"
+            className="font-semibold no-underline survol-texte pointer-coarse:inline-flex pointer-coarse:min-h-11 pointer-coarse:min-w-11 pointer-coarse:items-center pointer-coarse:justify-center"
           >
             {LIBELLES_ORIGINE[volet]}
           </Link>
