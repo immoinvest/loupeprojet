@@ -35,4 +35,5 @@ export const ERREURS_LOUER: Readonly<Record<ChampLouer, string>> = {
   entree: ERREURS_SAISIE.entree,
   jourLoyer: ERREURS_SAISIE.jourLoyer,
   depot: ERREURS_SAISIE.depot,
+  apl: ERREURS_SAISIE.apl,
 };

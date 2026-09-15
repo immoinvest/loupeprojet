@@ -1,4 +1,4 @@
-import type { BienGere, Locataire, LocationGeree, Paiement } from '../src/schemas';
+import type { BienGere, Changement, Locataire, LocationGeree, Paiement } from '../src/schemas';
 
 /** Données de test réalistes : les biens et locataires de la maquette de Gérer. */
 
@@ -30,6 +30,8 @@ export interface OptionsLocation {
   readonly jourLoyer?: number;
   readonly loyerHorsCharges?: number;
   readonly charges?: number;
+  readonly apl?: number;
+  readonly changements?: readonly Changement[];
 }
 
 /** Par défaut : le T2 de Julie, meublé, 650 € + 50 € de charges, loyer le 5, depuis le 1er octobre 2025. */
@@ -45,7 +47,9 @@ export function location(id: string, options: OptionsLocation = {}): LocationGer
     jourLoyer: options.jourLoyer ?? 5,
     loyerHorsCharges: options.loyerHorsCharges ?? 65_000,
     charges: options.charges ?? 5_000,
+    ...(options.apl === undefined ? {} : { apl: options.apl }),
     depot: 130_000,
+    ...(options.changements === undefined ? {} : { changements: [...options.changements] }),
     creeLe: CREE_LE,
   };
   return options.fin === undefined ? base : { ...base, fin: options.fin };

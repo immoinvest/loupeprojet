@@ -13,6 +13,7 @@ export const TEXTES_MENU = {
   loyersDuMois: 'Loyers du mois',
   /** La page Loyers, mois par mois. */
   tousLesLoyers: 'Tous les loyers',
+  mesLocataires: 'Mes locataires',
   gererSansCompte: 'Gérer mes biens loués',
 } as const;
 
@@ -22,6 +23,11 @@ export const PROJETS_DANS_LE_MENU = 3;
 /** « Mes projets · 7 », « Mes projets · 0 ». */
 export function mesProjets(nombre: number): string {
   return `${TEXTES_MENU.mesProjets} · ${String(nombre)}`;
+}
+
+/** « Mes biens · 4 » dans le menu Gérer ; sans le nombre tant que les biens ne sont pas chargés. */
+export function mesBiens(nombre: number | null): string {
+  return nombre === null ? 'Mes biens' : `Mes biens · ${String(nombre)}`;
 }
 
 /** « 1 loyer en retard », « 3 loyers en retard ». */
@@ -67,6 +73,7 @@ export const ERREURS_GESTION: Readonly<Record<CodeErreurGestion, string>> = {
   loyer_non_regle: 'Ce loyer n’est pas encore entièrement reçu : pas de quittance pour l’instant.',
   loyer_regle: 'Ce paiement solde le mois : c’est la quittance qui l’atteste.',
   bien_occupe: 'Ce bien (ou cette chambre) est déjà loué à ces dates.',
+  periode_payee: 'Ce mois a déjà reçu un paiement : choisissez un mois suivant.',
   fin_avant_entree: 'La sortie ne peut pas précéder l’entrée.',
   paiements_apres_sortie:
     'Des loyers sont déjà reçus pour des mois après cette sortie : annulez-les d’abord.',

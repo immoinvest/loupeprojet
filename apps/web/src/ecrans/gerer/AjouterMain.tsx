@@ -163,6 +163,12 @@ export function AjouterMain(): JSX.Element {
                 unite={T.uniteEuros}
                 placeholder={DEPOT_PAR_DEFAUT[saisie.type]}
               />
+              <ChampGerer
+                {...champ('apl', T.apl)}
+                inputMode="decimal"
+                unite={T.uniteCharges}
+                aide={T.aideApl}
+              />
               <div className="flex flex-col gap-1.5">
                 <label htmlFor="saisie-typeBien" className="text-sm font-semibold text-encre-2">
                   {T.typeBien}

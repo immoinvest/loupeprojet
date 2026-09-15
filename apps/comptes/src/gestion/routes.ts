@@ -3,6 +3,8 @@ import {
   DemandeDocumentSchema,
   FinLocationSchema,
   IdentiteBailleurSchema,
+  ModificationLocationSchema,
+  NouveauLocataireSchema,
   NouveauPaiementSchema,
   NouvelleOccupationSchema,
   PreferencesMenuSchema,
@@ -33,6 +35,7 @@ const STATUTS_METIER = {
   FIN_AVANT_ENTREE: 400,
   PAIEMENTS_APRES_SORTIE: 409,
   BIEN_OCCUPE: 409,
+  PERIODE_PAYEE: 409,
 } as const;
 
 /** Le corps JSON validé par le schéma, ou `null` s'il est illisible ou invalide. */
@@ -99,12 +102,33 @@ export function routeurGestion(
     c.json(await deps.gestion.document(c.get('userId'), c.req.param('id'))),
   );
 
+  app.patch('/locations/:id', async (c) => {
+    const modification = await lireCorps(c, ModificationLocationSchema);
+    if (modification === null) return reponseErreur(400, 'CHAMPS_INVALIDES');
+    return c.json(
+      await deps.gestion.modifierLocation(c.get('userId'), c.req.param('id'), modification),
+    );
+  });
+
   app.post('/locations/:id/fin', async (c) => {
     const corps = await lireCorps(c, FinLocationSchema);
     if (corps === null) return reponseErreur(400, 'CHAMPS_INVALIDES');
     return c.json(
       await deps.gestion.terminerLocation(c.get('userId'), c.req.param('id'), corps.fin),
     );
+  });
+
+  app.patch('/locataires/:id', async (c) => {
+    const locataire = await lireCorps(c, NouveauLocataireSchema);
+    if (locataire === null) return reponseErreur(400, 'CHAMPS_INVALIDES');
+    return c.json(
+      await deps.gestion.modifierLocataire(c.get('userId'), c.req.param('id'), locataire),
+    );
+  });
+
+  app.delete('/biens/:id', async (c) => {
+    await deps.gestion.supprimerBien(c.get('userId'), c.req.param('id'));
+    return c.body(null, 204);
   });
 
   app.post('/biens/:id/locations', async (c) => {

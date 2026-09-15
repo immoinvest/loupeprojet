@@ -100,21 +100,21 @@ Régimes compatibles avec le type : nue et meublée comparent les quatre régime
 
 ## Cas de référence : « Ton Excel → Loupe » (projet 92K, prix 155 000 €)
 
-| Indicateur                       | Excel    | Loupe attendu | Pourquoi                                                                |
-| -------------------------------- | -------- | ------------- | ----------------------------------------------------------------------- |
-| Frais d'acquisition              | 14 725 € | 11 832 €      | formule réelle (DMTO 5 %, hors agence) vs 9,5 %                         |
-| Mensualité assurance comprise    | 813 €    | 807 €         | PMT sur taux nominal                                                    |
-| TAEG assurance incluse           | 3,74 %   | 4,13 %        | résolution exacte                                                       |
-| Taux d'effort                    | 38,7 %   | 23,8 %        | HCSF, loyers à 70 %                                                     |
-| Cash-flow mensuel                | +497 €   | +349 €        | vacance 1 mois/an                                                       |
-| Impôt micro-BIC année 1          | 5 211 €  | 5 365 €       | PS 18,6 %                                                               |
-| Impôt réel année 1               | 0 €      | 0 €           | déficit scindé : 13 589 € (10 ans) + 6 250 € d'amortissement (illimité) |
-| Première année imposable au réel | 4,2      | 6             | projection annuelle                                                     |
-| Plus-value taxable (5 ans)       | 27 579 € | 23 971 €      | réintégration immeuble seulement                                        |
-| IRA                              | 4 083 €  | 2 183 €       | min des deux plafonds                                                   |
-| TRI                              | 50,9 %   | 18,9 %        | vrai TRI (apport 22 682, 4 × 4 193, sortie 27 588)                      |
+Colocation meublée 4 × 460 €, 25 ans à 3,30 %, apport 14 725 €, LMNP réel, revente à 5 ans. Entrées relevées dans l'Excel le 15/09/2026 (`packages/moteur/src/exemples/projet-92k.ts`), vérifiées par `packages/moteur/tests/reference/projet-92k.test.ts`. Détail, sources et verdicts : `.product/audit/excel-92k.md` et `.product/audit/calculs-2026-09.md`.
 
-**Manque pour en faire des tests** : les entrées complètes de l'Excel (apport, durée, taux, loyer, charges, TMI, travaux, mobilier, département). À récupérer auprès de Pierre.
+| Indicateur                       | Excel    | Deklic   | Pourquoi                                                                            |
+| -------------------------------- | -------- | -------- | ----------------------------------------------------------------------------------- |
+| Frais d'acquisition              | 14 725 € | 11 832 € | formule réelle (DMTO 5 %, hors agence) vs 9,5 % du FAI                              |
+| Mensualité assurance comprise    | 813 €    | 807 €    | PMT au taux nominal (l'Excel prend 3,37 %)                                          |
+| TAEG assurance incluse           | 3,74 %   | 4,13 %   | taux actuariel résolu                                                               |
+| Taux d'effort                    | 38,7 %   | 23,8 %   | HCSF, loyers à 70 %                                                                 |
+| Cash-flow mensuel                | +497 €   | +583 €   | pas de ligne « Autre » (80 €) au moteur, mensualité au taux nominal                 |
+| Impôt micro-BIC année 1          | 5 211 €  | 5 365 €  | PS 18,6 %                                                                           |
+| Impôt réel année 1               | 0 €      | 0 €      | déficit 12 627 € (10 ans) + 5 300 € d'amortissements différés (art. 39 C)           |
+| Première année imposable au réel | 4,2      | 4        | projection annuelle (168 € de base en année 4)                                      |
+| Plus-value taxable (5 ans)       | 27 579 € | 0 €      | ni IRA ni mobilier dans le calcul, réintégration du bâti seul, forfait travaux 15 % |
+| IRA (5 ans)                      | 4 083 €  | 2 199 €  | min des deux plafonds                                                               |
+| TRI (5 ans)                      | 50,9 %   | 31,2 %   | vrai TRI (l'Excel divise le multiple sur apport par les années)                     |
 
 Corrections au modèle Excel : travaux soit en charge soit amortis, jamais les deux ; PS BIC 18,6 % (LFSS 2026), fonciers et plus-values 17,2 %.
 
@@ -146,7 +146,7 @@ Page de l'annonce (structuré) · texte (LLM) · Géoplateforme (géocodage) · 
 - **v1 (8–10 sem.)** : extension + bookmarklet (LBC, SeLoger, Bien'ici, PAP, Logic-Immo) ; pipeline complet ; saisie manuelle ; 5 volets, verdict, scénarios ; sauvegarde locale, PDF, partage ; test réel Marseille/Lyon/Aix.
 - **v1.5 (+4)** : compte (livré : code e-mail, Google, Apple), sync (livrée : projets sur le compte) ; comparaison 2–5 projets, statuts ; Safari iOS, partage mobile (livré en avance : application installable et hors ligne, « Partager → Deklic » sur Android, partage natif d'un projet ; iPhone : installation par Safari, sans cible de partage) ; portails supplémentaires.
 - **v2 (+6)** : historique de prix (extension), loyers infra-communaux, registre copro, DPE PDF, photos → travaux (option).
-- **Gérer (gestion locative après l'achat, épic G1 à G5, `specs/gestion-locative-specs.md`)** : commencé le 14/09/2026 avec le socle G1a (menu Analyser et Gérer, « Mon menu », biens, locataires, locations, loyers du mois, « Ajouter à la main » et « J'ai acheté ce bien » en deux clics, compte requis) ; puis G1b `quittances-fiches` (paiement en partie, quittance et reçu figés et imprimables selon l'art. 21 de la loi du 6 juillet 1989, identité du bailleur demandée une fois, page Loyers mois par mois, fiche d'un bien et fin de location, louer un bien vacant ou une autre chambre, plusieurs locataires par bien, export JSON ; paiements confirmés à la main en attendant la banque) ; ensuite G3 banque (détection des virements de loyer par les API bancaires, comme Rentila), G2 quittances automatiques, G4 vie du bail, G5 bilan et déclaration.
+- **Gérer (gestion locative après l'achat, épic G1 à G5, `specs/gestion-locative-specs.md`)** : commencé le 14/09/2026 avec le socle G1a (menu Analyser et Gérer, « Mon menu », biens, locataires, locations, loyers du mois, « Ajouter à la main » et « J'ai acheté ce bien » en deux clics, compte requis) ; puis G1b `quittances-fiches` (paiement en partie, quittance et reçu figés et imprimables selon l'art. 21 de la loi du 6 juillet 1989, identité du bailleur demandée une fois, page Loyers mois par mois, fiche d'un bien et fin de location, louer un bien vacant ou une autre chambre, plusieurs locataires par bien, export JSON ; paiements confirmés à la main en attendant la banque) ; puis G1c `gerer-biens` (pages Mes biens et Mes locataires, loyer modifié à partir d'un mois non payé, suppression d'un bien confirmée par son nom, APL versée au bailleur sur la ligne du loyer et la quittance, nom et e-mail du locataire corrigés) ; ensuite G3 banque (détection des virements de loyer par les API bancaires, comme Rentila), G2 quittances automatiques, G4 vie du bail, G5 bilan et déclaration.
 - **v3** : liasse LMNP, monétisation (affiliation, export premium).
 - **Pas en v1** : recherche/alertes d'annonces, chat IA, SCI IS, carte au-delà des DVF, app native.
 
