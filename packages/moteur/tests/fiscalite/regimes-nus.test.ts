@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { calculerCashflow } from '../../src/cashflow';
 import { projetExemple } from '../../src/exemples/t3-marseille';
 import { calculerFinancement } from '../../src/financement';
+import { assuranceAnnee, interetsPayesAnnee } from '../../src/fiscalite/interets';
 import { projeterMicroFoncier } from '../../src/fiscalite/micro-foncier';
 import { projeterNuReel } from '../../src/fiscalite/nu-reel';
 import type { ContexteFiscal } from '../../src/fiscalite/types';
@@ -63,28 +64,39 @@ describe('nu réel — T3 Marseille (loyer nu 850 €)', () => {
   const ctx = contexteNu(projetExemple, 'nu_reel', 850);
   const r = projeterNuReel(ctx);
 
-  it('année 1 : travaux déduits, déficit dû aux intérêts → rien sur le revenu global, tout reporté', () => {
+  it('année 1 : travaux et frais d’emprunt déduits ; les loyers compensent d’abord le financier (§ 110)', () => {
     const a1 = r.annees[0]!;
-    // charges : 3 085 (ni comptable ni CFE) + assurance 402,5 + travaux 6 000 = 9 487,5 < loyers 9 611,5
-    expect(a1.chargesDeductibles).toBeCloseTo(
-      3_085 + ctx.financement.assuranceMensuelle * 12 + 6_000,
-      4,
-    );
+    const assurance = ctx.financement.assuranceMensuelle * 12;
+    // charges : 3 085 (ni comptable ni CFE) + travaux 6 000 + assurance + dossier 850 + garantie 1 500
+    expect(a1.chargesDeductibles).toBeCloseTo(3_085 + 6_000 + assurance + 2_350, 4);
     expect(a1.interetsDeductibles).toBeGreaterThan(5_000);
-    expect(a1.deficitImputeRevenuGlobal).toBe(0);
-    expect(a1.impot).toBe(0);
+    // Loyers 9 611,5 − financier (intérêts + assurance + 2 350) = reste ; autres charges 9 085 − reste.
+    const reste = Math.max(0, a1.recettes - a1.interetsDeductibles - assurance - 2_350);
+    const revenuGlobal = Math.min(9_085 - reste, 10_700);
+    expect(revenuGlobal).toBeGreaterThan(0);
+    expect(a1.deficitImputeRevenuGlobal).toBeCloseTo(revenuGlobal, 6);
+    expect(a1.impot).toBeCloseTo(-revenuGlobal * 0.3, 6);
     expect(a1.stocks.deficitReportable).toBeCloseTo(
-      a1.chargesDeductibles + a1.interetsDeductibles - a1.recettes,
+      a1.chargesDeductibles + a1.interetsDeductibles - a1.recettes - revenuGlobal,
       6,
     );
   });
 
-  it('les années suivantes imputent le report puis paient IR + PS 17,2 %', () => {
+  it('les années suivantes imputent le report éventuel puis paient IR + PS 17,2 %', () => {
     const imposable = r.annees.find((a) => a.impot > 0)!;
     expect(r.premiereAnneeImposable).toBe(imposable.annee);
     expect(imposable.prelevementsSociaux).toBeCloseTo(imposable.baseImposable * 0.172, 6);
     expect(imposable.impotRevenu).toBeCloseTo(imposable.baseImposable * 0.3, 6);
-    expect(r.annees[1]!.deficitImpute).toBeGreaterThan(0);
+    // Le report de l'année 1 (part financière non compensée) est imputé l'année 2, dans la limite du stock.
+    const a1 = r.annees[0]!;
+    const a2 = r.annees[1]!;
+    expect(a2.deficitImpute).toBeCloseTo(
+      Math.min(
+        a1.stocks.deficitReportable,
+        Math.max(0, a2.recettes - a2.chargesDeductibles - a2.interetsDeductibles),
+      ),
+      6,
+    );
     expect(r.amortissementsImmeubleDeduits).toBe(0);
   });
 });
@@ -97,7 +109,10 @@ describe('nu réel — déficit foncier imputable sur le revenu global', () => {
       850,
     );
     const a1 = projeterNuReel(ctx).annees[0]!;
-    const horsInterets = a1.chargesDeductibles - a1.recettes; // ≈ 13 876 € − 9 611 € > 0, < 10 700 ?
+    // Autres charges 3 085 + travaux 20 000 = 23 085 € ; les loyers compensent d'abord intérêts,
+    // assurance et frais d'emprunt (§ 110), le reste des autres charges est plafonné à 10 700 €.
+    const financier = a1.interetsDeductibles + ctx.financement.assuranceMensuelle * 12 + 2_350;
+    const horsInterets = 23_085 - Math.max(0, a1.recettes - financier);
     const attendu = Math.min(horsInterets, 10_700);
     expect(a1.deficitImputeRevenuGlobal).toBeCloseTo(attendu, 6);
     expect(a1.impotRevenu).toBeCloseTo(-attendu * 0.3, 6);
@@ -136,8 +151,69 @@ describe('nu réel — déficit foncier imputable sur le revenu global', () => {
       850,
     );
     const a1 = projeterNuReel(ctx).annees[0]!;
-    expect(a1.baseImposable).toBeCloseTo(a1.recettes - 3_085, 4);
+    // Frais de dossier (850 €) et de garantie (1 500 €) de l'hypothèse du prêt déduits l'année 1,
+    // comme en LMNP réel (fraisDeductiblesAnnee1).
+    expect(a1.baseImposable).toBeCloseTo(a1.recettes - 3_085 - 2_350, 4);
     expect(a1.impot).toBeCloseTo(a1.baseImposable * 0.472, 4);
     expect(a1.stocks.deficitReportable).toBe(0);
+  });
+});
+
+/**
+ * Frais d'emprunt et ordre de compensation, calculé à la main. Sources :
+ * - BOI-RFPI-BASE-20-80 § 190 : frais de constitution du dossier et sommes versées à un organisme de
+ *   cautionnement déductibles « au même titre que le montant des intérêts » ; § 240 : charges de
+ *   l'année où elles sont payées (frais payés à la signature : année 1) ;
+ * - BOI-RFPI-BASE-30-20 § 110 (16/09/2025) : « Le revenu brut est toujours réputé compenser
+ *   prioritairement les intérêts d'emprunt » ; les frais accessoires à un emprunt (frais de dossier,
+ *   assurance) sont assimilés aux intérêts : leur part du déficit se reporte 10 ans sur les revenus
+ *   fonciers, seule la part des autres charges s'impute sur le revenu global (10 700 €). Exemple du
+ *   § 110 : revenu brut 1 500, autres charges 2 900, intérêts 2 100 → 600 reportés, 2 900 imputés.
+ *
+ * Cas du moteur : T3 Marseille en nu, sans travaux, recettes R = 9 000 € et charges d'exploitation
+ * C = 10 000 € posées chaque année ; I = intérêts payés l'année 1, A = assurance de l'année 1, frais
+ * d'emprunt 850 + 1 500 = 2 350 €. Financier F = I + A + 2 350 (sous R, vérifié) :
+ * - charges déductibles = C + A + 2 350 ;
+ * - revenu global = min(C − (R − F), 10 700) ; report = (C + F − R) − revenu global.
+ */
+describe('nu réel — frais d’emprunt et ordre de compensation (BOI-RFPI-BASE-30-20 § 110)', () => {
+  const base = contexteNu(
+    variante({ achat: { ...projetExemple.hypotheses.achat, travaux: 0 } }),
+    'nu_reel',
+    850,
+  );
+  const ctx: ContexteFiscal = {
+    ...base,
+    cashflow: {
+      ...base.cashflow,
+      parAnnee: base.cashflow.parAnnee
+        .slice(0, 2)
+        .map((a) => ({ ...a, recettes: 9_000, charges: 10_000 })),
+    },
+  };
+  const interets = interetsPayesAnnee(base.financement, 1);
+  const assurance = assuranceAnnee(base.financement, 1);
+  const financier = interets + assurance + 850 + 1_500;
+  const [a1, a2] = projeterNuReel(ctx).annees;
+
+  it('précondition : intérêts, assurance et frais de l’année 1 restent sous les recettes', () => {
+    expect(interets).toBeGreaterThan(5_000);
+    expect(financier).toBeLessThan(9_000);
+  });
+
+  it('année 1 : frais de dossier (850 €) et de garantie (1 500 €) déduits avec l’assurance', () => {
+    expect(a1!.chargesDeductibles).toBeCloseTo(10_000 + assurance + 2_350, 6);
+    expect(a1!.interetsDeductibles).toBeCloseTo(interets, 6);
+  });
+
+  it('le revenu brut compense d’abord intérêts, assurance et frais ; le reste des charges va au revenu global', () => {
+    const revenuGlobal = Math.min(10_000 - (9_000 - financier), 10_700);
+    expect(a1!.deficitImputeRevenuGlobal).toBeCloseTo(revenuGlobal, 6);
+    expect(a1!.stocks.deficitReportable).toBeCloseTo(10_000 + financier - 9_000 - revenuGlobal, 6);
+    expect(a1!.impotRevenu).toBeCloseTo(-revenuGlobal * 0.3, 6);
+  });
+
+  it('année 2 : plus de frais de dossier ni de garantie, l’assurance reste', () => {
+    expect(a2!.chargesDeductibles).toBeCloseTo(10_000 + assuranceAnnee(base.financement, 2), 6);
   });
 });

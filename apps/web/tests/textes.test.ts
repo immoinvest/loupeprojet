@@ -133,7 +133,8 @@ describe('régimes : explications et ordre', () => {
     expect(n(explicationRegime(r.fiscalite!.regimes.lmnp_reel, dix))).toContain(
       'aucun impôt sur 10 ans, et 31 134 € restent en réserve',
     );
-    expect(explicationRegime(r.fiscalite!.regimes.nu_reel, dix)).toContain("à partir de l'année 6");
+    // Le déficit de l'année 1 part sur le revenu global (§ 110) : plus de report, imposé dès l'année 2.
+    expect(explicationRegime(r.fiscalite!.regimes.nu_reel, dix)).toContain("à partir de l'année 2");
     expect(explicationRegime(r.fiscalite!.regimes.micro_bic, dix)).toContain('50 %');
     expect(explicationRegime(r.fiscalite!.regimes.micro_foncier, dix)).toContain('30 %');
   });
