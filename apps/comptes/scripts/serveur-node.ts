@@ -9,11 +9,15 @@ import { depotArgentD1 } from '../src/gestion/argent/depot-d1';
 import { depotBailD1 } from '../src/gestion/bail/depot-d1';
 import { depotFinBailD1 } from '../src/gestion/fin-bail/depot-d1';
 import { depotD1 } from '../src/gestion/depot-d1';
+import { depotEnvoisD1 } from '../src/gestion/envois/depot-d1';
+import { signatureJetons } from '../src/gestion/envois/jetons';
 import {
+  attendreVraiment,
   lireOriginesSupplementaires,
   ORIGINES_DEV,
   ORIGINES_SITE,
   SECRET_DEV,
+  SECRET_JETONS_DEV,
 } from '../src/dependances';
 import { journalConsole } from '../src/journal';
 import { depotPartagesD1 } from '../src/partage/depot-d1';
@@ -48,6 +52,9 @@ const app = creerApp({
   finBail: depotFinBailD1(d1SurSqlite(base).base),
   projets: depotProjetsD1(d1SurSqlite(base).base),
   partages: depotPartagesD1(d1SurSqlite(base).base, SECRET_DEV),
+  envois: depotEnvoisD1(d1SurSqlite(base).base),
+  jetons: signatureJetons(SECRET_JETONS_DEV),
+  attendre: attendreVraiment,
   courriel: envoyeurJournal(journalConsole),
   fournisseurs: {},
   origines: [

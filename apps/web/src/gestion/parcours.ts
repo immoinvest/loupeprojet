@@ -12,6 +12,8 @@ export const CHEMIN_MES_BIENS = '/gerer/biens';
 export const CHEMIN_MES_LOCATAIRES = '/gerer/locataires';
 export const CHEMIN_NOUVEAU_LOCATAIRE = '/gerer/locataires/nouveau';
 export const CHEMIN_LOYERS = '/gerer/loyers';
+/** La page publique où le locataire accepte les quittances par e-mail ; le jeton suit dans le fragment. */
+export const CHEMIN_ACCORD = '/accord';
 
 function avecRecherche(
   chemin: string,
@@ -82,6 +84,20 @@ export function lienNouvelleDepense(
   options: { readonly bienId?: string | undefined; readonly retour?: string | undefined } = {},
 ): string {
   return avecRecherche(CHEMIN_NOUVELLE_DEPENSE, { bien: options.bienId, retour: options.retour });
+}
+
+export const CHEMIN_DECLARATION = '/gerer/declaration';
+
+/** L'aide à la déclaration des revenus d'une année (G5-3). */
+export function lienDeclaration(options: { readonly annee?: number | undefined } = {}): string {
+  return avecRecherche(CHEMIN_DECLARATION, {
+    annee: options.annee === undefined ? undefined : String(options.annee),
+  });
+}
+
+/** Le récapitulatif imprimable d'une année (G5-5), hors coque. */
+export function lienRecapitulatif(annee: number): string {
+  return avecRecherche(`${CHEMIN_DECLARATION}/imprimer`, { annee: String(annee) });
 }
 
 /** Modifier ou supprimer une dépense, avec la page où revenir. */

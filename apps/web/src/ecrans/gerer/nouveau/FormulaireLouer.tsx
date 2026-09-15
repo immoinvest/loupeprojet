@@ -10,6 +10,8 @@ import { useRef, useState, type JSX } from 'react';
 
 import { MenuChoix, type GroupeChoix, type OptionChoix } from '@/composants/MenuChoix';
 import { Bouton, LienBouton } from '@/composants/ui';
+import { useEnvois } from '@/gestion/envois/EnvoisContext';
+import { telephoneDepuisSaisie } from '@/gestion/envois/logique';
 import { derniereLocation } from '@/gestion/fiche';
 import { useGestion } from '@/gestion/GestionContext';
 import {
@@ -24,6 +26,7 @@ import {
   type ChoixDesBiens,
 } from '@/gestion/saisie-nouveau-locataire';
 import { ERREURS_GESTION } from '@/textes/gerer';
+import { TEXTES_ENVOIS } from '@/textes/gerer-envois';
 import { statutDuBien } from '@/textes/gerer-fiche';
 import { colocataireNumero, ERREURS_LOUER, TEXTES_LOUER as T } from '@/textes/gerer-louer';
 import { DEPOT_PAR_DEFAUT, LIBELLES_LOCATION, TEXTES_AJOUTER as A } from '@/textes/gerer-saisie';
@@ -77,6 +80,10 @@ export function FormulaireLouer({
   onLoue,
 }: FormulaireLouerProps): JSX.Element {
   const { louer } = useGestion();
+  const envois = useEnvois();
+  const avecTelephone = envois.statut === 'pret';
+  const [telephone, setTelephone] = useState('');
+  const [telephoneInvalide, setTelephoneInvalide] = useState(false);
   const [bienId, setBienId] = useState(bienInitial);
   const [saisie, setSaisie] = useState<SaisieLouer>(() =>
     saisieLouer(derniereLocation(donnees, bienInitial), aujourdhui),
@@ -110,18 +117,31 @@ export function FormulaireLouer({
 
   const soumettre = async (): Promise<void> => {
     const lu = occupationDepuisSaisie({ ...saisie, colocataires: colocataires.map((c) => c.nom) });
+    const tel = telephoneDepuisSaisie(avecTelephone ? telephone : '');
+    setTelephoneInvalide(!tel.ok);
     if (!lu.ok) {
       setErreurs(lu.erreurs);
       document.getElementById(identifiant(lu.erreurs[0] ?? 'locataire'))?.focus();
       return;
     }
     setErreurs([]);
+    if (!tel.ok) {
+      document.getElementById('louer-telephone')?.focus();
+      return;
+    }
     setEchec(null);
     setOccupe(true);
     const r = await louer(bienId, lu.occupation);
+    if (r.ok && tel.telephone !== null) {
+      // Le téléphone vit à côté du locataire : un échec ici n'annule pas la location créée.
+      await envois.enregistrerContact(r.valeur.locataire.id, tel.telephone);
+    }
     setOccupe(false);
-    if (r.ok) onLoue(r.valeur, bienId);
-    else setEchec(ERREURS_GESTION[r.code]);
+    if (r.ok) {
+      // L'e-mail saisi déclenche la demande d'accord : l'état des envois est relu juste après.
+      envois.rechargerDans(1_500);
+      onLoue(r.valeur, bienId);
+    } else setEchec(ERREURS_GESTION[r.code]);
   };
 
   return (
@@ -161,6 +181,18 @@ export function FormulaireLouer({
           inputMode="email"
           autoComplete="off"
         />
+        {avecTelephone && (
+          <ChampGerer
+            id="louer-telephone"
+            libelle={TEXTES_ENVOIS.telephone}
+            type="tel"
+            inputMode="tel"
+            valeur={telephone}
+            onChange={setTelephone}
+            erreur={telephoneInvalide ? TEXTES_ENVOIS.telephoneInvalide : undefined}
+            autoComplete="off"
+          />
+        )}
       </div>
 
       {colocataires.map((ligne, i) => (

@@ -17,9 +17,11 @@ import { titreLouer } from '@/textes/gerer-louer';
 import { TEXTES_PARCOURS as P } from '@/textes/gerer-parcours';
 
 import { CarteArgent } from './argent/CarteArgent';
+import { CarteReelPrevu } from './argent/CarteReelPrevu';
 import { CarteConformite } from './bail/CarteConformite';
 import { CarteRevision } from './bail/CarteRevision';
 import { EcranAttente } from './EcranAttente';
+import { BailleurDuBien } from './envois/BailleurDuBien';
 import { FilAriane } from './FilAriane';
 import { CarteLocation } from './fiche/CarteLocation';
 import { FriseMois } from './fiche/FriseMois';
@@ -119,12 +121,15 @@ function Fiche({
       </div>
 
       <CarteArgent bien={bien} donnees={donnees} />
+      <CarteReelPrevu bien={bien} donnees={donnees} />
 
       <FriseMois
         frise={friseDuBien(donnees, bien.id, aujourdhui)}
         actions={actions}
         bienId={bien.id}
       />
+
+      <BailleurDuBien bien={bien} bailleurCompte={donnees.bailleur} />
 
       <SupprimerBien bien={bien} />
     </Page>

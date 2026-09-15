@@ -1,0 +1,77 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`fichier PDF > la quittance reprend le contenu figé : titre, montants, aide, colocataires, mentions 1`] = `
+"%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /F1 4 0 R /F2 5 0 R >> >> /Contents 6 0 R >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>
+endobj
+6 0 obj
+<< /Length 2259 >>
+stream
+0.8 G 0.6 w 60 559.3 m 535.28 559.3 l S
+0.8 G 0.6 w 60 537.3 m 535.28 537.3 l S
+0.8 G 0.6 w 60 515.3 m 535.28 515.3 l S
+0.8 G 0.6 w 60 493.3 m 535.28 493.3 l S
+0.8 G 0.6 w 60 471.3 m 535.28 471.3 l S
+BT /F2 22 Tf 60 780 Td (Quittance de loyer) Tj ET
+BT /F1 10 Tf 460.8 780 Td (N\\260 Q-202610-L1) Tj ET
+BT /F2 8 Tf 60 736 Td (BAILLEUR) Tj ET
+BT /F2 11 Tf 60 722 Td (Pierre Georgel) Tj ET
+BT /F1 11 Tf 60 706.05 Td (3 rue Paradis, 13006 Marseille) Tj ET
+BT /F2 8 Tf 60 682.1 Td (LOCATAIRES) Tj ET
+BT /F1 11 Tf 60 668.1 Td (Julie Martin) Tj ET
+BT /F1 11 Tf 60 652.15 Td (L\\351a Bernard) Tj ET
+BT /F2 8 Tf 60 628.2 Td (LOGEMENT LOU\\311) Tj ET
+BT /F1 11 Tf 60 614.2 Td (T2 Lices \\267 Chambre 2, 12 rue des Lices) Tj ET
+BT /F2 8 Tf 60 590.25 Td (P\\311RIODE) Tj ET
+BT /F1 11 Tf 60 576.25 Td (du 1er octobre 2026 au 31 octobre 2026) Tj ET
+BT /F1 11 Tf 60 546.3 Td (Loyer hors charges) Tj ET
+BT /F1 11 Tf 507.76 546.3 Td (650 \\200) Tj ET
+BT /F1 11 Tf 60 524.3 Td (Charges) Tj ET
+BT /F1 11 Tf 513.87 524.3 Td (50 \\200) Tj ET
+BT /F2 11 Tf 60 502.3 Td (Total du terme) Tj ET
+BT /F2 11 Tf 507.76 502.3 Td (700 \\200) Tj ET
+BT /F1 11 Tf 60 480.3 Td (Dont aide au logement vers\\351e par la CAF) Tj ET
+BT /F1 11 Tf 507.76 480.3 Td (200 \\200) Tj ET
+BT /F1 11 Tf 60 458.3 Td (Pay\\351 par le locataire) Tj ET
+BT /F1 11 Tf 507.76 458.3 Td (500 \\200) Tj ET
+BT /F2 8 Tf 60 426.3 Td (PAIEMENTS RE\\307US) Tj ET
+BT /F1 11 Tf 60 412.3 Td (300 \\200 le 6 octobre 2026) Tj ET
+BT /F1 11 Tf 60 396.35 Td (400,50 \\200 le 20 octobre 2026) Tj ET
+BT /F1 11 Tf 60 372.4 Td (Pierre Georgel, bailleur du logement d\\351sign\\351 ci-dessus, d\\351clare avoir re\\347u de Julie Martin et L\\351a) Tj ET
+BT /F1 11 Tf 60 356.45 Td (Bernard la somme de 700 \\200 au titre du loyer et des charges de la p\\351riode du 1er octobre 2026 au) Tj ET
+BT /F1 11 Tf 60 340.5 Td (31 octobre 2026, et en donne quittance, sous r\\351serve de tous ses droits.) Tj ET
+BT /F2 11 Tf 60 320.55 Td (Pour acquit.) Tj ET
+BT /F2 11 Tf 60 304.6 Td (Cette quittance annule les re\\347us d\\351livr\\351s pour les paiements partiels de cette p\\351riode.) Tj ET
+BT /F1 9 Tf 60 276.65 Td (Fait le 2 novembre 2026.) Tj ET
+BT /F1 9 Tf 60 263.6 Td (Document d\\351livr\\351 gratuitement \\(loi n\\260 89-462 du 6 juillet 1989, article 21\\).) Tj ET
+endstream
+endobj
+xref
+0 7
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000257 00000 n 
+0000000354 00000 n 
+0000000456 00000 n 
+trailer
+<< /Size 7 /Root 1 0 R >>
+startxref
+2767
+%%EOF
+"
+`;

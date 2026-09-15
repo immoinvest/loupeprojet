@@ -36,7 +36,15 @@ export type CodeErreur =
   | 'REGULARISATION_IMPOSSIBLE'
   | 'COLOCATAIRE_REFUSE'
   | 'PROJETS_INDISPONIBLE'
-  | 'PARTAGE_INDISPONIBLE';
+  | 'PARTAGE_INDISPONIBLE'
+  | 'ENVOIS_INDISPONIBLE'
+  | 'ENVOIS_INACTIFS'
+  | 'SANS_EMAIL'
+  | 'SANS_ACCORD'
+  | 'ENVOI_RECENT'
+  | 'INVITATION_RECENTE'
+  | 'ENVOI_ECHOUE'
+  | 'LIEN_INVALIDE';
 
 /** Réponse JSON d'erreur, indépendante du contexte Hono (utilisable dans notFound, onError et index). */
 export function reponseErreur(statut: ContentfulStatusCode, code: CodeErreur): Response {

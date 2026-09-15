@@ -19,6 +19,8 @@ export const TEXTES_MENU = {
   mesLocataires: 'Mes locataires',
   /** Loyers encaissés, dépenses, prêts et cash-flow réel (G5-1). */
   argent: 'Argent',
+  /** Aide à la déclaration et export de l'année (G5-3, G5-5). */
+  declaration: 'Déclaration',
   gererSansCompte: 'Gérer mes biens loués',
 } as const;
 

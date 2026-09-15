@@ -13,7 +13,7 @@ export interface ChampGererProps {
   readonly aide?: string | undefined;
   readonly unite?: string | undefined;
   readonly type?: HTMLInputTypeAttribute | undefined;
-  readonly inputMode?: 'text' | 'decimal' | 'numeric' | 'email' | undefined;
+  readonly inputMode?: 'text' | 'decimal' | 'numeric' | 'email' | 'tel' | undefined;
   readonly autoComplete?: string | undefined;
   readonly placeholder?: string | undefined;
 }

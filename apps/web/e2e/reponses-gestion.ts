@@ -72,6 +72,28 @@ export async function simulerGestion(page: Page): Promise<void> {
     }),
   );
 
+  // Quittances par e-mail (quittances-auto) : Julie a accepté, Antoine n'a pas d'e-mail.
+  await page.route('**/api/gestion/envois', (route) =>
+    route.fulfill({
+      json: {
+        mode: 'reel',
+        invitations: true,
+        accords: [
+          { locataireId: 'julie', statut: 'accorde', le: creeLe },
+          { locataireId: 'antoine', statut: 'sans_email' },
+        ],
+        envois: [],
+        contacts: [{ locataireId: 'julie', telephone: '06 12 34 56 78' }],
+        bailleursBiens: [],
+      },
+    }),
+  );
+  await page.route('**/api/accord/lire', (route) =>
+    route.fulfill({
+      json: { prenom: 'Julie', bailleur: 'Camille Martin', logement: 'T2 Lices, 12 rue des Lices' },
+    }),
+  );
+
   // Dépenses et prêts (G5-4, G5-1) : la taxe foncière du T2 Lices et son prêt, qui commence ce mois-ci.
   await page.route('**/api/gestion/argent', (route) =>
     route.fulfill({
