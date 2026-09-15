@@ -5,11 +5,23 @@ import type { Regles } from '../regles/types';
 import type { Regime } from '../schema/hypotheses';
 import type { Projet } from '../schema/projet';
 import { plusValueImposable, type DetailPlusValue } from './plus-value';
-import { fraisVente, valeurRevente, type FraisVente } from './valeur';
+import {
+  fraisVente,
+  valeurRevente,
+  valorisationTravaux,
+  type FraisVente,
+  type ValorisationTravaux,
+} from './valeur';
 
 export interface ResultatRevente {
   readonly annees: number;
+  /** Prix de vente retenu : le prix saisi s'il y en a un, sinon la valeur estimée. */
   readonly valeur: number;
+  /** (Prix retenu + valorisation des travaux) capitalisé à l'évolution annuelle. */
+  readonly valeurEstimee: number;
+  /** Vrai quand `valeur` vient de `revente.prixVente`. */
+  readonly valeurSaisie: boolean;
+  readonly valorisationTravaux: ValorisationTravaux;
   readonly fraisVente: FraisVente;
   readonly crd: number;
   readonly ira: number;
@@ -40,7 +52,13 @@ export function reventeDuRegime(
 ): ResultatRevente {
   const { achat, revente } = projet.hypotheses;
   const prix = prixRetenu(achat);
-  const valeur = valeurRevente(prix, revente.evolutionAnnuelle, revente.annees);
+  const valorisation = valorisationTravaux(projet, regles);
+  const valeurEstimee = valeurRevente(
+    prix + valorisation.montant,
+    revente.evolutionAnnuelle,
+    revente.annees,
+  );
+  const valeur = revente.prixVente ?? valeurEstimee;
   const frais = fraisVente(valeur, revente);
   const plusValue = plusValueImposable(
     {
@@ -57,6 +75,9 @@ export function reventeDuRegime(
   return {
     annees: revente.annees,
     valeur,
+    valeurEstimee,
+    valeurSaisie: revente.prixVente !== undefined,
+    valorisationTravaux: valorisation,
     fraisVente: frais,
     crd: financement.crdRevente,
     ira: financement.iraRevente,
