@@ -5,9 +5,10 @@ import type {
   NouveauPaiement,
 } from '@loupe/gestion';
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router';
+import { useLocation, useNavigate } from 'react-router';
 
 import { useGestion } from '@/gestion/GestionContext';
+import { cheminDe, lienDocument } from '@/gestion/parcours';
 import { ERREURS_GESTION } from '@/textes/gerer';
 import { loyerRecu, TEXTES_GERER } from '@/textes/gerer-ecrans';
 import { paiementEnregistre } from '@/textes/gerer-loyers';
@@ -56,6 +57,8 @@ function prenomDe(ligne: LigneLoyer): string {
 export function useActionsLoyer(aujourdhui: string): ActionsLoyer {
   const { payer, annulerPaiement, emettreDocument, enregistrerBailleur } = useGestion();
   const naviguer = useNavigate();
+  // La page où l'on ouvre un document : son lien de retour y ramène (ADR-G20).
+  const location = useLocation();
   const [occupe, setOccupe] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
   const [annulation, setAnnulation] = useState<Annulation | null>(null);
@@ -86,7 +89,7 @@ export function useActionsLoyer(aujourdhui: string): ActionsLoyer {
     const r = await emettreDocument(demande);
     setOccupe(false);
     if (r.ok) {
-      void naviguer(`/gerer/documents/${encodeURIComponent(r.valeur.id)}`);
+      void naviguer(lienDocument(r.valeur.id, cheminDe(location)));
       return;
     }
     if (r.code === 'bailleur_manquant') {

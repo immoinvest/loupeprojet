@@ -1,12 +1,14 @@
 import type { DocumentComplet } from '@loupe/gestion';
 import { useEffect, useState, type JSX } from 'react';
-import { Link, useParams } from 'react-router';
+import { Link, useParams, useSearchParams } from 'react-router';
 
 import { Bouton } from '@/composants/ui';
 import { useGestion } from '@/gestion/GestionContext';
+import { destinationRetour } from '@/gestion/parcours';
 import type { ResultatGestion } from '@/gestion/types';
 import { ERREURS_GESTION } from '@/textes/gerer';
 import { TEXTES_DOCUMENT as D } from '@/textes/gerer-documents';
+import { libelleRetour } from '@/textes/gerer-parcours';
 
 import { DocumentLoyer } from './DocumentLoyer';
 import { EcranAttente } from './EcranAttente';
@@ -14,7 +16,8 @@ import { EcranAttente } from './EcranAttente';
 /** `/gerer/documents/:id` : la quittance ou le reçu, hors coque, prêt à imprimer ou à enregistrer en PDF. */
 export function ImprimerDocument(): JSX.Element {
   const { id = '' } = useParams();
-  const { statut, document: lireDocument } = useGestion();
+  const { statut, donnees, document: lireDocument } = useGestion();
+  const [recherche] = useSearchParams();
   const [lu, setLu] = useState<ResultatGestion<DocumentComplet> | null>(null);
 
   useEffect(() => {
@@ -29,15 +32,20 @@ export function ImprimerDocument(): JSX.Element {
   }, [statut, id, lireDocument]);
 
   if (statut !== 'pret') return <EcranAttente />;
+  // La page d'où le document a été ouvert (`?retour=`), sinon Tous les loyers.
+  const retour = destinationRetour(
+    recherche.get('retour'),
+    donnees ?? { biens: [], locataires: [] },
+  );
 
   return (
     <div className="min-h-dvh bg-fond pr-[env(safe-area-inset-right)] pl-[env(safe-area-inset-left)]">
       <div className="no-print z-10 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-bordure bg-surface px-4 py-3 sm:sticky sm:top-0 sm:flex-nowrap sm:px-6">
         <Link
-          to="/gerer/loyers"
+          to={retour.chemin}
           className="inline-flex min-h-11 items-center text-sm font-semibold no-underline survol-texte"
         >
-          ← {D.retour}
+          ← {libelleRetour(retour.cible)}
         </Link>
         {lu?.ok === true && (
           <>

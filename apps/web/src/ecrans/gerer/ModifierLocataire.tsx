@@ -1,5 +1,5 @@
 import type { Locataire } from '@loupe/gestion';
-import { useEffect, useState, type JSX } from 'react';
+import { useLayoutEffect, useState, type JSX } from 'react';
 
 import { Bouton } from '@/composants/ui';
 import { useGestion } from '@/gestion/GestionContext';
@@ -28,7 +28,9 @@ export function ModifierLocataire({
   const [occupe, setOccupe] = useState(false);
   const id = (champ: ChampLocataire): string => `locataire-${locataire.id}-${champ}`;
 
-  useEffect(() => {
+  // Dans la même passe que l'affichage : le curseur est dans l'e-mail dès que le formulaire se voit,
+  // même quand il apparaît après le chargement des données (`?modifier=1`).
+  useLayoutEffect(() => {
     if (focusEmail) document.getElementById(`locataire-${locataire.id}-email`)?.focus();
   }, [focusEmail, locataire.id]);
   const erreur = (champ: ChampLocataire): string | undefined =>

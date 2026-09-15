@@ -26,7 +26,10 @@ function avecRecherche(
 }
 
 /** La fiche d'un bien ; `modifier` : la location dont le formulaire « Modifier » s'ouvre à l'arrivée. */
-export function lienFicheBien(id: string, options: { readonly modifier?: string } = {}): string {
+export function lienFicheBien(
+  id: string,
+  options: { readonly modifier?: string | undefined } = {},
+): string {
   return avecRecherche(`${CHEMIN_MES_BIENS}/${encodeURIComponent(id)}`, {
     modifier: options.modifier,
   });
@@ -44,14 +47,14 @@ export function lienFicheLocataire(
 
 /** Le formulaire « Nouveau locataire », le bien déjà choisi, et la page où revenir après. */
 export function lienNouveauLocataire(
-  options: { readonly bienId?: string; readonly retour?: string } = {},
+  options: { readonly bienId?: string | undefined; readonly retour?: string | undefined } = {},
 ): string {
   return avecRecherche(CHEMIN_NOUVEAU_LOCATAIRE, { bien: options.bienId, retour: options.retour });
 }
 
 /** Les loyers d'un mois ; `bienId` : les lignes de ce bien sont mises en évidence. */
 export function lienLoyers(
-  options: { readonly periode?: string; readonly bienId?: string } = {},
+  options: { readonly periode?: string | undefined; readonly bienId?: string | undefined } = {},
 ): string {
   return avecRecherche(CHEMIN_LOYERS, { mois: options.periode, bien: options.bienId });
 }

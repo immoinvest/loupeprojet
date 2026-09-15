@@ -9,7 +9,6 @@ import { bienEtChambre, nomsDesLocataires } from './gerer-loyers';
  * d'impression. Le document s'adresse au locataire : phrases à la troisième personne, sans tutoiement.
  */
 export const TEXTES_DOCUMENT = {
-  retour: 'Loyers',
   apercu:
     'Aperçu du document. Dans la fenêtre d’impression, choisissez « Enregistrer au format PDF ».',
   imprimer: 'Imprimer ou enregistrer en PDF',

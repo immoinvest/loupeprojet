@@ -80,6 +80,8 @@ function Fiche({
             location={location}
             donnees={donnees}
             aujourdhui={aujourdhui}
+            // `?modifier=<location>` (montant d'une ligne de loyer) : « Modifier » déjà ouvert.
+            modifierOuvert={recherche.get('modifier') === location.id}
           />
         ))
       )}
@@ -90,7 +92,11 @@ function Fiche({
         </LienBouton>
       </div>
 
-      <FriseMois frise={friseDuBien(donnees, bien.id, aujourdhui)} actions={actions} />
+      <FriseMois
+        frise={friseDuBien(donnees, bien.id, aujourdhui)}
+        actions={actions}
+        bienId={bien.id}
+      />
 
       <SupprimerBien bien={bien} />
     </Page>

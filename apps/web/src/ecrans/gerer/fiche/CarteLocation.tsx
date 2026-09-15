@@ -27,13 +27,16 @@ export function CarteLocation({
   location,
   donnees,
   aujourdhui,
+  modifierOuvert = false,
 }: {
   readonly location: LocationGeree;
   readonly donnees: EtatGestion;
   readonly aujourdhui: string;
+  /** Arrivée par le montant d'une ligne de loyer : le formulaire « Modifier » est déjà ouvert. */
+  readonly modifierOuvert?: boolean;
 }): JSX.Element {
   const { terminerLocation, modifierLocation } = useGestion();
-  const [ouvert, setOuvert] = useState<Formulaire>(null);
+  const [ouvert, setOuvert] = useState<Formulaire>(modifierOuvert ? 'modifier' : null);
   const [occupe, setOccupe] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
   const aVenir = location.debut > aujourdhui;
