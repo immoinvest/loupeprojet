@@ -22,23 +22,26 @@ Décidé le 14/09/2026. Tout ce qui se clique le montre : la main sous la souris
 
 Définies une fois dans `apps/web/src/index.css` (`@utility survol-*`). Elles ignorent d'elles-mêmes les éléments désactivés et les écrans tactiles.
 
-| Classe                | Famille                                                                                     | Au survol                                   | Exemples                                                                              |
-| --------------------- | ------------------------------------------------------------------------------------------- | ------------------------------------------- | ------------------------------------------------------------------------------------- |
-| `survol-plein`        | Bouton plein bleu (action principale)                                                       | Le bleu fonce (`accent-fonce`)              | « Créer le projet », « Imprimer », `Bouton variante="primaire"`                       |
-| `survol-danger-plein` | Bouton plein rouge (suppression confirmée)                                                  | Le rouge fonce (`probleme-texte`)           | « Confirmer la suppression » du compte                                                |
-| `survol-fond`         | Bouton à contour, puce de choix, tuile, entrée de menu, bouton icône, logo, libellé de case | Fond `accent-fond`, bordure bleue           | `Bouton` secondaire, menu latéral, horizons de revente, états du bien, filtres, ⓘ, ☰ |
-| `survol-fond-fort`    | Même famille, sur un fond déjà bleuté                                                       | Fond `accent-doux`                          | Ligne active du menu (« Mes projets · N » surlignée)                                  |
-| `survol-danger`       | Action destructrice discrète                                                                | Fond `probleme-fond`, texte rouge           | Corbeille d'un projet, déconnexion                                                    |
-| `survol-texte`        | Lien ou bouton texte, titre cliquable                                                       | Bleu foncé et souligné (2 px)               | « Voir la fiscalité → », « Ajouter une note », nom d'un projet, tri de Comparer       |
-| `survol-discret`      | Texte gris cliquable                                                                        | Passe à l'encre ; un volet montre son trait | Volets inactifs du projet, « Changer d'adresse », type de location non choisi         |
-| `survol-pastille`     | Pastille colorée cliquable                                                                  | Halo de sa propre couleur (la teinte reste) | Statut du projet dans l'en-tête                                                       |
+| Classe                | Famille                                                                               | Au survol                                   | Exemples                                                                              |
+| --------------------- | ------------------------------------------------------------------------------------- | ------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `survol-plein`        | Bouton plein bleu (action principale)                                                 | Le bleu fonce (`accent-fonce`)              | « Créer le projet », « Imprimer », `Bouton variante="primaire"`                       |
+| `survol-danger-plein` | Bouton plein rouge (suppression confirmée)                                            | Le rouge fonce (`probleme-texte`)           | « Confirmer la suppression » du compte                                                |
+| `survol-fond`         | Bouton à contour, puce de choix, tuile, entrée de menu, bouton icône, libellé de case | Fond `accent-fond`, bordure bleue           | `Bouton` secondaire, menu latéral, horizons de revente, états du bien, filtres, ⓘ, ☰ |
+| `survol-fond-fort`    | Même famille, sur un fond déjà bleuté, ou petit bouton bordé                          | Fond `accent-doux`                          | « + » du menu, sur une ligne surlignée ou non                                         |
+| `survol-danger`       | Action destructrice discrète                                                          | Fond `probleme-fond`, texte rouge           | Corbeille d'un projet, déconnexion                                                    |
+| `survol-texte`        | Lien ou bouton texte, titre cliquable                                                 | Bleu foncé et souligné (2 px)               | « Voir la fiscalité → », « Ajouter une note », nom d'un projet, tri de Comparer       |
+| `survol-discret`      | Texte gris cliquable                                                                  | Passe à l'encre ; un volet montre son trait | Volets inactifs du projet, « Changer d'adresse », type de location non choisi         |
+| `survol-pastille`     | Pastille colorée cliquable                                                            | Halo de sa propre couleur (la teinte reste) | Statut du projet dans l'en-tête                                                       |
 
 Sans classe, deux règles de base s'appliquent déjà partout :
 
 - **Lien dans un texte** (`<a>`, `<Link>` sans style) : souligné, il passe au bleu foncé et son trait s'épaissit.
 - **Champ de saisie et liste déroulante** : la bordure fonce (`encre-4`), sauf pendant la saisie, en erreur ou désactivé.
 
-Exception assumée : le bouton « Annuler » du bandeau sombre de Gérer garde `hover:bg-white/25` (texte blanc sur fond sombre, aucune recette claire ne s'y lit).
+Exceptions assumées :
+
+- le bouton « Annuler » du bandeau sombre de Gérer garde `hover:bg-white/25` (texte blanc sur fond sombre, aucune recette claire ne s'y lit) ;
+- le **logo Deklic** (barre latérale, barre d'app, écran de connexion) garde la main mais n'a **aucun effet de survol** (décision de Pierre du 15/09/2026) : il porte `data-logo`, que `survol.spec.ts` écarte.
 
 ### Dans le code
 
@@ -54,3 +57,17 @@ Exception assumée : le bouton « Annuler » du bandeau sombre de Gérer garde `
 - W3C, [WCAG 2.2 – 1.4.13 Content on Hover or Focus](https://www.w3.org/WAI/WCAG22/Understanding/content-on-hover-or-focus.html) : un contenu révélé au survol doit pouvoir être fermé, survolé et rester affiché.
 - Tailwind CSS, [guide de migration v4](https://tailwindcss.com/docs/upgrade-guide) : les boutons reprennent le curseur par défaut du navigateur, `hover:` ne s'applique qu'aux appareils qui survolent.
 - Material Design, [States](https://m2.material.io/design/interaction/states.html) : états survol, focus, pressé et désactivé cumulables, calque de survol léger et identique par famille.
+
+## Menu latéral
+
+Décidé le 15/09/2026 (feature `menu-lisible`, maquette `.product/design/menu-lisible-maquette.html`). Styles dans `apps/web/src/coque/liens.ts`.
+
+1. **Une icône à chaque destination, bleue au repos** (`[&>svg]:text-accent`), libellé à l'encre. Au doigt, sans survol, c'est ce qui dit qu'une ligne se clique.
+2. **Une icône par page**, jamais la même pour deux destinations (Accueil : maison ; Mes projets : dossier ; Mes biens : immeuble ; Loyers du mois : calendrier coché ; Tous les loyers : reçu ; Mes locataires : personnes ; Simulateur : calculette).
+3. **Page ouverte** : fond `accent-doux`, libellé `accent-fonce`, icône bleue ; sans survol (principe 9).
+4. **Ligne avec « + »** (`LigneAvecAjout`) : icône, libellé, nombre dans une pastille (`classeNombre`), « + » en petit bouton bordé de 30 px (44 px au doigt). Le nom accessible reste « Mes projets · 4 » (`aria-label`).
+5. **Projets récents en retrait** (`classeSousLien`) : 13 px, gris, point de cash-flow de 8 px dans la colonne des icônes.
+6. **Titres de section** (`CLASSE_ETIQUETTE`) : 11 px, capitales espacées, `encre-3` (4,8 pour 1 sur blanc), collés à ce qu'ils annoncent et éloignés de ce qui précède.
+7. **Hauteur** : 38 px à la souris, 44 px au doigt (`pointer-coarse:min-h-11`).
+
+Sources : NN/g, [Flat UI Elements Attract Less Attention](https://www.nngroup.com/articles/flat-ui-less-attention-cause-uncertainty/) ; NN/g, [Proximity Principle](https://www.nngroup.com/articles/gestalt-proximity/) ; W3C, [WCAG 2.2 – 1.4.3 Contrast (Minimum)](https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html) ; Material 3, [Navigation drawer](https://m3.material.io/components/navigation-drawer/guidelines).

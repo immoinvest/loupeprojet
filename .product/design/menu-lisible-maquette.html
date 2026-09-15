@@ -1,0 +1,1400 @@
+<title>Refonte du menu Deklic</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&family=Outfit:wght@500;600;700&display=swap"
+/>
+<style>
+  :root {
+    color-scheme: light;
+    /* Tokens de apps/web/src/index.css (direction « Le guide », identité Deklic). */
+    --fond: #fffdf9;
+    --surface: #ffffff;
+    --bordure: #ece8e0;
+    --bordure-douce: #f1ede5;
+    --encre: #23272f;
+    --encre-2: #4b5563;
+    --encre-3: #6b7280;
+    --encre-4: #9ca3af;
+    --accent: #2b4bf2;
+    --accent-fonce: #1f38c4;
+    --accent-doux: #e8ecff;
+    --accent-fond: #f5f7ff;
+    --accent-bordure: #d9dfff;
+    --flash: #ff7a1a;
+    --bon: #2e9e6b;
+    --probleme-fond: #fbe5e3;
+    --probleme-texte: #a3302a;
+    /* Fond de la page de maquette seulement : un cran sous le fond de l'app, pour détacher les cadres. */
+    --page: #f3f0ea;
+    --display: 'Outfit', 'Segoe UI', system-ui, sans-serif;
+    --sans: 'Nunito Sans', 'Segoe UI', system-ui, sans-serif;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    background: var(--page);
+    color: var(--encre);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.55;
+  }
+  a {
+    color: inherit;
+  }
+  .page {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding-block: 40px 72px;
+    padding-inline: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 48px;
+  }
+
+  /* En-tête du document */
+  .intro {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 70ch;
+  }
+  .surtitre {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  h1,
+  h2,
+  h3 {
+    font-family: var(--display);
+    text-wrap: balance;
+    margin: 0;
+  }
+  h1 {
+    font-size: 34px;
+    line-height: 1.15;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  h2 {
+    font-size: 22px;
+    line-height: 1.25;
+    font-weight: 600;
+  }
+  h3 {
+    font-size: 16px;
+    line-height: 1.3;
+    font-weight: 600;
+  }
+  p {
+    margin: 0;
+  }
+  .chapeau {
+    font-size: 17px;
+    color: var(--encre-2);
+  }
+
+  /* Comparaison */
+  .comparaison {
+    display: grid;
+    grid-template-columns: auto auto minmax(0, 1fr);
+    gap: 28px;
+    align-items: start;
+  }
+  .colonne {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .legende-cadre {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 13px;
+    color: var(--encre-3);
+  }
+  .legende-cadre strong {
+    font-family: var(--display);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--encre);
+  }
+  .puce-reco {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent-fonce);
+    background: var(--accent-doux);
+    border-radius: 999px;
+    padding: 2px 8px;
+  }
+
+  /* ——— Barre latérale : cadre commun ——— */
+  .sb {
+    width: 224px;
+    height: 880px;
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);
+    border: 1px solid var(--bordure);
+    border-radius: 14px;
+    box-shadow: 0 6px 24px rgba(35, 39, 47, 0.06);
+    overflow: hidden;
+  }
+  .sb a {
+    text-decoration: none;
+  }
+  .sb svg.ico {
+    width: 18px;
+    height: 18px;
+    flex: none;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .sb :focus-visible,
+  .reglages input:focus-visible + label {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .sb a,
+    .sb button {
+      transition:
+        background-color 150ms ease-out,
+        border-color 150ms ease-out,
+        color 150ms ease-out;
+    }
+  }
+
+  /* ——— Aujourd'hui : copie fidèle de la capture ——— */
+  .actuel {
+    padding: 20px 12px 16px;
+    gap: 20px;
+  }
+  .actuel .logo {
+    display: flex;
+    padding: 4px 8px;
+    border-radius: 12px;
+    border: 1px solid transparent;
+  }
+  .a-lien {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 44px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: 1px solid transparent;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--encre-2);
+  }
+  .a-etiq {
+    padding: 0 12px 6px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--encre-4);
+  }
+  .a-groupe {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .a-double {
+    display: flex;
+    min-height: 44px;
+  }
+  .a-double .a-lien {
+    flex: 1;
+    min-width: 0;
+  }
+  .a-plus {
+    width: 44px;
+    display: grid;
+    place-items: center;
+    border-radius: 12px;
+    color: var(--accent);
+    border: 1px solid transparent;
+  }
+  .a-lib {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .a-point {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex: none;
+  }
+  .a-milieu {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .a-installer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 44px;
+    border-radius: 12px;
+    border: 1px solid var(--accent-bordure);
+    background: var(--accent-fond);
+    color: var(--accent);
+    font: 600 15px/1 var(--sans);
+  }
+  .a-profil {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    border-top: 1px solid var(--bordure);
+    padding-top: 12px;
+  }
+  .a-profil a {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 4px 8px;
+    border-radius: 12px;
+    border: 1px solid transparent;
+    color: var(--encre);
+  }
+  .avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    flex: none;
+    display: grid;
+    place-items: center;
+    background: var(--accent-doux);
+    color: var(--accent);
+    font: 700 15px/1 var(--display);
+  }
+  .noms {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+  .noms b,
+  .noms span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .noms b {
+    font-size: 15px;
+  }
+  .noms span {
+    font-size: 12px;
+    color: var(--encre-3);
+  }
+  .sortie {
+    width: 44px;
+    height: 44px;
+    flex: none;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    border: 0;
+    background: transparent;
+    color: var(--encre-2);
+    cursor: pointer;
+  }
+  @media (hover: hover) {
+    .actuel .logo:hover,
+    .a-lien:hover,
+    .a-plus:hover,
+    .a-profil a:hover {
+      background: var(--accent-fond);
+      border-color: var(--accent-bordure);
+    }
+    .a-installer:hover {
+      background: var(--accent-doux);
+    }
+    .sortie:hover {
+      background: var(--probleme-fond);
+      color: var(--probleme-texte);
+    }
+  }
+
+  /* ——— Proposé ——— */
+  .nouveau {
+    padding: 14px 12px 14px;
+  }
+  .n-tete {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    margin-bottom: 10px;
+  }
+  .n-tete .logo {
+    display: flex;
+    align-items: center;
+    padding: 6px 8px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+  }
+  .n-milieu {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    margin-inline: -4px;
+    padding-inline: 4px;
+  }
+  .n-groupe {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .n-etiq {
+    padding: 0 10px 6px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--encre-3);
+  }
+  .ligne {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 38px;
+    padding: 0 10px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--encre);
+  }
+  .ic {
+    width: 18px;
+    height: 18px;
+    flex: none;
+    display: grid;
+    place-items: center;
+    color: var(--accent);
+  }
+  .lib {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .nombre {
+    min-width: 22px;
+    height: 20px;
+    padding: 0 6px;
+    border-radius: 999px;
+    display: grid;
+    place-items: center;
+    background: var(--bordure-douce);
+    color: var(--encre-3);
+    font-size: 12px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+  .ligne[aria-current] {
+    background: var(--accent-doux);
+    color: var(--accent-fonce);
+  }
+  .ligne[aria-current] .nombre {
+    background: var(--surface);
+    color: var(--accent-fonce);
+  }
+
+  .double {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    border-radius: 10px;
+  }
+  .double .ligne {
+    flex: 1;
+    min-width: 0;
+  }
+  .double:has(.ligne[aria-current]) {
+    background: var(--accent-doux);
+  }
+  .ajout {
+    width: 30px;
+    height: 30px;
+    margin-right: 4px;
+    flex: none;
+    display: grid;
+    place-items: center;
+    border-radius: 8px;
+    border: 1px solid var(--accent-bordure);
+    background: var(--surface);
+    color: var(--accent);
+  }
+  .ajout svg.ico {
+    width: 16px;
+    height: 16px;
+    stroke-width: 2.4;
+  }
+  .ajout[aria-current] {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+
+  .sous {
+    min-height: 34px;
+    font-size: 13px;
+    color: var(--encre-2);
+  }
+  .sous .point {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+  .sous[aria-current] {
+    color: var(--accent-fonce);
+  }
+
+  .n-pied {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-top: 14px;
+  }
+  .n-installer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 38px;
+    border-radius: 10px;
+    border: 1px solid var(--accent-bordure);
+    background: var(--accent-fond);
+    color: var(--accent);
+    font: 600 14px/1 var(--sans);
+    cursor: pointer;
+  }
+  .n-profil {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    border-top: 1px solid var(--bordure);
+    padding-top: 10px;
+  }
+  .n-profil a {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 4px 6px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    color: var(--encre);
+  }
+  .n-profil .avatar {
+    width: 34px;
+    height: 34px;
+    font-size: 13px;
+  }
+  .n-profil .noms b {
+    font-size: 14px;
+  }
+  .n-profil a[aria-current] {
+    background: var(--accent-doux);
+  }
+  .nouveau .sortie {
+    width: 36px;
+    height: 36px;
+    color: var(--encre-3);
+  }
+
+  @media (hover: hover) {
+    .ligne:not([aria-current]):hover,
+    .n-profil a:not([aria-current]):hover {
+      background: var(--accent-fond);
+      border-color: var(--accent-bordure);
+    }
+    .double:has(.ligne[aria-current]) .ajout:not([aria-current]):hover,
+    .ajout:not([aria-current]):hover,
+    .n-installer:hover {
+      background: var(--accent-doux);
+    }
+    .nouveau .sortie:hover {
+      background: var(--probleme-fond);
+      color: var(--probleme-texte);
+    }
+  }
+
+  /* Réglage : ligne Accueil ou logo seul */
+  .nouveau[data-accueil='logo'] .groupe-accueil {
+    display: none;
+  }
+  .nouveau[data-accueil='ligne'] .n-tete .logo[aria-current] {
+    background: transparent;
+  }
+  .nouveau[data-accueil='logo'] .n-tete .logo[aria-current] {
+    background: var(--accent-doux);
+  }
+
+  /* Réglage : couleur affirmée = icône dans une tuile */
+  .nouveau[data-couleur='affirmee'] .ligne {
+    padding-left: 5px;
+    min-height: 40px;
+  }
+  .nouveau[data-couleur='affirmee'] .ic {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+  }
+  .nouveau[data-couleur='affirmee'] .ligne:not(.sous) .ic {
+    background: var(--accent-fond);
+  }
+  .nouveau[data-couleur='affirmee'] .ligne:not(.sous) .ic svg.ico {
+    width: 16px;
+    height: 16px;
+  }
+  .nouveau[data-couleur='affirmee'] .ligne:not(.sous)[aria-current] .ic {
+    background: var(--accent);
+    color: #fff;
+  }
+  .nouveau[data-couleur='affirmee'] .sous {
+    min-height: 34px;
+  }
+  @media (hover: hover) {
+    .nouveau[data-couleur='affirmee'] .ligne:not(.sous):not([aria-current]):hover .ic {
+      background: var(--accent-doux);
+    }
+  }
+
+  /* Réglage : au doigt, cibles de 44 px (règle pointer-coarse de la feature responsive) */
+  .nouveau[data-taille='doigt'] .ligne {
+    min-height: 44px;
+  }
+  .nouveau[data-taille='doigt'] .ajout {
+    width: 44px;
+    height: 44px;
+    margin-right: 0;
+  }
+  .nouveau[data-taille='doigt'] .n-installer {
+    min-height: 44px;
+  }
+  .nouveau[data-taille='doigt'] .sortie {
+    width: 44px;
+    height: 44px;
+  }
+
+  /* Panneau de réglages */
+  .reglages {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    padding-top: 30px;
+  }
+  .reglages fieldset {
+    border: 0;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .reglages legend {
+    padding: 0;
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 15px;
+    margin-bottom: 8px;
+  }
+  .segment {
+    display: inline-flex;
+    align-self: flex-start;
+    padding: 3px;
+    gap: 2px;
+    border-radius: 11px;
+    background: var(--bordure-douce);
+    border: 1px solid var(--bordure);
+  }
+  .segment input {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+  }
+  .segment label {
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--encre-2);
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .segment input:checked + label {
+    background: var(--surface);
+    color: var(--accent-fonce);
+    box-shadow: 0 1px 3px rgba(35, 39, 47, 0.1);
+  }
+  @media (hover: hover) {
+    .segment input:not(:checked) + label:hover {
+      color: var(--encre);
+    }
+  }
+  .reglages .aide {
+    font-size: 13.5px;
+    color: var(--encre-3);
+    max-width: 46ch;
+  }
+  .astuce {
+    font-size: 13.5px;
+    color: var(--encre-2);
+    background: var(--surface);
+    border: 1px solid var(--bordure);
+    border-radius: 12px;
+    padding: 12px 14px;
+    max-width: 46ch;
+  }
+
+  /* Liste des changements */
+  .section {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .changements {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 40px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .changements li {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-block: 18px;
+    border-top: 1px solid #e2ddd3;
+  }
+  .changements p {
+    font-size: 14.5px;
+    color: var(--encre-2);
+    max-width: 62ch;
+  }
+  .avant-apres {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: 10px;
+    row-gap: 2px;
+    font-size: 14.5px;
+  }
+  .avant-apres dt {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--encre-3);
+    padding-top: 3px;
+  }
+  .avant-apres dd {
+    margin: 0;
+    color: var(--encre-2);
+  }
+  .source {
+    font-size: 12.5px;
+    color: var(--encre-3);
+  }
+  .source a {
+    color: var(--accent-fonce);
+  }
+
+  /* Décisions */
+  .decisions {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+  }
+  .decision {
+    background: var(--surface);
+    border: 1px solid var(--bordure);
+    border-radius: 16px;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .decision .reco {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent-fonce);
+  }
+  .decision p {
+    font-size: 14px;
+    color: var(--encre-2);
+  }
+  .inchange {
+    margin: 0;
+    padding-left: 18px;
+    color: var(--encre-2);
+    font-size: 14.5px;
+    display: grid;
+    gap: 4px;
+    max-width: 80ch;
+  }
+
+  code {
+    font-family: ui-monospace, 'Cascadia Code', Consolas, monospace;
+    font-size: 0.9em;
+    background: var(--bordure-douce);
+    padding: 1px 5px;
+    border-radius: 5px;
+  }
+
+  @media (max-width: 980px) {
+    .comparaison {
+      grid-template-columns: auto auto;
+    }
+    .reglages {
+      grid-column: 1 / -1;
+      padding-top: 0;
+    }
+  }
+  @media (max-width: 560px) {
+    h1 {
+      font-size: 28px;
+    }
+    .comparaison {
+      grid-template-columns: minmax(0, 1fr);
+      justify-items: center;
+    }
+    .colonne {
+      width: 224px;
+    }
+    .reglages {
+      justify-self: stretch;
+    }
+    .changements,
+    .decisions {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>
+
+<svg width="0" height="0" style="position: absolute" aria-hidden="true">
+  <defs>
+    <symbol id="logo" viewBox="0 0 399 64">
+      <path
+        d="M32 22 L50 36 V56 H14 V36 Z"
+        fill="#2b4bf2"
+        stroke="#2b4bf2"
+        stroke-width="4"
+        stroke-linejoin="round"
+      />
+      <path
+        d="M32 16 V6 M21 19 L14 12 M43 19 L50 12"
+        fill="none"
+        stroke="#ff7a1a"
+        stroke-width="5"
+        stroke-linecap="round"
+      />
+      <g transform="translate(78 56) scale(0.6)">
+        <path
+          fill="#2b4bf2"
+          d="M29.9 1.8Q24.1 1.8 19.35 -0.3Q14.6 -2.4 11.1 -6.15Q7.6 -9.9 5.75 -15Q3.9 -20.1 3.9 -26L3.9 -28.3Q3.9 -34.2 5.65 -39.3Q7.4 -44.4 10.75 -48.25Q14.1 -52.1 18.8 -54.25Q23.5 -56.4 29.3 -56.4Q35.9 -56.4 40.7 -53.55Q45.5 -50.7 48.2 -45.15Q50.9 -39.6 51.2 -31.5L47 -35.4L47 -73L63.1 -73L63.1 0L50.4 0L50.4 -22.7L52.6 -22.7Q52.3 -14.9 49.35 -9.4Q46.4 -3.9 41.4 -1.05Q36.4 1.8 29.9 1.8ZM33.9 -11.6Q37.6 -11.6 40.65 -13.25Q43.7 -14.9 45.55 -18.1Q47.4 -21.3 47.4 -25.8L47.4 -29.5Q47.4 -33.9 45.5 -36.9Q43.6 -39.9 40.5 -41.5Q37.4 -43.1 33.8 -43.1Q29.8 -43.1 26.650 -41.05Q23.5 -39 21.7 -35.45Q19.9 -31.9 19.9 -27.2Q19.9 -22.4 21.7 -18.9Q23.5 -15.4 26.7 -13.5Q29.9 -11.6 33.9 -11.6Z M97.7 1.9Q90.7 1.9 85.35 -0.5Q80 -2.9 76.45 -6.95Q72.9 -11 71.05 -16.05Q69.2 -21.1 69.2 -26.4L69.2 -28.4Q69.2 -33.9 71.05 -38.95Q72.9 -44 76.4 -48Q79.9 -52 85.15 -54.35Q90.4 -56.7 97.1 -56.7Q105.9 -56.7 111.95 -52.75Q118 -48.8 121.2 -42.45Q124.4 -36.1 124.4 -28.6L124.4 -23.2L75.9 -23.2L75.9 -32.3L114.7 -32.3L109.5 -28.1Q109.5 -33 108.1 -36.5Q106.7 -40 103.95 -41.85Q101.2 -43.7 97.1 -43.7Q92.9 -43.7 90 -41.8Q87.1 -39.9 85.6 -36.25Q84.1 -32.6 84.1 -27.3Q84.1 -22.4 85.5 -18.75Q86.9 -15.1 89.9 -13.1Q92.9 -11.1 97.7 -11.1Q102.1 -11.1 104.9 -12.8Q107.7 -14.5 108.7 -17L123.4 -17Q122.2 -11.5 118.7 -7.2Q115.2 -2.9 109.9 -0.5Q104.6 1.9 97.7 1.9Z M168.6 0L151.3 -25.6L143.6 -25.6L165.9 -54.8L182.7 -54.8L161.7 -27.6L161.9 -35.4L186.6 0ZM130 0L130 -73L146 -73L146 0Z M189.2 0L189.2 -73L205.3 -73L205.3 0ZM182.7 -61.2L182.7 -73L205.3 -73L205.3 -61.2Z"
+        />
+        <path
+          fill="#ff7a1a"
+          d="M217.6 0L217.6 -54.8L233.6 -54.8L233.6 0ZM210.3 -43L210.3 -54.8L233.6 -54.8L233.6 -43ZM223.8 -60.2Q219.3 -60.2 217.15 -62.55Q215 -64.9 215 -68.5Q215 -72.2 217.15 -74.55Q219.3 -76.9 223.8 -76.9Q228.3 -76.9 230.45 -74.55Q232.6 -72.2 232.6 -68.5Q232.6 -64.9 230.45 -62.55Q228.3 -60.2 223.8 -60.2Z"
+        />
+        <path
+          fill="#2b4bf2"
+          d="M268 1.9Q260.9 1.9 255.65 -0.45Q250.4 -2.8 246.9 -6.8Q243.4 -10.8 241.7 -15.85Q240 -20.9 240 -26.3L240 -28.2Q240 -33.8 241.8 -38.95Q243.6 -44.1 247.1 -48.1Q250.6 -52.1 255.85 -54.4Q261.1 -56.7 267.9 -56.7Q275.3 -56.7 281 -53.85Q286.7 -51 290.1 -45.9Q293.5 -40.8 293.9 -34.2L278.2 -34.2Q277.8 -37.9 275.25 -40.45Q272.7 -43 267.9 -43Q263.9 -43 261.25 -41Q258.6 -39 257.3 -35.5Q256 -32 256 -27.2Q256 -22.8 257.2 -19.25Q258.4 -15.7 261.05 -13.75Q263.7 -11.8 268 -11.8Q271.2 -11.8 273.45 -12.95Q275.7 -14.1 277.05 -16.15Q278.4 -18.2 278.7 -20.9L294.3 -20.9Q294 -14.1 290.5 -8.95Q287 -3.8 281.2 -0.95Q275.4 1.9 268 1.9Z"
+        />
+      </g>
+    </symbol>
+    <!-- Icônes Lucide (mêmes que l'app) -->
+    <symbol id="i-maison" viewBox="0 0 24 24">
+      <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" />
+      <path
+        d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"
+      />
+    </symbol>
+    <symbol id="i-dossier" viewBox="0 0 24 24">
+      <path
+        d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"
+      />
+    </symbol>
+    <symbol id="i-immeuble" viewBox="0 0 24 24">
+      <path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z" />
+      <path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2" />
+      <path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2" />
+      <path d="M10 6h4" />
+      <path d="M10 10h4" />
+      <path d="M10 14h4" />
+      <path d="M10 18h4" />
+    </symbol>
+    <symbol id="i-calendrier" viewBox="0 0 24 24">
+      <rect width="18" height="18" x="3" y="4" rx="2" />
+      <path d="M16 2v4" />
+      <path d="M8 2v4" />
+      <path d="M3 10h18" />
+      <path d="m9 16 2 2 4-4" />
+    </symbol>
+    <symbol id="i-recu" viewBox="0 0 24 24">
+      <path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z" />
+      <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8" />
+      <path d="M12 17.5v-11" />
+    </symbol>
+    <symbol id="i-personnes" viewBox="0 0 24 24">
+      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+      <circle cx="9" cy="7" r="4" />
+      <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+    </symbol>
+    <symbol id="i-calculette" viewBox="0 0 24 24">
+      <rect width="16" height="20" x="4" y="2" rx="2" />
+      <path d="M8 6h8" />
+      <path d="M16 14v4" />
+      <path d="M16 10h.01" />
+      <path d="M12 10h.01" />
+      <path d="M8 10h.01" />
+      <path d="M12 14h.01" />
+      <path d="M8 14h.01" />
+      <path d="M12 18h.01" />
+      <path d="M8 18h.01" />
+    </symbol>
+    <symbol id="i-piece" viewBox="0 0 24 24">
+      <path
+        d="M19.439 7.85c-.049.322.059.648.289.878l1.568 1.568c.47.47.706 1.087.706 1.704s-.235 1.233-.706 1.704l-1.611 1.611a.98.98 0 0 1-.837.276c-.47-.07-.802-.48-.968-.925a2.501 2.501 0 1 0-3.214 3.214c.446.166.855.497.925.968a.979.979 0 0 1-.276.837l-1.61 1.61a2.404 2.404 0 0 1-1.705.707 2.402 2.402 0 0 1-1.704-.706l-1.568-1.568a1.026 1.026 0 0 0-.877-.29c-.493.074-.84.504-1.02.968a2.5 2.5 0 1 1-3.237-3.237c.464-.18.894-.527.967-1.02a1.026 1.026 0 0 0-.289-.877l-1.568-1.568A2.402 2.402 0 0 1 1.998 12c0-.617.236-1.234.706-1.704L4.23 8.77c.24-.24.581-.353.917-.303.515.077.877.528 1.073 1.01a2.5 2.5 0 1 0 3.259-3.259c-.482-.196-.933-.558-1.01-1.073-.05-.336.062-.676.303-.917l1.525-1.525A2.402 2.402 0 0 1 12 1.998c.617 0 1.234.236 1.704.706l1.568 1.568c.23.23.556.338.877.29.493-.074.84-.504 1.02-.968a2.5 2.5 0 1 1 3.237 3.237c-.464.18-.894.527-.967 1.02Z"
+      />
+    </symbol>
+    <symbol id="i-telecharger" viewBox="0 0 24 24">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+      <path d="m7 10 5 5 5-5" />
+      <path d="M12 15V3" />
+    </symbol>
+    <symbol id="i-sortir" viewBox="0 0 24 24">
+      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+      <path d="m16 17 5-5-5-5" />
+      <path d="M21 12H9" />
+    </symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24">
+      <path d="M5 12h14" />
+      <path d="M12 5v14" />
+    </symbol>
+  </defs>
+</svg>
+
+<main class="page">
+  <header class="intro">
+    <span class="surtitre">Deklic · barre latérale</span>
+    <h1>Un menu qui se lit et se clique</h1>
+    <p class="chapeau">
+      La maquette de droite est interactive : survolez et cliquez les lignes, la page ouverte suit.
+      Les réglages à côté montrent les deux choix qui restent à trancher.
+    </p>
+  </header>
+
+  <section class="comparaison" aria-label="Comparaison du menu">
+    <!-- Aujourd'hui -->
+    <div class="colonne">
+      <div class="legende-cadre"><strong>Aujourd’hui</strong><span>capture du 15/09</span></div>
+      <aside class="sb actuel" aria-label="Menu actuel">
+        <a class="logo" href="#" aria-label="Deklic : accueil"
+          ><svg width="162" height="26"><use href="#logo" /></svg
+        ></a>
+        <a class="a-lien" href="#" style="margin-top: -8px"
+          ><svg class="ico"><use href="#i-maison" /></svg>Accueil</a
+        >
+        <div class="a-milieu">
+          <nav class="a-groupe" aria-label="Analyser (actuel)">
+            <div class="a-etiq">Analyser</div>
+            <div class="a-double">
+              <a class="a-lien" href="#"><span class="a-lib">Mes projets · 4</span></a>
+              <a class="a-plus" href="#" aria-label="Nouveau projet"
+                ><svg class="ico"><use href="#i-plus" /></svg
+              ></a>
+            </div>
+            <a class="a-lien" href="#"
+              ><span class="a-lib">T3 · 70 m² · Aix-en-Provence</span
+              ><span class="a-point" style="background: var(--bon)"></span
+            ></a>
+            <a class="a-lien" href="#"
+              ><span class="a-lib">52 m² · Aix-en-Provence</span
+              ><span class="a-point" style="background: var(--encre-4)"></span
+            ></a>
+            <a class="a-lien" href="#"
+              ><span class="a-lib">T3 · 64 m² · Aix-en-Provence</span
+              ><span class="a-point" style="background: var(--bon)"></span
+            ></a>
+          </nav>
+          <nav class="a-groupe" aria-label="Gérer (actuel)">
+            <div class="a-etiq">Gérer</div>
+            <div class="a-double">
+              <a class="a-lien" href="#"><span class="a-lib">Mes biens · 2</span></a>
+              <a class="a-plus" href="#" aria-label="Ajouter un bien"
+                ><svg class="ico"><use href="#i-plus" /></svg
+              ></a>
+            </div>
+            <a class="a-lien" href="#"
+              ><svg class="ico"><use href="#i-maison" /></svg>Loyers du mois</a
+            >
+            <a class="a-lien" href="#"
+              ><svg class="ico"><use href="#i-recu" /></svg>Tous les loyers</a
+            >
+            <a class="a-lien" href="#"
+              ><svg class="ico"><use href="#i-personnes" /></svg>Mes locataires</a
+            >
+          </nav>
+        </div>
+        <nav class="a-groupe" aria-label="Outils (actuel)">
+          <div class="a-etiq">Outils</div>
+          <a class="a-lien" href="#"
+            ><svg class="ico"><use href="#i-calculette" /></svg>Simulateur de prêt</a
+          >
+        </nav>
+        <a class="a-lien" href="#"
+          ><svg class="ico"><use href="#i-piece" /></svg>Extension navigateur</a
+        >
+        <div style="display: flex; flex-direction: column; gap: 12px">
+          <button class="a-installer" type="button">
+            <svg class="ico"><use href="#i-telecharger" /></svg>Installer l’application
+          </button>
+          <div class="a-profil">
+            <a href="#"
+              ><span class="avatar">EG</span
+              ><span class="noms"><b>erreip Gorguel</b><span>Mon compte · 4 projets</span></span></a
+            >
+            <button class="sortie" type="button" aria-label="Se déconnecter">
+              <svg class="ico" style="width: 20px; height: 20px"><use href="#i-sortir" /></svg>
+            </button>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <!-- Proposé -->
+    <div class="colonne">
+      <div class="legende-cadre">
+        <strong>Proposé</strong><span class="puce-reco">à valider</span>
+      </div>
+      <aside
+        class="sb nouveau"
+        id="propose"
+        aria-label="Menu proposé"
+        data-couleur="subtile"
+        data-accueil="ligne"
+        data-taille="souris"
+      >
+        <div class="n-tete">
+          <a class="logo" href="#" data-page="accueil" aria-label="Deklic : accueil"
+            ><svg width="150" height="24"><use href="#logo" /></svg
+          ></a>
+        </div>
+
+        <div class="n-milieu">
+          <nav class="n-groupe groupe-accueil" aria-label="Accueil">
+            <a class="ligne" href="#" data-page="accueil"
+              ><span class="ic"
+                ><svg class="ico"><use href="#i-maison" /></svg></span
+              ><span class="lib">Accueil</span></a
+            >
+          </nav>
+
+          <nav class="n-groupe" aria-label="Analyser">
+            <div class="n-etiq">Analyser</div>
+            <div class="double">
+              <a class="ligne" href="#" data-page="projets"
+                ><span class="ic"
+                  ><svg class="ico"><use href="#i-dossier" /></svg></span
+                ><span class="lib">Mes projets</span><span class="nombre">4</span></a
+              >
+              <a
+                class="ajout"
+                href="#"
+                data-page="nouveau-projet"
+                aria-label="Nouveau projet"
+                title="Nouveau projet"
+                ><svg class="ico"><use href="#i-plus" /></svg
+              ></a>
+            </div>
+            <a class="ligne sous" href="#" data-page="p1" title="Cash-flow : bon"
+              ><span class="ic"><span class="point" style="background: var(--bon)"></span></span
+              ><span class="lib">T3 · 70 m² · Aix-en-Provence</span></a
+            >
+            <a class="ligne sous" href="#" data-page="p2" title="Cash-flow : inconnu"
+              ><span class="ic"><span class="point" style="background: var(--encre-4)"></span></span
+              ><span class="lib">52 m² · Aix-en-Provence</span></a
+            >
+            <a class="ligne sous" href="#" data-page="p3" title="Cash-flow : bon"
+              ><span class="ic"><span class="point" style="background: var(--bon)"></span></span
+              ><span class="lib">T3 · 64 m² · Aix-en-Provence</span></a
+            >
+          </nav>
+
+          <nav class="n-groupe" aria-label="Gérer">
+            <div class="n-etiq">Gérer</div>
+            <div class="double">
+              <a class="ligne" href="#" data-page="biens" aria-current="page"
+                ><span class="ic"
+                  ><svg class="ico"><use href="#i-immeuble" /></svg></span
+                ><span class="lib">Mes biens</span><span class="nombre">2</span></a
+              >
+              <a
+                class="ajout"
+                href="#"
+                data-page="ajouter-bien"
+                aria-label="Ajouter un bien"
+                title="Ajouter un bien"
+                ><svg class="ico"><use href="#i-plus" /></svg
+              ></a>
+            </div>
+            <a class="ligne" href="#" data-page="loyers-mois"
+              ><span class="ic"
+                ><svg class="ico"><use href="#i-calendrier" /></svg></span
+              ><span class="lib">Loyers du mois</span></a
+            >
+            <a class="ligne" href="#" data-page="loyers"
+              ><span class="ic"
+                ><svg class="ico"><use href="#i-recu" /></svg></span
+              ><span class="lib">Tous les loyers</span></a
+            >
+            <a class="ligne" href="#" data-page="locataires"
+              ><span class="ic"
+                ><svg class="ico"><use href="#i-personnes" /></svg></span
+              ><span class="lib">Mes locataires</span></a
+            >
+          </nav>
+        </div>
+
+        <div class="n-pied">
+          <nav class="n-groupe" aria-label="Outils">
+            <div class="n-etiq">Outils</div>
+            <a class="ligne" href="#" data-page="simulateur"
+              ><span class="ic"
+                ><svg class="ico"><use href="#i-calculette" /></svg></span
+              ><span class="lib">Simulateur de prêt</span></a
+            >
+            <a class="ligne" href="#" data-page="extension"
+              ><span class="ic"
+                ><svg class="ico"><use href="#i-piece" /></svg></span
+              ><span class="lib">Extension navigateur</span></a
+            >
+          </nav>
+          <button class="n-installer" type="button">
+            <svg class="ico"><use href="#i-telecharger" /></svg>Installer l’application
+          </button>
+          <div class="n-profil">
+            <a href="#" data-page="compte"
+              ><span class="avatar">EG</span
+              ><span class="noms"><b>erreip Gorguel</b><span>Mon compte</span></span></a
+            >
+            <button class="sortie" type="button" aria-label="Se déconnecter" title="Se déconnecter">
+              <svg class="ico"><use href="#i-sortir" /></svg>
+            </button>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <!-- Réglages -->
+    <div class="reglages">
+      <fieldset>
+        <legend>Intensité de la couleur</legend>
+        <div class="segment">
+          <input type="radio" name="couleur" id="couleur-subtile" value="subtile" checked />
+          <label for="couleur-subtile">Subtile</label>
+          <input type="radio" name="couleur" id="couleur-affirmee" value="affirmee" />
+          <label for="couleur-affirmee">Affirmée</label>
+        </div>
+        <p class="aide">
+          Subtile : l’icône seule est bleue. Affirmée : l’icône est posée dans une petite tuile bleu
+          clair, qui devient bleu plein sur la page ouverte.
+        </p>
+      </fieldset>
+
+      <fieldset>
+        <legend>Retour à l’accueil</legend>
+        <div class="segment">
+          <input type="radio" name="accueil" id="accueil-ligne" value="ligne" checked />
+          <label for="accueil-ligne">Ligne « Accueil »</label>
+          <input type="radio" name="accueil" id="accueil-logo" value="logo" />
+          <label for="accueil-logo">Logo seul</label>
+        </div>
+        <p class="aide">
+          Le logo ramène déjà à l’accueil. Sans la ligne, le menu commence directement par «
+          Analyser ».
+        </p>
+      </fieldset>
+
+      <fieldset>
+        <legend>Taille des cibles</legend>
+        <div class="segment">
+          <input type="radio" name="taille" id="taille-souris" value="souris" checked />
+          <label for="taille-souris">Souris</label>
+          <input type="radio" name="taille" id="taille-doigt" value="doigt" />
+          <label for="taille-doigt">Doigt</label>
+        </div>
+        <p class="aide">
+          Lignes de 38 px à la souris, 44 px sur écran tactile, où le « + » devient un carré de 44
+          px.
+        </p>
+      </fieldset>
+
+      <p class="astuce">
+        Au doigt, le survol n’existe pas : c’est la couleur au repos qui dit ce qui se clique. C’est
+        la raison principale du bleu sur les icônes.
+      </p>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="titre-changements">
+    <h2 id="titre-changements">Ce qui change</h2>
+    <ul class="changements">
+      <li>
+        <h3>« Mes projets » et « Mes biens » ressemblent à des liens</h3>
+        <dl class="avant-apres">
+          <dt>Avant</dt>
+          <dd>Texte gris sans icône, comme un titre ; seul le « + » bleu attire l’œil.</dd>
+          <dt>Après</dt>
+          <dd>
+            Icône, libellé foncé, nombre dans une pastille ; le « + » devient un petit bouton bordé,
+            secondaire.
+          </dd>
+        </dl>
+        <p class="source">
+          Un élément plat et pâle passe pour du texte ; l’œil prend l’élément le plus coloré pour la
+          seule action.
+          <a
+            href="https://www.nngroup.com/articles/flat-ui-less-attention-cause-uncertainty/"
+            target="_blank"
+            rel="noopener"
+            >NN/g, éléments plats</a
+          >
+        </p>
+      </li>
+      <li>
+        <h3>Une touche de bleu au repos</h3>
+        <dl class="avant-apres">
+          <dt>Avant</dt>
+          <dd>Tout est gris ; seul le survol montre qu’une ligne réagit.</dd>
+          <dt>Après</dt>
+          <dd>
+            Icônes en bleu Deklic, libellés en encre. Survol inchangé (recette
+            <code>survol-fond</code>). Page ouverte : fond bleu doux, libellé bleu foncé.
+          </dd>
+        </dl>
+        <p class="source">
+          Principe 6 des design guidelines : le survol est un indice, jamais la seule information.
+        </p>
+      </li>
+      <li>
+        <h3>Les projets se rangent sous « Mes projets »</h3>
+        <dl class="avant-apres">
+          <dt>Avant</dt>
+          <dd>Mêmes taille et retrait que la ligne parente, point de couleur à droite.</dd>
+          <dt>Après</dt>
+          <dd>
+            Texte de 13 px aligné sur le libellé parent, point de cash-flow à gauche, dans la
+            colonne des icônes.
+          </dd>
+        </dl>
+        <p class="source">La colonne d’icônes devient un repère : icône = page, point = projet.</p>
+      </li>
+      <li>
+        <h3>Accueil ne flotte plus entre le logo et « Analyser »</h3>
+        <dl class="avant-apres">
+          <dt>Avant</dt>
+          <dd>
+            Accueil collé au logo (−8 px), « ANALYSER » à égale distance de ce qui précède et de ce
+            qui suit.
+          </dd>
+          <dt>Après</dt>
+          <dd>
+            Le logo a sa propre bande ; chaque titre de section est collé à ce qu’il annonce (6 px)
+            et loin de ce qui précède (22 px).
+          </dd>
+        </dl>
+        <p class="source">
+          Ce qui est proche est lu comme un groupe.
+          <a
+            href="https://www.nngroup.com/articles/gestalt-proximity/"
+            target="_blank"
+            rel="noopener"
+            >NN/g, loi de proximité</a
+          >
+        </p>
+      </li>
+      <li>
+        <h3>Des titres de section lisibles</h3>
+        <dl class="avant-apres">
+          <dt>Avant</dt>
+          <dd>« ANALYSER » en #9ca3af sur blanc : contraste de 2,5 pour 1.</dd>
+          <dt>Après</dt>
+          <dd>#6b7280 : 4,8 pour 1, au-dessus du minimum de 4,5 pour 1.</dd>
+        </dl>
+        <p class="source">
+          <a
+            href="https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html"
+            target="_blank"
+            rel="noopener"
+            >WCAG 2.2, 1.4.3 Contraste minimum</a
+          >
+        </p>
+      </li>
+      <li>
+        <h3>Une icône par page</h3>
+        <dl class="avant-apres">
+          <dt>Avant</dt>
+          <dd>« Loyers du mois » porte la même maison qu’« Accueil ».</dd>
+          <dt>Après</dt>
+          <dd>
+            Un calendrier coché pour les loyers du mois, un immeuble pour « Mes biens », un dossier
+            pour « Mes projets ».
+          </dd>
+        </dl>
+        <p class="source">
+          Une icône n’aide que si elle désigne toujours la même chose.
+          <a href="https://www.nngroup.com/articles/icon-usability/" target="_blank" rel="noopener"
+            >NN/g, icônes</a
+          >
+        </p>
+      </li>
+      <li>
+        <h3>Les outils regroupés</h3>
+        <dl class="avant-apres">
+          <dt>Avant</dt>
+          <dd>« Extension navigateur » seule, sans titre, sous le simulateur.</dd>
+          <dt>Après</dt>
+          <dd>Les deux lignes sous « Outils ».</dd>
+        </dl>
+      </li>
+      <li>
+        <h3>Plus compact, profil sans doublon</h3>
+        <dl class="avant-apres">
+          <dt>Avant</dt>
+          <dd>
+            Lignes de 44 px partout ; « Mon compte · 4 projets » répète le nombre déjà affiché, et
+            le nom est coupé.
+          </dd>
+          <dt>Après</dt>
+          <dd>38 px à la souris, 44 px au doigt ; « Mon compte » seul, le nom tient en entier.</dd>
+        </dl>
+        <p class="source">
+          <a
+            href="https://m3.material.io/components/navigation-drawer/guidelines"
+            target="_blank"
+            rel="noopener"
+            >Material 3, tiroir de navigation</a
+          >
+          : icône + libellé pour chaque destination, titres de section discrets.
+        </p>
+      </li>
+    </ul>
+  </section>
+
+  <section class="section" aria-labelledby="titre-decisions">
+    <h2 id="titre-decisions">À trancher avant d’implémenter</h2>
+    <div class="decisions">
+      <div class="decision">
+        <h3>Intensité de la couleur</h3>
+        <p class="reco">Recommandé : subtile</p>
+        <p>
+          Assez de bleu pour signaler les liens, sans concurrencer les feux verts, orange et rouges
+          du contenu. La version affirmée est plus « application mobile », mais charge une barre de
+          224 px.
+        </p>
+      </div>
+      <div class="decision">
+        <h3>Ligne « Accueil »</h3>
+        <p class="reco">Recommandé : la garder</p>
+        <p>
+          Camille ne connaît pas forcément la convention du logo cliquable, et la ligne montre quand
+          l’accueil est ouvert. Le décalage est corrigé par l’espacement, pas par la suppression.
+        </p>
+      </div>
+      <div class="decision">
+        <h3>Le reste</h3>
+        <p class="reco">À valider en bloc</p>
+        <p>
+          Icônes partout, pastilles de nombre, « + » bordé, projets en retrait, titres plus
+          contrastés, lignes de 38 px, « Outils » regroupés, profil allégé.
+        </p>
+      </div>
+    </div>
+
+    <h3>Ce qui ne bouge pas</h3>
+    <ul class="inchange">
+      <li>
+        Les adresses des pages et l’ordre des sections ; « Mon menu » masque toujours Analyser ou
+        Gérer.
+      </li>
+      <li>
+        Deux liens distincts sur la ligne « Mes projets » et son « + » (jamais un lien dans un
+        lien).
+      </li>
+      <li>Largeur de 224 px, tiroir sous 1 024 px, seule la zone du milieu défile.</li>
+      <li>
+        Les recettes de survol existantes ; aucune couleur inventée hors des tokens de
+        <code>index.css</code>.
+      </li>
+      <li>Le badge rouge des loyers en retard sur « Loyers du mois ».</li>
+    </ul>
+  </section>
+</main>
+
+<script>
+  (function () {
+    const menu = document.getElementById('propose');
+
+    document.querySelectorAll('.sb a, .sb button').forEach(function (el) {
+      el.addEventListener('click', function (e) {
+        e.preventDefault();
+      });
+    });
+
+    menu.addEventListener('click', function (e) {
+      const cible = e.target.closest('[data-page]');
+      if (!cible) return;
+      menu.querySelectorAll('[aria-current]').forEach(function (el) {
+        el.removeAttribute('aria-current');
+      });
+      menu.querySelectorAll('[data-page="' + cible.dataset.page + '"]').forEach(function (el) {
+        el.setAttribute('aria-current', 'page');
+      });
+    });
+
+    [
+      ['couleur', 'couleur'],
+      ['accueil', 'accueil'],
+      ['taille', 'taille'],
+    ].forEach(function (paire) {
+      document.querySelectorAll('input[name="' + paire[0] + '"]').forEach(function (champ) {
+        champ.addEventListener('change', function () {
+          if (champ.checked) menu.dataset[paire[1]] = champ.value;
+        });
+      });
+    });
+  })();
+</script>

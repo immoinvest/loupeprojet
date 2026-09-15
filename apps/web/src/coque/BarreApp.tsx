@@ -32,7 +32,8 @@ export function BarreApp({ menu }: { menu: Menu }): JSX.Element {
       <NavLink
         to="/"
         aria-label={TEXTES_LOGO}
-        className="flex min-h-11 items-center rounded-encart px-1 survol-fond"
+        data-logo
+        className="flex min-h-11 items-center rounded-encart px-1"
       >
         <LogotypeDeklic hauteur={24} />
       </NavLink>

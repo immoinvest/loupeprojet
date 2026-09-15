@@ -6,9 +6,12 @@ export const TEXTES_MENU = {
   accueil: 'Accueil',
   analyser: 'Analyser',
   gerer: 'Gérer',
+  /** Libellé de la ligne du menu ; le nombre suit dans une pastille (nom accessible « Mes projets · 4 »). */
   mesProjets: 'Mes projets',
   /** Nom accessible et infobulle du « + » de la ligne « Mes projets ». */
   nouveauProjet: 'Nouveau projet',
+  /** Sans nombre tant que les biens ne sont pas chargés. */
+  mesBiens: 'Mes biens',
   ajouterBien: 'Ajouter un bien',
   loyersDuMois: 'Loyers du mois',
   /** La page Loyers, mois par mois. */
@@ -19,16 +22,6 @@ export const TEXTES_MENU = {
 
 /** Les projets les plus récents montrés dans le menu ; tous les autres sont derrière « Mes projets ». */
 export const PROJETS_DANS_LE_MENU = 3;
-
-/** « Mes projets · 7 », « Mes projets · 0 ». */
-export function mesProjets(nombre: number): string {
-  return `${TEXTES_MENU.mesProjets} · ${String(nombre)}`;
-}
-
-/** « Mes biens · 4 » dans le menu Gérer ; sans le nombre tant que les biens ne sont pas chargés. */
-export function mesBiens(nombre: number | null): string {
-  return nombre === null ? 'Mes biens' : `Mes biens · ${String(nombre)}`;
-}
 
 /** « 1 loyer en retard », « 3 loyers en retard ». */
 export function loyersEnRetard(nombre: number): string {

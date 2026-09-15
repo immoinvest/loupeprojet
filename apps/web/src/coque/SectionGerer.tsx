@@ -1,15 +1,15 @@
 import { jourLocal } from '@loupe/gestion';
-import { Building2, House, Receipt, Users } from 'lucide-react';
+import { Building2, CalendarCheck, Receipt, Users } from 'lucide-react';
 import type { JSX } from 'react';
 import { NavLink } from 'react-router';
 
 import { useCompte } from '@/compte/CompteContext';
 import { useGestion } from '@/gestion/GestionContext';
 import { retardsDuMois } from '@/gestion/menu';
-import { loyersEnRetard, mesBiens, TEXTES_MENU } from '@/textes/gerer';
+import { loyersEnRetard, TEXTES_MENU } from '@/textes/gerer';
 
 import { LigneAvecAjout } from './LigneAvecAjout';
-import { CLASSE_ETIQUETTE, classeLien } from './liens';
+import { CLASSE_ETIQUETTE, CLASSE_SECTION, classeLien } from './liens';
 
 /**
  * Section « Gérer » : « Mes biens · N » et son « + » (ajouter un bien) sur une ligne, les loyers du
@@ -22,7 +22,7 @@ export function SectionGerer(): JSX.Element {
   const retards = retardsDuMois(donnees, jourLocal(new Date()));
 
   return (
-    <nav aria-label={TEXTES_MENU.gerer} className="flex flex-col gap-1">
+    <nav aria-label={TEXTES_MENU.gerer} className={CLASSE_SECTION}>
       <div className={CLASSE_ETIQUETTE}>{TEXTES_MENU.gerer}</div>
       {etat === 'connecte' ? (
         <>
@@ -30,17 +30,19 @@ export function SectionGerer(): JSX.Element {
           <LigneAvecAjout
             vers="/gerer/biens"
             end={false}
-            libelle={mesBiens(donnees === null ? null : donnees.biens.length)}
+            icone={Building2}
+            libelle={TEXTES_MENU.mesBiens}
+            nombre={donnees === null ? null : donnees.biens.length}
             versAjout="/gerer/ajouter"
             libelleAjout={TEXTES_MENU.ajouterBien}
           />
           <NavLink to="/gerer" end className={classeLien}>
-            <House size={18} aria-hidden="true" />
+            <CalendarCheck size={18} aria-hidden="true" />
             <span className="flex-1">{TEXTES_MENU.loyersDuMois}</span>
             {retards > 0 && (
               <span
                 aria-label={loyersEnRetard(retards)}
-                className="flex h-[22px] min-w-[22px] items-center justify-center rounded-full bg-probleme-fond px-1.5 text-xs font-bold text-probleme-texte"
+                className="flex h-5 min-w-[22px] items-center justify-center rounded-full bg-probleme-fond px-1.5 text-xs font-bold text-probleme-texte"
               >
                 {retards}
               </span>
