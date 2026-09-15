@@ -8,10 +8,12 @@ import {
   lienConformite,
   lienFicheBien,
   lienFicheLocataire,
+  lienFinBail,
   lienNouveauLocataire,
   lienRevision,
 } from '@/gestion/parcours';
 import { alerteAFaire, revisionAFaire } from '@/textes/gerer-bail';
+import { depotAFaire, echeanceEnLettres, soldeEnLettres } from '@/textes/gerer-fin-bail';
 import {
   ajouterEmailDe,
   louerLeBien,
@@ -71,6 +73,38 @@ function ligneDe(action: ActionAFaire): Ligne {
         vers: lienConformite(action.bien.id),
         libelle: alerteAFaire(action.alerte, action.bien.nom),
         point: action.alerte.code === 'fin_bail_court' ? 'bg-surveiller' : 'bg-probleme',
+      };
+    case 'depot':
+      return {
+        vers: lienFinBail(action.bien.id, action.location.id),
+        libelle: depotAFaire(
+          action.locataire?.prenom ?? TEXTES_GERER.tonLocataire,
+          action.suivi.dateLimite ?? '',
+        ),
+        precision: bienEtChambre(action.bien.nom, action.location.libelle),
+        point: action.suivi.enRetard ? 'bg-probleme' : 'bg-surveiller',
+      };
+    case 'regularisation':
+      return {
+        vers: lienFinBail(action.bien.id, action.location.id),
+        libelle: soldeEnLettres(
+          action.annee,
+          action.solde,
+          action.locataire?.prenom ?? TEXTES_GERER.tonLocataire,
+        ),
+        precision: bienEtChambre(action.bien.nom, action.location.libelle),
+        point: 'bg-accent',
+      };
+    case 'charges_a_regler':
+      return {
+        vers: lienFinBail(action.bien.id, action.location.id),
+        libelle: soldeEnLettres(
+          action.regularisation.annee,
+          action.regularisation.solde,
+          action.locataire?.prenom ?? TEXTES_GERER.tonLocataire,
+        ),
+        precision: echeanceEnLettres(action.regularisation.aPartirDe),
+        point: 'bg-surveiller',
       };
     case 'revision':
       return {

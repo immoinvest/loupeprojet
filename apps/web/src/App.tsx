@@ -40,6 +40,7 @@ import { AjouterMain } from './ecrans/gerer/AjouterMain';
 import { Argent } from './ecrans/gerer/argent/Argent';
 import { ModifierDepense, NouvelleDepense } from './ecrans/gerer/argent/PagesDepense';
 import { ImprimerLettre } from './ecrans/gerer/bail/ImprimerLettre';
+import { ImprimerDecompte } from './ecrans/gerer/fin-bail/ImprimerDecompte';
 import { FicheBien } from './ecrans/gerer/FicheBien';
 import { FicheLocataire } from './ecrans/gerer/FicheLocataire';
 import { Gerer } from './ecrans/gerer/Gerer';
@@ -81,6 +82,7 @@ export const routes: RouteObject[] = [
   { path: 'projets/:id/imprimer', element: <Imprimer /> },
   { path: 'gerer/documents/:id', element: <ImprimerDocument /> },
   { path: 'gerer/lettres/:id', element: <ImprimerLettre /> },
+  { path: 'gerer/decomptes/:id', element: <ImprimerDecompte /> },
   { path: 'simulateur-pret/imprimer', element: <SimulateurImprimer /> },
   {
     element: <AppLayout />,

@@ -8,6 +8,7 @@ import {
 } from '@loupe/gestion';
 
 import type { ActionBail } from './bail/vue';
+import { cleActionFinBail, type ActionFinBail } from './fin-bail/vue';
 import { etatDuBien } from './fiche';
 import { groupesDeLocataires } from './locataires';
 
@@ -21,7 +22,9 @@ export type ActionAFaire =
   | { readonly type: 'pret'; readonly bien: BienGere }
   | { readonly type: 'email'; readonly locataire: Locataire }
   /** Vie du bail (B1) : alertes de conformité urgentes, puis révisions à valider. */
-  | ActionBail;
+  | ActionBail
+  /** Fin du bail (B2) : dépôts à rendre, charges à régulariser puis à régler. */
+  | ActionFinBail;
 
 /** Les lignes montrées avant « Voir les N autres ». */
 export const A_FAIRE_VISIBLES = 3;
@@ -38,6 +41,7 @@ export function actionsAFaire(
   aujourdhui: string,
   pretsAEnregistrer: readonly BienGere[] = [],
   bail: readonly ActionBail[] = [],
+  finBail: readonly ActionFinBail[] = [],
 ): readonly ActionAFaire[] {
   const retards = resumeDuMois(donnees, periodeDe(aujourdhui), aujourdhui)
     .lignes.filter((ligne) => ligne.statut === 'en_retard')
@@ -50,7 +54,7 @@ export function actionsAFaire(
     .enCeMoment.filter((ligne) => ligne.locataire.email === undefined)
     .map((ligne): ActionAFaire => ({ type: 'email', locataire: ligne.locataire }));
   const prets = pretsAEnregistrer.map((bien): ActionAFaire => ({ type: 'pret', bien }));
-  return [...retards, ...vacants, ...prets, ...emails, ...bail];
+  return [...retards, ...vacants, ...prets, ...emails, ...bail, ...finBail];
 }
 
 /** Une clé stable par action (un même locataire peut être en retard et sans e-mail). */
@@ -71,5 +75,9 @@ export function cleAction(action: ActionAFaire): string {
     }
     case 'revision':
       return `revision-${action.location.id}`;
+    case 'depot':
+    case 'regularisation':
+    case 'charges_a_regler':
+      return cleActionFinBail(action);
   }
 }

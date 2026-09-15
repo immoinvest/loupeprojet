@@ -144,11 +144,33 @@ export const ECRANS_GERER_BAIL: readonly Ecran[] = [
   },
 ];
 
+/** Les écrans ajoutés par `gerer-bail-fin` (B2) : le congé d'une location et un décompte imprimable. */
+export const ECRANS_GERER_FIN_BAIL: readonly Ecran[] = [
+  {
+    nom: 'Congé d’une location',
+    chemin: '/gerer/biens/bien-lices',
+    ouvrir: async (page) => {
+      await page.getByRole('button', { name: 'Julie part' }).click();
+      await expect(page.getByRole('form', { name: 'Enregistrer un congé' })).toBeVisible();
+    },
+  },
+  {
+    nom: 'Décompte du dépôt de garantie',
+    chemin: '/gerer/decomptes/decompte-julie',
+    ouvrir: async (page) => {
+      await expect(
+        page.getByRole('heading', { level: 1, name: 'Décompte du dépôt de garantie' }),
+      ).toBeVisible();
+    },
+  },
+];
+
 /** Tous les écrans de Gérer mesurés après « Gérer (loyers du mois) », feature par feature. */
 export const ECRANS_GERER: readonly Ecran[] = [
   ...ECRANS_QUITTANCES_FICHES,
   ...ECRANS_GERER_BIENS,
   ...ECRANS_GERER_PARCOURS,
+  ...ECRANS_GERER_FIN_BAIL,
   ...ECRANS_GERER_ARGENT,
   ...ECRANS_GERER_BAIL,
 ];

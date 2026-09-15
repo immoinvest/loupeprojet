@@ -163,6 +163,56 @@ export async function simulerGestion(page: Page): Promise<void> {
     }),
   );
 
+  // Fin du bail (B2) : rien d'enregistré, et le décompte d'un dépôt déjà restitué.
+  await page.route('**/api/gestion/fin-bail', (route) =>
+    route.fulfill({
+      json: {
+        conges: [],
+        charges: [],
+        restitutions: [],
+        regularisations: [],
+        mouvements: [],
+        decomptes: [
+          {
+            id: 'decompte-julie',
+            type: 'restitution',
+            locationId: 'location-julie',
+            numero: 'D-202608-LOCATION',
+            emisLe: '2026-09-01T09:00:00.000Z',
+          },
+        ],
+      },
+    }),
+  );
+  await page.route('**/api/gestion/fin-bail/decomptes/*', (route) =>
+    route.fulfill({
+      json: {
+        id: 'decompte-julie',
+        type: 'restitution',
+        locationId: 'location-julie',
+        numero: 'D-202608-LOCATION',
+        emisLe: '2026-09-01T09:00:00.000Z',
+        contenu: {
+          type: 'restitution',
+          numero: 'D-202608-LOCATION',
+          emisLe: '2026-09-01',
+          bailleur,
+          locataires: [{ prenom: 'Julie', nom: 'Martin' }],
+          logement: { nom: 'T2 Lices', adresse: '12 rue des Lices, Marseille 5e' },
+          entree: '2025-10-01',
+          sortie: '2026-08-20',
+          clesLe: '2026-08-20',
+          conforme: false,
+          depot: 130_000,
+          retenues: [{ motif: 'Peinture de la chambre', montant: 12_000 }],
+          totalRetenues: 12_000,
+          aRendre: 118_000,
+          dateLimite: '2026-10-20',
+        },
+      },
+    }),
+  );
+
   // La quittance du mois de Julie, telle que l'API la rend : contenu figé complet.
   const periode = aujourdhui.slice(0, 7);
   const numero = `Q-${periode.replace('-', '')}-LOCATION`;
