@@ -1,5 +1,6 @@
 import { VERSION_REGLES_COURANTE, obtenirRegles, type ProjetEntree } from '@loupe/moteur';
 
+import { pasAdaptatif } from '@/composants/saisie/pas';
 import { euros } from '@/formatage/nombres';
 
 import type { Groupe, Option } from './types';
@@ -22,17 +23,37 @@ export const GROUPE_BIEN: Groupe = {
   titre: 'Le bien',
   champs: [
     { chemin: 'bien.surface', libelle: 'Surface', type: 'nombre', unite: 'm²', obligatoire: true },
-    { chemin: 'bien.pieces', libelle: 'Pièces', type: 'entier', obligatoire: true },
-    { chemin: 'bien.chambres', libelle: 'Chambres', type: 'entier' },
-    { chemin: 'bien.etage', libelle: 'Étage', type: 'entier' },
+    {
+      chemin: 'bien.pieces',
+      libelle: 'Pièces',
+      type: 'entier',
+      obligatoire: true,
+      bornes: { min: 1, max: 20 },
+    },
+    { chemin: 'bien.chambres', libelle: 'Chambres', type: 'entier', bornes: { min: 0, max: 20 } },
+    {
+      chemin: 'bien.etage',
+      libelle: 'Étage',
+      type: 'entier',
+      bornes: { min: 0, max: 50 },
+      libelleZero: 'RDC',
+    },
     { chemin: 'bien.ascenseur', libelle: 'Ascenseur', type: 'bool', options: OUI_NON },
     {
       chemin: 'bien.annee',
       libelle: 'Année de construction',
       type: 'entier',
+      commande: 'annee',
       terme: 'anneeConstruction',
     },
-    { chemin: 'bien.dpe', libelle: 'DPE', type: 'enum', options: DPE, terme: 'dpe' },
+    {
+      chemin: 'bien.dpe',
+      libelle: 'DPE',
+      type: 'enum',
+      options: DPE,
+      commande: 'energie',
+      terme: 'dpe',
+    },
     { chemin: 'bien.etat', libelle: 'État', type: 'enum', options: ETATS },
     { chemin: 'bien.exterieur', libelle: 'Balcon ou terrasse', type: 'bool', options: OUI_NON },
     {
@@ -47,6 +68,7 @@ export const GROUPE_BIEN: Groupe = {
       chemin: 'bien.copro.lots',
       libelle: 'Lots de copropriété',
       type: 'entier',
+      bornes: { min: 1, max: 9999, pas: pasAdaptatif(20, 10) },
       terme: 'lotsCopro',
     },
   ],

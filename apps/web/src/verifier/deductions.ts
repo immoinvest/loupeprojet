@@ -4,7 +4,10 @@ import type { ProvenanceValeurs, ValeursInitiales, Valeurs } from '@/ecrans/form
 /** Les tuiles de l'apport : une part du coût total, ou « Autre » (montant saisi). */
 export type ChoixApport = '0' | '0.1' | '0.2' | 'autre';
 
-export const PARTS_APPORT: readonly Exclude<ChoixApport, 'autre'>[] = ['0', '0.1', '0.2'];
+/** Une part du coût total proposée en tuile. */
+export type PartApport = Exclude<ChoixApport, 'autre'>;
+
+export const PARTS_APPORT: readonly PartApport[] = ['0', '0.1', '0.2'];
 
 function entier(texte: string): number | null {
   return /^\s*\d+\s*$/.test(texte) ? Number(texte) : null;

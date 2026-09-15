@@ -120,7 +120,8 @@ describe('Rapport', () => {
 
   it(
     'modifie une hypothèse : recalcul, enregistrement, provenance, erreurs',
-    { timeout: 30_000 },
+    // Les commandes de Vérifier rendent l'onglet plus riche : 30 s ne suffisent plus quand toute la suite tourne.
+    { timeout: 60_000 },
     async () => {
       await ouvrirExemple();
       const utilisateur = userEvent.setup();

@@ -162,6 +162,8 @@ describe('Terme et ChampHypothese', () => {
       </ModeDocument>,
     );
     expect(screen.queryByRole('button', { name: /Explication/ })).not.toBeInTheDocument();
-    expect(screen.getByLabelText('DPE')).toHaveValue('D');
+    // En document, l'échelle n'écrit que la lettre retenue, sans bouton.
+    expect(screen.getByText('D')).toBeInTheDocument();
+    expect(screen.queryByRole('radio', { name: 'D' })).not.toBeInTheDocument();
   });
 });
