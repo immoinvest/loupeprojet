@@ -1,0 +1,32 @@
+{
+  "feature_slug": "liens-hypotheses",
+  "started_at": "2026-09-15T00:00:00Z",
+  "current_step": "implement",
+  "scope": "frontend_only",
+  "backlog": "17",
+  "steps": {
+    "discovery": {
+      "status": "completed",
+      "output": ".product/features/liens-hypotheses-discovery.md",
+      "validation": "auto-revue (session de nuit)"
+    },
+    "specs": {
+      "status": "completed",
+      "stories_count": 8,
+      "output": ".product/specs/liens-hypotheses-specs.md"
+    },
+    "architecture": {
+      "status": "completed",
+      "output": ".product/architecture/liens-hypotheses.md"
+    },
+    "implement": {
+      "status": "in_progress",
+      "stories_completed": 0,
+      "stories_total": 8,
+      "commits": []
+    },
+    "qa_tests": { "status": "pending" },
+    "security": { "status": "pending" },
+    "push": { "status": "pending" }
+  }
+}
