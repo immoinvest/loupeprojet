@@ -11,7 +11,7 @@
     "qa": "fait en local : lint, format, typecheck, build, 2 854 tests, couverture 100 % sur apps/comptes/src et packages/gestion ; couverture web complète relancée ; Playwright CI=1 responsive (12) et gerer-parcours + accueil (12)",
     "securite": "fait : HTML des e-mails échappé, jetons HMAC à usage unique dans le fragment, Origin exigé sur la page publique, aucune adresse ni nom dans les journaux, aucun secret dans le code, aucun dangerouslySetInnerHTML",
     "cleanup": "fait : docs communes (CLAUDE.md, README, registre, specs, vue d'ensemble), .dev.vars.example",
-    "pr": "en attente de la file vide (PR #103 d'une autre session ouverte)"
+    "pr": "PR #105 fusionnee le 16/09/2026 a 00 h 30 (commit 222dd2f5), apres une relance d'e2e et deux fusions de master (PR #104 depenses, PR #106 vie du bail) ; correctif du test d'installation : PR #107"
   },
   "stories": {
     "US-1": "fait — 2cf75ede (règles pures, 100 % de couverture, article 21 vérifié sur Légifrance)",
