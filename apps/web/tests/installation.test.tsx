@@ -108,8 +108,10 @@ describe('Mon compte : Deklic sur vos appareils', () => {
       proposer();
     });
     menuSansAppareils();
+    // `findByRole` et non `getByRole` : les contextes de Gérer (Argent, bail, envois) rendent de
+    // nouveau la page quand leurs données arrivent, et le bouton peut n'apparaître qu'au rendu suivant.
     await utilisateur.click(
-      within(appareils).getByRole('button', { name: TEXTES_INSTALLATION.bouton }),
+      await within(appareils).findByRole('button', { name: TEXTES_INSTALLATION.bouton }),
     );
     expect(await within(appareils).findByText(T.installee)).toBeInTheDocument();
     expect(
