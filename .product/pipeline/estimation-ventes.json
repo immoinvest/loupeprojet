@@ -1,0 +1,65 @@
+{
+  "feature_slug": "estimation-ventes",
+  "title": "Estimation : l'adresse d'abord, repère appliqué seul, ventes triées, paginées et détaillées (fiche 14)",
+  "session": "nuit S7 du 14-15/09/2026",
+  "started_at": "2026-09-14T22:00:00Z",
+  "current_step": "qa_tests",
+  "scope": "apps/web/src/{ecrans/Adresse.tsx,ecrans/adresse (sauf CarteVentes, CarteQuartier),enrichissement,textes/{adresse,ventes,repere}.ts}, apps/worker/src/adresse, data/src/{schemas/dvf.ts,sources/dvf}, tests",
+  "branch": "feat/estimation-ventes",
+  "base": "master 9aceb3bf (PR #84 feat/adresse-suggestions fusionnée)",
+  "backlog": ".product/backlog/14-estimation-adresse-ventes.md",
+  "steps": {
+    "discovery": {
+      "status": "completed",
+      "output": ".product/features/estimation-ventes-discovery.md",
+      "note": "auto-validée (session de nuit) ; contrat /marche/adresse déjà en v6 sur master : passage en v7"
+    },
+    "specs": {
+      "status": "completed",
+      "output": ".product/specs/estimation-ventes-specs.md",
+      "stories_count": 7
+    },
+    "architecture": {
+      "status": "completed",
+      "output": ".product/architecture/estimation-ventes.md",
+      "note": "API ADEME vérifiée le 15/09/2026 : filtre identifiant_ban_in, clés BAN en minuscules, champs conso_5_usages_par_m2_ep, periode_construction, type_energie_principale_chauffage ; licence Licence Ouverte 2.0"
+    },
+    "implement": {
+      "status": "completed",
+      "stories_completed": 7,
+      "stories_total": 7,
+      "preparation": "préparé pendant l'attente du prérequis (commits locaux sur la branche du worktree, jamais poussés), rapporté par squash sur feat/estimation-ventes ; conflits résolus dans enrichissement/client.ts et enrichissement/index.ts (exports de S6 gardés)",
+      "commits": [
+        { "etape": "US-5 data", "hash": "b04594ba" },
+        { "etape": "US-3, US-6 worker", "hash": "cce0cbeb" },
+        { "etape": "US-1, US-4 logique web", "hash": "28c27d28" },
+        { "etape": "US-1 écrans (adresse d'abord, repère automatique)", "hash": "54e27c03" },
+        { "etape": "US-2, US-4, US-7 tableaux", "hash": "207e5431" }
+      ]
+    },
+    "refactor": {
+      "status": "completed",
+      "note": "analyse.ts du Worker sous 300 lignes (ventes-proches.ts extrait) ; Adresse.tsx sous 300 lignes (LigneAdresse et RepereAnalyse extraits) ; carte Repère supprimée (BlocRepere dans la carte Estimation) ; TableauVentes sorti de Tableaux.tsx"
+    },
+    "qa_tests": { "status": "in_progress" },
+    "security": {
+      "status": "completed",
+      "note": "aucune entrée de la personne n'est envoyée à l'ADEME (clés BAN tirées du CSV DVF public) ; réponses ADEME validées par Zod, contrat v7 revalidé côté web ; rendu texte seulement ; aucune donnée sur les acheteurs ni les vendeurs ; 4 paquets ADEME au plus par analyse (sous-requêtes du Worker)"
+    },
+    "push": { "status": "pending" }
+  },
+  "decisions": {
+    "repere_manuel": "question 1 : un repère saisi à la main n'est jamais écrasé ; bouton « Remplacer par le repère de l'adresse » (proposition de la fiche)",
+    "adresse_enregistree": "question 2 : ligne compacte en tête avec « Changer » (proposition)",
+    "plafond": "question 3 : 300 comparables, « Les 300 ventes les plus proches sur 1 240. » (proposition)",
+    "non_comparables": "question 4 : non montrées en v1 (proposition)",
+    "dpe_probable": "question 5 : rapprochement « probable » accepté et signalé (proposition)",
+    "vefa": "question 6 : plus tard (proposition)",
+    "recentes": "« 2 dernières années » = 730 jours avant la vente la plus récente de la liste (pur, stable)",
+    "suffixes": "adresses à suffixe (bis, ter) non rapprochées d'un DPE en v1",
+    "numeros_fiscaux": "numéros 9000 et plus (adresses du cadastre, fiche 21) jamais envoyés à l'ADEME : absents de la BAN",
+    "sous_requetes": "4 paquets ADEME au plus (200 adresses), les plus proches d'abord",
+    "textes_repere": "textes de la ligne du repère dans textes/repere.ts (et non textes/adresse.ts, modifié par S6)",
+    "annuler": "« Annuler » vit dans l'écran : rouvrir l'onglet réanalyse l'adresse et réapplique le repère (sauf repère saisi à la main)"
+  }
+}
