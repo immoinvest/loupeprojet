@@ -1,0 +1,19 @@
+---
+import ChampAnnonce from './ChampAnnonce.astro';
+
+/** L'appel vers l'application, une seule fois dans chaque guide. */
+interface Props {
+  titre?: string;
+}
+
+const { titre = 'Appliquez-le à votre annonce' } = Astro.props;
+---
+
+<aside aria-labelledby="appel-analyse" class="rounded-carte bg-accent p-6 text-white sm:p-8">
+  <h2 id="appel-analyse" class="text-2xl font-bold tracking-tight">{titre}</h2>
+  <p class="mt-2 max-w-xl text-accent-bordure">
+    Collez le lien : Deklic calcule le crédit, le cash-flow, les impôts selon quatre régimes et la
+    revente, et compare le prix aux ventes réelles du quartier.
+  </p>
+  <ChampAnnonce id="lien-annonce-guide" class="mt-5 [&_p]:text-accent-bordure" />
+</aside>

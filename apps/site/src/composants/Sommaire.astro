@@ -1,0 +1,56 @@
+---
+import type { EntreeSommaire } from '../lib/guides/sommaire';
+
+/** Sommaire d'un guide : replié au-dessus du texte sur téléphone, colonne collée sur grand écran. */
+interface Props {
+  entrees: readonly EntreeSommaire[];
+}
+
+const { entrees } = Astro.props;
+---
+
+{
+  entrees.length > 0 && (
+    <>
+      <details class="rounded-carte border border-bordure bg-surface lg:hidden">
+        <summary class="flex min-h-12 items-center px-4 font-display font-semibold survol-fond">
+          Sommaire
+        </summary>
+        <nav aria-label="Sommaire" class="border-t border-bordure px-4 py-3">
+          <ol class="grid gap-1">
+            {entrees.map((entree) => (
+              <li class:list={[entree.niveau === 2 && 'pl-4']}>
+                <a
+                  href={`#${entree.ancre}`}
+                  class="flex min-h-10 items-center text-encre-2 no-underline survol-texte"
+                >
+                  {entree.texte}
+                </a>
+              </li>
+            ))}
+          </ol>
+        </nav>
+      </details>
+      <nav aria-label="Sommaire" class="sticky top-6 hidden lg:block">
+        <p class="font-display text-xs font-semibold tracking-[0.12em] text-encre-3 uppercase">
+          Sommaire
+        </p>
+        <ol class="mt-3 grid gap-0.5 border-l-2 border-bordure text-sm">
+          {entrees.map((entree) => (
+            <li>
+              <a
+                href={`#${entree.ancre}`}
+                class:list={[
+                  '-ml-0.5 block border-l-2 border-transparent py-1.5 pr-2 text-encre-2 no-underline survol-discret',
+                  entree.niveau === 1 ? 'pl-3' : 'pl-6',
+                ]}
+              >
+                {entree.texte}
+              </a>
+            </li>
+          ))}
+        </ol>
+      </nav>
+    </>
+  )
+}

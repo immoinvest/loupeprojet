@@ -16,6 +16,7 @@ packages/capture/    Contrat de capture d'une annonce (schéma, encodage pour fr
 packages/gestion/    Calcul pur de la gestion locative (loyers dus, paiements en partie, retards, résumé du mois, quittances et reçus figés, fins de location, colocation et chambres, schémas Zod), 100 % couvert par les tests
 packages/projets/    Projets enregistrés : schémas Zod, contrat de synchronisation avec le compte, règles de fusion de l'appareil, 100 % couvert par les tests
 apps/web/            Application React + Vite + Tailwind v4 (coque SaaS, Accueil, menu Analyser et Gérer, Mes projets, Nouveau projet, Rapport, Hypothèses, Fiscalité, Revente, Visite, Comparer, Simulateur de prêt, impression, partage, Extension, Gérer : loyers du mois, tous les loyers, quittances et reçus imprimables, fiche d'un bien, louer un bien, ajouter un bien, « J'ai acheté ce bien »), Cloudflare Pages
+apps/site/           Site vitrine deklic.pro et guides SEO (Astro statique, MDX, aucun traceur), projet Cloudflare Pages « deklic-site »
 apps/worker/         Serveur Hono sur Cloudflare Workers : proxy des données publiques (cache KV, limite de débit)
 apps/comptes/        Comptes optionnels (Better Auth sur Hono) : Google, Apple ou code e-mail, synchronisation des projets et API de la gestion locative, servis par le worker Pages sur l'origine du site, base D1
 apps/extension/      Extension navigateur (Manifest V3, Chrome/Edge/Firefox) : lit l'annonce ouverte et l'envoie à Deklic ; règles par portail
@@ -33,9 +34,10 @@ npm run lint          # eslint . --max-warnings=0
 npm run format:check  # prettier --check .
 npm run typecheck     # tsc --noEmit dans chaque workspace
 npm run test          # vitest run
-npm run test:coverage # vitest run --coverage (seuil 100 % sur packages/moteur, packages/capture, packages/gestion, packages/projets, apps/worker, apps/comptes, apps/extension, data et les modules de logique d'apps/web)
+npm run test:coverage # vitest run --coverage (seuil 100 % sur packages/moteur, packages/capture, packages/gestion, packages/projets, apps/worker, apps/comptes, apps/extension, data, apps/site/src/lib et les modules de logique d'apps/web)
 npm run test:e2e      # vite build puis playwright test : parcours complets dans Chromium (apps/web/e2e)
 npm run build         # build de chaque workspace
+npm run dev -w apps/site   # site vitrine et guides en local (astro dev)
 ```
 
 Node 22 ou plus. La CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) exécute ces six commandes sur chaque pull request (2 122 tests au 15/09/2026 avec Mes biens et la vie de la location dans Gérer (G1c) ; décompte précédent, 1 881 tests avec les quittances et fiches (G1b) ; décompte précédent, 1 696 tests, dont 78 pour la synchronisation des projets : 30 pour `@loupe/projets`, 14 pour son API, 34 côté web ; détail du décompte précédent, 1 402 tests : 386 pour le moteur, 553 pour le web, 115 pour le Worker, 144 pour les référentiels, 145 pour la capture et l'extension, 89 pour les comptes, 62 pour la gestion locative ; dont 14 pour la note de confiance du moteur, 11 pour ses cartes et textes, et 35 pour le Rapport expliqué : icône ⓘ, cascade de l'autofinancement, rendements, liens vers les onglets ; 39 pour la négociation du prix, et 58 pour la liste de visite ; 20 pour l'onglet Financement, le feu couverture et le lien du simulateur). Une PR est fusionnée automatiquement dès que le check `verify` est vert (`gh pr merge <n> --auto --merge`) ; `master` refuse tout merge sans ce check. Un second job `e2e` joue les parcours Playwright dans Chromium sur ordinateur, téléphone et tablette, puis mesure 36 écrans sur 9 formats ; il n'est pas encore requis pour fusionner.
@@ -173,6 +175,27 @@ Le Worker est déployé sur `https://loupe-worker.erreip-gorguel.workers.dev` (e
 4. Comptes : voir « Mettre en service les comptes » (variable de build `DEKLIC_COMPTES=1`, binding D1 `DB`, flag `nodejs_compat`, secrets).
 
 En local : `npx wrangler pages deploy dist` depuis `apps/web` (compte Cloudflare requis).
+
+## Le site vitrine et les guides (`@loupe/site`)
+
+Page d'accueil et guides de `deklic.pro` ([ADR-010](.product/adr/010-site-vitrine.md)) : Astro 7 en sortie statique, aucun cookie, aucun traceur, polices servies par le site. Le champ « Collez le lien de l'annonce » envoie vers `/projets/nouveau?texte=…` de l'application (formulaire GET, sans JavaScript) ; « Se connecter » vers `/connexion`. L'adresse de l'application vient de la variable de build `DEKLIC_ORIGINE` (absente : `https://loupeprojet.pages.dev`).
+
+- **Accueil** (`src/pages/index.astro`) : le rapport d'exemple est calculé au build par le moteur (`src/lib/exemple.ts`), jamais écrit à la main.
+- **Guides** : un fichier MDX par guide dans `apps/site/contenu/guides/`, frontmatter validé par Zod (`src/lib/guides/schema.ts` : title de 30 à 65 caractères, description de 120 à 160, mot-clé, catégorie, dates, L'essentiel, FAQ, sources en https). Dans le texte : `<Regle chemin="fiscalite.microBic.plafond" format="euros" />` cite une règle du moteur (formats `euros`, `taux`, `nombre`, `annees`, `annee` ; « à confirmer » ajouté seul), `<Calcul prix={150000} departement="13" loyer={650} valeur="brut" />` un chiffre du simulateur, `<Simulateur />` le simulateur de rentabilité.
+- **Le build échoue** si un guide est incomplet, si deux guides visent le même mot-clé, si le mot-clé manque au title, au titre, à l'adresse ou aux 100 premiers mots, si une règle citée n'existe pas, ou si une page a un lien interne cassé, zéro ou deux H1, des données structurées illisibles, une note ou un avis, un script ou un style inline (`src/integrations/verification.ts`). Il écrit `dist/_headers` (CSP stricte, anti-cadrage, cache des fichiers versionnés).
+- **Écrire un guide** : copier un guide existant, changer le nom du fichier (= adresse `/guides/<nom>/`), le frontmatter et le texte, vérifier chaque source le jour même, puis `npm run build -w apps/site`.
+
+### Mettre en ligne deklic.pro (Pierre, une fois)
+
+1. Cloudflare, **Workers & Pages** → Créer → Pages → connecter le même dépôt GitHub que l'application.
+2. Nom du projet `deklic-site`, branche de production `master`, commande de build `npm ci && npm run build -w apps/site`, dossier de sortie `apps/site/dist`. Node 22.16 est pris par défaut (Astro demande 22.12 ou plus).
+3. **Chemins surveillés** (Paramètres → Build) : inclure `apps/site/*`, `packages/moteur/*`, `packages/capture/*`, `marque/*`. Dans le projet de l'application, exclure `apps/site/*`.
+4. **Variable de build** (Production) : `DEKLIC_ORIGINE` = `https://app.deklic.pro` une fois l'application branchée sur cette adresse (voir « Passer sur app.deklic.pro ») ; avant, ne rien mettre.
+5. **Domaines personnalisés** : `deklic.pro`, puis `www.deklic.pro`, et une règle de redirection 301 de `www.deklic.pro` vers `https://deklic.pro` qui garde le chemin.
+6. **Adresse `contact@deklic.pro`** : la créer par Email Routing (gratuit) vers ta boîte ; elle est citée dans les mentions légales, la confidentialité et la page auteur.
+7. **Google Search Console** : propriété de domaine `deklic.pro` (enregistrement TXT), puis soumettre `https://deklic.pro/sitemap-index.xml`. Bing Webmaster Tools peut importer la propriété depuis la Search Console.
+
+Coût : 0 € (site statique sous les quotas gratuits de Cloudflare Pages).
 
 ## Les comptes (`@loupe/comptes`)
 

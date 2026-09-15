@@ -1,0 +1,41 @@
+---
+import { SITE } from '../lib/site';
+import Base from '../mises-en-page/Base.astro';
+---
+
+<Base
+  titre="Mentions légales | Deklic"
+  description="Mentions légales du site deklic.pro : éditeur, directeur de la publication, hébergeur, propriété intellectuelle et limites de responsabilité."
+  chemin="/mentions-legales/"
+>
+  <article class="prose-guide mx-auto max-w-3xl px-4 py-12 sm:px-6">
+    <h1 class="text-3xl font-bold tracking-tight sm:text-4xl">Mentions légales</h1>
+
+    <h2>Éditeur</h2>
+    <p>
+      Le site {SITE.origine.replace('https://', '')} est édité par {SITE.auteur.nom}, directeur de la
+      publication. Contact : <a href={`mailto:${SITE.contact}`}>{SITE.contact}</a>.
+    </p>
+
+    <h2>Hébergeur</h2>
+    <p>
+      Cloudflare, Inc., 101 Townsend Street, San Francisco, CA 94107, États-Unis
+      (<a href="https://www.cloudflare.com/">cloudflare.com</a>).
+    </p>
+
+    <h2>Nature du service</h2>
+    <p>
+      Deklic est un outil d’aide à la décision. Ses guides et ses calculs ne constituent ni un
+      conseil en investissement, ni un conseil fiscal ou juridique personnalisé. Les chiffres
+      reposent sur des hypothèses modifiables et sur des données publiques (DVF, ADEME, ANIL,
+      Géorisques, INSEE) dont les sources sont citées. Vérifiez votre situation auprès d’un
+      professionnel avant de décider.
+    </p>
+
+    <h2>Propriété intellectuelle</h2>
+    <p>
+      Les textes, le logo et la marque Deklic sont protégés. Toute reproduction sans autorisation est
+      interdite, sauf courte citation mentionnant la source et le lien de la page.
+    </p>
+  </article>
+</Base>

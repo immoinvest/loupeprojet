@@ -1,0 +1,43 @@
+---
+import { SITE } from '../lib/site';
+import { LIENS } from '../liens-du-build';
+import Base from '../mises-en-page/Base.astro';
+---
+
+<Base
+  titre="Confidentialité | Deklic"
+  description="Le site deklic.pro ne dépose aucun cookie, n'utilise aucun traceur et ne charge rien depuis un autre site. Ce qui se passe quand vous collez un lien."
+  chemin="/confidentialite/"
+>
+  <article class="prose-guide mx-auto max-w-3xl px-4 py-12 sm:px-6">
+    <h1 class="text-3xl font-bold tracking-tight sm:text-4xl">Confidentialité</h1>
+
+    <h2>Aucun cookie, aucun traceur</h2>
+    <p>
+      Le site vitrine et ses guides ne déposent aucun cookie et n’utilisent aucun outil de mesure
+      d’audience ni de publicité. Les polices et les images sont servies par le site lui-même : votre
+      navigateur ne contacte aucun autre service en lisant ces pages.
+    </p>
+
+    <h2>Quand vous collez un lien</h2>
+    <p>
+      Le formulaire « Analyser mon annonce » ouvre directement l’application Deklic
+      (<a href={LIENS.origine}>{LIENS.origine.replace('https://', '')}</a>) avec le lien dans
+      l’adresse. Le site vitrine ne l’enregistre pas.
+    </p>
+
+    <h2>Journaux techniques</h2>
+    <p>
+      Comme tout hébergeur, Cloudflare traite l’adresse IP et les informations de connexion pour
+      acheminer les pages et protéger le site contre les attaques. Deklic n’exploite pas ces
+      journaux.
+    </p>
+
+    <h2>Vos droits</h2>
+    <p>
+      Pour toute question sur vos données, écrivez à <a href={`mailto:${SITE.contact}`}
+        >{SITE.contact}</a
+      >. Vous pouvez aussi saisir la CNIL (<a href="https://www.cnil.fr/">cnil.fr</a>).
+    </p>
+  </article>
+</Base>

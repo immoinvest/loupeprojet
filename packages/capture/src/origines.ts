@@ -9,6 +9,9 @@ export const ORIGINE_HISTORIQUE = 'https://loupeprojet.pages.dev';
 /** L'adresse cible, une fois le domaine `deklic.pro` branché par Pierre (fiche de backlog 23). */
 export const ORIGINE_DEKLIC = 'https://app.deklic.pro';
 
+/** Le site vitrine et ses guides : projet Cloudflare Pages `deklic-site`, domaine nu (ADR-010). */
+export const ORIGINE_VITRINE = 'https://deklic.pro';
+
 /** Les aperçus Cloudflare Pages : https://<branche ou empreinte>.loupeprojet.pages.dev. */
 export const MOTIF_APERCUS = 'https://*.loupeprojet.pages.dev';
 

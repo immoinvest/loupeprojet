@@ -1,0 +1,117 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+import AppelAnalyse from '../composants/AppelAnalyse.astro';
+import CarteGuide from '../composants/CarteGuide.astro';
+import DonneesStructurees from '../composants/DonneesStructurees.astro';
+import Essentiel from '../composants/Essentiel.astro';
+import Faq from '../composants/Faq.astro';
+import Sommaire from '../composants/Sommaire.astro';
+import Sources from '../composants/Sources.astro';
+import { article, faq, filAriane, graphe, organisation } from '../lib/donnees-structurees';
+import { dateIso, dateLongue } from '../lib/formatage';
+import { CATEGORIES } from '../lib/guides/categories';
+import type { EntreeSommaire } from '../lib/guides/sommaire';
+import { SITE } from '../lib/site';
+import Base from './Base.astro';
+
+/** Page d'un guide : fil d'Ariane, en-tête, sommaire, l'essentiel, texte, appel, FAQ, sources, guides liés. */
+interface Props {
+  guide: CollectionEntry<'guides'>;
+  sommaire: readonly EntreeSommaire[];
+  minutes: number;
+  lies: readonly { guide: CollectionEntry<'guides'>; minutes: number }[];
+}
+
+const { guide, sommaire, minutes, lies } = Astro.props;
+const { data } = guide;
+const categorie = CATEGORIES[data.categorie];
+const chemin = `/guides/${guide.id}/`;
+const etapes = [
+  { nom: 'Accueil', chemin: '/' },
+  { nom: 'Guides', chemin: '/guides/' },
+  { nom: categorie.nom, chemin: `/guides/${categorie.slug}/` },
+  { nom: data.titre, chemin },
+];
+const donnees = graphe([
+  organisation(),
+  article({
+    titre: data.titre,
+    description: data.description,
+    chemin,
+    publieLe: data.publieLe,
+    misAJourLe: data.misAJourLe,
+  }),
+  faq(data.faq),
+  filAriane(etapes),
+]);
+---
+
+<Base titre={data.titreSeo} description={data.description} chemin={chemin} type="article">
+  <DonneesStructurees slot="tete" donnees={donnees} />
+  <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+    <nav aria-label="Fil d’Ariane" class="pt-6 text-sm">
+      <ol class="flex flex-wrap items-center gap-x-2 gap-y-1 text-encre-3">
+        {
+          etapes.slice(0, -1).map((etape) => (
+            <li class="flex items-center gap-2">
+              <a href={etape.chemin} class="text-encre-3 no-underline survol-texte">
+                {etape.nom}
+              </a>
+              <span aria-hidden="true">›</span>
+            </li>
+          ))
+        }
+        <li aria-current="page" class="text-encre-2">{data.titre}</li>
+      </ol>
+    </nav>
+
+    <header class="max-w-3xl py-8">
+      <a
+        href={`/guides/${categorie.slug}/`}
+        class="inline-flex rounded-full bg-accent-doux px-3 py-1 font-display text-xs font-semibold tracking-[0.08em] text-accent-fonce uppercase no-underline survol-fond-fort"
+        >{categorie.nom}</a
+      >
+      <h1 class="mt-4 text-3xl leading-[1.1] font-bold tracking-tight sm:text-4xl lg:text-[2.75rem]">
+        {data.titre}
+      </h1>
+      <p class="mt-4 text-lg leading-relaxed text-encre-2">{data.description}</p>
+      <p class="mt-5 flex flex-wrap gap-x-5 gap-y-1 border-b border-bordure pb-5 text-sm text-encre-3">
+        <span>Par <a href={SITE.auteur.chemin} class="font-semibold">{SITE.auteur.nom}</a></span>
+        <span
+          >Mis à jour le <time datetime={dateIso(data.misAJourLe)}>{dateLongue(data.misAJourLe)}</time
+          ></span
+        >
+        <span>{minutes} min de lecture</span>
+      </p>
+    </header>
+
+    <div class="grid gap-8 lg:grid-cols-[13rem_minmax(0,1fr)] lg:gap-12">
+      <div>
+        <Sommaire entrees={sommaire} />
+      </div>
+      <article class="grid max-w-3xl min-w-0 gap-10">
+        <Essentiel points={data.essentiel} />
+        <div class="prose-guide"><slot /></div>
+        <AppelAnalyse />
+        <Faq questions={data.faq} />
+        <Sources sources={data.sources} />
+      </article>
+    </div>
+
+    {
+      lies.length > 0 && (
+        <section aria-labelledby="a-lire-ensuite" class="mt-16">
+          <h2 id="a-lire-ensuite" class="text-2xl font-bold tracking-tight">
+            À lire ensuite
+          </h2>
+          <div class="mt-5 grid gap-4 md:grid-cols-3">
+            {lies.map((lie) => (
+              <CarteGuide guide={lie.guide} minutes={lie.minutes} />
+            ))}
+          </div>
+        </section>
+      )
+    }
+  </div>
+</Base>
