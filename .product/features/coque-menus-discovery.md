@@ -26,15 +26,15 @@ Accueil (`BlocAnalyser`, garde ses deux boutons : proposition de la fiche), autr
 
 ## Décisions prises à la place de Pierre (questions ouvertes)
 
-| Fiche | Question            | Décision (proposition de la fiche)                                                                                |
-| ----- | ------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| 12    | Q4 Accueil          | Inchangé                                                                                                          |
-| 12    | Q5 Compteur « · N » | Gardé                                                                                                             |
-| 12    | Gérer               | Page « Mes biens » absente : Gérer inchangé, à brancher quand G1c sera fusionnée (`LigneAvecAjout` prêt à servir) |
-| 18    | Q1 Ordre            | Parcours puis Scénario / Écarté séparés                                                                           |
-| 18    | Q2 Généraliser      | Non ici ; `MenuChoix` réutilisable par les fiches concernées                                                      |
-| 18    | Q3 Acheté → Gérer   | Déjà livré par la PR #74 (navigation + lien « Gérer ce bien ») : rien de plus                                     |
-| 18    | Q4 Feuille du bas   | Oui, sous 640 px                                                                                                  |
+| Fiche | Question            | Décision (proposition de la fiche)                                                                                 |
+| ----- | ------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| 12    | Q4 Accueil          | Inchangé                                                                                                           |
+| 12    | Q5 Compteur « · N » | Gardé                                                                                                              |
+| 12    | Gérer               | Page « Mes biens » absente au départ ; G1c fusionnée pendant la nuit (PR #80) : ligne « Mes biens · N [+] » livrée |
+| 18    | Q1 Ordre            | Parcours puis Scénario / Écarté séparés                                                                            |
+| 18    | Q2 Généraliser      | Non ici ; `MenuChoix` réutilisable par les fiches concernées                                                       |
+| 18    | Q3 Acheté → Gérer   | Déjà livré par la PR #74 (navigation + lien « Gérer ce bien ») : rien de plus                                      |
+| 18    | Q4 Feuille du bas   | Oui, sous 640 px                                                                                                   |
 
 ## Contraintes et risques
 

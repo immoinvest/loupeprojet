@@ -1,8 +1,8 @@
 # 12 — Menu Analyser : « Mes projets » et « + » sur une seule ligne
 
-Statut : `livrée` pour Analyser (feature `coque-menus`, 15/09/2026, PR `feat/coque-menus` ; discovery `../features/coque-menus-discovery.md`, specs `../specs/coque-menus-specs.md`, architecture `../architecture/coque-menus.md`) · **Gérer à brancher** quand la page « Mes biens » (G1c) sera sur `master` · Notée le 14/09/2026 · Dépend de : rien
+Statut : `livrée` (feature `coque-menus`, 15/09/2026, PR `feat/coque-menus` ; discovery `../features/coque-menus-discovery.md`, specs `../specs/coque-menus-specs.md`, architecture `../architecture/coque-menus.md`) · Notée le 14/09/2026 · Dépend de : rien
 
-Livré : ligne « Mes projets · N [+] » en tête de la section Analyser (composant partagé `coque/LigneAvecAjout.tsx`), « · 0 » sans projet, états actifs séparés, « + » de 44 px nommé « Nouveau projet » avec son infobulle ; `mesProjets(n)` remplace `tousMesProjets(n)`. Décisions de la nuit : Accueil inchangé (Q4), compteur gardé (Q5). Section Gérer inchangée : la page liste des biens n'existait pas sur `master` le 15/09 ; il suffira de remplacer « + Ajouter un bien » de `SectionGerer.tsx` par `<LigneAvecAjout vers="<route de Mes biens>" libelle={mesBiens(n)} versAjout="/gerer/ajouter" libelleAjout={TEXTES_MENU.ajouterBien} />`.
+Livré : ligne « Mes projets · N [+] » en tête de la section Analyser (composant partagé `coque/LigneAvecAjout.tsx`), « · 0 » sans projet, états actifs séparés, « + » de 44 px nommé « Nouveau projet » avec son infobulle ; `mesProjets(n)` remplace `tousMesProjets(n)`. Section Gérer branchée après la fusion de « Mes biens » (G1c, PR #80) : « Mes biens · N [+] » en tête (le « + » nommé « Ajouter un bien », la fiche d'un bien garde la ligne active), puis Loyers du mois, Tous les loyers, Mes locataires. Décisions de la nuit : Accueil inchangé (Q4), compteur gardé (Q5).
 
 ## La demande de Pierre
 
@@ -27,7 +27,7 @@ ANALYSER
 - Une ligne de moins dans le menu ; libellé plus court.
 - Créer un projet reste à un clic (le « + »).
 
-## Section Gérer : même principe (décidé, à brancher)
+## Section Gérer : même principe (décidé, livré)
 
 ```
 GÉRER
@@ -35,13 +35,13 @@ GÉRER
   Loyers du mois                (2)
 ```
 
-- N = nombre de biens gérés (`useGestion().donnees`) ; « Mes biens · 0 [+] » sans bien ; sans compte : inchangé.
-- Tests à adapter alors : `tests/menu-sections.test.tsx` (« Ajouter un bien » devient le nom du « + »), `tests/coque-fixe.test.tsx`.
+- N = nombre de biens gérés (`useGestion().donnees`), « Mes biens » sans nombre tant que les biens ne sont pas chargés ; sans compte : inchangé.
+- Tests : `tests/menu-sections.test.tsx` (ligne en tête, « + » nommé « Ajouter un bien », ligne active sur la fiche d'un bien).
 
 ## Questions ouvertes (toutes tranchées)
 
 1. Position : en tête (décidé le 14/09).
 2. Zéro projet : « Mes projets · 0 [+] » (décidé le 14/09).
-3. Section Gérer : même principe (décidé le 14/09), à brancher avec G1c.
+3. Section Gérer : même principe (décidé le 14/09), livré le 15/09 après la fusion de G1c.
 4. Accueil : inchangé (proposition appliquée le 15/09).
 5. Compteur : gardé (proposition appliquée le 15/09).

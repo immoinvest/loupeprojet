@@ -84,9 +84,18 @@ Scénario: impression et animation
   Et l'apparition de la liste (100 ms) est coupée quand le système réduit les animations
 ```
 
-## US-4 : « Mes biens · N [+] » dans Gérer (P1, bloquée)
+## US-4 : « Mes biens · N [+] » dans Gérer (P1, S)
 
-Bloquée : la page « Mes biens » (G1c) n'existe pas sur `master`. `LigneAvecAjout` est générique ; brancher `SectionGerer` quand la route liste existera (« Ajouter un bien » devient le nom du « + »).
+Bloquée au départ (page « Mes biens » absente), livrée après la fusion de G1c (PR #80) pendant la même nuit.
+
+```gherkin
+Scénario: la ligne en tête de la section Gérer, compte connecté
+  Étant donné un compte qui gère 2 biens
+  Alors le premier lien de « Gérer » s'appelle « Mes biens · 2 » et mène à /gerer/biens
+  Et le suivant s'appelle « Ajouter un bien », porte l'infobulle « Ajouter un bien » et mène à /gerer/ajouter
+  Quand j'ouvre la fiche d'un bien
+  Alors la ligne « Mes biens » reste surlignée et le « + » n'est pas actif
+```
 
 ## Auto-revue
 

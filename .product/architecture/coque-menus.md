@@ -8,6 +8,7 @@ Specs : `../specs/coque-menus-specs.md`.
 | ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `apps/web/src/coque/LigneAvecAjout.tsx`  | Nouveau. Ligne de menu à deux cibles : `NavLink` libellé (`end`) + `NavLink` carré « + » (44 px, `aria-label` et `title`). Ligne surlignée par `useMatch` |
 | `apps/web/src/coque/liens.ts`            | Classes de la ligne (`classeLigneAvecAjout`, `classeLibelleLigne`, `classeAjout`)                                                                         |
+| `apps/web/src/coque/SectionGerer.tsx`    | « Mes biens · N [+] » en tête (`end={false}` : la fiche d'un bien garde la ligne active), ajouté après la fusion de G1c                                   |
 | `apps/web/src/coque/SectionAnalyser.tsx` | La ligne « Mes projets · N [+] » en tête, puis les trois récents ; plus de « Tous mes projets »                                                           |
 | `apps/web/src/textes/gerer.ts`           | `TEXTES_MENU.mesProjets`, `mesProjets(n)` remplace `tousMesProjets(n)`                                                                                    |
 | `apps/web/src/composants/menu-choix.ts`  | Nouveau, **pur** : `indexSuivant` (flèches, Début, Fin), `indexParLettre` (lettre tapée, accents ignorés), `placementListe` (dessous / dessus)            |
