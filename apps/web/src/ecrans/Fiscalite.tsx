@@ -98,7 +98,8 @@ export function Fiscalite(): JSX.Element {
 
       {/* Une colonne sur téléphone, deux à partir de 640 px et sur papier, quatre à l'écran à partir de 1 280 px. */}
       <div
-        className={`grid grid-cols-1 gap-4 sm:grid-cols-2 ${document ? 'print:grid-cols-2' : 'xl:grid-cols-4'}`}
+        data-champ="hypotheses.fiscalite.regime"
+        className={`grid grid-cols-1 gap-4 rounded-carte sm:grid-cols-2 ${document ? 'print:grid-cols-2' : 'xl:grid-cols-4'}`}
       >
         {affiches.map((regime) => (
           <CarteRegime

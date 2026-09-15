@@ -7,6 +7,7 @@ import {
   CHIFFRES_COMPARER,
   CHIFFRES_PAR_VOLET,
   VOLETS,
+  adresseDansProjet,
   cheminDepuisFragment,
   descripteurLie,
   lienHypothese,
@@ -107,6 +108,12 @@ describe('lienHypothese', () => {
     expect(lireDepuis({ depuis: { ...bon, chemin: undefined } })).toBeNull();
     expect(lireDepuis({ depuis: { ...bon, origine: 'ailleurs' } })).toBeNull();
     expect(lireDepuis({ depuis: { ...bon, origine: 4 } })).toBeNull();
+  });
+
+  it('adresse d’un autre volet du même projet', () => {
+    expect(adresseDansProjet('/projets/abc/revente', 'hypotheses')).toBe('/projets/abc/hypotheses');
+    expect(adresseDansProjet('/projets/abc/revente', 'rapport')).toBe('/projets/abc');
+    expect(adresseDansProjet('/comparer', 'hypotheses')).toBeNull();
   });
 
   it('repli vers Hypothèses seulement si le champ y vit', () => {

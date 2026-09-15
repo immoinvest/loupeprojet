@@ -176,6 +176,14 @@ export function lireDepuis(state: unknown): Depuis | null {
   return { pathname, origine: origine as Origine, chemin };
 }
 
+/** L'adresse d'un autre volet du même projet (« /projets/abc/revente » → « /projets/abc/hypotheses »). */
+export function adresseDansProjet(pathname: string, volet: Volet): string | null {
+  const racine = /^\/projets\/[^/]+/.exec(pathname);
+  if (racine === null) return null;
+  const segment = segmentDe(volet);
+  return segment === '' ? racine[0] : `${racine[0]}/${segment}`;
+}
+
 /** Champ introuvable dans le volet courant : Hypothèses s'il y vit et qu'on n'y est pas déjà. */
 export function voletDeRepli(chemin: string, courant: Volet): Volet | null {
   return courant !== 'hypotheses' && DANS_HYPOTHESES.has(chemin) ? 'hypotheses' : null;

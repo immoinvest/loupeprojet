@@ -1,5 +1,6 @@
 import type { ProjetEntree, Resultats } from '@loupe/moteur';
 import { useState, type JSX } from 'react';
+import { useLocation } from 'react-router';
 
 import { CURSEUR_NEGOCIATION, pourcentNegociation, pourcentPourViser } from '@/analyses';
 import { Curseur } from '@/composants/Curseur';
@@ -11,6 +12,7 @@ import {
   lireChemin,
   type Descripteur,
 } from '@/hypotheses';
+import { cheminDepuisFragment } from '@/hypotheses/liens';
 import { PHRASES_ACHAT, libelleNegociation, phrasePrixRetenu, resumeTravaux } from '@/textes/achat';
 import { eurosArrondis } from '@/textes/estimation';
 
@@ -49,7 +51,11 @@ export function CarteAchat({
 
   const travaux = Number(lireChemin(projet, 'hypotheses.achat.travaux') ?? 0);
   const mobilier = Number(lireChemin(projet, 'hypotheses.achat.mobilier') ?? 0);
-  const [travauxOuverts, setTravauxOuverts] = useState(travaux > 0);
+  // Ouvert d'emblée s'il y a des travaux, ou si un lien vise l'un de ses champs (#hypotheses.achat.travaux).
+  const cible = cheminDepuisFragment(useLocation().hash);
+  const [travauxOuverts, setTravauxOuverts] = useState(
+    () => travaux > 0 || (cible !== null && CHEMINS_TRAVAUX.includes(cible)),
+  );
   const champsTravaux = CHAMPS_TRAVAUX.filter(
     (d) => d.visibleSi === undefined || d.visibleSi(projet),
   );

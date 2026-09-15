@@ -51,7 +51,10 @@ export function ChampHypothese({
   const bordure = erreur === undefined ? 'border-bordure' : 'border-probleme';
   const aToi = badge?.libelle === 'à toi';
   return (
-    <div className={`flex flex-col gap-1 rounded-encart p-2 ${aToi ? 'bg-accent-fond' : ''}`}>
+    <div
+      data-champ={d.chemin}
+      className={`flex flex-col gap-1 rounded-encart p-2 ${aToi ? 'bg-accent-fond' : ''}`}
+    >
       <span className="flex items-center justify-between gap-2 text-xs text-encre-3">
         {/* L'icône ⓘ reste hors du libellé : la toucher n'active pas la saisie. */}
         <span className="inline-flex items-center gap-1">

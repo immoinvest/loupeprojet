@@ -88,7 +88,12 @@ export function CarteEstimation({ repere }: { repere: ReactNode }): JSX.Element 
 
       {repere}
 
-      <div role="group" aria-label="État du bien" className="grid grid-cols-2 gap-2 md:grid-cols-4">
+      <div
+        role="group"
+        aria-label="État du bien"
+        data-champ="bien.etat"
+        className="grid grid-cols-2 gap-2 md:grid-cols-4"
+      >
         {ETATS.map((etat) => {
           const choisi = !e.etatSuppose && e.etat === etat;
           return (

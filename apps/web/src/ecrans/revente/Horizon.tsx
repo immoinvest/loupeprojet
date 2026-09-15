@@ -52,18 +52,21 @@ export function CarteHorizon({
 
   return (
     <Carte>
-      <Curseur
-        libelle="Revente dans"
-        valeur={horizon}
-        min={HORIZON_MIN}
-        max={HORIZON_MAX}
-        formater={ans}
-        texteValeur={dans}
-        reperes={REPERES}
-        seuils={seuils}
-        onChangement={onChangement}
-        onValidation={onValidation}
-      />
+      {/* Le curseur est la maison de l'horizon : un lien d'hypothèse y mène (#hypotheses.revente.annees). */}
+      <div data-champ="hypotheses.revente.annees" className="rounded-encart">
+        <Curseur
+          libelle="Revente dans"
+          valeur={horizon}
+          min={HORIZON_MIN}
+          max={HORIZON_MAX}
+          formater={ans}
+          texteValeur={dans}
+          reperes={REPERES}
+          seuils={seuils}
+          onChangement={onChangement}
+          onValidation={onValidation}
+        />
+      </div>
       <p className="m-0 text-[15px] text-encre-2">
         Plus-value imposée à{' '}
         <span className="font-bold text-encre">{pourcentage(imposition.tauxGlobal)}</span> à{' '}
