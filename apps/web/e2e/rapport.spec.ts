@@ -48,8 +48,8 @@ test('le rapport affiche le verdict, les cinq feux et les chiffres clés', async
   const impots = carte(page, "Combien d'impôts ?");
   await expect(impots).toContainText(/0\s€\s*sur 10 ans de location/);
   await expect(impots).toContainText('Meublé au réel.');
-  // Meublé au réel : rien pendant la location, 723 € à la revente (amortissements réintégrés).
-  await expect(impots).toContainText(/Impôt total, revente comprise :\s*723\s€/);
+  // Meublé au réel : rien pendant la location, 1 695 € à la revente (amortissements réintégrés).
+  await expect(impots).toContainText(/Impôt total, revente comprise :\s*1\s695\s€/);
   // Les régimes se comparent sur l'impôt total (location et revente), triés du moins cher au plus cher.
   await expect(
     impots.getByRole('list', { name: 'Impôt total des autres régimes' }).getByRole('listitem'),

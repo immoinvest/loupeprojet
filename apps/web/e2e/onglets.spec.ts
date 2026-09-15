@@ -35,11 +35,11 @@ test('fiscalité : « Retenir ce régime » change le régime retenu et le rappo
   await expect(impots).toContainText(/26\s928\s€\s*sur 10 ans de location/);
   await expect(impots).toContainText('Meublé micro-BIC.');
   await expect(impots).toContainText(/Impôt total, revente comprise :\s*26\s928\s€/);
-  // Le meublé au réel se compare avec ses 723 € d'impôt à la revente, jamais à 0 €.
+  // Le meublé au réel se compare avec ses 1 695 € d'impôt à la revente, jamais à 0 €.
   await expect(
     impots.getByRole('list', { name: 'Impôt total des autres régimes' }).getByRole('listitem'),
   ).toHaveText([
-    /^Meublé au réel\s723\s€$/,
+    /^Meublé au réel\s1\s695\s€$/,
     /^Nu au réel\s4\s426\s€$/,
     /^Nu micro-foncier\s31\s757\s€$/,
   ]);

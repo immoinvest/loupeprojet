@@ -200,8 +200,8 @@ describe('Rapport : prix, impôts et revente', () => {
     const impots = carte("Combien d'impôts ?");
     // Le montant et son complément sont deux éléments séparés par une marge : pas d'espace entre eux.
     expect(n(impots.textContent)).toMatch(/0 € ?sur 10 ans de location/);
-    // Meublé au réel : rien pendant la location, 723 € à la revente (amortissements réintégrés).
-    expect(n(impots.textContent)).toContain('Impôt total, revente comprise : 723 €');
+    // Meublé au réel : rien pendant la location, 1 695 € à la revente (amortissements réintégrés).
+    expect(n(impots.textContent)).toContain('Impôt total, revente comprise : 1 695 €');
     const autres = within(impots).getByRole('list', { name: 'Impôt total des autres régimes' });
     expect(
       within(autres)
@@ -229,12 +229,12 @@ describe('Rapport : prix, impôts et revente', () => {
     expect(n(impots.textContent)).toMatch(/26 928 € ?sur 10 ans de location/);
     expect(n(impots.textContent)).toContain('Impôt total, revente comprise : 26 928 €');
     const autres = within(impots).getByRole('list', { name: 'Impôt total des autres régimes' });
-    // Trié sur l'impôt total : 723 € (et non 0 €) pour le meublé au réel, toujours le moins cher.
+    // Trié sur l'impôt total : 1 695 € (et non 0 €) pour le meublé au réel, toujours le moins cher.
     expect(
       within(autres)
         .getAllByRole('listitem')
         .map((li) => n(li.textContent)),
-    ).toEqual(['Meublé au réel 723 €', 'Nu au réel 4 426 €', 'Nu micro-foncier 31 757 €']);
+    ).toEqual(['Meublé au réel 1 695 €', 'Nu au réel 4 426 €', 'Nu micro-foncier 31 757 €']);
   });
 
   it('la revente affiche le multiple sur apport avec sa bulle', async () => {

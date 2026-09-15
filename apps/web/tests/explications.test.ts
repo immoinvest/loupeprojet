@@ -165,8 +165,9 @@ describe('impôts et revente', () => {
     expect(t).toContain('Sur 10 ans de location, le meublé au réel ne coûte aucun impôt.');
     // Amortissements déduits avant le déficit antérieur (CE, 15/04/2015) : 31 134 € en réserve.
     expect(t).toContain('31 134 € restent en réserve');
-    // 19 486 € d'amortissements du bâti réintégrés à la revente, prix de l'acte : 723 € d'impôt.
-    expect(t).toContain("Avec 723 € d'impôt à la revente, l'impôt total est de 723 €.");
+    // 19 486 € d'amortissements du bâti réintégrés à la revente, prix de l'acte et 3 000 € de valeur
+    // ajoutée par les travaux : 1 695 € d'impôt à la revente (voir le test de la revente plus bas).
+    expect(t).toContain("Avec 1 695 € d'impôt à la revente, l'impôt total est de 1 695 €.");
     // Nu au réel : frais d'emprunt déduits et loyers compensant d'abord le financier (BOI-RFPI-BASE-30-20
     // § 110) : 7 556 € sur le revenu global l'année 1 (−2 267 €), puis imposé dès l'année 2 → 4 426 €,
     // rien à la revente (pas d'amortissement réintégré, abattements pour durée de détention).
@@ -178,9 +179,9 @@ describe('impôts et revente', () => {
     expect(m).toContain("Sur 10 ans de location, le meublé micro-BIC coûte 26 928 € d'impôt.");
     expect(m).toContain('Abattement de 50 %');
     expect(m).toContain('Aucun impôt à la revente : impôt total 26 928 €.');
-    // Le meublé au réel ne paie rien pendant la location mais 723 € à la revente : comparé sur l'impôt
-    // de la location seul, il afficherait 0 € à tort.
-    expect(m).toContain("est le meublé au réel (723 € d'impôt total)");
+    // Le meublé au réel ne paie rien pendant la location mais 1 695 € à la revente : comparé sur
+    // l'impôt de la location seul, il afficherait 0 € à tort.
+    expect(m).toContain("est le meublé au réel (1 695 € d'impôt total)");
     expect(m).not.toContain('(0 €');
 
     // Colocation : un seul autre régime possible, jamais un régime nu.
