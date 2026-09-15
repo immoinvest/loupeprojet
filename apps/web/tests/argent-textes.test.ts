@@ -2,7 +2,9 @@ import { describe, expect, it } from 'vitest';
 
 import {
   CATEGORIES_TEXTE,
+  conditionsDuPret,
   dureeEnLettres,
+  moisCourt,
   enregistrerLePretDe,
   montantDuBien,
   montantSigne,
@@ -47,6 +49,8 @@ describe('textes de la page Argent', () => {
       'L’analyse prévoyait 150 000 € à 3,35 % sur 25 ans.',
     );
     expect(enregistrerLePretDe('T2 Lices')).toBe('Enregistrer le prêt de T2 Lices');
+    expect(simple(conditionsDuPret(1_200_000, 0.12, 12))).toBe('12 000 € à 12 % sur 1 an');
+    expect(moisCourt('2026-10')).toBe('oct.');
   });
 
   it('dépenses : catégories, récurrence en lettres, nom accessible d’un montant', () => {

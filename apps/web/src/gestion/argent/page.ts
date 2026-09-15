@@ -86,6 +86,20 @@ export function anneesProposees(aujourdhui: string): readonly number[] {
   return Array.from({ length: ANNEES_PROPOSEES }, (_, rang) => courante - rang);
 }
 
+/** « Tous les biens » dans la liste du filtre. */
+export const TOUS_LES_BIENS = '';
+
+/**
+ * Les valeurs de la liste des périodes : « AAAA-MM » (24 derniers mois) ou « AAAA » (5 dernières
+ * années), avec la période affichée en tête si elle est plus ancienne (adresse gardée).
+ */
+export function periodesDuChoix(vue: Vue, aujourdhui: string): readonly string[] {
+  const proposees =
+    vue.type === 'mois' ? moisProposes(aujourdhui) : anneesProposees(aujourdhui).map(String);
+  const affichee = vue.type === 'mois' ? vue.periode : String(vue.annee);
+  return proposees.includes(affichee) ? proposees : [affichee, ...proposees];
+}
+
 export interface MontantCategorie {
   readonly categorie: CategorieDepense;
   readonly montant: number;

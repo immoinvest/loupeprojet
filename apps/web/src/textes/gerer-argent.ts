@@ -91,6 +91,7 @@ export const ERREURS_DEPENSE: Readonly<Record<ChampDepense, string>> = {
 
 export const TEXTES_PRET = {
   titre: 'Le prêt',
+  formulaire: 'Le prêt du bien',
   aucun: 'Aucun prêt enregistré pour ce bien.',
   ajouter: 'Ajouter le prêt',
   enregistrerPropose: 'Enregistrer ce prêt',
@@ -163,9 +164,21 @@ export function dureeEnLettres(mois: number): string {
   return [partAnnees, partMois].filter((p) => p !== '').join(' et ');
 }
 
+/** « 150 000 € à 3,35 % sur 25 ans ». */
+export function conditionsDuPret(capital: number, taux: number, dureeMois: number): string {
+  return `${montant(capital)} à ${pourcentage(taux)} sur ${dureeEnLettres(dureeMois)}`;
+}
+
 /** « L’analyse prévoyait 150 000 € à 3,35 % sur 25 ans. » */
 export function pretPropose(capital: number, taux: number, dureeMois: number): string {
-  return `L’analyse prévoyait ${montant(capital)} à ${pourcentage(taux)} sur ${dureeEnLettres(dureeMois)}.`;
+  return `L’analyse prévoyait ${conditionsDuPret(capital, taux, dureeMois)}.`;
+}
+
+const MOIS_COURT = new Intl.DateTimeFormat('fr-FR', { month: 'short', timeZone: 'UTC' });
+
+/** « 2026-10 » → « oct. » : sous chaque barre de la courbe. */
+export function moisCourt(periode: string): string {
+  return MOIS_COURT.format(new Date(`${periode}-01T00:00:00Z`));
 }
 
 /** La ligne de « À faire » : « Enregistrer le prêt de T2 Lices ». */

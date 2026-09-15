@@ -10,6 +10,7 @@ import {
   courbeDeLaVue,
   donneesArgent,
   moisProposes,
+  periodesDuChoix,
   pretsAEnregistrer,
   vueDepuisRecherche,
   type Vue,
@@ -73,6 +74,19 @@ describe('vue et filtre de la page Argent', () => {
     expect(mois).toHaveLength(24);
     expect([mois[0], mois[23]]).toEqual(['2026-09', '2024-10']);
     expect(anneesProposees('2026-09-14')).toEqual([2026, 2025, 2024, 2023, 2022]);
+  });
+
+  it('la liste des périodes garde la période affichée, même ancienne', () => {
+    expect(periodesDuChoix({ type: 'mois', periode: '2026-08' }, '2026-09-14')).toHaveLength(24);
+    expect(periodesDuChoix({ type: 'mois', periode: '2020-01' }, '2026-09-14')[0]).toBe('2020-01');
+    expect(periodesDuChoix({ type: 'annee', annee: 2025 }, '2026-09-14')).toEqual([
+      '2026',
+      '2025',
+      '2024',
+      '2023',
+      '2022',
+    ]);
+    expect(periodesDuChoix({ type: 'annee', annee: 2010 }, '2026-09-14')).toHaveLength(6);
   });
 });
 
