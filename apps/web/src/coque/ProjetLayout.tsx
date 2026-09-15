@@ -14,6 +14,7 @@ import { Link, NavLink, Outlet, useLocation, useNavigate, useParams } from 'reac
 
 import { MARGES_LATERALES, Page, TitrePage } from '@/composants/mise-en-page';
 import { Bouton, LienBouton } from '@/composants/ui';
+import { RetourEtEffet } from '@/ecrans/hypotheses/Retour';
 import { useGestion } from '@/gestion/GestionContext';
 import { useProjets } from '@/stockage/ProjetsContext';
 import type { ProjetEnregistre } from '@/stockage/projets';
@@ -23,6 +24,7 @@ import { MODES } from '@/textes/regimes';
 import { visiteDe } from '@/visite';
 
 import { BoutonPartager } from './BoutonPartager';
+import { useChampCible } from './champ-cible';
 import { defilementPourVoir } from './defilement';
 import { useMesuresEnTete } from './entete';
 import { SelecteurStatut } from './SelecteurStatut';
@@ -130,7 +132,7 @@ function EnTete(): JSX.Element {
   const onglets = ONGLETS.filter((o) => o.to !== 'visite' || !visiteDe(enregistre).faite);
 
   return (
-    <header ref={enTeteRef} className={`${EN_TETE} ${MARGES_LATERALES}`}>
+    <header ref={enTeteRef} data-colle className={`${EN_TETE} ${MARGES_LATERALES}`}>
       <div className="flex min-w-0 flex-col justify-center gap-0.5 py-2 md:h-12 md:flex-row md:items-center md:gap-2 md:py-0 2xl:h-14">
         <span className="min-w-0 text-[13px] break-words text-encre-3 md:truncate">
           <Link
@@ -189,10 +191,18 @@ function EnTete(): JSX.Element {
   );
 }
 
+/** Le retour vers le volet d'origine d'un lien d'hypothèse, et l'effet de la modification. */
+function RetourDuProjet(): JSX.Element | null {
+  const { resultats } = useProjetCourant();
+  return <RetourEtEffet resultats={resultats} />;
+}
+
 export function ProjetLayout(): JSX.Element {
   const { id } = useParams();
   const { trouver } = useProjets();
   const enregistre = trouver(id);
+  // « #hypotheses.location.loyerHc » : le champ visé par un lien d'hypothèse, dans n'importe quel volet.
+  useChampCible();
 
   if (enregistre === undefined) return <ProjetIntrouvable />;
 
@@ -201,6 +211,7 @@ export function ProjetLayout(): JSX.Element {
       {/* Le cadre porte les variables publiées par l'en-tête : décalage et hauteur collée. */}
       <div data-cadre-projet>
         <EnTete />
+        <RetourDuProjet />
         <Outlet />
       </div>
     </FournisseurProjet>

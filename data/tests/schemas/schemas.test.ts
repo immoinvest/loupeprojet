@@ -79,8 +79,13 @@ describe('DVF', () => {
       codeVoie: 'A090',
       voie: 'RES DES CANNES',
       carrez: 67.09,
+      dependances: 1,
+      terrain: null,
+      lots: 2,
     };
     expect(VenteSchema.parse(complete).type).toBe('appartement');
+    expect(VenteSchema.safeParse({ ...complete, lots: 0 }).success).toBe(false);
+    expect(VenteSchema.safeParse({ ...complete, dependances: -1 }).success).toBe(false);
     expect(
       VenteSchema.safeParse({
         date: '2025-06-15',
@@ -96,6 +101,9 @@ describe('DVF', () => {
         codeVoie: null,
         voie: null,
         carrez: null,
+        dependances: 0,
+        terrain: 850,
+        lots: null,
       }).success,
     ).toBe(true);
     expect(VenteSchema.safeParse({ ...complete, idParcelle: '2A004-BO-412' }).success).toBe(false);

@@ -110,6 +110,8 @@ test('statut du projet : liste aux couleurs de Deklic, feuille du bas sur télé
   ]);
   await expect(liste.getByRole('option', { selected: true })).toHaveText('Visite prévue');
 
+  // La liste apparaît en glissant de 4 px (100 ms) : mesurer une fois l'animation finie.
+  await liste.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
   const [boite, boiteBouton] = await Promise.all([liste.boundingBox(), bouton.boundingBox()]);
   if (boite === null || boiteBouton === null) throw new Error('liste ou bouton sans boîte');
   const { width: largeur, height: hauteur } = page.viewportSize() ?? { width: 0, height: 0 };

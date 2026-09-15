@@ -3,7 +3,9 @@ import type { JSX } from 'react';
 
 import { Info } from '@/composants/info';
 import { Carte, GrosChiffre, Ligne, Pastille, TitreCarte } from '@/composants/ui';
+import { ValeurHypothese } from '@/composants/ValeurHypothese';
 import { euros, eurosSignes, pourcentage } from '@/formatage/nombres';
+import { cheminLoyer } from '@/hypotheses/liens';
 import { EXPLICATIONS } from '@/textes/explications';
 import { TEXTES_FINANCEMENT as T, phraseCouverture } from '@/textes/financement';
 import { libelleTravauxCout } from '@/textes/travaux';
@@ -30,7 +32,14 @@ export function CarteCout({ r }: { r: Resultats }): JSX.Element {
       <div>
         <Ligne libelle="Emprunté" valeur={euros(f.montantEmprunte)} />
         <Ligne libelle="Mensualité hors assurance" valeur={euros(f.mensualiteHorsAssurance)} />
-        <Ligne libelle="Assurance emprunteur" valeur={euros(f.assuranceMensuelle)} />
+        <Ligne
+          libelle="Assurance emprunteur"
+          valeur={
+            <ValeurHypothese chemin="hypotheses.pret.tauxAssurance">
+              {euros(f.assuranceMensuelle)}
+            </ValeurHypothese>
+          }
+        />
         <Ligne libelle="TAEG hors assurance" valeur={taux(f.taegHorsAssurance)} />
         <Ligne
           libelle={
@@ -48,7 +57,14 @@ export function CarteCout({ r }: { r: Resultats }): JSX.Element {
         />
         <Ligne libelle="Intérêts sur toute la durée" valeur={euros(f.totalInterets)} />
         <Ligne libelle="Assurance sur toute la durée" valeur={euros(f.totalAssurance)} />
-        <Ligne libelle="Frais de dossier et garantie" valeur={euros(fraisBancaires)} />
+        <Ligne
+          libelle="Frais de dossier et garantie"
+          valeur={
+            <ValeurHypothese chemin="hypotheses.pret.fraisDossier">
+              {euros(fraisBancaires)}
+            </ValeurHypothese>
+          }
+        />
         <Ligne libelle="Coût total du crédit" valeur={euros(f.coutTotalCredit)} fort />
       </div>
     </Carte>
@@ -63,9 +79,21 @@ export function CarteOrigine({ r }: { r: Resultats }): JSX.Element {
     <Carte>
       <TitreCarte>{T.origine}</TitreCarte>
       <div>
-        <Ligne libelle="Prix affiché" valeur={euros(achat.prix)} />
+        <Ligne
+          libelle="Prix affiché"
+          valeur={
+            <ValeurHypothese chemin="hypotheses.achat.prix">{euros(achat.prix)}</ValeurHypothese>
+          }
+        />
         {achat.travaux > 0 && (
-          <Ligne libelle={libelleTravauxCout(achat.travauxChoix)} valeur={euros(achat.travaux)} />
+          <Ligne
+            libelle={libelleTravauxCout(achat.travauxChoix)}
+            valeur={
+              <ValeurHypothese chemin="hypotheses.achat.travaux">
+                {euros(achat.travaux)}
+              </ValeurHypothese>
+            }
+          />
         )}
         <Ligne
           libelle="Frais d'acquisition (droits, notaire)"
@@ -73,13 +101,31 @@ export function CarteOrigine({ r }: { r: Resultats }): JSX.Element {
         />
         <Ligne
           libelle="Frais de dossier et garantie"
-          valeur={euros(pret.fraisDossier + pret.fraisGarantie)}
+          valeur={
+            <ValeurHypothese chemin="hypotheses.pret.fraisDossier">
+              {euros(pret.fraisDossier + pret.fraisGarantie)}
+            </ValeurHypothese>
+          }
         />
         {achat.mobilier > 0 && (
-          <Ligne libelle="Mobilier, payé comptant" valeur={euros(achat.mobilier)} />
+          <Ligne
+            libelle="Mobilier, payé comptant"
+            valeur={
+              <ValeurHypothese chemin="hypotheses.achat.mobilier">
+                {euros(achat.mobilier)}
+              </ValeurHypothese>
+            }
+          />
         )}
         <Ligne libelle="Coût total du projet" valeur={euros(f.coutTotalProjet)} fort />
-        <Ligne libelle="Vous apportez (apport et mobilier)" valeur={euros(f.miseDeDepart)} />
+        <Ligne
+          libelle="Vous apportez (apport et mobilier)"
+          valeur={
+            <ValeurHypothese chemin="hypotheses.pret.apport">
+              {euros(f.miseDeDepart)}
+            </ValeurHypothese>
+          }
+        />
         <Ligne
           libelle="La banque prête"
           valeur={euros(f.montantEmprunte)}
@@ -120,7 +166,16 @@ export function CarteCouverture({ r }: { r: Resultats }): JSX.Element {
       </GrosChiffre>
       <p className="m-0 text-[15px] leading-relaxed text-encre-2">{phraseCouverture(etat)}</p>
       <div>
-        {loyer !== null && <Ligne libelle="Loyer hors charges" valeur={euros(loyer)} />}
+        {loyer !== null && (
+          <Ligne
+            libelle="Loyer hors charges"
+            valeur={
+              <ValeurHypothese chemin={cheminLoyer(r.projet.hypotheses.location.mode)}>
+                {euros(loyer)}
+              </ValeurHypothese>
+            }
+          />
+        )}
         <Ligne libelle="Crédit et assurance" valeur={eurosSignes(-f.mensualiteTotale)} />
         {loyer !== null && (
           <Ligne

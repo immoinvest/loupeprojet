@@ -1,5 +1,6 @@
 import { distanceMetres, type Point } from './geometrie';
 import { ventesSurCarte, type VenteSurCarte } from './carte';
+import { ventesProchesDe, type VentesProches } from './ventes-proches';
 import type { VenteDvf } from './ventes';
 
 export type TypeLogement = 'appartement' | 'maison';
@@ -39,7 +40,6 @@ export const ORDRE_REFERENCE: readonly CodeGroupe[] = [
 export const SEUIL_REFERENCE = 5;
 /** Comparable : même type de logement, surface à ±40 % de celle du bien quand elle est connue. */
 export const TOLERANCE_SURFACE = 0.4;
-export const MAX_VENTES_PROCHES = 20;
 /** La pente du prix au m² selon la surface se mesure sur au moins 30 ventes de la commune du même type. */
 export const MIN_VENTES_PENTE = 30;
 /** Garde-fou : la pente mesurée reste entre −0,5 et 0 (un grand logement ne se vend pas plus cher au m²). */
@@ -59,6 +59,8 @@ export interface BienAdresse {
   readonly voisines: readonly string[];
   readonly type: TypeLogement;
   readonly surface?: number | undefined;
+  /** Commune du bien : elle complète la clé BAN des ventes de la commune (DPE des ventes). */
+  readonly codeInsee: string;
 }
 
 export interface StatistiquesPrix {
@@ -90,26 +92,6 @@ export interface Groupe {
   readonly periode: Periode | null;
 }
 
-export interface VenteProche {
-  readonly date: string;
-  readonly prix: number;
-  readonly surface: number;
-  /** Prix au m² de l'acte, à sa date. */
-  readonly prixM2: number;
-  /** Même prix ramené au dernier semestre connu par la tendance locale. */
-  readonly prixM2Actualise: number;
-  readonly coefficient: number;
-  /** (surface du bien ÷ surface de la vente) ^ pente de la commune ; 1 sans surface du bien ou sans pente. */
-  readonly correctionSurface: number;
-  /** Prix au m² actualisé et ramené à la surface du bien. */
-  readonly prixM2Corrige: number;
-  readonly pieces: number;
-  readonly type: TypeLogement;
-  readonly adresse: string | null;
-  readonly distanceMetres: number | null;
-  readonly groupes: readonly CodeGroupe[];
-}
-
 export interface Reference {
   readonly code: CodeGroupe;
   readonly rayonMetres: number;
@@ -118,11 +100,10 @@ export interface Reference {
   readonly periode: Periode | null;
 }
 
-export interface AnalyseAdresse {
+export interface AnalyseAdresse extends VentesProches {
   readonly ventesCommune: number;
   readonly groupes: readonly Groupe[];
   readonly reference: Reference | null;
-  readonly ventesProches: readonly VenteProche[];
   /** Ventes comparables géolocalisées à 300 m au plus, pour la carte du quartier. */
   readonly ventesCarte: readonly VenteSurCarte[];
 }
@@ -236,12 +217,6 @@ export function pentePrixSurface(ventes: readonly VenteDvf[], type: TypeLogement
   return Math.min(0, Math.max(PENTE_MIN, covariance / variance));
 }
 
-export function adresseDe(vente: VenteDvf): string | null {
-  if (vente.voie === null) return null;
-  const numero = vente.numero === null ? '' : `${String(vente.numero)}${vente.suffixe ?? ''} `;
-  return `${numero}${vente.voie}`;
-}
-
 export interface VenteSituee {
   readonly vente: VenteDvf;
   readonly distance: number | null;
@@ -333,32 +308,11 @@ export function analyserAdresse(
   }
   const estUnComparable = (s: VenteSituee): boolean =>
     s.groupes.some((code) => comparableDans(s, code));
-  const ventesProches = situees
-    .filter(estUnComparable)
-    .sort(
-      (a, b) => (a.distance ?? Number.POSITIVE_INFINITY) - (b.distance ?? Number.POSITIVE_INFINITY),
-    )
-    .slice(0, MAX_VENTES_PROCHES)
-    .map((s) => ({
-      date: s.vente.date,
-      prix: s.vente.prix,
-      surface: s.vente.surface,
-      prixM2: Math.round(s.vente.prix / s.vente.surface),
-      prixM2Actualise: Math.round(s.prixM2Actualise),
-      coefficient: Math.round(s.coefficient * 10_000) / 10_000,
-      correctionSurface: Math.round(s.correctionSurface * 10_000) / 10_000,
-      prixM2Corrige: Math.round(s.prixM2Corrige),
-      pieces: s.vente.pieces,
-      type: s.vente.type,
-      adresse: adresseDe(s.vente),
-      distanceMetres: s.distance === null ? null : Math.round(s.distance),
-      groupes: s.groupes,
-    }));
   return {
     ventesCommune: ventes.length,
     groupes: GROUPES.map((code) => parCode[code]),
     reference,
-    ventesProches,
+    ...ventesProchesDe(situees.filter(estUnComparable), bien.codeInsee),
     ventesCarte: ventesSurCarte(situees, estUnComparable),
   };
 }

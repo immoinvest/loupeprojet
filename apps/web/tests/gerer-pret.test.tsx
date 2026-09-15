@@ -185,9 +185,10 @@ describe('porte ouverte par le statut « Acheté »', () => {
     monter(`/gerer/pret/${p.id}`, gestion);
 
     expect(await screen.findByText(TEXTES_PRET.loyerInconnu)).toBeInTheDocument();
+    // Droit au champ du loyer dans Hypothèses (lien d'hypothèse).
     expect(screen.getByRole('link', { name: TEXTES_PRET.ajouterLoyer })).toHaveAttribute(
       'href',
-      `/projets/${p.id}/hypotheses`,
+      `/projets/${p.id}/hypotheses#hypotheses.location.loyerHc`,
     );
     await utilisateur.type(screen.getByLabelText(TEXTES_PRET.locataire), 'Julie Martin');
     await utilisateur.click(screen.getByRole('button', { name: TEXTES_PRET.cestParti }));

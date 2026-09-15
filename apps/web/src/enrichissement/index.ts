@@ -52,6 +52,35 @@ export {
   type OptionAdresse,
 } from './suggestions';
 export {
+  appliquerRepere,
+  decisionRepere,
+  instantaneRepere,
+  memeRepere,
+  repereSaisiALaMain,
+  restaurerRepere,
+  type DecisionRepere,
+  type InstantaneRepere,
+} from './repere';
+export {
+  CLES_TRI,
+  dateMoinsJours,
+  filtrerVentes,
+  JOURS_RECENTES,
+  pageDe,
+  prixAujourdhui,
+  SANS_FILTRE,
+  TAILLE_PAGE,
+  TRI_DEFAUT,
+  trierVentes,
+  triSuivant,
+  valeurDeTri,
+  type CleTri,
+  type FiltresVentes,
+  type PageVentes,
+  type SensTri,
+  type Tri,
+} from './ventes';
+export {
   clientHorsLigne,
   clientWorker,
   CONTRAT_ADRESSE,
@@ -77,6 +106,7 @@ export {
   type ChampsIa,
   type CodeGroupe,
   type DpeAdresse,
+  type DpeVente,
   type NiveauRisqueAdresse,
   type ReponseRisques,
   type RisqueAdresse,
@@ -87,6 +117,7 @@ export {
   type StatistiquesPrix,
   type TendanceAdresse,
   type VenteCarte,
+  type VenteProcheAdresse,
 } from './contrat';
 export {
   completerAvecIa,
@@ -106,13 +137,60 @@ export {
 export {
   ATTRIBUTION_IGN,
   classePrix,
+  cleVente,
+  COUCHE_PARCELLES,
+  COUCHES_FOND,
   donneesCarte,
+  FONDS_CARTE,
   RAYONS_CARTE_METRES,
   repereCarte,
   URL_TUILES_IGN,
+  urlTuilesIgn,
   ZOOM_MAX_IGN,
   type ClassePrix,
+  type CoucheTuiles,
   type DonneesCarte,
+  type FondCarte,
   type PointCarte,
+  type RayonCarte,
   type ReperePrixCarte,
 } from './carte';
+export {
+  JOURS_ANCIENNETE,
+  joursEntre,
+  MODES_COULEUR,
+  modesCouleur,
+  niveauAnciennete,
+  niveauDpe,
+  niveauPoint,
+  type ModeCouleur,
+  type NiveauPoint,
+  type PointColore,
+} from './carte-couleurs';
+export {
+  ECART_EVENTAIL_PX,
+  eventail,
+  grouperPoints,
+  RAYON_EVENTAIL_MIN_PX,
+  type Decalage,
+  type GroupePoints,
+} from './carte-groupes';
+export {
+  dansLeRayon,
+  ETAT_LIAISON_INITIAL,
+  filtresActifs,
+  liaisonVentes,
+  pageDeLaVente,
+  pointsVisibles,
+  ventesVisibles,
+  type ActionLiaison,
+  type Affichage,
+  type EtatLiaison,
+} from './carte-liaison';
+export {
+  DUREE_MESSAGE_MS,
+  glisserActif,
+  messageGeste,
+  type Geste,
+  type MessageGeste,
+} from './carte-gestes';

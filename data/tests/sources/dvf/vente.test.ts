@@ -53,12 +53,15 @@ describe('venteDepuisMutation', () => {
           codeVoie: 'B180',
           voie: 'SAINT SYLVESTRE',
           carrez: null,
+          dependances: 0,
+          terrain: 1001,
+          lots: null,
         },
       },
     });
   });
 
-  it('retient un appartement vendu avec une dépendance, sans compter la dépendance', () => {
+  it('retient un appartement vendu avec une dépendance, sans compter la dépendance dans la surface', () => {
     const resultat = analyser('2025-327560');
     expect(resultat.ok && resultat.vente.vente).toMatchObject({
       type: 'appartement',
@@ -68,7 +71,47 @@ describe('venteDepuisMutation', () => {
       idParcelle: '2A004000BO0412',
       codeVoie: 'A090',
       carrez: 67.09,
+      dependances: 1,
+      terrain: null,
+      lots: 1,
     });
+  });
+
+  it('additionne une fois le terrain de chaque parcelle et nature de culture, compte les dépendances distinctes', () => {
+    const base = mutations.get('2025-327551');
+    if (base === undefined) {
+      throw new Error('fixture incomplète');
+    }
+    const maison = base[0] as Record<string, string>;
+    const sol = {
+      ...maison,
+      code_type_local: '',
+      type_local: '',
+      surface_reelle_bati: '',
+      nombre_pieces_principales: '',
+    };
+    const cave = { ...sol, code_type_local: '3', type_local: 'Dépendance', surface_terrain: '' };
+    const resultat = venteDepuisMutation(
+      [
+        maison,
+        sol, // même parcelle, même culture que la maison : 1 001 m² comptés une fois
+        { ...sol, code_nature_culture: 'AG', surface_terrain: '250' },
+        { ...sol, id_parcelle: '2A0620000B1204', surface_terrain: '99.5' },
+        cave,
+        { ...cave, id_parcelle: '2A0620000B1204' },
+        cave,
+      ],
+      FILTRES_DVF,
+    );
+    expect(resultat.ok && resultat.vente.vente).toMatchObject({
+      terrain: 1350.5,
+      dependances: 2,
+    });
+    const sansTerrain = venteDepuisMutation(
+      [{ ...maison, surface_terrain: '', nombre_lots: '3' }],
+      FILTRES_DVF,
+    );
+    expect(sansTerrain.ok && sansTerrain.vente.vente).toMatchObject({ terrain: null, lots: 3 });
   });
 
   it("ne compte qu'une fois un local répété à l'identique sur plusieurs lignes", () => {

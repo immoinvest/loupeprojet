@@ -18,7 +18,10 @@ export const PHRASES_ADRESSE = {
   sansRepere: 'Moins de 5 ventes comparables à chaque échelle : pas de repère fiable.',
   introuvable: 'Adresse introuvable : vérifiez le numéro, la rue et la ville.',
   indisponible: "L'analyse est indisponible pour le moment. Réessayez dans un instant.",
-  repereUtilise: 'Repère utilisé par le rapport.',
+  titreAdresse: 'Où se trouve le bien ?',
+  adresseDuBien: 'Adresse du bien',
+  changer: 'Changer',
+  analyseEnCours: 'Analyse en cours…',
   numeroCadastre:
     "Ce numéro vient du cadastre : choisissez l'adresse dans la liste des suggestions, ou tapez le nom de la résidence.",
   aucuneSuggestion:

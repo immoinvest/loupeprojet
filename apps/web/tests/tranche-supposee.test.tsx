@@ -49,7 +49,11 @@ describe('tranche d’imposition supposée', () => {
     const id = amorcer(true);
     render(<AppEnMemoire chemin={`/projets/${id}`} />);
     await screen.findByRole('heading', { name: /Le prix est bon/ });
-    expect(screen.getByText(/Meublé au réel\./).textContent).toContain('Tranche supposée à 30 %.');
+    // Le régime et la tranche sont des liens d'hypothèse : la phrase se lit sur tout le paragraphe.
+    const phrase = screen.getByText(/Tranche supposée à/).closest('p');
+    expect(phrase?.textContent.replace(/\s/g, ' ')).toContain(
+      'Meublé au réel. Tranche supposée à 30 %.',
+    );
   });
 
   it('tranche choisie : ni mention ni encart', async () => {

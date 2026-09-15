@@ -12,6 +12,7 @@ import {
 } from '@/gestion/depuis-projet';
 import { dateEnLettres, leJourDuMois, montant } from '@/gestion/format';
 import { useGestion } from '@/gestion/GestionContext';
+import { cheminLoyer } from '@/hypotheses/liens';
 import { useProjets } from '@/stockage/ProjetsContext';
 import { ERREURS_GESTION } from '@/textes/gerer';
 import {
@@ -175,7 +176,15 @@ export function PretAGerer(): JSX.Element {
               }`}
             >
               {erreur('loyer') ?? T.loyerManquant}{' '}
-              <Link to={`/projets/${enregistre.id}/hypotheses`}>{T.ajouterLoyer}</Link>
+              {/* Droit au champ du loyer, selon le type de location. */}
+              <Link
+                to={{
+                  pathname: `/projets/${enregistre.id}/hypotheses`,
+                  hash: `#${cheminLoyer(enregistre.projet.hypotheses.location.mode)}`,
+                }}
+              >
+                {T.ajouterLoyer}
+              </Link>
             </p>
           )}
         </Carte>

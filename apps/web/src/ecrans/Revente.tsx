@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState, type JSX } from 'react';
 import { HORIZONS, projetAHorizon, variantesRevente } from '@/analyses';
 import { Page, TitrePage } from '@/composants/mise-en-page';
 import { Carte, Ligne, Pastille, TitreCarte } from '@/composants/ui';
+import { ValeurHypothese } from '@/composants/ValeurHypothese';
 import { useProjetCourant } from '@/coque/ProjetLayout';
 import { euros, eurosSignes, pourcentage } from '@/formatage/nombres';
 import { appliquerSaisie, descripteurParChemin } from '@/hypotheses';
@@ -95,11 +96,23 @@ export function Revente(): JSX.Element {
           <TitreCarte>Revente dans {horizon} ans</TitreCarte>
           <div>
             <Ligne
-              libelle={`Valeur estimée (${pourcentage(r.projet.hypotheses.revente.evolutionAnnuelle)} par an)`}
+              libelle={
+                <>
+                  Valeur estimée (
+                  <ValeurHypothese chemin="hypotheses.revente.evolutionAnnuelle">
+                    {`${pourcentage(r.projet.hypotheses.revente.evolutionAnnuelle)} par an`}
+                  </ValeurHypothese>
+                  )
+                </>
+              }
               valeur={euros(rv.valeur)}
             />
             <Ligne
-              libelle="Frais d'agence et diagnostics"
+              libelle={
+                <ValeurHypothese chemin="hypotheses.revente.fraisAgenceTaux">
+                  Frais d'agence et diagnostics
+                </ValeurHypothese>
+              }
               valeur={eurosSignes(-rv.fraisVente.total)}
             />
             <Ligne libelle="Capital restant dû" valeur={eurosSignes(-rv.crd)} />
@@ -157,9 +170,23 @@ export function Revente(): JSX.Element {
           <div className="grid grid-cols-1 md:grid-cols-2 md:gap-x-10 print:grid-cols-2 print:gap-x-10">
             <div>
               <Ligne libelle="Prix de cession, frais déduits" valeur={euros(pv.prixCession)} />
-              <Ligne libelle="Prix d'achat" valeur={euros(r.achat.prixRetenu)} />
+              <Ligne
+                libelle="Prix d'achat"
+                valeur={
+                  <ValeurHypothese chemin="hypotheses.achat.prix">
+                    {euros(r.achat.prixRetenu)}
+                  </ValeurHypothese>
+                }
+              />
               <Ligne libelle="Frais d'acquisition retenus" valeur={eurosSignes(pv.fraisRetenus)} />
-              <Ligne libelle="Travaux retenus" valeur={eurosSignes(pv.travauxRetenus)} />
+              <Ligne
+                libelle="Travaux retenus"
+                valeur={
+                  <ValeurHypothese chemin="hypotheses.achat.travaux">
+                    {eurosSignes(pv.travauxRetenus)}
+                  </ValeurHypothese>
+                }
+              />
               {pv.reintegration > 0 && (
                 <Ligne
                   libelle="Amortissements réintégrés"

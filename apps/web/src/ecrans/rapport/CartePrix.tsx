@@ -4,8 +4,9 @@ import { useLayoutEffect, useRef, useState, type JSX } from 'react';
 import { rangerLibelles } from '@/analyses/reperes';
 import { Info } from '@/composants/info';
 import { Carte, GrosChiffre, LienOnglet, TitreCarte } from '@/composants/ui';
-import { nombre } from '@/formatage/nombres';
-import { phrasePrixAffiche } from '@/textes/achat';
+import { ValeurHypothese } from '@/composants/ValeurHypothese';
+import { euros, nombre } from '@/formatage/nombres';
+import { suitePrixAffiche } from '@/textes/achat';
 import { eurosArrondis, niveauEnPhrase } from '@/textes/estimation';
 import { explicationPrix } from '@/textes/explications';
 import { reponseCourte } from '@/textes/verdict';
@@ -150,7 +151,13 @@ export function CartePrix({ r }: { r: Resultats }): JSX.Element {
           {reponseCourte(reponse)}
         </GrosChiffre>
       )}
-      <p className="m-0 text-[15px] text-encre-2">{phrasePrixAffiche(r.achat)}</p>
+      <p className="m-0 text-[15px] text-encre-2">
+        Prix affiché{' '}
+        <ValeurHypothese chemin="hypotheses.achat.prix">
+          {euros(r.achat.prixAffiche)}
+        </ValeurHypothese>
+        {suitePrixAffiche(r.achat)}
+      </p>
       <JaugePrix r={r} />
       {r.estimation !== null && (
         <p className="m-0 text-[15px] leading-relaxed text-encre-2">

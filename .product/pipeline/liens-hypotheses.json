@@ -1,0 +1,38 @@
+{
+  "feature_slug": "liens-hypotheses",
+  "started_at": "2026-09-15T04:05:00Z",
+  "current_step": "push",
+  "scope": "frontend_only",
+  "backlog": "17",
+  "steps": {
+    "discovery": {
+      "status": "completed",
+      "output": ".product/features/liens-hypotheses-discovery.md",
+      "validation": "auto-revue (session de nuit)"
+    },
+    "specs": {
+      "status": "completed",
+      "stories_count": 8,
+      "output": ".product/specs/liens-hypotheses-specs.md"
+    },
+    "architecture": {
+      "status": "completed",
+      "output": ".product/architecture/liens-hypotheses.md"
+    },
+    "implement": {
+      "status": "completed",
+      "stories_completed": 8,
+      "stories_total": 8,
+      "commits": ["737e4295", "18d5e5a9", "9e01c4f8", "e89e89d0", "bb9ec3c1"]
+    },
+    "qa_tests": {
+      "status": "completed",
+      "notes": "Suite complète : 2 457 tests, 11 échecs sous charge dont 2 réels corrigés ; les 9 autres passent relancés un par un. Logique pure à 100 %."
+    },
+    "security": {
+      "status": "completed",
+      "notes": "Aucune entrée réseau ni stockage nouveaux ; fragment et état d'historique validés (cheminDepuisFragment, lireDepuis) ; pas de dangerouslySetInnerHTML."
+    },
+    "push": { "status": "in_progress" }
+  }
+}

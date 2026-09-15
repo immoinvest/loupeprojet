@@ -13,6 +13,12 @@ export interface VenteDvf {
   readonly codeVoie: string | null;
   readonly voie: string | null;
   readonly carrez: number | null;
+  /** Dépendances vendues avec le logement ; `null` dans les CSV publiés avant la colonne (15/09/2026). */
+  readonly dependances: number | null;
+  /** Terrain vendu avec le logement, en m² ; `null` sans terrain ou dans un ancien CSV. */
+  readonly terrain: number | null;
+  /** Lots de copropriété de la mutation ; `null` hors copropriété ou dans un ancien CSV. */
+  readonly lots: number | null;
   /** Commune de la vente quand elle vient d'une commune voisine ; absente pour la commune du bien. */
   readonly codeInsee?: string | undefined;
 }
@@ -64,6 +70,9 @@ export function lireVentes(csv: string): VenteDvf[] {
       codeVoie: texteOuNull(valeur('codeVoie')),
       voie: texteOuNull(valeur('voie')),
       carrez: nombreOuNull(valeur('carrez')),
+      dependances: nombreOuNull(valeur('dependances')),
+      terrain: nombreOuNull(valeur('terrain')),
+      lots: nombreOuNull(valeur('lots')),
     });
   }
   return ventes;

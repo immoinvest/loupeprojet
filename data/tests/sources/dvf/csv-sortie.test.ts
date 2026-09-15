@@ -16,6 +16,9 @@ const AVEC_COORDONNEES: Vente = {
   codeVoie: 'A090',
   voie: 'RES DES CANNES, BAT "A"',
   carrez: 67.09,
+  dependances: 1,
+  terrain: null,
+  lots: 2,
 };
 
 const SANS_COORDONNEES: Vente = {
@@ -32,23 +35,28 @@ const SANS_COORDONNEES: Vente = {
   codeVoie: null,
   voie: null,
   carrez: null,
+  dependances: 0,
+  terrain: 540.5,
+  lots: null,
 };
 
 describe('ligneCsvVente', () => {
-  it('écrit coordonnées, parcelle et adresse quand elles existent, des colonnes vides sinon', () => {
+  it('écrit coordonnées, parcelle, adresse, dépendances, terrain et lots quand ils existent, des colonnes vides sinon', () => {
     expect(ligneCsvVente(AVEC_COORDONNEES)).toBe(
-      '2025-01-09,136000,66,appartement,4,41.934774,8.740565,2A004000BO0412,9001,B,A090,RES DES CANNES BAT A,67.09',
+      '2025-01-09,136000,66,appartement,4,41.934774,8.740565,2A004000BO0412,9001,B,A090,RES DES CANNES BAT A,67.09,1,,2',
     );
-    expect(ligneCsvVente(SANS_COORDONNEES)).toBe('2024-06-15,120000,31.5,maison,0,,,,,,,,');
+    expect(ligneCsvVente(SANS_COORDONNEES)).toBe(
+      '2024-06-15,120000,31.5,maison,0,,,,,,,,,0,540.5,',
+    );
   });
 });
 
 describe('csvDesVentes', () => {
   it("ajoute l'en-tête et trie par date croissante", () => {
     expect(csvDesVentes([AVEC_COORDONNEES, SANS_COORDONNEES])).toBe(
-      'date,prix,surface,type,pieces,lat,lon,idParcelle,numero,suffixe,codeVoie,voie,carrez\n' +
-        '2024-06-15,120000,31.5,maison,0,,,,,,,,\n' +
-        '2025-01-09,136000,66,appartement,4,41.934774,8.740565,2A004000BO0412,9001,B,A090,RES DES CANNES BAT A,67.09\n',
+      'date,prix,surface,type,pieces,lat,lon,idParcelle,numero,suffixe,codeVoie,voie,carrez,dependances,terrain,lots\n' +
+        '2024-06-15,120000,31.5,maison,0,,,,,,,,,0,540.5,\n' +
+        '2025-01-09,136000,66,appartement,4,41.934774,8.740565,2A004000BO0412,9001,B,A090,RES DES CANNES BAT A,67.09,1,,2\n',
     );
   });
 });

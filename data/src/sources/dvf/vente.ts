@@ -67,6 +67,12 @@ function entierOuNull(texte: string): number | null {
   return Number.isNaN(valeur) ? null : valeur;
 }
 
+/** DVF écrit 0 lot hors copropriété : zéro et vide valent `null`. */
+function entierPositifOuNull(texte: string): number | null {
+  const valeur = Number.parseInt(texte, 10);
+  return valeur > 0 ? valeur : null;
+}
+
 const NUMEROS_LOTS = ['1', '2', '3', '4', '5'] as const;
 
 /** Surface Carrez du logement : somme des lots de sa ligne qui en mentionnent une. */
@@ -77,6 +83,32 @@ function surfaceCarrez(ligne: EnregistrementCsv): number | null {
     if (surface > 0) total += surface;
   }
   return total > 0 ? Math.round(total * 100) / 100 : null;
+}
+
+const CODE_DEPENDANCE = '3';
+
+/** Dépendances distinctes de la mutation (une cave répétée sur deux parcelles ne compte qu'une fois). */
+function nombreDependances(lignes: readonly EnregistrementCsv[]): number {
+  return dedoublonner(lignes.filter((l) => champ(l, 'code_type_local') === CODE_DEPENDANCE)).length;
+}
+
+/**
+ * Terrain de la mutation : DVF répète la surface d'une parcelle sur chaque local ; on additionne une fois
+ * chaque couple parcelle et nature de culture.
+ */
+function surfaceTerrain(lignes: readonly EnregistrementCsv[]): number | null {
+  const surfaces = new Map<string, number>();
+  for (const ligne of lignes) {
+    const surface = Number.parseFloat(champ(ligne, 'surface_terrain'));
+    if (surface > 0) {
+      surfaces.set(
+        `${champ(ligne, 'id_parcelle')}|${champ(ligne, 'code_nature_culture')}`,
+        surface,
+      );
+    }
+  }
+  const total = [...surfaces.values()].reduce((somme, s) => somme + s, 0);
+  return total > 0 ? total : null;
 }
 
 /**
@@ -135,6 +167,9 @@ export function venteDepuisMutation(
         codeVoie: texteOuNull(champ(logement, 'adresse_code_voie')),
         voie: texteOuNull(champ(logement, 'adresse_nom_voie')),
         carrez: surfaceCarrez(logement),
+        dependances: nombreDependances(lignes),
+        terrain: surfaceTerrain(lignes),
+        lots: entierPositifOuNull(champ(logement, 'nombre_lots')),
       },
     },
   };

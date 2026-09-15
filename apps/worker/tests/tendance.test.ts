@@ -149,9 +149,11 @@ const CSV = `${[
   ...[1, 2, 3, 4].map(() => ligne('2025-03-01', 198000)),
 ].join('\n')}\n`;
 const REQUETE = '/marche/adresse?codeInsee=13205&lat=43.294813&lon=5.393807&surface=60';
-/** Cadastre sans parcelle, API Géo sans commune voisine. */
-const SANS_PARCELLE = (url: URL): Promise<Response> =>
-  Promise.resolve(reponseJson(url.hostname === 'geo.api.gouv.fr' ? [] : { features: [] }));
+/** Cadastre sans parcelle, API Géo sans commune voisine, base ADEME sans DPE. */
+const SANS_PARCELLE = (url: URL): Promise<Response> => {
+  if (url.hostname === 'data.ademe.fr') return Promise.resolve(reponseJson({ results: [] }));
+  return Promise.resolve(reponseJson(url.hostname === 'geo.api.gouv.fr' ? [] : { features: [] }));
+};
 
 interface Reponse {
   reference: { code: string; statistiques: { medianeM2: number; minM2: number } } | null;

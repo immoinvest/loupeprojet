@@ -16,6 +16,7 @@ import { useProjets } from '@/stockage/ProjetsContext';
 
 import { badgePour } from './badges';
 import { ChampHypothese } from './ChampHypothese';
+import { UtilisePar } from './UtilisePar';
 
 export function champsVisibles(groupe: Groupe, projet: ProjetEntree): readonly Descripteur[] {
   return groupe.champs
@@ -73,6 +74,7 @@ export function useSaisieHypotheses(): SaisieHypotheses {
       erreur={erreurs[d.chemin]}
       badge={badgePour(projet, d)}
       aide={d.aideSelon?.(projet) ?? d.aide}
+      utilisePar={<UtilisePar chemin={d.chemin} />}
       onChange={(t) => {
         changer(d, t);
       }}

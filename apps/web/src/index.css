@@ -69,6 +69,28 @@
   }
 }
 
+/* Champ visé par un lien d'hypothèse (coque/champ-cible.ts) : un anneau d'accent qui s'efface en
+   deux secondes ; immobile si l'utilisateur réduit les animations. */
+.mise-en-evidence {
+  animation: mise-en-evidence 2s ease-out;
+}
+@keyframes mise-en-evidence {
+  from,
+  40% {
+    background-color: var(--color-accent-fond);
+    box-shadow: 0 0 0 3px var(--color-accent);
+  }
+  to {
+    box-shadow: 0 0 0 3px transparent;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mise-en-evidence {
+    animation: none;
+    box-shadow: 0 0 0 3px var(--color-accent);
+  }
+}
+
 /* La coque tient dans la fenêtre et seul le contenu défile (AppLayout). Largeur de la barre
    latérale à partir de 1 024 px ; hauteur de la barre d'app des écrans plus étroits (BarreApp). */
 :root {
@@ -402,6 +424,105 @@ main:focus-visible {
   fill-opacity: 1;
   stroke: var(--color-surface);
   stroke-width: 3px;
+}
+
+.carte-vente-inconnu {
+  fill: var(--color-surface);
+  stroke: var(--color-encre-4);
+}
+
+/* La vente sélectionnée, sur la carte ou dans le tableau : pastille plus grande, contour bleu. */
+.carte-vente.carte-vente-selectionnee {
+  stroke: var(--color-accent);
+  stroke-width: 3px;
+  fill-opacity: 1;
+}
+
+/* Le cercle qui filtre le tableau. */
+.carte-cercle.carte-cercle-actif {
+  stroke-width: 3px;
+  stroke-dasharray: none;
+}
+
+/* Tracé invisible et épais de chaque cercle : il se clique sans être peint. */
+.leaflet-pane > svg path.leaflet-interactive.carte-cercle-cible {
+  pointer-events: stroke;
+}
+
+/* Centre d'un groupe de ventes ouvert en éventail. */
+.carte-eventail {
+  fill: var(--color-encre-3);
+  stroke: none;
+}
+
+/* Plusieurs ventes au même point : pastille chiffrée. */
+.carte-groupe {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--color-surface);
+  border-radius: 999px;
+  background: var(--color-encre-2);
+  color: var(--color-surface);
+  font-size: 13px;
+  font-weight: 700;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.3);
+}
+
+/* Fiche d'une vente dans sa bulle. */
+.carte-bulle {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--color-encre);
+  font-size: 14px;
+}
+.carte-bulle-titre {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+}
+.carte-bulle-lignes {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 2px 10px;
+  margin: 0;
+}
+.carte-bulle-lignes dt {
+  color: var(--color-encre-2);
+  font-weight: 600;
+}
+.carte-bulle-lignes dd {
+  margin: 0;
+}
+.carte-bulle-bouton {
+  align-self: flex-start;
+  min-height: 36px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-accent);
+  font: inherit;
+  font-weight: 700;
+}
+
+/* Message des gestes (« Ctrl + molette pour zoomer ») par-dessus la carte, sans capter le pointeur. */
+.carte-message {
+  position: absolute;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 16px;
+  border-radius: 12px;
+  background: rgb(0 0 0 / 0.5);
+  color: #fff;
+  font-size: 17px;
+  font-weight: 600;
+  text-align: center;
+  pointer-events: none;
 }
 
 /* Au doigt : boutons de zoom de 44 px. */
