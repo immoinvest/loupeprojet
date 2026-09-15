@@ -31,8 +31,18 @@ test('fiscalité : « Retenir ce régime » change le régime retenu et le rappo
   await expect(page.getByText(/Premier impôt l'année 1\./)).toBeVisible();
 
   await ouvrirVolet(page, 'Rapport', /Le prix est bon\./);
-  await expect(carte(page, "Combien d'impôts ?")).toContainText(/26\s928\s€\s*sur 10 ans/);
-  await expect(carte(page, "Combien d'impôts ?")).toContainText('Meublé micro-BIC.');
+  const impots = carte(page, "Combien d'impôts ?");
+  await expect(impots).toContainText(/26\s928\s€\s*sur 10 ans de location/);
+  await expect(impots).toContainText('Meublé micro-BIC.');
+  await expect(impots).toContainText(/Impôt total, revente comprise :\s*26\s928\s€/);
+  // Le meublé au réel se compare avec ses 723 € d'impôt à la revente, jamais à 0 €.
+  await expect(
+    impots.getByRole('list', { name: 'Impôt total des autres régimes' }).getByRole('listitem'),
+  ).toHaveText([
+    /^Meublé au réel\s723\s€$/,
+    /^Nu au réel\s4\s426\s€$/,
+    /^Nu micro-foncier\s31\s757\s€$/,
+  ]);
 });
 
 test('fiscalité : l’impôt à la revente suit l’horizon choisi dans l’onglet Revente', async ({

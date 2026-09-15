@@ -160,23 +160,32 @@ describe('rendements', () => {
 });
 
 describe('impôts et revente', () => {
-  it('fiscalité : régime retenu, réserve, le moins cher des autres', () => {
+  it('fiscalité : impôt de la location, impôt total, le moins cher des autres au total', () => {
     const t = n(explicationFiscalite(exemple));
-    expect(t).toContain('Sur 10 ans, le meublé au réel ne coûte aucun impôt.');
+    expect(t).toContain('Sur 10 ans de location, le meublé au réel ne coûte aucun impôt.');
     // Amortissements déduits avant le déficit antérieur (CE, 15/04/2015) : 31 134 € en réserve.
     expect(t).toContain('31 134 € restent en réserve');
+    // 19 486 € d'amortissements du bâti réintégrés à la revente, prix de l'acte : 723 € d'impôt.
+    expect(t).toContain("Avec 723 € d'impôt à la revente, l'impôt total est de 723 €.");
     // Nu au réel : frais d'emprunt déduits et loyers compensant d'abord le financier (BOI-RFPI-BASE-30-20
-    // § 110) : 7 556 € sur le revenu global l'année 1 (−2 267 €), puis imposé dès l'année 2 → 4 426 €.
-    expect(t).toContain('Le moins cher des trois autres régimes est le nu au réel (4 426 €)');
+    // § 110) : 7 556 € sur le revenu global l'année 1 (−2 267 €), puis imposé dès l'année 2 → 4 426 €,
+    // rien à la revente (pas d'amortissement réintégré, abattements pour durée de détention).
+    expect(t).toContain(
+      "Le moins cher des trois autres régimes, revente comprise, est le nu au réel (4 426 € d'impôt total)",
+    );
 
     const m = n(explicationFiscalite(microBic));
-    expect(m).toContain("le meublé micro-BIC coûte 26 928 € d'impôt");
+    expect(m).toContain("Sur 10 ans de location, le meublé micro-BIC coûte 26 928 € d'impôt.");
     expect(m).toContain('Abattement de 50 %');
-    expect(m).toContain('est le meublé au réel (0 €)');
+    expect(m).toContain('Aucun impôt à la revente : impôt total 26 928 €.');
+    // Le meublé au réel ne paie rien pendant la location mais 723 € à la revente : comparé sur l'impôt
+    // de la location seul, il afficherait 0 € à tort.
+    expect(m).toContain("est le meublé au réel (723 € d'impôt total)");
+    expect(m).not.toContain('(0 €');
 
     // Colocation : un seul autre régime possible, jamais un régime nu.
     const c = n(explicationFiscalite(coloc));
-    expect(c).toMatch(/L'autre régime possible est le meublé micro-BIC \(/);
+    expect(c).toContain("L'autre régime possible est le meublé micro-BIC (36 338 € d'impôt total)");
     expect(c).not.toContain(' nu ');
   });
 
