@@ -82,7 +82,7 @@ export function avertissementRepriseDeficit(annee: number): string {
 }
 
 /** Un abattement sans décimale quand il tombe juste (30 %), au centième sinon (8,25 %) : jamais arrondi. */
-function abattement(taux: number): string {
+function tauxAbattement(taux: number): string {
   return pourcentage(taux, Number.isInteger(Math.round(taux * 10_000) / 100) ? 0 : 2);
 }
 
@@ -104,11 +104,11 @@ export const LIGNES_REVENTE: readonly {
   { titre: 'Plus-value brute', valeur: (r) => euros(r.plusValue.plusValueBrute) },
   {
     titre: 'Abattement impôt sur le revenu',
-    valeur: (r) => abattement(r.plusValue.abattements.ir),
+    valeur: (r) => tauxAbattement(r.plusValue.abattements.ir),
   },
   {
     titre: 'Abattement prélèvements sociaux',
-    valeur: (r) => abattement(r.plusValue.abattements.ps),
+    valeur: (r) => tauxAbattement(r.plusValue.abattements.ps),
   },
   { titre: 'Impôt sur le revenu', valeur: (r) => euros(r.plusValue.impotIr) },
   { titre: 'Prélèvements sociaux', valeur: (r) => euros(r.plusValue.impotPs) },
