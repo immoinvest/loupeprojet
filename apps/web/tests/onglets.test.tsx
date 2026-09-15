@@ -29,7 +29,7 @@ describe('Fiscalité', () => {
     expect(screen.getByText('le plus avantageux au total')).toBeInTheDocument();
     expect(n(screen.getAllByText(/26 928 €/)[0]?.textContent)).toContain('26 928 €');
     expect(
-      // Amortissements déduits avant le déficit (CE, 15/04/2015) : réintégrés, ils créent 418 € d'impôt.
+      // Amortissements déduits avant le déficit (CE, 15/04/2015) : réintégrés, ils créent l'essentiel des 1 390 € d'impôt.
       screen.getByRole('img', { name: /0 années imposées sur 10, puis impôt à la revente/ }),
     ).toBeInTheDocument();
     expect(screen.getByText(/Pas avant l'année 11/)).toBeInTheDocument();
@@ -136,11 +136,16 @@ describe('Revente', () => {
       'Dans 20 ans',
     ]);
     expect(reperes[1]).toHaveAttribute('aria-pressed', 'true');
-    expect(n(screen.getAllByText(/57 799 €/)[0]?.textContent)).toContain('57 799 €');
+    expect(n(screen.getAllByText(/60 169 €/)[0]?.textContent)).toContain('60 169 €');
     expect(screen.getByRole('heading', { name: 'Revente dans 10 ans' })).toBeInTheDocument();
-    // 19 486 € d'amortissements du bâti réintégrés : plus-value brute 1 437 €.
+    // 19 486 € d'amortissements du bâti réintégrés et 3 000 € de valeur ajoutée par les travaux
+    // (état inconnu : la moitié des 6 000 €) : plus-value brute 4 779 €.
     expect(screen.getByText('amortissements réintégrés (réforme 2025)')).toBeInTheDocument();
-    expect(screen.getByText('1 437 €')).toBeInTheDocument();
+    expect(screen.getByText('4 779 €')).toBeInTheDocument();
+    expect(screen.getByText(/dont valeur ajoutée par les/)).toHaveTextContent(
+      'moitié des travaux, état du bien inconnu',
+    );
+    expect(screen.getByText('+3 000 €')).toBeInTheDocument();
     expect(screen.getByText(/Ce qu'il vous reste en poche/)).toBeInTheDocument();
   });
 
@@ -153,7 +158,7 @@ describe('Revente', () => {
     expect(curseur).toHaveValue('20');
     expect(screen.getByRole('heading', { name: 'Revente dans 20 ans' })).toBeInTheDocument();
     expect(screen.getByText('Cash-flows cumulés sur 20 ans')).toBeInTheDocument();
-    expect(n(screen.getAllByText(/144 957 €/)[0]?.textContent)).toContain('144 957 €');
+    expect(n(screen.getAllByText(/148 260 €/)[0]?.textContent)).toContain('148 260 €');
     expect(screen.getByRole('button', { name: /Dans 20 ans/ })).toHaveAttribute(
       'aria-pressed',
       'true',
@@ -184,6 +189,37 @@ describe('Revente', () => {
       'aria-pressed',
       'true',
     );
+  });
+
+  it('un prix de vente saisi remplace l’estimation, les repères restent estimés, puis on y revient', async () => {
+    await ouvrir('revente');
+    await screen.findByRole('heading', { name: /Qu'est-ce qu'il vous restera/ });
+    const champ = screen.getByRole('textbox', { name: 'Prix de vente' });
+    expect(champ).toHaveValue('');
+    expect(n(screen.getByText(/^Vide : /).textContent)).toContain('Vide : 183 365 €');
+
+    fireEvent.change(champ, { target: { value: '200000' } });
+    const enregistre = (): number | undefined =>
+      lireProjets(window.localStorage)[0]?.projet.hypotheses.revente.prixVente;
+    expect(enregistre()).toBe(200_000);
+    expect(screen.getByText('Prix de vente saisi')).toBeInTheDocument();
+    expect(screen.queryByText(/dont valeur ajoutée par les/)).not.toBeInTheDocument();
+    expect(n(screen.getByText(/^Estimation : /).textContent)).toContain('Estimation : 183 365 €');
+    // La carte des 10 ans suit toujours l'estimation.
+    const dix = within(screen.getByRole('group', { name: 'Horizons repères' })).getByRole(
+      'button',
+      {
+        name: /Dans 10 ans/,
+      },
+    );
+    expect(n(dix.textContent)).toContain('60 169 €');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Revenir à l’estimation' }));
+    expect(enregistre()).toBeUndefined();
+    expect(screen.getByText(/Prix de vente estimé/)).toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'Revenir à l’estimation' }),
+    ).not.toBeInTheDocument();
   });
 
   it('se règle au clavier, et un horizon hors des repères ne marque aucune carte', async () => {

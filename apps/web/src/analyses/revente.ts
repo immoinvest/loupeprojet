@@ -26,8 +26,21 @@ export function projetAHorizon(projet: ProjetEntree, annees: number): ProjetEntr
   };
 }
 
+/** Le même projet sans prix de vente saisi : la revente suit l'estimation. */
+export function sansPrixVente(projet: ProjetEntree): ProjetEntree {
+  const revente = projet.hypotheses.revente ?? {};
+  return {
+    ...projet,
+    hypotheses: {
+      ...projet.hypotheses,
+      revente: Object.fromEntries(Object.entries(revente).filter(([cle]) => cle !== 'prixVente')),
+    },
+  };
+}
+
 /**
- * Le même projet revendu à différents horizons (sans scénarios : ~5 ms par horizon).
+ * Le même projet revendu à différents horizons (sans scénarios : ~5 ms par horizon), toujours au prix
+ * estimé : un prix de vente saisi ne vaut que pour l'horizon choisi.
  * Vide quand le projet n'a pas de loyer : aucune revente ne peut être calculée.
  */
 export function variantesRevente(
@@ -35,8 +48,9 @@ export function variantesRevente(
   horizons: readonly number[] = HORIZONS,
 ): VarianteRevente[] {
   const variantes: VarianteRevente[] = [];
+  const estime = sansPrixVente(projet);
   for (const annees of horizons) {
-    const r = calculerProjet(projetAHorizon(projet, annees), { avecScenarios: false });
+    const r = calculerProjet(projetAHorizon(estime, annees), { avecScenarios: false });
     if (!r.complet) return [];
     variantes.push({
       annees,

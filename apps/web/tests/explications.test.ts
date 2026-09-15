@@ -182,19 +182,21 @@ describe('impôts et revente', () => {
 
   it('revente : valeur, frais, capital restant dû, IRA, impôt, net vendeur', () => {
     const t = n(explicationRevente(exemple));
-    expect(t).toContain('179 884 € dans 10 ans (+1,5 % par an)');
-    expect(t).toContain('diagnostics (7 695 €)');
+    expect(t).toContain(
+      '183 365 € dans 10 ans (+1,5 % par an, dont 3 000 € de valeur ajoutée par les travaux)',
+    );
+    expect(t).toContain('diagnostics (7 835 €)');
     expect(t).toContain('capital restant dû (112 094 €)');
     expect(t).toContain('anticipé (1 878 €)');
-    // 19 486 € d'amortissements du bâti réintégrés : plus-value 1 436,87 € × 29,081 % = 418 €.
-    expect(t).toContain('plus-value (418 €)');
-    expect(t).toContain('57 799 € net vendeur');
+    // 19 486 € d'amortissements du bâti réintégrés : plus-value 4 779,23 € × 29,081 % = 1 390 €.
+    expect(t).toContain('plus-value (1 390 €)');
+    expect(t).toContain('60 169 € net vendeur');
   });
 
   it('multiple sur apport : exemple, perte, sans mise', () => {
     const t = n(explicationMultiple(exemple));
-    expect(t).toContain('13 229 € ÷ 19 337 € = × 0,7.');
-    expect(t).toContain('en rend 0,7');
+    expect(t).toContain('15 599 € ÷ 19 337 € = × 0,8.');
+    expect(t).toContain('en rend 0,8');
 
     const perte = {
       rendement: { enrichissement: { miseDeDepart: 10_000, total: -5_000 } },

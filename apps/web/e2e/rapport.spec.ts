@@ -50,9 +50,9 @@ test('le rapport affiche le verdict, les cinq feux et les chiffres clés', async
 
   const revente = carte(page, "Qu'est-ce qu'il vous restera ?");
   // 58 217 € avant impôt de plus-value, moins 418 € sur les amortissements réintégrés.
-  await expect(revente).toContainText(/57\s799\s€\s*dans 10 ans/);
+  await expect(revente).toContainText(/60\s169\s€\s*dans 10 ans/);
   await expect(revente).toContainText('Multiple sur apport');
-  await expect(revente).toContainText(/×\s0,7/);
+  await expect(revente).toContainText(/×\s0,8/);
 });
 
 test('les icônes ouvrent une bulle qui tient dans l’écran, les liens mènent aux onglets', async ({

@@ -100,8 +100,9 @@ describe('Rapport', () => {
       screen.getAllByRole('link', { name: 'Meublé au réel — modifier Régime retenu' }).length,
     ).toBeGreaterThan(0);
     // Le cash net de revente : en gros chiffre, et dans le texte de sa bulle (fermée). 58 217 € avant
-    // impôt, moins 418 € sur les amortissements réintégrés (fiscalité, ordre d'imputation LMNP).
-    expect(n(screen.getByText('57 799 €').textContent)).toContain('57 799 €');
+    // impôt, moins 1 390 € sur les amortissements réintégrés (fiscalité, ordre d'imputation LMNP)
+    // et la valeur ajoutée par les travaux (3 000 €).
+    expect(n(screen.getByText('60 169 €').textContent)).toContain('60 169 €');
   });
 
   it('les pages non livrées affichent un état « bientôt », un id inconnu une page introuvable', async () => {

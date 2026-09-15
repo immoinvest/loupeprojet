@@ -42,10 +42,11 @@ test('fiscalité : l’impôt à la revente suit l’horizon choisi dans l’ong
   await ouvrirVolet(page, 'Fiscalité', /Combien d'impôts, selon le régime/);
 
   // Deuxième ligne de la carte : « À la revente ». À 10 ans, 19 486 € d'amortissements du bâti
-  // réintégrés (déduits avant le déficit, CE 15/04/2015) : 1 437 € de plus-value, 418 € d'impôt.
+  // réintégrés (déduits avant le déficit, CE 15/04/2015), 3 000 € de valeur ajoutée par les travaux :
+  // 4 779 € de plus-value, 1 390 € d'impôt.
   const reel = carte(page, 'Meublé au réel');
   const aLaRevente = reel.getByRole('definition').nth(1);
-  await expect(aLaRevente).toHaveText(/^418\s€$/);
+  await expect(aLaRevente).toHaveText(/^1\s390\s€$/);
   await expect(carte(page, 'La revente selon le régime').getByRole('table')).toBeVisible();
 
   // L'horizon est un lien d'hypothèse : il mène au curseur de l'onglet Revente.
@@ -56,14 +57,14 @@ test('fiscalité : l’impôt à la revente suit l’horizon choisi dans l’ong
   await page.getByRole('slider', { name: 'Revente dans' }).fill('20');
   await expect(page.getByRole('heading', { level: 2, name: 'Revente dans 20 ans' })).toBeVisible();
 
-  // À 20 ans, 60 822 € d'amortissements réintégrés : 10 464 € d'impôt à la revente au réel,
-  // dont 9 028 € de plus que le micro-BIC (1 436 €).
+  // À 20 ans, 60 822 € d'amortissements réintégrés : 11 040 € d'impôt à la revente au réel,
+  // dont 9 028 € de plus que le micro-BIC (2 012 €).
   await ouvrirVolet(page, 'Fiscalité', /Combien d'impôts, selon le régime/);
   await expect(page.getByText(/à la revente dans\s*20 ans/)).toBeVisible();
-  await expect(aLaRevente).toHaveText(/^10\s464\s€$/);
+  await expect(aLaRevente).toHaveText(/^11\s040\s€$/);
   await expect(reel).toContainText(/dont\s9\s028\s€\sdus aux amortissements réintégrés/);
   await expect(carte(page, 'Meublé micro-BIC').getByRole('definition').nth(1)).toHaveText(
-    /^1\s436\s€$/,
+    /^2\s012\s€$/,
   );
 });
 
@@ -114,7 +115,7 @@ test('revente : le curseur, le clavier et les repères changent l’horizon', as
   );
   await expect(page.getByRole('heading', { level: 2, name: 'Revente dans 20 ans' })).toBeVisible();
   await expect(carte(page, 'Revente dans 20 ans')).toContainText(
-    /Ce qu'il vous reste en poche\s*144\s957\s€/,
+    /Ce qu'il vous reste en poche\s*148\s260\s€/,
   );
   await expect(page.getByText('Cash-flows cumulés sur 20 ans')).toBeVisible();
 
