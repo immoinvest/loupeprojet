@@ -1,0 +1,20 @@
+---
+/**
+ * Un chiffre des règles de calcul de l'application, cité dans un guide :
+ * <Regle chemin="fiscalite.microBic.plafond" format="euros" />. Un chemin inconnu arrête le build.
+ */
+import { estAConfirmer, texteRegle, type FormatRegle } from '../lib/regles';
+
+interface Props {
+  chemin: string;
+  format: FormatRegle;
+}
+
+const { chemin, format } = Astro.props;
+const texte = texteRegle(chemin, format);
+const aConfirmer = estAConfirmer(chemin);
+---
+
+<span class="font-semibold whitespace-nowrap text-encre">{texte}</span>{
+  aConfirmer && <span class="text-sm text-surveiller-texte"> (à confirmer)</span>
+}
