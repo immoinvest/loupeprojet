@@ -17,6 +17,7 @@ import { STATUTS_LOYER, TONS_LOYER } from '@/textes/gerer-ecrans';
 import { statutDuBien, TONS_BIEN } from '@/textes/gerer-fiche';
 
 import { EcranAttente } from './EcranAttente';
+import { NomsDeLocataires } from './NomsDeLocataires';
 import { Portes } from './Portes';
 
 function LigneDuBien({ resume }: { readonly resume: ResumeDuBien }): JSX.Element {
@@ -34,9 +35,14 @@ function LigneDuBien({ resume }: { readonly resume: ResumeDuBien }): JSX.Element
         <span className="truncate text-sm text-encre-3">{bien.adresse}</span>
       </div>
       <div className="flex min-w-0 basis-48 flex-col gap-0.5 text-sm">
-        <span className="truncate text-encre-2">
-          {occupantsDuBien(noms, resume.locations, resume.aVenir)}
-        </span>
+        {/* Un bail (seul ou en colocation) : ses locataires en liens ; à la chambre, leur nombre. */}
+        {resume.locations === 1 ? (
+          <NomsDeLocataires locataires={resume.locataires} className="truncate text-encre-2" />
+        ) : (
+          <span className="truncate text-encre-2">
+            {occupantsDuBien(noms, resume.locations, resume.aVenir)}
+          </span>
+        )}
         {resume.locations > 0 && (
           <span className="font-semibold tabular-nums">{loyerParMois(resume.loyerMensuel)}</span>
         )}

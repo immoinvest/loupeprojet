@@ -41,7 +41,10 @@ function monter(gestion: ClientGestion, chemin = '/gerer/loyers'): void {
 
 /** La ligne du loyer d'un bien. */
 async function ligne(nomDuBien: string): Promise<HTMLElement> {
-  const element = (await screen.findByText(nomDuBien, { selector: 'li span' })).closest('li');
+  // Premier rendu de la page : plus d'une seconde quand la machine est chargée.
+  const element = (
+    await screen.findByText(nomDuBien, { selector: 'li span' }, { timeout: 10_000 })
+  ).closest('li');
   if (element === null) throw new Error(`ligne ${nomDuBien} absente`);
   return element;
 }
@@ -74,7 +77,7 @@ describe('Page Loyers : un mois au choix', () => {
     const utilisateur = userEvent.setup();
     monter(clientGestionMemoire({ etat: ETAT_SEPTEMBRE }));
     expect(
-      await screen.findByRole('heading', { level: 1, name: 'Septembre 2026' }),
+      await screen.findByRole('heading', { level: 1, name: 'Septembre 2026' }, { timeout: 10_000 }),
     ).toBeInTheDocument();
     expect(groupes()).toEqual(['En retard', 'Reçus']);
 
@@ -95,13 +98,13 @@ describe('Page Loyers : un mois au choix', () => {
   it('un mois illisible dans l’adresse : le mois en cours', async () => {
     monter(clientGestionMemoire({ etat: ETAT_SEPTEMBRE }), '/gerer/loyers?mois=2026-13');
     expect(
-      await screen.findByRole('heading', { level: 1, name: 'Septembre 2026' }),
+      await screen.findByRole('heading', { level: 1, name: 'Septembre 2026' }, { timeout: 10_000 }),
     ).toBeInTheDocument();
   });
 
   it('un mois sans loyer le dit', async () => {
     monter(clientGestionMemoire({ etat: ETAT_SEPTEMBRE }), '/gerer/loyers?mois=2020-01');
-    expect(await screen.findByText(T.aucun)).toBeInTheDocument();
+    expect(await screen.findByText(T.aucun, {}, { timeout: 10_000 })).toBeInTheDocument();
   });
 
   it('sans compte : la page qui explique pourquoi il en faut un', async () => {
@@ -125,7 +128,13 @@ describe('Page Loyers : un mois au choix', () => {
     };
     monter(clientGestionMemoire({ etat }));
     const chambre = await ligne('Studio Baille · Chambre 2');
-    expect(within(chambre).getByText('Antoine Dupont et Léa Bernard')).toBeInTheDocument();
+    const antoine = within(chambre).getByRole('link', { name: 'Antoine Dupont' });
+    expect(antoine).toHaveAttribute('href', '/gerer/locataires/locataire-antoine');
+    expect(antoine.parentElement).toHaveTextContent('Antoine Dupont et Léa Bernard');
+    expect(within(chambre).getByRole('link', { name: 'Léa Bernard' })).toHaveAttribute(
+      'href',
+      '/gerer/locataires/locataire-lea',
+    );
   });
 });
 

@@ -24,11 +24,15 @@ export const GROUPES_LOYERS_TEXTES: Readonly<Record<GroupeLoyer, string>> = {
   recu: 'Reçus',
 };
 
+/** Ce qui précède le nom de rang `rang` (à partir de 0) dans une liste de `total` noms : rien, « , » ou « et ». */
+export function separateurNom(rang: number, total: number): string {
+  if (rang === 0) return '';
+  return rang === total - 1 ? ' et ' : ', ';
+}
+
 /** « Julie Martin », « Julie Martin et Léa Bernard », « Julie Martin, Léa Bernard et Hugo Petit ». */
 export function nomsDesLocataires(noms: readonly string[]): string {
-  const [dernier, ...avant] = [...noms].reverse();
-  if (dernier === undefined) return '';
-  return avant.length === 0 ? dernier : `${avant.reverse().join(', ')} et ${dernier}`;
+  return noms.map((nom, rang) => `${separateurNom(rang, noms.length)}${nom}`).join('');
 }
 
 /** « Coloc Rouet · Chambre 2 » pour une location à la chambre ; le nom seul pour le bien entier. */

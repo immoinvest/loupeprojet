@@ -13,19 +13,35 @@ import {
 
 import type { ActionsLoyer } from '../useActionsLoyer';
 
-/** Les douze derniers mois du bien : un statut en mot par mois, « Quittance » sur un mois reçu. */
+/**
+ * Les douze derniers mois d'un bien (ou les loyers d'un locataire) : un statut en mot par mois,
+ * « Quittance » sur un mois reçu.
+ */
 export function FriseMois({
   frise,
   actions,
+  titre = F.douzeMois,
+  vide,
 }: {
   readonly frise: readonly MoisDuBien[];
   readonly actions: ActionsLoyer;
+  readonly titre?: string;
+  /** La phrase d'une frise sans aucun mois (un locataire qui ne devait rien ces douze mois). */
+  readonly vide?: string;
 }): JSX.Element {
+  if (frise.length === 0) {
+    return (
+      <Carte>
+        <TitreCarte>{titre}</TitreCarte>
+        <p className="m-0 text-encre-3">{vide}</p>
+      </Carte>
+    );
+  }
   return (
     <Carte>
-      <TitreCarte>{F.douzeMois}</TitreCarte>
+      <TitreCarte>{titre}</TitreCarte>
       <ol
-        aria-label={F.douzeMois}
+        aria-label={titre}
         className="m-0 grid list-none grid-cols-2 gap-2 p-0 sm:grid-cols-3 lg:grid-cols-4"
       >
         {frise.map((mois) => (

@@ -8,7 +8,6 @@ import { paiementsAvecRecu, quittancePossible } from '@/gestion/loyers-page';
 import { marquerRecu, STATUTS_LOYER, TEXTES_GERER, TONS_LOYER } from '@/textes/gerer-ecrans';
 import {
   bienEtChambre,
-  nomsDesLocataires,
   plusApl,
   recuDe,
   resteAPayer,
@@ -16,6 +15,7 @@ import {
 } from '@/textes/gerer-loyers';
 
 import { EnPartie } from './EnPartie';
+import { NomsDeLocataires } from './NomsDeLocataires';
 import type { ActionsLoyer } from './useActionsLoyer';
 
 interface PropsLigne {
@@ -30,8 +30,8 @@ interface PropsLigne {
  */
 export function LigneDeLoyer({ ligne, aujourdhui, actions }: PropsLigne): JSX.Element {
   const { occupe } = actions;
-  const noms = [ligne.locataire, ...ligne.colocataires].flatMap((l) =>
-    l === undefined ? [] : [`${l.prenom} ${l.nom}`],
+  const locataires = [ligne.locataire, ...ligne.colocataires].flatMap((l) =>
+    l === undefined ? [] : [l],
   );
   const ouvert = actions.enPartie === ligne.location.id;
 
@@ -46,7 +46,7 @@ export function LigneDeLoyer({ ligne, aujourdhui, actions }: PropsLigne): JSX.El
             {bienEtChambre(ligne.bien?.nom ?? '', ligne.location.libelle)}
           </span>
         </Link>
-        <span className="truncate text-sm text-encre-3">{nomsDesLocataires(noms)}</span>
+        <NomsDeLocataires locataires={locataires} className="truncate text-sm text-encre-3" />
       </span>
       {/* Tiers payant (ADR-G16) : la part du locataire, puis l'aide versée par la CAF. */}
       <span className="flex flex-col text-right tabular-nums">

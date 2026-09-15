@@ -6,6 +6,7 @@ import { Page, TitrePage } from '@/composants/mise-en-page';
 import { Bouton, Carte, TitreCarte } from '@/composants/ui';
 import { useGestion } from '@/gestion/GestionContext';
 import { groupesDeLocataires, type LigneLocataire } from '@/gestion/locataires';
+import { lienFicheLocataire } from '@/gestion/parcours';
 import {
   nombreDeLocataires,
   periodeDuLocataire,
@@ -30,7 +31,12 @@ function LigneDuLocataire({
     <li className="flex flex-col gap-2 border-t border-bordure-douce py-3 first:border-t-0">
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
         <div className="flex min-w-0 flex-1 basis-56 flex-col gap-0.5">
-          <span className="font-bold">{`${locataire.prenom} ${locataire.nom}`}</span>
+          <Link
+            to={lienFicheLocataire(locataire.id)}
+            className="self-start font-bold text-encre no-underline survol-texte pointer-coarse:inline-flex pointer-coarse:min-h-11 pointer-coarse:items-center"
+          >
+            {`${locataire.prenom} ${locataire.nom}`}
+          </Link>
           {locataire.email === undefined ? (
             <span className="text-sm font-semibold text-surveiller-texte">{T.emailManquant}</span>
           ) : (

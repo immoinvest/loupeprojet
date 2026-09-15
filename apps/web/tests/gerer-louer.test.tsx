@@ -105,7 +105,11 @@ describe('Louer un bien', () => {
     expect(
       await screen.findByRole('heading', { level: 2, name: 'Location en cours · Chambre 2' }),
     ).toBeInTheDocument();
-    expect(screen.getByText('Hugo Petit et Léa Bernard')).toBeInTheDocument();
+    // Chaque colocataire est un lien vers sa fiche.
+    expect(screen.getByRole('link', { name: 'Hugo Petit' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Léa Bernard' }).parentElement).toHaveTextContent(
+      'Hugo Petit et Léa Bernard',
+    );
     expect(gestion.donnees().locations).toContainEqual(
       expect.objectContaining({
         bienId: 'bien-lices',

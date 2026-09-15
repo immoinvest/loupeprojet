@@ -6,10 +6,13 @@ import { Chapo, Page, TitrePage } from '@/composants/mise-en-page';
 import { Bouton, Carte, LienBouton, Pastille, TitreCarte } from '@/composants/ui';
 import { derniereLocation, etatDuBien, friseDuBien } from '@/gestion/fiche';
 import { useGestion } from '@/gestion/GestionContext';
+import { CHEMIN_GERER, CHEMIN_MES_BIENS } from '@/gestion/parcours';
 import { statutDuBien, TEXTES_FICHE as F, TONS_BIEN } from '@/textes/gerer-fiche';
 import { titreLouer } from '@/textes/gerer-louer';
+import { TEXTES_PARCOURS as P } from '@/textes/gerer-parcours';
 
 import { EcranAttente } from './EcranAttente';
+import { FilAriane } from './FilAriane';
 import { CarteLocation } from './fiche/CarteLocation';
 import { FriseMois } from './fiche/FriseMois';
 import { LouerBien } from './fiche/LouerBien';
@@ -34,16 +37,25 @@ function Fiche({
 
   return (
     <Page espacement="large" className="max-w-[900px]">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div className="flex min-w-0 flex-col gap-1.5">
-          <TitrePage>{bien.nom}</TitrePage>
-          <Chapo>{bien.adresse}</Chapo>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <Pastille ton={TONS_BIEN[etat.statut]}>{statutDuBien(etat)}</Pastille>
-          {bien.projetId !== undefined && (
-            <LienBouton to={`/projets/${bien.projetId}`}>{F.voirAnalyse}</LienBouton>
-          )}
+      <div className="flex flex-col gap-3">
+        <FilAriane
+          etapes={[
+            { libelle: P.gerer, vers: CHEMIN_GERER },
+            { libelle: P.mesBiens, vers: CHEMIN_MES_BIENS },
+            { libelle: bien.nom },
+          ]}
+        />
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div className="flex min-w-0 flex-col gap-1.5">
+            <TitrePage>{bien.nom}</TitrePage>
+            <Chapo>{bien.adresse}</Chapo>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <Pastille ton={TONS_BIEN[etat.statut]}>{statutDuBien(etat)}</Pastille>
+            {bien.projetId !== undefined && (
+              <LienBouton to={`/projets/${bien.projetId}`}>{F.voirAnalyse}</LienBouton>
+            )}
+          </div>
         </div>
       </div>
 
