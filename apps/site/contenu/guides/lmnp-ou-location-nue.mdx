@@ -1,0 +1,103 @@
+---
+titre: 'LMNP ou location nue : quel régime paie le moins d’impôt ?'
+titreSeo: 'LMNP ou location nue : quel régime fiscal choisir ?'
+description: 'Micro-BIC, LMNP au réel, micro-foncier ou nu au réel : comment chaque régime impose vos loyers et votre revente, pour choisir entre meublé et location nue.'
+motCle: 'lmnp ou location nue'
+motsClesSecondaires:
+  - lmnp micro bic
+  - lmnp fiscalité
+  - micro-foncier ou réel
+  - déficit foncier
+  - lmnp revente amortissements
+categorie: fiscalite
+auteur: pierre-georgel
+publieLe: 2026-09-15
+misAJourLe: 2026-09-15
+essentiel:
+  - 'En location meublée (LMNP), les loyers sont des bénéfices industriels et commerciaux : micro-BIC avec abattement forfaitaire, ou régime réel avec amortissement du bien.'
+  - 'En location nue, les loyers sont des revenus fonciers : micro-foncier avec abattement forfaitaire, ou régime réel avec déduction des charges et déficit foncier.'
+  - 'Le LMNP au réel efface souvent l’impôt pendant des années, mais les amortissements du bien sont réintégrés dans la plus-value à la revente depuis le 15 février 2025.'
+  - 'Pour choisir, comparez l’impôt total sur toute la durée de détention, revente comprise, et pas seulement l’impôt de la première année.'
+faq:
+  - question: 'Le LMNP est-il toujours plus avantageux que la location nue ?'
+    reponse: 'Non. Le meublé au réel paie souvent moins d’impôt pendant la location, mais la réintégration des amortissements alourdit la plus-value à la revente, et le meublé coûte plus cher à exploiter (mobilier, comptable, cotisation foncière). Avec de gros travaux, le nu au réel peut l’emporter.'
+  - question: 'Peut-on passer du micro-foncier au régime réel ?'
+    reponse: 'Oui, sur option, même sous le plafond du micro-foncier. L’option pour le réel vous engage pendant trois ans.'
+  - question: 'Qu’est-ce que la réintégration des amortissements en LMNP ?'
+    reponse: 'Depuis la loi de finances pour 2025, le prix d’acquisition retenu pour calculer la plus-value est diminué des amortissements déduits au régime réel. La plus-value imposable augmente d’autant. Les résidences services (étudiants, seniors, personnes handicapées) ne sont pas concernées.'
+  - question: 'La location courte durée a-t-elle un régime à part ?'
+    reponse: 'Au micro-BIC, oui : un meublé de tourisme non classé a un plafond et un abattement plus faibles qu’une location meublée classique. Au régime réel, les règles du LMNP s’appliquent.'
+sources:
+  - nom: 'Service-public.gouv.fr : Revenus locatifs d’une location non meublée'
+    url: 'https://www.service-public.gouv.fr/particuliers/vosdroits/F1991'
+    consulteLe: 2026-09-15
+  - nom: 'Service-public.gouv.fr : Revenus d’une location meublée'
+    url: 'https://www.service-public.gouv.fr/particuliers/vosdroits/F32744'
+    consulteLe: 2026-09-15
+  - nom: 'impots.gouv.fr : Location meublée'
+    url: 'https://www.impots.gouv.fr/particulier/location-meublee'
+    consulteLe: 2026-09-15
+  - nom: 'Légifrance : loi n° 2025-127 du 14 février 2025 de finances pour 2025, article 84'
+    url: 'https://www.legifrance.gouv.fr/jorf/article_jo/JORFARTI000051168884'
+    consulteLe: 2026-09-15
+  - nom: 'Légifrance : article 150 VB du Code général des impôts'
+    url: 'https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000051202577'
+    consulteLe: 2026-09-15
+---
+
+import Regle from '../../src/composants/Regle.astro';
+
+LMNP ou location nue : la question se pose dès la première annonce, parce que le même appartement, au même loyer, ne paie pas le même impôt selon qu’il est loué meublé ou vide. Il y a en réalité quatre régimes, deux par type de location. Ce guide explique comment chacun impose les loyers puis la revente, et comment les comparer sur toute la durée du projet.
+
+## Location meublée : micro-BIC ou LMNP au réel
+
+En meublé, les loyers sont des bénéfices industriels et commerciaux. Vous êtes loueur en meublé non professionnel (LMNP) tant que la location reste une activité d’appoint, et vous choisissez entre un abattement forfaitaire et le régime réel.
+
+### Le micro-BIC
+
+Vos loyers sont imposés après un abattement forfaitaire de <Regle chemin="fiscalite.microBic.abattement" format="taux" />, censé couvrir toutes vos charges. Rien d’autre ne se déduit : ni intérêts, ni taxe foncière, ni amortissement.
+
+Le régime s’applique jusqu’à <Regle chemin="fiscalite.microBic.plafond" format="euros" /> de recettes par an dans les règles utilisées par Deklic, pour les revenus 2026 à 2028 ; impots.gouv.fr indiquait 77 700 € pour les revenus 2025. Pour un meublé de tourisme non classé, l’abattement tombe à <Regle chemin="fiscalite.microBic.abattementTourismeNonClasse" format="taux" /> et le plafond à <Regle chemin="fiscalite.microBic.plafondTourismeNonClasse" format="euros" />.
+
+### Le LMNP au réel
+
+Au réel, vous déduisez vos charges réelles (intérêts, assurance, taxe foncière, copropriété, comptable) et vous **amortissez** le bien : chaque année, une part du prix du logement hors terrain, des travaux et du mobilier vient réduire le résultat. Deklic amortit le mobilier sur <Regle chemin="fiscalite.amortissement.mobilierDureeAnnees" format="annees" />.
+
+Les amortissements ne peuvent pas créer de déficit : ce qui dépasse le résultat de l’année est reporté sur les années suivantes. En pratique, l’impôt sur les loyers est souvent nul pendant de longues années. Un déficit dû aux charges se reporte, lui, pendant <Regle chemin="fiscalite.deficitBic.reportAnnees" format="annees" /> sur les bénéfices de location meublée.
+
+Les prélèvements sociaux sur ces revenus sont comptés à <Regle chemin="fiscalite.prelevementsSociaux.bic" format="taux" /> par Deklic.
+
+## Location nue : micro-foncier ou réel
+
+En location vide, les loyers sont des revenus fonciers. Sous un plafond, un abattement forfaitaire s’applique d’office ; au-delà, ou sur option, c’est le régime réel.
+
+### Le micro-foncier
+
+Si vos loyers ne dépassent pas <Regle chemin="fiscalite.microFoncier.plafond" format="euros" /> par an, un abattement de <Regle chemin="fiscalite.microFoncier.abattement" format="taux" /> s’applique automatiquement. Les prélèvements sociaux sont de <Regle chemin="fiscalite.prelevementsSociaux.foncier" format="taux" />.
+
+### Le régime réel et le déficit foncier
+
+Au réel, vous déduisez vos charges réelles, travaux d’entretien et d’amélioration compris, mais le logement lui-même ne s’amortit pas. Si les charges dépassent les loyers, le **déficit foncier** hors intérêts s’impute sur votre revenu global dans la limite de <Regle chemin="fiscalite.deficitFoncier.plafondRevenuGlobal" format="euros" /> par an, portée à <Regle chemin="fiscalite.deficitFoncier.plafondRenovationEnergetique" format="euros" /> pour certains travaux de rénovation énergétique. Le reste se reporte pendant <Regle chemin="fiscalite.deficitFoncier.reportAnnees" format="annees" /> sur vos revenus fonciers.
+
+Deux conditions à connaître : l’option pour le réel vous engage trois ans, et le déficit imputé sur le revenu global est repris si vous cessez de louer avant la fin de la troisième année qui suit.
+
+## La revente change le calcul
+
+À la revente, la plus-value est imposée de la même façon en nu et en meublé non professionnel, avec des abattements pour durée de détention : exonération d’impôt sur le revenu après 22 ans, de prélèvements sociaux après 30 ans.
+
+La différence vient du LMNP au réel. Depuis le 15 février 2025, les amortissements déduits sont **retirés du prix d’acquisition** pour calculer la plus-value. Exemple : pour un bien acheté 150 000 € sur lequel 30 000 € d’amortissements ont été déduits, le prix d’acquisition retenu dans le calcul de la plus-value part de 120 000 € au lieu de 150 000 €. L’économie d’impôt pendant la location est en partie rendue à la revente, surtout si vous revendez avant 22 ans.
+
+## Comment choisir entre LMNP et location nue
+
+Le bon régime est celui qui laisse le plus d’argent au total : impôt pendant la location, puis impôt à la revente. Quatre situations reviennent souvent.
+
+- **Petit loyer, peu de charges, aucune envie de comptabilité** : micro-BIC en meublé ou micro-foncier en vide.
+- **Crédit important, revente lointaine** : le LMNP au réel efface l’impôt pendant la location ; la réintégration pèse moins si vous gardez le bien longtemps.
+- **Gros travaux la première année** : le nu au réel transforme les travaux en déficit foncier imputable sur vos autres revenus.
+- **Location courte durée** : vérifiez le classement du meublé de tourisme, qui change le plafond et l’abattement du micro-BIC.
+
+Le type de location compte aussi hors fiscalité : un meublé demande du mobilier, un expert-comptable au réel et la cotisation foncière des entreprises, mais se loue souvent un peu plus cher.
+
+## Comparer les quatre régimes sur votre projet
+
+Faire ce calcul à la main sur vingt ans est long et fragile : les intérêts baissent chaque année, les amortissements et le déficit se reportent, et la revente dépend de la durée de détention. Deklic calcule les quatre régimes côte à côte sur votre annonce, avec l’impôt pendant la location, l’impôt à la revente et ce qu’il vous reste au total. Pour les notions de base, lisez aussi le [calcul de la rentabilité locative](/guides/calcul-rentabilite-locative/).
