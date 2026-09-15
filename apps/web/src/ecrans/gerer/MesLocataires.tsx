@@ -3,18 +3,24 @@ import { useState, type JSX } from 'react';
 import { Link } from 'react-router';
 
 import { Page, TitrePage } from '@/composants/mise-en-page';
-import { Bouton, Carte, TitreCarte } from '@/composants/ui';
+import { Bouton, Carte, LienBouton, TitreCarte } from '@/composants/ui';
 import { useGestion } from '@/gestion/GestionContext';
 import { groupesDeLocataires, type LigneLocataire } from '@/gestion/locataires';
-import { lienFicheLocataire } from '@/gestion/parcours';
+import {
+  CHEMIN_MES_LOCATAIRES,
+  lienFicheLocataire,
+  lienNouveauLocataire,
+} from '@/gestion/parcours';
 import {
   nombreDeLocataires,
   periodeDuLocataire,
   TEXTES_LOCATAIRES as T,
 } from '@/textes/gerer-locataires';
 import { bienEtChambre } from '@/textes/gerer-loyers';
+import { TEXTES_PARCOURS as P } from '@/textes/gerer-parcours';
 
 import { EcranAttente } from './EcranAttente';
+import { LocationCreee } from './LocationCreee';
 import { ModifierLocataire } from './ModifierLocataire';
 import { Portes } from './Portes';
 
@@ -107,10 +113,19 @@ function ListeDesLocataires({ donnees }: { readonly donnees: EtatGestion }): JSX
   const nombre = enCeMoment.length + anciens.length;
   return (
     <Page espacement="large" className="max-w-[900px]">
-      <div className="flex flex-col gap-1">
-        <span className="text-xs font-bold tracking-wider text-encre-3 uppercase">{T.titre}</span>
-        <TitrePage taille="accroche">{nombreDeLocataires(nombre)}</TitrePage>
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div className="flex flex-col gap-1">
+          <span className="text-xs font-bold tracking-wider text-encre-3 uppercase">{T.titre}</span>
+          <TitrePage taille="accroche">{nombreDeLocataires(nombre)}</TitrePage>
+        </div>
+        <LienBouton
+          to={lienNouveauLocataire({ retour: CHEMIN_MES_LOCATAIRES })}
+          variante="primaire"
+        >
+          {P.ajouterLocataire}
+        </LienBouton>
       </div>
+      <LocationCreee />
       {nombre === 0 && (
         <Carte>
           <p className="m-0 text-encre-2">{T.aucun}</p>

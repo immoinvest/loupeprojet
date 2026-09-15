@@ -32,6 +32,7 @@ import { ImprimerDocument } from './ecrans/gerer/ImprimerDocument';
 import { Loyers } from './ecrans/gerer/Loyers';
 import { MesBiens } from './ecrans/gerer/MesBiens';
 import { MesLocataires } from './ecrans/gerer/MesLocataires';
+import { NouveauLocataire } from './ecrans/gerer/NouveauLocataire';
 import { PretAGerer } from './ecrans/gerer/PretAGerer';
 import { Hypotheses } from './ecrans/Hypotheses';
 import { Imprimer } from './ecrans/Imprimer';
@@ -89,6 +90,7 @@ export const routes: RouteObject[] = [
       { path: 'gerer/loyers', element: <Loyers /> },
       { path: 'gerer/biens', element: <MesBiens /> },
       { path: 'gerer/locataires', element: <MesLocataires /> },
+      { path: 'gerer/locataires/nouveau', element: <NouveauLocataire /> },
       { path: 'gerer/locataires/:id', element: <FicheLocataire /> },
       { path: 'gerer/biens/:id', element: <FicheBien /> },
       { path: 'gerer/pret/:id', element: <PretAGerer /> },

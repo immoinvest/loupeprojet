@@ -3,9 +3,10 @@ import type { JSX } from 'react';
 import { Link, useLocation } from 'react-router';
 
 import { Page, TitrePage } from '@/composants/mise-en-page';
-import { Carte, Pastille } from '@/composants/ui';
+import { Carte, LienBouton, Pastille } from '@/composants/ui';
 import { nomSupprime, resumeDesBiens, type ResumeDuBien } from '@/gestion/biens';
 import { useGestion } from '@/gestion/GestionContext';
+import { CHEMIN_MES_BIENS, lienNouveauLocataire } from '@/gestion/parcours';
 import {
   bienSupprime,
   loyerParMois,
@@ -13,16 +14,43 @@ import {
   occupantsDuBien,
   TEXTES_BIENS as T,
 } from '@/textes/gerer-biens';
+import { louerLeBien } from '@/textes/gerer-a-faire';
 import { STATUTS_LOYER, TONS_LOYER } from '@/textes/gerer-ecrans';
 import { statutDuBien, TONS_BIEN } from '@/textes/gerer-fiche';
+import { TEXTES_PARCOURS as P } from '@/textes/gerer-parcours';
 
 import { EcranAttente } from './EcranAttente';
+import { LocationCreee } from './LocationCreee';
 import { NomsDeLocataires } from './NomsDeLocataires';
 import { Portes } from './Portes';
 
+/** Qui occupe le bien : « Louer » s'il est vacant, ses locataires en liens pour un bail, leur nombre à la chambre. */
+function Occupants({ resume }: { readonly resume: ResumeDuBien }): JSX.Element {
+  const { bien } = resume;
+  if (resume.etat.statut === 'vacant') {
+    return (
+      <div className="self-start">
+        <LienBouton to={lienNouveauLocataire({ bienId: bien.id, retour: CHEMIN_MES_BIENS })}>
+          {/* Nom lu : « Louer Parking Prado » ; « Louer » seul se voit. */}
+          <span aria-hidden="true">{P.louer}</span>
+          <span className="sr-only">{louerLeBien(bien.nom)}</span>
+        </LienBouton>
+      </div>
+    );
+  }
+  if (resume.locations === 1) {
+    return <NomsDeLocataires locataires={resume.locataires} className="truncate text-encre-2" />;
+  }
+  const noms = resume.locataires.map((l) => `${l.prenom} ${l.nom}`);
+  return (
+    <span className="truncate text-encre-2">
+      {occupantsDuBien(noms, resume.locations, resume.aVenir)}
+    </span>
+  );
+}
+
 function LigneDuBien({ resume }: { readonly resume: ResumeDuBien }): JSX.Element {
   const { bien, etat, statutDuMois } = resume;
-  const noms = resume.locataires.map((l) => `${l.prenom} ${l.nom}`);
   return (
     <li className="flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-bordure-douce py-3 first:border-t-0">
       <div className="flex min-w-0 flex-1 basis-56 flex-col gap-0.5">
@@ -35,14 +63,7 @@ function LigneDuBien({ resume }: { readonly resume: ResumeDuBien }): JSX.Element
         <span className="truncate text-sm text-encre-3">{bien.adresse}</span>
       </div>
       <div className="flex min-w-0 basis-48 flex-col gap-0.5 text-sm">
-        {/* Un bail (seul ou en colocation) : ses locataires en liens ; à la chambre, leur nombre. */}
-        {resume.locations === 1 ? (
-          <NomsDeLocataires locataires={resume.locataires} className="truncate text-encre-2" />
-        ) : (
-          <span className="truncate text-encre-2">
-            {occupantsDuBien(noms, resume.locations, resume.aVenir)}
-          </span>
-        )}
+        <Occupants resume={resume} />
         {resume.locations > 0 && (
           <span className="font-semibold tabular-nums">{loyerParMois(resume.loyerMensuel)}</span>
         )}
@@ -87,6 +108,7 @@ function ListeDesBiens({ donnees }: { readonly donnees: EtatGestion }): JSX.Elem
           {bienSupprime(supprime)}
         </p>
       )}
+      <LocationCreee />
       <Carte>
         <ul aria-label={T.titre} className="m-0 flex list-none flex-col p-0">
           {resumes.map((resume) => (

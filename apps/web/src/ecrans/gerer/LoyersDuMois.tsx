@@ -5,6 +5,7 @@ import { Link } from 'react-router';
 import { Page, TitrePage } from '@/composants/mise-en-page';
 import { Carte, TitreCarte } from '@/composants/ui';
 import { dateEnLettres, moisEnLettres, montant } from '@/gestion/format';
+import { CHEMIN_GERER, lienNouveauLocataire } from '@/gestion/parcours';
 import {
   avecMajuscule,
   entreesAVenir,
@@ -14,6 +15,7 @@ import {
 import { TEXTES_LOYERS } from '@/textes/gerer-loyers';
 
 import { ListeDeLoyers } from './LigneDeLoyer';
+import { LocationCreee } from './LocationCreee';
 import { RetoursLoyer } from './RetoursLoyer';
 import { useActionsLoyer } from './useActionsLoyer';
 
@@ -72,6 +74,7 @@ export function LoyersDuMois({ donnees }: { donnees: EtatGestion }): JSX.Element
         </div>
       )}
 
+      <LocationCreee />
       <RetoursLoyer actions={actions} bailleur={donnees.bailleur} />
 
       {resume.lignes.length > 0 && (
@@ -93,13 +96,15 @@ export function LoyersDuMois({ donnees }: { donnees: EtatGestion }): JSX.Element
       )}
       {aVenir.length > 0 && <p className="m-0 text-sm text-encre-3">{entreesAVenir(aVenir)}</p>}
       {vacants.length > 0 && (
-        // Chaque bien vacant ouvre sa fiche, où l'on ajoute son locataire.
+        // Chaque bien vacant ouvre « Nouveau locataire » avec ce bien, puis revient ici.
         <p className="m-0 text-sm text-encre-3">
           {T.sansLocataire}{' '}
           {vacants.map((bien, i) => (
             <Fragment key={bien.id}>
               {i > 0 && ', '}
-              <Link to={`/gerer/biens/${bien.id}?louer=1`}>{bien.nom}</Link>
+              <Link to={lienNouveauLocataire({ bienId: bien.id, retour: CHEMIN_GERER })}>
+                {bien.nom}
+              </Link>
             </Fragment>
           ))}
         </p>

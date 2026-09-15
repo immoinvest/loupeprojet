@@ -14,6 +14,7 @@ import { EcranAttente } from './EcranAttente';
 import { FilAriane } from './FilAriane';
 import { FriseMois } from './fiche/FriseMois';
 import { CarteOccupation } from './locataire/CarteOccupation';
+import { LocationCreee } from './LocationCreee';
 import { ModifierLocataire } from './ModifierLocataire';
 import { RetoursLoyer } from './RetoursLoyer';
 import { useActionsLoyer } from './useActionsLoyer';
@@ -67,6 +68,8 @@ function Fiche({
           )}
         </div>
       </div>
+
+      <LocationCreee />
 
       {modifier && (
         <ModifierLocataire

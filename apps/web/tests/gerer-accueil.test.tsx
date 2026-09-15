@@ -204,7 +204,7 @@ describe('Gérer : les loyers du mois', () => {
     expect(screen.getByText(/^Sans locataire/)).toHaveTextContent('Sans locataire : Parking Prado');
     expect(screen.getByRole('link', { name: 'Parking Prado' })).toHaveAttribute(
       'href',
-      '/gerer/biens/parking?louer=1',
+      '/gerer/locataires/nouveau?bien=parking&retour=%2Fgerer',
     );
     expect(screen.queryByRole('img', { name: /reçus sur/ })).toBeNull();
   });

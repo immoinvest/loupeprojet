@@ -2,17 +2,21 @@ import type { ChampLouer } from '@/gestion/saisie-louer';
 
 import { ERREURS_SAISIE, TEXTES_AJOUTER } from './gerer-saisie';
 
-/** Textes du formulaire « Louer » de la fiche d'un bien (tutoiement). */
+/** Textes du formulaire « Nouveau locataire » (tutoiement). */
 export const TEXTES_LOUER = {
-  formulaire: 'Louer le bien',
+  formulaire: 'Nouveau locataire',
   locataire: TEXTES_AJOUTER.locataire,
   email: TEXTES_AJOUTER.email,
   ajouterColocataire: '+ Ajouter un colocataire',
   retirer: 'Retirer',
   libelle: 'Chambre',
   aideLibelle: 'Facultatif : pour une location à la chambre, par exemple « Chambre 2 ».',
-  louer: 'Louer',
-  fermer: 'Fermer',
+  /** La liste des biens du formulaire « Nouveau locataire » et ses deux groupes. */
+  bien: 'Bien',
+  groupeVacants: 'Sans locataire',
+  groupeLoues: 'Déjà loués',
+  enregistrer: 'Enregistrer',
+  annuler: 'Annuler',
 } as const;
 
 /** Le bouton qui ouvre le formulaire : le locataire d'un bien vacant, ou une location de plus. */

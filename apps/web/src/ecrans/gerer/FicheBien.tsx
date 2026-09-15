@@ -1,12 +1,17 @@
 import { jourLocal, type BienGere, type EtatGestion } from '@loupe/gestion';
-import { useState, type JSX } from 'react';
-import { Link, useParams, useSearchParams } from 'react-router';
+import type { JSX } from 'react';
+import { Link, Navigate, useParams, useSearchParams } from 'react-router';
 
 import { Chapo, Page, TitrePage } from '@/composants/mise-en-page';
-import { Bouton, Carte, LienBouton, Pastille, TitreCarte } from '@/composants/ui';
-import { derniereLocation, etatDuBien, friseDuBien } from '@/gestion/fiche';
+import { Carte, LienBouton, Pastille } from '@/composants/ui';
+import { etatDuBien, friseDuBien } from '@/gestion/fiche';
 import { useGestion } from '@/gestion/GestionContext';
-import { CHEMIN_GERER, CHEMIN_MES_BIENS } from '@/gestion/parcours';
+import {
+  CHEMIN_GERER,
+  CHEMIN_MES_BIENS,
+  lienFicheBien,
+  lienNouveauLocataire,
+} from '@/gestion/parcours';
 import { statutDuBien, TEXTES_FICHE as F, TONS_BIEN } from '@/textes/gerer-fiche';
 import { titreLouer } from '@/textes/gerer-louer';
 import { TEXTES_PARCOURS as P } from '@/textes/gerer-parcours';
@@ -15,8 +20,8 @@ import { EcranAttente } from './EcranAttente';
 import { FilAriane } from './FilAriane';
 import { CarteLocation } from './fiche/CarteLocation';
 import { FriseMois } from './fiche/FriseMois';
-import { LouerBien } from './fiche/LouerBien';
 import { SupprimerBien } from './fiche/SupprimerBien';
+import { LocationCreee } from './LocationCreee';
 import { RetoursLoyer } from './RetoursLoyer';
 import { useActionsLoyer } from './useActionsLoyer';
 
@@ -28,12 +33,14 @@ function Fiche({
   readonly bien: BienGere;
 }): JSX.Element {
   const [recherche] = useSearchParams();
-  // `?louer=1` (lien d'un bien vacant sur l'accueil) : le formulaire est déjà ouvert, deux clics en tout.
-  const [louerOuvert, setLouerOuvert] = useState(recherche.get('louer') === '1');
   const aujourdhui = jourLocal(new Date());
   const actions = useActionsLoyer(aujourdhui);
   const etat = etatDuBien(donnees, bien.id, aujourdhui);
   const vacant = etat.statut === 'vacant';
+  // « Nouveau locataire » avec ce bien, puis retour sur cette fiche (ADR-G21).
+  const louer = lienNouveauLocataire({ bienId: bien.id, retour: lienFicheBien(bien.id) });
+  // Ancienne adresse `?louer=1` (liens gardés, application installée) : le formulaire unique.
+  if (recherche.get('louer') === '1') return <Navigate replace to={louer} />;
 
   return (
     <Page espacement="large" className="max-w-[900px]">
@@ -59,6 +66,7 @@ function Fiche({
         </div>
       </div>
 
+      <LocationCreee />
       <RetoursLoyer actions={actions} bailleur={donnees.bailleur} />
 
       {etat.locations.length === 0 ? (
@@ -76,33 +84,11 @@ function Fiche({
         ))
       )}
 
-      {louerOuvert ? (
-        <Carte className="border-accent-bordure">
-          <TitreCarte>{titreLouer(vacant)}</TitreCarte>
-          <LouerBien
-            bienId={bien.id}
-            derniere={derniereLocation(donnees, bien.id)}
-            aujourdhui={aujourdhui}
-            onFermer={() => {
-              setLouerOuvert(false);
-            }}
-            onLoue={() => {
-              setLouerOuvert(false);
-            }}
-          />
-        </Carte>
-      ) : (
-        <div>
-          <Bouton
-            variante={vacant ? 'primaire' : 'secondaire'}
-            onClick={() => {
-              setLouerOuvert(true);
-            }}
-          >
-            {titreLouer(vacant)}
-          </Bouton>
-        </div>
-      )}
+      <div>
+        <LienBouton to={louer} variante={vacant ? 'primaire' : 'secondaire'}>
+          {titreLouer(vacant)}
+        </LienBouton>
+      </div>
 
       <FriseMois frise={friseDuBien(donnees, bien.id, aujourdhui)} actions={actions} />
 
