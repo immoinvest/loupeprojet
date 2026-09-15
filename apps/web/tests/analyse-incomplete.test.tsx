@@ -59,6 +59,18 @@ describe('Rapport sans loyer', () => {
       screen.getByRole('heading', { name: "Qu'est-ce qu'il vous restera ?" }),
     ).toBeInTheDocument();
     expect(screen.queryByText('Levier 1 · Négocier')).not.toBeInTheDocument();
+
+    // Même disposition que le rapport complet : à côté du prix, la carte à compléter et les points
+    // d'offre empilés, la dernière étirée jusqu'au bas du prix.
+    const section = (titre: string): HTMLElement =>
+      screen.getByRole('heading', { level: 2, name: titre }).closest('section')!;
+    const colonne = section('Combien ça rapporte ?').parentElement!;
+    expect([...colonne.children]).toEqual([
+      section('Combien ça rapporte ?'),
+      section('Avant de faire une offre'),
+    ]);
+    expect(section("Est-ce que c'est cher ?").nextElementSibling).toBe(colonne);
+    expect(section('Avant de faire une offre')).toHaveClass('flex-1');
   });
 
   it('le champ du bandeau complète le projet ; le rapport se remplit', async () => {

@@ -1,0 +1,47 @@
+{
+  "feature_slug": "rapport-espaces",
+  "title": "Rapport plus serré : lien de l'annonce à droite du titre, phrase du prix bas retirée, rendements et points d'offre empilés à côté du prix",
+  "started_at": "2026-09-15T10:00:00Z",
+  "current_step": "implement",
+  "scope": "apps/web/src/ecrans/{Rapport.tsx,rapport/{CarteBien,CartePrix,Vigilance}.tsx}, tests/{rapport,carte-bien}.test.tsx, e2e/rapport.spec.ts",
+  "branch": "feat/rapport-espaces",
+  "base": "master (713d27b0, après la PR #95)",
+  "worktree": "C:/Users/errei/Claude/loupeprojet/.claude/worktrees/rapport-espaces",
+  "steps": {
+    "discovery": {
+      "status": "completed",
+      "output": ".product/features/rapport-espaces-discovery.md",
+      "auto_review": "mesures réelles à 1 440, 1 180, 820 et 390 px avant de proposer ; vide du Rendements (181 à 246 px) ≈ hauteur de « Avant de faire une offre » (174 px) → empilement plutôt qu'un contenu ajouté ; vide d'Impôts accepté faute de carte courte à y mettre"
+    },
+    "specs": {
+      "status": "completed",
+      "stories_count": 3,
+      "output": ".product/specs/rapport-espaces-specs.md",
+      "auto_review": "cas sans loyer ajouté (même empilement) ; la question du vendeur qui baisse reste dans la liste de visite"
+    },
+    "architecture": {
+      "status": "completed",
+      "output": ".product/architecture/rapport-espaces.md",
+      "auto_review": "colonne flex et non row-span (qui étirerait le Rendements) ; responsive.spec compte les .grid du Rapport imprimé [2, 1, 2, 3, 2] : la colonne est un flex, le compte ne change pas"
+    },
+    "implement": {
+      "status": "completed",
+      "stories_completed": 3,
+      "stories_total": 3,
+      "commits": ["081859d6 US-1", "273af63c US-2", "c59f4a27 US-3"]
+    },
+    "qa_tests": {
+      "status": "completed",
+      "note": "unitaires : lien dans la rangée du titre (target, rel), phrase absente, colonne empilée (même parent, voisine du prix, flex-1, lien mt-auto, ordre des titres), même empilement sans loyer ; 25 tests verts sur rapport, carte-bien, analyse-incomplete ; e2e rapport.spec : géométrie réelle (≥ 768 px bas alignés à 2 px, téléphone une colonne) sur ordinateur, téléphone, tablette ; responsive.spec (impression A4, grilles [2, 1, 2, 3, 2] inchangées)"
+    },
+    "security": {
+      "status": "completed",
+      "note": "aucun appel réseau, aucune donnée, aucun HTML injecté ; le lien de l'annonce garde le contrôle surUnPortail + resoudreAnnonce, target _blank avec rel noopener noreferrer"
+    },
+    "push": {
+      "status": "in_progress",
+      "pr": "https://github.com/immoinvest/loupeprojet/pull/98",
+      "note": "fusion automatique armée (protection de master vérifiée : verify requis, branche à jour, administrateurs) ; master (#96 compte-appareils) fusionnée dans la branche, conflits de CLAUDE.md et du registre résolus en gardant les deux côtés ; lint complet vert, typecheck vert ; e2e lancés avec un serveur démarré à l'avance (le webServer de 60 s échouait sous charge)"
+    }
+  }
+}

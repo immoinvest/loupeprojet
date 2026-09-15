@@ -66,6 +66,37 @@ test('le rapport affiche le verdict, les cinq feux et les chiffres clés', async
   await expect(revente).toContainText(/×\s0,7/);
 });
 
+test('à côté du prix, les rendements et « Avant de faire une offre » empilés, sans vide', async ({
+  page,
+}) => {
+  await ouvrirExemple(page);
+  await expect(page.getByText(/Un prix aussi bas/)).toHaveCount(0);
+
+  const prix = await carte(page, "Est-ce que c'est cher ?").boundingBox();
+  const rendements = await carte(page, 'Combien ça rapporte ?').boundingBox();
+  const vigilance = await carte(page, 'Avant de faire une offre').boundingBox();
+  expect(prix).not.toBeNull();
+  expect(rendements).not.toBeNull();
+  expect(vigilance).not.toBeNull();
+  if (prix === null || rendements === null || vigilance === null) return;
+
+  // Toujours : « Avant de faire une offre » juste sous les rendements, dans la même colonne.
+  expect(Math.abs(vigilance.x - rendements.x)).toBeLessThan(1);
+  expect(vigilance.y).toBeGreaterThan(rendements.y + rendements.height);
+  expect(vigilance.y - (rendements.y + rendements.height)).toBeLessThan(24);
+
+  if ((page.viewportSize()?.width ?? 0) >= 768) {
+    // Tablette et ordinateur : la colonne est à droite du prix et finit à la même hauteur.
+    expect(rendements.x).toBeGreaterThan(prix.x + prix.width);
+    expect(Math.abs(rendements.y - prix.y)).toBeLessThan(1);
+    expect(Math.abs(vigilance.y + vigilance.height - (prix.y + prix.height))).toBeLessThan(2);
+  } else {
+    // Téléphone : une seule colonne, le prix d'abord.
+    expect(Math.abs(rendements.x - prix.x)).toBeLessThan(1);
+    expect(rendements.y).toBeGreaterThan(prix.y + prix.height);
+  }
+});
+
 test('les icônes ouvrent une bulle qui tient dans l’écran, les liens mènent aux onglets', async ({
   page,
 }) => {
