@@ -519,7 +519,11 @@ describe('migration 0003 : paiements partiels, bailleur, documents', () => {
 
   it('migration 0011 : additive, les tables existantes restent identiques ; la fin du bail part avec le bien', () => {
     const base = baseDeG1a();
-    appliquerMigrations(base, 8);
+    // Toutes les migrations sauf la nôtre : d'autres peuvent s'intercaler avant 0011.
+    appliquerMigrations(
+      base,
+      MIGRATIONS.findIndex((m) => m.fichier.startsWith('0011')),
+    );
     const sansFinBail = `select name, sql from sqlite_master where ${TABLES_0011.map(
       (table) => `name not like '%${table}%'`,
     ).join(' and ')} order by name`;
