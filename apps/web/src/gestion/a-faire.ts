@@ -19,6 +19,8 @@ export type ActionAFaire =
   /** La dernière quittance envoyée par e-mail a échoué (quittances-auto). */
   | { readonly type: 'email_a_verifier'; readonly locataire: Locataire }
   | { readonly type: 'vacant'; readonly bien: BienGere }
+  /** Un bien acheté depuis une analyse avec emprunt, dont le prêt n'est pas encore enregistré. */
+  | { readonly type: 'pret'; readonly bien: BienGere }
   | { readonly type: 'email'; readonly locataire: Locataire }
   /** Invité à recevoir ses quittances par e-mail, sans réponse ; montré tant que sa fiche n'est pas ouverte. */
   | { readonly type: 'accord'; readonly locataire: Locataire };
@@ -28,12 +30,14 @@ export const A_FAIRE_VISIBLES = 3;
 
 /**
  * Dans l'ordre d'urgence : les loyers en retard du mois en cours (les plus anciennes échéances
- * d'abord), les biens sans location en cours ni à venir (par nom), puis les locataires en place
- * ou qui arrivent sans e-mail (par nom). Un ancien locataire sans e-mail n'en crée pas.
+ * d'abord), les biens sans location en cours ni à venir (par nom), les prêts à enregistrer (biens
+ * déjà triés, calculés par la page Argent), puis les locataires en place ou qui arrivent sans
+ * e-mail (par nom). Un ancien locataire sans e-mail n'en crée pas.
  */
 export function actionsAFaire(
   donnees: Donnees,
   aujourdhui: string,
+  pretsAEnregistrer: readonly BienGere[] = [],
   envois: ActionsEnvois = SANS_ACTIONS_ENVOIS,
 ): readonly ActionAFaire[] {
   const retards = resumeDuMois(donnees, periodeDe(aujourdhui), aujourdhui)
@@ -56,7 +60,8 @@ export function actionsAFaire(
   const emails = groupesDeLocataires(donnees, aujourdhui)
     .enCeMoment.filter((ligne) => ligne.locataire.email === undefined)
     .map((ligne): ActionAFaire => ({ type: 'email', locataire: ligne.locataire }));
-  return [...retards, ...aVerifier, ...vacants, ...emails, ...accords];
+  const prets = pretsAEnregistrer.map((bien): ActionAFaire => ({ type: 'pret', bien }));
+  return [...retards, ...aVerifier, ...vacants, ...prets, ...emails, ...accords];
 }
 
 /** Une clé stable par action (un même locataire peut être en retard et sans e-mail). */
@@ -66,6 +71,8 @@ export function cleAction(action: ActionAFaire): string {
       return `retard-${action.ligne.location.id}`;
     case 'vacant':
       return `vacant-${action.bien.id}`;
+    case 'pret':
+      return `pret-${action.bien.id}`;
     case 'email':
       return `email-${action.locataire.id}`;
     case 'email_a_verifier':

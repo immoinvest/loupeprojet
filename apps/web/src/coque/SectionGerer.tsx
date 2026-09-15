@@ -1,11 +1,12 @@
 import { jourLocal } from '@loupe/gestion';
-import { Building2, CalendarCheck, Receipt, Users } from 'lucide-react';
+import { Building2, CalendarCheck, Receipt, Users, Wallet } from 'lucide-react';
 import type { JSX } from 'react';
 import { NavLink } from 'react-router';
 
 import { useCompte } from '@/compte/CompteContext';
 import { useGestion } from '@/gestion/GestionContext';
 import { retardsDuMois } from '@/gestion/menu';
+import { CHEMIN_ARGENT } from '@/gestion/parcours';
 import { loyersEnRetard, TEXTES_MENU } from '@/textes/gerer';
 
 import { LigneAvecAjout } from './LigneAvecAjout';
@@ -14,7 +15,7 @@ import { CLASSE_ETIQUETTE, CLASSE_SECTION, classeLien } from './liens';
 /**
  * Section « Gérer » : « Mes biens · N » et son « + » (ajouter un bien) sur une ligne, les loyers du
  * mois (avec les loyers en retard), tous les loyers mois par mois et tous les locataires. Sans compte, une seule ligne vers la
- * page qui explique pourquoi il en faut un. La page Argent y entrera avec sa feature.
+ * page qui explique pourquoi il en faut un. Puis l'argent des biens (G5-1).
  */
 export function SectionGerer(): JSX.Element {
   const { etat } = useCompte();
@@ -55,6 +56,10 @@ export function SectionGerer(): JSX.Element {
           <NavLink to="/gerer/locataires" className={classeLien}>
             <Users size={18} aria-hidden="true" />
             {TEXTES_MENU.mesLocataires}
+          </NavLink>
+          <NavLink to={CHEMIN_ARGENT} className={classeLien}>
+            <Wallet size={18} aria-hidden="true" />
+            {TEXTES_MENU.argent}
           </NavLink>
         </>
       ) : (

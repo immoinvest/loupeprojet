@@ -49,7 +49,7 @@ describe('compléments des envois', () => {
   });
 
   it('« À faire » : l’adresse à vérifier après les retards, l’accord en attente en dernier', () => {
-    const actions = actionsAFaire(ETAT_SEPTEMBRE, '2026-09-14', {
+    const actions = actionsAFaire(ETAT_SEPTEMBRE, '2026-09-14', [], {
       enAttente: ['locataire-julie', 'inconnu'],
       aVerifier: ['locataire-antoine'],
     });

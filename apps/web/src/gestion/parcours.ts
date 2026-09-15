@@ -61,6 +61,36 @@ export function lienLoyers(
   return avecRecherche(CHEMIN_LOYERS, { mois: options.periode, bien: options.bienId });
 }
 
+export const CHEMIN_ARGENT = '/gerer/argent';
+export const CHEMIN_NOUVELLE_DEPENSE = '/gerer/depenses/nouvelle';
+
+/** La page Argent : un mois (`periode`) ou une année, et un bien filtré. */
+export function lienArgent(
+  options: {
+    readonly periode?: string | undefined;
+    readonly annee?: number | undefined;
+    readonly bienId?: string | undefined;
+  } = {},
+): string {
+  return avecRecherche(CHEMIN_ARGENT, {
+    mois: options.periode,
+    annee: options.annee === undefined ? undefined : String(options.annee),
+    bien: options.bienId,
+  });
+}
+
+/** « Ajouter une dépense », le bien déjà choisi, et la page où revenir après. */
+export function lienNouvelleDepense(
+  options: { readonly bienId?: string | undefined; readonly retour?: string | undefined } = {},
+): string {
+  return avecRecherche(CHEMIN_NOUVELLE_DEPENSE, { bien: options.bienId, retour: options.retour });
+}
+
+/** Modifier ou supprimer une dépense, avec la page où revenir. */
+export function lienDepense(id: string, retour?: string): string {
+  return avecRecherche(`/gerer/depenses/${encodeURIComponent(id)}`, { retour });
+}
+
 /** Une quittance ou un reçu, avec la page où revenir. */
 export function lienDocument(id: string, retour: string): string {
   return avecRecherche(`/gerer/documents/${encodeURIComponent(id)}`, { retour });

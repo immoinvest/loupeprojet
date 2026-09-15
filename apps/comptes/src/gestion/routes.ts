@@ -17,6 +17,7 @@ import type { Auth } from '../auth';
 import type { Dependances } from '../dependances';
 import { messageDe, reponseErreur } from '../erreurs';
 import { acces, type EnvGestion } from './acces';
+import { routeurArgent } from './argent/routes';
 import { ErreurGestion, estTableAbsente } from './depot';
 import { declencheursEnvois } from './envois/declencheurs';
 import { routeurEnvois } from './envois/routes';
@@ -143,12 +144,19 @@ export function routeurGestion(
   });
 
   // Une lecture : un simple lien de téléchargement suffit (session exigée, pas d'en-tête Origin).
+  // Dépenses et prêts s'y ajoutent seulement quand la migration 0007 est passée (ADR-G25).
   app.get('/export', async (c) => {
-    const exporte = await deps.gestion.exporter(c.get('userId'));
+    const [exporte, argent] = await Promise.all([
+      deps.gestion.exporter(c.get('userId')),
+      deps.argent.exporter(c.get('userId')),
+    ]);
     const jour = exporte.exporteLe.slice(0, 10);
     c.header('Content-Disposition', `attachment; filename="deklic-gestion-${jour}.json"`);
-    return c.json(exporte);
+    return c.json({ ...exporte, ...argent });
   });
+
+  // Dépenses et prêt d'un bien : leurs propres routes et leur propre 503 (G5-4, G5-1).
+  app.route('/', routeurArgent(deps));
 
   app.onError((erreur, c) => {
     if (erreur instanceof ErreurGestion) {
