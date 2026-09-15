@@ -90,8 +90,10 @@ describe('porte ouverte par le statut « Acheté »', () => {
       { timeout: 5_000 },
     );
     await act(() => new Promise((fin) => setTimeout(fin, 0)));
+    // Choisir un statut reste un geste (ouvrir la liste puis choisir, comme une liste native).
     clics += 1;
-    await utilisateur.selectOptions(await screen.findByLabelText('Statut du projet'), 'achete');
+    await utilisateur.click(await screen.findByLabelText('Statut du projet'));
+    await utilisateur.click(screen.getByRole('option', { name: 'Acheté' }));
     expect(
       await screen.findByRole('heading', { level: 1, name: TEXTES_PRET.titre }),
     ).toBeInTheDocument();
@@ -258,7 +260,8 @@ describe('porte ouverte par le statut « Acheté »', () => {
     const utilisateur = userEvent.setup();
     const id = enregistrerProjet();
     monter(`/projets/${id}`, clientGestionMemoire(), clientMemoire());
-    await utilisateur.selectOptions(await screen.findByLabelText('Statut du projet'), 'achete');
+    await utilisateur.click(await screen.findByLabelText('Statut du projet'));
+    await utilisateur.click(screen.getByRole('option', { name: 'Acheté' }));
     expect(lireProjets(window.localStorage)[0]?.statut).toBe('achete');
     expect(screen.getByRole('button', { name: 'PDF' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: TEXTES_PRET.gererCeBien })).toHaveAttribute(
