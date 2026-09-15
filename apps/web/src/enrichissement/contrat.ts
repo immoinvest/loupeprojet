@@ -75,6 +75,19 @@ export const ReponseGeocodageSchema = z.object({
   donnees: z.object({ resultats: z.array(ResultatGeocodageSchema) }),
 });
 
+/** Une commune de l'API Géo : Paris, Lyon et Marseille entières (l'arrondissement suit le code postal). */
+export const CommuneSchema = z.object({
+  nom: z.string(),
+  codeInsee: z.string(),
+  codesPostaux: z.array(z.string()),
+});
+export type Commune = z.infer<typeof CommuneSchema>;
+
+/** GET /proxy/communes : communes d'un code postal, ou dont le nom commence par la recherche. */
+export const ReponseCommunesSchema = z.object({
+  donnees: z.object({ communes: z.array(CommuneSchema) }),
+});
+
 const SourceSchema = z.object({
   nom: z.string(),
   url: z.string(),

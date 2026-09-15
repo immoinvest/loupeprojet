@@ -49,8 +49,9 @@ test('une annonce partagée reste sur l’appareil : la coque en cache la sert, 
   const annonce = 'T3 lumineux, 155 000 €, DPE D';
   await page.goto(`/projets/nouveau?texte=${encodeURIComponent(annonce)}`);
   await expect(page.getByRole('heading', { level: 1, name: /Colle le lien/ })).toBeVisible();
-  // Le texte est lu sur l'appareil : le formulaire s'ouvre avec le prix qu'il donne.
-  await expect(page.getByLabel(/Prix affiché/)).toHaveValue('155000');
+  // Le texte est lu sur l'appareil : le formulaire s'ouvre avec le prix qu'il donne (replié, « lu dans l'annonce »).
+  await page.getByRole('button', { name: /^Lu dans l'annonce/ }).click();
+  await expect(page.getByLabel(/Prix affiché/)).toHaveValue('155 000');
   expect(envoyees.filter((adresse) => adresse.includes('texte='))).toEqual([]);
 });
 

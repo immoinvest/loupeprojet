@@ -37,6 +37,7 @@ export const GROUPE_LOCATION: Groupe = {
       unite: '€/mois',
       aToi: true,
       visibleSi: pour('nu', 'meuble', 'moyenne_duree'),
+      terme: 'loyerHc',
     },
     // L'encadrement des loyers n'est dans aucun référentiel : à saisir, à côté du loyer visé (jamais en courte durée).
     {
@@ -45,6 +46,7 @@ export const GROUPE_LOCATION: Groupe = {
       type: 'euros',
       unite: '€/mois',
       visibleSi: pour('nu', 'meuble', 'colocation', 'moyenne_duree'),
+      terme: 'plafondEncadrement',
     },
     {
       chemin: 'hypotheses.location.loyerHcNu',
@@ -68,6 +70,7 @@ export const GROUPE_LOCATION: Groupe = {
       unite: '€/mois',
       aToi: true,
       visibleSi: pour('colocation'),
+      terme: 'loyerHc',
     },
     {
       chemin: 'hypotheses.location.forfaitChargesChambre',
@@ -75,6 +78,7 @@ export const GROUPE_LOCATION: Groupe = {
       type: 'euros',
       unite: '€/mois',
       visibleSi: pour('colocation'),
+      terme: 'forfaitCharges',
     },
     {
       chemin: 'hypotheses.location.forfaitCharges',
@@ -82,6 +86,7 @@ export const GROUPE_LOCATION: Groupe = {
       type: 'euros',
       unite: '€/mois',
       visibleSi: pour('moyenne_duree'),
+      terme: 'forfaitCharges',
     },
     {
       chemin: 'hypotheses.location.nuitee',
@@ -134,6 +139,7 @@ export const GROUPE_LOCATION: Groupe = {
       type: 'euros',
       unite: '€/mois',
       visibleSi: pour('nu', 'meuble'),
+      terme: 'chargesRefacturees',
     },
     {
       chemin: 'hypotheses.location.vacanceSemaines',
@@ -141,6 +147,7 @@ export const GROUPE_LOCATION: Groupe = {
       type: 'nombre',
       unite: 'semaines / an',
       visibleSi: pour('nu', 'meuble', 'colocation', 'moyenne_duree'),
+      terme: 'vacance',
     },
     {
       chemin: 'hypotheses.location.gestionTaux',
@@ -148,6 +155,7 @@ export const GROUPE_LOCATION: Groupe = {
       type: 'pourcent',
       unite: '% des loyers',
       visibleSi: pour('nu', 'meuble', 'colocation', 'moyenne_duree'),
+      terme: 'gestionDeleguee',
     },
     {
       chemin: 'hypotheses.location.conciergerieTaux',
@@ -155,6 +163,7 @@ export const GROUPE_LOCATION: Groupe = {
       type: 'pourcent',
       unite: '% des recettes',
       visibleSi: pour('courte_duree'),
+      terme: 'conciergerie',
     },
     {
       chemin: 'hypotheses.location.plateformeTaux',
@@ -162,12 +171,14 @@ export const GROUPE_LOCATION: Groupe = {
       type: 'pourcent',
       unite: '% des recettes',
       visibleSi: pour('courte_duree', 'moyenne_duree'),
+      terme: 'plateforme',
     },
     {
       chemin: 'hypotheses.location.tourismeClasse',
       libelle: 'Meublé de tourisme classé',
       type: 'bool',
       visibleSi: pour('courte_duree'),
+      terme: 'meubleTourismeClasse',
     },
   ],
 };

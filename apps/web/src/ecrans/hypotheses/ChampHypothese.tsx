@@ -1,7 +1,10 @@
-import type { JSX } from 'react';
+import { useId, type JSX } from 'react';
 
+import { useModeDocument } from '@/composants/document';
+import { Info } from '@/composants/info';
 import { Pastille, type TonPastille } from '@/composants/ui';
 import type { Descripteur } from '@/hypotheses';
+import { texteDuTerme } from '@/textes/glossaire';
 
 export interface BadgeProvenance {
   readonly ton: TonPastille;
@@ -43,12 +46,20 @@ export function ChampHypothese({
   /** Phrase d'aide sous le champ ; par défaut, celle du descripteur. */
   aide?: string | undefined;
 }): JSX.Element {
+  const id = useId();
+  const document = useModeDocument();
   const bordure = erreur === undefined ? 'border-bordure' : 'border-probleme';
   const aToi = badge?.libelle === 'à toi';
   return (
-    <label className={`flex flex-col gap-1 rounded-encart p-2 ${aToi ? 'bg-accent-fond' : ''}`}>
+    <div className={`flex flex-col gap-1 rounded-encart p-2 ${aToi ? 'bg-accent-fond' : ''}`}>
       <span className="flex items-center justify-between gap-2 text-xs text-encre-3">
-        {d.libelle}
+        {/* L'icône ⓘ reste hors du libellé : la toucher n'active pas la saisie. */}
+        <span className="inline-flex items-center gap-1">
+          <label htmlFor={id}>{d.libelle}</label>
+          {d.terme !== undefined && !document && (
+            <Info sujet={d.libelle} texte={texteDuTerme(d.terme)} />
+          )}
+        </span>
         {badge !== null && (
           <Pastille ton={badge.ton} compacte>
             {badge.libelle}
@@ -58,6 +69,7 @@ export function ChampHypothese({
       {d.options === undefined ? (
         <span className="flex items-center gap-2">
           <input
+            id={id}
             name={d.chemin}
             value={texte}
             inputMode={d.type === 'texte' ? 'text' : 'decimal'}
@@ -72,6 +84,7 @@ export function ChampHypothese({
         </span>
       ) : (
         <select
+          id={id}
           name={d.chemin}
           value={texte}
           onChange={(e) => {
@@ -89,6 +102,6 @@ export function ChampHypothese({
       )}
       {aide !== undefined && <span className="text-xs text-encre-3">{aide}</span>}
       {erreur !== undefined && <span className="text-xs text-probleme">{erreur}</span>}
-    </label>
+    </div>
   );
 }
