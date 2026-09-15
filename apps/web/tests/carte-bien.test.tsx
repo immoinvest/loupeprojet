@@ -48,10 +48,13 @@ describe('CarteBien', () => {
     expect(images[0]).toHaveAttribute('alt', "Photo 1 sur 3 de l'annonce");
     expect(screen.getByText('Chauffage collectif · gaz')).toBeInTheDocument();
     expect(screen.getByText('Cave')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: "Voir l'annonce sur pap.fr" })).toHaveAttribute(
-      'href',
-      URL_PAP,
-    );
+    const lien = screen.getByRole('link', { name: "Voir l'annonce sur pap.fr" });
+    expect(lien).toHaveAttribute('href', URL_PAP);
+    expect(lien).toHaveAttribute('target', '_blank');
+    expect(lien).toHaveAttribute('rel', 'noopener noreferrer');
+    // Sur la ligne du titre, à droite, et non sur une ligne à lui sous les pastilles.
+    expect(lien.parentElement).toContainElement(screen.getByRole('heading', { name: 'Le bien' }));
+    expect(lien.closest('section')?.lastElementChild).not.toBe(lien);
   });
 
   it('une image qui ne se charge plus disparaît ; une image d’un autre site n’est jamais affichée', () => {
