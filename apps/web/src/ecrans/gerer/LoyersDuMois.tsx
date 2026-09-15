@@ -8,6 +8,8 @@ import { dateEnLettres, moisEnLettres, montant } from '@/gestion/format';
 import { actionsAFaire } from '@/gestion/a-faire';
 import { useArgent } from '@/gestion/argent/ArgentContext';
 import { pretsAEnregistrer } from '@/gestion/argent/page';
+import { useBail } from '@/gestion/bail/BailContext';
+import { actionsBail } from '@/gestion/bail/vue';
 import { useEnvois } from '@/gestion/envois/EnvoisContext';
 import { actionsEnvois, lireAccordsVus, stockageLocal } from '@/gestion/envois/logique';
 import {
@@ -31,14 +33,16 @@ export function LoyersDuMois({ donnees }: { donnees: EtatGestion }): JSX.Element
   const periode = periodeDe(aujourdhui);
   const resume = resumeDuMois(donnees, periode, aujourdhui);
   // Retards, envois à vérifier, biens vacants, prêts à enregistrer, e-mails manquants, accords en
-  // attente : déduits des données, jamais stockés (ADR-G22).
+  // attente, puis la vie du bail : déduits des données, jamais stockés (ADR-G22).
   const argent = useArgent().donnees;
   const prets = argent === null ? [] : pretsAEnregistrer(donnees.biens, argent);
+  const bail = useBail();
   const { donnees: envois } = useEnvois();
   const aFaire = actionsAFaire(
     donnees,
     aujourdhui,
     prets.map((p) => p.bien),
+    bail.donnees === null ? [] : actionsBail(donnees, bail.donnees, aujourdhui),
     actionsEnvois(envois, lireAccordsVus(stockageLocal())),
   );
   const enCours = donnees.locations.filter((l) => l.fin === undefined || l.fin >= aujourdhui);

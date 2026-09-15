@@ -18,6 +18,7 @@ import type { Dependances } from '../dependances';
 import { messageDe, reponseErreur } from '../erreurs';
 import { acces, type EnvGestion } from './acces';
 import { routeurArgent } from './argent/routes';
+import { routeurBail } from './bail/routes';
 import { ErreurGestion, estTableAbsente } from './depot';
 import { declencheursEnvois } from './envois/declencheurs';
 import { routeurEnvois } from './envois/routes';
@@ -157,6 +158,8 @@ export function routeurGestion(
 
   // Dépenses et prêt d'un bien : leurs propres routes et leur propre 503 (G5-4, G5-1).
   app.route('/', routeurArgent(deps));
+  // Vie du bail (B1) : DPE, révision, lettres, dans leurs propres tables (migration 0008).
+  app.route('/bail', routeurBail(deps));
 
   app.onError((erreur, c) => {
     if (erreur instanceof ErreurGestion) {

@@ -13,6 +13,10 @@ import { ArgentProvider } from './gestion/argent/ArgentContext';
 import { clientArgentMemoire } from './gestion/argent/memoire';
 import { clientArgentReseau } from './gestion/argent/reseau';
 import type { ClientArgent } from './gestion/argent/types';
+import { BailProvider } from './gestion/bail/BailContext';
+import { clientBailIndisponible } from './gestion/bail/memoire';
+import { clientBailReseau } from './gestion/bail/reseau';
+import type { ClientBail } from './gestion/bail/types';
 import { GestionProvider } from './gestion/GestionContext';
 import { EnvoisProvider } from './gestion/envois/EnvoisContext';
 import { clientAccordMemoire, clientEnvoisMemoire } from './gestion/envois/memoire';
@@ -36,6 +40,7 @@ import { Fiscalite } from './ecrans/Fiscalite';
 import { AjouterMain } from './ecrans/gerer/AjouterMain';
 import { Argent } from './ecrans/gerer/argent/Argent';
 import { ModifierDepense, NouvelleDepense } from './ecrans/gerer/argent/PagesDepense';
+import { ImprimerLettre } from './ecrans/gerer/bail/ImprimerLettre';
 import { FicheBien } from './ecrans/gerer/FicheBien';
 import { FicheLocataire } from './ecrans/gerer/FicheLocataire';
 import { Gerer } from './ecrans/gerer/Gerer';
@@ -77,6 +82,7 @@ export const routes: RouteObject[] = [
   { path: 'projets/:id/imprimer', element: <Imprimer /> },
   { path: 'gerer/documents/:id', element: <ImprimerDocument /> },
   { path: 'accord', element: <Accord /> },
+  { path: 'gerer/lettres/:id', element: <ImprimerLettre /> },
   { path: 'simulateur-pret/imprimer', element: <SimulateurImprimer /> },
   {
     element: <AppLayout />,
@@ -146,6 +152,8 @@ const CLIENT_GESTION = clientGestionReseau();
 
 /** Dépenses et prêts des biens gérés : les routes Argent de la même API (ADR-G25). */
 const CLIENT_ARGENT = clientArgentReseau();
+/** La vie du bail (DPE, révision, lettres) : l'API /api/gestion/bail du même worker, même origine. */
+const CLIENT_BAIL = clientBailReseau();
 
 /** La synchronisation des projets avec le compte : l'API /api/projets du même worker, même origine. */
 const CLIENT_PROJETS = clientProjetsReseau();
@@ -171,11 +179,13 @@ export function App(): JSX.Element {
               <GestionProvider client={CLIENT_GESTION}>
                 <ArgentProvider client={CLIENT_ARGENT}>
                   <EnvoisProvider client={CLIENT_ENVOIS} accord={CLIENT_ACCORD}>
-                    <InstallationProvider suivi={SUIVI_INSTALLATION}>
-                      <BrowserRouter>
-                        <Racine />
-                      </BrowserRouter>
-                    </InstallationProvider>
+                    <BailProvider client={CLIENT_BAIL}>
+                      <InstallationProvider suivi={SUIVI_INSTALLATION}>
+                        <BrowserRouter>
+                          <Racine />
+                        </BrowserRouter>
+                      </InstallationProvider>
+                    </BailProvider>
                   </EnvoisProvider>
                 </ArgentProvider>
               </GestionProvider>
@@ -198,6 +208,8 @@ export function AppEnMemoire({
   compte,
   gestion,
   argent,
+  // Comme en production sans la migration 0008 : les écrans existants de Gérer restent inchangés.
+  bail = clientBailIndisponible,
   projets,
   partage,
   envois,
@@ -210,6 +222,7 @@ export function AppEnMemoire({
   compte?: ClientCompte;
   gestion?: ClientGestion;
   argent?: ClientArgent;
+  bail?: ClientBail;
   projets?: ClientProjets;
   partage?: ClientPartage;
   envois?: ClientEnvois;
@@ -232,11 +245,13 @@ export function AppEnMemoire({
               <GestionProvider client={clientGestion} stockage={stockage}>
                 <ArgentProvider client={clientArgent}>
                   <EnvoisProvider client={clientEnvois} accord={clientAccord}>
-                    <InstallationProvider suivi={installation}>
-                      <MemoryRouter initialEntries={[chemin]}>
-                        <Racine />
-                      </MemoryRouter>
-                    </InstallationProvider>
+                    <BailProvider client={bail}>
+                      <InstallationProvider suivi={installation}>
+                        <MemoryRouter initialEntries={[chemin]}>
+                          <Racine />
+                        </MemoryRouter>
+                      </InstallationProvider>
+                    </BailProvider>
                   </EnvoisProvider>
                 </ArgentProvider>
               </GestionProvider>

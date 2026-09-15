@@ -8,6 +8,7 @@ import { creerApp } from '../src/app';
 import type { Envoyeur, Message } from '../src/courriel';
 import type { Dependances } from '../src/dependances';
 import { depotArgentD1, type OptionsDepotArgent } from '../src/gestion/argent/depot-d1';
+import { depotBailD1 } from '../src/gestion/bail/depot-d1';
 import { depotD1, type OptionsDepot } from '../src/gestion/depot-d1';
 import { depotEnvoisD1 } from '../src/gestion/envois/depot-d1';
 import { signatureJetons } from '../src/gestion/envois/jetons';
@@ -119,6 +120,7 @@ export function banc(surcharges: Partial<Dependances> = {}, origine = ORIGINE): 
     // Sans tables : une route de gestion rendrait 503 ; les tests de gestion utilisent bancD1.
     gestion: depotD1(d1SurSqlite(new DatabaseSync(':memory:')).base),
     argent: depotArgentD1(d1SurSqlite(new DatabaseSync(':memory:')).base),
+    bail: depotBailD1(d1SurSqlite(new DatabaseSync(':memory:')).base),
     projets: depotProjetsD1(d1SurSqlite(new DatabaseSync(':memory:')).base),
     partages: depotPartagesD1(d1SurSqlite(new DatabaseSync(':memory:')).base, 'sel-de-test'),
     envois: depotEnvoisD1(d1SurSqlite(new DatabaseSync(':memory:')).base),
@@ -204,6 +206,7 @@ export function bancD1(options: OptionsBancD1 = {}): BancD1 {
       base: d1.base,
       gestion: depotD1(d1.base, options.optionsDepot),
       argent: depotArgentD1(d1.base, options.optionsArgent),
+      bail: depotBailD1(d1.base, options.optionsDepot),
       projets: depotProjetsD1(d1.base, options.optionsProjets),
       partages: depotPartagesD1(d1.base, 'sel-de-test', options.optionsPartages),
       envois: depotEnvoisD1(d1.base),

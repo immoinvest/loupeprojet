@@ -1,0 +1,56 @@
+{
+  "feature_slug": "gerer-bail-revision",
+  "title": "Gérer, vie du bail (B1) : caractéristiques légales du bien, alertes de conformité (G4-5), révision annuelle du loyer (G4-1)",
+  "started_at": "2026-09-15T22:30:00Z",
+  "current_step": "qa_tests",
+  "scope": "packages/gestion, apps/comptes (migration 0008, sous-routeur /api/gestion/bail), apps/web (gestion/bail, ecrans/gerer/bail, À faire, fiche du bien, lettre imprimable)",
+  "branch": "feat/gerer-bail-revision",
+  "worktree": "C:\\Users\\errei\\Claude\\loupeprojet\\.claude\\worktrees\\hungry-murdock-2b84cb",
+  "base": "master (12642727)",
+  "prerequis": "aucun (fiche B1)",
+  "decisions_pierre": "15/09/2026 22 h : migrations fusionnées sans application (règle « migration sans risque »), auto-validation, aucune question ; migration réservée 0008",
+  "baseline": { "status": "completed", "source": "npm run typecheck vert sur 12642727" },
+  "steps": {
+    "discovery": {
+      "status": "completed",
+      "output": ".product/architecture/gerer-bail-revision.md § 1"
+    },
+    "specs": {
+      "status": "completed",
+      "output": ".product/architecture/gerer-bail-revision.md § 4",
+      "stories_count": 5
+    },
+    "architecture": {
+      "status": "completed",
+      "output": ".product/architecture/gerer-bail-revision.md"
+    },
+    "implement": {
+      "status": "completed",
+      "stories_completed": 5,
+      "stories_total": 5,
+      "commits": [
+        "7a48ff75 US-1 calcul pur (IRL sourcé, révision, gel F et G, alertes DPE, lettre)",
+        "e5fa2805 US-2 migration 0008, /api/gestion/bail, lot D1 conditionné",
+        "US-3 à US-5 web : client, contexte, cartes Conformité et Révision, À faire, lettre, e2e"
+      ],
+      "ecarts": [
+        "zone tendue en saisie seule (ADR-G32) : liste des communes non vérifiable cette nuit",
+        "AppEnMemoire utilise par défaut un client du bail « indisponible » : les tests existants de Gérer restent inchangés, comme la production avant la migration",
+        "la carte Révision n'apparaît que si la vie du bail est chargée ; sans migration, seule la carte Conformité dit « Bientôt disponible »",
+        "export JSON des nouvelles données non ajouté (l'export lit l'état existant ; A2 s'occupe de l'export)"
+      ],
+      "notes": "sources vérifiées le 15/09/2026 : INSEE Informations rapides n° 167 et tableau de l'ANIL (IRL), Légifrance art. 17-1, art. 6 (recherche), ministère de la Transition écologique (validité du DPE, calendrier) ; projet de loi « relance logement » signalé à suivre"
+    },
+    "qa_tests": {
+      "status": "completed",
+      "verification": "15/09/2026 : lint, format, typecheck, 338 fichiers et 2 834 tests avec couverture (racine), build ; master (#103) fusionnée ensuite"
+    },
+    "security": { "status": "completed", "score": "97/100" },
+    "push": { "status": "pending" }
+  },
+  "auto_revue": {
+    "discovery": "trois objectifs de la fiche couverts ; zone tendue en saisie seule (source non vérifiable cette nuit), sans effet sur B1",
+    "specs": "cinq stories Must, cas pièges testables (gel, indice attendu, demande tardive, mois payé, double clic), deux clics comptés",
+    "architecture": "ADR-G29 à G33 (G24 à G28 pris par A1) ; tables latérales et sous-routeur ; lot D1 conditionné ; une seule année d'IRL comparée (renonciation art. 17-1 I, à relire par Pierre)"
+  }
+}
