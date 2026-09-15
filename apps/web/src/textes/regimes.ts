@@ -81,6 +81,11 @@ export function avertissementRepriseDeficit(annee: number): string {
   return `Revendre avant la fin de l'année ${String(annee + 3)} fait reprendre le déficit foncier imputé sur votre revenu l'année ${String(annee)} : l'économie d'impôt affichée serait en partie perdue.`;
 }
 
+/** Un abattement sans décimale quand il tombe juste (30 %), au centième sinon (8,25 %) : jamais arrondi. */
+function abattement(taux: number): string {
+  return pourcentage(taux, Number.isInteger(Math.round(taux * 10_000) / 100) ? 0 : 2);
+}
+
 /** Les lignes du tableau « La revente selon le régime ». */
 export const LIGNES_REVENTE: readonly {
   readonly titre: string;
@@ -99,11 +104,11 @@ export const LIGNES_REVENTE: readonly {
   { titre: 'Plus-value brute', valeur: (r) => euros(r.plusValue.plusValueBrute) },
   {
     titre: 'Abattement impôt sur le revenu',
-    valeur: (r) => pourcentage(r.plusValue.abattements.ir, 0),
+    valeur: (r) => abattement(r.plusValue.abattements.ir),
   },
   {
     titre: 'Abattement prélèvements sociaux',
-    valeur: (r) => pourcentage(r.plusValue.abattements.ps, 0),
+    valeur: (r) => abattement(r.plusValue.abattements.ps),
   },
   { titre: 'Impôt sur le revenu', valeur: (r) => euros(r.plusValue.impotIr) },
   { titre: 'Prélèvements sociaux', valeur: (r) => euros(r.plusValue.impotPs) },

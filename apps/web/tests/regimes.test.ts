@@ -75,6 +75,8 @@ describe('LIGNES_REVENTE', () => {
     const valeurs = Object.fromEntries(LIGNES_REVENTE.map((l) => [l.titre, n(l.valeur(revente))]));
     expect(LIGNES_REVENTE).toHaveLength(11);
     expect(valeurs['Abattement impôt sur le revenu']).toBe('30 %');
+    // 10 ans de détention : 5 × 1,65 % de prélèvements sociaux, jamais arrondi à 8 %.
+    expect(valeurs['Abattement prélèvements sociaux']).toBe('8,25 %');
     expect(valeurs['Impôt à la revente']).toBe(
       n(`${Math.round(revente.plusValue.impotTotal).toLocaleString('fr-FR')} €`),
     );
