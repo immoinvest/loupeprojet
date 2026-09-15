@@ -14,6 +14,7 @@ import { Link, NavLink, Outlet, useLocation, useNavigate, useParams } from 'reac
 
 import { MARGES_LATERALES, Page, TitrePage } from '@/composants/mise-en-page';
 import { Bouton, LienBouton } from '@/composants/ui';
+import { RetourEtEffet } from '@/ecrans/hypotheses/Retour';
 import { useGestion } from '@/gestion/GestionContext';
 import { useProjets } from '@/stockage/ProjetsContext';
 import type { ProjetEnregistre } from '@/stockage/projets';
@@ -190,6 +191,12 @@ function EnTete(): JSX.Element {
   );
 }
 
+/** Le retour vers le volet d'origine d'un lien d'hypothèse, et l'effet de la modification. */
+function RetourDuProjet(): JSX.Element | null {
+  const { resultats } = useProjetCourant();
+  return <RetourEtEffet resultats={resultats} />;
+}
+
 export function ProjetLayout(): JSX.Element {
   const { id } = useParams();
   const { trouver } = useProjets();
@@ -204,6 +211,7 @@ export function ProjetLayout(): JSX.Element {
       {/* Le cadre porte les variables publiées par l'en-tête : décalage et hauteur collée. */}
       <div data-cadre-projet>
         <EnTete />
+        <RetourDuProjet />
         <Outlet />
       </div>
     </FournisseurProjet>

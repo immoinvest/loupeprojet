@@ -1,4 +1,4 @@
-import { useId, type JSX } from 'react';
+import { useId, type JSX, type ReactNode } from 'react';
 
 import { useModeDocument } from '@/composants/document';
 import { Info } from '@/composants/info';
@@ -37,6 +37,7 @@ export function ChampHypothese({
   badge,
   onChange,
   aide = d.aide,
+  utilisePar,
 }: {
   descripteur: Descripteur;
   texte: string;
@@ -45,6 +46,8 @@ export function ChampHypothese({
   onChange: (texte: string) => void;
   /** Phrase d'aide sous le champ ; par défaut, celle du descripteur. */
   aide?: string | undefined;
+  /** Les volets qui reprennent ce chiffre (« Utilisé par »), sous le champ. */
+  utilisePar?: ReactNode;
 }): JSX.Element {
   const id = useId();
   const document = useModeDocument();
@@ -105,6 +108,7 @@ export function ChampHypothese({
       )}
       {aide !== undefined && <span className="text-xs text-encre-3">{aide}</span>}
       {erreur !== undefined && <span className="text-xs text-probleme">{erreur}</span>}
+      {utilisePar}
     </div>
   );
 }
