@@ -23,6 +23,9 @@ function vente(date: string, prixM2: number, type: TypeLogement = 'appartement')
     codeVoie: null,
     voie: null,
     carrez: null,
+    dependances: 0,
+    terrain: null,
+    lots: null,
   };
 }
 

@@ -24,6 +24,9 @@ export function ligneCsvVente(vente: Vente): string {
     texteCsv(vente.codeVoie),
     texteCsv(vente.voie),
     texteOuVide(vente.carrez),
+    String(vente.dependances),
+    texteOuVide(vente.terrain),
+    texteOuVide(vente.lots),
   ].join(',');
 }
 

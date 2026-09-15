@@ -25,10 +25,19 @@ export const VenteSchema = z.object({
   voie: z.string().min(1).nullable(),
   /** Surface Carrez du logement (somme de ses lots) quand l'acte la mentionne. */
   carrez: z.number().positive().nullable(),
+  /** Dépendances vendues avec le logement (cave, parking…) : elles gonflent le prix au m². */
+  dependances: z.number().int().nonnegative(),
+  /** Surface du terrain vendu avec le logement (maisons surtout), en m² ; `null` sans terrain. */
+  terrain: z.number().positive().nullable(),
+  /** Nombre de lots de copropriété de la mutation ; `null` hors copropriété. */
+  lots: z.number().int().positive().nullable(),
 });
 export type Vente = z.infer<typeof VenteSchema>;
 
-/** Colonnes du CSV des ventes ; les colonnes d'adresse ont été ajoutées à la fin (compatibles avec les anciens lecteurs). */
+/**
+ * Colonnes du CSV des ventes ; les colonnes d'adresse, puis dépendances, terrain et lots (15/09/2026), ont été
+ * ajoutées à la fin (compatibles avec les anciens lecteurs, qui lisent les colonnes par leur nom).
+ */
 export const EN_TETE_VENTES = [
   'date',
   'prix',
@@ -43,6 +52,9 @@ export const EN_TETE_VENTES = [
   'codeVoie',
   'voie',
   'carrez',
+  'dependances',
+  'terrain',
+  'lots',
 ] as const;
 
 /** Prix au m² d'un type de logement dans une commune : nombre de ventes, médiane, quartiles (en €/m² entiers). */

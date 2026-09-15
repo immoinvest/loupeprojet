@@ -27,6 +27,9 @@ function vente(
     codeVoie: null,
     voie: null,
     carrez: null,
+    dependances: 0,
+    terrain: null,
+    lots: null,
   };
 }
 
