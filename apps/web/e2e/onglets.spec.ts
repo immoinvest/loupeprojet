@@ -47,7 +47,8 @@ test('fiscalité : l’impôt à la revente suit l’horizon choisi dans l’ong
   await expect(aLaRevente).toHaveText(/^0\s€$/);
   await expect(carte(page, 'La revente selon le régime').getByRole('table')).toBeVisible();
 
-  await page.getByRole('link', { name: "Changer l'horizon" }).click();
+  // L'horizon est un lien d'hypothèse : il mène au curseur de l'onglet Revente.
+  await page.getByRole('link', { name: /^\d+ ans — modifier Revente dans$/ }).click();
   await expect(
     page.getByRole('heading', { level: 1, name: "Qu'est-ce qu'il vous restera ?" }),
   ).toBeVisible();

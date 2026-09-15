@@ -63,7 +63,7 @@ test('Fiscalité → tranche d’imposition : Hypothèses au champ ; le lien dir
 
 test('Financement : l’apport de « D’où vient l’argent » se change sur place', async ({ page }) => {
   await ouvrirExemple(page);
-  await ouvrirVolet(page, 'Financement', /financement/i);
+  await ouvrirVolet(page, 'Financement', /Comment se finance l'achat/);
   const avant = page.url();
   await page.getByRole('link', { name: /modifier Apport$/ }).click();
   await expect(page.getByLabel('Apport', { exact: true })).toBeFocused();

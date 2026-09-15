@@ -54,7 +54,7 @@ export function ValeurHypothese({
           e.preventDefault();
         }
       }}
-      className="group relative text-inherit underline decoration-encre-4 decoration-dotted underline-offset-4 survol-texte pointer-coarse:inline-flex pointer-coarse:min-h-11 pointer-coarse:items-center"
+      className="group relative text-inherit underline decoration-encre-4 decoration-dotted underline-offset-4 survol-texte pointer-coarse:inline-flex pointer-coarse:min-h-11 pointer-coarse:min-w-11 pointer-coarse:items-center pointer-coarse:justify-center"
     >
       {children}
       {/* Hors du flux : le chiffre ne bouge pas quand le crayon apparaît. */}
