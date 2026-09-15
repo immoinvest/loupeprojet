@@ -196,6 +196,15 @@ describe('impôts et revente', () => {
     expect(t).toContain('59 864 € net vendeur');
   });
 
+  it('revente au prix saisi : le prix de l’utilisateur, sans évolution ni travaux', () => {
+    const saisi = rapportComplet(
+      variante({ revente: { ...projetExemple.hypotheses.revente, prixVente: 200_000 } }),
+    );
+    const t = n(explicationRevente(saisi));
+    expect(t).toContain('Revente au prix que vous avez saisi, 200 000 €, dans 10 ans, moins');
+    expect(t).not.toContain('par an');
+  });
+
   it('multiple sur apport : exemple, perte, sans mise', () => {
     const t = n(explicationMultiple(exemple));
     expect(t).toContain('15 294 € ÷ 19 337 € = × 0,8.');

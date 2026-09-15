@@ -17,6 +17,7 @@ import {
   seuilsExoneration,
   variantesRevente,
 } from '@/analyses';
+import { sansPrixVente } from '@/analyses/revente';
 import { descripteurParChemin } from '@/hypotheses';
 
 const regles = obtenirRegles(VERSION_REGLES_COURANTE);
@@ -43,6 +44,30 @@ describe('projetAHorizon', () => {
     expect(variante.bien).toBe(projetExemple.bien);
     expect(projetExemple.hypotheses.revente?.annees).toBe(10);
     expect(calculerProjet(variante).revente!.annees).toBe(17);
+  });
+});
+
+describe('sansPrixVente', () => {
+  it('retire le prix de vente saisi et garde les autres hypothèses de revente', () => {
+    const saisi = {
+      ...projetExemple,
+      hypotheses: {
+        ...projetExemple.hypotheses,
+        revente: { ...projetExemple.hypotheses.revente, prixVente: 200_000 },
+      },
+    };
+    const estime = sansPrixVente(saisi);
+    expect(estime.hypotheses.revente).not.toHaveProperty('prixVente');
+    expect(estime.hypotheses.revente).toEqual(projetExemple.hypotheses.revente);
+    expect(saisi.hypotheses.revente.prixVente).toBe(200_000);
+  });
+
+  it('accepte un projet sans hypothèses de revente', () => {
+    const hypotheses = Object.fromEntries(
+      Object.entries(projetExemple.hypotheses).filter(([k]) => k !== 'revente'),
+    ) as typeof projetExemple.hypotheses;
+    const projet = { ...projetExemple, hypotheses };
+    expect(sansPrixVente(projet).hypotheses.revente).toEqual({});
   });
 });
 

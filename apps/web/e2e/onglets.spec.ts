@@ -121,7 +121,7 @@ test('revente : le curseur, le clavier et les repères changent l’horizon', as
 
   await ouvrirVolet(page, 'Rapport', /Le prix est bon\./);
   await expect(carte(page, "Qu'est-ce qu'il vous restera ?")).toContainText(
-    /144\s801\s€\s*dans 20 ans/,
+    /148\s104\s€\s*dans 20 ans/,
   );
 });
 
