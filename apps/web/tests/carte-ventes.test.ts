@@ -114,7 +114,7 @@ describe('carte des ventes : textes', () => {
       ['haut', 'Plus de 3 750 €/m²'],
     ]);
     expect(legendeCarte(null)).toEqual([{ classe: 'milieu', libelle: 'Ventes comparables' }]);
-    expect(n(libelleVenteCarte({ ...vente(3621), classe: 'milieu' }))).toBe(
+    expect(n(libelleVenteCarte({ ...vente(3621), classe: 'milieu', cle: 'x', vente: null }))).toBe(
       '3 621 €/m² · 58 m² · 210 000 € · 1 mars 2025 · à 40 m',
     );
   });

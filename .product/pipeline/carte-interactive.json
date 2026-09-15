@@ -1,0 +1,40 @@
+{
+  "feature_slug": "carte-interactive",
+  "title": "Carte des ventes interactive (fiche 15)",
+  "session": "nuit S8 du 15/09/2026",
+  "started_at": "2026-09-15T02:00:00Z",
+  "current_step": "implement",
+  "scope": "apps/web/src/{ecrans/Adresse.tsx,ecrans/adresse/{CarteQuartier,CarteVentes,BarreCarte,TableauVentes}.tsx,ecrans/adresse/{useLiaisonVentes,bulle-vente}.ts,enrichissement/carte*.ts,textes/carte.ts,index.css}, tests, e2e",
+  "branch": "feat/carte-interactive",
+  "base": "master af2476e6 (PR #87 feat/estimation-ventes fusionnée)",
+  "backlog": ".product/backlog/15-carte-interactive.md",
+  "steps": {
+    "discovery": {
+      "status": "completed",
+      "output": ".product/features/carte-interactive-discovery.md",
+      "note": "auto-validée (session de nuit)"
+    },
+    "specs": {
+      "status": "completed",
+      "output": ".product/specs/carte-interactive-specs.md",
+      "stories_count": 5
+    },
+    "architecture": {
+      "status": "completed",
+      "output": ".product/architecture/carte-interactive.md"
+    },
+    "implement": { "status": "in_progress", "stories_completed": 0, "stories_total": 5, "commits": [] },
+    "qa_tests": { "status": "pending" },
+    "security": { "status": "pending" },
+    "push": { "status": "pending" }
+  },
+  "decisions": {
+    "gestes": "question 1 : Ctrl (ou ⌘) + molette et deux doigts (proposition)",
+    "plein_ecran": "question 2 : bouton seulement, en surcouche fixed plutôt que l'API Fullscreen (iOS)",
+    "fonds": "question 3 : Plan IGN, photo aérienne, case parcelles cadastrales (proposition)",
+    "couleur": "question 4 : sélecteur prix / ancienneté / DPE (proposition)",
+    "dpe_quartier": "question 5 : non (proposition)",
+    "regroupement": "maison, par coordonnées identiques ; pas de leaflet.markercluster",
+    "cle_vente": "date|prix|surface|distance : rapproche ventesCarte et ventesProches sans toucher au Worker"
+  }
+}
