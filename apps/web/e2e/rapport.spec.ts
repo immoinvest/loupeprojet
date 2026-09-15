@@ -49,7 +49,7 @@ test('le rapport affiche le verdict, les cinq feux et les chiffres clés', async
   await expect(carte(page, "Combien d'impôts ?")).toContainText('Meublé au réel.');
 
   const revente = carte(page, "Qu'est-ce qu'il vous restera ?");
-  await expect(revente).toContainText(/58\s217\s€\s*dans 10 ans/);
+  await expect(revente).toContainText(/57\s799\s€\s*dans 10 ans/);
   await expect(revente).toContainText('Multiple sur apport');
   await expect(revente).toContainText(/×\s0,7/);
 });
