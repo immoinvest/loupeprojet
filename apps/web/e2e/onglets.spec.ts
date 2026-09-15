@@ -42,7 +42,7 @@ test('fiscalité : l’impôt à la revente suit l’horizon choisi dans l’ong
   await ouvrirVolet(page, 'Fiscalité', /Combien d'impôts, selon le régime/);
 
   // Deuxième ligne de la carte : « À la revente ». À 10 ans, 19 486 € d'amortissements du bâti
-  // réintégrés donnent 418 € d'impôt (ordre d'imputation LMNP, PR #92).
+  // réintégrés (déduits avant le déficit, CE 15/04/2015) : 1 437 € de plus-value, 418 € d'impôt.
   const reel = carte(page, 'Meublé au réel');
   const aLaRevente = reel.getByRole('definition').nth(1);
   await expect(aLaRevente).toHaveText(/^418\s€$/);
@@ -56,8 +56,8 @@ test('fiscalité : l’impôt à la revente suit l’horizon choisi dans l’ong
   await page.getByRole('slider', { name: 'Revente dans' }).fill('20');
   await expect(page.getByRole('heading', { level: 2, name: 'Revente dans 20 ans' })).toBeVisible();
 
-  // À 20 ans, amortissements réintégrés : 10 464 € d'impôt à la revente au réel,
-  // dont 9 028 € de plus que le micro-BIC (1 436 €) (ordre d'imputation LMNP, PR #92).
+  // À 20 ans, 60 822 € d'amortissements réintégrés : 10 464 € d'impôt à la revente au réel,
+  // dont 9 028 € de plus que le micro-BIC (1 436 €).
   await ouvrirVolet(page, 'Fiscalité', /Combien d'impôts, selon le régime/);
   await expect(page.getByText(/à la revente dans\s*20 ans/)).toBeVisible();
   await expect(aLaRevente).toHaveText(/^10\s464\s€$/);

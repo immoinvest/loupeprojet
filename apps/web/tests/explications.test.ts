@@ -165,7 +165,9 @@ describe('impôts et revente', () => {
     expect(t).toContain('Sur 10 ans, le meublé au réel ne coûte aucun impôt.');
     // Amortissements déduits avant le déficit antérieur (CE, 15/04/2015) : 31 134 € en réserve.
     expect(t).toContain('31 134 € restent en réserve');
-    expect(t).toContain('Le moins cher des trois autres régimes est le nu au réel (4 235 €)');
+    // Nu au réel : frais d'emprunt déduits et loyers compensant d'abord le financier (BOI-RFPI-BASE-30-20
+    // § 110) : 7 556 € sur le revenu global l'année 1 (−2 267 €), puis imposé dès l'année 2 → 4 426 €.
+    expect(t).toContain('Le moins cher des trois autres régimes est le nu au réel (4 426 €)');
 
     const m = n(explicationFiscalite(microBic));
     expect(m).toContain("le meublé micro-BIC coûte 26 928 € d'impôt");
