@@ -49,6 +49,8 @@ export const ContenuDocumentSchema = z.object({
   loyerHorsCharges: CentimesSchema,
   charges: CentimesSchema,
   total: CentimesSchema,
+  /** Aide au logement versée par la CAF, comprise dans le total ; absente sans aide (ADR-G16). */
+  apl: CentimesSchema.min(1).optional(),
   /** Quittance : tous les paiements du terme ; reçu : le paiement attesté. */
   paiements: z.array(z.object({ montant: CentimesSchema, date: JourSchema })).min(1),
   /** Montant attesté : total des paiements (quittance) ou montant du paiement (reçu). */

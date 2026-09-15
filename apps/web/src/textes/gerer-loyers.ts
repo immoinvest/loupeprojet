@@ -47,6 +47,11 @@ export function resteAPayer(centimes: number): string {
 }
 
 /** 30 000 centimes → « Reçu de 300 € » (le bouton qui ouvre le reçu d'un paiement partiel). */
+/** « + 180 € d’APL » sous la part du locataire, quand la CAF verse l’aide au bailleur. */
+export function plusApl(centimes: number): string {
+  return `+ ${montant(centimes)} d’APL`;
+}
+
 export function recuDe(centimes: number): string {
   return `Reçu de ${montant(centimes)}`;
 }

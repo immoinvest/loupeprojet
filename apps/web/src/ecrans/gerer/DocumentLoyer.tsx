@@ -82,6 +82,12 @@ export function DocumentLoyer({ contenu }: { readonly contenu: ContenuDocument }
           <LigneMontant libelle={D.loyer} centimes={contenu.loyerHorsCharges} />
           <LigneMontant libelle={D.charges} centimes={contenu.charges} />
           <LigneMontant libelle={D.total} centimes={contenu.total} fort />
+          {contenu.apl !== undefined && (
+            <>
+              <LigneMontant libelle={D.apl} centimes={contenu.apl} />
+              <LigneMontant libelle={D.partLocataire} centimes={contenu.total - contenu.apl} />
+            </>
+          )}
           {!quittance && <LigneMontant libelle={D.dejaRecu} centimes={contenu.dejaRecu} />}
           {!quittance && <LigneMontant libelle={D.resteDu} centimes={contenu.resteDu} fort />}
         </tbody>

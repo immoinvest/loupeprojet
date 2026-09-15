@@ -100,6 +100,15 @@ describe('menu à deux sections', () => {
       'href',
       '/gerer/loyers',
     );
+    // Tous les biens, loués ou non, avec leur nombre.
+    expect(within(gerer).getByRole('link', { name: 'Mes biens · 2' })).toHaveAttribute(
+      'href',
+      '/gerer/biens',
+    );
+    expect(within(gerer).getByRole('link', { name: 'Mes locataires' })).toHaveAttribute(
+      'href',
+      '/gerer/locataires',
+    );
   });
 });
 

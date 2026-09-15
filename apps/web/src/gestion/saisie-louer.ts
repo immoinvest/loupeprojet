@@ -29,6 +29,8 @@ export interface SaisieLouer {
   readonly entree: string;
   readonly jourLoyer: string;
   readonly depot: string;
+  /** L'APL du nouveau locataire versée au bailleur ; vide : aucune. */
+  readonly apl: string;
 }
 
 export type ChampLouer = ChampLocataire | 'colocataires' | 'libelle' | ChampLocation;
@@ -49,7 +51,8 @@ function enTexte(centimes: number): string {
 
 /**
  * Le formulaire prérempli : type, loyer, charges et jour du loyer repris de la dernière location du
- * bien s'il y en a une (le dépôt reste au maximum légal) ; entrée le 1er du mois en cours.
+ * bien s'il y en a une (le dépôt reste au maximum légal, l'APL propre à chaque locataire reste vide) ;
+ * entrée le 1er du mois en cours.
  */
 export function saisieLouer(derniere: LocationGeree | undefined, aujourdhui: string): SaisieLouer {
   const commun = {
@@ -59,6 +62,7 @@ export function saisieLouer(derniere: LocationGeree | undefined, aujourdhui: str
     libelle: '',
     entree: `${periodeDe(aujourdhui)}-01`,
     depot: '',
+    apl: '',
   };
   if (derniere === undefined) {
     return { ...commun, type: 'meublee', loyer: '', charges: '', jourLoyer: '' };

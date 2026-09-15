@@ -1,6 +1,7 @@
 import type { D1PreparedStatement } from '@cloudflare/workers-types';
 import {
   BienGereSchema,
+  ChangementSchema,
   DocumentCompletSchema,
   DocumentSchema,
   IdentiteBailleurSchema,
@@ -10,6 +11,8 @@ import {
   PREFERENCES_PAR_DEFAUT,
   PreferencesMenuSchema,
   type BienGere,
+  type Changement,
+  type chevauche,
   type DocumentComplet,
   type DocumentGestion,
   type IdentiteBailleur,
@@ -68,24 +71,61 @@ export function versLocataire(ligne: Ligne): Locataire {
   return LocataireSchema.parse(sansNulls(ligne));
 }
 
-/** La location et ses colocataires, lus à part dans gestion_colocataire (ADR-G13). */
-export function versLocation(ligne: Ligne, colocataireIds: readonly string[]): LocationGeree {
-  return LocationGereeSchema.parse({ ...sansNulls(ligne), colocataireIds });
+/**
+ * La location, ses colocataires (ADR-G13, gestion_colocataire) et ses changements de montants
+ * (ADR-G14, gestion_changement), lus à part.
+ */
+export function versLocation(
+  ligne: Ligne,
+  colocataireIds: readonly string[],
+  changements: readonly Changement[],
+): LocationGeree {
+  return LocationGereeSchema.parse({ ...sansNulls(ligne), colocataireIds, changements });
+}
+
+/** Des lignes regroupées par location, dans leur ordre (lignes triées par location). */
+function parLocation<T>(
+  lignes: readonly Ligne[],
+  valeur: (ligne: Ligne) => T,
+): ReadonlyMap<string, readonly T[]> {
+  const groupes = new Map<string, T[]>();
+  for (const ligne of lignes) {
+    const locationId = String(ligne.locationId);
+    groupes.set(locationId, [...(groupes.get(locationId) ?? []), valeur(ligne)]);
+  }
+  return groupes;
 }
 
 /** Les colocataires de chaque location, dans l'ordre du bail (lignes triées par location puis ordre). */
 export function colocatairesParLocation(
   lignes: readonly Ligne[],
 ): ReadonlyMap<string, readonly string[]> {
-  const parLocation = new Map<string, string[]>();
-  for (const ligne of lignes) {
-    const locationId = String(ligne.locationId);
-    parLocation.set(locationId, [
-      ...(parLocation.get(locationId) ?? []),
-      String(ligne.locataireId),
-    ]);
-  }
-  return parLocation;
+  return parLocation(lignes, (ligne) => String(ligne.locataireId));
+}
+
+export function versChangement(ligne: Ligne): Changement {
+  return ChangementSchema.parse({
+    aPartirDe: ligne.aPartirDe,
+    loyerHorsCharges: ligne.loyerHorsCharges,
+    charges: ligne.charges,
+    apl: ligne.apl,
+  });
+}
+
+/** Les changements de montants de chaque location, dans l'ordre des mois. */
+export function changementsParLocation(
+  lignes: readonly Ligne[],
+): ReadonlyMap<string, readonly Changement[]> {
+  return parLocation(lignes, versChangement);
+}
+
+/** Les dates et le libellé d'une location, pour le contrôle de chevauchement. */
+export function versPeriode(ligne: Ligne): Parameters<typeof chevauche>[1] {
+  return {
+    debut: String(ligne.debut),
+    ...(typeof ligne.fin === 'string' ? { fin: ligne.fin } : {}),
+    ...(typeof ligne.libelle === 'string' ? { libelle: ligne.libelle } : {}),
+  };
 }
 
 export function versPaiement(ligne: Ligne): Paiement {

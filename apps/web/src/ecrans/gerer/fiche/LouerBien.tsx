@@ -195,6 +195,12 @@ export function LouerBien({
           unite={A.uniteEuros}
           placeholder={DEPOT_PAR_DEFAUT[saisie.type]}
         />
+        <ChampGerer
+          {...champ('apl', A.apl)}
+          inputMode="decimal"
+          unite={A.uniteCharges}
+          aide={A.aideApl}
+        />
       </div>
 
       {echec !== null && (

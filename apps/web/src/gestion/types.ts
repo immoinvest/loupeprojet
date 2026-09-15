@@ -5,7 +5,10 @@ import type {
   DocumentComplet,
   EtatGestion,
   IdentiteBailleur,
+  Locataire,
   LocationGeree,
+  ModificationLocation,
+  NouveauLocataire,
   NouveauPaiement,
   NouvelleOccupation,
   OccupationCreee,
@@ -30,6 +33,8 @@ export type CodeErreurGestion =
   | 'bien_occupe'
   | 'fin_avant_entree'
   | 'paiements_apres_sortie'
+  /** Un paiement existe pour le mois des nouveaux montants ou après. */
+  | 'periode_payee'
   | 'limite'
   | 'indisponible'
   | 'reseau'
@@ -54,4 +59,16 @@ export interface ClientGestion {
   terminerLocation(locationId: string, fin: string): Promise<ResultatGestion<LocationGeree>>;
   /** Loue un bien existant : vacant, ou une autre chambre ; refusé si la même chambre est déjà louée. */
   louer(bienId: string, occupation: NouvelleOccupation): Promise<ResultatGestion<OccupationCreee>>;
+  /** Montants à partir d'un mois non payé, jour du loyer, dépôt, libellé. */
+  modifierLocation(
+    locationId: string,
+    modification: ModificationLocation,
+  ): Promise<ResultatGestion<LocationGeree>>;
+  /** Supprime le bien, ses locations, paiements et documents, et ses locataires sans autre location. */
+  supprimerBien(bienId: string): Promise<ResultatGestion>;
+  /** Nom et e-mail du locataire ; sans e-mail, il est retiré. Les documents émis ne changent pas. */
+  modifierLocataire(
+    locataireId: string,
+    locataire: NouveauLocataire,
+  ): Promise<ResultatGestion<Locataire>>;
 }

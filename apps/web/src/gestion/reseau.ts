@@ -3,6 +3,7 @@ import {
   DocumentCompletSchema,
   EtatGestionSchema,
   IdentiteBailleurSchema,
+  LocataireSchema,
   LocationGereeSchema,
   OccupationCreeeSchema,
   PaiementSchema,
@@ -36,6 +37,7 @@ const CODES_SERVEUR: Readonly<Record<string, CodeErreurGestion>> = {
   BIEN_OCCUPE: 'bien_occupe',
   FIN_AVANT_ENTREE: 'fin_avant_entree',
   PAIEMENTS_APRES_SORTIE: 'paiements_apres_sortie',
+  PERIODE_PAYEE: 'periode_payee',
   LIMITE_ATTEINTE: 'limite',
   GESTION_INDISPONIBLE: 'indisponible',
 };
@@ -47,7 +49,7 @@ async function codeDe(reponse: Response): Promise<CodeErreurGestion> {
   return reponse.status >= 500 ? 'indisponible' : 'inconnue';
 }
 
-type Methode = 'GET' | 'POST' | 'PUT' | 'DELETE';
+type Methode = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
 /**
  * Le client réel : l'API /api/gestion servie par le worker des comptes, sur l'origine du site (le cookie
@@ -108,6 +110,22 @@ export function clientGestionReseau(
         `/biens/${encodeURIComponent(bienId)}/locations`,
         occupation,
         OccupationCreeeSchema,
+      ),
+    modifierLocation: (locationId, modification) =>
+      appeler(
+        'PATCH',
+        `/locations/${encodeURIComponent(locationId)}`,
+        modification,
+        LocationGereeSchema,
+      ),
+    supprimerBien: (bienId) =>
+      appeler('DELETE', `/biens/${encodeURIComponent(bienId)}`, undefined, z.undefined()),
+    modifierLocataire: (locataireId, locataire) =>
+      appeler(
+        'PATCH',
+        `/locataires/${encodeURIComponent(locataireId)}`,
+        locataire,
+        LocataireSchema,
       ),
   };
 }

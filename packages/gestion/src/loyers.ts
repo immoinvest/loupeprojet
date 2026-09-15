@@ -1,4 +1,5 @@
 import { ajouterJours, bornesPeriode } from './dates';
+import { montantsDuMois } from './montants';
 import { DELAI_RETARD_JOURS } from './regles';
 import type { LocationGeree, Paiement } from './schemas';
 
@@ -15,6 +16,10 @@ export interface LoyerDu {
   readonly loyerHorsCharges: number;
   readonly charges: number;
   readonly total: number;
+  /** Aide au logement versée au bailleur, comprise dans le total (ADR-G16). */
+  readonly apl: number;
+  /** Ce que le locataire paie lui-même : le total moins l'aide. */
+  readonly partLocataire: number;
   readonly joursOccupes: number;
   readonly joursDuMois: number;
 }
@@ -32,7 +37,7 @@ export interface SuiviLoyer {
 
 type Occupation = Pick<
   LocationGeree,
-  'id' | 'debut' | 'fin' | 'jourLoyer' | 'loyerHorsCharges' | 'charges'
+  'id' | 'debut' | 'fin' | 'jourLoyer' | 'loyerHorsCharges' | 'charges' | 'apl' | 'changements'
 >;
 
 function jourDuMois(jour: string): number {
@@ -41,8 +46,9 @@ function jourDuMois(jour: string): number {
 
 /**
  * Le loyer dû par la location pour la période, ou `null` si elle n'occupe aucun jour du mois.
- * Prorata au jour près : montant × jours occupés ÷ jours du mois, arrondi au centime le plus proche,
- * loyer et charges séparément (ils figurent séparément sur la quittance).
+ * Montants en vigueur ce mois-là (changements compris). Prorata au jour près : montant × jours
+ * occupés ÷ jours du mois, arrondi au centime le plus proche, loyer, charges et aide séparément
+ * (ils figurent séparément sur la quittance) ; l'aide arrondie ne dépasse jamais le total.
  */
 export function loyerDuMois(location: Occupation, periode: string): LoyerDu | null {
   const mois = bornesPeriode(periode);
@@ -53,8 +59,11 @@ export function loyerDuMois(location: Occupation, periode: string): LoyerDu | nu
   const joursOccupes = jourDuMois(fin) - jourDuMois(debut) + 1;
   const auProrata = (centimes: number): number =>
     Math.round((centimes * joursOccupes) / mois.jours);
-  const loyerHorsCharges = auProrata(location.loyerHorsCharges);
-  const charges = auProrata(location.charges);
+  const montants = montantsDuMois(location, periode);
+  const loyerHorsCharges = auProrata(montants.loyerHorsCharges);
+  const charges = auProrata(montants.charges);
+  const total = loyerHorsCharges + charges;
+  const apl = Math.min(auProrata(montants.apl), total);
   const echeanceDuBail = `${periode}-${String(location.jourLoyer).padStart(2, '0')}`;
 
   return {
@@ -65,7 +74,9 @@ export function loyerDuMois(location: Occupation, periode: string): LoyerDu | nu
     echeance: echeanceDuBail < debut ? debut : echeanceDuBail,
     loyerHorsCharges,
     charges,
-    total: loyerHorsCharges + charges,
+    total,
+    apl,
+    partLocataire: total - apl,
     joursOccupes,
     joursDuMois: mois.jours,
   };

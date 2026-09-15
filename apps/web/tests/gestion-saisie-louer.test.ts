@@ -20,6 +20,7 @@ function saisie(champs: Partial<SaisieLouer> = {}): SaisieLouer {
 describe('saisieLouer', () => {
   it('sans location précédente : meublée, vide, entrée le 1er du mois', () => {
     expect(saisieLouer(undefined, AUJOURDHUI)).toEqual({
+      apl: '',
       locataire: '',
       email: '',
       colocataires: [],

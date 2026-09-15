@@ -15,7 +15,15 @@ export interface EntreesDocument {
   readonly locataires: readonly Pick<Locataire, 'prenom' | 'nom'>[];
   readonly location: Pick<
     LocationGeree,
-    'id' | 'libelle' | 'debut' | 'fin' | 'jourLoyer' | 'loyerHorsCharges' | 'charges'
+    | 'id'
+    | 'libelle'
+    | 'debut'
+    | 'fin'
+    | 'jourLoyer'
+    | 'loyerHorsCharges'
+    | 'charges'
+    | 'apl'
+    | 'changements'
   >;
   /** Les paiements de la location (ceux des autres locations sont ignorés). */
   readonly paiements: readonly Paiement[];
@@ -63,6 +71,7 @@ function socle(
   | 'loyerHorsCharges'
   | 'charges'
   | 'total'
+  | 'apl'
 > {
   return {
     emisLe: e.emisLe,
@@ -79,6 +88,8 @@ function socle(
     loyerHorsCharges: du.loyerHorsCharges,
     charges: du.charges,
     total: du.total,
+    // Sans aide, le contenu reste celui de G1b (ADR-G16).
+    ...(du.apl > 0 ? { apl: du.apl } : {}),
   };
 }
 
