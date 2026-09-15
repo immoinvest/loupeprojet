@@ -42,6 +42,8 @@ export interface ParametresPlusValue {
 
 export interface DetailPlusValue {
   readonly prixCession: number;
+  /** Prix stipulé dans l'acte, base des forfaits de 7,5 % et 15 % (BOI-RFPI-PVI-20-10-20-20 § 70). */
+  readonly prixAcquisition: number;
   readonly fraisRetenus: number;
   readonly travauxRetenus: number;
   readonly reintegration: number;
@@ -77,6 +79,7 @@ export function plusValueImposable(p: ParametresPlusValue, regles: Regles): Deta
   const surtaxe = baseIr * tauxSurtaxe(baseIr, regles);
   return {
     prixCession,
+    prixAcquisition: p.prixAcquisition,
     fraisRetenus,
     travauxRetenus,
     reintegration: p.amortissementsReintegres,
