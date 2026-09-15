@@ -10,7 +10,9 @@ import {
   type Resultat,
 } from '@/enrichissement';
 import { ecrireProjets, lireProjets, type ProjetEnregistre } from '@/stockage/projets';
+import { PHRASES_ADRESSE } from '@/textes/adresse';
 import { PHRASES_CONFIANCE } from '@/textes/confiance';
+import { PHRASES_REPERE } from '@/textes/repere';
 
 const n = (s: string | null): string => (s ?? '').replace(/\s/g, ' ');
 const ok = <T,>(valeur: T): Promise<Resultat<T>> => Promise.resolve({ ok: true, valeur });
@@ -76,14 +78,20 @@ async function ouvrir(
 const raisons = (): HTMLElement[] =>
   within(screen.getByRole('list', { name: 'Les raisons de la note' })).getAllByRole('listitem');
 
-describe('Carte Confiance et carte Le repère utilisé', () => {
+async function analyserOlivier(): Promise<void> {
+  const u = userEvent.setup();
+  await u.type(screen.getByLabelText('Adresse du bien'), '144 rue de l’Olivier');
+  await u.click(screen.getByRole('button', { name: 'Analyser' }));
+}
+
+describe('Carte Confiance et repère utilisé', () => {
   it(
-    'projet d’exemple : note moyenne expliquée, repère de quartier sans lieu ni période',
+    'projet d’exemple sans adresse : l’adresse d’abord, note moyenne expliquée, repère de quartier',
     { timeout: 30_000 },
     async () => {
       await ouvrir();
       const cartes = screen.getAllByRole('heading', { level: 2 }).map((h) => h.textContent);
-      expect(cartes.indexOf(PHRASES_CONFIANCE.titre)).toBe(0);
+      expect(cartes.slice(0, 2)).toEqual([PHRASES_ADRESSE.titreAdresse, PHRASES_CONFIANCE.titre]);
       expect(screen.getByText('Confiance moyenne · 62 sur 100')).toBeInTheDocument();
       const lignes = raisons().map((li) => n(li.textContent));
       expect(lignes).toHaveLength(4);
@@ -94,7 +102,10 @@ describe('Carte Confiance et carte Le repère utilisé', () => {
       expect(lignes[3]).toContain('supposée au milieu de la fenêtre');
       expect(screen.queryByText(PHRASES_CONFIANCE.affiner)).not.toBeInTheDocument();
 
-      expect(screen.getByRole('heading', { name: PHRASES_CONFIANCE.titreRepere })).toBeVisible();
+      expect(screen.getByText(PHRASES_CONFIANCE.titreRepere)).toBeVisible();
+      expect(
+        screen.queryByRole('heading', { name: PHRASES_CONFIANCE.titreRepere }),
+      ).not.toBeInTheDocument();
       expect(n(screen.getByText(/Appartements vendus/).textContent)).toBe(
         'Appartements vendus : 31 ventes, médiane 3 050 €/m², la moitié des ventes entre 2 700 €/m² et 3 400 €/m².',
       );
@@ -158,35 +169,32 @@ describe('Carte Confiance et carte Le repère utilisé', () => {
     expect(screen.getByText(PHRASES_CONFIANCE.moinsPrecis)).toBeInTheDocument();
   });
 
-  it('sans repère : les deux cartes le disent', { timeout: 30_000 }, async () => {
-    await ouvrir((p) => ({ ...p, projet: { ...p.projet, marche: { risques: [] } } }));
-    expect(screen.getAllByText(PHRASES_CONFIANCE.sansRepere)).toHaveLength(2);
-    expect(screen.queryByRole('list', { name: 'Les raisons de la note' })).not.toBeInTheDocument();
-  });
+  it(
+    'sans repère : la carte Confiance et la carte Estimation le disent',
+    { timeout: 30_000 },
+    async () => {
+      await ouvrir((p) => ({ ...p, projet: { ...p.projet, marche: { risques: [] } } }));
+      expect(screen.getAllByText(PHRASES_CONFIANCE.sansRepere)).toHaveLength(2);
+      expect(
+        screen.queryByRole('list', { name: 'Les raisons de la note' }),
+      ).not.toBeInTheDocument();
+    },
+  );
 
   it(
-    'après l’analyse et « Utiliser ce repère » : la note suit le repère de la rue, la carte Repère disparaît',
+    'après l’analyse, sans clic : la note suit le repère de la rue, le repère du projet disparaît',
     { timeout: 30_000 },
     async () => {
       const id = await ouvrir(identite, CLIENT);
-      const u = userEvent.setup();
-      await u.type(screen.getByLabelText('Adresse du bien'), '144 rue de l’Olivier');
-      await u.click(screen.getByRole('button', { name: 'Analyser' }));
-      await u.click(
-        await screen.findByRole(
-          'button',
-          { name: "Utiliser ce repère pour l'estimation" },
-          { timeout: 10_000 },
-        ),
-      );
+      await analyserOlivier();
       // Rue 30 + 6 ventes 5 + dispersion 8,6 % → 30 + 9 mois → 13 = 78, bonne.
-      expect(await screen.findByText('Confiance bonne · 78 sur 100')).toBeInTheDocument();
+      expect(
+        await screen.findByText('Confiance bonne · 78 sur 100', {}, { timeout: 10_000 }),
+      ).toBeInTheDocument();
       const lignes = raisons().map((li) => n(li.textContent));
       expect(lignes[0]).toBe('Localisation du repère30/35Ventes de la même rue, à 90 m au plus.');
       expect(lignes[3]).toBe('Ancienneté des ventes13/15Ventes vieilles de 9 mois en médiane.');
-      expect(
-        screen.queryByRole('heading', { name: PHRASES_CONFIANCE.titreRepere }),
-      ).not.toBeInTheDocument();
+      expect(screen.queryByText(PHRASES_CONFIANCE.titreRepere)).not.toBeInTheDocument();
       expect(lireProjets(window.localStorage).find((p) => p.id === id)?.projet.marche.dvf).toEqual({
         medianM2: 3600,
         q1M2: 3440,
@@ -197,6 +205,38 @@ describe('Carte Confiance et carte Le repère utilisé', () => {
         periode: { debut: '2025-03-01', fin: '2026-06-15' },
         ancienneteMedianeMois: 9,
       });
+    },
+  );
+
+  it(
+    'repère saisi à la main : conservé après l’analyse, puis « Remplacer » applique celui de l’adresse',
+    { timeout: 30_000 },
+    async () => {
+      const id = await ouvrir(
+        (p) => ({
+          ...p,
+          projet: {
+            ...p.projet,
+            marche: { ...p.projet.marche, dvf: { medianM2: 3000, nombreVentes: 40 } },
+            provenance: { ...p.projet.provenance, 'marche.dvf.medianM2': 'utilisateur' },
+          },
+        }),
+        CLIENT,
+      );
+      await analyserOlivier();
+      expect(
+        await screen.findByText(PHRASES_REPERE.protege, {}, { timeout: 10_000 }),
+      ).toBeInTheDocument();
+      const lire = (): ProjetEnregistre | undefined =>
+        lireProjets(window.localStorage).find((p) => p.id === id);
+      expect(lire()?.projet.marche.dvf).toEqual({ medianM2: 3000, nombreVentes: 40 });
+      expect(screen.getByText('Confiance faible · 35 sur 100')).toBeInTheDocument();
+
+      await userEvent.setup().click(screen.getByRole('button', { name: PHRASES_REPERE.remplacer }));
+      expect(await screen.findByText('Confiance bonne · 78 sur 100')).toBeInTheDocument();
+      expect(lire()?.projet.marche.dvf?.medianM2).toBe(3600);
+      expect(lire()?.projet.provenance['marche.dvf.medianM2']).toBe('dvf');
+      expect(screen.getByRole('button', { name: PHRASES_REPERE.annuler })).toBeInTheDocument();
     },
   );
 });

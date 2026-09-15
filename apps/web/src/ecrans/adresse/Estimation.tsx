@@ -1,5 +1,5 @@
 import { ETATS, type CodeCorrection, type EtatBien } from '@loupe/moteur';
-import type { JSX } from 'react';
+import type { JSX, ReactNode } from 'react';
 
 import { Carte, Pastille } from '@/composants/ui';
 import { useProjetCourant } from '@/coque/ProjetLayout';
@@ -22,9 +22,10 @@ const CELLULE = 'border-b border-bordure-douce px-3 py-2 text-left align-top';
 
 /**
  * Le prix estimé du bien : fourchette selon l'état, corrections sourcées une à une (désactivables),
- * confiance. Calculé par le moteur à chaque modification, sans réseau.
+ * confiance. Calculé par le moteur à chaque modification, sans réseau. `repere` : le repère de prix qui fait
+ * l'estimation (celui du projet, ou celui de l'adresse analysée), fourni par l'onglet (fiche 14).
  */
-export function CarteEstimation(): JSX.Element {
+export function CarteEstimation({ repere }: { repere: ReactNode }): JSX.Element {
   const { enregistre, resultats } = useProjetCourant();
   const { mettreAJour } = useProjets();
   const { projet } = enregistre;
@@ -35,6 +36,7 @@ export function CarteEstimation(): JSX.Element {
       <Carte>
         <h2 className="m-0 font-display text-[22px] font-semibold">L'estimation du bien</h2>
         <p className="m-0 text-[15px] text-encre-2">{PHRASES_ESTIMATION.sansVentes}</p>
+        {repere}
       </Carte>
     );
   }
@@ -77,6 +79,8 @@ export function CarteEstimation(): JSX.Element {
       {e.etatSuppose && (
         <p className="m-0 text-sm text-encre-2">{PHRASES_ESTIMATION.etatSuppose}</p>
       )}
+
+      {repere}
 
       <div role="group" aria-label="État du bien" className="grid grid-cols-2 gap-2 md:grid-cols-4">
         {ETATS.map((etat) => {

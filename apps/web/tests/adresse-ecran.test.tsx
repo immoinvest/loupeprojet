@@ -12,6 +12,7 @@ import {
 } from '@/enrichissement';
 import { lireProjets } from '@/stockage/projets';
 import { PHRASES_ADRESSE } from '@/textes/adresse';
+import { PHRASES_REPERE } from '@/textes/repere';
 
 const n = (s: string | null): string => (s ?? '').replace(/\s/g, ' ');
 const ok = <T,>(valeur: T): Promise<Resultat<T>> => Promise.resolve({ ok: true, valeur });
@@ -182,8 +183,10 @@ describe('Onglet Adresse', () => {
       expect(screen.getByText('144 RUE DE L OLIVIER')).toBeInTheDocument();
       expect(screen.getByText(/parcelle 132058200E0318/)).toBeInTheDocument();
 
-      await u.click(screen.getByRole('button', { name: "Utiliser ce repère pour l'estimation" }));
-      expect(await screen.findByText(PHRASES_ADRESSE.repereUtilise)).toBeInTheDocument();
+      // Le repère de l'adresse s'applique sans clic (fiche 14).
+      expect(n(screen.getByText(/^Repère appliqué :/).textContent)).toBe(
+        'Repère appliqué : même côté de la rue, 6 ventes comparables, médiane 3 600 €/m².',
+      );
       const enregistre = lireProjets(window.localStorage)[0];
       expect(enregistre?.projet.marche.dvf).toEqual({
         medianM2: 3600,
@@ -195,6 +198,14 @@ describe('Onglet Adresse', () => {
       });
       expect(enregistre?.projet.provenance['marche.dvf.rayonMetres']).toBe('dvf');
       expect(enregistre?.adresse?.numero).toBe(144);
+
+      // « Annuler » remet le repère du projet d'exemple, « Appliquer » repose celui de l'adresse.
+      await u.click(screen.getByRole('button', { name: PHRASES_REPERE.annuler }));
+      expect(await screen.findByText(/^Repère de l’adresse non appliqué/)).toBeInTheDocument();
+      expect(lireProjets(window.localStorage)[0]?.projet.marche.dvf?.medianM2).toBe(3050);
+      await u.click(screen.getByRole('button', { name: PHRASES_REPERE.appliquer }));
+      expect(await screen.findByText(/^Repère appliqué :/)).toBeInTheDocument();
+      expect(lireProjets(window.localStorage)[0]?.projet.marche.dvf?.medianM2).toBe(3600);
     },
   );
 
@@ -236,6 +247,14 @@ describe('Onglet Adresse', () => {
         await screen.findByText(PHRASES_ADRESSE.sansRepere, {}, { timeout: 10_000 }),
       ).toBeInTheDocument();
       expect(screen.getByText(PHRASES_ADRESSE.cadastreIndisponible)).toBeInTheDocument();
+      // Adresse enregistrée : une ligne compacte en tête ; « Changer » rouvre le champ, prérempli.
+      const changer = screen.getAllByRole('button', { name: PHRASES_ADRESSE.changer }).at(-1);
+      if (changer === undefined) throw new Error('aucun bouton Changer');
+      const titres = screen.getAllByRole('heading', { name: PHRASES_ADRESSE.titreAdresse });
+      await u.click(changer);
+      expect(screen.getAllByRole('heading', { name: PHRASES_ADRESSE.titreAdresse })).toHaveLength(
+        titres.length + 1,
+      );
       expect(screen.getAllByLabelText('Adresse du bien').at(-1)).toHaveValue(LIEU.libelle);
     },
   );

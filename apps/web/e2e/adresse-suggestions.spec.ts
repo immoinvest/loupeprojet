@@ -104,7 +104,9 @@ test('taper une adresse, la choisir au clavier : l’analyse démarre', async ({
   await expect.poll(() => analyses.length).toBeGreaterThan(0);
   expect(analyses[0]?.get('numero')).toBe('144');
   expect(analyses[0]?.get('codeVoie')).toBe('6659');
-  await expect(page.getByRole('heading', { level: 2, name: 'Le repère de prix' })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { level: 2, name: 'Les ventes, du plus près au plus large' }),
+  ).toBeVisible();
   await expect(champ).toHaveValue("144 Rue de l'Olivier 13005 Marseille");
 });
 
