@@ -66,7 +66,7 @@ function EnteteTriable({
         onClick={() => {
           onTri(cle);
         }}
-        className={`inline-flex items-center gap-1 rounded-sm text-left uppercase survol-texte pointer-coarse:min-h-11 ${
+        className={`inline-flex items-center gap-1 rounded-sm text-left uppercase survol-texte pointer-coarse:min-h-11 pointer-coarse:min-w-11 ${
           actif ? 'text-accent' : ''
         }`}
       >
@@ -183,7 +183,9 @@ export function TableauVentes({ analyse }: { analyse: ReponseAdresse }): JSX.Ele
       {affichees.length === 0 ? (
         <p className="m-0 text-[15px] text-encre-2">{PHRASES_VENTES.aucune}</p>
       ) : (
-        <div className="overflow-x-auto">
+        // `relative` : les textes pour lecteurs d'écran (sr-only, en position absolue) restent dans le
+        // conteneur qui défile au lieu d'élargir la page sur téléphone.
+        <div className="relative overflow-x-auto">
           <table className="w-full border-collapse text-[15px]">
             <thead>
               <tr>
@@ -247,7 +249,7 @@ export function TableauVentes({ analyse }: { analyse: ReponseAdresse }): JSX.Ele
                           onClick={() => {
                             basculerDetail(v.numero);
                           }}
-                          className="rounded-sm text-sm font-semibold text-accent survol-texte pointer-coarse:min-h-11"
+                          className="rounded-sm text-sm font-semibold text-accent survol-texte pointer-coarse:min-h-11 pointer-coarse:min-w-11"
                         >
                           {PHRASES_VENTES.detail}
                           <span className="sr-only"> {dateCourte(v.date)}</span>
