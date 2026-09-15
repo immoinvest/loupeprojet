@@ -24,7 +24,7 @@ export function FilAriane({ etapes }: { readonly etapes: readonly EtapeAriane[] 
             ) : (
               <Link
                 to={etape.vers}
-                className="inline-flex items-center text-encre-3 no-underline survol-texte pointer-coarse:min-h-11"
+                className="inline-flex items-center text-encre-3 no-underline survol-texte pointer-coarse:min-h-11 pointer-coarse:min-w-11 pointer-coarse:justify-center"
               >
                 {etape.libelle}
               </Link>

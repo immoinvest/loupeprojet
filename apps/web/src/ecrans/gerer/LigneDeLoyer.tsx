@@ -67,7 +67,7 @@ export function LigneDeLoyer({
       <Link
         to={lienFicheBien(ligne.location.bienId, { modifier: ligne.location.id })}
         aria-label={modifierLaLocation(montantAffiche, nomDuBien)}
-        className="flex flex-col text-right text-encre tabular-nums no-underline survol-texte pointer-coarse:min-h-11 pointer-coarse:justify-center"
+        className="flex flex-col text-right text-encre tabular-nums no-underline survol-texte pointer-coarse:min-h-11 pointer-coarse:min-w-11 pointer-coarse:justify-center"
       >
         <span className="font-bold underline decoration-bordure decoration-dotted underline-offset-4">
           {montantAffiche}
