@@ -1,6 +1,41 @@
 import { describe, expect, it } from 'vitest';
 
-import { defilementPourVoir } from '@/coque/defilement';
+import { defilementPourCentrer, defilementPourVoir, positionAuRetour } from '@/coque/defilement';
+
+describe('defilementPourCentrer (champ visé par un lien d’hypothèse)', () => {
+  const contenu = { defilement: 1000, hauteurVisible: 800 };
+
+  it('centre le champ sous l’en-tête collé', () => {
+    // Zone visible sous 100 px d'en-tête : 700 px ; champ de 100 px à 300 px sous le haut visible.
+    expect(defilementPourCentrer({ haut: 300, hauteur: 100 }, contenu, 100)).toBe(900);
+  });
+
+  it('un champ plus haut que la zone s’aligne sous le masque', () => {
+    expect(defilementPourCentrer({ haut: 300, hauteur: 900 }, contenu, 100)).toBe(1200);
+  });
+
+  it('le masque ne couvre jamais plus de la moitié de l’écran, ni moins que rien', () => {
+    expect(defilementPourCentrer({ haut: 0, hauteur: 0 }, contenu, 5000)).toBe(
+      defilementPourCentrer({ haut: 0, hauteur: 0 }, contenu, 400),
+    );
+    expect(defilementPourCentrer({ haut: 300, hauteur: 100 }, contenu, -50)).toBe(950);
+  });
+
+  it('jamais sous zéro', () => {
+    expect(
+      defilementPourCentrer({ haut: 10, hauteur: 20 }, { defilement: 0, hauteurVisible: 800 }, 0),
+    ).toBe(0);
+  });
+});
+
+describe('positionAuRetour', () => {
+  it('rend la position notée seulement en revenant par l’historique', () => {
+    expect(positionAuRetour('POP', 480)).toBe(480);
+    expect(positionAuRetour('POP', undefined)).toBe(0);
+    expect(positionAuRetour('PUSH', 480)).toBe(0);
+    expect(positionAuRetour('REPLACE', 480)).toBe(0);
+  });
+});
 
 /** Bande des volets sur un téléphone de 320 px, au repos. */
 const AU_REPOS = { defilement: 0, largeurVisible: 320 };

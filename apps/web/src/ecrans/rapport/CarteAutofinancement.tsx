@@ -5,7 +5,9 @@ import { cascadeAutofinancement } from '@/analyses/rapport';
 import { useModeDocument } from '@/composants/document';
 import { Info } from '@/composants/info';
 import { Carte, GrosChiffre, Ligne, TitreCarte } from '@/composants/ui';
+import { ValeurHypothese } from '@/composants/ValeurHypothese';
 import { euros, eurosSignes, nombre, pourcentage } from '@/formatage/nombres';
+import { cheminLoyer } from '@/hypotheses/liens';
 import {
   explicationAutofinancement,
   explicationCouverture,
@@ -64,7 +66,15 @@ function Cascade({ r }: { r: ResultatsComplets }): JSX.Element {
   const annees = String(r.projet.hypotheses.revente.annees);
   return (
     <div>
-      <Ligne libelle="Loyer" valeur={eurosSignes(c.loyer)} tonValeur="font-bold text-bon" />
+      <Ligne
+        libelle="Loyer"
+        valeur={
+          <ValeurHypothese chemin={cheminLoyer(location.mode)}>
+            {eurosSignes(c.loyer)}
+          </ValeurHypothese>
+        }
+        tonValeur="font-bold text-bon"
+      />
       {c.recuperees > 0 && (
         <Ligne
           libelle="Forfaits de charges et ménage facturés"
@@ -72,17 +82,38 @@ function Cascade({ r }: { r: ResultatsComplets }): JSX.Element {
           tonValeur="text-bon"
         />
       )}
-      <Ligne libelle="Crédit et assurance" valeur={eurosSignes(-c.credit)} />
+      <Ligne
+        libelle={
+          <ValeurHypothese chemin="hypotheses.pret.tauxNominal">
+            Crédit et assurance
+          </ValeurHypothese>
+        }
+        valeur={eurosSignes(-c.credit)}
+      />
       <Ligne
         libelle={libelleSousTotal('Après le crédit')}
         valeur={eurosSignes(c.apresCredit)}
         tonValeur={`font-semibold ${tonSelonSigne(c.apresCredit)}`}
       />
-      <Ligne libelle="Charges, impôts locaux, entretien" valeur={eurosSignes(-c.charges)} />
+      <Ligne
+        libelle={
+          <ValeurHypothese chemin="hypotheses.charges.taxeFonciere">
+            Charges, impôts locaux, entretien
+          </ValeurHypothese>
+        }
+        valeur={eurosSignes(-c.charges)}
+      />
       {/* En courte durée, les nuits louées portent déjà la vacance ; les frais sont dans les charges. */}
       {location.mode !== 'courte_duree' && (
         <Ligne
-          libelle={`${nombre(vacanceSemaines(location))} semaines vides par an`}
+          libelle={
+            <>
+              <ValeurHypothese chemin="hypotheses.location.vacanceSemaines">
+                {`${nombre(vacanceSemaines(location))} semaines`}
+              </ValeurHypothese>{' '}
+              vides par an
+            </>
+          }
           valeur={eurosSignes(-c.vacance)}
         />
       )}
@@ -97,7 +128,10 @@ function Cascade({ r }: { r: ResultatsComplets }): JSX.Element {
           <span className="flex flex-col">
             Impôt
             <span className="text-xs text-encre-3">
-              {REGIMES[r.fiscalite.retenu]}, moyenne sur {annees} ans
+              <ValeurHypothese chemin="hypotheses.fiscalite.regime">
+                {REGIMES[r.fiscalite.retenu]}
+              </ValeurHypothese>
+              , moyenne sur {annees} ans
             </span>
           </span>
         }

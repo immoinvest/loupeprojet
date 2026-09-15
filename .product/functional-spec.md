@@ -127,6 +127,10 @@ Corrections au modèle Excel : travaux soit en charge soit amortis, jamais les d
 - **Travaux** (feature `travaux-etat`, fiche 19) : selon l'état du bien, surface × coût au m² — rénové 0 ; bon état 0 (jusqu'à 150 €/m²) ; à rafraîchir 400 €/m² (150 à 700) ; à rénover 1 200 €/m² (1 000 à 2 000) ; DPE F ou G : + 250 €/m² de rénovation énergétique (200 à 500), moitié pour un bien à rénover ; arrondi à la centaine, TTC, hors aides, sans coefficient maison ni région ; barème « à confirmer » (aucun barème officiel : fourchettes de professionnels, ANAH 55 065 € par rénovation d'ampleur en 2024). Le montant suit l'état, la surface et le DPE tant qu'il n'est pas saisi ; bas, estimé ou haut en un clic ; projets d'avant inchangés. Rappel des interdictions de louer (G 2025, F 2028, E 2034) dans la visite.
 - **Taxe foncière** : taux REI × VL estimée, croisé avec 0,8–1,2 mois de loyer ; « estimation, demander l'avis ».
 
+## Changer une hypothèse depuis le chiffre qu'elle produit
+
+Feature `liens-hypotheses` (fiche 17). Règle : **on change une hypothèse là où l'on est, si l'onglet l'affiche ; sinon on va au champ exact, avec un retour immédiat.** Les chiffres qui reposent directement sur une hypothèse (jamais un résultat calculé comme le cash-flow ou le TRI) sont soulignés en pointillé et mènent au champ : le prêt se règle dans Financement, l'horizon sur le curseur de Revente, l'état du bien dans Estimation ou Hypothèses, le reste dans Hypothèses. Après un saut : « Revenir à [onglet] » (position gardée) et message de l'effet (valeur avant → après, deux chiffres liés au plus). Adresse partageable par fragment (`#hypotheses.location.loyerHc`) ; « Utilisé par » sous chaque champ repris ailleurs.
+
 ## Sources de données (remplissage automatique)
 
 Page de l'annonce (structuré) · texte (LLM) · Géoplateforme (géocodage) · DVF géolocalisées (CSV commune) · ADEME `dpe03existant` · Carte des loyers ANIL 2025 · REI/OFGL (taux TF) · Géorisques · zonage ABC · geo.api.gouv.fr · BDNB Open · seuils de l'usure · barèmes intégrés (notaire, assurance, CFE, comptable, PNO).

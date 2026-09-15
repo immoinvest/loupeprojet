@@ -1,4 +1,4 @@
-import { useId, type JSX } from 'react';
+import { useId, type JSX, type ReactNode } from 'react';
 
 import { useModeDocument } from '@/composants/document';
 import { Info } from '@/composants/info';
@@ -37,6 +37,7 @@ export function ChampHypothese({
   badge,
   onChange,
   aide = d.aide,
+  utilisePar,
 }: {
   descripteur: Descripteur;
   texte: string;
@@ -45,13 +46,18 @@ export function ChampHypothese({
   onChange: (texte: string) => void;
   /** Phrase d'aide sous le champ ; par défaut, celle du descripteur. */
   aide?: string | undefined;
+  /** Les volets qui reprennent ce chiffre (« Utilisé par »), sous le champ. */
+  utilisePar?: ReactNode;
 }): JSX.Element {
   const id = useId();
   const document = useModeDocument();
   const bordure = erreur === undefined ? 'border-bordure' : 'border-probleme';
   const aToi = badge?.libelle === 'à toi';
   return (
-    <div className={`flex flex-col gap-1 rounded-encart p-2 ${aToi ? 'bg-accent-fond' : ''}`}>
+    <div
+      data-champ={d.chemin}
+      className={`flex flex-col gap-1 rounded-encart p-2 ${aToi ? 'bg-accent-fond' : ''}`}
+    >
       <span className="flex items-center justify-between gap-2 text-xs text-encre-3">
         {/* L'icône ⓘ reste hors du libellé : la toucher n'active pas la saisie. */}
         <span className="inline-flex items-center gap-1">
@@ -102,6 +108,7 @@ export function ChampHypothese({
       )}
       {aide !== undefined && <span className="text-xs text-encre-3">{aide}</span>}
       {erreur !== undefined && <span className="text-xs text-probleme">{erreur}</span>}
+      {utilisePar}
     </div>
   );
 }

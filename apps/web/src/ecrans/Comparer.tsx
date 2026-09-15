@@ -1,4 +1,4 @@
-import { prixRetenu } from '@loupe/moteur';
+import { prixRetenu, type Resultats } from '@loupe/moteur';
 import { useMemo, useState, type JSX } from 'react';
 import { Link, useNavigate } from 'react-router';
 
@@ -18,7 +18,9 @@ import {
 } from '@/analyses';
 import { Page, TitrePage } from '@/composants/mise-en-page';
 import { Bouton, Carte, Point } from '@/composants/ui';
+import { ValeurHypothese } from '@/composants/ValeurHypothese';
 import { euros } from '@/formatage/nombres';
+import { cheminLoyer, type CheminLie } from '@/hypotheses/liens';
 import { useProjets } from '@/stockage/ProjetsContext';
 import { STATUTS, type ProjetEnregistre } from '@/stockage/projets';
 import { ETATS } from '@/textes/feux';
@@ -66,6 +68,14 @@ function Selection({
   );
 }
 
+/** Les lignes qui sont une hypothèse du projet : la valeur mène au champ, dans ce projet. */
+const CHEMINS_INDICATEURS: Partial<Record<CodeIndicateur, (r: Resultats) => CheminLie>> = {
+  prix: () => 'hypotheses.achat.prix',
+  negociation: () => 'hypotheses.achat.negociationTaux',
+  loyer: (r) => cheminLoyer(r.projet.hypotheses.location.mode),
+  horizon: () => 'hypotheses.revente.annees',
+};
+
 function Cellule({
   indicateur,
   colonne,
@@ -77,6 +87,7 @@ function Cellule({
 }): JSX.Element {
   const valeur = colonne.valeurs[indicateur.code];
   const feu = indicateur.axe === undefined ? undefined : colonne.feux[indicateur.axe];
+  const cheminIndicateur = CHEMINS_INDICATEURS[indicateur.code];
   const enAvant = valeur !== null && meilleure !== null && valeur === meilleure;
   return (
     <td className={`px-3 py-2.5 align-top ${enAvant ? 'font-bold text-bon-texte' : ''}`}>
@@ -87,7 +98,15 @@ function Cellule({
             <span className="sr-only">{ETATS[feu]}</span>
           </>
         )}
-        {valeur === null ? '—' : indicateur.formater(valeur)}
+        {valeur === null ? (
+          '—'
+        ) : cheminIndicateur === undefined ? (
+          indicateur.formater(valeur)
+        ) : (
+          <ValeurHypothese chemin={cheminIndicateur(colonne.resultats)} projetId={colonne.id}>
+            {indicateur.formater(valeur)}
+          </ValeurHypothese>
+        )}
       </span>
       {indicateur.detail !== undefined && (
         <div className="text-xs font-normal text-encre-3">

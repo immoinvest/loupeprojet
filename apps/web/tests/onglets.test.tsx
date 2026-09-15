@@ -76,9 +76,10 @@ describe('Fiscalité', () => {
     expect(
       screen.getByRole('heading', { name: 'Pendant la location et à la revente' }),
     ).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: "Changer l'horizon" })).toHaveAttribute(
+    // L'horizon mène à son curseur dans Revente (lien d'hypothèse).
+    expect(screen.getByRole('link', { name: /^\d+ ans — modifier Revente dans$/ })).toHaveAttribute(
       'href',
-      expect.stringMatching(/\/projets\/[^/]+\/revente$/),
+      expect.stringMatching(/\/projets\/[^/]+\/revente#hypotheses\.revente\.annees$/),
     );
   });
 

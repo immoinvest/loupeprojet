@@ -2,6 +2,8 @@ import { ETATS, recalerTravaux, type CodeCorrection, type EtatBien } from '@loup
 import type { JSX, ReactNode } from 'react';
 
 import { Carte, Pastille } from '@/composants/ui';
+import { ValeurHypothese } from '@/composants/ValeurHypothese';
+import { CHEMIN_CORRECTION } from '@/hypotheses/liens';
 import { useProjetCourant } from '@/coque/ProjetLayout';
 import { euros, pourcentageSigne } from '@/formatage/nombres';
 import { useProjets } from '@/stockage/ProjetsContext';
@@ -88,7 +90,12 @@ export function CarteEstimation({ repere }: { repere: ReactNode }): JSX.Element 
 
       {repere}
 
-      <div role="group" aria-label="État du bien" className="grid grid-cols-2 gap-2 md:grid-cols-4">
+      <div
+        role="group"
+        aria-label="État du bien"
+        data-champ="bien.etat"
+        className="grid grid-cols-2 gap-2 md:grid-cols-4"
+      >
         {ETATS.map((etat) => {
           const choisi = !e.etatSuppose && e.etat === etat;
           return (
@@ -133,7 +140,11 @@ export function CarteEstimation({ repere }: { repere: ReactNode }): JSX.Element 
                       Source : {SOURCES_CORRECTIONS[c.code]}
                     </span>
                   </th>
-                  <td className={CELLULE}>{pourcentageSigne(c.taux, 1)}</td>
+                  <td className={CELLULE}>
+                    <ValeurHypothese chemin={CHEMIN_CORRECTION[c.code]}>
+                      {pourcentageSigne(c.taux, 1)}
+                    </ValeurHypothese>
+                  </td>
                   <td className={CELLULE}>{euros(c.montant)}</td>
                   <td className={CELLULE}>
                     <label className="-mx-1.5 inline-flex items-center gap-2 rounded-encart px-1.5 text-sm survol-fond pointer-coarse:min-h-11">

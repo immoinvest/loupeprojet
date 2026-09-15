@@ -69,6 +69,28 @@
   }
 }
 
+/* Champ visé par un lien d'hypothèse (coque/champ-cible.ts) : un anneau d'accent qui s'efface en
+   deux secondes ; immobile si l'utilisateur réduit les animations. */
+.mise-en-evidence {
+  animation: mise-en-evidence 2s ease-out;
+}
+@keyframes mise-en-evidence {
+  from,
+  40% {
+    background-color: var(--color-accent-fond);
+    box-shadow: 0 0 0 3px var(--color-accent);
+  }
+  to {
+    box-shadow: 0 0 0 3px transparent;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mise-en-evidence {
+    animation: none;
+    box-shadow: 0 0 0 3px var(--color-accent);
+  }
+}
+
 /* La coque tient dans la fenêtre et seul le contenu défile (AppLayout). Largeur de la barre
    latérale à partir de 1 024 px ; hauteur de la barre d'app des écrans plus étroits (BarreApp). */
 :root {
