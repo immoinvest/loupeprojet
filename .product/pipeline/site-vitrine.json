@@ -1,0 +1,54 @@
+{
+  "feature_slug": "site-vitrine",
+  "title": "Site vitrine deklic.pro (maquette A) et guides SEO de la vague 1",
+  "started_at": "2026-09-15T00:00:00Z",
+  "current_step": "implement",
+  "scope": "apps/site, packages/capture/src/origines.ts, vitest.config.ts, eslint.config.js, .gitignore, README.md",
+  "branch": "feat/site-vitrine",
+  "base": "master (713d27b0) ; master a avancé à cc96d0c6 : rebase avant la PR",
+  "worktree": "C:/Users/errei/Claude/loupe-site",
+  "baseline": {
+    "ci_master": "CI verte sur 713d27b0 (15/09/2026 10:31) et sur cc96d0c6",
+    "local": "typecheck vert ; tests 2 621 passés, 3 échecs par dépassement de délai (machine chargée, 38 min, dossier modifié pendant l'exécution) : non retenus comme régression"
+  },
+  "decisions_pierre": {
+    "maquette": "A « Coller le lien »",
+    "domaine": "deklic.pro (acheté)",
+    "auteur": "Pierre Georgel",
+    "pages_villes": "plus tard"
+  },
+  "steps": {
+    "discovery": {
+      "status": "completed",
+      "output": ".product/features/site-vitrine-discovery.md",
+      "auto_review": "rapport d'exemple calculé par le moteur plutôt qu'écrit à la main (la maquette mélangeait avant et après impôt) ; paramètre texte plutôt que lien pour les partages mobiles"
+    },
+    "specs": {
+      "status": "completed",
+      "stories_count": 12,
+      "output": ".product/specs/site-vitrine-specs.md",
+      "auto_review": "sommaire replié en <details> pour marcher sans JavaScript ; aperçus : liens de production seulement ; absence d'avis vérifiée sur le HTML"
+    },
+    "architecture": {
+      "status": "completed",
+      "output": ".product/architecture/site-vitrine.md",
+      "adr": ".product/adr/010-site-vitrine.md",
+      "auto_review": "pas d'intégration React (Vite 7 du web et Vite 8 d'Astro) ; polices auto-hébergées ; lib sans astro:content pour rester testable ; taille du script du simulateur à mesurer"
+    },
+    "implement": {
+      "status": "in_progress",
+      "stories_completed": 0,
+      "stories_total": 12,
+      "notes": [
+        "Code et contenus écrits : socle, liens, accueil, guides (collection, pages, SEO, vérification du build), simulateur, six guides, README",
+        "Ajouts à l'architecture : contrôle du placement du mot-clé (title, titre, adresse, 100 premiers mots) ; composant <Calcul> pour les exemples chiffrés des guides ; format de règle « annee »",
+        "Écart relevé : plafond micro-BIC 83 600 € (règles du moteur, revenus 2026-2028) contre 77 700 € sur impots.gouv.fr (revenus 2025) ; le guide LMNP cite les deux, à confirmer par Pierre",
+        "Reste : installation, build, astro check, lint (sans .astro/ comme en CI), tests, commits par story"
+      ],
+      "commits": []
+    },
+    "qa_tests": { "status": "pending" },
+    "security": { "status": "pending" },
+    "push": { "status": "pending" }
+  }
+}
