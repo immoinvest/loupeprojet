@@ -1,6 +1,7 @@
 import {
   CreationLocationSchema,
   depotParDefaut,
+  depotTropEleve,
   JOUR_LOYER_DEFAUT,
   JOUR_LOYER_MAX,
   JourSchema,
@@ -140,6 +141,8 @@ export function lireLocation(
   const jourLoyer = lireJourLoyer(s.jourLoyer, signaler);
   const charges = lireMontant(s.charges, 0, 'charges', signaler);
   const depot = lireMontant(s.depot, depotParDefaut(s.type, loyerHorsCharges), 'depot', signaler);
+  // Plafond légal (art. 22, 25-6) : 1 mois de loyer en vide, 2 en meublé.
+  if (depotTropEleve(s.type, 'classique', loyerHorsCharges, depot)) signaler('depot');
   const apl = lireMontant(s.apl, 0, 'apl', signaler);
   // L'aide versée au bailleur est comprise dans le loyer charges comprises (ADR-G16).
   if (apl > loyerHorsCharges + charges) signaler('apl');

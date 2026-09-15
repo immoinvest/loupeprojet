@@ -17,6 +17,10 @@ import { BailProvider } from './gestion/bail/BailContext';
 import { clientBailIndisponible } from './gestion/bail/memoire';
 import { clientBailReseau } from './gestion/bail/reseau';
 import type { ClientBail } from './gestion/bail/types';
+import { FinBailProvider } from './gestion/fin-bail/FinBailContext';
+import { clientFinBailIndisponible } from './gestion/fin-bail/memoire';
+import { clientFinBailReseau } from './gestion/fin-bail/reseau';
+import type { ClientFinBail } from './gestion/fin-bail/types';
 import { GestionProvider } from './gestion/GestionContext';
 import { clientGestionMemoire } from './gestion/memoire';
 import { clientGestionReseau } from './gestion/reseau';
@@ -148,6 +152,8 @@ const CLIENT_GESTION = clientGestionReseau();
 const CLIENT_ARGENT = clientArgentReseau();
 /** La vie du bail (DPE, révision, lettres) : l'API /api/gestion/bail du même worker, même origine. */
 const CLIENT_BAIL = clientBailReseau();
+/** La fin du bail (congé, dépôt, charges, colocataires) : l'API /api/gestion/fin-bail (ADR-G34). */
+const CLIENT_FIN_BAIL = clientFinBailReseau();
 
 /** La synchronisation des projets avec le compte : l'API /api/projets du même worker, même origine. */
 const CLIENT_PROJETS = clientProjetsReseau();
@@ -169,11 +175,13 @@ export function App(): JSX.Element {
               <GestionProvider client={CLIENT_GESTION}>
                 <ArgentProvider client={CLIENT_ARGENT}>
                   <BailProvider client={CLIENT_BAIL}>
-                    <InstallationProvider suivi={SUIVI_INSTALLATION}>
-                      <BrowserRouter>
-                        <Racine />
-                      </BrowserRouter>
-                    </InstallationProvider>
+                    <FinBailProvider client={CLIENT_FIN_BAIL}>
+                      <InstallationProvider suivi={SUIVI_INSTALLATION}>
+                        <BrowserRouter>
+                          <Racine />
+                        </BrowserRouter>
+                      </InstallationProvider>
+                    </FinBailProvider>
                   </BailProvider>
                 </ArgentProvider>
               </GestionProvider>
@@ -198,6 +206,8 @@ export function AppEnMemoire({
   argent,
   // Comme en production sans la migration 0008 : les écrans existants de Gérer restent inchangés.
   bail = clientBailIndisponible,
+  // Comme en production sans la migration 0011 (ADR-G34).
+  finBail = clientFinBailIndisponible,
   projets,
   partage,
   installation = suiviIndisponible,
@@ -209,6 +219,7 @@ export function AppEnMemoire({
   gestion?: ClientGestion;
   argent?: ClientArgent;
   bail?: ClientBail;
+  finBail?: ClientFinBail;
   projets?: ClientProjets;
   partage?: ClientPartage;
   installation?: SuiviInstallation;
@@ -227,11 +238,13 @@ export function AppEnMemoire({
               <GestionProvider client={clientGestion} stockage={stockage}>
                 <ArgentProvider client={clientArgent}>
                   <BailProvider client={bail}>
-                    <InstallationProvider suivi={installation}>
-                      <MemoryRouter initialEntries={[chemin]}>
-                        <Racine />
-                      </MemoryRouter>
-                    </InstallationProvider>
+                    <FinBailProvider client={finBail}>
+                      <InstallationProvider suivi={installation}>
+                        <MemoryRouter initialEntries={[chemin]}>
+                          <Racine />
+                        </MemoryRouter>
+                      </InstallationProvider>
+                    </FinBailProvider>
                   </BailProvider>
                 </ArgentProvider>
               </GestionProvider>

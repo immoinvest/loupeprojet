@@ -58,7 +58,8 @@ export const ERREURS_MODIFIER: Readonly<Record<ChampModification, string>> = {
   charges: 'Indique des charges en euros, ou laisse vide.',
   apl: 'Une aide en euros par mois, au plus le loyer charges comprises.',
   jourLoyer: 'Indique un jour entre 1 et 28.',
-  depot: 'Indique un dépôt en euros, par exemple 1300.',
+  depot:
+    'Indique un dépôt en euros, au plus 1 mois de loyer en location vide et 2 mois en meublé (loi du 6 juillet 1989).',
   libelle: '40 caractères au plus.',
 };
 

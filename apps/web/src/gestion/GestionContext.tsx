@@ -70,6 +70,8 @@ export interface ContexteGestion {
   ) => Promise<ResultatGestion<Locataire>>;
   /** Une location modifiée par un autre module (révision du loyer, B1) : elle remplace l'ancienne. */
   readonly integrerLocation: (location: LocationGeree) => void;
+  /** Un locataire créé par un autre module (colocataire qui arrive, B2) : il rejoint la liste. */
+  readonly integrerLocataire: (locataire: Locataire) => void;
 }
 
 const Contexte = createContext<ContexteGestion | null>(null);
@@ -247,6 +249,13 @@ export function GestionProvider({
       },
       integrerLocation: (location) => {
         remplacerLocation({ ok: true, valeur: location });
+      },
+      integrerLocataire: (locataire) => {
+        fusionner((e) =>
+          e.locataires.some((l) => l.id === locataire.id)
+            ? e
+            : { ...e, locataires: [...e.locataires, locataire] },
+        );
       },
     };
   }, [client, etatCompte, chargement, donnees, erreur, preferences, store]);
