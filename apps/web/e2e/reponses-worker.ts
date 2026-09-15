@@ -28,6 +28,24 @@ const PERIODES = [
   '2025-S1',
 ];
 
+/**
+ * 24 ventes à moins de 300 m, en spirale autour du bien, prix de part et d'autre des quartiles ; les trois premières
+ * dans l'immeuble du bien, aux mêmes coordonnées (une pastille chiffrée sur la carte). Sept à 100 m au plus.
+ */
+const VENTES = Array.from({ length: 24 }, (_, i) => {
+  const tour = i < 3 ? 0 : i;
+  return {
+    lat: Math.round((43.294813 + Math.cos(tour) * (0.0003 + tour * 0.0001)) * 1e6) / 1e6,
+    lon: Math.round((5.393807 + Math.sin(tour) * (0.0004 + tour * 0.00012)) * 1e6) / 1e6,
+    date: `2025-0${String(1 + (i % 9))}-15`,
+    prix: 170_000 + i * 4_000,
+    surface: 50 + (i % 20),
+    prixM2Corrige: 3_150 + i * 40,
+    distanceMetres: 30 + i * 11,
+    groupes: i < 3 ? ['meme_parcelle', 'rayon_100'] : ['rayon_300'],
+  };
+});
+
 const ANALYSE = {
   codeInsee: '13205',
   millesime: '2025',
@@ -67,30 +85,46 @@ const ANALYSE = {
     periode: { debut: '2025-01-15', fin: '2025-08-15' },
     ancienneteMedianeMois: 17,
   },
-  ventesProches: Array.from({ length: 8 }, (_, i) => ({
-    date: `2025-0${String(1 + i)}-15`,
-    prix: 182_000 + i * 9_500,
-    surface: 52 + i * 3,
-    prixM2: 3_500 + i * 40,
-    prixM2Actualise: 3_560 + i * 40,
+  ventesProches: VENTES.map((v, i) => ({
+    date: v.date,
+    prix: v.prix,
+    surface: v.surface,
+    prixM2: Math.round(v.prix / v.surface),
+    prixM2Actualise: v.prixM2Corrige,
     coefficient: 1.017,
+    prixM2Corrige: v.prixM2Corrige,
+    correctionSurface: 1,
     pieces: 2 + (i % 3),
     type: 'appartement',
-    adresse: `${String(120 + i * 2)} rue de l'Olivier, résidence Les Jardins des Cinq-Avenues`,
-    distanceMetres: 20 + i * 25,
-    groupes: ['rayon_200'],
+    adresse:
+      i < 3
+        ? "144 rue de l'Olivier, résidence Les Jardins des Cinq-Avenues"
+        : `${String(120 + i * 2)} rue de l'Olivier, résidence Les Jardins des Cinq-Avenues`,
+    distanceMetres: v.distanceMetres,
+    groupes: v.groupes,
+    carrez: v.surface - 1.5,
+    parcelle: '13205000AB0144',
+    dependances: i % 5 === 0 ? 1 : 0,
+    terrain: null,
+    lots: 2,
+    dpe:
+      i % 4 === 0
+        ? {
+            etiquetteDpe: i % 8 === 0 ? 'D' : 'F',
+            etiquetteGes: 'C',
+            consommationM2: 240,
+            periodeConstruction: '1948-1974',
+            energieChauffage: 'Gaz naturel',
+            date: '2024-11-02',
+            surface: v.surface,
+          }
+        : null,
   })),
-  // 24 ventes à moins de 300 m, en spirale autour du bien, prix de part et d'autre des quartiles.
-  ventesCarte: Array.from({ length: 24 }, (_, i) => ({
-    lat: 43.294813 + Math.cos(i) * (0.0003 + i * 0.0001),
-    lon: 5.393807 + Math.sin(i) * (0.0004 + i * 0.00012),
-    date: `2025-0${String(1 + (i % 9))}-15`,
-    prix: 170_000 + i * 4_000,
-    surface: 50 + (i % 20),
-    prixM2Corrige: 3_150 + i * 40,
-    distanceMetres: 30 + i * 11,
-    groupes: ['rayon_300'],
-  })),
+  ventesProchesTotal: 24,
+  ventesProchesTronquees: false,
+  dpeVentes: 'ok',
+  // Les mêmes ventes sur la carte (même clé date · prix · surface · distance).
+  ventesCarte: VENTES,
   tendance: {
     zone: 'commune',
     periodeReference: '2025-S1',

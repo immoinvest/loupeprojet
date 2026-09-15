@@ -28,7 +28,7 @@ Statuts : `idée` → `en discussion` → `spécifiée` → `en cours` → `livr
 | 12  | [Menu Analyser : Mes projets et +](12-menu-analyser-mes-projets.md)                | « Mes projets · N [+] » en tête d'Analyser (remplace deux lignes) ; même principe « Mes biens · N [+] » dans Gérer                        | livrée (PR #82)                                                 | —                |
 | 13  | [Formulaire Vérifier sans saisie](13-formulaire-verifier-sans-saisie.md)           | Compteurs, tuiles, échelle DPE, curseurs, ville trouvée par le code postal : presque plus de chiffres à taper ; le strict minimum d'abord | livrée (PR #81)                                                 | 05, 06           |
 | 14  | [Estimation : adresse d'abord, ventes détaillées](14-estimation-adresse-ventes.md) | Adresse en premier, repère appliqué seul après l'analyse, min/max, ventes triables et paginées avec DPE et dépendances                    | livrée (PR #87)                                                 | 09               |
-| 15  | [Carte des ventes interactive](15-carte-interactive.md)                            | Zoom et déplacement faciles, plein écran, clic sur une vente, carte liée au tableau, fonds photo et cadastre                              | en cours (session de nuit S8, pas de PR au 15/09 à l'aube)      | 14               |
+| 15  | [Carte des ventes interactive](15-carte-interactive.md)                            | Zoom et déplacement faciles, plein écran, clic sur une vente, carte liée au tableau, fonds photo et cadastre                              | livrée (PR #88)                                                 | 14               |
 | 16  | [Fiscalité : impôt total avec la revente](16-fiscalite-impot-total-revente.md)     | Par régime : impôt pendant l'exploitation + impôt à la revente (amortissements réintégrés) = impôt total                                  | livrée (PR #83)                                                 | 06               |
 | 17  | [Liens vers les hypothèses](17-liens-vers-hypotheses.md)                           | Chaque chiffre supposé mène au champ exact où le changer (sur place ou dans Hypothèses), avec retour et effet affiché                     | livrée (session S9)                                             | 10               |
 | 18  | [Statut : menu soigné](18-statut-menu-joli.md)                                     | Le menu du statut du projet aux couleurs de Deklic au lieu de la liste système, accessible au clavier                                     | livrée (PR #82)                                                 | —                |
@@ -40,7 +40,7 @@ Statuts : `idée` → `en discussion` → `spécifiée` → `en cours` → `livr
 
 ## Ordre suggéré
 
-Livrées : `01` à `11` (14/09/2026) ; `12`, `13`, `14`, `16` à `22` pendant les sessions de nuit du 15/09/2026 (fiches de session : `../sessions/nuit/`). Restent : `15` (session S8) et `23` (PR ouverte, actions de Pierre).
+Livrées : `01` à `11` (14/09/2026) ; `12` à `22` pendant les sessions de nuit du 15/09/2026 (fiches de session : `../sessions/nuit/`). Reste : `23` (PR ouverte, actions de Pierre).
 
 `03` (une heure) → `01` → `04` (réutilise le composant `Curseur` de la fiche 06) → `02` (touche au moteur et à tous les onglets : mieux après 01 et 04) → `09` (en cours) → `05` (le plus gros : moteur + formulaires + fiscalité ; les questions de visite propres à la colocation et à la moyenne durée sont déjà écrites, voir `07`).
 

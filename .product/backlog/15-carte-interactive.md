@@ -1,6 +1,6 @@
 # 15 — Carte des ventes interactive
 
-Statut : `idée` · Notée le 14/09/2026 · Dépend de : 14 (tableau des ventes triable, DPE des ventes) pour la liaison carte ↔ tableau · Taille : une session (web seul)
+Statut : `livrée` (feature `carte-interactive`, 15/09/2026 : [discovery](../features/carte-interactive-discovery.md), [specs](../specs/carte-interactive-specs.md), [architecture](../architecture/carte-interactive.md)) · Notée le 14/09/2026 · Dépend de : 14 (tableau des ventes triable, DPE des ventes) pour la liaison carte ↔ tableau · Taille : une session (web seul)
 
 ## La demande de Pierre
 
