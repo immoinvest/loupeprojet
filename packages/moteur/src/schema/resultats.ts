@@ -134,6 +134,7 @@ export const ReventeResultatSchema = z.strictObject({
   ira: n,
   plusValue: z.strictObject({
     prixCession: n,
+    prixAcquisition: n,
     fraisRetenus: n,
     travauxRetenus: n,
     reintegration: n,

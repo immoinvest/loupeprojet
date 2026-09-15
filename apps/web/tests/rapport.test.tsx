@@ -155,7 +155,7 @@ describe('Rapport : prix, impôts et revente', () => {
     await utilisateur.click(
       within(revente).getByRole('button', { name: "Explication : Qu'est-ce qu'il vous restera ?" }),
     );
-    expect(n(within(revente).getByRole('tooltip').textContent)).toContain('57 799 € net vendeur');
+    expect(n(within(revente).getByRole('tooltip').textContent)).toContain('57 493 € net vendeur');
   });
 
   it('la revente affiche le multiple sur apport avec sa bulle', async () => {
@@ -168,7 +168,7 @@ describe('Rapport : prix, impôts et revente', () => {
       within(revente).getByRole('button', { name: 'Explication : Multiple sur apport' }),
     );
     expect(n(within(revente).getByRole('tooltip').textContent)).toContain(
-      '13 229 € ÷ 19 337 € = × 0,7',
+      '12 924 € ÷ 19 337 € = × 0,7',
     );
   });
 

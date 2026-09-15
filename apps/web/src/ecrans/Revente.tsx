@@ -171,10 +171,10 @@ export function Revente(): JSX.Element {
             <div>
               <Ligne libelle="Prix de cession, frais déduits" valeur={euros(pv.prixCession)} />
               <Ligne
-                libelle="Prix d'achat"
+                libelle="Prix d'achat dans l'acte, hors honoraires de l'acquéreur"
                 valeur={
                   <ValeurHypothese chemin="hypotheses.achat.prix">
-                    {euros(r.achat.prixRetenu)}
+                    {euros(pv.prixAcquisition)}
                   </ValeurHypothese>
                 }
               />
