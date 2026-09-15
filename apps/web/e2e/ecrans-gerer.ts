@@ -23,10 +23,11 @@ export const ECRANS_QUITTANCES_FICHES: readonly Ecran[] = [
     },
   },
   {
+    // L'ancienne adresse redirige vers « Nouveau locataire » (gerer-parcours, G1d).
     nom: 'Louer un bien vacant',
     chemin: '/gerer/biens/bien-prado?louer=1',
     ouvrir: async (page) => {
-      await expect(page.getByRole('form', { name: 'Louer le bien' })).toBeVisible();
+      await expect(page.getByRole('form', { name: 'Nouveau locataire' })).toBeVisible();
     },
   },
   {
@@ -36,6 +37,25 @@ export const ECRANS_QUITTANCES_FICHES: readonly Ecran[] = [
       await expect(
         page.getByRole('heading', { level: 1, name: 'Quittance de loyer' }),
       ).toBeVisible();
+    },
+  },
+];
+
+/** Les écrans ajoutés par `gerer-parcours` (G1d) : la fiche d'un locataire et sa liste des biens ouverte. */
+export const ECRANS_GERER_PARCOURS: readonly Ecran[] = [
+  {
+    nom: 'Fiche d’un locataire',
+    chemin: '/gerer/locataires/julie',
+    ouvrir: async (page) => {
+      await expect(page.getByRole('list', { name: 'Ses 12 derniers loyers' })).toBeVisible();
+    },
+  },
+  {
+    nom: 'Nouveau locataire (choix du bien)',
+    chemin: '/gerer/locataires/nouveau',
+    ouvrir: async (page) => {
+      await page.getByRole('button', { name: 'Bien Parking Prado' }).click();
+      await expect(page.getByRole('listbox', { name: 'Bien' })).toBeVisible();
     },
   },
 ];
@@ -72,4 +92,11 @@ export const ECRANS_GERER_BIENS: readonly Ecran[] = [
       await expect(page.getByRole('region', { name: 'Supprimer ce bien ?' })).toBeVisible();
     },
   },
+];
+
+/** Tous les écrans de Gérer mesurés après « Gérer (loyers du mois) », feature par feature. */
+export const ECRANS_GERER: readonly Ecran[] = [
+  ...ECRANS_QUITTANCES_FICHES,
+  ...ECRANS_GERER_BIENS,
+  ...ECRANS_GERER_PARCOURS,
 ];

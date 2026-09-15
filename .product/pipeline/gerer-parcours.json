@@ -1,0 +1,69 @@
+{
+  "feature_slug": "gerer-parcours",
+  "title": "Gérer, pages reliées (G1d) : fiche d'un locataire, formulaire unique « Nouveau locataire », retour à l'origine, fil d'Ariane, raccourcis, « À faire »",
+  "started_at": "2026-09-15T13:10:00Z",
+  "current_step": "implement",
+  "scope": "apps/web (src/gestion, src/ecrans/gerer, src/textes, src/App.tsx, e2e) ; aucune API, aucune migration",
+  "branch": "feat/gerer-parcours",
+  "worktree": "C:\\Users\\errei\\Claude\\loupeprojet\\.claude\\worktrees\\suspicious-lovelace-2707d5",
+  "base": "master (713d27b0)",
+  "prerequis": "PR #80 (G1c) fusionnée le 15/09/2026 à 00 h 36 (vérifié par gh pr view 80)",
+  "decisions_pierre": "15/09/2026 : page unique « Nouveau locataire » ; retour à la page d'origine avec message et lien vers la fiche ; « À faire » à trois lignes (retards > vacants > e-mails manquants) ; G1-6 dans G1d ; export avant suppression du compte (G1-9) et téléphone (G1-8) hors G1d",
+  "baseline": {
+    "status": "pending",
+    "source": "CI de master verte sur 713d27b0 (fusion de la PR #95) ; npm ci du worktree bloqué par un vite dev du 14/09 lancé depuis ce worktree (port 5180), arrêté, puis relancé"
+  },
+  "steps": {
+    "discovery": {
+      "status": "completed",
+      "output": ".product/features/gerer-parcours-discovery.md"
+    },
+    "specs": {
+      "status": "completed",
+      "output": ".product/specs/gerer-parcours-specs.md",
+      "stories_count": 5
+    },
+    "architecture": {
+      "status": "completed",
+      "output": ".product/architecture/gerer-parcours.md"
+    },
+    "implement": {
+      "status": "completed",
+      "stories_completed": 5,
+      "stories_total": 5,
+      "commits": [
+        "df9a64cf docs : discovery, specs, architecture",
+        "fdd6aab1 US-1 fiche d'un locataire, noms en liens, fil d'Ariane",
+        "41782470 US-2 formulaire unique Nouveau locataire, retour à l'origine",
+        "baec9453 US-3 raccourcis : retour des quittances, mois de la frise, montant d'un loyer",
+        "db86feeb docs communes (CLAUDE.md, README, specs, registre)",
+        "dbcea373 US-4 « À faire » en haut des loyers du mois",
+        "bce9d113 US-5 écrans de référence et parcours Playwright",
+        "315409cb fusion de master (PR #96 compte-appareils, #98 rapport-espaces) : conflit du registre résolu en gardant les trois entrées"
+      ],
+      "ecarts": [
+        "choix du bien dans gestion/saisie-nouveau-locataire.ts plutôt que saisie-louer.ts",
+        "précision d'une ligne de « À faire » en small : un span dans un li se confondait avec la ligne du loyer du même bien",
+        "focus de l'e-mail par useLayoutEffect : le formulaire ouvert par ?modifier=1 apparaît après le chargement des données"
+      ],
+      "notes": "machine chargée (autre session Vitest, CPU 100 %) : tests d'écran lancés fichier par fichier sur un seul processus ; délais de 10 s ajoutés aux premiers rendus des tests Fiche et Loyers ; vrai défaut trouvé par les tests : nom accessible du lien « Louer » de Mes biens (espace perdue avant le sr-only)"
+    },
+    "qa_tests": {
+      "status": "completed",
+      "fusion": "b636531a fusion de master (28 commits : site vitrine, menu lisible, correctif impôt global) ; conflits de architecture-overview, features-registry et functional-spec résolus en reprenant master puis en y reportant G1d ; npm ci refait",
+      "verification": "comme la CI le 15/09/2026 à 21 h 33 : lint, format, typecheck, 328 fichiers et 2 760 tests avec les seuils de couverture, build de tous les espaces",
+      "incident": "premier passage tué à 17 h 28 pendant les tests (code 0x40010004), shells indisponibles ensuite ; relancé après la reprise de session"
+    },
+    "security": {
+      "status": "completed",
+      "score": "98/100",
+      "notes": "web seul ; retour validé (redirections ouvertes testées), identifiants encodés, aucun HTML injecté, paramètres limités aux données du compte, écriture existante de G1b réutilisée ; restes bénins : retour vers n'importe quelle page de Gérer, message réaffiché en revenant dans l'historique"
+    },
+    "push": { "status": "pending" }
+  },
+  "auto_revue": {
+    "discovery": "quatre décisions posées à Pierre avant d'écrire ; téléphone écarté par Pierre donc aucune migration ; « Sans locataire : … » remplacé par « À faire » sans rien cacher (« Voir les N autres ») ; retour par l'adresse pour les documents, message par l'état de navigation",
+    "specs": "cinq stories (quatre Must, une Should) ; deux clics comptés pour louer, corriger un e-mail, corriger un loyer, retrouver une quittance ; adresses hostiles testées ; ancien ?louer=1 redirigé",
+    "architecture": "ADR-G19 à G23 : module d'adresses unique, retour validé, formulaire unique toujours avec un bien choisi (MenuChoix n'a pas d'état vide), « À faire » déduit sur le mois en cours, fiche du locataire calculée côté web"
+  }
+}

@@ -99,7 +99,10 @@ describe('Document imprimable', () => {
 
     await utilisateur.click(screen.getByRole('button', { name: D.imprimer }));
     expect(imprimer).toHaveBeenCalledTimes(1);
-    expect(screen.getByRole('link', { name: /Loyers/ })).toHaveAttribute('href', '/gerer/loyers');
+    expect(screen.getByRole('link', { name: /Tous les loyers/ })).toHaveAttribute(
+      'href',
+      '/gerer/loyers',
+    );
   });
 
   it('quittance d’une chambre en colocation payée en deux fois : locataires, chambre, reçus annulés', async () => {
@@ -184,7 +187,10 @@ describe('Document imprimable', () => {
       await screen.findByRole('heading', { level: 1, name: D.introuvable }),
     ).toBeInTheDocument();
     expect(screen.getByText(D.introuvableTexte)).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /Loyers/ })).toHaveAttribute('href', '/gerer/loyers');
+    expect(screen.getByRole('link', { name: /Tous les loyers/ })).toHaveAttribute(
+      'href',
+      '/gerer/loyers',
+    );
     expect(screen.queryByRole('button', { name: D.imprimer })).toBeNull();
   });
 

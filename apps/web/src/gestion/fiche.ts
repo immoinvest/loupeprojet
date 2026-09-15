@@ -70,12 +70,22 @@ export function friseDuBien(
   bienId: string,
   aujourdhui: string,
 ): readonly MoisDuBien[] {
-  const duBien = { ...donnees, locations: donnees.locations.filter((l) => l.bienId === bienId) };
+  const duBien = donnees.locations.filter((l) => l.bienId === bienId);
+  return friseDesLocations(donnees, duBien, aujourdhui);
+}
+
+/** Les douze derniers mois de ces locations (d'un bien, ou d'un locataire), du plus ancien au mois en cours. */
+export function friseDesLocations(
+  donnees: Donnees,
+  locations: readonly LocationGeree[],
+  aujourdhui: string,
+): readonly MoisDuBien[] {
+  const choisies = { ...donnees, locations: [...locations] };
   const frise: MoisDuBien[] = [];
   let periode = periodeDe(aujourdhui);
   for (let i = 0; i < MOIS_DE_LA_FRISE; i += 1) {
     // Les lignes sont triées par urgence : la première donne le statut du mois.
-    const { lignes } = resumeDuMois(duBien, periode, aujourdhui);
+    const { lignes } = resumeDuMois(choisies, periode, aujourdhui);
     const [plusUrgente] = lignes;
     frise.unshift({
       periode,

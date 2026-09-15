@@ -15,8 +15,8 @@ import type { ResultatGestion } from '@/gestion/types';
 import { ERREURS_GESTION } from '@/textes/gerer';
 import { depuisLe, loyerAPartirDe, TEXTES_MODIFIER as M } from '@/textes/gerer-biens';
 import { TEXTES_FICHE as F, titreLocation } from '@/textes/gerer-fiche';
-import { nomsDesLocataires } from '@/textes/gerer-loyers';
 
+import { NomsDeLocataires } from '../NomsDeLocataires';
 import { ModifierLocation } from './ModifierLocation';
 import { TerminerLocation } from './TerminerLocation';
 
@@ -27,19 +27,22 @@ export function CarteLocation({
   location,
   donnees,
   aujourdhui,
+  modifierOuvert = false,
 }: {
   readonly location: LocationGeree;
   readonly donnees: EtatGestion;
   readonly aujourdhui: string;
+  /** Arrivée par le montant d'une ligne de loyer : le formulaire « Modifier » est déjà ouvert. */
+  readonly modifierOuvert?: boolean;
 }): JSX.Element {
   const { terminerLocation, modifierLocation } = useGestion();
-  const [ouvert, setOuvert] = useState<Formulaire>(null);
+  const [ouvert, setOuvert] = useState<Formulaire>(modifierOuvert ? 'modifier' : null);
   const [occupe, setOccupe] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
   const aVenir = location.debut > aujourdhui;
-  const noms = [location.locataireId, ...location.colocataireIds]
-    .flatMap((id) => donnees.locataires.filter((l) => l.id === id))
-    .map((l) => `${l.prenom} ${l.nom}`);
+  const locataires = [location.locataireId, ...location.colocataireIds].flatMap((id) =>
+    donnees.locataires.filter((l) => l.id === id),
+  );
   // Ceux de ce mois-ci, ou ceux du mois d'entrée pour une location à venir ; puis le prochain changement.
   const periode = periodeDe(aVenir ? location.debut : aujourdhui);
   const montants = montantsDuMois(location, periode);
@@ -70,7 +73,9 @@ export function CarteLocation({
   return (
     <Carte>
       <TitreCarte>{titreLocation(location.libelle, aVenir)}</TitreCarte>
-      <p className="m-0 text-[17px] font-bold">{nomsDesLocataires(noms)}</p>
+      <p className="m-0 text-[17px] font-bold">
+        <NomsDeLocataires locataires={locataires} />
+      </p>
       <div>
         <Ligne
           libelle={F.loyer}
