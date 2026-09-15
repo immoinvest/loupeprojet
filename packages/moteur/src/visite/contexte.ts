@@ -87,6 +87,11 @@ export const travauxPrevus: PredicatVisite = (c) =>
   c.projet.hypotheses.achat.travaux > 0 ||
   c.projet.bien.etat === 'a_renover' ||
   c.projet.bien.etat === 'a_rafraichir';
+/** Le montant des travaux vient de l'estimation selon l'état (pas d'un devis ni d'une saisie). */
+export const travauxEstimes: PredicatVisite = (c) => {
+  const { travaux, travauxChoix } = c.projet.hypotheses.achat;
+  return travaux > 0 && travauxChoix !== undefined && travauxChoix !== 'saisi';
+};
 export const honorairesAgence: PredicatVisite = (c) =>
   c.projet.hypotheses.achat.honorairesAgence > 0;
 export const loyerEncadre: PredicatVisite = (c) =>

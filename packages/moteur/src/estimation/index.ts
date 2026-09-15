@@ -11,6 +11,7 @@ import { confianceEstimation, type ConfianceEstimation } from './confiance';
 
 export type { NiveauConfiance } from '../regles/types';
 export * from './confiance';
+export * from './travaux';
 
 export const ETATS: readonly EtatBien[] = ['a_renover', 'a_rafraichir', 'bon_etat', 'renove'];
 

@@ -6,12 +6,21 @@ const montant = (): z.ZodNumber => z.number().nonnegative();
 /** Remise maximale acceptée sur le prix affiché (30 %). */
 export const NEGOCIATION_MAX = 0.3;
 
+/**
+ * D'où vient le montant des travaux : l'estimation selon l'état (valeur estimée, bas ou haut de la
+ * fourchette) ou la saisie de la personne. Absent = saisi : les projets d'avant ne bougent pas.
+ */
+export const TravauxChoixSchema = z.enum(['estime', 'bas', 'haut', 'saisi']);
+export type TravauxChoix = z.infer<typeof TravauxChoixSchema>;
+
 export const AchatSchema = z.object({
   /** Prix affiché, honoraires d'agence inclus s'ils sont à la charge de l'acquéreur. */
   prix: z.number().positive(),
   honorairesAgence: montant().default(0),
   honorairesChargeAcquereur: z.boolean().default(true),
   travaux: montant().default(0),
+  /** Recalculé depuis l'état, la surface et le DPE tant qu'il ne vaut pas « saisi » (voir `recalerTravaux`). */
+  travauxChoix: TravauxChoixSchema.optional(),
   travauxRenovationEnergetique: z.boolean().default(false),
   mobilier: montant().default(0),
   /** Remise obtenue ou visée sur le prix affiché, en proportion (0,05 = −5 %) ; les honoraires en euros ne bougent pas. */

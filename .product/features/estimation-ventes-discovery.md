@@ -16,14 +16,14 @@ Dans l'onglet Estimation : l'adresse d'abord quand elle manque ; le repère de l
 
 ## Livrables (outputs)
 
-| Temps | Où | Quoi |
-| --- | --- | --- |
-| A | `apps/web` | ordre des cartes, ligne compacte d'adresse, repère automatique et Annuler, carte Repère supprimée (contenu dans la carte Estimation), colonnes Min / Max |
-| B | `apps/worker` | `ventesProches` : toutes les comparables jusqu'à 300, `ventesProchesTotal`, `ventesProchesTronquees`, `carrez`, `parcelle` ; contrat v7 |
-| B | `apps/web` | `trierVentes`, `filtrerVentes`, `pageDe` purs ; tableau des ventes triable (`aria-sort`), paginé, filtré, détail dépliable |
-| C | `data` | colonnes `dependances`, `terrain`, `lots` en fin de CSV DVF, ancien format toléré |
-| C | `apps/worker` | lecture des colonnes ; rapprochement des DPE ADEME des ventes (clé BAN, surface ±10 %, 18 mois avant la vente, paquets de 50, cache 7 jours) |
-| C | `apps/web` | colonne DPE triable (A → G, inconnus à la fin), filtre « DPE F ou G », détails DPE dans le dépliant |
+| Temps | Où            | Quoi                                                                                                                                                     |
+| ----- | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A     | `apps/web`    | ordre des cartes, ligne compacte d'adresse, repère automatique et Annuler, carte Repère supprimée (contenu dans la carte Estimation), colonnes Min / Max |
+| B     | `apps/worker` | `ventesProches` : toutes les comparables jusqu'à 300, `ventesProchesTotal`, `ventesProchesTronquees`, `carrez`, `parcelle` ; contrat v7                  |
+| B     | `apps/web`    | `trierVentes`, `filtrerVentes`, `pageDe` purs ; tableau des ventes triable (`aria-sort`), paginé, filtré, détail dépliable                               |
+| C     | `data`        | colonnes `dependances`, `terrain`, `lots` en fin de CSV DVF, ancien format toléré                                                                        |
+| C     | `apps/worker` | lecture des colonnes ; rapprochement des DPE ADEME des ventes (clé BAN, surface ±10 %, 18 mois avant la vente, paquets de 50, cache 7 jours)             |
+| C     | `apps/web`    | colonne DPE triable (A → G, inconnus à la fin), filtre « DPE F ou G », détails DPE dans le dépliant                                                      |
 
 ## Périmètre
 

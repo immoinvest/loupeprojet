@@ -14,6 +14,8 @@ import {
 import { PHRASES_ACHAT, libelleNegociation, phrasePrixRetenu, resumeTravaux } from '@/textes/achat';
 import { eurosArrondis } from '@/textes/estimation';
 
+import { TravauxEstimes } from './TravauxEstimes';
+
 const GRILLE = 'grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3';
 
 const CHAMPS_PRINCIPAUX = GROUPE_ACHAT.champs.filter(
@@ -115,8 +117,9 @@ export function CarteAchat({
           {resumeTravaux(travaux, mobilier)}
         </button>
         {travauxOuverts && (
-          <div id="champs-travaux" className={GRILLE}>
-            {champsTravaux.map(rendre)}
+          <div id="champs-travaux" className="flex flex-col gap-2">
+            <TravauxEstimes projet={projet} estimation={resultats.travaux} changer={changer} />
+            <div className={GRILLE}>{champsTravaux.map(rendre)}</div>
           </div>
         )}
       </div>

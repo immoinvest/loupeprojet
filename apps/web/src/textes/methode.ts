@@ -5,6 +5,7 @@ import type { Defauts } from '@/analyses';
 import { pct, pctSigne, type ConstanteMethode, type SectionMethode } from './methode-commun';
 import { sectionEstimation } from './methode-estimation';
 import { sectionLocation } from './methode-location';
+import { sectionTravaux } from './methode-travaux';
 import {
   sectionAcquisition,
   sectionCashflow,
@@ -42,6 +43,7 @@ export function sectionsMethode(regles: Regles, defauts: Defauts): SectionMethod
     sectionRevente(regles, defauts),
     sectionTri(),
     sectionEstimation(regles),
+    sectionTravaux(regles),
     sectionVerdict(regles),
     sectionScenarios(regles),
     sectionDefauts(defauts),

@@ -2,7 +2,10 @@ import {
   CHAMP_LOYER_PAR_MODE,
   LocationSchema,
   ModeLocationSchema,
+  TravauxChoixSchema,
+  choisirTravaux,
   defautsPourMode,
+  recalerTravaux,
   loyerConnu,
   loyerMensuelReference,
   obtenirRegles,
@@ -23,6 +26,16 @@ export type Application =
   | { readonly ok: false; readonly erreur: string };
 
 type Provenance = Record<string, string>;
+
+export const CHEMIN_TRAVAUX = 'hypotheses.achat.travaux';
+/** Pseudo-champ des tuiles Bas · Estimé · Haut et de « Revenir à l'estimation ». */
+export const CHEMIN_CHOIX_TRAVAUX = 'hypotheses.achat.travauxChoix';
+/** Les caractéristiques du bien dont dépendent les travaux estimés. */
+const CHEMINS_TRAVAUX_ESTIMES: ReadonlySet<string> = new Set([
+  'bien.etat',
+  'bien.surface',
+  'bien.dpe',
+]);
 
 /** Les valeurs de départ du nouveau type sont « estimées » ; celles de l'ancien type ne valent plus. */
 function provenanceDuType(
@@ -109,16 +122,32 @@ export function appliquerSaisie(
     if (mode.data === projet.hypotheses.location.mode) return { ok: true, projet };
     return { ok: true, projet: changerDeType(projet, mode.data) };
   }
+  if (descripteur.chemin === CHEMIN_CHOIX_TRAVAUX) {
+    const choix = TravauxChoixSchema.safeParse(conversion.valeur);
+    if (!choix.success) return { ok: false, erreur: 'Choix de travaux inconnu.' };
+    return { ok: true, projet: choisirTravaux(projet, choix.data) };
+  }
   const suivant = ecrireChemin(projet, descripteur.chemin, conversion.valeur);
   // Les clés de provenance contiennent des points (« pret.tauxNominal ») : écriture directe, pas par chemin.
-  return {
-    ok: true,
-    projet: {
-      ...suivant,
-      provenance: {
-        ...(suivant.provenance ?? {}),
-        [cleProvenance(descripteur.chemin)]: 'utilisateur',
-      },
+  const ecrit: ProjetEntree = {
+    ...suivant,
+    provenance: {
+      ...(suivant.provenance ?? {}),
+      [cleProvenance(descripteur.chemin)]: 'utilisateur',
     },
   };
+  if (descripteur.chemin === CHEMIN_TRAVAUX) {
+    // Un montant saisi ne suit plus l'état du bien.
+    const { achat } = ecrit.hypotheses;
+    return {
+      ok: true,
+      projet: {
+        ...ecrit,
+        hypotheses: { ...ecrit.hypotheses, achat: { ...achat, travauxChoix: 'saisi' } },
+      },
+    };
+  }
+  if (CHEMINS_TRAVAUX_ESTIMES.has(descripteur.chemin))
+    return { ok: true, projet: recalerTravaux(ecrit) };
+  return { ok: true, projet: ecrit };
 }
