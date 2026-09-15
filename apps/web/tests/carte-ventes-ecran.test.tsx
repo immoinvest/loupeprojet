@@ -88,7 +88,11 @@ async function analyser(analyse: ReponseAdresse): Promise<void> {
   const u = userEvent.setup();
   await u.type(screen.getByLabelText('Adresse du bien'), '144 rue de l’Olivier');
   await u.click(screen.getByRole('button', { name: 'Analyser' }));
-  await screen.findByRole('heading', { name: 'Le repère de prix' }, { timeout: 10_000 });
+  await screen.findByRole(
+    'heading',
+    { name: 'Les ventes, du plus près au plus large' },
+    { timeout: 10_000 },
+  );
 }
 
 describe('Carte des ventes dans l’onglet Estimation', () => {

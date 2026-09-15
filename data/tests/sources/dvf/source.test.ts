@@ -75,18 +75,18 @@ describe('executerDvf', () => {
 
     // Là où les ventes sont rares, les plus anciennes comptent : le CSV garde les cinq dossiers annuels.
     expect(await lireSortie('dvf/2025/2A004.csv')).toBe(
-      'date,prix,surface,type,pieces,lat,lon,idParcelle,numero,suffixe,codeVoie,voie,carrez\n' +
-        '2023-12-31,100000,40,appartement,2,41.91,8.71,2A004000CC0006,7,,0120,RUE BONAPARTE,40\n' +
-        '2024-01-01,150000,50,appartement,2,41.9,8.7,2A004000CB0005,6,,0700,RUE DES TROIS MARIE,50.4\n' +
-        '2025-01-09,136000,66,appartement,4,41.934774,8.740565,2A004000BO0412,9001,,A090,RES DES CANNES,67.09\n' +
-        '2025-01-13,93000,27,appartement,1,41.924773,8.735188,2A004000BW0375,9002,,0990,AV NAPOLEON 3,27.01\n' +
-        '2025-06-15,120000,31,appartement,0,,,2A004000BW0999,9002,,0990,AV NAPOLEON 3,31.5\n' +
-        '2025-12-31,160000,40,appartement,2,41.92,8.73,2A004000CA0004,5,,0600,RUE DU ROI DE ROME,40.3\n',
+      'date,prix,surface,type,pieces,lat,lon,idParcelle,numero,suffixe,codeVoie,voie,carrez,dependances,terrain,lots\n' +
+        '2023-12-31,100000,40,appartement,2,41.91,8.71,2A004000CC0006,7,,0120,RUE BONAPARTE,40,0,,1\n' +
+        '2024-01-01,150000,50,appartement,2,41.9,8.7,2A004000CB0005,6,,0700,RUE DES TROIS MARIE,50.4,0,,1\n' +
+        '2025-01-09,136000,66,appartement,4,41.934774,8.740565,2A004000BO0412,9001,,A090,RES DES CANNES,67.09,1,,1\n' +
+        '2025-01-13,93000,27,appartement,1,41.924773,8.735188,2A004000BW0375,9002,,0990,AV NAPOLEON 3,27.01,0,,1\n' +
+        '2025-06-15,120000,31,appartement,0,,,2A004000BW0999,9002,,0990,AV NAPOLEON 3,31.5,0,,1\n' +
+        '2025-12-31,160000,40,appartement,2,41.92,8.73,2A004000CA0004,5,,0600,RUE DU ROI DE ROME,40.3,0,,1\n',
     );
     expect(await lireSortie('dvf/2025/2A062.csv')).toBe(
-      'date,prix,surface,type,pieces,lat,lon,idParcelle,numero,suffixe,codeVoie,voie,carrez\n' +
-        '2024-07-10,250000,100,maison,4,42.0381,8.9494,2A0620000B1204,5012,,B180,SAINT SYLVESTRE,\n' +
-        '2025-01-02,311610,118,maison,4,42.038082,8.949341,2A0620000B1203,5011,,B180,SAINT SYLVESTRE,\n',
+      'date,prix,surface,type,pieces,lat,lon,idParcelle,numero,suffixe,codeVoie,voie,carrez,dependances,terrain,lots\n' +
+        '2024-07-10,250000,100,maison,4,42.0381,8.9494,2A0620000B1204,5012,,B180,SAINT SYLVESTRE,,0,800,\n' +
+        '2025-01-02,311610,118,maison,4,42.038082,8.949341,2A0620000B1203,5011,,B180,SAINT SYLVESTRE,,0,1001,\n',
     );
     await expect(lireSortie('dvf/2025/2A041.csv')).rejects.toThrow(); // VEFA écartée
     await expect(lireSortie('dvf/2025/index.json')).rejects.toThrow(); // passe partielle

@@ -185,6 +185,18 @@ const StatistiquesPrixSchema = z.object({
 });
 export type StatistiquesPrix = z.infer<typeof StatistiquesPrixSchema>;
 
+/** DPE probable d'un logement vendu, rapproché par le Worker (adresse, surface, date) ; contrat v7. */
+const DpeVenteSchema = z.object({
+  etiquetteDpe: lettre,
+  etiquetteGes: lettre.nullable(),
+  consommationM2: z.number().nonnegative().nullable(),
+  periodeConstruction: z.string().nullable(),
+  energieChauffage: z.string().nullable(),
+  date: z.string(),
+  surface: z.number().positive(),
+});
+export type DpeVente = z.infer<typeof DpeVenteSchema>;
+
 /** GET /marche/adresse : ventes autour d'une adresse précise, par groupe, et repère de prix. */
 export const ReponseAdresseSchema = z.object({
   codeInsee: z.string(),
@@ -230,8 +242,22 @@ export const ReponseAdresseSchema = z.object({
       adresse: z.string().nullable(),
       distanceMetres: z.number().nonnegative().nullable(),
       groupes: z.array(CodeGroupeSchema),
+      /** Contrat v7 (Worker 0.11) : absents des réponses plus anciennes. */
+      carrez: z.number().positive().nullable().optional(),
+      parcelle: z.string().nullable().optional(),
+      cleBan: z.string().nullable().optional(),
+      /** `null` quand le CSV DVF publié ne porte pas encore la colonne. */
+      dependances: z.number().int().nonnegative().nullable().optional(),
+      terrain: z.number().positive().nullable().optional(),
+      lots: z.number().int().positive().nullable().optional(),
+      dpe: DpeVenteSchema.nullable().optional(),
     }),
   ),
+  /** Comparables avant le plafond de 300, et s'il a joué ; absents avant le contrat v7. */
+  ventesProchesTotal: z.number().int().nonnegative().optional(),
+  ventesProchesTronquees: z.boolean().optional(),
+  /** DPE des ventes : lus, base ADEME indisponible, ou ventes sans adresse ; absent avant le contrat v7. */
+  dpeVentes: z.enum(['ok', 'indisponible', 'sans_adresse']).optional(),
   /** Évolution locale des prix qui a servi à actualiser les ventes ; `null` quand elle est inconnue. */
   tendance: z
     .object({
@@ -275,6 +301,7 @@ export type ReponseAdresse = z.infer<typeof ReponseAdresseSchema>;
 export type TendanceAdresse = NonNullable<ReponseAdresse['tendance']>;
 export type ReferenceAdresse = NonNullable<ReponseAdresse['reference']>;
 export type VenteCarte = NonNullable<ReponseAdresse['ventesCarte']>[number];
+export type VenteProcheAdresse = ReponseAdresse['ventesProches'][number];
 
 /** GET /proxy/dpe : DPE de la base ADEME enregistrés autour de l'adresse, du plus proche au plus récent. */
 export const DpeAdresseSchema = z.object({

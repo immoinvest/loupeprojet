@@ -43,6 +43,7 @@ type Fetcher = Dependances['fetcher'];
 
 /** Au nord du bien le 4e arrondissement, ailleurs le 5e ; cadastre sans parcelle. */
 const fetcher: Fetcher = (url) => {
+  if (url.hostname === 'data.ademe.fr') return Promise.resolve(reponseJson({ results: [] }));
   if (url.hostname !== 'geo.api.gouv.fr') return Promise.resolve(reponseJson({ features: [] }));
   const lat = Number(url.searchParams.get('lat'));
   return Promise.resolve(reponseJson([{ code: lat > LAT + 0.001 ? '13204' : '13205' }]));

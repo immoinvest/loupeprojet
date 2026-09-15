@@ -14,6 +14,7 @@ import {
   lireVentes,
   MIN_VENTES_PENTE,
   MAX_VENTES_CARTE,
+  MAX_VENTES_PROCHES,
   ParametresAdresseSchema,
   PENTE_MIN,
   pentePrixSurface,
@@ -168,6 +169,7 @@ const BIEN: BienAdresse = {
   voisines: ['132058200E0319'],
   type: 'appartement',
   surface: 60,
+  codeInsee: '13205',
 };
 
 function vente(o: Partial<Ligne> = {}): VenteDvf {
@@ -215,8 +217,9 @@ const BOITE_PAR_DEFAUT = (): Promise<Response> =>
 /** Faux API Carto : la parcelle du bien au point, trois parcelles dans la boîte élargie. */
 function fauxCadastre(appels: URL[], boite = BOITE_PAR_DEFAUT): Fetcher {
   return (url) => {
-    // API Géo : aucune commune voisine autour de ce point.
+    // API Géo : aucune commune voisine autour de ce point. Base ADEME : aucun DPE.
     if (url.hostname === 'geo.api.gouv.fr') return Promise.resolve(reponseJson([]));
+    if (url.hostname === 'data.ademe.fr') return Promise.resolve(reponseJson({ results: [] }));
     appels.push(url);
     const geom = url.searchParams.get('geom') ?? '';
     return geom.includes('"Point"')
@@ -278,9 +281,20 @@ describe('lecture du CSV des ventes', () => {
         codeVoie: null,
         voie: null,
         carrez: null,
+        dependances: null,
+        terrain: null,
+        lots: null,
       },
     ]);
     expect(lireVentes('')).toEqual([]);
+  });
+
+  it('lit dépendances, terrain et lots des CSV publiés à partir du 15/09/2026', () => {
+    const [avec, sans] = lireVentes(
+      `${ENTETE},dependances,terrain,lots\n${ligne()},1,,2\n${ligne({ type: 'maison' })},0,850,\n`,
+    );
+    expect(avec).toMatchObject({ dependances: 1, terrain: null, lots: 2 });
+    expect(sans).toMatchObject({ dependances: 0, terrain: 850, lots: null });
   });
 });
 
@@ -468,9 +482,17 @@ describe('analyserAdresse', () => {
       periode: { debut: '2024-11-02', fin: '2025-03-01' },
     });
     expect(r.ventesProches).toHaveLength(8);
+    expect(r.ventesProchesTotal).toBe(8);
+    expect(r.ventesProchesTronquees).toBe(false);
     expect(r.ventesProches[0]).toMatchObject({
       adresse: '144 RUE DE L OLIVIER',
       distanceMetres: 0,
+      carrez: 58.5,
+      parcelle: '132058200E0318',
+      cleBan: '13205_6659_00144',
+      dependances: null,
+      terrain: null,
+      lots: null,
     });
     expect(r.ventesProches.map((v) => v.distanceMetres)).toEqual([0, 0, 12, 18, 40, 60, 90, 150]);
     // La carte : les mêmes comparables, tous à 300 m au plus, avec leurs coordonnées.
@@ -531,6 +553,11 @@ describe('analyserAdresse', () => {
     expect(seules.ventesProches[0]?.distanceMetres).toBeGreaterThan(300);
     expect(seules.ventesCarte).toEqual([]);
     expect(r.ventesCarte).toHaveLength(MAX_VENTES_CARTE);
+    // Le tableau : toutes les comparables (la vente à 320 m comprise), plafonnées aux plus proches.
+    expect(r.ventesProchesTotal).toBe(MAX_VENTES_CARTE + 6);
+    expect(r.ventesProchesTronquees).toBe(true);
+    expect(r.ventesProches).toHaveLength(MAX_VENTES_PROCHES);
+    expect(Math.max(...r.ventesProches.map((v) => v.distanceMetres ?? 0))).toBeLessThanOrEqual(50);
     const distances = r.ventesCarte.map((v) => v.distanceMetres);
     expect(distances[0]).toBe(1);
     expect([...distances].sort((a, b) => a - b)).toEqual(distances);

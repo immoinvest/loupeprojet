@@ -52,6 +52,35 @@ export {
   type OptionAdresse,
 } from './suggestions';
 export {
+  appliquerRepere,
+  decisionRepere,
+  instantaneRepere,
+  memeRepere,
+  repereSaisiALaMain,
+  restaurerRepere,
+  type DecisionRepere,
+  type InstantaneRepere,
+} from './repere';
+export {
+  CLES_TRI,
+  dateMoinsJours,
+  filtrerVentes,
+  JOURS_RECENTES,
+  pageDe,
+  prixAujourdhui,
+  SANS_FILTRE,
+  TAILLE_PAGE,
+  TRI_DEFAUT,
+  trierVentes,
+  triSuivant,
+  valeurDeTri,
+  type CleTri,
+  type FiltresVentes,
+  type PageVentes,
+  type SensTri,
+  type Tri,
+} from './ventes';
+export {
   clientHorsLigne,
   clientWorker,
   CONTRAT_ADRESSE,
@@ -77,6 +106,7 @@ export {
   type ChampsIa,
   type CodeGroupe,
   type DpeAdresse,
+  type DpeVente,
   type NiveauRisqueAdresse,
   type ReponseRisques,
   type RisqueAdresse,
@@ -87,6 +117,7 @@ export {
   type StatistiquesPrix,
   type TendanceAdresse,
   type VenteCarte,
+  type VenteProcheAdresse,
 } from './contrat';
 export {
   completerAvecIa,

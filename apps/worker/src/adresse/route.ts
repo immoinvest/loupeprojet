@@ -12,6 +12,7 @@ import { millesimesDvfAEssayer } from '../marche/millesime';
 import { cleCache } from '../proxy/cache';
 import { analyserAdresse, type Actualiser } from './analyse';
 import { voisinageDe, type Voisinage } from './cadastre';
+import { avecDpe, lireDpeVentes, type DpeDesVentes } from './dpe-ventes';
 import {
   coefficientPour,
   lireTendance,
@@ -29,13 +30,28 @@ export const TTL_ADRESSE_SECONDES = 24 * 3600;
 export const TTL_CADASTRE_SECONDES = 30 * 24 * 3600;
 /** À incrémenter quand le contrat de réponse change : les réponses en cache en dépendent. */
 // Monter aussi `CONTRAT_ADRESSE` dans apps/web/src/enrichissement/client.ts (cache HTTP du navigateur).
-const VERSION_CONTRAT = 6;
+const VERSION_CONTRAT = 7;
 
 export const SOURCE_DVF = {
   nom: 'Demandes de valeurs foncières géolocalisées (Etalab, à partir des données DGFiP)',
   url: 'https://www.data.gouv.fr/datasets/demandes-de-valeurs-foncieres-geolocalisees',
   licence: 'Licence Ouverte 2.0',
 };
+
+/** Ajoutée aux sources quand au moins une vente a un DPE probable. */
+export const SOURCE_ADEME = {
+  nom: 'DPE des logements existants depuis juillet 2021 (ADEME)',
+  url: 'https://data.ademe.fr/datasets/dpe03existant',
+  licence: 'Licence Ouverte 2.0',
+};
+
+export type EtatDpeVentes = 'ok' | 'indisponible' | 'sans_adresse';
+
+/** `sans_adresse` : aucune vente n'a de voie ni de numéro, la base ADEME n'est pas interrogée. */
+export function etatDpeVentes(adresses: number, dpe: DpeDesVentes): EtatDpeVentes {
+  if (adresses === 0) return 'sans_adresse';
+  return dpe.complet ? 'ok' : 'indisponible';
+}
 
 export const ParametresAdresseSchema = z.object({
   codeInsee: z.string().regex(/^(\d{5}|2[AB]\d{3})$/),
@@ -190,9 +206,15 @@ export function creerAnalyseAdresse(deps: Dependances): Handler<BlankEnv, '/marc
         voisines: voisinage?.voisines ?? [],
         type: p.type,
         surface: p.surface,
+        codeInsee: p.codeInsee,
       },
       actualiser,
     );
+    // DPE probable des ventes : une requête ADEME par paquet d'adresses, après l'analyse (il faut les adresses).
+    const adresses = analyse.ventesProches.flatMap((v) => (v.cleBan === null ? [] : [v.cleBan]));
+    const dpe = await lireDpeVentes(deps, adresses);
+    const ventesProches = avecDpe(analyse.ventesProches, dpe);
+    const dpeTrouve = ventesProches.some((v) => v.dpe !== null);
     const maintenant = deps.maintenant();
     const texte = JSON.stringify({
       codeInsee: p.codeInsee,
@@ -201,6 +223,8 @@ export function creerAnalyseAdresse(deps: Dependances): Handler<BlankEnv, '/marc
       parcellesVoisines: voisinage?.voisines ?? [],
       cadastre: voisinage === null ? 'indisponible' : 'ok',
       ...analyse,
+      ventesProches,
+      dpeVentes: etatDpeVentes(adresses.length, dpe),
       // Ancienneté mesurée à la date de la réponse (cache de 24 h : au mois près).
       reference:
         analyse.reference === null
@@ -212,10 +236,10 @@ export function creerAnalyseAdresse(deps: Dependances): Handler<BlankEnv, '/marc
       ventesCommune: commune?.ventes.length ?? 0,
       communesVoisines: voisines.map((v) => ({ codeInsee: v.codeInsee, ventes: v.ventes.length })),
       tendance: actualisations.get(p.codeInsee)?.resume ?? null,
-      sources: commune === null ? [] : [SOURCE_DVF],
+      sources: commune === null ? [] : [SOURCE_DVF, ...(dpeTrouve ? [SOURCE_ADEME] : [])],
       obtenuLe: new Date(maintenant).toISOString(),
     });
-    if (!passe.panne && voisinage !== null && autour.complet) {
+    if (!passe.panne && voisinage !== null && autour.complet && dpe.complet) {
       await ecrireCache(deps, cle, texte, TTL_ADRESSE_SECONDES);
     }
     return repondre(c, texte, 'MISS');

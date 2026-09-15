@@ -17,6 +17,9 @@ function vente(date: string): Vente {
     codeVoie: null,
     voie: null,
     carrez: null,
+    dependances: 0,
+    terrain: null,
+    lots: null,
   };
 }
 

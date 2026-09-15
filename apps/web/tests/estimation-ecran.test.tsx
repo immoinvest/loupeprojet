@@ -160,7 +160,7 @@ describe('Onglet Estimation', () => {
       ).toBeInTheDocument();
       expect(screen.getByText(/3\s048/)).toBeInTheDocument();
 
-      await u.click(screen.getByRole('button', { name: "Utiliser ce repère pour l'estimation" }));
+      // Le repère de l'adresse s'applique sans clic, actualisé au dernier semestre de la tendance.
       expect(await screen.findByText(/Ventes ramenées au 1er semestre 2025/)).toBeInTheDocument();
       expect(lireProjets(window.localStorage).find((p) => p.id === id)?.projet.marche.dvf).toEqual({
         medianM2: 3600,
