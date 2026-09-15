@@ -1,0 +1,256 @@
+---
+import { getCollection } from 'astro:content';
+
+import CarteExemple from '../composants/CarteExemple.astro';
+import CarteGuide from '../composants/CarteGuide.astro';
+import ChampAnnonce from '../composants/ChampAnnonce.astro';
+import DonneesStructurees from '../composants/DonneesStructurees.astro';
+import LienBouton from '../composants/LienBouton.astro';
+import { application, graphe, organisation, siteWeb } from '../lib/donnees-structurees';
+import { publies } from '../lib/guides/controles';
+import { tempsDeLecture } from '../lib/guides/lecture';
+import { LIENS } from '../liens-du-build';
+import Base from '../mises-en-page/Base.astro';
+
+const derniersGuides = publies(await getCollection('guides')).slice(0, 3);
+
+const SOURCES = ['Ventes DVF', 'DPE de l’ADEME', 'Loyers de l’ANIL', 'Géorisques', 'INSEE'];
+
+const ETAPES = [
+  {
+    titre: 'Collez le lien',
+    texte: 'Prix, surface, DPE, charges : l’annonce est lue pour vous.',
+  },
+  {
+    titre: 'Vérifiez l’essentiel',
+    texte: 'Prix, surface, commune, loyer visé. Le reste est estimé, et la source est dite.',
+  },
+  {
+    titre: 'Lisez le rapport',
+    texte: 'Cinq feux, chaque chiffre expliqué, chaque hypothèse modifiable.',
+  },
+];
+
+const PUBLICS = [
+  {
+    titre: 'Votre premier investissement',
+    texte:
+      'Vous hésitez devant une annonce et votre tableur ne parle ni de fiscalité, ni de revente, ni du prix du quartier.',
+  },
+  {
+    titre: 'Vous comparez plusieurs biens',
+    texte:
+      'Chaque annonce devient un projet. Comparez-les ligne à ligne, avec les quatre régimes fiscaux côte à côte.',
+  },
+  {
+    titre: 'Vous louez déjà',
+    texte: 'Loyers du mois, quittances, fiches des biens et des locataires, en deux clics.',
+  },
+];
+
+const RAPPORT = [
+  { titre: 'Financement', texte: 'Mensualité, TAEG, taux d’usure, deux offres de banque comparées.' },
+  {
+    titre: 'Fiscalité',
+    texte: 'Micro-BIC, LMNP au réel, micro-foncier, nu au réel : l’impôt total, revente comprise.',
+  },
+  {
+    titre: 'Estimation du prix',
+    texte: 'Les ventes réelles autour de l’adresse, sur une carte, avec une note de confiance.',
+  },
+  { titre: 'Revente', texte: 'Plus-value, TRI et ce qu’il vous reste, de 1 à 30 ans.' },
+];
+
+const LOYERS_EXEMPLE = [
+  { bien: 'T2 · Villeurbanne', montant: '650 €', statut: 'Reçu', classe: 'bg-bon-fond text-bon-texte' },
+  {
+    bien: 'Studio · Lyon 7e',
+    montant: '480 €',
+    statut: 'En partie',
+    classe: 'bg-surveiller-fond text-surveiller-texte',
+  },
+  {
+    bien: 'T3 · Saint-Étienne',
+    montant: '590 €',
+    statut: 'En retard',
+    classe: 'bg-probleme-fond text-probleme-texte',
+  },
+];
+---
+
+<Base
+  titre="Investissement locatif : analysez une annonce | Deklic"
+  description="Collez le lien d'une annonce immobilière : Deklic calcule crédit, cash-flow, impôts et revente, et compare le prix aux ventes réelles. Gratuit, sans compte."
+  chemin="/"
+>
+  <DonneesStructurees
+    slot="tete"
+    donnees={graphe([organisation(), siteWeb(), application(LIENS.origine)])}
+  />
+
+  <section
+    class="mx-auto grid max-w-6xl items-center gap-12 px-4 py-10 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:gap-16 lg:px-8 lg:py-20"
+  >
+    <div>
+      <p class="font-display text-xs font-semibold tracking-[0.12em] text-accent uppercase">
+        Gratuit · sans compte
+      </p>
+      <h1
+        class="mt-4 text-4xl leading-[1.04] font-extrabold tracking-tight sm:text-5xl lg:text-[3.5rem]"
+      >
+        Collez une annonce. Voyez si elle est <span class="text-accent">rentable</span> avant de visiter.
+      </h1>
+      <p class="mt-5 max-w-xl text-lg leading-relaxed text-encre-2">
+        Deklic lit l’annonce, la compare aux ventes réelles du quartier et calcule le crédit, le
+        cash-flow, les impôts et la revente. Vous vérifiez quelques chiffres, le rapport est prêt.
+      </p>
+      <ChampAnnonce id="lien-annonce" class="mt-8" />
+    </div>
+    <CarteExemple />
+  </section>
+
+  <div class="border-y border-accent-bordure bg-accent-fond">
+    <div
+      class="mx-auto flex max-w-6xl flex-wrap items-center gap-x-7 gap-y-2 px-4 py-4 text-sm text-encre-2 sm:px-6 lg:px-8"
+    >
+      <p class="font-display font-semibold text-encre">Comparé aux données publiques</p>
+      <ul class="flex flex-wrap gap-x-6 gap-y-1">
+        {SOURCES.map((source) => <li>{source}</li>)}
+      </ul>
+    </div>
+  </div>
+
+  <section
+    id="comment-ca-marche"
+    aria-labelledby="titre-etapes"
+    class="mx-auto max-w-6xl scroll-mt-4 px-4 py-16 sm:px-6 lg:px-8"
+  >
+    <p class="font-display text-xs font-semibold tracking-[0.12em] text-accent uppercase">
+      Comment ça marche
+    </p>
+    <h2 id="titre-etapes" class="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">
+      Trois étapes, pas de tableur
+    </h2>
+    <ol class="mt-8 grid gap-6 md:grid-cols-3">
+      {
+        ETAPES.map((etape, index) => (
+          <li class="grid grid-cols-[auto_1fr] items-start gap-4">
+            <span
+              aria-hidden="true"
+              class="grid size-10 place-items-center rounded-full bg-accent font-display font-bold text-white"
+            >
+              {index + 1}
+            </span>
+            <div>
+              <h3 class="text-lg font-semibold">{etape.titre}</h3>
+              <p class="mt-1 text-encre-2">{etape.texte}</p>
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+  </section>
+
+  <section
+    id="pour-qui"
+    aria-labelledby="titre-publics"
+    class="mx-auto max-w-6xl scroll-mt-4 px-4 pb-16 sm:px-6 lg:px-8"
+  >
+    <p class="font-display text-xs font-semibold tracking-[0.12em] text-accent uppercase">Pour qui</p>
+    <h2 id="titre-publics" class="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">
+      Pour décider seul, sans se tromper de calcul
+    </h2>
+    <div class="mt-8 grid gap-4 md:grid-cols-3">
+      {
+        PUBLICS.map((publicCible) => (
+          <div class="rounded-carte border border-bordure bg-surface p-6">
+            <h3 class="text-lg font-semibold">{publicCible.titre}</h3>
+            <p class="mt-2 text-encre-2">{publicCible.texte}</p>
+          </div>
+        ))
+      }
+    </div>
+    <h3 class="sr-only">Ce que contient le rapport</h3>
+    <ul class="mt-8 grid border-t border-bordure sm:grid-cols-2 lg:grid-cols-4">
+      {
+        RAPPORT.map((bloc) => (
+          <li class="border-b border-bordure py-5 pr-5">
+            <p class="font-display font-semibold">{bloc.titre}</p>
+            <p class="mt-1 text-sm text-encre-2">{bloc.texte}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <section
+    id="gerer"
+    aria-labelledby="titre-gerer"
+    class="mx-auto max-w-6xl scroll-mt-4 px-4 pb-16 sm:px-6 lg:px-8"
+  >
+    <div
+      class="grid items-center gap-8 rounded-[24px] bg-accent p-6 text-white sm:p-10 lg:grid-cols-[1.2fr_1fr]"
+    >
+      <div>
+        <p class="font-display text-xs font-semibold tracking-[0.12em] text-flash-fond uppercase">
+          Après l’achat
+        </p>
+        <h2 id="titre-gerer" class="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">
+          Gérez vos locations au même endroit
+        </h2>
+        <p class="mt-3 max-w-lg text-accent-bordure">
+          Marquez un loyer reçu, émettez la quittance, suivez les retards. Avec un compte gratuit.
+        </p>
+        <LienBouton href={LIENS.gerer} variante="blanc" class="mt-6">Gérer mes locations</LienBouton>
+      </div>
+      <div class="rounded-carte bg-surface p-4 text-encre">
+        <p class="px-1 font-display text-xs font-semibold tracking-[0.08em] text-encre-3 uppercase">
+          Exemple · loyers du mois
+        </p>
+        <ul class="mt-2 divide-y divide-bordure">
+          {
+            LOYERS_EXEMPLE.map((ligne) => (
+              <li class="flex items-center justify-between gap-3 px-1 py-3 text-sm">
+                <span>{ligne.bien}</span>
+                <span class="ml-auto font-display font-semibold tabular-nums">{ligne.montant}</span>
+                <span
+                  class:list={[
+                    'rounded-full px-2.5 py-0.5 font-display text-xs font-semibold',
+                    ligne.classe,
+                  ]}
+                >
+                  {ligne.statut}
+                </span>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  {
+    derniersGuides.length > 0 && (
+      <section aria-labelledby="titre-guides" class="mx-auto max-w-6xl px-4 pb-8 sm:px-6 lg:px-8">
+        <div class="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <p class="font-display text-xs font-semibold tracking-[0.12em] text-accent uppercase">
+              Guides
+            </p>
+            <h2 id="titre-guides" class="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">
+              Apprendre avant d’acheter
+            </h2>
+          </div>
+          <a href="/guides/" class="font-display font-semibold survol-texte">
+            Tous les guides →
+          </a>
+        </div>
+        <div class="mt-8 grid gap-4 md:grid-cols-3">
+          {derniersGuides.map((guide) => (
+            <CarteGuide guide={guide} minutes={tempsDeLecture(guide.body ?? '')} />
+          ))}
+        </div>
+      </section>
+    )
+  }
+</Base>
