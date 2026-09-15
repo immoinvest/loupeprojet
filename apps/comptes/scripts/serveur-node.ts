@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 
 import { creerApp } from '../src/app';
 import { envoyeurJournal } from '../src/courriel';
+import { depotArgentD1 } from '../src/gestion/argent/depot-d1';
 import { depotD1 } from '../src/gestion/depot-d1';
 import {
   lireOriginesSupplementaires,
@@ -40,6 +41,7 @@ const app = creerApp({
   secret: SECRET_DEV,
   base,
   gestion: depotD1(d1SurSqlite(base).base),
+  argent: depotArgentD1(d1SurSqlite(base).base),
   projets: depotProjetsD1(d1SurSqlite(base).base),
   partages: depotPartagesD1(d1SurSqlite(base).base, SECRET_DEV),
   courriel: envoyeurJournal(journalConsole),
