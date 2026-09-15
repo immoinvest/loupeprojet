@@ -51,8 +51,20 @@ describe('propriétés — tableau d’amortissement', () => {
   });
 });
 
+/**
+ * Le TRI est une racine de la VAN : juste avant et juste après le taux trouvé, la VAN change de signe.
+ * On ne teste pas « VAN ≈ 0 » en euros : pour un TRI très négatif, la VAN varie de plusieurs dizaines
+ * d'euros par millionième de taux, et un reste de quelques millièmes d'euro n'est qu'un arrondi machine.
+ */
+function encadreUneRacine(serie: readonly number[], taux: number): boolean {
+  const ecart = 1e-6;
+  const avant = van(serie, taux - ecart);
+  const apres = van(serie, taux + ecart);
+  return van(serie, taux) === 0 || Math.sign(avant) !== Math.sign(apres);
+}
+
 describe('propriétés — TRI', () => {
-  it('le TRI trouvé annule la valeur actuelle nette', () => {
+  it('le TRI trouvé est une racine de la valeur actuelle nette', () => {
     fc.assert(
       fc.property(
         fc.integer({ min: 1_000, max: 100_000 }),
@@ -61,11 +73,19 @@ describe('propriétés — TRI', () => {
         (mise, flux, sortie) => {
           const serie = [-mise, ...flux.slice(0, -1), (flux.at(-1) ?? 0) + sortie];
           const taux = tri(serie);
-          if (taux !== null) expect(Math.abs(van(serie, taux))).toBeLessThan(1e-3);
+          if (taux !== null) expect(encadreUneRacine(serie, taux)).toBe(true);
         },
       ),
       { numRuns: 60 },
     );
+  });
+
+  it('TRI très négatif (−80 %) : racine encadrée même si la VAN au taux trouvé reste à 0,001 €', () => {
+    // Tirage de la CI du 14/09/2026 (graine −1848825631) : VAN −42,82 € et +42,82 € à ±1e-6 du taux.
+    const serie = [-1_012, 15_421, 272, 7_076, 9_819, -2_251];
+    const taux = tri(serie)!;
+    expect(taux).toBeCloseTo(-0.8017, 4);
+    expect(encadreUneRacine(serie, taux)).toBe(true);
   });
 });
 
