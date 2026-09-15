@@ -33,7 +33,7 @@ apps/web/e2e/coque.spec.ts            menu et en-tête en vue après un long dé
 apps/web/src/index.css                token --largeur-menu (14rem) ; scroll-padding-top retiré de html (le document ne défile plus) ; body min-height 100dvh ; commentaire de --hauteur-barre-app
 apps/web/src/coque/AppLayout.tsx      racine flex h-dvh overflow-hidden, grille lg:[var(--largeur-menu)_1fr] lg:grid-rows-[minmax(0,1fr)] ; main min-h-0 flex-1 overflow-y-auto ; useRetourEnHaut ; print:
 apps/web/src/coque/BarreApp.tsx       plus sticky (elle est hors du conteneur qui défile) ; fond plein
-apps/web/src/coque/Sidebar.tsx        trois zones : haut (logo, Nouveau projet), milieu overflow-y-auto (Mes projets, Comparer), bas (aide, Installer, Profil) ; overflow-hidden, marges resserrées
+apps/web/src/coque/Sidebar.tsx        trois zones : haut (logo, Nouveau projet), milieu overflow-y-auto (Mes projets, Comparer), bas (Outils, Profil ; l'extension et l'installation sont dans Mon compte depuis le 15/09/2026) ; overflow-hidden, marges resserrées
 apps/web/src/coque/ProjetLayout.tsx   cadre <div> du projet portant les variables ; en-tête sticky compact (rangées de 48 / 44 px, une rangée de 56 px à 2xl) ; useMesuresEnTete (ResizeObserver) ; sous md, top négatif
 apps/web/src/ecrans/Hypotheses.tsx    Synthese : top-[var(--hauteur-entete-projet,0px)]
 apps/web/e2e/formats.ts               mesurer : débordement = max(document, main) ; main n'excuse pas un élément qui déborde
@@ -60,7 +60,7 @@ AppLayout (h-dvh overflow-hidden)
 ├── Sidebar (aside)                      < lg : tiroir fixe ; ≥ lg : colonne de la grille, h-full, overflow-hidden
 │   ├── haut     logo, Nouveau projet
 │   ├── milieu   overflow-y-auto : Mes projets, Comparer      ← seule zone qui défile
-│   └── bas      aide, Installer l'application, Profil
+│   └── bas      Outils, Profil (extension et installation : Mon compte)
 └── main (min-h-0 flex-1 overflow-y-auto, ref = contenuRef)
     └── Outlet
         └── ProjetLayout : <div data-cadre-projet style={--decalage-entete, --hauteur-entete-projet}>
