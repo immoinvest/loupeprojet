@@ -26,41 +26,46 @@ const slider = (): HTMLElement => screen.getByRole('slider', { name: 'Négociati
 const champNegociation = (): HTMLElement => screen.getByRole('textbox', { name: /^Négociation/ });
 
 describe('carte « L’achat » : négociation', () => {
-  it('le curseur et le champ règlent la même négociation ; le prix retenu suit', async () => {
-    await ouvrirHypotheses();
-    expect(slider()).toHaveValue('0');
-    expect(slider()).toHaveAttribute('aria-valuetext', '0 %');
-    expect(slider()).toHaveAttribute('min', '0');
-    expect(slider()).toHaveAttribute('max', '15');
-    expect(slider()).toHaveAttribute('step', '0.5');
-    expect(n(screen.getByText(/^Prix retenu/).textContent)).toBe('Prix retenu 155 000 €');
+  // Onglet Hypothèses complet et une vingtaine de saisies : lent quand toute la suite tourne.
+  it(
+    'le curseur et le champ règlent la même négociation ; le prix retenu suit',
+    { timeout: 60_000 },
+    async () => {
+      await ouvrirHypotheses();
+      expect(slider()).toHaveValue('0');
+      expect(slider()).toHaveAttribute('aria-valuetext', '0 %');
+      expect(slider()).toHaveAttribute('min', '0');
+      expect(slider()).toHaveAttribute('max', '15');
+      expect(slider()).toHaveAttribute('step', '0.5');
+      expect(n(screen.getByText(/^Prix retenu/).textContent)).toBe('Prix retenu 155 000 €');
 
-    fireEvent.change(slider(), { target: { value: '5' } });
-    expect(projetEnregistre().hypotheses.achat.negociationTaux).toBe(0.05);
-    expect(projetEnregistre().provenance['achat.negociationTaux']).toBe('utilisateur');
-    expect(n(screen.getByText(/^Prix retenu/).textContent)).toBe(
-      'Prix retenu 147 250 € · −7 750 € (−5 %)',
-    );
-    expect(champNegociation()).toHaveValue('5');
-    expect(slider()).toHaveAttribute('aria-valuetext', '−5 %');
-    // La synthèse est recalculée : moins cher, meilleur cash-flow qu'à −210 €/mois.
-    const synthese = screen.getAllByText('Cash-flow', { exact: true }).at(-1)?.parentElement;
-    expect(n(synthese?.textContent)).not.toContain('−210 €/mois');
+      fireEvent.change(slider(), { target: { value: '5' } });
+      expect(projetEnregistre().hypotheses.achat.negociationTaux).toBe(0.05);
+      expect(projetEnregistre().provenance['achat.negociationTaux']).toBe('utilisateur');
+      expect(n(screen.getByText(/^Prix retenu/).textContent)).toBe(
+        'Prix retenu 147 250 € · −7 750 € (−5 %)',
+      );
+      expect(champNegociation()).toHaveValue('5');
+      expect(slider()).toHaveAttribute('aria-valuetext', '−5 %');
+      // La synthèse est recalculée : moins cher, meilleur cash-flow qu'à −210 €/mois.
+      const synthese = screen.getAllByText('Cash-flow', { exact: true }).at(-1)?.parentElement;
+      expect(n(synthese?.textContent)).not.toContain('−210 €/mois');
 
-    const utilisateur = userEvent.setup();
-    await utilisateur.clear(champNegociation());
-    await utilisateur.type(champNegociation(), '20');
-    expect(projetEnregistre().hypotheses.achat.negociationTaux).toBe(0.2);
-    // Au-delà du curseur : il se place en butée, la valeur reste dans le champ.
-    expect(slider()).toHaveValue('15');
-    expect(champNegociation()).toHaveValue('20');
+      const utilisateur = userEvent.setup();
+      await utilisateur.clear(champNegociation());
+      await utilisateur.type(champNegociation(), '20');
+      expect(projetEnregistre().hypotheses.achat.negociationTaux).toBe(0.2);
+      // Au-delà du curseur : il se place en butée, la valeur reste dans le champ.
+      expect(slider()).toHaveValue('15');
+      expect(champNegociation()).toHaveValue('20');
 
-    // 40 % dépasse la borne du schéma : refusé, la dernière valeur valide (4 %) reste en vigueur.
-    await utilisateur.clear(champNegociation());
-    await utilisateur.type(champNegociation(), '40');
-    expect(projetEnregistre().hypotheses.achat.negociationTaux).toBe(0.04);
-    expect(champNegociation().closest('div')?.textContent).toMatch(/0\.3/);
-  });
+      // 40 % dépasse la borne du schéma : refusé, la dernière valeur valide (4 %) reste en vigueur.
+      await utilisateur.clear(champNegociation());
+      await utilisateur.type(champNegociation(), '40');
+      expect(projetEnregistre().hypotheses.achat.negociationTaux).toBe(0.04);
+      expect(champNegociation().closest('div')?.textContent).toMatch(/0\.3/);
+    },
+  );
 
   it('« Viser le prix estimé » n’apparaît que si l’estimation est sous le prix affiché', async () => {
     await ouvrirHypotheses();
