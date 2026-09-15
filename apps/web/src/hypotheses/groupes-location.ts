@@ -61,6 +61,7 @@ export const GROUPE_LOCATION: Groupe = {
       type: 'entier',
       obligatoire: true,
       aToi: true,
+      bornes: { min: 1, max: 20 },
       visibleSi: pour('colocation'),
     },
     {
@@ -103,6 +104,7 @@ export const GROUPE_LOCATION: Groupe = {
       unite: 'nuits',
       obligatoire: true,
       aToi: true,
+      commande: 'curseur',
       visibleSi: pour('courte_duree'),
     },
     {

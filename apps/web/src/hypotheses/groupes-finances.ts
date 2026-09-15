@@ -5,6 +5,9 @@ import { texteApport } from '@/textes/apport';
 
 import type { Groupe } from './types';
 
+/** Les différés de remboursement se comptent en mois, rarement au-delà de trois ans. */
+const BORNES_DIFFERE = { min: 0, max: 36 } as const;
+
 export const GROUPE_FINANCEMENT: Groupe = {
   titre: 'Le financement',
   champs: [
@@ -14,6 +17,7 @@ export const GROUPE_FINANCEMENT: Groupe = {
       type: 'euros',
       unite: '€',
       aToi: true,
+      commande: 'apport',
       aideSelon: (projet) =>
         texteApport(projet.hypotheses.pret.apport ?? null, coutTotalDuProjet(projet)),
       terme: 'apport',
@@ -25,6 +29,7 @@ export const GROUPE_FINANCEMENT: Groupe = {
       unite: 'ans',
       obligatoire: true,
       aToi: true,
+      commande: 'duree',
     },
     {
       chemin: 'hypotheses.pret.tauxNominal',
@@ -60,6 +65,7 @@ export const GROUPE_FINANCEMENT: Groupe = {
       libelle: 'Différé total',
       type: 'entier',
       unite: 'mois',
+      bornes: BORNES_DIFFERE,
       terme: 'differeTotal',
     },
     {
@@ -67,6 +73,7 @@ export const GROUPE_FINANCEMENT: Groupe = {
       libelle: 'Différé partiel',
       type: 'entier',
       unite: 'mois',
+      bornes: BORNES_DIFFERE,
       terme: 'differePartiel',
     },
   ],
@@ -178,7 +185,13 @@ export const GROUPE_FISCALITE: Groupe = {
       unite: '%',
       terme: 'prelevementsSociaux',
     },
-    { chemin: 'hypotheses.revente.annees', libelle: 'Revente dans', type: 'entier', unite: 'ans' },
+    {
+      chemin: 'hypotheses.revente.annees',
+      libelle: 'Revente dans',
+      type: 'entier',
+      unite: 'ans',
+      bornes: { min: 1, max: 30 },
+    },
     {
       chemin: 'hypotheses.revente.evolutionAnnuelle',
       libelle: 'Évolution du prix',

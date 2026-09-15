@@ -1,0 +1,32 @@
+{
+  "feature_slug": "hypotheses-commandes",
+  "started_at": "2026-09-15T08:00:00Z",
+  "current_step": "implement",
+  "scope": "frontend_only",
+  "backlog": "24",
+  "steps": {
+    "discovery": {
+      "status": "completed",
+      "output": ".product/features/hypotheses-commandes-discovery.md",
+      "validation": "auto-revue (session autonome)"
+    },
+    "specs": {
+      "status": "completed",
+      "stories_count": 6,
+      "output": ".product/specs/hypotheses-commandes-specs.md"
+    },
+    "architecture": {
+      "status": "completed",
+      "output": ".product/architecture/hypotheses-commandes.md"
+    },
+    "implement": {
+      "status": "in_progress",
+      "stories_completed": 0,
+      "stories_total": 6,
+      "commits": []
+    },
+    "qa_tests": { "status": "pending" },
+    "security": { "status": "pending" },
+    "push": { "status": "pending" }
+  }
+}
