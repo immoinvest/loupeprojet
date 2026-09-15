@@ -16,6 +16,7 @@ import { Page, TitrePage } from '@/composants/mise-en-page';
 import { Carte, Pastille } from '@/composants/ui';
 import { useClientWorker } from '@/coque/ClientWorker';
 import { completerAvecIa, enrichirSaisie, lireAnnonce } from '@/enrichissement';
+import { champsDepuisGestion, valeursDepuisGestion } from '@/gestion/declaration/analyser';
 import { useProjets } from '@/stockage/ProjetsContext';
 
 import { FormulaireProjet, valeursDepuisChamps, type OptionsFormulaire } from './FormulaireProjet';
@@ -29,17 +30,29 @@ const CHEMIN = '/projets/nouveau';
 export function NouveauProjet(): JSX.Element {
   const { creer } = useProjets();
   const naviguer = useNavigate();
-  const { hash, search } = useLocation();
+  const lieu = useLocation();
+  const { hash, search } = lieu;
+  const etatNavigation: unknown = lieu.state;
   // Le fragment est lu une seule fois, au premier rendu, puis effacé de l'adresse (effet ci-dessous).
   const [fragment] = useState(() => lireFragmentCapture(hash));
   // Annonce partagée depuis l'app d'un portail : lue au premier rendu, ignorée si une capture arrive.
   const [partage] = useState(() => annoncePartagee(fragment.statut !== 'absente', search));
   const capture: CaptureImportee | null = fragment.statut === 'lue' ? fragment.capture : null;
+  // « Analyser ce bien » depuis Gérer (G5-2) : saisie manuelle déjà remplie, sauf si une capture arrive.
+  const [depuisGestion] = useState(() =>
+    capture === null ? champsDepuisGestion(etatNavigation) : null,
+  );
   const [importee, setImportee] = useState<CaptureImportee | null>(capture);
   const [url, setUrl] = useState(capture?.annonce.urlCanonique ?? partage.lien ?? '');
-  const [etape, setEtape] = useState<Etape>(capture === null ? 'lien' : 'verifier');
-  const [manuel, setManuel] = useState(false);
-  const [initial, setInitial] = useState(() => valeursDepuisChamps(capture?.champs ?? {}));
+  const [etape, setEtape] = useState<Etape>(
+    capture === null && depuisGestion === null ? 'lien' : 'verifier',
+  );
+  const [manuel, setManuel] = useState(depuisGestion !== null);
+  const [initial, setInitial] = useState(() =>
+    depuisGestion === null
+      ? valeursDepuisChamps(capture?.champs ?? {})
+      : valeursDepuisGestion(depuisGestion),
+  );
   // Change à chaque lecture : le formulaire repart des nouvelles valeurs.
   const [version, setVersion] = useState(0);
   const client = useClientWorker();
