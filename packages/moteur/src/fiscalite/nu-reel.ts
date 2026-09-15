@@ -7,7 +7,7 @@ import {
   type StockDeficits,
 } from './deficits';
 import { assuranceAnnee, interetsPayesAnnee } from './interets';
-import type { AnneeFiscale, ContexteFiscal, ResultatRegime } from './types';
+import type { AnneeFiscale, ContexteFiscal, ProjectionRegime } from './types';
 
 interface AnneeNuReel {
   readonly stock: StockDeficits;
@@ -79,7 +79,7 @@ function anneeNuReel(
   };
 }
 
-export function projeterNuReel(ctx: ContexteFiscal): ResultatRegime {
+export function projeterNuReel(ctx: ContexteFiscal): ProjectionRegime {
   let stock = STOCK_VIDE;
   const annees: AnneeFiscale[] = [];
   for (const a of ctx.cashflow.parAnnee) {

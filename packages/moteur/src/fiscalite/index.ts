@@ -3,6 +3,7 @@ import { estMeuble } from '../cashflow/charges';
 import type { ResultatFinancement } from '../financement';
 import { loyerMensuelReference } from '../location/equivalents';
 import type { Regles } from '../regles/types';
+import { reventeParRegime } from '../revente/par-regime';
 import {
   regimesCompatibles,
   type HypothesesCompletes,
@@ -14,11 +15,12 @@ import { projeterLmnpReel } from './lmnp-reel';
 import { projeterMicroBic } from './micro-bic';
 import { projeterMicroFoncier } from './micro-foncier';
 import { projeterNuReel } from './nu-reel';
-import type { ContexteFiscal, ResultatFiscalite, ResultatRegime } from './types';
+import { bilanRegime } from './bilan';
+import type { ContexteFiscal, ProjectionRegime, ResultatFiscalite, ResultatRegime } from './types';
 
 export const REGIMES: readonly Regime[] = ['micro_bic', 'lmnp_reel', 'micro_foncier', 'nu_reel'];
 
-const PROJECTEURS: Readonly<Record<Regime, (ctx: ContexteFiscal) => ResultatRegime>> = {
+const PROJECTEURS: Readonly<Record<Regime, (ctx: ContexteFiscal) => ProjectionRegime>> = {
   micro_bic: projeterMicroBic,
   lmnp_reel: projeterLmnpReel,
   micro_foncier: projeterMicroFoncier,
@@ -94,10 +96,12 @@ export function calculerFiscalite(
   financement: ResultatFinancement,
   regles: Regles,
 ): ResultatFiscalite {
-  const resultats = REGIMES.map((regime) => {
+  const projections = REGIMES.map((regime) => {
     const cashflow = cashflowDuRegime(projet, financement, regime, regles);
     return PROJECTEURS[regime]({ projet, financement, cashflow, regles });
   });
+  const reventes = reventeParRegime(projet, financement, projections, regles);
+  const resultats = projections.map((p) => bilanRegime(p, reventes[p.regime]));
   const regimes = Object.fromEntries(resultats.map((r) => [r.regime, r])) as Record<
     Regime,
     ResultatRegime
@@ -109,10 +113,12 @@ export function calculerFiscalite(
     retenu: projet.hypotheses.fiscalite.regime,
     meilleur: meilleurSelon(resultats, compatibles, (r) => r.cashflowApresImpotTotal),
     meilleurImpot: meilleurSelon(resultats, compatibles, (r) => -r.impotTotal),
+    meilleurAuTotal: meilleurSelon(resultats, compatibles, (r) => r.enrichissementFinal),
   };
 }
 
 export { baseAmortissableBati, dotationsAnnee, type DotationsAnnee } from './amortissements';
+export { bilanRegime } from './bilan';
 export {
   STOCK_VIDE,
   ajouterDeficit,
@@ -131,6 +137,7 @@ export type {
   AnneeFiscale,
   ContexteFiscal,
   MotifIneligibilite,
+  ProjectionRegime,
   ResultatFiscalite,
   ResultatRegime,
   StocksFiscaux,

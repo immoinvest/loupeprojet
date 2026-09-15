@@ -84,6 +84,8 @@ Projection année par année sur la durée de détention avec stocks de déficit
 
 Régimes compatibles avec le type : nue et meublée comparent les quatre régimes ; colocation, courte et moyenne durée n'ont que les deux régimes du meublé (le moteur projette toujours les quatre, `ResultatFiscalite.compatibles` guide l'affichage et le choix du meilleur ; un régime incompatible est refusé). Micro-BIC d'un meublé de tourisme non classé : abattement 30 %, plafond 15 000 € ; classé : 50 %, plafond général.
 
+**Impôt total par régime** (fiche 16) : chaque régime porte sa propre revente à l'horizon du projet (même valeur, mêmes frais, même capital restant dû ; seul le LMNP réel réintègre ses amortissements de l'immeuble), d'où impôt à la revente, **impôt total = impôt pendant la location + impôt à la revente**, et **ce qu'il reste au total = cash-flow après impôt cumulé + cash net de revente**. « Le plus avantageux au total » = le régime compatible et éligible qui laisse le plus d'argent (repère factuel, pas un conseil) ; « meilleur cash-flow » reste affiché. Nu au réel : avertissement si la revente précède la fin de la 3ᵉ année qui suit un déficit imputé sur le revenu global (reprise du déficit, non chiffrée). Résidences services (exclues de la réintégration) et LMP : hors v1.
+
 ### Revente
 
 - Prix = valeur × (1 + évolution)^n − agence − diagnostics − IRA − CRD → **cash net vendeur**.
