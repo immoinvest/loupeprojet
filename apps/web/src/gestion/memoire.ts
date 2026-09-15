@@ -27,6 +27,11 @@ import {
 } from '@loupe/gestion';
 
 import { cleDuDocument, documentEnMemoire } from './memoire-documents';
+import {
+  modifierEnMemoire,
+  modifierLocataireEnMemoire,
+  supprimerEnMemoire,
+} from './memoire-modifications';
 import type { ClientGestion, CodeErreurGestion, ResultatGestion } from './types';
 
 export type ActionGestion = keyof ClientGestion;
@@ -230,6 +235,29 @@ export function clientGestionMemoire(options: OptionsGestionMemoire = {}): Clien
         if (chevauche(duBien, lu.data.location)) return { ok: false, code: 'bien_occupe' };
         const colocataires = lu.data.colocataires ?? [];
         return { ok: true, valeur: occuper(bienId, { ...lu.data, colocataires }) };
+      }),
+    modifierLocation: (locationId, modification) =>
+      executer('modifierLocation', () => {
+        const effet = modifierEnMemoire(donnees, locationId, modification, aujourdhui);
+        donnees = effet.donnees;
+        return effet.resultat;
+      }),
+    supprimerBien: (bienId) =>
+      executer('supprimerBien', () => {
+        const avant = donnees.documents;
+        const effet = supprimerEnMemoire(donnees, bienId);
+        donnees = effet.donnees;
+        // Le contenu d'un document supprimé ne se relit plus.
+        for (const document of avant) {
+          if (!donnees.documents.includes(document)) complets.delete(document.id);
+        }
+        return effet.resultat;
+      }),
+    modifierLocataire: (locataireId, locataire) =>
+      executer('modifierLocataire', () => {
+        const effet = modifierLocataireEnMemoire(donnees, locataireId, locataire);
+        donnees = effet.donnees;
+        return effet.resultat;
       }),
   };
 }

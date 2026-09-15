@@ -13,6 +13,7 @@ import { EcranAttente } from './EcranAttente';
 import { CarteLocation } from './fiche/CarteLocation';
 import { FriseMois } from './fiche/FriseMois';
 import { LouerBien } from './fiche/LouerBien';
+import { SupprimerBien } from './fiche/SupprimerBien';
 import { RetoursLoyer } from './RetoursLoyer';
 import { useActionsLoyer } from './useActionsLoyer';
 
@@ -92,6 +93,8 @@ function Fiche({
       )}
 
       <FriseMois frise={friseDuBien(donnees, bien.id, aujourdhui)} actions={actions} />
+
+      <SupprimerBien bien={bien} />
     </Page>
   );
 }

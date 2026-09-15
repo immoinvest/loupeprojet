@@ -86,3 +86,8 @@ export function friseDuBien(
   }
   return frise;
 }
+
+/** La location reçoit-elle l'APL (à l'entrée ou après un changement) ? La sortie rappelle de prévenir la CAF. */
+export function recoitApl(location: Pick<LocationGeree, 'apl' | 'changements'>): boolean {
+  return (location.apl ?? 0) > 0 || (location.changements ?? []).some((c) => c.apl > 0);
+}

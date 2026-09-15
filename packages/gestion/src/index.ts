@@ -5,5 +5,6 @@ export * from './dates';
 export * from './documents';
 export * from './loyers';
 export * from './mois';
+export * from './montants';
 export * from './regles';
 export * from './schemas';

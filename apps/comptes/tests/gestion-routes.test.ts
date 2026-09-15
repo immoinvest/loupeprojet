@@ -374,6 +374,9 @@ describe('pannes et suppression du compte', () => {
       document: () => Promise.reject(new Error('disque plein')),
       terminerLocation: () => Promise.reject(new Error('disque plein')),
       louer: () => Promise.reject(new Error('disque plein')),
+      modifierLocation: () => Promise.reject(new Error('disque plein')),
+      supprimerBien: () => Promise.reject(new Error('disque plein')),
+      modifierLocataire: () => Promise.reject(new Error('disque plein')),
       exporter: () => Promise.reject(new Error('disque plein')),
     };
     const b = bancD1({ surcharges: { gestion: enPanne } });

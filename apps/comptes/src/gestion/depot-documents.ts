@@ -10,7 +10,8 @@ import {
 } from '@loupe/gestion';
 
 import { ErreurGestion, type Emission } from './depot';
-import { versBailleur, versDocumentComplet, versPaiement, type Ligne, type Lier } from './lignes';
+import { lignes, lireChangements } from './lecture';
+import { versBailleur, versDocumentComplet, versPaiement, type Lier } from './lignes';
 
 /** Horloge, identifiants et requêtes du dépôt, partagés avec `depotD1`. */
 export interface Outils {
@@ -29,17 +30,13 @@ const SQL = {
   paiementDuCompte: 'select locationId from gestion_paiement where userId = ? and id = ?',
   // Une seule lecture : la location du compte avec son bien et son locataire en titre (clés étrangères).
   occupation:
-    'select l.id, l.libelle, l.debut, l.fin, l.jourLoyer, l.loyerHorsCharges, l.charges, b.nom as bienNom, b.adresse as bienAdresse, t.prenom, t.nom as locataireNom from gestion_location l join gestion_bien b on b.id = l.bienId join gestion_locataire t on t.id = l.locataireId where l.userId = ? and l.id = ?',
+    'select l.id, l.libelle, l.debut, l.fin, l.jourLoyer, l.loyerHorsCharges, l.charges, l.apl, b.nom as bienNom, b.adresse as bienAdresse, t.prenom, t.nom as locataireNom from gestion_location l join gestion_bien b on b.id = l.bienId join gestion_locataire t on t.id = l.locataireId where l.userId = ? and l.id = ?',
   colocataires:
     'select t.prenom, t.nom from gestion_colocataire c join gestion_locataire t on t.id = c.locataireId where c.userId = ? and c.locationId = ? order by c.ordre',
   paiementsDeLaLocation: 'select * from gestion_paiement where userId = ? and locationId = ?',
   insererDocument:
     'insert into gestion_document (id, userId, cle, type, numero, locationId, periode, paiementId, contenu, emisLe) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) on conflict (userId, cle) do nothing',
 } as const;
-
-async function lignes(lier: Lier, sql: string, ...valeurs: string[]): Promise<Ligne[]> {
-  return (await lier(sql, ...valeurs).all<Ligne>()).results;
-}
 
 /** La location d'où part la demande : directe (quittance) ou celle du paiement (reçu). */
 async function locationDeLaDemande(
@@ -61,10 +58,11 @@ async function entreesDe(
   const { lier, maintenant } = outils;
   const [occupation] = await lignes(lier, SQL.occupation, userId, locationId);
   if (occupation === undefined) throw new ErreurGestion('INTROUVABLE');
-  const [bailleur, paiements, colocataires] = await Promise.all([
+  const [bailleur, paiements, colocataires, changements] = await Promise.all([
     lignes(lier, SQL.bailleur, userId),
     lignes(lier, SQL.paiementsDeLaLocation, userId, locationId),
     lignes(lier, SQL.colocataires, userId, locationId),
+    lireChangements(lier, userId, locationId),
   ]);
   const { fin, libelle } = occupation;
   return {
@@ -82,6 +80,8 @@ async function entreesDe(
       jourLoyer: Number(occupation.jourLoyer),
       loyerHorsCharges: Number(occupation.loyerHorsCharges),
       charges: Number(occupation.charges),
+      apl: Number(occupation.apl),
+      changements,
     },
     paiements: paiements.map(versPaiement),
     emisLe: maintenant().slice(0, 10),

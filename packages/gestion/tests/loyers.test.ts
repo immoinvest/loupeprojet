@@ -21,6 +21,8 @@ describe('loyerDuMois', () => {
       loyerHorsCharges: 65_000,
       charges: 5_000,
       total: 70_000,
+      apl: 0,
+      partLocataire: 70_000,
       joursOccupes: 31,
       joursDuMois: 31,
     });

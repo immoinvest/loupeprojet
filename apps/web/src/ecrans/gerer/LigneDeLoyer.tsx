@@ -9,6 +9,7 @@ import { marquerRecu, STATUTS_LOYER, TEXTES_GERER, TONS_LOYER } from '@/textes/g
 import {
   bienEtChambre,
   nomsDesLocataires,
+  plusApl,
   recuDe,
   resteAPayer,
   TEXTES_LOYERS as T,
@@ -47,7 +48,13 @@ export function LigneDeLoyer({ ligne, aujourdhui, actions }: PropsLigne): JSX.El
         </Link>
         <span className="truncate text-sm text-encre-3">{nomsDesLocataires(noms)}</span>
       </span>
-      <span className="text-right font-bold tabular-nums">{montant(ligne.du.total)}</span>
+      {/* Tiers payant (ADR-G16) : la part du locataire, puis l'aide versée par la CAF. */}
+      <span className="flex flex-col text-right tabular-nums">
+        <span className="font-bold">
+          {montant(ligne.du.apl > 0 ? ligne.du.partLocataire : ligne.du.total)}
+        </span>
+        {ligne.du.apl > 0 && <span className="text-xs text-encre-3">{plusApl(ligne.du.apl)}</span>}
+      </span>
       <span className="hidden text-sm text-encre-3 sm:block">{leJour(ligne.du.echeance)}</span>
       <span className="col-span-2 flex flex-wrap items-center justify-end gap-2 sm:col-span-1">
         <Pastille ton={TONS_LOYER[ligne.statut]} compacte>

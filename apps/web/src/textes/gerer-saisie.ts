@@ -17,6 +17,8 @@ export const TEXTES_AJOUTER = {
   plusDeDetails: 'Plus de détails',
   jourLoyer: 'Jour du loyer',
   depot: 'Dépôt de garantie',
+  apl: 'APL versée par la CAF',
+  aideApl: 'Seulement si la CAF te la verse directement.',
   typeBien: 'Type de bien',
   surface: 'Surface',
   creer: 'Créer',
@@ -55,5 +57,6 @@ export const ERREURS_SAISIE: Readonly<Record<ChampSaisie, string>> = {
   entree: 'Choisis la date d’entrée.',
   jourLoyer: 'Un jour entre 1 et 28.',
   depot: 'Le dépôt est un montant, par exemple 650.',
+  apl: 'L’APL est un montant par mois, au plus le loyer charges comprises, par exemple 180.',
   surface: 'Une surface en m², par exemple 38.',
 };

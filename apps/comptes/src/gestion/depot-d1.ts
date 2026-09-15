@@ -16,8 +16,11 @@ import {
 import { ErreurGestion, type DepotGestion } from './depot';
 import { depotBaux } from './depot-baux';
 import { depotDocuments } from './depot-documents';
+import { depotModifications } from './depot-modifications';
 import { ecrireOccupation } from './ecritures';
+import { lireLocation } from './lecture';
 import {
+  changementsParLocation,
   colocatairesParLocation,
   valeurSql,
   versBien,
@@ -47,16 +50,6 @@ export const LIMITE_BIENS = 200;
 /** Un loyer ne se marque pas reçu plus d'un an à l'avance. */
 const JOURS_D_AVANCE_MAX = 366;
 
-/** Ce que `payer` relit de la location : ses bornes et ses montants, pour recalculer le dû. */
-interface LigneLocationPayee {
-  readonly id: string;
-  readonly debut: string;
-  readonly fin: string | null;
-  readonly jourLoyer: number;
-  readonly loyerHorsCharges: number;
-  readonly charges: number;
-}
-
 /** Un loyer ne se marque pas reçu plus d'un an à l'avance. */
 function tropEnAvance(periode: string, aujourdhui: string): boolean {
   return periode > periodeDe(ajouterJours(aujourdhui, JOURS_D_AVANCE_MAX));
@@ -70,11 +63,11 @@ const SQL = {
   locations: 'select * from gestion_location where userId = ? order by debut, id',
   colocataires:
     'select locationId, locataireId from gestion_colocataire where userId = ? order by locationId, ordre',
+  changements:
+    'select locationId, aPartirDe, loyerHorsCharges, charges, apl from gestion_changement where userId = ? order by locationId, aPartirDe',
   // Plusieurs paiements par mois depuis G1b : l'ordre chronologique, stable.
   paiements: 'select * from gestion_paiement where userId = ? order by periode, date, creeLe, id',
   preferences: 'select * from gestion_preference where userId = ?',
-  locationDuCompte:
-    'select id, debut, fin, jourLoyer, loyerHorsCharges, charges from gestion_location where id = ? and userId = ?',
   paiementDuCompte: 'select locationId, periode from gestion_paiement where id = ? and userId = ?',
   documentsDuPaiement:
     'select count(*) as n from gestion_document where userId = ? and (cle = ? or cle = ?)',
@@ -129,7 +122,7 @@ function insererPaiement(lier: Lier, userId: string, p: Paiement, du: number): D
   );
 }
 
-/** Le dépôt de production : la base D1 des comptes (tables gestion_* des migrations 0002 et 0003). */
+/** Le dépôt de production : la base D1 des comptes (tables gestion_* des migrations 0002 à 0005). */
 export function depotD1(base: D1Database, options: OptionsDepot = {}): DepotGestion {
   const maintenant = options.maintenant ?? ((): string => new Date().toISOString());
   const genererId = options.genererId ?? ((): string => crypto.randomUUID());
@@ -139,29 +132,36 @@ export function depotD1(base: D1Database, options: OptionsDepot = {}): DepotGest
     (await lier(sql, userId).all<Ligne>()).results;
   const outils = { lier, maintenant, genererId };
   const documents = depotDocuments(outils);
-  const baux = depotBaux({ ...outils, ensemble: (instructions) => base.batch(instructions) });
+  const ensemble = (instructions: D1PreparedStatement[]): Promise<unknown> =>
+    base.batch(instructions);
+  const baux = depotBaux({ ...outils, ensemble });
+  const modifications = depotModifications({ ...outils, ensemble });
 
   const etat = async (userId: string): Promise<EtatGestion> => {
-    const [biens, locataires, locations, colocations, paiements, emis, bailleur, preferences] =
+    const [biens, locataires, locations, colocations, changes, paiements, emis, bailleur, prefs] =
       await Promise.all([
         lire(SQL.biens, userId),
         lire(SQL.locataires, userId),
         lire(SQL.locations, userId),
         lire(SQL.colocataires, userId),
+        lire(SQL.changements, userId),
         lire(SQL.paiements, userId),
         lire(SQL.documents, userId),
         documents.bailleur(userId),
         lire(SQL.preferences, userId),
       ]);
     const colocataires = colocatairesParLocation(colocations);
+    const changements = changementsParLocation(changes);
     return {
       biens: biens.map(versBien),
       locataires: locataires.map(versLocataire),
-      locations: locations.map((l) => versLocation(l, colocataires.get(String(l.id)) ?? [])),
+      locations: locations.map((l) =>
+        versLocation(l, colocataires.get(String(l.id)) ?? [], changements.get(String(l.id)) ?? []),
+      ),
       paiements: paiements.map(versPaiement),
       bailleur,
       documents: emis.map(versDocument),
-      preferences: versPreferences(preferences[0]),
+      preferences: versPreferences(prefs[0]),
     };
   };
 
@@ -172,6 +172,9 @@ export function depotD1(base: D1Database, options: OptionsDepot = {}): DepotGest
     document: documents.document,
     terminerLocation: baux.terminerLocation,
     louer: baux.louer,
+    modifierLocation: modifications.modifierLocation,
+    supprimerBien: modifications.supprimerBien,
+    modifierLocataire: modifications.modifierLocataire,
     exporter: async (userId) =>
       ExportGestionSchema.parse({
         ...(await etat(userId)),
@@ -200,17 +203,11 @@ export function depotD1(base: D1Database, options: OptionsDepot = {}): DepotGest
     },
 
     async payer(userId, nouveau) {
-      const { results } = await lier(
-        SQL.locationDuCompte,
-        nouveau.locationId,
-        userId,
-      ).all<LigneLocationPayee>();
-      const [location] = results;
-      if (location === undefined) throw new ErreurGestion('INTROUVABLE');
+      const location = await lireLocation(lier, userId, nouveau.locationId);
       const aujourdhui = maintenant().slice(0, 10);
-      // Le dû est recalculé ici, jamais lu dans la requête ; aucun dû = période hors de la location.
-      const { fin, ...bornes } = location;
-      const du = loyerDuMois(fin === null ? bornes : { ...bornes, fin }, nouveau.periode);
+      // Le dû est recalculé ici (changements de montants compris), jamais lu dans la requête ;
+      // aucun dû = période hors de la location.
+      const du = loyerDuMois(location, nouveau.periode);
       if (du === null || tropEnAvance(nouveau.periode, aujourdhui)) {
         throw new ErreurGestion('HORS_LOCATION');
       }

@@ -27,6 +27,7 @@ export const TEXTES_FICHE = {
   fermer: 'Fermer',
   douzeMois: 'Les 12 derniers mois',
   erreurDateSortie: 'Indique une date de sortie valide.',
+  rappelCaf: 'Pense à prévenir la CAF du départ de ton locataire.',
 } as const;
 
 export const TONS_BIEN: Readonly<Record<StatutBien, TonPastille>> = {
