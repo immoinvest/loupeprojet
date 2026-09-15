@@ -59,6 +59,22 @@ describe('règles 2026-09', () => {
     expect(regles.visite.chambreColocationM2).toBe(9);
   });
 
+  it('a un barème de travaux croissant avec l’état, bas ≤ estimé ≤ haut, marqué à confirmer', () => {
+    const { parEtat, renovationEnergetique, arrondi } = regles.travaux;
+    const ordre = ['renove', 'bon_etat', 'a_rafraichir', 'a_renover'] as const;
+    for (const f of [...ordre.map((e) => parEtat[e]), renovationEnergetique]) {
+      expect(f.bas).toBeLessThanOrEqual(f.estime);
+      expect(f.estime).toBeLessThanOrEqual(f.haut);
+    }
+    const estimes = ordre.map((e) => parEtat[e].estime);
+    expect([...estimes].sort((a, b) => a - b)).toEqual(estimes);
+    expect(renovationEnergetique.classes).toEqual(['F', 'G']);
+    expect(renovationEnergetique.partSiARenover).toBe(0.5);
+    expect(arrondi).toBe(100);
+    expect(regles.aConfirmer).toContain('travaux.parEtat');
+    expect(regles.aConfirmer).toContain('travaux.renovationEnergetique');
+  });
+
   it('a des barèmes de confiance cohérents : 100 points, paliers triés, niveaux jusqu’à zéro, marges croissantes', () => {
     const c = regles.estimation.confiance;
     const maximum = (paliers: readonly { points: number }[]): number =>

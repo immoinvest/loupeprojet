@@ -2,6 +2,7 @@ import {
   TMI_PAR_DEFAUT,
   VERSION_REGLES_COURANTE,
   estModeMeuble,
+  estimerTravaux,
   obtenirRegles,
   type ClasseEnergie,
   type EtatBien,
@@ -136,7 +137,11 @@ function assembler(
   const provenanceDe = (cle: keyof SaisieProjet, valeur: unknown): Provenance =>
     valeur === undefined ? 'estime' : (s.provenance[cle] ?? 'utilisateur');
   const location = construireLocation(s, loyer);
+  // Sans montant indiqué, les travaux suivent l'état du bien (0 € tant qu'il est inconnu).
+  const travauxEstimes = estimerTravaux(s, obtenirRegles(VERSION_REGLES_COURANTE));
+  const travaux = s.travaux ?? travauxEstimes?.estime ?? 0;
   const provenance: Record<string, string> = {
+    'achat.travaux': provenanceDe('travaux', s.travaux),
     'achat.prix': s.provenance.prix ?? 'utilisateur',
     'bien.surface': s.provenance.surface ?? 'utilisateur',
     'location.mode': s.provenance.mode ?? 'utilisateur',
@@ -211,7 +216,8 @@ function assembler(
       achat: {
         prix: s.prix,
         honorairesAgence: s.honorairesAgence ?? 0,
-        travaux: s.travaux ?? 0,
+        travaux,
+        travauxChoix: s.travaux === undefined ? 'estime' : 'saisi',
         mobilier: meuble ? Math.round(s.surface * MOBILIER_PAR_M2) : 0,
       },
       pret: {

@@ -250,7 +250,34 @@ export const regles202609: Regles = {
     marges: { elevee: 0.05, bonne: 0.065, moyenne: 0.08, faible: 0.12, tres_faible: 0.15 },
   },
 
+  // Aucun barème officiel national du coût des travaux au m² selon l'état. Fourchettes publiques
+  // relevées le 14/09/2026 chez des professionnels du bâtiment (Co'Building, Groupe R, Adora Économie,
+  // La Maison Saint-Gobain, Renovation-artisan) : rafraîchissement 150-700 €/m², rénovation complète
+  // 1 000-2 000 €/m². Rénovation énergétique ciblée 200-500 €/m² (fourchettes attribuées à l'ADEME par
+  // Travaux.com, Selectra, OneDPE ; publication d'origine non retrouvée). Pour ordre de grandeur, l'ANAH
+  // compte 55 065 € de travaux en moyenne par rénovation d'ampleur MaPrimeRénov' en 2024 (bilan 2024).
+  // Valeur estimée proche du bas de la fourchette, moitié du supplément pour un bien à rénover
+  // (choix Deklic, fiche de backlog 19, à confirmer par Pierre). TTC, hors aides, sans coefficient régional.
+  travaux: {
+    parEtat: {
+      renove: { bas: 0, estime: 0, haut: 0 },
+      bon_etat: { bas: 0, estime: 0, haut: 150 },
+      a_rafraichir: { bas: 150, estime: 400, haut: 700 },
+      a_renover: { bas: 1_000, estime: 1_200, haut: 2_000 },
+    },
+    renovationEnergetique: {
+      classes: ['F', 'G'],
+      bas: 200,
+      estime: 250,
+      haut: 500,
+      partSiARenover: 0.5,
+    },
+    arrondi: 100,
+  },
+
   aConfirmer: [
+    'travaux.parEtat',
+    'travaux.renovationEnergetique',
     'fiscalite.prelevementsSociaux.bic',
     'acquisition.dmtoParDepartement',
     'estimation.dpe',

@@ -1,4 +1,9 @@
-export { appliquerSaisie, type Application } from './appliquer';
+export {
+  CHEMIN_CHOIX_TRAVAUX,
+  CHEMIN_TRAVAUX,
+  appliquerSaisie,
+  type Application,
+} from './appliquer';
 export { ecrireChemin, lireChemin } from './chemins';
 export { CHEMINS_TRAVAUX, GROUPE_ACHAT } from './groupes-bien';
 export { depuisTexte, versTexte, type Conversion, type TypeChamp } from './conversion';

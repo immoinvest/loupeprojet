@@ -82,6 +82,7 @@ describe('sectionsMethode', () => {
       'revente',
       'tri',
       'estimation',
+      'travaux',
       'verdict',
       'scenarios',
       'defauts',
@@ -146,8 +147,16 @@ describe('sectionsMethode', () => {
     expect(section('micro_foncier').constantes[0]?.chemin).toBeUndefined();
     expect(section('micro_foncier').constantes[0]?.aConfirmer).toBe(false);
     // 3 constantes fiscales + 7 coefficients de l'estimation (DPE ×2, étage ×2, extérieur, vendu loué,
-    // charges) + 9 valeurs de départ des types de location (Excel « Projet 92K », Airbnb, choix Deklic).
-    expect(sections.flatMap((s) => s.constantes).filter((c) => c.aConfirmer).length).toBe(19);
+    // charges) + 9 valeurs de départ des types de location (Excel « Projet 92K », Airbnb, choix Deklic)
+    // + 5 coûts de travaux au m² (quatre états, rénovation énergétique).
+    expect(sections.flatMap((s) => s.constantes).filter((c) => c.aConfirmer).length).toBe(24);
+    expect(section('travaux').constantes.map((c) => c.valeur.replace(/\s/g, ' '))).toEqual([
+      '1 200 €/m² (1 000 € à 2 000 €)',
+      '400 €/m² (150 € à 700 €)',
+      '0 €/m² (0 € à 150 €)',
+      '0 €/m²',
+      '250 €/m² (200 € à 500 €)',
+    ]);
     expect(
       section('estimation').constantes.find((c) => c.chemin === 'estimation.occupation'),
     ).toMatchObject({ valeur: '−10 %', aConfirmer: true });

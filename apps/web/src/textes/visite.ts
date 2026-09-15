@@ -25,7 +25,7 @@ export const ETATS_REPONSE: Readonly<Record<EtatReponse, string>> = {
 export const ORDRE_ETATS: readonly EtatReponse[] = ['a_verifier', 'ok', 'probleme', 'sans_objet'];
 
 /** Paramètres qui sont des montants en euros. */
-const MONTANTS: ReadonlySet<string> = new Set(['honoraires', 'travaux', 'plafond']);
+const MONTANTS: ReadonlySet<string> = new Set(['honoraires', 'travaux', 'bas', 'haut', 'plafond']);
 
 /** Le moteur donne des valeurs brutes ; ici on les met en forme selon ce qu'elles désignent. */
 function formaterParametre(cle: string, valeur: number | string): string {

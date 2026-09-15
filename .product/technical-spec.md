@@ -44,7 +44,8 @@ src/
 ├── revente/                 valeur, plus-value (abattements, surtaxe, réintégration), par-regime (reventeDuRegime, reventeParRegime), index (calculerRevente = régime retenu)
 ├── rendement/               rendements, tri, enrichissement, index
 ├── verdict/                 feux (5), vigilance (codes financiers), index
-├── visite/                  types, contexte (typeExploitation, prédicats, paramètres), base/ (74 questions sourcées, un fichier par catégorie), questions (questionsPourProjet), index
+├── estimation/              estimerPrix, confiance, travaux (estimerTravaux, recalerTravaux, choisirTravaux : barème `regles.travaux`, `achat.travauxChoix`)
+├── visite/                  types, contexte (typeExploitation, prédicats, paramètres), base/ (75 questions sourcées, un fichier par catégorie), questions (questionsPourProjet), index
 ├── scenarios/               prix-cible (3 critères), predefinis (6 transformations), index (deltas)
 └── exemples/t3-marseille.ts projet d'exemple
 tests/                       un dossier par module + integration/ ; 204 tests ; couverture 100 % lignes/branches/fonctions

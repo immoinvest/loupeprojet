@@ -3,6 +3,25 @@ import { z } from 'zod';
 const n = z.number();
 const nOuNull = z.number().nullable();
 
+const FourchetteSchema = z.strictObject({ bas: n, estime: n, haut: n });
+
+/** Les travaux estimés selon l'état du bien, validés à la sortie du moteur. */
+export const TravauxResultatSchema = z.strictObject({
+  etat: z.enum(['a_renover', 'a_rafraichir', 'bon_etat', 'renove']),
+  dpe: z.enum(['A', 'B', 'C', 'D', 'E', 'F', 'G']).nullable(),
+  lignes: z.array(
+    z.strictObject({
+      code: z.enum(['etat', 'renovation_energetique']),
+      surface: n,
+      prixM2: FourchetteSchema,
+      montant: FourchetteSchema,
+    }),
+  ),
+  bas: n,
+  estime: n,
+  haut: n,
+});
+
 /** Le résultat de l'estimation du prix, validé à la sortie du moteur (`ResultatsSchema`). */
 const EtatSchema = z.enum(['a_renover', 'a_rafraichir', 'bon_etat', 'renove']);
 

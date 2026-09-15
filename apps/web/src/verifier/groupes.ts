@@ -1,7 +1,8 @@
 import type { Cle, ProvenanceValeurs, Valeurs } from '@/ecrans/formulaire/valeurs';
-import { pourcentage } from '@/formatage/nombres';
+import { euros, pourcentage } from '@/formatage/nombres';
 
 import { ITEMS, ORDRE_ITEMS, ORDRE_PRECISER, type Item } from './items';
+import { travauxEstimesDe } from './travaux';
 
 /**
  * `essentiel` : visible en haut (ce qui manque parmi l'exigé, le loyer visé, le type de location non lu) ;
@@ -45,6 +46,8 @@ export function grouperChamps(v: Valeurs, p: ProvenanceValeurs): Groupes {
     else if (EXIGES.includes(item) && !estRenseigne(item, v)) groupe = 'essentiel';
     else if (source === 'annonce') groupe = 'lus';
     else if (source === 'estime') groupe = 'estimes';
+    // Sans montant, les travaux seront estimés d'après l'état du bien.
+    else if (item === 'travaux' && travauxEstimesDe(v) !== null) groupe = 'estimes';
     else groupe = 'preciser';
     groupes[groupe].push(item);
   }
@@ -109,6 +112,10 @@ export function resumeEstimes(
     dureeAnnees: () => `${v.dureeAnnees} ans`,
     tmi: () => `tranche ${pourcentage(Number(v.tmi), 0)}`,
     chambres: () => `${v.chambres} chambre${v.chambres === '0' || v.chambres === '1' ? '' : 's'}`,
+    travaux: () => {
+      const estimation = travauxEstimesDe(v);
+      return estimation === null ? ITEMS.travaux.nom : `travaux ${euros(estimation.estime)}`;
+    },
   };
   return items.map((item) => avecValeur[item]?.() ?? ITEMS[item].nom).join(', ');
 }

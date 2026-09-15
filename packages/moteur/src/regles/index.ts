@@ -19,6 +19,7 @@ export function obtenirRegles(version: string): Regles {
 
 export type {
   ComposantAmortissement,
+  FourchetteM2,
   Palier,
   PalierRayon,
   PeriodeAbattement,
