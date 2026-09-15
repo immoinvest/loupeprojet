@@ -7,7 +7,16 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'html'],
       include: ['packages/*/src/**', 'apps/*/src/**', 'data/src/**'],
-      exclude: ['**/index.ts', '**/exemples/**', 'apps/web/src/main.tsx', 'data/src/cli.ts'],
+      exclude: [
+        '**/index.ts',
+        '**/exemples/**',
+        'apps/web/src/main.tsx',
+        'data/src/cli.ts',
+        // Site vitrine : pages et composants Astro, colle du build et du navigateur (prouvés par le build).
+        '**/*.astro',
+        'apps/site/src/{integrations,scripts}/**',
+        'apps/site/src/{content.config,liens-du-build}.ts',
+      ],
       // En mode projets, seuls les seuils déclarés ici sont appliqués (ceux des sous-projets sont ignorés).
       thresholds: {
         'packages/moteur/src/**': { lines: 100, functions: 100, branches: 100, statements: 100 },
@@ -18,6 +27,7 @@ export default defineConfig({
         'apps/worker/src/**': { lines: 100, functions: 100, branches: 100, statements: 100 },
         'apps/comptes/src/**': { lines: 100, functions: 100, branches: 100, statements: 100 },
         'data/src/**': { lines: 100, functions: 100, branches: 100, statements: 100 },
+        'apps/site/src/lib/**': { lines: 100, functions: 100, branches: 100, statements: 100 },
         'apps/web/src/{stockage,formatage,textes,annonces,hypotheses,analyses,bookmarklet,enrichissement,compte,gestion,application,hors-ligne,simulateur,visite}/**':
           {
             lines: 100,

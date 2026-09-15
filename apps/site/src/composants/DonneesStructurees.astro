@@ -1,0 +1,12 @@
+---
+import { serialiserJsonLd, type NoeudJsonLd } from '../lib/donnees-structurees';
+
+/** Bloc de données structurées (schema.org), sérialisé sans risque de fermer la balise. */
+interface Props {
+  donnees: NoeudJsonLd;
+}
+
+const texte = serialiserJsonLd(Astro.props.donnees);
+---
+
+<script is:inline type="application/ld+json" set:html={texte} />

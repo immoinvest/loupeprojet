@@ -292,6 +292,14 @@ export interface Regles {
     readonly arrondi: number;
   };
 
+  readonly revente: {
+    /**
+     * Part du montant des travaux ajoutée à la valeur de revente quand l'état du bien ou les ventes
+     * comparables manquent (sinon, la valorisation vient de l'écart entre l'état et « rénové »).
+     */
+    readonly valorisationTravauxRepli: number;
+  };
+
   /** Chemins (notation pointée) des valeurs sans source officielle consolidée. */
   readonly aConfirmer: readonly string[];
   /** Simplifications assumées par cette version, affichées dans les résultats. */

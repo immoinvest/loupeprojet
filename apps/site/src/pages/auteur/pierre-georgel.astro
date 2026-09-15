@@ -1,0 +1,60 @@
+---
+import { getCollection } from 'astro:content';
+
+import CarteGuide from '../../composants/CarteGuide.astro';
+import DonneesStructurees from '../../composants/DonneesStructurees.astro';
+import { auteur, graphe } from '../../lib/donnees-structurees';
+import { publies } from '../../lib/guides/controles';
+import { tempsDeLecture } from '../../lib/guides/lecture';
+import { SITE } from '../../lib/site';
+import Base from '../../mises-en-page/Base.astro';
+
+const guides = publies(await getCollection('guides')).filter(
+  (guide) => guide.data.auteur === 'pierre-georgel',
+);
+---
+
+<Base
+  titre="Pierre Georgel, auteur des guides Deklic"
+  description="Pierre Georgel conçoit Deklic et écrit ses guides de l'investissement locatif à partir des textes officiels et des règles de calcul de l'application."
+  chemin={SITE.auteur.chemin}
+>
+  <DonneesStructurees
+    slot="tete"
+    donnees={graphe([{ '@type': 'ProfilePage', mainEntity: auteur() }])}
+  />
+  <div class="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
+    <p class="font-display text-xs font-semibold tracking-[0.12em] text-accent uppercase">Auteur</p>
+    <h1 class="mt-3 text-3xl font-bold tracking-tight sm:text-5xl">{SITE.auteur.nom}</h1>
+    <div class="mt-5 grid max-w-2xl gap-4 text-lg leading-relaxed text-encre-2">
+      <p>
+        Pierre Georgel conçoit Deklic, l’application qui analyse un investissement locatif à partir
+        du lien d’une annonce : financement, cash-flow, fiscalité, revente et prix face aux ventes
+        réelles.
+      </p>
+      <p>
+        Il écrit les guides à partir des textes officiels (service-public.gouv.fr, impots.gouv.fr,
+        Légifrance) et des règles de calcul de l’application. Chaque guide indique ses sources et sa
+        date de mise à jour ; les taux et plafonds cités sont ceux que l’application utilise.
+      </p>
+      <p>
+        Une erreur, une précision ? Écrivez à <a href={`mailto:${SITE.contact}`}>{SITE.contact}</a>.
+      </p>
+    </div>
+
+    {
+      guides.length > 0 && (
+        <section aria-labelledby="ses-guides" class="mt-14">
+          <h2 id="ses-guides" class="text-2xl font-bold tracking-tight">
+            Ses guides
+          </h2>
+          <div class="mt-5 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {guides.map((guide) => (
+              <CarteGuide guide={guide} minutes={tempsDeLecture(guide.body ?? '')} />
+            ))}
+          </div>
+        </section>
+      )
+    }
+  </div>
+</Base>

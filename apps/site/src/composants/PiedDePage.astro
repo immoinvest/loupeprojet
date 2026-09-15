@@ -1,0 +1,73 @@
+---
+import { LIENS } from '../liens-du-build';
+import Logo from './Logo.astro';
+
+const COLONNES = [
+  {
+    titre: 'Deklic',
+    liens: [
+      { libelle: 'Analyser une annonce', href: LIENS.nouveauProjet },
+      { libelle: 'Gérer mes locations', href: LIENS.gerer },
+      { libelle: 'Simulateur de prêt', href: LIENS.simulateurPret },
+      { libelle: 'Extension navigateur', href: LIENS.extension },
+      { libelle: 'Se connecter', href: LIENS.connexion },
+    ],
+  },
+  {
+    titre: 'Guides',
+    liens: [
+      { libelle: 'Tous les guides', href: '/guides/' },
+      { libelle: 'Investir', href: '/guides/investir/' },
+      { libelle: 'Trouver un bien rentable', href: '/guides/trouver-un-bien/' },
+      { libelle: 'Fiscalité', href: '/guides/fiscalite/' },
+      { libelle: 'Gérer ses locataires', href: '/guides/gerer-ses-locataires/' },
+    ],
+  },
+  {
+    titre: 'À propos',
+    liens: [
+      { libelle: 'L’auteur', href: '/auteur/pierre-georgel/' },
+      { libelle: 'Mentions légales', href: '/mentions-legales/' },
+      { libelle: 'Confidentialité', href: '/confidentialite/' },
+    ],
+  },
+] as const;
+---
+
+<footer class="mt-16 border-t border-bordure bg-surface">
+  <div class="mx-auto grid max-w-6xl gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[1.2fr_2fr] lg:px-8">
+    <div class="grid content-start gap-4">
+      <a href="/" class="justify-self-start rounded-encart" aria-label="Deklic : accueil"
+        ><Logo class="h-6" /></a
+      >
+      <p class="max-w-sm text-sm text-encre-2">
+        Deklic est un outil d’aide à la décision, pas un conseil en investissement. Les chiffres
+        viennent des données publiques : ventes DVF, DPE de l’ADEME, loyers de l’ANIL, Géorisques,
+        INSEE.
+      </p>
+    </div>
+    <nav aria-label="Pied de page" class="grid gap-8 sm:grid-cols-3">
+      {
+        COLONNES.map((colonne) => (
+          <div>
+            <h2 class="font-display text-sm font-semibold tracking-wide text-encre uppercase">
+              {colonne.titre}
+            </h2>
+            <ul class="mt-3 grid gap-1 text-sm">
+              {colonne.liens.map((lien) => (
+                <li>
+                  <a
+                    href={lien.href}
+                    class="inline-flex min-h-9 items-center text-encre-2 no-underline survol-texte"
+                  >
+                    {lien.libelle}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))
+      }
+    </nav>
+  </div>
+</footer>

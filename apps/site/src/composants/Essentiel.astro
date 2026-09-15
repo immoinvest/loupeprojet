@@ -1,0 +1,30 @@
+---
+/** « L'essentiel » : la réponse courte, avant le détail du guide. */
+interface Props {
+  points: readonly string[];
+}
+
+const { points } = Astro.props;
+---
+
+<section
+  aria-labelledby="essentiel"
+  class="rounded-carte border border-accent-bordure bg-accent-fond p-5 sm:p-6"
+>
+  <h2
+    id="essentiel"
+    class="font-display text-xs font-semibold tracking-[0.12em] text-accent uppercase"
+  >
+    L’essentiel
+  </h2>
+  <ul class="mt-3 grid gap-2.5">
+    {
+      points.map((point) => (
+        <li class="flex gap-3 text-[1.02rem] leading-relaxed">
+          <span aria-hidden="true" class="mt-2.5 size-1.5 flex-none rounded-full bg-accent" />
+          <span>{point}</span>
+        </li>
+      ))
+    }
+  </ul>
+</section>

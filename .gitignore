@@ -3,6 +3,7 @@ node_modules/
 dist/
 build/
 .wrangler/
+.astro/
 coverage/
 playwright-report/
 test-results/

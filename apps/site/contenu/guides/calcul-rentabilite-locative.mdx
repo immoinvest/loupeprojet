@@ -1,0 +1,115 @@
+---
+titre: 'Calcul de la rentabilité locative : brut, net et net-net'
+titreSeo: 'Calcul de la rentabilité locative : brut, net, net-net'
+description: "Comment calculer la rentabilité locative d'un bien ? Les formules brute, nette et net-net, les erreurs à éviter, un exemple chiffré et un simulateur gratuit."
+motCle: 'calcul rentabilité locative'
+motsClesSecondaires:
+  - calcul rendement locatif net
+  - rentabilité locative brute et nette
+  - simulateur rendement locatif
+  - rentabilité locative moyenne
+categorie: investir
+auteur: pierre-georgel
+publieLe: 2026-09-15
+misAJourLe: 2026-09-15
+essentiel:
+  - 'La rentabilité brute divise les loyers annuels hors charges par le coût total du projet : prix, travaux et frais d’acquisition.'
+  - 'La rentabilité nette retire les charges du propriétaire (taxe foncière, copropriété, assurance, gestion, entretien) et la vacance locative.'
+  - 'La rentabilité net-net retire aussi les intérêts, l’assurance de l’emprunt et l’impôt : c’est la plus proche de ce que le bien rapporte vraiment.'
+  - 'Pour comparer deux annonces, prenez la rentabilité nette sur le coût total, jamais la rentabilité brute sur le prix affiché.'
+faq:
+  - question: 'Quelle est une bonne rentabilité locative ?'
+    reponse: 'Il n’existe pas de seuil officiel. Une rentabilité élevée va souvent avec un risque plus fort : demande locative faible, travaux, copropriété fragile. Regardez-la avec le cash-flow, le prix du quartier et l’état du bien.'
+  - question: 'Faut-il inclure les frais de notaire dans le calcul ?'
+    reponse: 'Oui. Droits de mutation, émoluments du notaire et contribution de sécurité immobilière font partie du coût du projet. Dans l’ancien, ils représentent de l’ordre de 7 à 8 % du prix : les oublier gonfle la rentabilité.'
+  - question: 'La taxe foncière entre-t-elle dans la rentabilité nette ?'
+    reponse: 'Oui, comme les charges de copropriété non récupérables, l’assurance propriétaire non occupant, les frais de gestion et l’entretien. Les charges que le locataire vous rembourse n’en font pas partie.'
+  - question: 'Rentabilité ou cash-flow : que regarder ?'
+    reponse: 'Les deux. La rentabilité compare ce que rapporte le bien à ce qu’il coûte ; le cash-flow dit ce qui reste chaque mois après la mensualité du crédit. Un bien rentable peut coûter de l’argent chaque mois si l’apport est faible.'
+sources:
+  - nom: 'Service-public.gouv.fr : Frais de notaire, de quoi s’agit-il ?'
+    url: 'https://www.service-public.gouv.fr/particuliers/vosdroits/F17701'
+    consulteLe: 2026-09-15
+  - nom: 'impots.gouv.fr : Achat dans l’ancien'
+    url: 'https://www.impots.gouv.fr/particulier/achat-dans-lancien'
+    consulteLe: 2026-09-15
+  - nom: 'data.gouv.fr : Demandes de valeurs foncières (DVF)'
+    url: 'https://www.data.gouv.fr/datasets/demandes-de-valeurs-foncieres'
+    consulteLe: 2026-09-15
+  - nom: 'data.gouv.fr : Carte des loyers 2025 (ANIL)'
+    url: 'https://www.data.gouv.fr/datasets/carte-des-loyers-indicateurs-de-loyers-dannonce-par-commune-en-2025'
+    consulteLe: 2026-09-15
+  - nom: 'Service-public.gouv.fr : Encadrement des loyers en zone tendue'
+    url: 'https://www.service-public.gouv.fr/particuliers/vosdroits/F1314'
+    consulteLe: 2026-09-15
+  - nom: 'Ministère de la Transition écologique : Location et gel des loyers des passoires énergétiques'
+    url: 'https://www.ecologie.gouv.fr/interdiction-location-et-gel-des-loyers-des-passoires-energetiques'
+    consulteLe: 2026-09-15
+---
+
+import Calcul from '../../src/composants/Calcul.astro';
+import Regle from '../../src/composants/Regle.astro';
+import Simulateur from '../../src/composants/Simulateur.astro';
+
+Le calcul de la rentabilité locative répond à une question simple : combien le bien rapporte-t-il chaque année, comparé à ce qu’il coûte ? Il existe trois niveaux, du plus flatteur au plus réaliste : la rentabilité brute, la nette et la net-net. Ce guide donne les trois formules, un exemple chiffré avec de vrais frais de notaire, et un simulateur pour faire le calcul sur votre bien.
+
+## Rentabilité brute : la formule
+
+La rentabilité brute divise les loyers d’une année, hors charges, par le coût total du projet. Elle se calcule en dix secondes et sert à trier les annonces, pas à décider.
+
+**Rentabilité brute = loyer mensuel hors charges × 12 ÷ (prix + travaux + frais d’acquisition)**
+
+Exemple : un appartement à 150 000 € dans les Bouches-du-Rhône, loué 650 € par mois hors charges, sans travaux. Les frais d’acquisition atteignent <Calcul prix={150000} departement="13" loyer={650} valeur="frais" />, le coût total <Calcul prix={150000} departement="13" loyer={650} valeur="cout" />, et la rentabilité brute <Calcul prix={150000} departement="13" loyer={650} valeur="brut" />.
+
+Beaucoup d’annonces divisent par le seul prix affiché : 7 800 € de loyers ÷ 150 000 € donnent 5,2 %. Le chiffre paraît meilleur, parce que les frais d’acquisition ont disparu du calcul.
+
+## Rentabilité nette : les charges à retirer
+
+La rentabilité nette retire des loyers tout ce que le propriétaire paie lui-même, puis divise par le même coût total. C’est le bon chiffre pour comparer deux biens.
+
+**Rentabilité nette = (loyers encaissés − charges du propriétaire) ÷ coût total**
+
+Les charges à compter chaque année :
+
+- la **taxe foncière** ;
+- les **charges de copropriété non récupérables** (celles que le locataire ne rembourse pas) ;
+- l’**assurance propriétaire non occupant** ;
+- les **frais de gestion** si une agence gère la location ;
+- en meublé, l’**expert-comptable** et la **cotisation foncière des entreprises** ;
+- l’**entretien** et les petites réparations ;
+- la **vacance locative** : les semaines sans locataire entre deux baux. Deklic en compte <Regle chemin="exploitation.parType.nu.vacanceSemaines" format="nombre" /> semaines par an par défaut en location nue.
+
+Reprenons l’exemple avec 1 900 € de charges par an : la rentabilité nette tombe à <Calcul prix={150000} departement="13" loyer={650} charges={1900} valeur="net" />.
+
+## Rentabilité net-net : après crédit et impôt
+
+La rentabilité net-net retire encore les intérêts et l’assurance de l’emprunt, puis l’impôt sur les loyers. Elle dépend donc de votre financement et de votre régime fiscal.
+
+À loyer égal, l’impôt peut varier du tout au tout entre location nue et meublée, au micro ou au réel : le guide [LMNP ou location nue](/guides/lmnp-ou-location-nue/) compare les quatre régimes. C’est aussi le niveau où un calcul à la main devient fragile, parce que les intérêts baissent chaque année et que les amortissements ou le déficit foncier changent l’impôt d’une année sur l’autre.
+
+## Calculez la vôtre
+
+Modifiez les chiffres : les frais d’acquisition suivent le département, comme dans l’application.
+
+<Simulateur />
+
+## Quelle rentabilité viser ?
+
+Aucun seuil officiel n’existe. Dans son verdict, Deklic met un feu vert au rendement net à partir de <Regle chemin="verdict.rendementNet.bonDes" format="taux" />, et un feu orange à partir de <Regle chemin="verdict.rendementNet.surveillerDes" format="taux" /> : ce sont des repères, pas une promesse.
+
+Un rendement très au-dessus de ces repères cache souvent quelque chose : une ville où les locataires sont rares, des travaux à prévoir, un logement mal classé au DPE ou une copropriété en difficulté. Avant de vous réjouir, vérifiez deux chiffres :
+
+- **le prix**, face aux ventes réelles du quartier, dans la base publique [DVF](https://app.dvf.etalab.gouv.fr/) ;
+- **le loyer**, face aux loyers de marché de la commune publiés par l’ANIL, et au plafond de l’[encadrement des loyers](https://www.service-public.gouv.fr/particuliers/vosdroits/F1314) si la ville y est soumise.
+
+## Les erreurs qui faussent le calcul
+
+La plupart des rentabilités trop belles viennent de cinq oublis.
+
+1. **Diviser par le prix affiché** au lieu du coût total.
+2. **Prendre le loyer charges comprises** : les charges récupérables ne sont pas un revenu.
+3. **Oublier la vacance et l’entretien**, comme si le bien restait loué et intact pendant vingt ans.
+4. **Ignorer les travaux**, ou le DPE : un logement classé G ne peut plus faire l’objet d’un nouveau bail depuis <Regle chemin="exploitation.interdictionLocationDpe.G" format="annee" />, et les logements classés F seront concernés à partir de <Regle chemin="exploitation.interdictionLocationDpe.F" format="annee" />.
+5. **Estimer le loyer au jugé**, sans le comparer aux annonces du quartier.
+
+Deklic fait ces vérifications à partir du lien de l’annonce : coût total avec les frais du département, charges pleines, loyer comparé à celui du marché, prix comparé aux ventes réelles et rendements brut, net et net-net selon quatre régimes fiscaux.

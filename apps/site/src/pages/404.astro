@@ -1,0 +1,26 @@
+---
+import LienBouton from '../composants/LienBouton.astro';
+import { LIENS } from '../liens-du-build';
+import Base from '../mises-en-page/Base.astro';
+---
+
+<Base
+  titre="Page introuvable | Deklic"
+  description="Cette page n'existe pas ou a changé d'adresse. Retrouvez l'accueil de Deklic, les guides de l'investissement locatif ou l'application."
+  chemin="/404/"
+  indexer={false}
+>
+  <section class="mx-auto grid max-w-2xl gap-5 px-4 py-20 text-center sm:px-6">
+    <p class="font-display text-xs font-semibold tracking-[0.12em] text-accent uppercase">Erreur 404</p>
+    <h1 class="text-4xl font-bold tracking-tight">Cette page n’existe pas</h1>
+    <p class="text-lg text-encre-2">
+      Elle a peut-être changé d’adresse. Repartez de l’accueil, lisez un guide ou analysez directement
+      une annonce.
+    </p>
+    <div class="flex flex-wrap justify-center gap-3">
+      <LienBouton href="/">Accueil</LienBouton>
+      <LienBouton href="/guides/" variante="contour">Les guides</LienBouton>
+      <LienBouton href={LIENS.nouveauProjet} variante="contour">Analyser une annonce</LienBouton>
+    </div>
+  </section>
+</Base>

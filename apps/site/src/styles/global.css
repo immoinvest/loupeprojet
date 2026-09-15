@@ -1,0 +1,213 @@
+@import 'tailwindcss';
+
+/*
+ * Tokens du site vitrine : identité Deklic (ADR-005, marque/couleurs.json) et direction « Le guide »
+ * (ADR-004), comme apps/web/src/index.css. tests/marque.test.ts vérifie les couleurs de la marque.
+ */
+@theme {
+  --font-display: 'Outfit Variable', 'Segoe UI', system-ui, sans-serif;
+  --font-sans: 'Nunito Sans Variable', 'Segoe UI', system-ui, sans-serif;
+
+  --color-fond: #fffdf9;
+  --color-surface: #ffffff;
+  --color-bordure: #ece8e0;
+  --color-encre: #23272f;
+  --color-encre-2: #4b5563;
+  --color-encre-3: #6b7280;
+  --color-encre-4: #9ca3af;
+
+  --color-accent: #2b4bf2;
+  --color-accent-fonce: #1f38c4;
+  --color-accent-doux: #e8ecff;
+  --color-accent-fond: #f5f7ff;
+  --color-accent-bordure: #d9dfff;
+
+  --color-flash: #ff7a1a;
+  --color-flash-fond: #fff1e6;
+
+  --color-bon: #2e9e6b;
+  --color-bon-texte: #1f7a4d;
+  --color-bon-fond: #e3f4ea;
+  --color-surveiller: #d98a1e;
+  --color-surveiller-texte: #9a5b0f;
+  --color-surveiller-fond: #fbeeda;
+  --color-probleme: #d9453d;
+  --color-probleme-texte: #a3302a;
+  --color-probleme-fond: #fbe5e3;
+
+  --radius-carte: 20px;
+  --radius-encart: 12px;
+}
+
+/* Main et transition sur tout ce qui se clique (design-guidelines.md), liens bleus soulignables. */
+@layer base {
+  a[href],
+  button,
+  summary,
+  input[type='submit'] {
+    cursor: pointer;
+    transition-property: color, background-color, border-color, text-decoration-color, box-shadow;
+    transition-duration: 150ms;
+    transition-timing-function: ease-out;
+  }
+
+  :disabled {
+    cursor: not-allowed;
+  }
+
+  a {
+    color: var(--color-accent);
+    text-underline-offset: 0.2em;
+  }
+
+  @media (hover: hover) {
+    a[href]:hover {
+      color: var(--color-accent-fonce);
+      text-decoration-thickness: 2px;
+    }
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    text-wrap: balance;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      transition-duration: 0s !important;
+    }
+  }
+}
+
+/* Recettes de survol : les mêmes que l'application (apps/web/src/index.css). */
+@utility survol-plein {
+  @media (hover: hover) {
+    &:hover:not(:disabled, [aria-disabled='true']) {
+      background-color: var(--color-accent-fonce);
+    }
+  }
+}
+
+@utility survol-fond {
+  @media (hover: hover) {
+    &:hover:not(:disabled, [aria-disabled='true']) {
+      background-color: var(--color-accent-fond);
+      border-color: var(--color-accent-bordure);
+    }
+  }
+}
+
+@utility survol-fond-fort {
+  @media (hover: hover) {
+    &:hover:not(:disabled, [aria-disabled='true']) {
+      background-color: var(--color-accent-doux);
+      border-color: var(--color-accent-bordure);
+    }
+  }
+}
+
+@utility survol-texte {
+  @media (hover: hover) {
+    &:hover:not(:disabled, [aria-disabled='true']) {
+      color: var(--color-accent-fonce);
+      text-decoration-line: underline;
+      text-decoration-thickness: 2px;
+      text-underline-offset: 0.2em;
+    }
+  }
+}
+
+/* Texte d'un guide (MDX) : rythme de lecture, intertitres, listes, tableaux, encadrés. */
+.prose-guide {
+  font-size: 1.07rem;
+  line-height: 1.75;
+  color: var(--color-encre);
+
+  & > * + * {
+    margin-top: 1.1em;
+  }
+  & h2 {
+    margin-top: 2.2em;
+    font-size: 1.6rem;
+    line-height: 1.2;
+    font-weight: 700;
+    letter-spacing: -0.015em;
+    scroll-margin-top: 1.5rem;
+  }
+  & h3 {
+    margin-top: 1.8em;
+    font-size: 1.2rem;
+    line-height: 1.3;
+    font-weight: 600;
+    scroll-margin-top: 1.5rem;
+  }
+  & h2 + *,
+  & h3 + * {
+    margin-top: 0.6em;
+  }
+  & ul,
+  & ol {
+    padding-left: 1.3em;
+  }
+  & ul {
+    list-style: disc;
+  }
+  & ol {
+    list-style: decimal;
+  }
+  & li + li {
+    margin-top: 0.4em;
+  }
+  & li::marker {
+    color: var(--color-accent);
+  }
+  & strong {
+    font-weight: 700;
+  }
+  & a {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+  }
+  & blockquote {
+    border-left: 3px solid var(--color-accent-bordure);
+    padding-left: 1em;
+    color: var(--color-encre-2);
+  }
+  & table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+    font-variant-numeric: tabular-nums;
+  }
+  & th {
+    text-align: left;
+    font-family: var(--font-display);
+    font-weight: 600;
+    border-bottom: 2px solid var(--color-encre);
+    padding: 0.5em 0.75em 0.5em 0;
+  }
+  & td {
+    border-bottom: 1px solid var(--color-bordure);
+    padding: 0.55em 0.75em 0.55em 0;
+    vertical-align: top;
+  }
+  & .tableau {
+    overflow-x: auto;
+  }
+}
+
+@utility survol-discret {
+  @media (hover: hover) {
+    &:hover:not(:disabled, [aria-disabled='true']) {
+      color: var(--color-encre);
+      border-color: var(--color-encre-4);
+    }
+  }
+}
