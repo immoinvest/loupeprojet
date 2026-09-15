@@ -5,11 +5,14 @@ import {
   exploitationParmi,
   installationsAnciennes,
   maison,
+  non,
   parametreAnnee,
   parametreChambreM2,
   tous,
+  travauxEstimes,
   travauxPrevus,
 } from '../contexte';
+import { estimerTravaux } from '../../estimation/travaux';
 import type { QuestionVisite } from '../types';
 
 /** Diagnostics du dossier technique et travaux, votés ou à prévoir. */
@@ -91,9 +94,26 @@ export const QUESTIONS_DIAGNOSTICS: readonly QuestionVisite[] = [
     },
   },
   {
+    id: 'TRAVAUX_ESTIMES_DEVIS',
+    categorie: 'diagnostics',
+    condition: travauxEstimes,
+    texte:
+      "Travaux estimés d'après l'état ({travaux}, entre {bas} et {haut}, hors aides) : faites-les chiffrer sur devis. Ce que vous voyez (cuisine, salle d'eau, électricité, sols, fenêtres) correspond-il ?",
+    source: 'Barème Deklic 2026-09 (fourchettes publiques de professionnels du bâtiment)',
+    parametres: (c) => {
+      const estimation = estimerTravaux(c.projet.bien, c.regles);
+      return {
+        travaux: c.projet.hypotheses.achat.travaux,
+        bas: estimation?.bas ?? 0,
+        haut: estimation?.haut ?? 0,
+      };
+    },
+    valeur: { chemin: 'hypotheses.achat.travaux', type: 'euros' },
+  },
+  {
     id: 'TRAVAUX_CHIFFRAGE',
     categorie: 'diagnostics',
-    condition: travauxPrevus,
+    condition: tous(travauxPrevus, non(travauxEstimes)),
     texte:
       "Travaux prévus ({travaux}) : un artisan a-t-il chiffré sur devis ? Sinon, le montant est-il réaliste pour l'état constaté (cuisine, salle d'eau, électricité, sols) ?",
     source: 'Spec Deklic',

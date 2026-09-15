@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { CODES_CHARGES } from '../cashflow/charges';
 import { ModeLocationSchema, RegimeSchema } from './hypotheses';
 import { CodeManqueSchema, ManqueSchema } from './manques';
-import { EstimationResultatSchema } from './resultats-estimation';
+import { EstimationResultatSchema, TravauxResultatSchema } from './resultats-estimation';
 import { ProjetSchema, VersionReglesSchema } from './projet';
 
 /**
@@ -246,7 +246,7 @@ export const ScenariosSchema = z.strictObject({
   ),
 });
 
-export { EstimationResultatSchema } from './resultats-estimation';
+export { EstimationResultatSchema, TravauxResultatSchema } from './resultats-estimation';
 
 /** Ce que tout rapport porte, complet ou partiel. */
 const communs = {
@@ -259,6 +259,7 @@ const communs = {
   }),
   financement: FinancementSchema,
   estimation: EstimationResultatSchema.nullable(),
+  travaux: TravauxResultatSchema.nullable(),
   verdict: VerdictSchema,
   manques: z.array(ManqueSchema),
   meta: z.strictObject({

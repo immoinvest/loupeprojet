@@ -1,6 +1,11 @@
 import { resumerAchat, type ResumeAchat } from './achat';
 import type { ResultatCashflow } from './cashflow';
-import { estimerPrix, type EstimationPrix } from './estimation';
+import {
+  estimerPrix,
+  estimerTravaux,
+  type EstimationPrix,
+  type EstimationTravaux,
+} from './estimation';
 import { calculerFinancement, type ResultatFinancement } from './financement';
 import { calculerFiscalite, type ResultatFiscalite } from './fiscalite';
 import type { Regles } from './regles/types';
@@ -17,6 +22,8 @@ interface ResultatsCommuns {
   readonly financement: ResultatFinancement;
   /** Estimation du prix du bien ; `null` sans ventes réelles connues. */
   readonly estimation: EstimationPrix | null;
+  /** Travaux estimés selon l'état (repère, qu'ils soient retenus ou non) ; `null` si l'état est inconnu. */
+  readonly travaux: EstimationTravaux | null;
   /** Toujours cinq feux ; ceux qui dépendent d'une donnée absente sont « inconnu » avec leur raison. */
   readonly verdict: ResultatVerdict;
   /** Données sans défaut que le projet ne donne pas ; l'interface sait quoi demander. */
@@ -68,6 +75,7 @@ export function calculerComplet(projet: ProjetComplet, regles: Regles): Resultat
     revente,
     rendement,
     estimation,
+    travaux: estimerTravaux(projet.bien, regles),
     verdict,
     manques,
   };
@@ -89,6 +97,7 @@ export function calculerPartiel(projet: Projet, regles: Regles): ResultatsBasePa
     revente: null,
     rendement: null,
     estimation,
+    travaux: estimerTravaux(projet.bien, regles),
     verdict,
     manques,
   };

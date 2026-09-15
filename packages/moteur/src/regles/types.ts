@@ -57,6 +57,13 @@ export interface EffetEtage {
   readonly hauts: number;
 }
 
+/** Coût de travaux au m² de surface : bas et haut de la fourchette relevée, valeur estimée retenue. */
+export interface FourchetteM2 {
+  readonly bas: number;
+  readonly estime: number;
+  readonly haut: number;
+}
+
 /** Défauts communs aux locations à loyer mensuel. */
 export interface DefautsLoyerMensuel {
   readonly vacanceSemaines: number;
@@ -270,6 +277,19 @@ export interface Regles {
     };
     /** Demi-largeur de la fourchette d'estimation selon le niveau de confiance. */
     readonly marges: Readonly<Record<NiveauConfiance, number>>;
+  };
+
+  /** Travaux estimés selon l'état du bien, TTC et hors aides, en € par m² de surface. */
+  readonly travaux: {
+    readonly parEtat: Readonly<Record<EtatBien, FourchetteM2>>;
+    /** Supplément de rénovation énergétique pour les classes listées (isolation, chauffage, ventilation). */
+    readonly renovationEnergetique: FourchetteM2 & {
+      readonly classes: readonly ClasseEnergie[];
+      /** Part du supplément comptée pour un bien à rénover (la rénovation complète en couvre une partie). */
+      readonly partSiARenover: number;
+    };
+    /** Les montants sont arrondis à ce multiple d'euros. */
+    readonly arrondi: number;
   };
 
   /** Chemins (notation pointée) des valeurs sans source officielle consolidée. */
