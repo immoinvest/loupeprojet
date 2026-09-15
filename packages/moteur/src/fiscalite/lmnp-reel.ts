@@ -34,9 +34,11 @@ export function fraisDeductiblesAnnee1(ctx: ContexteFiscal): number {
 }
 
 /**
- * Art. 39 C : l'amortissement ne peut ni créer ni augmenter un déficit.
- * On impute d'abord les déficits antérieurs, puis les amortissements disponibles
- * (année + reports), répartis au prorata immeuble / mobilier.
+ * Art. 39 C II : l'amortissement ne peut ni créer ni augmenter un déficit ; son excédent se reporte sans
+ * limite. Sur un résultat positif, on déduit d'abord les amortissements disponibles (année + reports),
+ * répartis au prorata immeuble / mobilier, puis les déficits antérieurs (10 ans, CGI 156 I 1° ter) sur
+ * le bénéfice qui reste : CE, 15 avril 2015, un déficit ne s'impute que sur le bénéfice établi après
+ * tous les amortissements.
  */
 function anneeLmnp(
   ctx: ContexteFiscal,
@@ -72,16 +74,16 @@ function anneeLmnp(
       regles.fiscalite.deficitBic.reportAnnees,
     );
   } else {
-    const imputation = imputerDeficits(deficits, resultatAvantAmortissement, annee);
-    deficits = imputation.stock;
-    deficitImpute = imputation.impute;
-    const reste = resultatAvantAmortissement - deficitImpute;
     const dispo = amortImmeubleDispo + amortMobilierDispo;
-    amortissementsDeduits = Math.min(dispo, reste);
+    amortissementsDeduits = Math.min(dispo, resultatAvantAmortissement);
     immeubleDeduit = dispo > 0 ? (amortissementsDeduits * amortImmeubleDispo) / dispo : 0;
     amortImmeubleDispo -= immeubleDeduit;
     amortMobilierDispo -= amortissementsDeduits - immeubleDeduit;
-    baseImposable = reste - amortissementsDeduits;
+    const benefice = resultatAvantAmortissement - amortissementsDeduits;
+    const imputation = imputerDeficits(deficits, benefice, annee);
+    deficits = imputation.stock;
+    deficitImpute = imputation.impute;
+    baseImposable = benefice - deficitImpute;
   }
 
   return {

@@ -268,11 +268,12 @@ describe('LMNP réel — ordre d’imputation : amortissements avant déficits (
   });
 
   it('résultat égal à la dotation chaque année : le déficit n’est jamais imputé et expire après 10 ans', () => {
-    // Années 2 à 7 : recettes D ; années 8 à 12 : D − mobilier (le mobilier est amorti sur 7 ans).
-    // Chaque année la dotation absorbe le résultat ; le différé D de l'année 1 reste en stock.
-    const r = projeterLmnpReel(
-      avecRecettes(12, (annee) => (annee <= 7 ? dotation : dotation - mobilier)),
-    );
+    // Dotation de l'année : D jusqu'à 7 ans, D − mobilier de 8 à 10 ans (mobilier sur 7 ans), puis
+    // D − mobilier − 600 € de 11 à 12 ans (travaux sur 10 ans). Recettes posées égales à cette dotation :
+    // chaque année elle absorbe le résultat ; le différé D de l'année 1 reste en stock.
+    const dotationDe = (annee: number): number =>
+      dotation - (annee > 7 ? mobilier : 0) - (annee > 10 ? 600 : 0);
+    const r = projeterLmnpReel(avecRecettes(12, dotationDe));
     expect(r.annees.every((a) => a.deficitImpute === 0)).toBe(true);
     expect(r.impotTotal).toBeCloseTo(0, 6);
     expect(r.annees[10]!.stocks.deficitReportable).toBeCloseTo(frais, 6);
@@ -282,8 +283,8 @@ describe('LMNP réel — ordre d’imputation : amortissements avant déficits (
 });
 
 describe('LMNP réel — imputation d’un déficit antérieur', () => {
-  it('un déficit d’année 1 est imputé dès que le résultat redevient positif', () => {
-    // Petit crédit : intérêts faibles, résultat positif dès l'année 2.
+  it('un déficit d’année 1 n’est imputé qu’une fois tous les amortissements disponibles déduits', () => {
+    // Petit crédit : intérêts faibles, résultat positif dès l'année 2 (CE, 15/04/2015).
     const ctx = contexte(
       variante({
         pret: { ...projetExemple.hypotheses.pret, apport: 150_000 },
@@ -295,14 +296,14 @@ describe('LMNP réel — imputation d’un déficit antérieur', () => {
     const a1 = r.annees[0]!;
     const a2 = r.annees[1]!;
     expect(a1.stocks.deficitReportable).toBeGreaterThan(0);
-    expect(a2.deficitImpute).toBeGreaterThan(0);
-    expect(a2.deficitImpute).toBeLessThanOrEqual(a1.stocks.deficitReportable);
-    expect(a2.stocks.deficitReportable).toBeCloseTo(
-      a1.stocks.deficitReportable - a2.deficitImpute,
-      6,
-    );
-    // Tant qu'un déficit est imputé, le résultat est absorbé : ni base ni amortissement déduit.
-    expect(a2.baseImposable).toBe(0);
-    expect(r.annees.some((a) => a.annee > 2 && a.stocks.deficitReportable === 0)).toBe(true);
+    expect(a2.recettes - a2.chargesDeductibles - a2.interetsDeductibles).toBeGreaterThan(0);
+    expect(a2.amortissementsDeduits).toBeGreaterThan(0);
+    r.annees.forEach((a, i) => {
+      const precedent = i === 0 ? 0 : r.annees[i - 1]!.stocks.deficitReportable;
+      // Un déficit imputé suppose un stock d'amortissements vidé cette année-là.
+      if (a.deficitImpute > 0) expect(a.stocks.amortissementsReportes).toBeCloseTo(0, 6);
+      expect(a.deficitImpute).toBeLessThanOrEqual(precedent + 1e-6);
+    });
+    expect(r.annees.some((a) => a.deficitImpute > 0)).toBe(true);
   });
 });

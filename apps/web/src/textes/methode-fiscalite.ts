@@ -70,7 +70,7 @@ export function sectionLmnpReel(regles: Regles): SectionMethode {
       "Résultat avant amortissement = recettes − charges d'exploitation − assurance emprunteur − intérêts payés − frais d'acquisition et bancaires (année 1).",
       `Amortissement du bâti : prix hors honoraires × (1 − ${pct(am.partTerrain)} de terrain), en ${composants} ; travaux sur ${String(am.travauxDureeAnnees)} ans ; mobilier sur ${String(am.mobilierDureeAnnees)} ans.`,
       "Art. 39 C : l'amortissement ne crée pas de déficit ; la part non déduite se reporte sans limite de durée.",
-      `Un déficit hors amortissement se reporte ${String(deficitBic.reportAnnees)} ans sur les mêmes revenus.`,
+      `Un déficit hors amortissement se reporte ${String(deficitBic.reportAnnees)} ans sur les mêmes revenus ; il ne s'impute que sur le bénéfice qui reste après tous les amortissements, de l'année et reportés (Conseil d'État, 15 avril 2015).`,
       `Impôt = base × votre tranche + base × ${pct(ps.bic)} de prélèvements sociaux. Les amortissements du bâti déduits sont réintégrés à la plus-value depuis le 15 février 2025.`,
     ],
     constantes: [
