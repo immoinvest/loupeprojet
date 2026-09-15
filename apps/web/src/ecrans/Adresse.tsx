@@ -42,6 +42,7 @@ import { CarteRisques } from './adresse/Risques';
 import { TableauGroupes, TableauVentes } from './adresse/Tableaux';
 import { Tendance } from './adresse/Tendance';
 import { useChoixAdresse } from './adresse/useChoixAdresse';
+import { useLiaisonVentes } from './adresse/useLiaisonVentes';
 
 interface DonneesAdresse {
   readonly analyse: ReponseAdresse;
@@ -176,6 +177,7 @@ export function Adresse(): JSX.Element {
 
   const prixM2Bien = prixRetenu(projet.hypotheses.achat) / projet.bien.surface;
   const analyse = etat.etape === 'resultat' ? etat.donnees.analyse : null;
+  const liaison = useLiaisonVentes(analyse);
 
   const carteAdresse = (
     <Carte>
@@ -296,10 +298,10 @@ export function Adresse(): JSX.Element {
             <CarteLoyer resultat={etat.donnees.marche} />
           </div>
           <CarteRisques resultat={etat.donnees.risques} />
-          <CarteQuartier analyse={analyse} adresse={etat.adresse} />
+          <CarteQuartier analyse={analyse} adresse={etat.adresse} liaison={liaison} />
           {analyse.tendance != null && <Tendance tendance={analyse.tendance} />}
           <TableauGroupes analyse={analyse} />
-          <TableauVentes analyse={analyse} />
+          <TableauVentes analyse={analyse} liaison={liaison} />
           <p className="m-0 text-xs text-encre-3">
             Sources : {analyse.sources.map((s) => s.nom).join(' ; ')}
             {analyse.parcelle === null ? '' : ` · parcelle ${analyse.parcelle}`}
