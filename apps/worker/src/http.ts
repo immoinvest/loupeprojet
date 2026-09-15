@@ -45,11 +45,18 @@ export async function ecrireCache(
   }
 }
 
-/** Limite par adresse IP (en-tête Cloudflare) ; sans en-tête, tous partagent la clé « inconnue ». */
-export function limiterDebit(limiteur: LimiteurDebit, journal: Journal): MiddlewareHandler {
+/**
+ * Limite par adresse IP (en-tête Cloudflare) ; sans en-tête, tous partagent la clé « inconnue ».
+ * `limiteur` peut dépendre du chemin : les suggestions d'adresse ont leur propre limite sous `/proxy/*`.
+ */
+export function limiterDebit(
+  limiteur: LimiteurDebit | ((chemin: string) => LimiteurDebit),
+  journal: Journal,
+): MiddlewareHandler {
   return async (c, next) => {
     const ip = c.req.header('CF-Connecting-IP') ?? 'inconnue';
-    const { success } = await limiteur.limit({ key: ip });
+    const choisi = typeof limiteur === 'function' ? limiteur(c.req.path) : limiteur;
+    const { success } = await choisi.limit({ key: ip });
     if (!success) {
       journal.info('debit.refuse', { chemin: c.req.path });
       return reponseErreur(429, 'TROP_DE_REQUETES');
