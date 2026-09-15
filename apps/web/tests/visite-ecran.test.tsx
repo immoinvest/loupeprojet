@@ -44,7 +44,10 @@ describe('Écran Visite', () => {
     // Quatre réponses par question (les champs à valeur ont aussi leurs tuiles, comptées à part).
     const reponses = screen.getAllByRole('group', { name: /^Réponse : / });
     expect(reponses).toHaveLength(N);
-    for (const groupe of reponses) expect(within(groupe).getAllByRole('radio')).toHaveLength(4);
+    // Lecture directe du DOM : une requête par rôle sur chaque groupe est trop lente sous charge.
+    for (const groupe of reponses) {
+      expect(groupe.querySelectorAll('input[type="radio"]')).toHaveLength(4);
+    }
     expect(screen.getAllByText(/^Source : /)).toHaveLength(N);
     expect(screen.getByText(`0 sur ${String(N)} répondues`)).toBeInTheDocument();
     expect(screen.getByRole('progressbar', { name: 'Questions répondues' })).toHaveAttribute(

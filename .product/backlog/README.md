@@ -37,6 +37,7 @@ Statuts : `idée` → `en discussion` → `spécifiée` → `en cours` → `livr
 | 21  | [Adresse avec suggestions](21-adresse-autocompletion.md)                           | Autocomplétion de l'adresse du bien dans Estimation (ville du projet d'abord), choisir lance l'analyse, numéro demandé si absent          | livrée (PR #84)                                                 | —                |
 | 22  | [Vérification des calculs et de l'Excel](22-verification-calculs-excel.md)         | Audit du moteur : moteur ↔ Excel 92K ↔ calcul à la main ↔ sources officielles, tableau d'écarts, tests de référence, recommandations      | livrée (PR #79)                                                 | —                |
 | 23  | [Liens courts et app.deklic.pro](23-liens-courts-domaine.md)                       | Liens de partage `app.deklic.pro/p/xxxxxxxx`, bascule du domaine sans perdre les projets locaux                                           | en cours (PR #86 ouverte : migration D1 puis fusion par Pierre) | domaine (Pierre) |
+| 24  | [Hypothèses : mêmes commandes que Vérifier](24-hypotheses-memes-commandes.md)      | Montants mis en forme, compteurs, tuiles, échelle DPE, durées et apport en tuiles dans Hypothèses et Financement, sans changer les calculs | livrée (feature `hypotheses-commandes`)                         | 13, 17, 19, 20   |
 
 ## Ordre suggéré
 
