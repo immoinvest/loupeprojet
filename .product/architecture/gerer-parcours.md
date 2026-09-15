@@ -114,6 +114,12 @@ Un commit par story ; `master` fusionnée avant la QA et juste avant la PR.
 - [x] Route statique `locataires/nouveau` prioritaire sur `locataires/:id` (classement de React Router).
 - [x] Cas limites : colocation (deux liens), location à la chambre (plusieurs locations, « Déjà loués »), locataire sans location, ligne de loyer sans locataire retrouvé (texte seul), bien sans location (repli par défaut), `?modifier=` d'une location d'un autre bien (ignoré).
 
+## Écarts avec l'inventaire
+
+- **Choix du bien à part** : `optionsDesBiens`, `bienInitial` et `apresChangementDeBien` vivent dans `gestion/saisie-nouveau-locataire.ts` (`choixDesBiens`, `bienInitial`, `apresChangementDeBien`) plutôt que dans `saisie-louer.ts`, qui garde la lecture du formulaire : une responsabilité par fichier.
+- **Textes de « À faire »** dans `textes/gerer-a-faire.ts` ; `cleAction` dans `gestion/a-faire.ts`.
+- **Montant d'un loyer** : le nom accessible vient de `textes/gerer-parcours.ts` (`modifierLaLocation`).
+
 ## Auto-revue (checkpoint validé par Claude, sur autorisation de Pierre)
 
 - **Un module d'adresses (G19)** : sans lui, cinq écrans construiraient `retour` à la main ; la validation serait contournable par un seul oubli.

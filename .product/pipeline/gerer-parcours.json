@@ -27,7 +27,17 @@
       "status": "completed",
       "output": ".product/architecture/gerer-parcours.md"
     },
-    "implement": { "status": "pending", "stories_completed": 0, "stories_total": 5, "commits": [] },
+    "implement": {
+      "status": "in_progress",
+      "stories_completed": 2,
+      "stories_total": 5,
+      "commits": [
+        "df9a64cf docs : discovery, specs, architecture",
+        "fdd6aab1 US-1 fiche d'un locataire, noms en liens, fil d'Ariane",
+        "41782470 US-2 formulaire unique Nouveau locataire, retour à l'origine"
+      ],
+      "notes": "machine chargée (autre session Vitest, CPU 100 %) : tests d'écran lancés fichier par fichier sur un seul processus ; délais de 10 s ajoutés aux premiers rendus des tests Fiche et Loyers ; vrai défaut trouvé par les tests : nom accessible du lien « Louer » de Mes biens (espace perdue avant le sr-only)"
+    },
     "qa_tests": { "status": "pending" },
     "security": { "status": "pending" },
     "push": { "status": "pending" }
