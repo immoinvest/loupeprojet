@@ -41,7 +41,10 @@
       "status": "completed",
       "note": "analyse.ts du Worker sous 300 lignes (ventes-proches.ts extrait) ; Adresse.tsx sous 300 lignes (LigneAdresse et RepereAnalyse extraits) ; carte Repère supprimée (BlocRepere dans la carte Estimation) ; TableauVentes sorti de Tableaux.tsx"
     },
-    "qa_tests": { "status": "in_progress" },
+    "qa_tests": {
+      "status": "completed",
+      "note": "suite complète : 2 416 tests sur 2 418 au premier passage, sous charge ; app.test.tsx a dépassé 30 s puis est passé seul (7/7) ; adresse.test.ts attendait contrat=6 (corrigé, 66982a48) ; spec des formats : cibles de 44 px et débordement du tableau sur téléphone corrigés (228a064a), 12 formats verts ; fusion de master (travaux-etat) en f36ef195, conflit d'imports dans Estimation.tsx"
+    },
     "security": {
       "status": "completed",
       "note": "aucune entrée de la personne n'est envoyée à l'ADEME (clés BAN tirées du CSV DVF public) ; réponses ADEME validées par Zod, contrat v7 revalidé côté web ; rendu texte seulement ; aucune donnée sur les acheteurs ni les vendeurs ; 4 paquets ADEME au plus par analyse (sous-requêtes du Worker)"
