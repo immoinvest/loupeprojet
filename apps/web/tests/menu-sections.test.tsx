@@ -1,4 +1,4 @@
-import { creerProjet, ecrireProjets } from '@/stockage/projets';
+import { creerProjet, ecrireProjets, NOM_PROJET_EXEMPLE } from '@/stockage/projets';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -44,16 +44,20 @@ describe('menu à deux sections', () => {
     render(<AppEnMemoire chemin="/projets" compte={clientMemoire()} />);
     await screen.findByRole('heading', { level: 1, name: 'Mes projets' });
     const analyser = section('Analyser');
-    expect(within(analyser).getByRole('link', { name: 'Nouveau projet' })).toHaveAttribute(
-      'href',
-      '/projets/nouveau',
-    );
-    // Comparer est dans la page Tous mes projets, plus dans le menu.
+    // Une seule ligne en tête : « Mes projets · N » puis son « + », avant les projets récents.
+    const liens = within(analyser).getAllByRole('link');
+    expect(liens[0]).toHaveAccessibleName('Mes projets · 1');
+    expect(liens[0]).toHaveAttribute('href', '/projets');
+    expect(liens[0]).toHaveAttribute('aria-current', 'page');
+    expect(liens[1]).toHaveAccessibleName('Nouveau projet');
+    expect(liens[1]).toHaveAttribute('href', '/projets/nouveau');
+    expect(liens[1]).toHaveAttribute('title', 'Nouveau projet');
+    expect(liens[1]).not.toHaveAttribute('aria-current');
+    // Sur la liste, toute la ligne est surlignée.
+    expect(liens[0]?.parentElement).toHaveClass('bg-accent-doux');
+    // Comparer est dans la page Mes projets, plus dans le menu ; « Tous mes projets » a disparu.
     expect(within(analyser).queryByRole('link', { name: 'Comparer' })).toBeNull();
-    expect(within(analyser).getByRole('link', { name: 'Tous mes projets · 1' })).toHaveAttribute(
-      'href',
-      '/projets',
-    );
+    expect(within(analyser).queryByRole('link', { name: /Tous mes projets/ })).toBeNull();
     const gerer = section('Gérer');
     expect(within(gerer).getAllByRole('link')).toHaveLength(1);
     expect(within(gerer).getByRole('link', { name: 'Gérer mes biens loués' })).toHaveAttribute(
@@ -63,7 +67,7 @@ describe('menu à deux sections', () => {
     expect(within(barreLaterale()).queryByRole('button', { name: 'Nouveau projet' })).toBeNull();
   });
 
-  it('les 3 projets les plus récents puis « Tous mes projets · N »', async () => {
+  it('« Mes projets · N » puis les 3 projets les plus récents', async () => {
     const stockage = window.localStorage;
     ecrireProjets(
       stockage,
@@ -71,15 +75,42 @@ describe('menu à deux sections', () => {
     );
     render(<AppEnMemoire chemin="/comparer" stockage={stockage} compte={clientMemoire()} />);
     const analyser = await screen.findByRole('navigation', { name: 'Analyser' });
-    expect(within(analyser).queryByRole('link', { name: /Projet 3/ })).toBeInTheDocument();
-    expect(within(analyser).queryByRole('link', { name: /Projet 4/ })).toBeNull();
-    expect(within(analyser).getByRole('link', { name: 'Tous mes projets · 7' })).toHaveAttribute(
-      'href',
-      '/projets',
-    );
+    expect(
+      within(analyser)
+        .getAllByRole('link')
+        .map((l) => l.textContent),
+    ).toEqual(['Mes projets · 7', '', 'Projet 1', 'Projet 2', 'Projet 3']);
+    // Ailleurs que sur la liste, rien n'est surligné.
+    const ligne = within(analyser).getByRole('link', { name: 'Mes projets · 7' });
+    expect(ligne).not.toHaveAttribute('aria-current');
+    expect(ligne.parentElement).not.toHaveClass('bg-accent-doux');
   });
 
-  it('connecté : Ajouter un bien, Loyers du mois avec les retards, puis Tous les loyers', async () => {
+  it('sans projet, la même ligne : « Mes projets · 0 » et son « + »', async () => {
+    // Une liste vide est amorcée avec l'exemple au lancement : on le supprime depuis la page.
+    const utilisateur = userEvent.setup();
+    render(<AppEnMemoire chemin="/projets" compte={clientMemoire()} />);
+    await utilisateur.click(
+      await screen.findByRole('button', { name: `Supprimer ${NOM_PROJET_EXEMPLE}` }),
+    );
+    const analyser = section('Analyser');
+    expect(within(analyser).getAllByRole('link')).toHaveLength(2);
+    expect(within(analyser).getByRole('link', { name: 'Mes projets · 0' })).toBeInTheDocument();
+    expect(within(analyser).getByRole('link', { name: 'Nouveau projet' })).toBeInTheDocument();
+  });
+
+  it('sur la page de création, seul le « + » est actif, en accent plein', async () => {
+    render(<AppEnMemoire chemin="/projets/nouveau" compte={clientMemoire()} />);
+    const analyser = await screen.findByRole('navigation', { name: 'Analyser' });
+    const plus = within(analyser).getByRole('link', { name: 'Nouveau projet' });
+    expect(plus).toHaveAttribute('aria-current', 'page');
+    expect(plus).toHaveClass('bg-accent', 'w-11');
+    const ligne = within(analyser).getByRole('link', { name: /^Mes projets/ });
+    expect(ligne).not.toHaveAttribute('aria-current');
+    expect(ligne.parentElement).not.toHaveClass('bg-accent-doux');
+  });
+
+  it('connecté : « Mes biens · N » et son « + », Loyers du mois avec les retards, Tous les loyers, Mes locataires', async () => {
     render(
       <AppEnMemoire
         chemin="/projets"
@@ -88,10 +119,13 @@ describe('menu à deux sections', () => {
       />,
     );
     const gerer = await screen.findByRole('navigation', { name: 'Gérer' });
-    expect(within(gerer).getByRole('link', { name: 'Ajouter un bien' })).toHaveAttribute(
-      'href',
-      '/gerer/ajouter',
-    );
+    // Une seule ligne en tête : le libellé ouvre Mes biens, le « + » ajoute un bien.
+    await within(gerer).findByRole('link', { name: 'Mes biens · 2' });
+    const liens = within(gerer).getAllByRole('link');
+    expect(liens[0]).toHaveAccessibleName('Mes biens · 2');
+    expect(liens[1]).toHaveAccessibleName('Ajouter un bien');
+    expect(liens[1]).toHaveAttribute('href', '/gerer/ajouter');
+    expect(liens[1]).toHaveAttribute('title', 'Ajouter un bien');
     const loyers = await within(gerer).findByRole('link', { name: /Loyers du mois/ });
     expect(loyers).toHaveAttribute('href', '/gerer');
     expect(await within(loyers).findByLabelText('1 loyer en retard')).toHaveTextContent('1');
@@ -108,6 +142,23 @@ describe('menu à deux sections', () => {
     expect(within(gerer).getByRole('link', { name: 'Mes locataires' })).toHaveAttribute(
       'href',
       '/gerer/locataires',
+    );
+  });
+
+  it('connecté, sur la fiche d’un bien : la ligne « Mes biens » reste surlignée', async () => {
+    render(
+      <AppEnMemoire
+        chemin="/gerer/biens/bien-lices"
+        compte={clientMemoire({ utilisateur: CAMILLE })}
+        gestion={clientGestionMemoire({ etat: ETAT_SEPTEMBRE })}
+      />,
+    );
+    const gerer = await screen.findByRole('navigation', { name: 'Gérer' });
+    const ligne = await within(gerer).findByRole('link', { name: 'Mes biens · 2' });
+    expect(ligne).toHaveAttribute('aria-current', 'page');
+    expect(ligne.parentElement).toHaveClass('bg-accent-doux');
+    expect(within(gerer).getByRole('link', { name: 'Ajouter un bien' })).not.toHaveAttribute(
+      'aria-current',
     );
   });
 });

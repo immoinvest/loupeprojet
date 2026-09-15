@@ -66,14 +66,16 @@ test('un projet saisi à la main a son rapport, apparaît dans la liste et se su
 
 test('recharger la page conserve les projets, le statut et la route ouverte', async ({ page }) => {
   await creerProjetManuel(page);
-  await page.getByLabel('Statut du projet').selectOption('offre');
+  await page.getByRole('button', { name: /Statut du projet/ }).click();
+  await page.getByRole('option', { name: 'Offre faite' }).click();
+  await expect(page.getByRole('listbox')).toHaveCount(0);
 
   // Route profonde rechargée : le repli SPA sert la page, le stockage rend le projet.
   await page.reload();
   await expect(
     page.getByRole('heading', { level: 1, name: /Prix sans repère de marché\./ }),
   ).toBeVisible();
-  await expect(page.getByLabel('Statut du projet')).toHaveValue('offre');
+  await expect(page.getByRole('button', { name: /Statut du projet/ })).toHaveText('Offre faite');
 
   await ouvrirMesProjets(page);
   const liste = page.getByRole('main');
