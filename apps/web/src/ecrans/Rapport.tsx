@@ -146,17 +146,26 @@ function CarteRevente({ r }: { r: ResultatsComplets }): JSX.Element {
 /** Deux cartes côte à côte sur tablette, ordinateur et papier ; empilées sur téléphone. */
 const DEUX_CARTES = 'grid grid-cols-1 gap-5 md:grid-cols-2 print:grid-cols-2';
 
-/** Le rapport complet : l'autofinancement en carte principale, le prix et les rendements, les leviers, les impôts et la revente. */
+/**
+ * À côté du prix, deux cartes courtes l'une sous l'autre : les rendements gardent leur hauteur,
+ * « Avant de faire une offre » (`flex-1`) s'étire pour finir à la hauteur du prix. Une colonne
+ * flex et non une grille : le compte des grilles du document imprimé ne change pas.
+ */
+const COLONNE_EMPILEE = 'flex flex-col gap-5';
+
+/** Le rapport complet : l'autofinancement en carte principale, le prix à côté des rendements et des points d'offre, les leviers, les impôts et la revente. */
 function Analyses({ r }: { r: ResultatsComplets }): JSX.Element {
   return (
     <>
       <CarteAutofinancement r={r} />
       <div className={DEUX_CARTES}>
         <CartePrix r={r} />
-        <CarteRendements r={r} />
+        <div className={COLONNE_EMPILEE}>
+          <CarteRendements r={r} />
+          <CarteVigilance r={r} className="flex-1" />
+        </div>
       </div>
       <Leviers r={r} />
-      <CarteVigilance r={r} />
       <div className={DEUX_CARTES}>
         <CarteFiscalite r={r} />
         <CarteRevente r={r} />
@@ -175,9 +184,11 @@ function AnalysesACompleter({ r }: { r: Resultats }): JSX.Element {
       <CarteACompleter titre={TITRE_AUTOFINANCEMENT} />
       <div className={DEUX_CARTES}>
         <CartePrix r={r} />
-        <CarteACompleter titre={TITRE_RENDEMENTS} />
+        <div className={COLONNE_EMPILEE}>
+          <CarteACompleter titre={TITRE_RENDEMENTS} />
+          <CarteVigilance r={r} className="flex-1" />
+        </div>
       </div>
-      <CarteVigilance r={r} />
       <div className={DEUX_CARTES}>
         <CarteACompleter titre={TITRE_FISCALITE} />
         <CarteACompleter titre={TITRE_REVENTE} />
