@@ -8,6 +8,11 @@ export type ModeCouleur = (typeof MODES_COULEUR)[number];
 /** Trois tranches, de la plus favorable à la moins favorable, et « inconnu ». */
 export type NiveauPoint = 'bas' | 'milieu' | 'haut' | 'inconnu';
 
+/** Un point prêt à dessiner, avec sa couleur. */
+export interface PointColore extends PointCarte {
+  readonly niveau: NiveauPoint;
+}
+
 /** Moins d'un an, de un à trois ans, plus de trois ans. */
 export const JOURS_ANCIENNETE = { recente: 365, ancienne: 1_095 } as const;
 

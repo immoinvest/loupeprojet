@@ -165,6 +165,7 @@ export {
   niveauPoint,
   type ModeCouleur,
   type NiveauPoint,
+  type PointColore,
 } from './carte-couleurs';
 export {
   ECART_EVENTAIL_PX,

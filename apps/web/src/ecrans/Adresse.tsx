@@ -298,7 +298,7 @@ export function Adresse(): JSX.Element {
             <CarteLoyer resultat={etat.donnees.marche} />
           </div>
           <CarteRisques resultat={etat.donnees.risques} />
-          <CarteQuartier analyse={analyse} adresse={etat.adresse} />
+          <CarteQuartier analyse={analyse} adresse={etat.adresse} liaison={liaison} />
           {analyse.tendance != null && <Tendance tendance={analyse.tendance} />}
           <TableauGroupes analyse={analyse} />
           <TableauVentes analyse={analyse} liaison={liaison} />
