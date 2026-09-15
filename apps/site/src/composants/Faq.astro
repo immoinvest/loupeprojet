@@ -1,0 +1,30 @@
+---
+/** Questions fréquentes d'un guide : les mêmes que les données structurées FAQPage. */
+interface Props {
+  questions: readonly { question: string; reponse: string }[];
+}
+
+const { questions } = Astro.props;
+---
+
+<section aria-labelledby="questions-frequentes" class="grid gap-3">
+  <h2 id="questions-frequentes" class="text-2xl font-bold tracking-tight">Questions fréquentes</h2>
+  <div class="divide-y divide-bordure border-y border-bordure">
+    {
+      questions.map(({ question, reponse }) => (
+        <details class="group py-1">
+          <summary class="flex min-h-12 list-none items-center justify-between gap-4 py-3 font-display text-lg font-semibold survol-texte [&::-webkit-details-marker]:hidden">
+            {question}
+            <span
+              aria-hidden="true"
+              class="flex-none text-2xl leading-none text-accent group-open:rotate-45 motion-safe:transition-transform"
+            >
+              +
+            </span>
+          </summary>
+          <p class="pb-4 leading-relaxed text-encre-2">{reponse}</p>
+        </details>
+      ))
+    }
+  </div>
+</section>

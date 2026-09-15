@@ -1,0 +1,27 @@
+---
+/** Lien présenté comme un bouton : action principale (plein), secondaire (contour) ou sur fond bleu (blanc). */
+interface Props {
+  href: string;
+  variante?: 'plein' | 'contour' | 'blanc';
+  class?: string;
+}
+
+const { href, variante = 'plein', class: classe } = Astro.props;
+
+const VARIANTES = {
+  plein: 'bg-accent text-white survol-plein',
+  contour: 'border border-accent-bordure bg-surface text-accent survol-fond',
+  blanc: 'bg-white text-accent survol-fond-fort',
+} as const;
+---
+
+<a
+  href={href}
+  class:list={[
+    'inline-flex min-h-11 items-center justify-center gap-2 rounded-encart px-5 py-2.5 text-center font-display text-[0.95rem] font-semibold',
+    VARIANTES[variante],
+    classe,
+  ]}
+>
+  <slot />
+</a>

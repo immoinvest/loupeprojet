@@ -11,6 +11,8 @@ export default defineConfig(
       '**/dist/**',
       '**/coverage/**',
       '**/.wrangler/**',
+      // Types générés par Astro (apps/site).
+      '**/.astro/**',
       '**/playwright-report/**',
       '**/test-results/**',
       // Worktrees des sessions parallèles (Claude Code) : du code en cours d'écriture, hors dépôt.

@@ -1,0 +1,71 @@
+{
+  "feature_slug": "site-vitrine",
+  "title": "Site vitrine deklic.pro (maquette A) et guides SEO de la vague 1",
+  "started_at": "2026-09-15T00:00:00Z",
+  "current_step": "push",
+  "scope": "apps/site, packages/capture/src/origines.ts, vitest.config.ts, eslint.config.js, .gitignore, package.json (lint), README.md, CLAUDE.md, .product",
+  "branch": "feat/site-vitrine",
+  "base": "master (713d27b0) ; master à fusionner avant la PR",
+  "worktree": "C:/Users/errei/Claude/loupe-site",
+  "baseline": {
+    "ci_master": "CI verte sur 713d27b0 (15/09/2026 10:31) et sur cc96d0c6",
+    "local": "typecheck vert ; tests 2 621 passés, 3 échecs par dépassement de délai (machine chargée, 38 min, dossier modifié pendant l'exécution) : non retenus comme régression"
+  },
+  "decisions_pierre": {
+    "maquette": "A « Coller le lien »",
+    "domaine": "deklic.pro (acheté)",
+    "auteur": "Pierre Georgel",
+    "pages_villes": "plus tard"
+  },
+  "steps": {
+    "discovery": {
+      "status": "completed",
+      "output": ".product/features/site-vitrine-discovery.md",
+      "auto_review": "rapport d'exemple calculé par le moteur plutôt qu'écrit à la main (la maquette mélangeait avant et après impôt) ; paramètre texte plutôt que lien pour les partages mobiles"
+    },
+    "specs": {
+      "status": "completed",
+      "stories_count": 12,
+      "output": ".product/specs/site-vitrine-specs.md",
+      "auto_review": "sommaire replié en <details> pour marcher sans JavaScript ; aperçus : liens de production seulement ; absence d'avis vérifiée sur le HTML"
+    },
+    "architecture": {
+      "status": "completed",
+      "output": ".product/architecture/site-vitrine.md",
+      "adr": ".product/adr/010-site-vitrine.md",
+      "auto_review": "pas d'intégration React (Vite 7 du web et Vite 8 d'Astro) ; polices auto-hébergées ; lib sans astro:content pour rester testable ; taille du script du simulateur à mesurer"
+    },
+    "implement": {
+      "status": "completed",
+      "stories_completed": 12,
+      "stories_total": 12,
+      "notes": [
+        "Ajouts à l'architecture : contrôle du placement du mot-clé (title, titre, adresse, 100 premiers mots) ; composant <Calcul> pour les exemples chiffrés des guides ; format de règle « annee » ; imports des composants dans chaque guide MDX",
+        "Écart relevé : plafond micro-BIC 83 600 € (règles du moteur, revenus 2026-2028) contre 77 700 € sur impots.gouv.fr (revenus 2025) ; le guide LMNP cite les deux, à confirmer par Pierre",
+        "Lint racine : `npm run sync -w apps/site` avant ESLint, sinon `astro:content` n'a pas de types en CI (lint lancé avant le build)",
+        "Espace fine insécable remplacée par une espace insécable dans les formats du site (absente des polices Fontsource : « 12143 € »)"
+      ],
+      "commits": [
+        "58bd3c6d US-1, US-2 socle et liens",
+        "517675be US-4, US-7 collection et règles",
+        "397948da US-5 pages des guides",
+        "0b295b59 US-6 SEO et vérification",
+        "f42b561b US-3 accueil",
+        "aa39f47c US-8 simulateur",
+        "b5ad220d US-9 guides Investir",
+        "41ee8870 US-10 guides Choisir",
+        "80afbc66 US-11 guides Gérer",
+        "a540d87b US-12 docs"
+      ]
+    },
+    "qa_tests": {
+      "status": "completed",
+      "resultats": "112 tests du site (100 % de src/lib), 23 fichiers site + capture verts ; astro check 0 erreur sur 64 fichiers ; lint sans .astro vert ; build : 16 pages vérifiées, _headers écrit ; captures ordinateur et téléphone sans débordement, simulateur calculé dans le navigateur"
+    },
+    "security": {
+      "status": "completed",
+      "auto_review": "aucun secret ni appel réseau ; CSP script-src 'self', form-action limité à l'application, frame-ancestors 'none' ; JSON-LD sérialisé avec < échappé ; sources en https validées par Zod ; formulaire GET sans stockage ; liens externes rel=noopener ; aucun cookie ni traceur, polices servies par le site"
+    },
+    "push": { "status": "in_progress" }
+  }
+}

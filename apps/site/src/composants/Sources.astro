@@ -1,0 +1,26 @@
+---
+import { dateLongue } from '../lib/formatage';
+
+/** Les sources d'un guide, avec la date de consultation. */
+interface Props {
+  sources: readonly { nom: string; url: string; consulteLe: Date }[];
+}
+
+const { sources } = Astro.props;
+---
+
+<section aria-labelledby="sources" class="grid gap-3">
+  <h2 id="sources" class="text-xl font-bold tracking-tight">Sources</h2>
+  <ul class="grid gap-2 text-sm text-encre-2">
+    {
+      sources.map((source) => (
+        <li>
+          <a href={source.url} rel="noopener" class="font-semibold">
+            {source.nom}
+          </a>
+          , consulté le {dateLongue(source.consulteLe)}
+        </li>
+      ))
+    }
+  </ul>
+</section>

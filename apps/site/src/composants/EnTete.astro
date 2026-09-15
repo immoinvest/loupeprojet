@@ -1,0 +1,77 @@
+---
+import { LIENS } from '../liens-du-build';
+import LienBouton from './LienBouton.astro';
+import Logo from './Logo.astro';
+
+/** Liens de la navigation : ancres de l'accueil (valables depuis toute page) et guides. */
+const NAVIGATION = [
+  { libelle: 'Comment ça marche', href: '/#comment-ca-marche' },
+  { libelle: 'Pour qui', href: '/#pour-qui' },
+  { libelle: 'Gérer mes locations', href: '/#gerer' },
+  { libelle: 'Guides', href: '/guides/' },
+] as const;
+---
+
+<header class="border-b border-bordure bg-fond">
+  <div class="mx-auto flex max-w-6xl items-center gap-6 px-4 py-3 sm:px-6 lg:px-8">
+    <a href="/" class="-m-2 rounded-encart p-2 survol-fond" aria-label="Deklic : accueil">
+      <Logo class="h-6 sm:h-7" />
+    </a>
+
+    <nav aria-label="Principale" class="hidden lg:block">
+      <ul class="flex items-center gap-6 font-display text-[0.95rem] font-medium text-encre-2">
+        {
+          NAVIGATION.map((lien) => (
+            <li>
+              <a href={lien.href} class="survol-texte">
+                {lien.libelle}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <div class="ml-auto hidden items-center gap-5 sm:flex">
+      <a href={LIENS.connexion} class="font-display text-[0.95rem] font-semibold survol-texte"
+        >Se connecter</a
+      >
+      <LienBouton href={LIENS.nouveauProjet}>Analyser une annonce</LienBouton>
+    </div>
+
+    <details class="group relative ml-auto sm:ml-0 lg:hidden">
+      <summary
+        class="flex min-h-11 list-none items-center gap-2 rounded-encart border border-bordure px-3 font-display font-semibold survol-fond [&::-webkit-details-marker]:hidden"
+      >
+        <span>Menu</span>
+        <svg viewBox="0 0 20 20" class="size-4 transition-transform group-open:rotate-180" aria-hidden="true"
+          ><path d="M5 8l5 5 5-5" fill="none" stroke="currentColor" stroke-width="2"></path></svg
+        >
+      </summary>
+      <nav
+        aria-label="Menu"
+        class="absolute right-0 z-40 mt-2 w-[min(18rem,calc(100vw-2rem))] rounded-carte border border-bordure bg-surface p-2 shadow-[0_18px_40px_-20px_rgba(35,39,47,0.4)]"
+      >
+        <ul class="grid font-display font-medium">
+          {
+            NAVIGATION.map((lien) => (
+              <li>
+                <a href={lien.href} class="flex min-h-11 items-center rounded-encart px-3 survol-fond">
+                  {lien.libelle}
+                </a>
+              </li>
+            ))
+          }
+          <li class="mt-2 border-t border-bordure pt-2 sm:hidden">
+            <a href={LIENS.connexion} class="flex min-h-11 items-center rounded-encart px-3 survol-fond"
+              >Se connecter</a
+            >
+          </li>
+          <li class="sm:hidden">
+            <LienBouton href={LIENS.nouveauProjet} class="w-full">Analyser une annonce</LienBouton>
+          </li>
+        </ul>
+      </nav>
+    </details>
+  </div>
+</header>
