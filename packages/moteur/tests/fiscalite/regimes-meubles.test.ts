@@ -205,6 +205,82 @@ describe('LMNP réel — cas particuliers', () => {
   });
 });
 
+/**
+ * Ordre d'imputation, calculé à la main. Sources : CGI 39 C II (l'amortissement ne crée pas de déficit,
+ * son excédent se reporte sans limite de durée) ; CGI 156 I 1° ter (déficit BIC non professionnel
+ * reportable 10 ans) ; Conseil d'État, 15 avril 2015 : un déficit antérieur ne s'impute que sur le
+ * bénéfice établi après déduction de tous les amortissements (de l'année et différés).
+ *
+ * Projet T3 Marseille sans crédit (apport 500 000 € : ni intérêts ni assurance), recettes et charges
+ * posées année par année :
+ * - dotation D = 125 800 × 55 % ÷ 50 + 125 800 × 45 % ÷ 20 + travaux 600 + mobilier 5 000 ÷ 7
+ *   = 1 383,80 + 2 830,50 + 600 + 714,29 = 5 528,59 € (mobilier jusqu'à l'année 7) ;
+ * - année 1 : recettes 0, charges 0, frais d'acquisition F passés en charge → déficit F (dernière année
+ *   d'imputation : 1 + 10 = 11), amortissements différés D.
+ */
+describe('LMNP réel — ordre d’imputation : amortissements avant déficits (CE, 15/04/2015)', () => {
+  const base = contexte(
+    variante({
+      pret: { ...projetExemple.hypotheses.pret, apport: 500_000 },
+      location: { mode: 'meuble', loyerHc: 1_200, vacanceSemaines: 0 },
+    }),
+    'lmnp_reel',
+  );
+  const dotation = (125_800 * 0.55) / 50 + (125_800 * 0.45) / 20 + 600 + 5_000 / 7;
+  const mobilier = 5_000 / 7;
+  const frais = fraisDeductiblesAnnee1(base);
+
+  /** Contexte dont les recettes de l'année n valent `recettesDe(n)`, sans charges ni crédit. */
+  function avecRecettes(annees: number, recettesDe: (annee: number) => number): ContexteFiscal {
+    const modele = base.cashflow.parAnnee[0]!;
+    const parAnnee = Array.from({ length: annees }, (_, i) => {
+      const recettes = i === 0 ? 0 : recettesDe(i + 1);
+      return { ...modele, annee: i + 1, recettes, charges: 0, credit: 0, avantImpot: recettes };
+    });
+    return { ...base, cashflow: { ...base.cashflow, parAnnee } };
+  }
+
+  it('sans crédit : ni intérêts ni assurance à déduire', () => {
+    expect(base.financement.tableau.every((l) => l.interets === 0)).toBe(true);
+    expect(base.financement.parAnnee.every((a) => a.assurance === 0)).toBe(true);
+  });
+
+  it('année 2, résultat D + 1 000 € : tout part en amortissements, le déficit reste entier', () => {
+    // Amortissements disponibles 2D (dotation 2 + différé 1) ≥ résultat D + 1 000 : déduits D + 1 000,
+    // bénéfice après amortissements 0, déficit imputé 0, stock différé 2D − (D + 1 000) = D − 1 000.
+    const r = projeterLmnpReel(avecRecettes(2, () => dotation + 1_000));
+    const a2 = r.annees[1]!;
+    expect(a2.amortissementsDeduits).toBeCloseTo(dotation + 1_000, 6);
+    expect(a2.deficitImpute).toBe(0);
+    expect(a2.baseImposable).toBeCloseTo(0, 6);
+    expect(a2.stocks.deficitReportable).toBeCloseTo(frais, 6);
+    expect(a2.stocks.amortissementsReportes).toBeCloseTo(dotation - 1_000, 6);
+  });
+
+  it('année 2, résultat 2D + 500 € : amortissements 2D, puis 500 € de déficit imputé, base nulle', () => {
+    const r = projeterLmnpReel(avecRecettes(2, () => 2 * dotation + 500));
+    const a2 = r.annees[1]!;
+    expect(a2.amortissementsDeduits).toBeCloseTo(2 * dotation, 6);
+    expect(a2.deficitImpute).toBeCloseTo(500, 6);
+    expect(a2.baseImposable).toBeCloseTo(0, 6);
+    expect(a2.stocks.deficitReportable).toBeCloseTo(frais - 500, 6);
+    expect(a2.stocks.amortissementsReportes).toBeCloseTo(0, 6);
+  });
+
+  it('résultat égal à la dotation chaque année : le déficit n’est jamais imputé et expire après 10 ans', () => {
+    // Années 2 à 7 : recettes D ; années 8 à 12 : D − mobilier (le mobilier est amorti sur 7 ans).
+    // Chaque année la dotation absorbe le résultat ; le différé D de l'année 1 reste en stock.
+    const r = projeterLmnpReel(
+      avecRecettes(12, (annee) => (annee <= 7 ? dotation : dotation - mobilier)),
+    );
+    expect(r.annees.every((a) => a.deficitImpute === 0)).toBe(true);
+    expect(r.impotTotal).toBeCloseTo(0, 6);
+    expect(r.annees[10]!.stocks.deficitReportable).toBeCloseTo(frais, 6);
+    expect(r.annees[11]!.stocks.deficitReportable).toBe(0);
+    expect(r.annees[11]!.stocks.amortissementsReportes).toBeCloseTo(dotation, 6);
+  });
+});
+
 describe('LMNP réel — imputation d’un déficit antérieur', () => {
   it('un déficit d’année 1 est imputé dès que le résultat redevient positif', () => {
     // Petit crédit : intérêts faibles, résultat positif dès l'année 2.
