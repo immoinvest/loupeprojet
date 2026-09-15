@@ -128,6 +128,16 @@ Codes : `ENVOIS_INDISPONIBLE` (503), `ENVOIS_INACTIFS` (409 : pas d'envoyeur ou 
 - Minimisation : adresse invitée et adresse d'accord en empreinte ; destinataire masqué dans les traces ; téléphone facultatif.
 - Suppression du compte : cascade sur les quatre nouvelles tables (testé).
 
+## 6 bis. Écarts à l'implémentation
+
+- `taches.ts` dépassait 300 lignes : l'accord et les outils partagés y restent, les quittances envoyées vont dans `apps/comptes/src/gestion/envois/quittances.ts`.
+- Le bouton de la carte « Bailleur de ce bien » s'appelle « Modifier le bailleur » : la fiche du bien a déjà un « Modifier » (location), deux boutons de même nom sont ambigus au lecteur d'écran et casseraient l'écran e2e « Modifier une location ».
+- Le journal de développement n'ajoute le nombre de pièces jointes que s'il y en a (le journal des codes de connexion ne change pas).
+- `ErreurCourriel` porte le statut HTTP de Resend (0 sans réponse) : le journal d'échec dit `statut`, jamais l'adresse.
+- Bundle du worker des comptes après la feature : 2 660 Kio bruts, 468 Kio compressés (limite Cloudflare Workers : 3 Mio compressés).
+- « Une seule fois » dans « À faire » : l'identifiant du locataire en attente est retenu dans `localStorage` (`deklic.gerer.accords-vus.v1`) dès que sa fiche s'ouvre ; stockage bloqué : la ligne revient, rien ne casse.
+- Article 21 vérifié sur Légifrance le 15/09/2026 (version en vigueur depuis le 27/03/2014) : accord exprès pour la transmission dématérialisée, aucun frais de quittance.
+
 ## 7. Ordre d'implémentation
 
 US-1 → US-2 → US-3 → US-4 → US-5, un commit par story (ou par module pour US-5), gates avant chaque commit.
