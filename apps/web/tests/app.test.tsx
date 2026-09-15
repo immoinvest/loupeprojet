@@ -160,7 +160,9 @@ describe('Rapport', () => {
   it('change le statut depuis l’en-tête', async () => {
     await ouvrirExemple();
     const utilisateur = userEvent.setup();
-    await utilisateur.selectOptions(screen.getByLabelText('Statut du projet'), 'offre');
+    await utilisateur.click(screen.getByLabelText('Statut du projet'));
+    await utilisateur.click(screen.getByRole('option', { name: 'Offre faite' }));
     expect(lireProjets(window.localStorage)[0]?.statut).toBe('offre');
+    expect(screen.getByLabelText('Statut du projet')).toHaveTextContent('Offre faite');
   });
 });

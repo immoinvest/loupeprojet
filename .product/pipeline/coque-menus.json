@@ -1,0 +1,48 @@
+{
+  "feature_slug": "coque-menus",
+  "title": "Menu : lignes « Mes projets · N [+] » et « Mes biens · N [+] » (fiche 12) et menu du statut du projet aux couleurs de Deklic (fiche 18)",
+  "started_at": "2026-09-15T00:00:00Z",
+  "current_step": "push",
+  "scope": "apps/web/src/{coque/LigneAvecAjout,SectionAnalyser,SectionGerer,SelecteurStatut,liens ; composants/MenuChoix, menu-choix ; textes/gerer, statut ; index.css (animation, curseur des options)} ; tests Vitest et Playwright du menu et du statut ; docs",
+  "branch": "feat/coque-menus",
+  "base": "master (e6f70f60), puis fusion de master (2427812c : audit-calculs #79, gerer-biens #80)",
+  "steps": {
+    "discovery": { "status": "completed", "output": ".product/features/coque-menus-discovery.md" },
+    "specs": {
+      "status": "completed",
+      "output": ".product/specs/coque-menus-specs.md",
+      "stories_count": 4
+    },
+    "architecture": { "status": "completed", "output": ".product/architecture/coque-menus.md" },
+    "implement": {
+      "status": "completed",
+      "stories_completed": 4,
+      "stories_total": 4,
+      "commits": [
+        { "etape": "US-1 ligne « Mes projets · N [+] », docs de la feature", "hash": "469f67bb" },
+        { "etape": "US-2 et US-3 MenuChoix et statut, tests migrés", "hash": "e971bc23" },
+        { "etape": "US-3 preuve Playwright, fiches 12 et 18", "hash": "5905cd4d" },
+        { "etape": "fusion de master (gerer-biens #80)", "hash": "merge" },
+        { "etape": "US-4 ligne « Mes biens · N [+] »", "hash": "55ce923e" }
+      ]
+    },
+    "qa_tests": {
+      "status": "completed",
+      "note": "avant la fusion de master : 2 063 tests unitaires verts ; nouveaux tests de la logique pure et du composant (clavier, souris, placement), de la ligne du menu (Analyser et Gérer) ; Playwright coque, accueil, mes-projets, survol sur trois appareils : 40 réussis, 28 ignorés (survol hors souris), un échec de survol « Extension » sous charge qui passe seul"
+    },
+    "security": {
+      "status": "completed",
+      "note": "aucun appel réseau, aucun innerHTML ni eval, aucune donnée nouvelle ; statut validé par le schéma fermé des options"
+    },
+    "push": {
+      "status": "in_progress",
+      "note": "gates après fusion de master, PR avec fusion automatique"
+    }
+  },
+  "decisions": {
+    "gerer": "page Mes biens fusionnée pendant la nuit (PR #80) : ligne Mes biens livrée",
+    "composant": "shadcn/ui absent : composant maison MenuChoix",
+    "ordre_statuts": "parcours puis Scénario / Écarté séparés",
+    "achete_gerer": "déjà livré par la PR #74"
+  }
+}

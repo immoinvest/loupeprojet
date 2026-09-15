@@ -114,12 +114,10 @@ describe('Coque fixe : seul le contenu défile', () => {
     const gerer = within(barre).getByRole('navigation', { name: 'Gérer' });
     expect(zone).toContainElement(analyser);
     expect(zone).toContainElement(gerer);
-    // Chaque section commence par son action de création : plus de grand bouton au-dessus.
+    // La section commence par « Mes projets · N » et son « + » : plus de grand bouton au-dessus.
+    expect(within(analyser).getByRole('link', { name: 'Mes projets · 1' })).toBeInTheDocument();
     expect(within(analyser).getByRole('link', { name: 'Nouveau projet' })).toBeInTheDocument();
     expect(within(analyser).getByRole('link', { name: NOM_EXEMPLE })).toBeInTheDocument();
-    expect(
-      within(analyser).getByRole('link', { name: 'Tous mes projets · 1' }),
-    ).toBeInTheDocument();
 
     const horsZone = [
       within(barre).getByRole('button', { name: 'Fermer le menu' }),

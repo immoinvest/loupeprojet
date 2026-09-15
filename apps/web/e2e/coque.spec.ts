@@ -58,6 +58,9 @@ test('menu et en-tête restent en vue quand le contenu défile ; changer de vole
   } else {
     const navigation = page.getByRole('navigation', { name: 'Analyser' });
     await expect(navigation.getByRole('link', { name: NOM_EXEMPLE })).toBeInViewport({ ratio: 1 });
+    await expect(navigation.getByRole('link', { name: 'Mes projets · 1' })).toBeInViewport({
+      ratio: 1,
+    });
     await expect(navigation.getByRole('link', { name: 'Nouveau projet' })).toBeInViewport({
       ratio: 1,
     });
@@ -81,6 +84,58 @@ test('menu et en-tête restent en vue quand le contenu défile ; changer de vole
   await ouvrirVolet(page, 'Fiscalité', /Combien d'impôts, selon le régime/);
   await expect.poll(() => defilementDuContenu(page)).toBe(0);
   expect(await defilementDeLaFenetre(page)).toBe(0);
+});
+
+/** Largeur sous laquelle la liste du statut devient une feuille qui monte du bas (point `sm`). */
+const LARGEUR_FEUILLE = 640;
+
+test('statut du projet : liste aux couleurs de Deklic, feuille du bas sur téléphone, clavier', async ({
+  page,
+}) => {
+  await ouvrirExemple(page);
+  const bouton = page.getByRole('button', { name: /Statut du projet/ });
+  await bouton.scrollIntoViewIfNeeded();
+  await bouton.click();
+  const liste = page.getByRole('listbox', { name: 'Statut du projet' });
+  await expect(liste).toBeVisible();
+  await expect(liste).toBeFocused();
+  // Le parcours d'achat, puis Scénario et Écarté à part.
+  await expect(liste.getByRole('option')).toHaveText([
+    'En analyse',
+    'Visite prévue',
+    'Offre faite',
+    'Acheté',
+    /^Scénario/,
+    /^Écarté/,
+  ]);
+  await expect(liste.getByRole('option', { selected: true })).toHaveText('Visite prévue');
+
+  const [boite, boiteBouton] = await Promise.all([liste.boundingBox(), bouton.boundingBox()]);
+  if (boite === null || boiteBouton === null) throw new Error('liste ou bouton sans boîte');
+  const { width: largeur, height: hauteur } = page.viewportSize() ?? { width: 0, height: 0 };
+  if (largeur < LARGEUR_FEUILLE) {
+    // Feuille du bas : toute la largeur, collée au bas de l'écran, options de 48 px.
+    expect(boite.width).toBeGreaterThanOrEqual(largeur - 1);
+    expect(boite.y + boite.height).toBeGreaterThanOrEqual(hauteur - 1);
+    const option = await liste.getByRole('option', { name: 'Acheté' }).boundingBox();
+    expect(option?.height).toBeGreaterThanOrEqual(48);
+  } else {
+    expect(boite.y).toBeGreaterThanOrEqual(boiteBouton.y + boiteBouton.height);
+  }
+
+  // Au clavier : flèche bas puis Entrée choisit « Offre faite » et rend le focus au bouton.
+  await page.keyboard.press('ArrowDown');
+  await page.keyboard.press('Enter');
+  await expect(liste).toHaveCount(0);
+  await expect(bouton).toBeFocused();
+  await expect(bouton).toHaveText('Offre faite');
+
+  // Échap referme sans rien changer.
+  await page.keyboard.press('Enter');
+  await expect(liste).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(liste).toHaveCount(0);
+  await expect(bouton).toHaveText('Offre faite');
 });
 
 test('formulaire Vérifier : les choix réservés aux lecteurs d’écran ne font pas défiler la fenêtre', async ({
@@ -107,7 +162,7 @@ test('formulaire Vérifier : les choix réservés aux lecteurs d’écran ne fon
   expect(await defilementDeLaFenetre(page)).toBe(0);
 });
 
-test('trente projets : le menu en montre trois puis « Tous mes projets », le profil reste en bas', async ({
+test('trente projets : le menu montre « Mes projets · 30 » et son « + », puis trois projets ; le profil reste en bas', async ({
   page,
 }) => {
   await ouvrirMesProjets(page);
@@ -130,14 +185,20 @@ test('trente projets : le menu en montre trois puis « Tous mes projets », le p
   const profil = page.getByText('Gratuit · 30 projets');
   await expect(profil).toBeInViewport({ ratio: 1 });
 
-  // Les trois plus récents seulement (l'exemple puis les copies 1 et 2), puis le lien vers la liste.
+  // La ligne « Mes projets · 30 [+] » en tête, puis les trois plus récents seulement (l'exemple
+  // puis les copies 1 et 2).
   const lien = (nom: string): ReturnType<Page['getByRole']> =>
     navigation.getByRole('link', { name: nom, exact: true });
+  const mesProjets = lien('Mes projets · 30');
+  await expect(mesProjets).toBeInViewport({ ratio: 1 });
+  const plus = lien('Nouveau projet');
+  await expect(plus).toBeInViewport({ ratio: 1 });
+  const cible = await plus.boundingBox();
+  expect(cible?.width).toBeGreaterThanOrEqual(44);
+  expect(cible?.height).toBeGreaterThanOrEqual(44);
   await expect(lien('Copie 2 · T2 · Lyon 3e')).toBeVisible();
   await expect(lien('Copie 3 · T2 · Lyon 3e')).toHaveCount(0);
-  const tous = lien('Tous mes projets · 30');
-  await tous.scrollIntoViewIfNeeded();
-  await expect(tous).toBeInViewport({ ratio: 1 });
+  await lien('Copie 2 · T2 · Lyon 3e').scrollIntoViewIfNeeded();
   // Le profil n'a pas bougé : seul le menu a défilé, à l'intérieur de sa zone.
   await expect(profil).toBeInViewport({ ratio: 1 });
   expect(await defilementDeLaFenetre(page)).toBe(0);
