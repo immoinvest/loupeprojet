@@ -1,0 +1,46 @@
+{
+  "feature_slug": "audit-calculs",
+  "title": "Vérifier les calculs, les recouper avec l'Excel, recommander (fiche de backlog 22)",
+  "started_at": "2026-09-15T00:00:00+02:00",
+  "current_step": "push",
+  "scope": "packages/moteur/src/exemples/projet-92k.ts, tests/reference/*, fast-check en devDependency, .product/audit/*, functional-spec (tableau Excel) ; aucun changement du code de calcul ; corrections 🟥 en PR séparées",
+  "branch": "feat/audit-calculs",
+  "base": "origin/master (e6f70f60)",
+  "steps": {
+    "discovery": {
+      "status": "completed",
+      "output": ".product/features/audit-calculs-discovery.md"
+    },
+    "specs": {
+      "status": "completed",
+      "output": ".product/specs/audit-calculs-specs.md",
+      "stories_count": 6
+    },
+    "architecture": { "status": "completed", "output": ".product/architecture/audit-calculs.md" },
+    "implement": { "status": "completed", "stories_completed": 5, "stories_total": 5 },
+    "qa_tests": {
+      "status": "completed",
+      "note": "25 vérifications du cas 92K (Excel, moteur, calcul à la main) et 5 propriétés fast-check"
+    },
+    "security": {
+      "status": "completed",
+      "note": "tests et documents seulement ; aucune donnée personnelle, fichier Excel hors git"
+    },
+    "push": { "status": "in_progress" },
+    "corrections": {
+      "status": "pending",
+      "branches": [
+        "fix/calcul-lmnp-ordre-imputation",
+        "fix/calcul-nu-reel-frais-emprunt",
+        "fix/calcul-plus-value-prix-acquisition"
+      ]
+    }
+  },
+  "decisions": {
+    "tableaux": "deux tableaux d'amortissement = deux banques ; seul le premier concerne le projet 92K",
+    "ecart_voulu": "règle ancienne ou fausse dans l'Excel : moteur gardé, écart documenté et testé",
+    "publication": "rapport en Markdown dans le dépôt, pas de page publiée cette nuit",
+    "garde_fou": "projet-92k.test.ts dans la CI",
+    "entrees_publiques": "entrées chiffrées de l'Excel dans le dépôt public, fichier hors git (décision de la fiche de session)"
+  }
+}
