@@ -1,0 +1,76 @@
+---
+import { getCollection } from 'astro:content';
+
+import CarteGuide from '../../composants/CarteGuide.astro';
+import DonneesStructurees from '../../composants/DonneesStructurees.astro';
+import { filAriane, graphe } from '../../lib/donnees-structurees';
+import { LISTE_CATEGORIES } from '../../lib/guides/categories';
+import { publies } from '../../lib/guides/controles';
+import { tempsDeLecture } from '../../lib/guides/lecture';
+import Base from '../../mises-en-page/Base.astro';
+
+const guides = publies(await getCollection('guides'));
+const sections = LISTE_CATEGORIES.map((categorie) => ({
+  categorie,
+  guides: guides.filter((guide) => guide.data.categorie === categorie.slug),
+})).filter((section) => section.guides.length > 0);
+---
+
+<Base
+  titre="Guides de l’investissement locatif en France | Deklic"
+  description="Investir, trouver un bien rentable, choisir son régime fiscal, gérer ses locataires : les guides Deklic, sourcés, datés et mis à jour avec les règles en vigueur."
+  chemin="/guides/"
+>
+  <DonneesStructurees
+    slot="tete"
+    donnees={graphe([
+      filAriane([
+        { nom: 'Accueil', chemin: '/' },
+        { nom: 'Guides', chemin: '/guides/' },
+      ]),
+    ])}
+  />
+  <div class="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
+    <p class="font-display text-xs font-semibold tracking-[0.12em] text-accent uppercase">Guides</p>
+    <h1 class="mt-3 max-w-3xl text-3xl font-bold tracking-tight sm:text-5xl">
+      Les guides de l’investissement locatif
+    </h1>
+    <p class="mt-4 max-w-2xl text-lg text-encre-2">
+      Écrits à partir des textes officiels et des règles de calcul de l’application, avec leurs
+      sources et leur date de mise à jour.
+    </p>
+
+    <nav aria-label="Catégories" class="mt-8 flex flex-wrap gap-2">
+      {
+        LISTE_CATEGORIES.map((categorie) => (
+          <a
+            href={`/guides/${categorie.slug}/`}
+            class="inline-flex min-h-11 items-center rounded-full border border-bordure bg-surface px-4 font-display text-sm font-semibold text-encre no-underline survol-fond"
+          >
+            {categorie.nom}
+          </a>
+        ))
+      }
+    </nav>
+
+    {
+      sections.map(({ categorie, guides: guidesCategorie }) => (
+        <section aria-labelledby={`categorie-${categorie.slug}`} class="mt-14">
+          <div class="flex flex-wrap items-end justify-between gap-3">
+            <h2 id={`categorie-${categorie.slug}`} class="text-2xl font-bold tracking-tight">
+              {categorie.nom}
+            </h2>
+            <a href={`/guides/${categorie.slug}/`} class="font-display text-sm font-semibold survol-texte">
+              Voir la catégorie →
+            </a>
+          </div>
+          <div class="mt-5 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {guidesCategorie.map((guide) => (
+              <CarteGuide guide={guide} minutes={tempsDeLecture(guide.body ?? '')} />
+            ))}
+          </div>
+        </section>
+      ))
+    }
+  </div>
+</Base>

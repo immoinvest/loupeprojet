@@ -1,0 +1,32 @@
+---
+import { CATEGORIES } from '../lib/guides/categories';
+import type { EntreeGuide } from '../lib/guides/controles';
+
+/** Carte d'un guide dans une liste : catégorie, titre, description, temps de lecture. */
+interface Props {
+  guide: EntreeGuide;
+  minutes: number;
+  niveauTitre?: 'h2' | 'h3';
+}
+
+const { guide, minutes, niveauTitre = 'h3' } = Astro.props;
+const Titre = niveauTitre;
+---
+
+<article
+  class="group relative grid content-start gap-3 rounded-carte border border-bordure bg-surface p-5 survol-fond"
+>
+  <p class="font-display text-xs font-semibold tracking-[0.1em] text-accent uppercase">
+    {CATEGORIES[guide.data.categorie].nom}
+  </p>
+  <Titre class="text-lg leading-snug font-semibold">
+    <a
+      href={`/guides/${guide.id}/`}
+      class="text-encre no-underline after:absolute after:inset-0 after:rounded-carte group-hover:text-accent-fonce"
+    >
+      {guide.data.titre}
+    </a>
+  </Titre>
+  <p class="text-sm leading-relaxed text-encre-2">{guide.data.description}</p>
+  <p class="text-xs text-encre-3">{minutes} min de lecture</p>
+</article>
