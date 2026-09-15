@@ -137,7 +137,8 @@ describe('calculerRevente — T3 Marseille', () => {
 
   it('assemble valeur, frais, CRD, IRA et impôt en un cash net vendeur', () => {
     expect(r.annees).toBe(10);
-    expect(r.valeur).toBeCloseTo(179_884, 0);
+    // 155 000 € + la moitié des 6 000 € de travaux (état inconnu), à +1,5 % par an sur 10 ans.
+    expect(r.valeur).toBeCloseTo(183_365, 0);
     expect(r.crd).toBe(financement.crdRevente);
     expect(r.ira).toBe(financement.iraRevente);
     expect(r.cashNetVendeur).toBeCloseTo(

@@ -160,43 +160,65 @@ describe('rendements', () => {
 });
 
 describe('impôts et revente', () => {
-  it('fiscalité : régime retenu, réserve, le moins cher des autres', () => {
+  it('fiscalité : impôt de la location, impôt total, le moins cher des autres au total', () => {
     const t = n(explicationFiscalite(exemple));
-    expect(t).toContain('Sur 10 ans, le meublé au réel ne coûte aucun impôt.');
+    expect(t).toContain('Sur 10 ans de location, le meublé au réel ne coûte aucun impôt.');
     // Amortissements déduits avant le déficit antérieur (CE, 15/04/2015) : 31 134 € en réserve.
     expect(t).toContain('31 134 € restent en réserve');
+    // 19 486 € d'amortissements du bâti réintégrés à la revente, prix de l'acte et 3 000 € de valeur
+    // ajoutée par les travaux : 1 695 € d'impôt à la revente (voir le test de la revente plus bas).
+    expect(t).toContain("Avec 1 695 € d'impôt à la revente, l'impôt total est de 1 695 €.");
     // Nu au réel : frais d'emprunt déduits et loyers compensant d'abord le financier (BOI-RFPI-BASE-30-20
-    // § 110) : 7 556 € sur le revenu global l'année 1 (−2 267 €), puis imposé dès l'année 2 → 4 426 €.
-    expect(t).toContain('Le moins cher des trois autres régimes est le nu au réel (4 426 €)');
+    // § 110) : 7 556 € sur le revenu global l'année 1 (−2 267 €), puis imposé dès l'année 2 → 4 426 €,
+    // rien à la revente (pas d'amortissement réintégré, abattements pour durée de détention).
+    expect(t).toContain(
+      "Le moins cher des trois autres régimes, revente comprise, est le nu au réel (4 426 € d'impôt total)",
+    );
 
     const m = n(explicationFiscalite(microBic));
-    expect(m).toContain("le meublé micro-BIC coûte 26 928 € d'impôt");
+    expect(m).toContain("Sur 10 ans de location, le meublé micro-BIC coûte 26 928 € d'impôt.");
     expect(m).toContain('Abattement de 50 %');
-    expect(m).toContain('est le meublé au réel (0 €)');
+    expect(m).toContain('Aucun impôt à la revente : impôt total 26 928 €.');
+    // Le meublé au réel ne paie rien pendant la location mais 1 695 € à la revente : comparé sur
+    // l'impôt de la location seul, il afficherait 0 € à tort.
+    expect(m).toContain("est le meublé au réel (1 695 € d'impôt total)");
+    expect(m).not.toContain('(0 €');
 
     // Colocation : un seul autre régime possible, jamais un régime nu.
     const c = n(explicationFiscalite(coloc));
-    expect(c).toMatch(/L'autre régime possible est le meublé micro-BIC \(/);
+    expect(c).toContain("L'autre régime possible est le meublé micro-BIC (36 338 € d'impôt total)");
     expect(c).not.toContain(' nu ');
   });
 
   it('revente : valeur, frais, capital restant dû, IRA, impôt, net vendeur', () => {
     const t = n(explicationRevente(exemple));
-    expect(t).toContain('179 884 € dans 10 ans (+1,5 % par an)');
-    expect(t).toContain('diagnostics (7 695 €)');
+    expect(t).toContain(
+      '183 365 € dans 10 ans (+1,5 % par an, dont 3 000 € de valeur ajoutée par les travaux)',
+    );
+    expect(t).toContain('diagnostics (7 835 €)');
     expect(t).toContain('capital restant dû (112 094 €)');
     expect(t).toContain('anticipé (1 878 €)');
     // 19 486 € d'amortissements du bâti réintégrés : plus-value 1 436,87 € × 29,081 % = 418 €.
     // Prix de l'acte 148 000 € (honoraires 7 000 € dans les frais, forfait travaux 22 200 €) : plus-value
-    // 1 436,87 + 1 050 = 2 486,87 € × 29,081 % = 723 € (BOI-RFPI-PVI-20-10-20-20 § 40 et 70).
-    expect(t).toContain('plus-value (723 €)');
-    expect(t).toContain('57 493 € net vendeur');
+    // 1 436,87 + 1 050 = 2 486,87 € (BOI-RFPI-PVI-20-10-20-20 § 40 et 70) ; valeur de revente +3 000 €
+    // de travaux capitalisés (+3 481,62 €), frais de vente −139,26 € : 5 829,23 € × 29,081 % = 1 695 €.
+    expect(t).toContain('plus-value (1 695 €)');
+    expect(t).toContain('59 864 € net vendeur');
+  });
+
+  it('revente au prix saisi : le prix de l’utilisateur, sans évolution ni travaux', () => {
+    const saisi = rapportComplet(
+      variante({ revente: { ...projetExemple.hypotheses.revente, prixVente: 200_000 } }),
+    );
+    const t = n(explicationRevente(saisi));
+    expect(t).toContain('Revente au prix que vous avez saisi, 200 000 €, dans 10 ans, moins');
+    expect(t).not.toContain('par an');
   });
 
   it('multiple sur apport : exemple, perte, sans mise', () => {
     const t = n(explicationMultiple(exemple));
-    expect(t).toContain('12 924 € ÷ 19 337 € = × 0,7.');
-    expect(t).toContain('en rend 0,7');
+    expect(t).toContain('15 294 € ÷ 19 337 € = × 0,8.');
+    expect(t).toContain('en rend 0,8');
 
     const perte = {
       rendement: { enrichissement: { miseDeDepart: 10_000, total: -5_000 } },

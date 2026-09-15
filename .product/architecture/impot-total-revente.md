@@ -41,6 +41,7 @@ analyses/comparaison.ts           indicateur impotGlobal
 - `impotDuAuxAmortissements(f)` = `regimes.lmnp_reel.impotRevente − regimes.micro_bic.impotRevente` (mêmes valeur, frais, durée : seule la réintégration diffère ; borné à 0).
 - `repriseDeficitPossible(r, annees)` : `r.regime === 'nu_reel'` et une année A avec `deficitImputeRevenuGlobal > 0` et `annees < A + 3`.
 - Lien « Changer l'horizon » : `Link to="../revente"` (relatif à la route du volet), `survol-texte`, absent en mode document.
+- Rapport, carte « Combien d'impôts ? » (correctif `rapport-impot-global`, 15/09/2026) : gros chiffre = `impotTotal` du régime retenu, libellé « sur N ans de location » ; ligne « Impôt total, revente comprise » = `impotGlobal` ; autres régimes compatibles en liste nommée « Impôt total des autres régimes », triés et chiffrés par `impotGlobal` (`TEXTES_FISCALITE_RAPPORT` dans `textes/regimes.ts`) ; `explicationFiscalite` compare aussi sur `impotGlobal`. **Règle** : tout écran qui compare ou classe des régimes lit `impotGlobal` ou `enrichissementFinal` ; `impotTotal` ne s'affiche que libellé comme l'impôt de la location.
 
 ## Tests
 

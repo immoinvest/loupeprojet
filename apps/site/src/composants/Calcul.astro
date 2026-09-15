@@ -1,0 +1,39 @@
+---
+/**
+ * Un chiffre d'exemple d'un guide, calculé au build par le simulateur (donc par le moteur) :
+ * <Calcul prix={150000} departement="13" loyer={650} charges={1900} valeur="brut" />.
+ * Une saisie invalide arrête le build.
+ */
+import { euros, pourcentage } from '../lib/formatage';
+import { calculerRentabilite } from '../lib/simulateur';
+
+interface Props {
+  prix: number;
+  departement: string;
+  loyer: number;
+  travaux?: number;
+  charges?: number;
+  valeur: 'frais' | 'cout' | 'brut' | 'net';
+}
+
+const { prix, departement, loyer, travaux = 0, charges = 0, valeur } = Astro.props;
+const calcul = calculerRentabilite({
+  prix: String(prix),
+  departement,
+  loyer: String(loyer),
+  travaux: String(travaux),
+  charges: String(charges),
+});
+if (!calcul.ok) {
+  throw new Error(`Exemple de calcul invalide : ${JSON.stringify(calcul.erreurs)}`);
+}
+const { resultat } = calcul;
+const TEXTES = {
+  frais: euros(resultat.fraisAcquisition),
+  cout: euros(resultat.coutTotal),
+  brut: pourcentage(resultat.brut),
+  net: pourcentage(resultat.net),
+} as const;
+---
+
+<span class="font-semibold whitespace-nowrap text-encre">{TEXTES[valeur]}</span>

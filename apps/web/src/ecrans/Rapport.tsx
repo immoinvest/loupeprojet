@@ -1,5 +1,5 @@
 import type { Resultats, ResultatsComplets } from '@loupe/moteur';
-import type { JSX } from 'react';
+import { useId, type JSX } from 'react';
 
 import { multipleSurApport } from '@/analyses/rapport';
 import { useModeDocument } from '@/composants/document';
@@ -16,7 +16,7 @@ import {
 } from '@/textes/explications';
 import { libelleFeu } from '@/textes/feux';
 import { manquesBloquants, TEXTES_TRANCHE } from '@/textes/manques';
-import { REGIMES } from '@/textes/regimes';
+import { REGIMES, TEXTES_FISCALITE_RAPPORT } from '@/textes/regimes';
 import { texteVerdict } from '@/textes/verdict';
 
 import { AnalyseIncomplete } from './projet/AnalyseIncomplete';
@@ -38,10 +38,13 @@ function CarteFiscalite({ r }: { r: ResultatsComplets }): JSX.Element {
   const f = r.fiscalite;
   const retenu = f.regimes[f.retenu];
   // Les régimes nus ne sont pas proposés pour une colocation, une courte ou une moyenne durée.
+  // Des régimes se comparent sur l'impôt total (location et revente), jamais sur l'impôt de la location
+  // seul : le meublé au réel paie à la revente l'impôt de ses amortissements réintégrés.
   const autres = Object.values(f.regimes)
     .filter((x) => x.regime !== f.retenu && f.compatibles.includes(x.regime))
-    .sort((a, b) => a.impotTotal - b.impotTotal);
+    .sort((a, b) => a.impotGlobal - b.impotGlobal);
   const annees = r.projet.hypotheses.revente.annees;
+  const idAutres = useId();
   return (
     <Carte>
       <TitreCarte info={<Info sujet={TITRE_FISCALITE} texte={explicationFiscalite(r)} />}>
@@ -52,7 +55,8 @@ function CarteFiscalite({ r }: { r: ResultatsComplets }): JSX.Element {
         complement={
           <>
             sur{' '}
-            <ValeurHypothese chemin="hypotheses.revente.annees">{`${String(annees)} ans`}</ValeurHypothese>
+            <ValeurHypothese chemin="hypotheses.revente.annees">{`${String(annees)} ans`}</ValeurHypothese>{' '}
+            de location
           </>
         }
       >
@@ -71,12 +75,23 @@ function CarteFiscalite({ r }: { r: ResultatsComplets }): JSX.Element {
           </>
         )}
       </p>
-      <div className="flex flex-wrap gap-2">
-        {autres.map((x) => (
-          <Pastille key={x.regime} ton="neutre" compacte>
-            {REGIMES[x.regime]} {euros(x.impotTotal)}
-          </Pastille>
-        ))}
+      <p className="m-0 text-[15px] text-encre-2">
+        {TEXTES_FISCALITE_RAPPORT.totalRetenu}{' '}
+        <strong className="text-encre tabular-nums">{euros(retenu.impotGlobal)}</strong>
+      </p>
+      <div className="flex flex-col gap-2">
+        <p id={idAutres} className="m-0 text-sm text-encre-3">
+          {TEXTES_FISCALITE_RAPPORT.totalAutres(autres.length)}
+        </p>
+        <ul aria-labelledby={idAutres} className="m-0 flex list-none flex-wrap gap-2 p-0">
+          {autres.map((x) => (
+            <li key={x.regime}>
+              <Pastille ton="neutre" compacte>
+                {REGIMES[x.regime]} {euros(x.impotGlobal)}
+              </Pastille>
+            </li>
+          ))}
+        </ul>
       </div>
       <LienOnglet vers="fiscalite">Voir la fiscalité</LienOnglet>
     </Carte>

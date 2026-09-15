@@ -1,0 +1,99 @@
+---
+/**
+ * Simulateur de rentabilité d'un guide : calculé dans le navigateur par le moteur de l'application
+ * (src/scripts/simulateur.ts). Caché sans JavaScript, où un message le remplace.
+ */
+interface Props {
+  prix?: number;
+  departement?: string;
+  travaux?: number;
+  loyer?: number;
+  charges?: number;
+}
+
+const { prix = 150000, departement = '13', travaux = 0, loyer = 650, charges = 1900 } = Astro.props;
+
+const CHAMPS = [
+  { nom: 'prix', libelle: 'Prix du bien (€)', valeur: String(prix), mode: 'decimal' },
+  { nom: 'departement', libelle: 'Département', valeur: departement, mode: 'text' },
+  { nom: 'travaux', libelle: 'Travaux (€)', valeur: String(travaux), mode: 'decimal' },
+  { nom: 'loyer', libelle: 'Loyer par mois, hors charges (€)', valeur: String(loyer), mode: 'decimal' },
+  { nom: 'charges', libelle: 'Charges du propriétaire par an (€)', valeur: String(charges), mode: 'decimal' },
+] as const;
+
+const SORTIES = [
+  { nom: 'frais', libelle: 'Frais d’acquisition' },
+  { nom: 'cout', libelle: 'Coût total' },
+  { nom: 'brut', libelle: 'Rentabilité brute' },
+  { nom: 'net', libelle: 'Rentabilité nette' },
+] as const;
+---
+
+<div class="not-prose">
+  <form
+    data-simulateur
+    hidden
+    aria-labelledby="simulateur-titre"
+    class="grid gap-5 rounded-carte border-2 border-accent bg-surface p-5 sm:p-6"
+  >
+    <div>
+      <p id="simulateur-titre" class="font-display text-lg font-semibold">
+        Simulateur de rentabilité
+      </p>
+      <p class="mt-1 text-sm text-encre-2">
+        Calculé par le moteur Deklic : frais d’acquisition de votre département, rendements avant
+        crédit et impôt, sans vacance locative.
+      </p>
+    </div>
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {
+        CHAMPS.map((champ) => (
+          <div class="grid content-start gap-1.5">
+            <label for={`simulateur-${champ.nom}`} class="font-display text-sm font-semibold">
+              {champ.libelle}
+            </label>
+            <input
+              id={`simulateur-${champ.nom}`}
+              name={champ.nom}
+              value={champ.valeur}
+              inputmode={champ.mode}
+              autocomplete="off"
+              aria-describedby={`simulateur-${champ.nom}-erreur`}
+              class="min-h-11 rounded-encart border border-bordure bg-fond px-3 text-base tabular-nums aria-invalid:border-probleme"
+            />
+            <p
+              id={`simulateur-${champ.nom}-erreur`}
+              data-erreur={champ.nom}
+              class="min-h-5 text-sm text-probleme-texte"
+            />
+          </div>
+        ))
+      }
+    </div>
+    <dl class="grid gap-4 border-t border-bordure pt-4 sm:grid-cols-4" aria-live="polite">
+      {
+        SORTIES.map((sortie) => (
+          <div>
+            <dt class="text-sm text-encre-2">{sortie.libelle}</dt>
+            <dd
+              data-sortie={sortie.nom}
+              class="font-display text-2xl font-bold text-accent tabular-nums"
+            >
+              —
+            </dd>
+          </div>
+        ))
+      }
+    </dl>
+  </form>
+  <noscript>
+    <p class="rounded-carte border border-bordure bg-surface p-5 text-encre-2">
+      Le simulateur calcule dans votre navigateur et demande JavaScript. La formule et l’exemple
+      chiffré ci-dessus restent valables.
+    </p>
+  </noscript>
+</div>
+
+<script>
+  import '../scripts/simulateur';
+</script>

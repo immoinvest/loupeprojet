@@ -1,0 +1,39 @@
+---
+import type { Feu } from '@loupe/moteur';
+
+/** Une ligne de feu du rapport d'exemple : pastille, libellé, valeur ; l'état est dit en texte. */
+interface Props {
+  etat: Feu;
+  libelle: string;
+  valeur: string;
+  texteEtat: string;
+}
+
+const { etat, libelle, valeur, texteEtat } = Astro.props;
+
+const PASTILLES = {
+  bon: 'bg-bon',
+  surveiller: 'bg-surveiller',
+  probleme: 'bg-probleme',
+  inconnu: 'bg-encre-4',
+} as const;
+const VALEURS = {
+  bon: 'bg-bon-fond text-bon-texte',
+  surveiller: 'bg-surveiller-fond text-surveiller-texte',
+  probleme: 'bg-probleme-fond text-probleme-texte',
+  inconnu: 'bg-bordure text-encre-2',
+} as const;
+---
+
+<li class="grid grid-cols-[auto_1fr_auto] items-center gap-3 py-2.5">
+  <span aria-hidden="true" class:list={['size-3 rounded-full', PASTILLES[etat]]}></span>
+  <span class="font-display text-[0.92rem] font-semibold">
+    {libelle}<span class="sr-only"> : {texteEtat}</span>
+  </span>
+  <span
+    class:list={[
+      'rounded-full px-2.5 py-0.5 font-display text-sm font-semibold whitespace-nowrap tabular-nums',
+      VALEURS[etat],
+    ]}>{valeur}</span
+  >
+</li>

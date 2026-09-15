@@ -1,0 +1,104 @@
+---
+titre: 'Comment trouver un bien rentable : 9 critères et la méthode'
+titreSeo: 'Comment trouver un bien rentable : 9 critères et méthode'
+description: 'Quelle ville viser, quels critères vérifier, comment contrôler prix et loyer avec les données publiques : la méthode pour trouver un bien rentable.'
+motCle: 'trouver un bien rentable'
+motsClesSecondaires:
+  - comment trouver un bien rentable
+  - annonce immobilière rentable
+  - rentabilité locative par ville
+  - où investir dans l’immobilier locatif
+categorie: trouver-un-bien
+auteur: pierre-georgel
+publieLe: 2026-09-15
+misAJourLe: 2026-09-15
+essentiel:
+  - 'Un bien rentable se trouve d’abord là où les locataires sont nombreux : commencez par la ville et le quartier, pas par l’annonce.'
+  - 'Vérifiez toujours le prix face aux ventes réelles du quartier (base DVF) et le loyer face aux loyers de marché de la commune.'
+  - 'Le DPE est devenu un critère financier : un logement classé G ne peut plus être mis en location, les logements classés F suivront en 2028.'
+  - 'Charges de copropriété, taxe foncière, travaux et risques naturels font la différence entre une rentabilité affichée et une rentabilité réelle.'
+faq:
+  - question: 'Quelle ville choisir pour un investissement locatif rentable ?'
+    reponse: 'Celle où la demande locative est solide et où le rapport entre loyers et prix reste favorable : ville étudiante, bassin d’emploi, bonne desserte. Les villes aux prix les plus bas ne sont pas toujours les plus rentables si les logements y restent vides.'
+  - question: 'Studio, T2 ou T3 : quelle surface rapporte le plus ?'
+    reponse: 'Les petites surfaces se louent souvent plus cher au mètre carré, mais changent plus souvent de locataire. Les T3 attirent des familles plus stables, ou se prêtent à la colocation. Le bon choix dépend de la demande locale.'
+  - question: 'Comment connaître le prix réel des ventes dans un quartier ?'
+    reponse: 'La base publique DVF recense les ventes immobilières des dernières années, avec leur prix et leur surface. Le site app.dvf.etalab.gouv.fr permet de les consulter sur une carte, parcelle par parcelle.'
+  - question: 'Un logement classé F au DPE est-il un mauvais investissement ?'
+    reponse: 'Pas forcément, mais son loyer ne peut plus augmenter et il ne pourra plus être mis en location à partir de 2028 sans travaux. Chiffrez la rénovation et négociez le prix en conséquence.'
+sources:
+  - nom: 'Explorateur des données de valeurs foncières (DVF)'
+    url: 'https://app.dvf.etalab.gouv.fr/'
+    consulteLe: 2026-09-15
+  - nom: 'data.gouv.fr : Carte des loyers 2025 (ANIL)'
+    url: 'https://www.data.gouv.fr/datasets/carte-des-loyers-indicateurs-de-loyers-dannonce-par-commune-en-2025'
+    consulteLe: 2026-09-15
+  - nom: 'Ministère de la Transition écologique : Location et gel des loyers des passoires énergétiques'
+    url: 'https://www.ecologie.gouv.fr/interdiction-location-et-gel-des-loyers-des-passoires-energetiques'
+    consulteLe: 2026-09-15
+  - nom: 'Service-public.gouv.fr : Encadrement des loyers en zone tendue'
+    url: 'https://www.service-public.gouv.fr/particuliers/vosdroits/F1314'
+    consulteLe: 2026-09-15
+  - nom: 'Géorisques'
+    url: 'https://www.georisques.gouv.fr/'
+    consulteLe: 2026-09-15
+---
+
+import Regle from '../../src/composants/Regle.astro';
+
+Trouver un bien rentable ne consiste pas à dénicher l’annonce la moins chère, mais un logement que des locataires voudront louer longtemps, à un prix cohérent avec le marché. La méthode tient en trois temps : choisir où investir, vérifier chaque annonce avec neuf critères, puis contrôler les chiffres avec les données publiques avant de visiter.
+
+## Ce que « rentable » veut dire pour vous
+
+Un bien rentable rapporte plus qu’il ne coûte, mais on peut viser trois choses différentes : un rendement élevé, un cash-flow positif chaque mois, ou la valeur du bien à la revente. Décidez laquelle compte le plus avant de chercher.
+
+Pour vous repérer, Deklic met un feu vert au rendement net à partir de <Regle chemin="verdict.rendementNet.bonDes" format="taux" /> et au cash-flow mensuel à partir de <Regle chemin="verdict.cashflowMensuel.bonDes" format="euros" />. Le guide du [calcul de la rentabilité locative](/guides/calcul-rentabilite-locative/) détaille les formules.
+
+## Choisir la ville et le quartier
+
+La demande locative passe avant le prix. Une ville où les logements trouvent preneur en quelques jours rapporte plus, sur la durée, qu’une ville bon marché où ils restent vides des mois.
+
+Les signes d’une demande solide :
+
+- une **université** ou des écoles, un **bassin d’emploi** qui recrute ;
+- une **desserte** en transports qui mène aux centres d’activité ;
+- des **loyers de marché** élevés par rapport aux prix de vente : comparez le loyer au mètre carré de la carte des loyers publiée par l’ANIL au prix au mètre carré des ventes réelles.
+
+Dans les villes soumises à l’**encadrement des loyers** (Paris, Lyon et Villeurbanne, Montpellier, Grenoble, le Pays basque, Plaine Commune…), le loyer est plafonné : le rendement se calcule avec le loyer de référence majoré, pas avec celui de l’annonce.
+
+## Les 9 critères d’un bien rentable
+
+Passez chaque annonce au crible de ces neuf points. Aucun ne suffit seul ; un seul mauvais peut suffire à écarter le bien.
+
+1. **Le prix au mètre carré**, comparé aux ventes réelles du quartier et non aux autres annonces, qui affichent des prix demandés.
+2. **Le loyer de marché**, vérifié dans la commune et dans le quartier, surface et meublé ou non compris.
+3. **Le DPE** : depuis <Regle chemin="exploitation.interdictionLocationDpe.G" format="annee" />, un logement classé G ne peut plus faire l’objet d’un nouveau bail ; ce sera le cas des logements classés F en <Regle chemin="exploitation.interdictionLocationDpe.F" format="annee" />, et E en <Regle chemin="exploitation.interdictionLocationDpe.E" format="annee" />. Le loyer d’un logement F ou G ne peut plus augmenter.
+4. **Les charges de copropriété**, dont la part non récupérable sur le locataire, et les travaux votés : demandez les trois derniers procès-verbaux d’assemblée générale.
+5. **La taxe foncière**, qui peut représenter plus d’un mois de loyer.
+6. **L’état et les travaux**, chiffrés par devis avant l’offre, pas après.
+7. **La surface et la typologie**, adaptées à la demande locale : étudiants, jeunes actifs, familles, colocation.
+8. **L’emplacement précis** : transports, commerces, étage, luminosité, nuisances.
+9. **Les risques** de l’adresse (inondation, retrait-gonflement des argiles, industrie), consultables sur Géorisques.
+
+## Où chercher les annonces
+
+Les grands portails (LeBonCoin, SeLoger, Bien’ici, PAP, Logic-Immo) concentrent l’essentiel de l’offre. Créez des alertes sur deux ou trois quartiers précis plutôt qu’une ville entière : vous verrez passer les biens au bon prix avant qu’ils partent.
+
+Deux pistes moins encombrées :
+
+- les **biens vendus loués**, souvent moins chers, mais dont vous ne choisissez ni le locataire ni le loyer ;
+- les **biens à rénover**, qui demandent un devis sérieux et un DPE après travaux estimé, mais se négocient mieux.
+
+## Vérifier une annonce en dix minutes
+
+Avant de visiter, trois contrôles écartent la plupart des mauvaises affaires.
+
+1. **Le prix** : ouvrez l’[explorateur DVF](https://app.dvf.etalab.gouv.fr/) sur l’adresse ou la rue, et comparez le prix au mètre carré aux ventes des dernières années.
+2. **Le loyer** : comparez le loyer visé aux loyers de marché de la commune, et au plafond de l’[encadrement des loyers](https://www.service-public.gouv.fr/particuliers/vosdroits/F1314) si la ville y est soumise.
+3. **Le coût total** : ajoutez au prix les frais d’acquisition, les travaux et le mobilier, puis calculez la rentabilité nette et le cash-flow.
+
+Deklic fait ces trois contrôles à partir du lien de l’annonce : ventes réelles autour de l’adresse, loyer de marché, DPE, risques, coût total et cinq feux pour décider.
+
+## Négocier avec les chiffres
+
+Une offre argumentée passe mieux qu’un rabais au hasard. Appuyez-vous sur l’écart entre le prix demandé et les ventes réelles du quartier, sur le montant des devis de travaux et sur le classement énergétique : ce sont des faits que le vendeur peut vérifier.

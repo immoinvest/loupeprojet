@@ -45,8 +45,9 @@ function marquerCliquables(page: Page, portee: string): Promise<number> {
           boite.height > 0 &&
           getComputedStyle(el).visibility !== 'hidden' &&
           el.closest('[inert]') === null;
+        // Le logo (`data-logo`) garde la main sans effet de survol : décision de Pierre du 15/09/2026.
         const ecarte = el.matches(
-          '[aria-current="page"], [aria-pressed="true"], label:has(input:checked), :disabled, [aria-disabled="true"], label:has(input:disabled)',
+          '[aria-current="page"], [aria-pressed="true"], label:has(input:checked), :disabled, [aria-disabled="true"], label:has(input:disabled), [data-logo]',
         );
         const signature = `${el.tagName}|${el.className}`;
         if (!visible || ecarte || el.closest('.leaflet-container') !== null || vus.has(signature)) {

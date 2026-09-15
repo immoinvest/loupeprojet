@@ -67,6 +67,46 @@ describe('menu à deux sections', () => {
     expect(within(barreLaterale()).queryByRole('button', { name: 'Nouveau projet' })).toBeNull();
   });
 
+  it('lisible : icône et nombre en pastille, projets en retrait, titres contrastés, logo sans survol, outils regroupés', async () => {
+    render(<AppEnMemoire chemin="/projets" compte={clientMemoire()} />);
+    await screen.findByRole('heading', { level: 1, name: 'Mes projets' });
+    const barre = barreLaterale();
+    const analyser = section('Analyser');
+
+    // Icône bleue, libellé, nombre dans sa pastille ; le nom accessible garde « · 1 ».
+    const ligne = within(analyser).getByRole('link', { name: 'Mes projets · 1' });
+    expect(ligne.querySelector('svg')).not.toBeNull();
+    expect(ligne).toHaveClass('[&>svg]:text-accent', 'text-accent-fonce');
+    expect(within(ligne).getByText('1')).toHaveClass('rounded-full', 'bg-surface');
+    // Le « + » est un petit bouton bordé, secondaire.
+    expect(within(analyser).getByRole('link', { name: 'Nouveau projet' })).toHaveClass(
+      'border-accent-bordure',
+      'bg-surface',
+    );
+
+    // Le projet récent : point de cash-flow à gauche, texte gris de 13 px.
+    const projet = within(analyser).getByRole('link', { name: NOM_PROJET_EXEMPLE });
+    expect(projet).toHaveClass('text-[13px]', 'text-encre-2');
+    expect(projet.firstElementChild?.firstElementChild).toHaveAttribute('aria-hidden', 'true');
+
+    // Titre de section en encre-3 (4,8 pour 1), plus en encre-4 (2,5 pour 1).
+    expect(within(analyser).getByText('Analyser')).toHaveClass('text-encre-3');
+
+    // Le logo mène à l'accueil sans effet de survol.
+    const logo = within(barre).getByRole('link', { name: 'Deklic : accueil' });
+    expect(logo).toHaveAttribute('data-logo');
+    expect(logo.className).not.toMatch(/survol-/);
+
+    // Sous « Outils », le simulateur seul : l'extension est dans Mon compte.
+    const outils = within(barre).getByRole('navigation', { name: 'Outils' });
+    expect(
+      within(outils)
+        .getAllByRole('link')
+        .map((l) => l.textContent),
+    ).toEqual(['Simulateur de prêt']);
+    expect(within(barre).queryByRole('navigation', { name: 'Aide' })).toBeNull();
+  });
+
   it('« Mes projets · N » puis les 3 projets les plus récents', async () => {
     const stockage = window.localStorage;
     ecrireProjets(
@@ -75,11 +115,11 @@ describe('menu à deux sections', () => {
     );
     render(<AppEnMemoire chemin="/comparer" stockage={stockage} compte={clientMemoire()} />);
     const analyser = await screen.findByRole('navigation', { name: 'Analyser' });
-    expect(
-      within(analyser)
-        .getAllByRole('link')
-        .map((l) => l.textContent),
-    ).toEqual(['Mes projets · 7', '', 'Projet 1', 'Projet 2', 'Projet 3']);
+    const liens = within(analyser).getAllByRole('link');
+    expect(liens).toHaveLength(5);
+    expect(liens[0]).toHaveAccessibleName('Mes projets · 7');
+    expect(liens[1]).toHaveAccessibleName('Nouveau projet');
+    expect(liens.slice(2).map((l) => l.textContent)).toEqual(['Projet 1', 'Projet 2', 'Projet 3']);
     // Ailleurs que sur la liste, rien n'est surligné.
     const ligne = within(analyser).getByRole('link', { name: 'Mes projets · 7' });
     expect(ligne).not.toHaveAttribute('aria-current');
@@ -104,7 +144,7 @@ describe('menu à deux sections', () => {
     const analyser = await screen.findByRole('navigation', { name: 'Analyser' });
     const plus = within(analyser).getByRole('link', { name: 'Nouveau projet' });
     expect(plus).toHaveAttribute('aria-current', 'page');
-    expect(plus).toHaveClass('bg-accent', 'w-11');
+    expect(plus).toHaveClass('bg-accent', 'text-white');
     const ligne = within(analyser).getByRole('link', { name: /^Mes projets/ });
     expect(ligne).not.toHaveAttribute('aria-current');
     expect(ligne.parentElement).not.toHaveClass('bg-accent-doux');
@@ -123,6 +163,8 @@ describe('menu à deux sections', () => {
     await within(gerer).findByRole('link', { name: 'Mes biens · 2' });
     const liens = within(gerer).getAllByRole('link');
     expect(liens[0]).toHaveAccessibleName('Mes biens · 2');
+    // Chaque page a sa propre icône : un calendrier pour les loyers du mois, plus la maison d'Accueil.
+    expect(liens[2]?.querySelector('svg')).toHaveClass('lucide-calendar-check');
     expect(liens[1]).toHaveAccessibleName('Ajouter un bien');
     expect(liens[1]).toHaveAttribute('href', '/gerer/ajouter');
     expect(liens[1]).toHaveAttribute('title', 'Ajouter un bien');

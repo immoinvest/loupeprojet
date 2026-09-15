@@ -195,9 +195,12 @@ test('trente projets : le menu montre « Mes projets · 30 » et son « + », pu
   await expect(mesProjets).toBeInViewport({ ratio: 1 });
   const plus = lien('Nouveau projet');
   await expect(plus).toBeInViewport({ ratio: 1 });
+  // Le « + » : petit bouton de 30 px à la souris, cible de 44 px au doigt.
   const cible = await plus.boundingBox();
-  expect(cible?.width).toBeGreaterThanOrEqual(44);
-  expect(cible?.height).toBeGreaterThanOrEqual(44);
+  const auDoigt = await page.evaluate(() => window.matchMedia('(pointer: coarse)').matches);
+  const tailleMinimale = auDoigt ? 44 : 30;
+  expect(cible?.width).toBeGreaterThanOrEqual(tailleMinimale);
+  expect(cible?.height).toBeGreaterThanOrEqual(tailleMinimale);
   await expect(lien('Copie 2 · T2 · Lyon 3e')).toBeVisible();
   await expect(lien('Copie 3 · T2 · Lyon 3e')).toHaveCount(0);
   await lien('Copie 2 · T2 · Lyon 3e').scrollIntoViewIfNeeded();

@@ -200,6 +200,14 @@ export const GROUPE_FISCALITE: Groupe = {
       terme: 'evolutionPrix',
     },
     {
+      chemin: 'hypotheses.revente.prixVente',
+      libelle: 'Prix de vente',
+      type: 'euros',
+      unite: '€',
+      aToi: true,
+      aide: 'Vide : estimé à partir du prix, des travaux et de l’évolution du prix.',
+    },
+    {
       chemin: 'hypotheses.revente.fraisAgenceTaux',
       libelle: "Frais d'agence à la revente",
       type: 'pourcent',

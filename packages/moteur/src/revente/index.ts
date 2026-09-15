@@ -28,4 +28,11 @@ export {
   type DetailPlusValue,
   type ParametresPlusValue,
 } from './plus-value';
-export { fraisVente, valeurRevente, type FraisVente } from './valeur';
+export {
+  fraisVente,
+  valeurRevente,
+  valorisationTravaux,
+  type FraisVente,
+  type MethodeValorisation,
+  type ValorisationTravaux,
+} from './valeur';

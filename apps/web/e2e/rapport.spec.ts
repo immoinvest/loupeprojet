@@ -45,14 +45,25 @@ test('le rapport affiche le verdict, les cinq feux et les chiffres clés', async
 
   await expect(page.getByText('Levier 1 · Négocier').locator('..')).toContainText('119 663 €');
 
-  await expect(carte(page, "Combien d'impôts ?")).toContainText(/0\s€\s*sur 10 ans/);
-  await expect(carte(page, "Combien d'impôts ?")).toContainText('Meublé au réel.');
+  const impots = carte(page, "Combien d'impôts ?");
+  await expect(impots).toContainText(/0\s€\s*sur 10 ans de location/);
+  await expect(impots).toContainText('Meublé au réel.');
+  // Meublé au réel : rien pendant la location, 1 695 € à la revente (amortissements réintégrés).
+  await expect(impots).toContainText(/Impôt total, revente comprise :\s*1\s695\s€/);
+  // Les régimes se comparent sur l'impôt total (location et revente), triés du moins cher au plus cher.
+  await expect(
+    impots.getByRole('list', { name: 'Impôt total des autres régimes' }).getByRole('listitem'),
+  ).toHaveText([
+    /^Nu au réel\s4\s426\s€$/,
+    /^Meublé micro-BIC\s26\s928\s€$/,
+    /^Nu micro-foncier\s31\s757\s€$/,
+  ]);
 
   const revente = carte(page, "Qu'est-ce qu'il vous restera ?");
-  // 58 217 € avant impôt de plus-value, moins 723 € (amortissements réintégrés, prix de l'acte).
-  await expect(revente).toContainText(/57\s493\s€\s*dans 10 ans/);
+  // Prix de l'acte dans la plus-value et 3 000 € de valeur ajoutée par les travaux : 1 695 € d'impôt.
+  await expect(revente).toContainText(/59\s864\s€\s*dans 10 ans/);
   await expect(revente).toContainText('Multiple sur apport');
-  await expect(revente).toContainText(/×\s0,7/);
+  await expect(revente).toContainText(/×\s0,8/);
 });
 
 test('à côté du prix, les rendements et « Avant de faire une offre » empilés, sans vide', async ({

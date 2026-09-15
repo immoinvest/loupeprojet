@@ -12,7 +12,7 @@ function Pastille({ texte }: { texte: string }): JSX.Element {
   return (
     <div
       aria-hidden="true"
-      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent-doux font-display text-[15px] font-bold text-accent"
+      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent-doux font-display text-sm font-bold text-accent"
     >
       {texte}
     </div>
@@ -48,10 +48,9 @@ export function Profil(): JSX.Element {
         >
           <Pastille texte={initiales(utilisateur)} />
           <span className="flex min-w-0 flex-1 flex-col">
-            <span className="truncate text-[15px] font-bold">{nomAffiche(utilisateur)}</span>
-            <span className="truncate text-xs text-encre-3">
-              {TEXTES_MON_COMPTE.titre} · {compteur}
-            </span>
+            <span className="truncate text-sm font-bold">{nomAffiche(utilisateur)}</span>
+            {/* Sans le nombre de projets : il est déjà à côté de « Mes projets ». */}
+            <span className="truncate text-xs text-encre-3">{TEXTES_MON_COMPTE.titre}</span>
           </span>
         </NavLink>
         <button
@@ -62,7 +61,7 @@ export function Profil(): JSX.Element {
           }}
           aria-label={TEXTES_MON_COMPTE.deconnecter}
           title={TEXTES_MON_COMPTE.deconnecter}
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-encre-2 survol-danger disabled:opacity-50"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-encre-3 survol-danger disabled:opacity-50 pointer-coarse:h-11 pointer-coarse:w-11"
         >
           <LogOut size={20} aria-hidden="true" />
         </button>

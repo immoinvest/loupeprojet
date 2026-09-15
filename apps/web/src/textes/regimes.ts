@@ -86,6 +86,16 @@ function tauxAbattement(taux: number): string {
   return pourcentage(taux, Number.isInteger(Math.round(taux * 10_000) / 100) ? 0 : 2);
 }
 
+/**
+ * Carte « Combien d'impôts ? » du Rapport : le gros chiffre reste l'impôt pendant la location du régime
+ * retenu ; les régimes se comparent sur l'impôt total, revente comprise (`impotGlobal`).
+ */
+export const TEXTES_FISCALITE_RAPPORT = {
+  totalRetenu: 'Impôt total, revente comprise :',
+  totalAutres: (n: number): string =>
+    n === 1 ? "Impôt total de l'autre régime possible" : 'Impôt total des autres régimes',
+} as const;
+
 /** Les lignes du tableau « La revente selon le régime ». */
 export const LIGNES_REVENTE: readonly {
   readonly titre: string;

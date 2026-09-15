@@ -3,7 +3,6 @@ import { describe, expect, it } from 'vitest';
 
 import { resumeDesBiens } from '@/gestion/biens';
 import { montant } from '@/gestion/format';
-import { mesBiens } from '@/textes/gerer';
 import { loyerParMois, nombreDeBiens, occupantsDuBien } from '@/textes/gerer-biens';
 import { nomsDesLocataires } from '@/textes/gerer-loyers';
 
@@ -106,11 +105,9 @@ describe('resumeDesBiens', () => {
 });
 
 describe('textes de Mes biens', () => {
-  it('titre, entrée du menu, occupants et loyer', () => {
+  it('titre, occupants et loyer', () => {
     expect(nombreDeBiens(1)).toBe('1 bien');
     expect(nombreDeBiens(4)).toBe('4 biens');
-    expect(mesBiens(null)).toBe('Mes biens');
-    expect(mesBiens(3)).toBe('Mes biens · 3');
     expect(occupantsDuBien([], 0, false)).toBe('Sans locataire');
     expect(occupantsDuBien(['Julie Martin'], 1, false)).toBe('Julie Martin');
     const colocation = ['Julie Martin', 'Léa Bernard'];

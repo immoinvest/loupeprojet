@@ -1,0 +1,95 @@
+---
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+
+import CarteGuide from '../../composants/CarteGuide.astro';
+import DonneesStructurees from '../../composants/DonneesStructurees.astro';
+import { filAriane, graphe } from '../../lib/donnees-structurees';
+import { LISTE_CATEGORIES } from '../../lib/guides/categories';
+import { cheminsGuides, type PageGuides } from '../../lib/guides/chemins';
+import { publies, verifierMotsCles } from '../../lib/guides/controles';
+import { tempsDeLecture } from '../../lib/guides/lecture';
+import { guidesLies } from '../../lib/guides/lies';
+import { sommaire } from '../../lib/guides/sommaire';
+import Base from '../../mises-en-page/Base.astro';
+import Guide from '../../mises-en-page/Guide.astro';
+
+type EntreeGuides = CollectionEntry<'guides'>;
+
+export async function getStaticPaths(): Promise<
+  { params: { slug: string }; props: { page: PageGuides<EntreeGuides>; tous: EntreeGuides[] } }[]
+> {
+  const tous = publies(await getCollection('guides'));
+  verifierMotsCles(tous);
+  return cheminsGuides(LISTE_CATEGORIES, tous).map((page) => ({
+    params: { slug: page.slug },
+    props: { page, tous },
+  }));
+}
+
+interface Props {
+  page: PageGuides<EntreeGuides>;
+  tous: EntreeGuides[];
+}
+
+const { page, tous } = Astro.props;
+const minutes = (guide: EntreeGuides): number => tempsDeLecture(guide.body ?? '');
+const rendu = page.type === 'article' ? await render(page.guide) : null;
+const Contenu = rendu?.Content;
+const guidesDeLaCategorie =
+  page.type === 'categorie' ? tous.filter((g) => g.data.categorie === page.categorie.slug) : [];
+---
+
+{
+  page.type === 'article' && rendu !== null && Contenu !== undefined && (
+    <Guide
+      guide={page.guide}
+      sommaire={sommaire(rendu.headings)}
+      minutes={minutes(page.guide)}
+      lies={guidesLies(page.guide, tous).map((guide) => ({ guide, minutes: minutes(guide) }))}
+    >
+      <Contenu />
+    </Guide>
+  )
+}
+{
+  page.type === 'categorie' && (
+    <Base
+      titre={page.categorie.titre}
+      description={page.categorie.description}
+      chemin={`/guides/${page.categorie.slug}/`}
+    >
+      <DonneesStructurees
+        slot="tete"
+        donnees={graphe([
+          filAriane([
+            { nom: 'Accueil', chemin: '/' },
+            { nom: 'Guides', chemin: '/guides/' },
+            { nom: page.categorie.nom, chemin: `/guides/${page.categorie.slug}/` },
+          ]),
+        ])}
+      />
+      <section class="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
+        <p class="text-sm">
+          <a href="/guides/" class="text-encre-3 no-underline survol-texte">
+            ← Tous les guides
+          </a>
+        </p>
+        <h1 class="mt-4 max-w-3xl text-3xl font-bold tracking-tight sm:text-4xl">
+          {page.categorie.titre}
+        </h1>
+        <p class="mt-4 max-w-2xl text-lg text-encre-2">{page.categorie.description}</p>
+        {guidesDeLaCategorie.length > 0 ? (
+          <div class="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {guidesDeLaCategorie.map((guide) => (
+              <CarteGuide guide={guide} minutes={minutes(guide)} niveauTitre="h2" />
+            ))}
+          </div>
+        ) : (
+          <p class="mt-8 rounded-carte border border-bordure bg-surface p-6 text-encre-2">
+            Les premiers guides de cette catégorie arrivent bientôt.
+          </p>
+        )}
+      </section>
+    </Base>
+  )
+}

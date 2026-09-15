@@ -168,7 +168,8 @@ describe('calculerProjet — négociation du prix', () => {
     // Rendements sur le coût complet.
     expect(r.rendement.rendements.coutTotal).toBeCloseTo(147_250 + 6_000 + frais.total, 6);
     // Revente et plus-value depuis le prix retenu.
-    expect(r.revente.valeur).toBeCloseTo(147_250 * 1.015 ** 10, 6);
+    // La valorisation des travaux (moitié des 6 000 €, état inconnu) ne dépend pas du prix.
+    expect(r.revente.valeur).toBeCloseTo((147_250 + 3_000) * 1.015 ** 10, 6);
     expect(r.revente.plusValue.prixAcquisitionMajore).toBeGreaterThanOrEqual(147_250);
     // Estimation (206 733 €) et feu prix comparés au prix retenu.
     expect(r.estimation?.ecartPrix).toBeCloseTo(147_250 / 206_733 - 1, 3);

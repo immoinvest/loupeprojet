@@ -77,8 +77,9 @@ describe('multiple sur apport', () => {
     const r = calculer(projetExemple);
     expect(r.rendement.enrichissement.miseDeDepart).toBe(19_337);
     // 13 646,75 € − 417,86 € d'impôt sur les amortissements réintégrés (ordre d'imputation LMNP).
-    // Puis − 305,36 € avec le prix de l'acte dans la plus-value (1 050 € × 29,081 %).
-    expect(multipleSurApport(r)).toBeCloseTo(12_923.54 / 19_337, 4);
+    // Puis − 305,36 € avec le prix de l'acte dans la plus-value (1 050 € × 29,081 %). Puis
+    // 3 000 € de valeur ajoutée par les travaux (la moitié des 6 000 €, état inconnu) : 15 293,91 €.
+    expect(multipleSurApport(r)).toBeCloseTo(15_293.91 / 19_337, 4);
   });
 
   it('sans mise de départ : null', () => {

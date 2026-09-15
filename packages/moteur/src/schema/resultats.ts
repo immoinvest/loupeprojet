@@ -129,6 +129,12 @@ const AnneeFiscaleSchema = z.strictObject({
 export const ReventeResultatSchema = z.strictObject({
   annees: n,
   valeur: n,
+  valeurEstimee: n,
+  valeurSaisie: z.boolean(),
+  valorisationTravaux: z.strictObject({
+    montant: n,
+    methode: z.enum(['aucune', 'etat', 'repli']),
+  }),
   fraisVente: z.strictObject({ agence: n, diagnostics: n, total: n }),
   crd: n,
   ira: n,

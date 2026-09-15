@@ -2,6 +2,7 @@ import { calculerProjet } from '@loupe/moteur';
 import { useCallback, useEffect, useMemo, useState, type JSX } from 'react';
 
 import { HORIZONS, projetAHorizon, variantesRevente } from '@/analyses';
+import { useModeDocument } from '@/composants/document';
 import { Page, TitrePage } from '@/composants/mise-en-page';
 import { Carte, Ligne, Pastille, TitreCarte } from '@/composants/ui';
 import { ValeurHypothese } from '@/composants/ValeurHypothese';
@@ -10,7 +11,9 @@ import { euros, eurosSignes, pourcentage } from '@/formatage/nombres';
 import { appliquerSaisie, descripteurParChemin } from '@/hypotheses';
 import { useProjets } from '@/stockage/ProjetsContext';
 import { manquesBloquants } from '@/textes/manques';
+import { PRECISION_VALORISATION, TEXTES_PRIX_VENTE, aidePrixVente } from '@/textes/revente';
 
+import { useSaisieHypotheses } from './hypotheses/GrilleHypotheses';
 import { AnalyseIncomplete } from './projet/AnalyseIncomplete';
 import { BandeauHorizons, CarteHorizon } from './revente/Horizon';
 
@@ -22,6 +25,8 @@ export const DELAI_ENREGISTREMENT_MS = 150;
 export function Revente(): JSX.Element {
   const { enregistre, resultats } = useProjetCourant();
   const { mettreAJour } = useProjets();
+  const saisie = useSaisieHypotheses();
+  const document = useModeDocument();
   const projet = enregistre.projet;
   const annees = resultats.projet.hypotheses.revente.annees;
 
@@ -77,6 +82,11 @@ export function Revente(): JSX.Element {
   const rv = r.revente;
   const pv = rv.plusValue;
   const e = r.rendement.enrichissement;
+  const valorisation = rv.valorisationTravaux;
+  const champPrixVente = {
+    ...descripteurParChemin('hypotheses.revente.prixVente'),
+    aide: aidePrixVente(rv.valeurSaisie, rv.valeurEstimee),
+  };
 
   return (
     <Page>
@@ -97,16 +107,32 @@ export function Revente(): JSX.Element {
           <div>
             <Ligne
               libelle={
-                <>
-                  Valeur estimée (
-                  <ValeurHypothese chemin="hypotheses.revente.evolutionAnnuelle">
-                    {`${pourcentage(r.projet.hypotheses.revente.evolutionAnnuelle)} par an`}
-                  </ValeurHypothese>
-                  )
-                </>
+                rv.valeurSaisie ? (
+                  TEXTES_PRIX_VENTE.saisi
+                ) : (
+                  <>
+                    {TEXTES_PRIX_VENTE.estime} (
+                    <ValeurHypothese chemin="hypotheses.revente.evolutionAnnuelle">
+                      {`${pourcentage(r.projet.hypotheses.revente.evolutionAnnuelle)} par an`}
+                    </ValeurHypothese>
+                    )
+                  </>
+                )
               }
               valeur={euros(rv.valeur)}
             />
+            {!rv.valeurSaisie && valorisation.methode !== 'aucune' && valorisation.montant > 0 && (
+              <Ligne
+                libelle={
+                  <>
+                    dont valeur ajoutée par les{' '}
+                    <ValeurHypothese chemin="hypotheses.achat.travaux">travaux</ValeurHypothese> (
+                    {PRECISION_VALORISATION[valorisation.methode]}), au prix d'aujourd'hui
+                  </>
+                }
+                valeur={eurosSignes(valorisation.montant)}
+              />
+            )}
             <Ligne
               libelle={
                 <ValeurHypothese chemin="hypotheses.revente.fraisAgenceTaux">
@@ -120,6 +146,22 @@ export function Revente(): JSX.Element {
             <Ligne libelle="Impôt sur la plus-value" valeur={eurosSignes(-pv.impotTotal)} />
             <Ligne libelle="Ce qu'il vous reste en poche" valeur={euros(rv.cashNetVendeur)} fort />
           </div>
+          {!document && (
+            <div className="flex flex-col gap-1">
+              {saisie.rendre(champPrixVente)}
+              {rv.valeurSaisie && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    saisie.changer(champPrixVente, '');
+                  }}
+                  className="inline-flex min-h-11 items-center gap-1.5 self-start px-2 text-[15px] font-bold text-accent survol-texte"
+                >
+                  {TEXTES_PRIX_VENTE.revenir}
+                </button>
+              )}
+            </div>
+          )}
         </Carte>
         <Carte>
           <TitreCarte>Ce que ça vous aura rapporté</TitreCarte>
