@@ -32,7 +32,7 @@ describe('tranche d’imposition supposée', () => {
     render(<AppEnMemoire chemin={`/projets/${id}/fiscalite`} />);
     await screen.findByRole('heading', { name: /Combien d'impôts, selon le régime/ });
     expect(screen.getByRole('heading', { name: "Votre tranche d'imposition" })).toBeInTheDocument();
-    expect(n(screen.getByText(/26 928 €/).textContent)).toContain('26 928 €');
+    expect(n(screen.getAllByText(/26 928 €/)[0]?.textContent)).toContain('26 928 €');
 
     await utilisateur.selectOptions(screen.getByLabelText(/Tranche d'imposition/), '0.41');
 
@@ -42,7 +42,7 @@ describe('tranche d’imposition supposée', () => {
     expect(
       screen.queryByRole('heading', { name: "Votre tranche d'imposition" }),
     ).not.toBeInTheDocument();
-    expect(screen.queryByText(/26 928 €/)).not.toBeInTheDocument();
+    expect(screen.queryAllByText(/26 928 €/)).toHaveLength(0);
   });
 
   it('Rapport : la carte des impôts mentionne la tranche supposée', async () => {

@@ -2,8 +2,10 @@ import { fireEvent, render, screen, waitFor, within } from '@testing-library/rea
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
+import { projetExemple } from '@loupe/moteur';
+
 import { AppEnMemoire } from '@/App';
-import { lireProjets } from '@/stockage/projets';
+import { creerProjet, ecrireProjets, lireProjets } from '@/stockage/projets';
 
 const n = (s: string | null | undefined): string => (s ?? '').replace(/\s/g, ' ');
 
@@ -24,13 +26,60 @@ describe('Fiscalité', () => {
     expect(screen.getByRole('heading', { name: 'Nu micro-foncier' })).toBeInTheDocument();
     expect(screen.getByText('retenu')).toBeInTheDocument();
     expect(screen.getByText('meilleur cash-flow')).toBeInTheDocument();
-    expect(n(screen.getByText(/26 928 €/).textContent)).toContain('26 928 €');
-    expect(screen.getByRole('img', { name: /0 années imposées sur 10/ })).toBeInTheDocument();
+    expect(screen.getByText('le plus avantageux au total')).toBeInTheDocument();
+    expect(n(screen.getAllByText(/26 928 €/)[0]?.textContent)).toContain('26 928 €');
+    expect(
+      screen.getByRole('img', { name: /0 années imposées sur 10, sans impôt à la revente/ }),
+    ).toBeInTheDocument();
     expect(screen.getByText(/Pas avant l'année 11/)).toBeInTheDocument();
     expect(screen.getByText(/taux à confirmer/)).toBeInTheDocument();
-    const table = screen.getByRole('table');
-    expect(within(table).getAllByRole('row')).toHaveLength(11);
+    const [revente, annuel] = screen.getAllByRole('table');
+    expect(within(revente!).getAllByRole('row')).toHaveLength(12);
+    expect(within(revente!).getAllByRole('columnheader')).toHaveLength(5);
+    expect(within(annuel!).getAllByRole('row')).toHaveLength(11);
     expect(screen.getAllByRole('button', { name: 'Retenir ce régime' })).toHaveLength(3);
+  });
+
+  it('chaque régime dit son impôt pendant la location, à la revente et au total', async () => {
+    // L'exemple revalorisé de 3 % par an : une plus-value existe à 10 ans, et les amortissements
+    // réintégrés du meublé au réel l'augmentent.
+    const p = creerProjet({
+      nom: 'T3 revalorisé',
+      genererId: () => 'revalorise',
+      source: {
+        ...projetExemple,
+        hypotheses: {
+          ...projetExemple.hypotheses,
+          revente: { ...projetExemple.hypotheses.revente, evolutionAnnuelle: 0.03 },
+        },
+      },
+    });
+    ecrireProjets(window.localStorage, [p]);
+    render(<AppEnMemoire chemin={`/projets/${p.id}/fiscalite`} />);
+    await screen.findByRole('heading', { name: /Combien d'impôts/ });
+    const carteReel = screen.getByRole('heading', { name: 'Meublé au réel' }).closest('section')!;
+    const carteMicro = screen
+      .getByRole('heading', { name: 'Meublé micro-BIC' })
+      .closest('section')!;
+    for (const carte of [carteReel, carteMicro]) {
+      expect(within(carte).getByText('Pendant 10 ans')).toBeInTheDocument();
+      expect(within(carte).getByText('À la revente')).toBeInTheDocument();
+      expect(within(carte).getByText('Impôt total')).toBeInTheDocument();
+      expect(within(carte).getByText(/Ce qu'il vous reste au total/)).toBeInTheDocument();
+    }
+    // Le meublé au réel paie à la revente l'impôt de ses amortissements réintégrés ; le micro-BIC non.
+    expect(within(carteReel).getByText(/dus aux amortissements réintégrés/)).toBeInTheDocument();
+    expect(n(within(carteReel).getByText(/s'ajoutent à la revente/).textContent)).toContain(
+      'résidence services',
+    );
+    expect(within(carteMicro).queryByText(/dus aux amortissements réintégrés/)).toBeNull();
+    expect(
+      screen.getByRole('heading', { name: 'Pendant la location et à la revente' }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: "Changer l'horizon" })).toHaveAttribute(
+      'href',
+      expect.stringMatching(/\/projets\/[^/]+\/revente$/),
+    );
   });
 
   it('« Retenir ce régime » change le régime du projet', async () => {
@@ -47,7 +96,9 @@ describe('Fiscalité', () => {
       'utilisateur',
     );
     expect(screen.getByText(/Premier impôt l'année 1/)).toBeInTheDocument();
-    expect(screen.getByRole('img', { name: /10 années imposées sur 10/ })).toBeInTheDocument();
+    expect(
+      screen.getByRole('img', { name: /10 années imposées sur 10, sans impôt à la revente/ }),
+    ).toBeInTheDocument();
   });
 });
 
