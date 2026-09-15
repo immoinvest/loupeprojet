@@ -1,11 +1,11 @@
 import { jourLocal, periodeDe, resumeDuMois, type EtatGestion } from '@loupe/gestion';
-import { Fragment, type JSX } from 'react';
+import type { JSX } from 'react';
 import { Link } from 'react-router';
 
 import { Page, TitrePage } from '@/composants/mise-en-page';
 import { Carte, TitreCarte } from '@/composants/ui';
 import { dateEnLettres, moisEnLettres, montant } from '@/gestion/format';
-import { CHEMIN_GERER, lienNouveauLocataire } from '@/gestion/parcours';
+import { actionsAFaire } from '@/gestion/a-faire';
 import {
   avecMajuscule,
   entreesAVenir,
@@ -14,6 +14,7 @@ import {
 } from '@/textes/gerer-ecrans';
 import { TEXTES_LOYERS } from '@/textes/gerer-loyers';
 
+import { AFaire } from './AFaire';
 import { ListeDeLoyers } from './LigneDeLoyer';
 import { LocationCreee } from './LocationCreee';
 import { RetoursLoyer } from './RetoursLoyer';
@@ -25,10 +26,9 @@ export function LoyersDuMois({ donnees }: { donnees: EtatGestion }): JSX.Element
   const actions = useActionsLoyer(aujourdhui);
   const periode = periodeDe(aujourdhui);
   const resume = resumeDuMois(donnees, periode, aujourdhui);
-  // Un bien est vacant sans location en cours ni à venir ; une entrée le mois prochain n'est pas une vacance.
+  // Retards, biens vacants, e-mails manquants : déduits des données, jamais stockés (ADR-G22).
+  const aFaire = actionsAFaire(donnees, aujourdhui);
   const enCours = donnees.locations.filter((l) => l.fin === undefined || l.fin >= aujourdhui);
-  const loues = new Set(enCours.map((l) => l.bienId));
-  const vacants = donnees.biens.filter((b) => !loues.has(b.id));
   const aVenir = enCours
     .filter((l) => periodeDe(l.debut) > periode)
     .map((l) => ({
@@ -76,6 +76,7 @@ export function LoyersDuMois({ donnees }: { donnees: EtatGestion }): JSX.Element
 
       <LocationCreee />
       <RetoursLoyer actions={actions} bailleur={donnees.bailleur} />
+      <AFaire actions={aFaire} />
 
       {resume.lignes.length > 0 && (
         <Carte>
@@ -95,20 +96,6 @@ export function LoyersDuMois({ donnees }: { donnees: EtatGestion }): JSX.Element
         </Carte>
       )}
       {aVenir.length > 0 && <p className="m-0 text-sm text-encre-3">{entreesAVenir(aVenir)}</p>}
-      {vacants.length > 0 && (
-        // Chaque bien vacant ouvre « Nouveau locataire » avec ce bien, puis revient ici.
-        <p className="m-0 text-sm text-encre-3">
-          {T.sansLocataire}{' '}
-          {vacants.map((bien, i) => (
-            <Fragment key={bien.id}>
-              {i > 0 && ', '}
-              <Link to={lienNouveauLocataire({ bienId: bien.id, retour: CHEMIN_GERER })}>
-                {bien.nom}
-              </Link>
-            </Fragment>
-          ))}
-        </p>
-      )}
     </Page>
   );
 }

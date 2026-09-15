@@ -115,7 +115,7 @@ describe('porte ouverte par le statut « Acheté »', () => {
     expect(
       screen.getByText('Entrée à venir : T3 · 65 m² · Marseille 5e le 1er octobre 2026'),
     ).toBeInTheDocument();
-    expect(screen.queryByText(/Sans locataire/)).toBeNull();
+    expect(screen.queryByRole('link', { name: /^Louer / })).toBeNull();
     const [bien] = gestion.donnees().biens;
     expect(bien).toMatchObject({
       nom: 'T3 · 65 m² · Marseille 5e',
@@ -150,10 +150,14 @@ describe('porte ouverte par le statut « Acheté »', () => {
     const gestion = clientGestionMemoire();
     monter(`/gerer/pret/${id}`, gestion);
     await utilisateur.click(await screen.findByRole('button', { name: TEXTES_PRET.pasEncoreLoue }));
-    // Le nom du bien vacant est un lien vers sa fiche : le texte se lit sur tout le paragraphe.
-    expect(await screen.findByText(/^Sans locataire/, {}, { timeout: 10_000 })).toHaveTextContent(
-      'Sans locataire : T3 · 65 m² · Marseille 5e',
-    );
+    // Le bien vacant apparaît dans « À faire », prêt à louer.
+    expect(
+      await screen.findByRole(
+        'link',
+        { name: 'Louer T3 · 65 m² · Marseille 5e' },
+        { timeout: 10_000 },
+      ),
+    ).toBeInTheDocument();
     expect(gestion.donnees()).toMatchObject({ locataires: [], locations: [] });
   });
 
@@ -196,9 +200,13 @@ describe('porte ouverte par le statut « Acheté »', () => {
     expect(gestion.appels).not.toContain('creer');
 
     await utilisateur.click(screen.getByRole('button', { name: TEXTES_PRET.pasEncoreLoue }));
-    expect(await screen.findByText(/^Sans locataire/, {}, { timeout: 10_000 })).toHaveTextContent(
-      'Sans locataire : T3 · 65 m² · Marseille 5e',
-    );
+    expect(
+      await screen.findByRole(
+        'link',
+        { name: 'Louer T3 · 65 m² · Marseille 5e' },
+        { timeout: 10_000 },
+      ),
+    ).toBeInTheDocument();
     expect(gestion.donnees()).toMatchObject({ locataires: [], locations: [] });
   });
 

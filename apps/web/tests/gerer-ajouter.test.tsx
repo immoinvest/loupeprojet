@@ -136,9 +136,8 @@ describe('porte « Ajouter à la main »', () => {
         { timeout: 10_000 },
       ),
     ).toBeInTheDocument();
-    expect(screen.getByText(/^Sans locataire/)).toHaveTextContent(
-      'Sans locataire : 8 avenue du Prado',
-    );
+    // Le bien vacant apparaît dans « À faire », prêt à louer.
+    expect(screen.getByRole('link', { name: 'Louer 8 avenue du Prado' })).toBeInTheDocument();
   });
 
   it('« Plus de détails » : location vide, jour, dépôt, type de bien et surface', async () => {
