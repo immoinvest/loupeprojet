@@ -10,6 +10,7 @@ import {
 } from '@loupe/gestion';
 
 import { ErreurGestion, type Emission } from './depot';
+import { estTableEnvoisAbsente } from './envois/depot';
 import { lignes, lireChangements } from './lecture';
 import { versBailleur, versDocumentComplet, versPaiement, type Lier } from './lignes';
 
@@ -22,6 +23,8 @@ export interface Outils {
 
 const SQL = {
   bailleur: 'select nom, adresse from gestion_bailleur where userId = ?',
+  // L'identité propre au bien (SCI…), migration 0009 ; sans elle, celle du compte (ADR-G46).
+  bailleurDuBien: 'select nom, adresse from gestion_bien_bailleur where userId = ? and bienId = ?',
   enregistrerBailleur:
     'insert into gestion_bailleur (userId, nom, adresse, modifieLe) values (?, ?, ?, ?) on conflict (userId) do update set nom = excluded.nom, adresse = excluded.adresse, modifieLe = excluded.modifieLe',
   documentParCle: 'select * from gestion_document where userId = ? and cle = ?',
@@ -30,7 +33,7 @@ const SQL = {
   paiementDuCompte: 'select locationId from gestion_paiement where userId = ? and id = ?',
   // Une seule lecture : la location du compte avec son bien et son locataire en titre (clés étrangères).
   occupation:
-    'select l.id, l.libelle, l.debut, l.fin, l.jourLoyer, l.loyerHorsCharges, l.charges, l.apl, b.nom as bienNom, b.adresse as bienAdresse, t.prenom, t.nom as locataireNom from gestion_location l join gestion_bien b on b.id = l.bienId join gestion_locataire t on t.id = l.locataireId where l.userId = ? and l.id = ?',
+    'select l.id, l.bienId, l.libelle, l.debut, l.fin, l.jourLoyer, l.loyerHorsCharges, l.charges, l.apl, b.nom as bienNom, b.adresse as bienAdresse, t.prenom, t.nom as locataireNom from gestion_location l join gestion_bien b on b.id = l.bienId join gestion_locataire t on t.id = l.locataireId where l.userId = ? and l.id = ?',
   colocataires:
     'select t.prenom, t.nom from gestion_colocataire c join gestion_locataire t on t.id = c.locataireId where c.userId = ? and c.locationId = ? order by c.ordre',
   paiementsDeLaLocation: 'select * from gestion_paiement where userId = ? and locationId = ?',
@@ -58,15 +61,20 @@ async function entreesDe(
   const { lier, maintenant } = outils;
   const [occupation] = await lignes(lier, SQL.occupation, userId, locationId);
   if (occupation === undefined) throw new ErreurGestion('INTROUVABLE');
-  const [bailleur, paiements, colocataires, changements] = await Promise.all([
+  const [bailleur, paiements, colocataires, changements, bailleurDuBien] = await Promise.all([
     lignes(lier, SQL.bailleur, userId),
     lignes(lier, SQL.paiementsDeLaLocation, userId, locationId),
     lignes(lier, SQL.colocataires, userId, locationId),
     lireChangements(lier, userId, locationId),
+    // Sans la migration 0009, les quittances restent émises avec l'identité du compte.
+    lignes(lier, SQL.bailleurDuBien, userId, String(occupation.bienId)).catch((erreur: unknown) => {
+      if (estTableEnvoisAbsente(erreur)) return [];
+      throw erreur;
+    }),
   ]);
   const { fin, libelle } = occupation;
   return {
-    bailleur: versBailleur(bailleur[0]),
+    bailleur: versBailleur(bailleurDuBien[0] ?? bailleur[0]),
     bien: { nom: String(occupation.bienNom), adresse: String(occupation.bienAdresse) },
     locataires: [
       { prenom: String(occupation.prenom), nom: String(occupation.locataireNom) },

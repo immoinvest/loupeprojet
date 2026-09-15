@@ -27,7 +27,12 @@ export const REGLES_ENVOIS = {
   intervalleInvitationHeures: 24,
 } as const;
 
-/** Art. 21 : « Avec l'accord exprès du locataire, le bailleur peut procéder à la transmission dématérialisée de la quittance. » */
+/**
+ * Art. 21 (version en vigueur depuis le 27/03/2014, vérifiée sur Légifrance le 15/09/2026) : « Avec
+ * l'accord exprès du locataire, le bailleur peut procéder à la transmission dématérialisée de la
+ * quittance. » et « Aucuns frais liés à la gestion de l'avis d'échéance ou de la quittance ne peuvent
+ * être facturés au locataire. »
+ */
 export const ENVOI_DEMATERIALISE = {
   source: 'Loi n° 89-462 du 6 juillet 1989, article 21',
   aConfirmer: false,
@@ -187,6 +192,8 @@ export type AccordLocataire = z.infer<typeof AccordLocataireSchema>;
 
 export const EtatEnvoisSchema = z.object({
   mode: z.enum(MODES_ENVOI),
+  /** Les liens d'accord peuvent partir (envoyeur et clé de signature présents). */
+  invitations: z.boolean(),
   accords: z.array(AccordLocataireSchema),
   envois: z.array(EnvoiSchema),
   contacts: z.array(z.object({ locataireId: IdentifiantSchema, telephone: TelephoneSchema })),
@@ -212,6 +219,6 @@ export type ReponseAccord = z.infer<typeof ReponseAccordSchema>;
 export const LectureAccordSchema = z.object({
   prenom: z.string().min(1).max(80),
   bailleur: z.string().min(1).max(120).nullable(),
-  logement: z.string().min(1).max(200).nullable(),
+  logement: z.string().min(1).max(400).nullable(),
 });
 export type LectureAccord = z.infer<typeof LectureAccordSchema>;

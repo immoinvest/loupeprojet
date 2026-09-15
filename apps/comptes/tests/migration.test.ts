@@ -6,6 +6,7 @@ import {
   compilerMigration,
   contenuMigration,
   lireMigration,
+  lireMigrationNommee,
   MIGRATIONS,
 } from '../scripts/migration';
 import { banc } from './aide';
@@ -119,6 +120,7 @@ describe('migration 0002 : gestion locative', () => {
       '0004_projets.sql',
       '0005_gestion_changements.sql',
       '0006_partage.sql',
+      '0009_gestion_envois.sql',
     ]);
   });
 
@@ -220,12 +222,17 @@ describe('migration 0003 : paiements partiels, bailleur, documents', () => {
     appliquerMigrations(base);
     expect(noms(base, 'table')).toEqual([
       'account',
+      'gestion_accord',
       'gestion_bailleur',
       'gestion_bien',
+      'gestion_bien_bailleur',
       'gestion_changement',
       'gestion_colocataire',
       'gestion_document',
+      'gestion_envoi',
+      'gestion_jeton',
       'gestion_locataire',
+      'gestion_locataire_contact',
       'gestion_location',
       'gestion_paiement',
       'gestion_preference',
@@ -237,10 +244,16 @@ describe('migration 0003 : paiements partiels, bailleur, documents', () => {
     ]);
     expect(noms(base, 'index')).toEqual([
       'account_userId_idx',
+      'gestion_accord_userId_idx',
+      'gestion_bien_bailleur_userId_idx',
       'gestion_bien_userId_idx',
       'gestion_changement_userId_idx',
       'gestion_colocataire_userId_idx',
       'gestion_document_userId_idx',
+      'gestion_envoi_userId_idx',
+      'gestion_jeton_locataireId_idx',
+      'gestion_jeton_userId_idx',
+      'gestion_locataire_contact_userId_idx',
       'gestion_locataire_userId_idx',
       'gestion_location_bienId_idx',
       'gestion_location_userId_idx',
@@ -313,5 +326,72 @@ describe('migration 0003 : paiements partiels, bailleur, documents', () => {
     );
     base.prepare('delete from gestion_location where id = ?').run('l1');
     expect(base.prepare('select count(*) as n from gestion_changement').get()).toEqual({ n: 0 });
+  });
+
+  it('migration 0009 : additive, une trace par document et locataire, tout part avec le compte', () => {
+    const instructions = lireMigrationNommee('0009_gestion_envois.sql')
+      .toLowerCase()
+      .split('\n')
+      .filter((ligne) => ligne.trim() !== '' && !ligne.startsWith('--'));
+    // Règle « migration sans risque » : seulement des créations de tables et d'index.
+    expect(instructions.every((ligne) => /^create (table|index) "gestion_/.test(ligne))).toBe(true);
+
+    const base = baseDeG1a();
+    appliquerMigrations(
+      base,
+      MIGRATIONS.findIndex((m) => m.fichier.startsWith('0009')),
+    );
+    const avant = base.prepare('select * from gestion_paiement order by id').all();
+    appliquerMigrations(base);
+    expect(base.prepare('select * from gestion_paiement order by id').all()).toEqual(avant);
+
+    base
+      .prepare(SQL.document)
+      .run('d1', 'u1', 'quittance:l1:2026-10', 'quittance', 'Q-1', 'l1', '2026-10', '{}', H);
+    const envoi = base.prepare(
+      'insert into gestion_envoi (id, userId, documentId, locataireId, destinataire, statut, tentatives, dernierEssaiLe) values (?, ?, ?, ?, ?, ?, ?, ?)',
+    );
+    envoi.run('e1', 'u1', 'd1', 't1', 'julie@…', 'envoye', 1, H);
+    expect(() => envoi.run('e2', 'u1', 'd1', 't1', 'julie@…', 'envoye', 1, H)).toThrow(
+      /UNIQUE constraint failed/,
+    );
+    base
+      .prepare(
+        'insert into gestion_locataire_contact (locataireId, userId, telephone, modifieLe) values (?, ?, ?, ?)',
+      )
+      .run('t1', 'u1', '0612345678', H);
+    base
+      .prepare(
+        'insert into gestion_bien_bailleur (bienId, userId, type, nom, adresse, modifieLe) values (?, ?, ?, ?, ?, ?)',
+      )
+      .run('b1', 'u1', 'sci', 'SCI Lices', '3 rue Paradis', H);
+    base
+      .prepare(
+        'insert into gestion_accord (locataireId, userId, statut, emailEmpreinte, modifieLe) values (?, ?, ?, ?, ?)',
+      )
+      .run('t1', 'u1', 'en_attente', 'a'.repeat(64), H);
+    base
+      .prepare(
+        'insert into gestion_jeton (id, userId, locataireId, type, emailEmpreinte, expireLe, creeLe) values (?, ?, ?, ?, ?, ?, ?)',
+      )
+      .run('j1', 'u1', 't1', 'accord', 'a'.repeat(64), H, H);
+    expect(() =>
+      base
+        .prepare(
+          'insert into gestion_accord (locataireId, userId, statut, emailEmpreinte, modifieLe) values (?, ?, ?, ?, ?)',
+        )
+        .run('inconnu', 'u1', 'accorde', 'a'.repeat(64), H),
+    ).toThrow(/FOREIGN KEY constraint failed/);
+
+    base.prepare('delete from "user" where id = ?').run('u1');
+    for (const table of [
+      'gestion_envoi',
+      'gestion_locataire_contact',
+      'gestion_bien_bailleur',
+      'gestion_accord',
+      'gestion_jeton',
+    ]) {
+      expect(base.prepare(`select count(*) as n from ${table}`).get()).toEqual({ n: 0 });
+    }
   });
 });

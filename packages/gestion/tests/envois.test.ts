@@ -164,6 +164,7 @@ describe('schémas', () => {
     expect(
       EtatEnvoisSchema.safeParse({
         mode: 'journal',
+        invitations: true,
         accords: [{ locataireId: 'julie', statut: 'non_demande' }],
         envois: [],
         contacts: [{ locataireId: 'julie', telephone: '0612345678' }],

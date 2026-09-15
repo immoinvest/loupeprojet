@@ -8,6 +8,8 @@ import { creerApp } from '../src/app';
 import type { Envoyeur, Message } from '../src/courriel';
 import type { Dependances } from '../src/dependances';
 import { depotD1, type OptionsDepot } from '../src/gestion/depot-d1';
+import { depotEnvoisD1 } from '../src/gestion/envois/depot-d1';
+import { signatureJetons } from '../src/gestion/envois/jetons';
 import { journalMemoire } from '../src/journal';
 import { depotPartagesD1, type OptionsDepotPartages } from '../src/partage/depot-d1';
 import { depotProjetsD1, type OptionsDepotProjets } from '../src/projets/depot-d1';
@@ -98,7 +100,11 @@ export interface Banc {
   readonly ip: string;
   /** Requête sur l'origine du banc, avec en-têtes Origin, IP et cookies, corps JSON si `corps` est fourni. */
   readonly requete: (chemin: string, options?: OptionsRequete) => Promise<Response>;
+  /** Attend les tâches confiées à `waitUntil` (invitations, quittances envoyées). */
+  readonly taches: () => Promise<void>;
 }
+
+export const SECRET_JETONS_TEST = 'secret-des-liens-d-accord-du-banc-de-test-0123';
 
 /** Une application avec des doubles : base mémoire, envoyeur mémoire, journal mémoire. */
 export function banc(surcharges: Partial<Dependances> = {}, origine = ORIGINE): Banc {
@@ -113,6 +119,9 @@ export function banc(surcharges: Partial<Dependances> = {}, origine = ORIGINE): 
     gestion: depotD1(d1SurSqlite(new DatabaseSync(':memory:')).base),
     projets: depotProjetsD1(d1SurSqlite(new DatabaseSync(':memory:')).base),
     partages: depotPartagesD1(d1SurSqlite(new DatabaseSync(':memory:')).base, 'sel-de-test'),
+    envois: depotEnvoisD1(d1SurSqlite(new DatabaseSync(':memory:')).base),
+    jetons: signatureJetons(SECRET_JETONS_TEST),
+    attendre: () => Promise.resolve(),
     courriel,
     fournisseurs: {},
     origines: ORIGINES_BANC,
@@ -122,12 +131,23 @@ export function banc(surcharges: Partial<Dependances> = {}, origine = ORIGINE): 
   };
   const app = creerApp(deps);
   const cookies = jarre();
+  const enCours: Promise<unknown>[] = [];
+  const contexte = {
+    waitUntil: (promesse: Promise<unknown>) => {
+      enCours.push(promesse);
+    },
+    passThroughOnException: () => undefined,
+    props: {},
+  } as unknown as Parameters<typeof app.request>[3];
   return {
     deps,
     journal,
     courriel,
     cookies,
     ip,
+    taches: async () => {
+      while (enCours.length > 0) await Promise.all(enCours.splice(0));
+    },
     requete: async (chemin, options = {}) => {
       const headers: Record<string, string> = { 'cf-connecting-ip': ip };
       const enteteOrigine = options.origine === undefined ? origine : options.origine;
@@ -144,7 +164,7 @@ export function banc(surcharges: Partial<Dependances> = {}, origine = ORIGINE): 
         init.body = corps;
         init.method = options.method ?? 'POST';
       }
-      const reponse = await app.request(`${origine}${chemin}`, init);
+      const reponse = await app.request(`${origine}${chemin}`, init, undefined, contexte);
       cookies.absorber(reponse);
       return reponse;
     },
@@ -181,6 +201,7 @@ export function bancD1(options: OptionsBancD1 = {}): BancD1 {
       gestion: depotD1(d1.base, options.optionsDepot),
       projets: depotProjetsD1(d1.base, options.optionsProjets),
       partages: depotPartagesD1(d1.base, 'sel-de-test', options.optionsPartages),
+      envois: depotEnvoisD1(d1.base),
       ...options.surcharges,
     },
     options.origine,
