@@ -68,7 +68,7 @@ describe('Partager un projet depuis le téléphone', () => {
     expect(
       await within(boite).findByRole('button', { name: TEXTES_PARTAGE_PROJET.copie }),
     ).toBeInTheDocument();
-    expect(writeText).toHaveBeenCalledWith(expect.stringContaining('/partage#p='));
+    expect(writeText).toHaveBeenCalledWith(expect.stringContaining('/p/'));
     expect(share).not.toHaveBeenCalled();
 
     await utilisateur.click(
@@ -77,7 +77,7 @@ describe('Partager un projet depuis le téléphone', () => {
     expect(share).toHaveBeenCalledWith({
       title: 'À partager',
       text: TEXTES_PARTAGE_PROJET.message('À partager'),
-      url: expect.stringContaining('/partage#p=') as string,
+      url: expect.stringContaining('/p/') as string,
     });
     expect(await within(boite).findByRole('status')).toHaveTextContent(
       TEXTES_PARTAGE_PROJET.partage,
@@ -94,7 +94,7 @@ describe('Partager un projet depuis le téléphone', () => {
     await utilisateur.click(screen.getByRole('button', { name: TEXTES_PARTAGE_PROJET.partager }));
     const boite = await screen.findByRole('dialog', { name: TEXTES_PARTAGE_PROJET.titre });
     await utilisateur.click(
-      within(boite).getByRole('button', { name: TEXTES_PARTAGE_PROJET.envoyer }),
+      await within(boite).findByRole('button', { name: TEXTES_PARTAGE_PROJET.envoyer }),
     );
     expect(share).toHaveBeenCalledTimes(1);
     expect(within(boite).getByRole('status')).not.toHaveTextContent(TEXTES_PARTAGE_PROJET.partage);

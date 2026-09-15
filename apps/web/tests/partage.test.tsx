@@ -1,12 +1,33 @@
 import { calculerProjet, projetExemple, questionsPourProjet } from '@loupe/moteur';
-import { render, screen, within } from '@testing-library/react';
+import { cleanup, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { AppEnMemoire } from '@/App';
-import { decoderPartage, encoderPartage, lienPartage, lireFragment } from '@/stockage/partage';
+import { liensDuProjet } from '@/stockage/liens-partage';
+import {
+  decoderPartage,
+  decoderPartageCompresse,
+  encoderPartage,
+  lienPartage,
+  lienPartageCompresse,
+  lienPartageCourt,
+  lireFragment,
+  lireFragmentPartage,
+} from '@/stockage/partage';
+import {
+  clientPartageIndisponible,
+  clientPartageMemoire,
+  type ClientPartage,
+} from '@/stockage/partage-client';
+import { usePartage } from '@/stockage/PartageContext';
 import { creerProjet, ecrireProjets, lireProjets, type ProjetEnregistre } from '@/stockage/projets';
-import { AVERTISSEMENT_PARTAGE, RAISONS_PARTAGE, TEXTES_PARTAGE_PROJET } from '@/textes/partage';
+import {
+  AVERTISSEMENT_PARTAGE,
+  RAISONS_PARTAGE,
+  RAISONS_PARTAGE_COURT,
+  TEXTES_PARTAGE_PROJET,
+} from '@/textes/partage';
 
 const DATE = '2026-09-13T10:00:00.000Z';
 
@@ -120,6 +141,45 @@ describe('encoderPartage / decoderPartage', () => {
 
   it('a une phrase pour chaque raison de refus', () => {
     expect(Object.keys(RAISONS_PARTAGE)).toEqual(['vide', 'illisible', 'invalide']);
+    expect(Object.keys(RAISONS_PARTAGE_COURT)).toEqual(['introuvable', 'indisponible']);
+  });
+});
+
+describe('liens courts et compressés', () => {
+  it('le lien court tient en une ligne', () => {
+    expect(lienPartageCourt('https://app.deklic.pro', '7fK2qA9x')).toBe(
+      'https://app.deklic.pro/p/7fK2qA9x',
+    );
+  });
+
+  it('le lien compressé est environ deux fois plus court, sans la visite, et se relit', async () => {
+    const complet = {
+      ...projetComplet(),
+      visite: { faite: false, reponses: { DOC_TITRE_PLAN: { etat: 'ok' as const } } },
+    };
+    const long = lienPartage('https://loupe.app', complet);
+    const compresse = await lienPartageCompresse('https://loupe.app', complet);
+    expect(compresse.startsWith('https://loupe.app/partage#z=')).toBe(true);
+    expect(compresse.length).toBeLessThan(long.length * 0.6);
+    const fragment = lireFragmentPartage(new URL(compresse).hash);
+    expect(fragment?.format).toBe('compresse');
+    const retour = await decoderPartageCompresse(fragment?.texte ?? '');
+    expect(retour.ok).toBe(true);
+    if (retour.ok) {
+      expect(retour.enregistre).not.toHaveProperty('visite');
+      expect(retour.enregistre.projet).toEqual(complet.projet);
+    }
+  });
+
+  it('refuse un fragment compressé vide, abîmé ou hors schéma', async () => {
+    expect(await decoderPartageCompresse(' ')).toEqual({ ok: false, raison: 'vide' });
+    expect(await decoderPartageCompresse('%%%')).toEqual({ ok: false, raison: 'illisible' });
+    const horsSchema = lireFragmentPartage(
+      new URL(await lienPartageCompresse('https://x', projetComplet())).hash,
+    );
+    expect(horsSchema?.texte).toBeDefined();
+    expect(lireFragmentPartage('#p=a&z=b')).toEqual({ format: 'complet', texte: 'a' });
+    expect(lireFragmentPartage('#autre=1')).toBeNull();
   });
 });
 
@@ -210,6 +270,51 @@ describe('Page /partage', () => {
     expect(await screen.findByText(RAISONS_PARTAGE.invalide)).toBeInTheDocument();
     expect(lireProjets(window.localStorage)).toHaveLength(1);
   });
+
+  it('ouvre un lien compressé #z= ; abîmé, il est expliqué', async () => {
+    const partage = creerProjet({ nom: 'Compressé', genererId: () => 'z', maintenant: () => DATE });
+    const lien = await lienPartageCompresse('http://localhost', partage);
+    render(<AppEnMemoire chemin={`/partage${new URL(lien).hash}`} />);
+    expect(await screen.findByText('Projet partagé')).toBeInTheDocument();
+    expect(screen.getAllByText('Compressé').length).toBeGreaterThan(0);
+
+    render(<AppEnMemoire chemin="/partage#z=%%%" />);
+    expect(await screen.findByText(RAISONS_PARTAGE.illisible)).toBeInTheDocument();
+  });
+});
+
+describe('Page /p/:id', () => {
+  it('lit le lien court et propose d’ajouter le projet', async () => {
+    const client = clientPartageMemoire({ genererId: () => '7fK2qA9x' });
+    await client.creer(creerProjet({ nom: 'Court', genererId: () => 'e', maintenant: () => DATE }));
+    const utilisateur = userEvent.setup();
+    render(<AppEnMemoire chemin="/p/7fK2qA9x" partage={client} />);
+    expect(screen.getByText(TEXTES_PARTAGE_PROJET.chargement)).toBeInTheDocument();
+    expect(await screen.findByText('Projet partagé')).toBeInTheDocument();
+    await utilisateur.click(screen.getByRole('button', { name: 'Ajouter à mes projets' }));
+    expect(lireProjets(window.localStorage)[0]?.nom).toBe('Court');
+  });
+
+  it('lien expiré ou arrêté, puis API injoignable : chacun sa phrase', async () => {
+    render(<AppEnMemoire chemin="/p/ZZZZZZZZ" />);
+    expect(await screen.findByText(RAISONS_PARTAGE_COURT.introuvable)).toBeInTheDocument();
+    cleanup();
+    render(<AppEnMemoire chemin="/p/ZZZZZZZZ" partage={clientPartageIndisponible} />);
+    expect(await screen.findByText(RAISONS_PARTAGE_COURT.indisponible)).toBeInTheDocument();
+  });
+
+  it('usePartage exige son fournisseur', () => {
+    function SansFournisseur(): null {
+      usePartage();
+      return null;
+    }
+    vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    expect(() => render(<SansFournisseur />)).toThrow(/PartageProvider/);
+  });
+});
+
+afterEach(() => {
+  vi.restoreAllMocks();
 });
 
 describe('Bouton Partager', () => {
@@ -223,24 +328,85 @@ describe('Bouton Partager', () => {
     return p.id;
   }
 
-  it('copie le lien dans le presse-papiers et le dit', async () => {
+  it('crée un lien court, le copie, et redonne le même tant que le projet ne change pas', async () => {
     const id = amorcer();
+    const client = clientPartageMemoire({ genererId: () => '7fK2qA9x' });
+    const creer = vi.spyOn(client, 'creer');
     const utilisateur = userEvent.setup();
-    render(<AppEnMemoire chemin={`/projets/${id}`} />);
+    render(<AppEnMemoire chemin={`/projets/${id}`} partage={client} />);
     await screen.findByRole('heading', { name: /Le prix est bon/ });
 
-    // L'infobulle prévient : le lien porte des données personnelles.
-    expect(screen.getByRole('button', { name: 'Partager' })).toHaveAttribute(
-      'title',
-      AVERTISSEMENT_PARTAGE,
-    );
+    // L'infobulle prévient : le lien donne des données personnelles.
+    const bouton = screen.getByRole('button', { name: 'Partager' });
+    expect(bouton).toHaveAttribute('title', AVERTISSEMENT_PARTAGE);
     expect(AVERTISSEMENT_PARTAGE).toContain("apport et tranche d'imposition");
-    await utilisateur.click(screen.getByRole('button', { name: 'Partager' }));
+    await utilisateur.click(bouton);
     expect(await screen.findByRole('button', { name: 'Lien copié' })).toBeInTheDocument();
     const lien = await navigator.clipboard.readText();
-    expect(lien).toContain('/partage#p=');
-    const retour = decoderPartage(lireFragment(new URL(lien).hash) ?? '');
+    expect(new URL(lien).pathname).toBe('/p/7fK2qA9x');
+    expect(screen.getByText(TEXTES_PARTAGE_PROJET.avertissement)).toBeInTheDocument();
+    const lu = await client.lire('7fK2qA9x');
+    expect(lu.ok && lu.valeur.projet.nom).toBe('À partager');
+    expect(liensDuProjet(window.localStorage, id)).toHaveLength(1);
+
+    await utilisateur.click(screen.getByRole('button', { name: 'Fermer' }));
+    await utilisateur.click(bouton);
+    expect(await screen.findByRole('button', { name: 'Lien copié' })).toBeInTheDocument();
+    expect(creer).toHaveBeenCalledOnce();
+  });
+
+  it('sans lien court possible, donne le lien long compressé et le dit', async () => {
+    const id = amorcer();
+    const utilisateur = userEvent.setup();
+    render(<AppEnMemoire chemin={`/projets/${id}`} partage={clientPartageIndisponible} />);
+    await screen.findByRole('heading', { name: /Le prix est bon/ });
+    await utilisateur.click(screen.getByRole('button', { name: 'Partager' }));
+    expect(await screen.findByText(TEXTES_PARTAGE_PROJET.avertissementLong)).toBeInTheDocument();
+    const lien = await navigator.clipboard.readText();
+    const retour = await decoderPartageCompresse(
+      lireFragmentPartage(new URL(lien).hash)?.texte ?? '',
+    );
     expect(retour.ok && retour.enregistre.nom).toBe('À partager');
+    expect(screen.queryByRole('button', { name: TEXTES_PARTAGE_PROJET.arreter })).toBeNull();
+    // Le décodeur complet refuse ce format : les deux restent distincts.
+    expect(decoderPartage(lireFragment(new URL(lien).hash) ?? '').ok).toBe(false);
+  });
+
+  it('hors ligne, n’appelle pas l’API', async () => {
+    const id = amorcer();
+    const creer = vi.fn();
+    const client: ClientPartage = { ...clientPartageMemoire(), creer };
+    vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false);
+    const utilisateur = userEvent.setup();
+    render(<AppEnMemoire chemin={`/projets/${id}`} partage={client} />);
+    await screen.findByRole('heading', { name: /Le prix est bon/ });
+    await utilisateur.click(screen.getByRole('button', { name: 'Partager' }));
+    expect(await screen.findByText(TEXTES_PARTAGE_PROJET.avertissementLong)).toBeInTheDocument();
+    expect(creer).not.toHaveBeenCalled();
+  });
+
+  it('« Arrêter le partage » éteint le lien ; un échec est dit et le lien reste à arrêter', async () => {
+    const id = amorcer();
+    const client = clientPartageMemoire({ genererId: () => 'AAAAAAAA' });
+    const utilisateur = userEvent.setup();
+    render(<AppEnMemoire chemin={`/projets/${id}`} partage={client} />);
+    await screen.findByRole('heading', { name: /Le prix est bon/ });
+    await utilisateur.click(screen.getByRole('button', { name: 'Partager' }));
+    await screen.findByRole('button', { name: 'Lien copié' });
+
+    const supprimer = vi
+      .spyOn(client, 'supprimer')
+      .mockResolvedValueOnce({ ok: false, code: 'reseau' });
+    await utilisateur.click(screen.getByRole('button', { name: TEXTES_PARTAGE_PROJET.arreter }));
+    expect(await screen.findByText(TEXTES_PARTAGE_PROJET.arretImpossible)).toBeInTheDocument();
+    expect(liensDuProjet(window.localStorage, id)).toHaveLength(1);
+
+    supprimer.mockRestore();
+    await utilisateur.click(screen.getByRole('button', { name: TEXTES_PARTAGE_PROJET.arreter }));
+    expect(await screen.findByText(TEXTES_PARTAGE_PROJET.arrete)).toBeInTheDocument();
+    expect(await client.lire('AAAAAAAA')).toEqual({ ok: false, code: 'introuvable' });
+    expect(liensDuProjet(window.localStorage, id)).toEqual([]);
+    expect(screen.queryByRole('button', { name: TEXTES_PARTAGE_PROJET.arreter })).toBeNull();
   });
 
   it('montre le lien à copier à la main si le presse-papiers refuse', async () => {
@@ -251,9 +417,9 @@ describe('Bouton Partager', () => {
     await screen.findByRole('heading', { name: /Le prix est bon/ });
 
     await utilisateur.click(screen.getByRole('button', { name: 'Partager' }));
-    const champ = await screen.findByLabelText<HTMLInputElement>('Lien de partage');
-    expect(champ.value).toContain('/partage#p=');
     expect(await screen.findByRole('status')).toHaveTextContent(TEXTES_PARTAGE_PROJET.copieRefusee);
+    const champ = screen.getByLabelText<HTMLInputElement>('Lien de partage');
+    expect(champ.value).toContain('/p/');
     expect(screen.getByRole('button', { name: 'Copier le lien' })).toBeInTheDocument();
   });
 
