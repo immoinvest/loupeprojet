@@ -1,7 +1,8 @@
 import { obtenirRegles, prixRetenu } from '@loupe/moteur';
-import { useEffect, useState, type JSX } from 'react';
+import { useEffect, useId, useState, type JSX } from 'react';
 
 import { Page, TitrePage } from '@/composants/mise-en-page';
+import { ChampAdresse } from '@/composants/saisie/ChampAdresse';
 import { Bouton, Carte, Pastille } from '@/composants/ui';
 import { useClientWorker } from '@/coque/ClientWorker';
 import { useProjetCourant } from '@/coque/ProjetLayout';
@@ -9,7 +10,6 @@ import {
   appliquerLoyerReference,
   appliquerRisques,
   ecartAuRepere,
-  lireCleBan,
   loyerPourBien,
   marcheDepuisReference,
   memesRisques,
@@ -22,17 +22,19 @@ import {
 } from '@/enrichissement';
 import { useProjets } from '@/stockage/ProjetsContext';
 import type { AdresseBien } from '@/stockage/projets';
-import { PHRASES_ADRESSE, phrasePrecision, phraseReference } from '@/textes/adresse';
+import { PHRASES_ADRESSE, phraseReference } from '@/textes/adresse';
 
 import { CarteQuartier } from './adresse/CarteQuartier';
 import { CarteConfiance } from './adresse/Confiance';
 import { CarteDpe } from './adresse/Dpe';
 import { CarteEstimation } from './adresse/Estimation';
 import { CarteLoyer } from './adresse/Loyer';
+import { NumeroRue } from './adresse/NumeroRue';
 import { CarteRepere } from './adresse/Repere';
 import { CarteRisques } from './adresse/Risques';
 import { TableauGroupes, TableauVentes } from './adresse/Tableaux';
 import { Tendance } from './adresse/Tendance';
+import { useChoixAdresse } from './adresse/useChoixAdresse';
 
 interface DonneesAdresse {
   readonly analyse: ReponseAdresse;
@@ -53,6 +55,7 @@ export function Adresse(): JSX.Element {
   const { enregistre } = useProjetCourant();
   const { mettreAJour } = useProjets();
   const client = useClientWorker();
+  const idAdresse = useId();
   const [texte, setTexte] = useState(enregistre.adresse?.libelle ?? '');
   const [etat, setEtat] = useState<Etat>({ etape: 'saisie' });
   const { projet } = enregistre;
@@ -108,37 +111,21 @@ export function Adresse(): JSX.Element {
     });
   };
 
-  const chercher = async (): Promise<void> => {
-    setEtat({ etape: 'recherche' });
-    const lieu = await client.geocoder(texte.trim());
-    if (!lieu.ok) {
-      setEtat({ etape: 'erreur', message: PHRASES_ADRESSE.indisponible });
-      return;
-    }
-    const trouve = lieu.valeur;
-    if (trouve?.codeInsee == null) {
-      setEtat({ etape: 'erreur', message: PHRASES_ADRESSE.introuvable });
-      return;
-    }
-    const imprecision = phrasePrecision(trouve.precision);
-    if (imprecision !== null) {
-      setEtat({ etape: 'erreur', message: imprecision });
-      return;
-    }
-    const voie = lireCleBan(trouve.cleBan);
-    const adresse: AdresseBien = {
-      libelle: trouve.libelle,
-      lat: trouve.lat,
-      lon: trouve.lon,
-      codeInsee: trouve.codeInsee,
-      codeVoie: voie?.codeVoie ?? null,
-      numero: voie?.numero ?? null,
-      ...(trouve.codePostal === null ? {} : { codePostal: trouve.codePostal }),
-    };
-    setTexte(adresse.libelle);
-    mettreAJour(enregistre.id, projet, { adresse });
-    await analyser(adresse);
-  };
+  const choix = useChoixAdresse({
+    client,
+    retenir: async (adresse) => {
+      setTexte(adresse.libelle);
+      mettreAJour(enregistre.id, projet, { adresse });
+      await analyser(adresse);
+    },
+    erreur: (message) => {
+      setEtat({ etape: 'erreur', message });
+    },
+    patienter: () => {
+      setEtat({ etape: 'recherche' });
+    },
+    montrerTexte: setTexte,
+  });
 
   // Une adresse déjà enregistrée est réanalysée une seule fois, à l'ouverture de l'onglet : c'est
   // l'actualisation du projet (ventes, tendance, DPE, risques, loyer ; réponses en cache côté Worker).
@@ -185,22 +172,25 @@ export function Adresse(): JSX.Element {
           className="flex flex-wrap items-end gap-3"
           onSubmit={(e) => {
             e.preventDefault();
-            void chercher();
+            void choix.chercher(texte);
           }}
         >
           {/* Toute la largeur sur téléphone ; à partir de 640 px, le champ et le bouton côte à côte. */}
-          <label className="flex w-full min-w-0 flex-col gap-2 sm:w-auto sm:min-w-[320px] sm:flex-1">
-            <span className="text-sm font-semibold text-encre-2">Adresse du bien</span>
-            <input
-              name="adresse"
-              value={texte}
-              placeholder="144 rue de l'Olivier 13005 Marseille"
-              onChange={(e) => {
-                setTexte(e.target.value);
+          <div className="flex w-full min-w-0 flex-col gap-2 sm:w-auto sm:min-w-[320px] sm:flex-1">
+            <label htmlFor={idAdresse} className="text-sm font-semibold text-encre-2">
+              Adresse du bien
+            </label>
+            <ChampAdresse
+              id={idAdresse}
+              texte={texte}
+              onTexte={(saisi) => {
+                setTexte(saisi);
+                choix.oublierRue();
               }}
-              className="min-h-[52px] rounded-encart border border-bordure bg-surface px-4 text-[16px]"
+              contexte={{ departement: projet.bien.departement, adresse: enregistre.adresse }}
+              onChoix={choix.choisir}
             />
-          </label>
+          </div>
           <Bouton
             variante="primaire"
             type="submit"
@@ -209,9 +199,23 @@ export function Adresse(): JSX.Element {
             {etat.etape === 'recherche' ? 'Analyse en cours…' : 'Analyser'}
           </Bouton>
         </form>
+        {choix.rue !== null && (
+          <NumeroRue
+            libelle={choix.rue.libelle}
+            occupe={etat.etape === 'recherche'}
+            onNumero={(numero) => {
+              void choix.numeroDeRue(numero);
+            }}
+          />
+        )}
         {etat.etape === 'erreur' && (
           <Pastille ton="surveiller" compacte>
             {etat.message}
+          </Pastille>
+        )}
+        {etat.etape === 'resultat' && choix.note !== null && (
+          <Pastille ton="accent" compacte>
+            {choix.note}
           </Pastille>
         )}
       </Carte>

@@ -29,10 +29,36 @@ export {
 } from './loyer';
 export { appliquerRisques, memesRisques, risquesDuProjet } from './risques';
 export {
+  adresseDeRue,
+  adresseDepuisCadastre,
+  adresseDepuisSuggestion,
+  casseDeTitre,
+  cleOptionAdresse,
+  dansLeDepartement,
+  demandeNumero,
+  doitSuggerer,
+  estNumeroFiscal,
+  fautChercherAuCadastre,
+  libelleCadastre,
+  lieuDuCadastre,
+  lireNumero,
+  LONGUEUR_MIN_SUGGESTIONS,
+  MAX_OPTIONS_ADRESSE,
+  NUMERO_FISCAL_MIN,
+  numeroTape,
+  optionsAdresse,
+  type ContexteAdresse,
+  type LieuCadastre,
+  type OptionAdresse,
+} from './suggestions';
+export {
   clientHorsLigne,
   clientWorker,
   CONTRAT_ADRESSE,
+  CONTRAT_ADRESSES_DVF,
   CONTRAT_MARCHE,
+  DELAI_SUGGESTIONS_MS,
+  LIMITE_SUGGESTIONS,
   DELAI_ADRESSE_MS,
   DELAI_DONNEES_MS,
   DELAI_EXTRACTION_MS,
@@ -46,6 +72,8 @@ export {
   type Resultat,
 } from './client';
 export {
+  type AdresseDvf,
+  type SuggestionAdresse,
   type ChampsIa,
   type CodeGroupe,
   type DpeAdresse,

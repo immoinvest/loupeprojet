@@ -37,7 +37,7 @@ const ReponseGeoplateformeSchema = z.object({
 
 export type PrecisionGeocodage = 'adresse' | 'rue' | 'lieu_dit' | 'commune' | 'inconnue';
 
-const PRECISIONS: Readonly<Record<string, PrecisionGeocodage>> = {
+export const PRECISIONS: Readonly<Record<string, PrecisionGeocodage>> = {
   housenumber: 'adresse',
   street: 'rue',
   locality: 'lieu_dit',
