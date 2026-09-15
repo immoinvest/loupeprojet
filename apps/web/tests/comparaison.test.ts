@@ -47,6 +47,8 @@ describe('comparerProjets', () => {
     expect(c!.valeurs.net).toBeCloseTo(r.rendement!.rendements.net, 6);
     expect(c!.valeurs.couverture).toBeCloseTo(r.cashflow!.tauxCouverture ?? 0, 6);
     expect(c!.valeurs.impot).toBe(r.fiscalite!.regimes.lmnp_reel.impotTotal);
+    expect(c!.valeurs.impotGlobal).toBe(r.fiscalite!.regimes.lmnp_reel.impotGlobal);
+    expect(c!.valeurs.impotGlobal).toBeGreaterThanOrEqual(c!.valeurs.impot!);
     expect(c!.valeurs.horizon).toBe(10);
     expect(c!.valeurs.cashNet).toBeCloseTo(r.revente!.cashNetVendeur, 6);
     expect(c!.valeurs.tri).toBeCloseTo(r.rendement!.tri ?? 0, 6);
@@ -79,7 +81,11 @@ describe('comparerProjets', () => {
     expect(formats.risques).toBe('aucun');
     expect(n(indicateurParCode('impot').detail!(c!.resultats))).toBe('Meublé au réel · 10 ans');
     expect(indicateurParCode('loyer').detail!(c!.resultats)).toBe('meublé longue durée');
-    expect(INDICATEURS.filter((i) => i.detail === undefined).length).toBe(INDICATEURS.length - 2);
+    expect(n(indicateurParCode('impotGlobal').detail!(c!.resultats))).toBe(
+      'Meublé au réel · 10 ans',
+    );
+    expect(indicateurParCode('impotGlobal').libelle).toBe('Impôt total (exploitation + revente)');
+    expect(INDICATEURS.filter((i) => i.detail === undefined).length).toBe(INDICATEURS.length - 3);
   });
 
   it('les indicateurs sans repère de marché ou sans loyer rendent null', () => {
@@ -194,6 +200,7 @@ describe('projet sans loyer', () => {
       net: null,
       couverture: null,
       impot: null,
+      impotGlobal: null,
       horizon: 10,
       cashNet: null,
       tri: null,
@@ -220,7 +227,7 @@ describe('négociation du prix', () => {
       achat: { ...projetExemple.hypotheses.achat, negociationTaux: 0.05 },
     });
     const [c] = comparerProjets([negocie]);
-    expect(INDICATEURS).toHaveLength(15);
+    expect(INDICATEURS).toHaveLength(16);
     expect(INDICATEURS.map((i) => i.code).slice(0, 3)).toEqual(['prix', 'negociation', 'prixM2']);
     expect(c!.valeurs.prix).toBe(155_000);
     expect(c!.valeurs.negociation).toBe(0.05);
