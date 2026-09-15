@@ -55,7 +55,8 @@ export function Compteur({
   }
   const { moins, plus } = bornesAtteintes(valeur, bornes.min, bornes.max);
   return (
-    <span className="flex items-center gap-2">
+    // Jamais tassé sous 44 px : dans une colonne étroite (simulateur à 1 024 px), le suffixe passe à la ligne.
+    <span className="flex flex-wrap items-center gap-2">
       <button
         type="button"
         aria-label={nomMoins}
@@ -80,7 +81,7 @@ export function Compteur({
         onChange={(e) => {
           onChange(e.target.value.replace(/\D/g, ''));
         }}
-        className={`min-h-[44px] w-16 min-w-0 rounded-encart border bg-surface px-2 text-center text-[15px] font-semibold pointer-coarse:text-base ${
+        className={`min-h-[44px] w-16 shrink-0 rounded-encart border bg-surface px-2 text-center text-[15px] font-semibold pointer-coarse:text-base ${
           invalide ? 'border-probleme' : 'border-bordure'
         }`}
       />

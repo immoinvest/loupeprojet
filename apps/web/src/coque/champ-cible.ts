@@ -46,11 +46,12 @@ export function montrerChamp(racine: Document, chemin: string): boolean {
     );
   }
 
-  // La tuile cochée d'un choix, sinon la saisie (l'icône ⓘ du libellé la précède, les boutons − / + d'un
-  // compteur aussi), la première tuile d'un choix vide, un bouton enfin (régimes de Fiscalité).
+  // La saisie d'abord (l'icône ⓘ du libellé la précède, les boutons − / + d'un compteur et les parts de
+  // l'apport aussi), puis la tuile cochée d'un choix, la première tuile d'un choix vide, un bouton enfin
+  // (régimes de Fiscalité).
   const saisie =
-    champ.querySelector<HTMLElement>('input[type="radio"]:checked') ??
     champ.querySelector<HTMLElement>('input:not([type="radio"]), select, textarea') ??
+    champ.querySelector<HTMLElement>('input[type="radio"]:checked') ??
     champ.querySelector<HTMLElement>('input[type="radio"]:not(:disabled)') ??
     champ.querySelector<HTMLElement>('button');
   (saisie ?? champ).focus({ preventScroll: true });
