@@ -25,9 +25,22 @@ export function CarteBien(): JSX.Element | null {
     source !== undefined && surUnPortail(source.url) ? resoudreAnnonce(source.url) : null;
   if (photos.length === 0 && pastilles.length === 0) return null;
 
+  // À droite du titre plutôt que sur une ligne à lui sous les pastilles.
+  const voir =
+    lien === null ? null : (
+      <a
+        href={lien.urlCanonique}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex min-h-11 items-center text-sm font-bold text-accent no-underline survol-texte print:hidden"
+      >
+        {TEXTES_FICHE.voir(PORTAILS[lien.portail])}
+      </a>
+    );
+
   return (
     <Carte>
-      <TitreCarte>{TEXTES_FICHE.titre}</TitreCarte>
+      <TitreCarte action={voir}>{TEXTES_FICHE.titre}</TitreCarte>
       {photos.length > 0 && (
         <ul
           aria-label={TEXTES_FICHE.photos}
@@ -58,16 +71,6 @@ export function CarteBien(): JSX.Element | null {
             </Pastille>
           ))}
         </div>
-      )}
-      {lien !== null && (
-        <a
-          href={lien.urlCanonique}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex min-h-11 items-center text-sm font-bold text-accent print:hidden"
-        >
-          {TEXTES_FICHE.voir(PORTAILS[lien.portail])}
-        </a>
       )}
     </Carte>
   );
