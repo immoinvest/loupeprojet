@@ -6,7 +6,10 @@ import { AppEnMemoire } from '@/App';
 import { ESPACE_MILLIERS } from '@/composants/saisie/montant';
 import { lireProjets } from '@/stockage/projets';
 
-import { PRECISER, ouvrirGroupe, saisirApport, saisirCommune } from './aides-verifier';
+import { PRECISER, ouvrirGroupe, radioDans, saisirApport, saisirCommune } from './aides-verifier';
+
+/** Les espaces insécables des nombres formatés deviennent des espaces simples. */
+const n = (s: string | null): string => (s ?? '').replace(/\s/g, ' ');
 
 describe('Vérifier : travaux facultatifs', () => {
   it(
@@ -49,6 +52,45 @@ describe('Vérifier : travaux facultatifs', () => {
       const cree = lireProjets(window.localStorage).find((p) => p.nom === '40 m² · Lyon');
       expect(cree?.projet.hypotheses.achat.travaux).toBe(6_000);
       expect(cree?.projet.hypotheses.achat.negociationTaux).toBe(0);
+    },
+  );
+
+  it(
+    'état choisi sans montant : les travaux estimés s’affichent et le projet créé les porte',
+    { timeout: 60_000 },
+    async () => {
+      const utilisateur = userEvent.setup();
+      render(<AppEnMemoire chemin="/projets/nouveau" />);
+      await screen.findByRole('heading', { name: /Colle le lien/ });
+      await utilisateur.click(screen.getByRole('button', { name: /je saisis à la main/ }));
+
+      await utilisateur.type(screen.getByLabelText(/Prix affiché/), '120000');
+      await utilisateur.type(screen.getByLabelText(/^Surface/), '40');
+      await saisirCommune(utilisateur, '69003 Lyon');
+      await utilisateur.type(screen.getByLabelText(/Loyer visé/), '700');
+      await ouvrirGroupe(utilisateur, PRECISER);
+      await utilisateur.click(radioDans(/^État/, /rafraîchir/i));
+
+      // 40 m² × 400 €/m².
+      expect(n(screen.getByText(/^Travaux estimés/).textContent)).toBe('Travaux estimés 16 000 €');
+      expect(screen.getByText(/Hors aides, à confirmer par devis/)).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Modifier les travaux' })).toHaveAttribute(
+        'aria-expanded',
+        'false',
+      );
+
+      await utilisateur.click(screen.getByRole('button', { name: /Créer le projet/ }));
+      await screen.findByRole(
+        'heading',
+        { name: /Prix sans repère de marché/ },
+        { timeout: 10_000 },
+      );
+      const cree = lireProjets(window.localStorage).find((p) => p.nom === '40 m² · Lyon');
+      expect(cree?.projet.hypotheses.achat).toMatchObject({
+        travaux: 16_000,
+        travauxChoix: 'estime',
+      });
+      expect(cree?.projet.provenance['achat.travaux']).toBe('estime');
     },
   );
 });
