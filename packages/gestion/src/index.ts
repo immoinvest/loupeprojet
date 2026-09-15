@@ -9,6 +9,7 @@ export * from './loyers';
 export * from './mois';
 export * from './montants';
 export * from './pret';
+export * from './reel-prevu';
 export * from './regles';
 export * from './regles-argent';
 export * from './schemas';
