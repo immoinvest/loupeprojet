@@ -19,7 +19,8 @@ export function elementBulle(fiche: FicheVente, onVoirTableau: (() => void) | nu
     valeur.textContent = ligne.valeur;
     lignes.append(terme, valeur);
   }
-  racine.append(titre, lignes);
+  racine.append(titre);
+  // Juste sous le titre : le bouton reste à portée même quand la fiche défile dans une petite carte (téléphone).
   if (onVoirTableau !== null) {
     const bouton = document.createElement('button');
     bouton.type = 'button';
@@ -28,5 +29,6 @@ export function elementBulle(fiche: FicheVente, onVoirTableau: (() => void) | nu
     bouton.addEventListener('click', onVoirTableau);
     racine.append(bouton);
   }
+  racine.append(lignes);
   return racine;
 }

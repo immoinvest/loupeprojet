@@ -63,6 +63,8 @@ export default function CarteVentes(props: ProprietesCarteVentes): JSX.Element {
   const positions = useRef<ReadonlyMap<string, L.LatLng>>(new Map());
   const groupeOuvert = useRef<string | null>(null);
   const fermetureProgrammee = useRef(false);
+  /** Vente dont la bulle affiche la fiche. */
+  const contenuBulle = useRef<PointColore | null>(null);
   const dernierCentrage = useRef(centrage);
   const [redessin, setRedessin] = useState(0);
   // Les rappels les plus récents, lus par les écouteurs Leaflet posés une seule fois.
@@ -206,13 +208,22 @@ export default function CarteVentes(props: ProprietesCarteVentes): JSX.Element {
       dernierCentrage.current = centrage;
       carte.setView(position, Math.max(carte.getZoom(), ZOOM_CENTRAGE));
     }
-    const voirTableau =
-      point.vente === null
-        ? null
-        : () => {
-            rappels.current.onVoirTableau(point.cle);
-          };
-    bulle.setLatLng(position).setContent(elementBulle(ficheVente(point), voirTableau));
+    bulle.setLatLng(position);
+    // Le contenu n'est reconstruit que pour une autre vente : un zoom ne fait perdre ni le focus ni un clic en cours.
+    if (!carte.hasLayer(bulle) || contenuBulle.current !== point) {
+      contenuBulle.current = point;
+      const voirTableau =
+        point.vente === null
+          ? null
+          : () => {
+              rappels.current.onVoirTableau(point.cle);
+            };
+      // La fiche tient dans la carte, même petite (280 px au téléphone) : au-delà, elle défile.
+      const taille = carte.getSize();
+      bulle.options.maxWidth = Math.min(280, Math.max(160, taille.x - 72));
+      bulle.options.maxHeight = Math.max(120, taille.y - 90);
+      bulle.setContent(elementBulle(ficheVente(point), voirTableau));
+    }
     if (!carte.hasLayer(bulle)) bulle.openOn(carte);
   }, [points, selection, centrage, redessin, lat, lon]);
 
