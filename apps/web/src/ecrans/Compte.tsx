@@ -13,6 +13,7 @@ import { alerteSynchro } from '@/textes/synchro';
 
 import { MesDonneesGestion } from './compte/MesDonneesGestion';
 import { MonMenu } from './compte/MonMenu';
+import { SurVosAppareils } from './compte/SurVosAppareils';
 import { CLASSE_SAISIE } from './connexion/styles';
 
 interface Message {
@@ -22,7 +23,7 @@ interface Message {
 
 const ALLER_A_LA_CONNEXION = '/connexion?retour=/compte';
 
-/** La page « Mon compte » : profil, projets, menu, déconnexion, suppression du compte. */
+/** La page « Mon compte » : profil, projets, appareils, menu, déconnexion, suppression du compte. */
 export function Compte(): JSX.Element {
   const compte = useCompte();
   const alerte = alerteSynchro(useSynchro().statut);
@@ -154,6 +155,8 @@ export function Compte(): JSX.Element {
         <p className="m-0 text-sm text-encre-2">{T.projetsTexte}</p>
         {alerte !== null && <p className="m-0 text-sm font-semibold text-encre-2">{alerte}</p>}
       </Carte>
+
+      <SurVosAppareils />
 
       <MonMenu />
 

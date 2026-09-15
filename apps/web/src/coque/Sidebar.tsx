@@ -1,14 +1,12 @@
-import { Calculator, Download, House, Puzzle, X } from 'lucide-react';
+import { Calculator, House, X } from 'lucide-react';
 import { useEffect, useRef, type JSX } from 'react';
 import { NavLink } from 'react-router';
 
 import { useGestion } from '@/gestion/GestionContext';
 import { LogotypeDeklic } from '@/marque/Logo';
-import { TEXTES_INSTALLATION } from '@/textes/application';
 import { TEXTES_LOGO } from '@/textes/accueil';
 import { TEXTES_MENU } from '@/textes/gerer';
 
-import { useInstallation } from './Installation';
 import { CLASSE_ETIQUETTE, classeLien as lien } from './liens';
 import { Profil } from './Profil';
 import { SectionAnalyser } from './SectionAnalyser';
@@ -28,8 +26,8 @@ const ETAT_TIROIR = {
 
 /**
  * La barre latérale tient dans la hauteur de l'écran, en trois zones : le haut (logo, Accueil) et le bas
- * (outils, aide, installation, profil) ne bougent jamais ; entre les deux, les sections Analyser et
- * Gérer, chacune ouverte par son action de création, sont les seules à défiler quand elles sont longues.
+ * (outils, profil) ne bougent jamais ; entre les deux, les sections Analyser et Gérer, chacune
+ * ouverte par son action de création, sont les seules à défiler quand elles sont longues.
  */
 export function Sidebar({
   ouvert,
@@ -39,7 +37,6 @@ export function Sidebar({
   onFermer: () => void;
 }): JSX.Element {
   const { sections } = useGestion();
-  const installation = useInstallation();
   const fermerRef = useRef<HTMLButtonElement>(null);
 
   // À l'ouverture du tiroir, le focus entre dedans.
@@ -90,6 +87,7 @@ export function Sidebar({
         {sections.gerer && <SectionGerer />}
       </div>
 
+      {/* L'extension et l'installation de l'application sont dans Mon compte (« Deklic sur vos appareils »). */}
       <div className="flex shrink-0 flex-col gap-5">
         <nav aria-label="Outils" className="flex flex-col gap-1">
           <div className={CLASSE_ETIQUETTE}>Outils</div>
@@ -98,29 +96,7 @@ export function Sidebar({
             <span className="truncate">Simulateur de prêt</span>
           </NavLink>
         </nav>
-        <nav aria-label="Aide" className="flex flex-col gap-1">
-          <NavLink to="/extension" className={lien}>
-            <Puzzle size={18} className="shrink-0" aria-hidden="true" />
-            <span className="truncate">Extension navigateur</span>
-          </NavLink>
-        </nav>
-
-        <div className="flex flex-col gap-3">
-          {/* Seulement quand le navigateur propose l'installation (Chrome, Edge, Android). */}
-          {installation.etat === 'disponible' && (
-            <button
-              type="button"
-              onClick={() => {
-                void installation.installer();
-              }}
-              className="flex min-h-[44px] items-center justify-center gap-2 rounded-encart border border-accent-bordure bg-accent-fond px-3 text-[15px] font-semibold text-accent survol-fond-fort"
-            >
-              <Download size={18} aria-hidden="true" />
-              {TEXTES_INSTALLATION.bouton}
-            </button>
-          )}
-          <Profil />
-        </div>
+        <Profil />
       </div>
     </aside>
   );
