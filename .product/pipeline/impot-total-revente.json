@@ -33,7 +33,7 @@
     },
     "qa_tests": {
       "status": "completed",
-      "note": "moteur : 13 tests de revente par régime (92K à 10 ans calculé à la main, non-régression de la revente retenue pour les quatre régimes, revente à perte, 22 et 30 ans), schéma Zod ; web : regimes.test.ts (impôt dû aux amortissements, reprise du déficit, lignes du tableau, explication), écran Fiscalité (trois lignes, pastilles, deux tableaux, lien), Comparer (16 indicateurs) ; e2e : l'impôt à la revente suit l'horizon (0 € à 10 ans, 7 759 € à 20 ans au réel dont 6 323 € dus aux amortissements, 1 436 € en micro-BIC) ; vérifié dans le navigateur (aperçu du worktree)"
+      "note": "moteur : 13 tests de revente par régime (92K à 10 ans calculé à la main, non-régression de la revente retenue pour les quatre régimes, revente à perte, 22 et 30 ans), schéma Zod ; web : regimes.test.ts (impôt dû aux amortissements, reprise du déficit, lignes du tableau, explication), écran Fiscalité (trois lignes, pastilles, deux tableaux, lien), Comparer (16 indicateurs) ; e2e : l'impôt à la revente suit l'horizon (0 € à 10 ans, 7 759 € à 20 ans au réel dont 6 323 € dus aux amortissements, 1 436 € en micro-BIC) ; vérifié dans le navigateur (aperçu du worktree) ; gates complets verts (2 175 tests, couverture tenue, build) ; Playwright 45 parcours verts (onglets, responsive, coque, location-types, rapport)"
     },
     "security": {
       "status": "completed",
