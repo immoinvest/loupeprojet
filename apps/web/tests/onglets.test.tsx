@@ -29,7 +29,7 @@ describe('Fiscalité', () => {
     expect(screen.getByText('le plus avantageux au total')).toBeInTheDocument();
     expect(n(screen.getAllByText(/26 928 €/)[0]?.textContent)).toContain('26 928 €');
     expect(
-      // Amortissements déduits avant le déficit (CE, 15/04/2015) : réintégrés, ils créent 418 € d'impôt.
+      // Amortissements déduits avant le déficit (CE, 15/04/2015) : réintégrés, ils créent 723 € d'impôt.
       screen.getByRole('img', { name: /0 années imposées sur 10, puis impôt à la revente/ }),
     ).toBeInTheDocument();
     expect(screen.getByText(/Pas avant l'année 11/)).toBeInTheDocument();
