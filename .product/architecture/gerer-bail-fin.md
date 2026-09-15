@@ -108,6 +108,16 @@ Carte de la location « Julie part » ──clic 1──▶ formulaire : reçu l
 - [x] Journaux : chemin et code seulement.
 - [x] Fichiers ≤ 300 lignes ; calcul pur à 100 % ; web `gestion/**` à 100 %.
 
+## Écarts à l'implémentation
+
+- **Noms de fichiers du paquet** : `depot-garantie.ts` (et non `depot.ts`, déjà pris par les dépôts D1 de l'API) ; l'état et les réponses de l'API vivent dans `etat-fin-bail.ts`, à part des décomptes.
+- **Client mémoire web découpé** : `memoire.ts` (congé, charges, colocataires) et `memoire-soldes.ts` (dépôt, régularisation), pour rester sous 300 lignes, comme l'API (`depot-soldes.ts`).
+- **Un code de plus** : `DEPOT_RENDU` (409) quand on annule un décompte déjà rendu ; la fiche n'en parlait pas.
+- **Écrans** : le bloc du préavis et du changement de colocataire (`ActionsLocation`) vit **dans** la carte de la location existante ; les charges d'une location en cours ont leur propre carte (`CarteCharges`) et les locations terminées à solder une carte « Terminée » (`LocationsTerminees`), plutôt qu'un onglet à part. La liste de choix « Qui part ? » réutilise `ListeChoix` d'A1 (`ecrans/gerer/argent/ListeChoix.tsx`).
+- **Dépôt au-dessus du plafond** : refusé par les formulaires « Ajouter à la main », « Louer » et « Modifier » ; la phrase générique de chaque champ dit la règle (1 mois en vide, 2 en meublé) plutôt qu'un montant calculé, pour ne pas toucher aux trois écrans concernés.
+- **Régularisation d'une location en cours** : proposée aussi (pas seulement à la sortie), puisque l'article 23 la veut annuelle.
+- **`GestionContext.integrerLocataire`** ajouté : le colocataire qui arrive rejoint la liste des locataires sans recharger tout l'état.
+
 ## Auto-revue (checkpoints validés par Claude, sur autorisation de Pierre)
 
 - **Discovery** : les quatre objectifs de la fiche sont couverts ; les états des lieux eux-mêmes restent hors épic (specs § 5 « Won't »). La répartition des charges entre chambres est un choix Deklic dit à l'écran, faute de règle légale pour un bailleur particulier.

@@ -20,9 +20,14 @@
     "architecture": { "status": "completed", "output": ".product/architecture/gerer-bail-fin.md" },
     "implement": {
       "status": "in_progress",
-      "stories_completed": 0,
+      "stories_completed": 5,
       "stories_total": 6,
-      "commits": []
+      "commits": [
+        "60e498bd US-1 calcul pur (préavis, dépôt, régularisation, colocation, décomptes)",
+        "675e9d3b US-2 migration 0011 et /api/gestion/fin-bail",
+        "8dcc9c9b US-3 web : client, contexte, vue, saisies, plafond du dépôt",
+        "US-4 et US-5 écrans : préavis, colocataire, dépôt, charges, décompte, « À faire »"
+      ]
     },
     "qa_tests": { "status": "pending" },
     "security": { "status": "pending" },
