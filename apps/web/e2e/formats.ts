@@ -1,6 +1,6 @@
 import { expect, type Browser, type BrowserContext, type Page } from '@playwright/test';
 
-import { ECRANS_QUITTANCES_FICHES } from './ecrans-gerer';
+import { ECRANS_GERER_BIENS, ECRANS_QUITTANCES_FICHES } from './ecrans-gerer';
 import { simulerGestion } from './reponses-gestion';
 import { ADRESSE_SIMULEE, simulerWorker } from './reponses-worker';
 
@@ -272,6 +272,7 @@ export function ecransDeReference({
       },
     },
     ...ECRANS_QUITTANCES_FICHES,
+    ...ECRANS_GERER_BIENS,
     { nom: 'Ajouter un bien', chemin: '/gerer/ajouter' },
     { nom: 'Prêt à gérer', chemin: `/gerer/pret/${id}` },
     { nom: 'Mon compte', chemin: '/compte' },

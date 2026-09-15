@@ -22,6 +22,7 @@ export const MIGRATIONS: readonly { readonly fichier: string; readonly table: st
   { fichier: '0002_gestion.sql', table: 'gestion_bien' },
   { fichier: '0003_gestion_documents.sql', table: 'gestion_document' },
   { fichier: '0004_projets.sql', table: 'projet' },
+  { fichier: '0005_gestion_changements.sql', table: 'gestion_changement' },
 ];
 
 export function lireMigrationNommee(fichier: string): string {

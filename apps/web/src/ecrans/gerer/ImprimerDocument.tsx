@@ -44,6 +44,11 @@ export function ImprimerDocument(): JSX.Element {
             <span className="order-last basis-full text-sm text-encre-3 sm:order-none sm:flex-1 sm:basis-auto">
               {D.apercu}
             </span>
+            {lu.valeur.contenu.apl !== undefined && (
+              <span className="order-last basis-full text-sm font-semibold text-surveiller-texte">
+                {D.aplAConfirmer}
+              </span>
+            )}
             <Bouton
               variante="primaire"
               onClick={() => {

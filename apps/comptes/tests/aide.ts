@@ -80,7 +80,7 @@ export function jarre(): {
 }
 
 export interface OptionsRequete {
-  readonly method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
+  readonly method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
   readonly corps?: unknown;
   /** Corps envoyé tel quel (JSON illisible, corps trop gros). */
   readonly brut?: string;

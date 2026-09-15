@@ -14,7 +14,7 @@ const SQL = {
   insererLocataire:
     'insert into gestion_locataire (id, userId, prenom, nom, email, creeLe) values (?, ?, ?, ?, ?, ?)',
   insererLocation:
-    'insert into gestion_location (id, userId, bienId, locataireId, libelle, type, debut, fin, jourLoyer, loyerHorsCharges, charges, depot, creeLe) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+    'insert into gestion_location (id, userId, bienId, locataireId, libelle, type, debut, fin, jourLoyer, loyerHorsCharges, charges, apl, depot, creeLe) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
   insererColocataire:
     'insert into gestion_colocataire (locationId, locataireId, userId, ordre) values (?, ?, ?, ?)',
 } as const;
@@ -38,6 +38,7 @@ export interface OccupationAEcrire {
 /**
  * Le locataire en titre, ses colocataires et la location d'un bien, partagés par la création d'un
  * bien loué et la location d'un bien existant (ADR-G13 : les colocataires dans gestion_colocataire).
+ * La location rendue a la forme que l'état relira : aide à 0 si absente, aucun changement (ADR-G14).
  */
 export function ecrireOccupation(
   contexte: ContexteEcriture,
@@ -54,6 +55,8 @@ export function ecrireOccupation(
     locataireId: locataire.id,
     colocataireIds: colocataires.map((c) => c.id),
     ...occupation.location,
+    apl: occupation.location.apl ?? 0,
+    changements: [],
     creeLe: horodatage,
   });
   return {
@@ -77,6 +80,7 @@ export function ecrireOccupation(
         location.jourLoyer,
         location.loyerHorsCharges,
         location.charges,
+        location.apl,
         location.depot,
         location.creeLe,
       ),

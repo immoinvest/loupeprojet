@@ -7,7 +7,10 @@ import {
   type DocumentComplet,
   type EtatGestion,
   type IdentiteBailleur,
+  type Locataire,
   type LocationGeree,
+  type ModificationLocation,
+  type NouveauLocataire,
   type NouveauPaiement,
   type NouvelleOccupation,
   type OccupationCreee,
@@ -18,6 +21,7 @@ import { createContext, useContext, useEffect, useMemo, useState, type ReactNode
 
 import { useCompte, type EtatCompte } from '@/compte/CompteContext';
 
+import { retirerBien } from './memoire-modifications';
 import { ecrirePreferencesLocales, lirePreferencesLocales, sectionsAffichees } from './menu';
 import type { ClientGestion, CodeErreurGestion, ResultatGestion } from './types';
 
@@ -54,6 +58,16 @@ export interface ContexteGestion {
     bienId: string,
     occupation: NouvelleOccupation,
   ) => Promise<ResultatGestion<OccupationCreee>>;
+  readonly modifierLocation: (
+    locationId: string,
+    modification: ModificationLocation,
+  ) => Promise<ResultatGestion<LocationGeree>>;
+  /** Supprime le bien ; l'état retire aussi ses locations, paiements, documents et locataires sans location. */
+  readonly supprimerBien: (bienId: string) => Promise<ResultatGestion>;
+  readonly modifierLocataire: (
+    locataireId: string,
+    locataire: NouveauLocataire,
+  ) => Promise<ResultatGestion<Locataire>>;
 }
 
 const Contexte = createContext<ContexteGestion | null>(null);
@@ -112,6 +126,14 @@ export function GestionProvider({
       setPreferences(p);
       ecrirePreferencesLocales(store, p);
       fusionner((e) => ({ ...e, preferences: p }));
+    };
+    const remplacerLocation = (r: ResultatGestion<LocationGeree>): void => {
+      if (!r.ok) return;
+      const { valeur: location } = r;
+      fusionner((e) => ({
+        ...e,
+        locations: e.locations.map((l) => (l.id === location.id ? location : l)),
+      }));
     };
 
     return {
@@ -185,13 +207,7 @@ export function GestionProvider({
       document: (id) => client.document(id),
       terminerLocation: async (locationId, fin) => {
         const r = await client.terminerLocation(locationId, fin);
-        if (r.ok) {
-          const { valeur: terminee } = r;
-          fusionner((e) => ({
-            ...e,
-            locations: e.locations.map((l) => (l.id === terminee.id ? terminee : l)),
-          }));
-        }
+        remplacerLocation(r);
         return r;
       },
       louer: async (bienId, occupation) => {
@@ -202,6 +218,27 @@ export function GestionProvider({
             ...e,
             locataires: [...e.locataires, locataire, ...colocataires],
             locations: [...e.locations, location],
+          }));
+        }
+        return r;
+      },
+      modifierLocation: async (locationId, modification) => {
+        const r = await client.modifierLocation(locationId, modification);
+        remplacerLocation(r);
+        return r;
+      },
+      supprimerBien: async (bienId) => {
+        const r = await client.supprimerBien(bienId);
+        if (r.ok) fusionner((e) => retirerBien(e, bienId));
+        return r;
+      },
+      modifierLocataire: async (locataireId, locataire) => {
+        const r = await client.modifierLocataire(locataireId, locataire);
+        if (r.ok) {
+          const { valeur: modifie } = r;
+          fusionner((e) => ({
+            ...e,
+            locataires: e.locataires.map((l) => (l.id === modifie.id ? modifie : l)),
           }));
         }
         return r;

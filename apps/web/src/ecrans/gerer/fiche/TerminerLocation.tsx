@@ -13,6 +13,8 @@ export interface TerminerLocationProps {
   readonly occupe: boolean;
   /** Une erreur de l'API (loyers déjà reçus après la sortie, sortie avant l'entrée). */
   readonly erreur: string | null;
+  /** La location reçoit l'APL : le bailleur doit signaler le départ à la CAF (CCH, art. L823-6). */
+  readonly rappelCaf: boolean;
   readonly onEnregistrer: (fin: string) => Promise<void>;
   readonly onFermer: () => void;
 }
@@ -23,6 +25,7 @@ export function TerminerLocation({
   aujourdhui,
   occupe,
   erreur,
+  rappelCaf,
   onEnregistrer,
   onFermer,
 }: TerminerLocationProps): JSX.Element {
@@ -62,6 +65,7 @@ export function TerminerLocation({
           {F.enregistrerSortie}
         </Bouton>
       </div>
+      {rappelCaf && <p className="m-0 basis-full text-sm text-encre-2">{F.rappelCaf}</p>}
       {erreur !== null && (
         <p
           role="alert"

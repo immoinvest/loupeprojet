@@ -29,19 +29,21 @@ export interface SaisieMain {
   // « Plus de détails » : vides, ils prennent les valeurs par défaut.
   readonly jourLoyer: string;
   readonly depot: string;
+  /** L'APL versée chaque mois au bailleur par la CAF ; vide : aucune (ADR-G16). */
+  readonly apl: string;
   readonly typeBien: TypeBien;
   readonly surface: string;
 }
 
 /** Les champs d'une location, partagés par « Ajouter à la main » et « Louer ». */
-export type ChampLocation = 'loyer' | 'charges' | 'entree' | 'jourLoyer' | 'depot';
+export type ChampLocation = 'loyer' | 'charges' | 'entree' | 'jourLoyer' | 'depot' | 'apl';
 export type ChampLocataire = 'locataire' | 'email';
 export type ChampSaisie = 'adresse' | ChampLocataire | ChampLocation | 'surface';
 
 /** Ce qu'il faut lire d'une saisie pour écrire une location. */
 export type SaisieLocation = Pick<
   SaisieMain,
-  'type' | 'loyer' | 'charges' | 'entree' | 'jourLoyer' | 'depot'
+  'type' | 'loyer' | 'charges' | 'entree' | 'jourLoyer' | 'depot' | 'apl'
 >;
 
 export type ResultatSaisie =
@@ -64,6 +66,7 @@ export function saisieInitiale(aujourdhui: string): SaisieMain {
     entree: `${periodeDe(aujourdhui)}-01`,
     jourLoyer: '',
     depot: '',
+    apl: '',
     typeBien: 'appartement',
     surface: '',
   };
@@ -134,13 +137,20 @@ export function lireLocation(
   if (loyer === null) signaler('loyer');
   const loyerHorsCharges = loyer ?? 0;
   if (!JourSchema.safeParse(s.entree).success) signaler('entree');
+  const jourLoyer = lireJourLoyer(s.jourLoyer, signaler);
+  const charges = lireMontant(s.charges, 0, 'charges', signaler);
+  const depot = lireMontant(s.depot, depotParDefaut(s.type, loyerHorsCharges), 'depot', signaler);
+  const apl = lireMontant(s.apl, 0, 'apl', signaler);
+  // L'aide versée au bailleur est comprise dans le loyer charges comprises (ADR-G16).
+  if (apl > loyerHorsCharges + charges) signaler('apl');
   return {
     type: s.type,
     debut: s.entree,
-    jourLoyer: lireJourLoyer(s.jourLoyer, signaler),
+    jourLoyer,
     loyerHorsCharges,
-    charges: lireMontant(s.charges, 0, 'charges', signaler),
-    depot: lireMontant(s.depot, depotParDefaut(s.type, loyerHorsCharges), 'depot', signaler),
+    charges,
+    depot,
+    ...(apl > 0 ? { apl } : {}),
   };
 }
 
