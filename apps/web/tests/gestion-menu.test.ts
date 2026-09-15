@@ -12,7 +12,7 @@ import {
   sectionsAffichees,
 } from '@/gestion/menu';
 import type { CodeErreurGestion } from '@/gestion/types';
-import { ERREURS_GESTION, loyersEnRetard, mesProjets } from '@/textes/gerer';
+import { ERREURS_GESTION, loyersEnRetard } from '@/textes/gerer';
 
 import { ETAT_SEPTEMBRE, STOCKAGE_EN_PANNE } from './gestion-exemples';
 
@@ -88,9 +88,7 @@ describe('format des montants et des dates', () => {
 });
 
 describe('textes de Gérer', () => {
-  it('pluriels et compteurs', () => {
-    expect(mesProjets(8)).toBe('Mes projets · 8');
-    expect(mesProjets(0)).toBe('Mes projets · 0');
+  it('pluriels', () => {
     expect(loyersEnRetard(1)).toBe('1 loyer en retard');
     expect(loyersEnRetard(3)).toBe('3 loyers en retard');
   });

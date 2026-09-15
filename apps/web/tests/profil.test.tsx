@@ -41,7 +41,9 @@ describe('profil dans la barre latérale et carte de Mes projets', () => {
     const lien = await screen.findByRole('link', { name: /Camille Durand/ });
     expect(lien).toHaveAttribute('href', '/compte');
     expect(within(lien).getByText('CD')).toBeInTheDocument();
-    expect(within(lien).getByText('Mon compte · 1 projet')).toBeInTheDocument();
+    // Le nombre de projets n'est plus répété ici : il est à côté de « Mes projets ».
+    expect(within(lien).getByText('Mon compte')).toBeInTheDocument();
+    expect(within(lien).queryByText(/projet/)).toBeNull();
     expect(screen.queryByText(TEXTES_MON_COMPTE.carteTitre)).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Créer mon compte' })).not.toBeInTheDocument();
     expect(document.querySelector('img')).toBeNull();
