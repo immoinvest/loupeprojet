@@ -204,3 +204,75 @@ describe('bilanRegime', () => {
     expect(b.revente).toBe(fiscalite.regimes.lmnp_reel.revente);
   });
 });
+
+/**
+ * Prix d'acquisition de la plus-value, calculé à la main. Source : BOI-RFPI-PVI-20-10-20-20 (20/12/2013)
+ * - § 70 : « Le prix d'acquisition s'entend du prix effectivement acquitté par le cédant, tel qu'il a
+ *   été stipulé dans l'acte » ; le forfait de 7,5 % « ne comprend pas les éléments venant en majoration
+ *   du prix », il se calcule sur ce prix ; § 400 : même base pour le forfait travaux de 15 % ;
+ * - § 40 : les commissions versées aux intermédiaires dues par l'acquéreur sont des frais d'acquisition
+ *   (réels, comparés au forfait de 7,5 %).
+ *
+ * Projet 92K : 155 000 € affichés dont 9 000 € d'honoraires à la charge de l'acquéreur → acte 146 000 €,
+ * frais d'acquisition réels 11 831,56 € (notaire), sans travaux.
+ * - frais retenus = max(11 831,56 + 9 000 ; 7,5 % × 146 000 = 10 950) = 20 831,56 € ;
+ * - travaux retenus (≥ 5 ans) = max(0 ; 15 % × 146 000) = 21 900 € ;
+ * - prix majoré sans réintégration = 146 000 + 20 831,56 + 21 900 = 188 731,56 € (190 081,56 € avant) ;
+ * - LMNP réel à 5 ans, réintégration 20 786,75 € : 167 944,81 € (169 294,81 € avant ; audit : 167 945 €).
+ */
+describe('plus-value : prix d’acquisition = prix de l’acte (BOI-RFPI-PVI-20-10-20-20 § 40 et 70)', () => {
+  it('projet 92K à 10 ans : forfaits sur 146 000 €, honoraires de 9 000 € dans les frais, pour chaque régime', () => {
+    const { fiscalite } = calculer(aHorizon(projet92k, 10, 0.02));
+    for (const regime of REGIMES) {
+      const pv = fiscalite.regimes[regime].revente.plusValue;
+      expect(pv.prixAcquisition).toBe(146_000);
+      expect(pv.fraisRetenus).toBeCloseTo(20_831.56, 2);
+      expect(pv.travauxRetenus).toBeCloseTo(21_900, 6);
+      expect(pv.prixAcquisitionMajore).toBeCloseTo(188_731.56 - pv.reintegration, 2);
+    }
+  });
+
+  it('projet 92K à 5 ans en LMNP réel : prix majoré 167 944,81 €, plus-value toujours nulle', () => {
+    const { fiscalite } = calculer(projet92k);
+    const pv = fiscalite.regimes.lmnp_reel.revente.plusValue;
+    expect(pv.reintegration).toBeCloseTo(20_786.75, 2);
+    expect(pv.prixAcquisitionMajore).toBeCloseTo(167_944.81, 2);
+    expect(pv.plusValueBrute).toBe(0);
+  });
+
+  it('honoraires à la charge du vendeur : le prix affiché est le prix de l’acte', () => {
+    // T3 Marseille : 155 000 € ; frais retenus max(réels ; 7,5 % = 11 625), travaux max(6 000 ; 15 % = 23 250).
+    const entree: ProjetEntree = {
+      ...projetExemple,
+      hypotheses: {
+        ...projetExemple.hypotheses,
+        achat: { ...projetExemple.hypotheses.achat, honorairesChargeAcquereur: false },
+      },
+    };
+    const { financement, fiscalite } = calculer(entree);
+    const pv = fiscalite.regimes.micro_bic.revente.plusValue;
+    expect(pv.prixAcquisition).toBe(155_000);
+    expect(pv.fraisRetenus).toBeCloseTo(Math.max(financement.fraisAcquisition.total, 11_625), 6);
+    expect(pv.travauxRetenus).toBeCloseTo(23_250, 6);
+  });
+
+  it('négociation de 10 % : acte = prix retenu 139 500 € − honoraires 7 000 € = 132 500 €', () => {
+    // T3 Marseille : forfait travaux 15 % × 132 500 = 19 875 € (> 6 000 € de travaux réels) ;
+    // frais retenus max(notaire + 7 000 ; 7,5 % × 132 500 = 9 937,50).
+    const entree: ProjetEntree = {
+      ...projetExemple,
+      hypotheses: {
+        ...projetExemple.hypotheses,
+        achat: { ...projetExemple.hypotheses.achat, negociationTaux: 0.1 },
+      },
+    };
+    const { financement, fiscalite } = calculer(entree);
+    const pv = fiscalite.regimes.micro_bic.revente.plusValue;
+    expect(pv.prixAcquisition).toBe(132_500);
+    expect(pv.travauxRetenus).toBeCloseTo(19_875, 6);
+    expect(pv.fraisRetenus).toBeCloseTo(
+      Math.max(financement.fraisAcquisition.total + 7_000, 9_937.5),
+      6,
+    );
+  });
+});
