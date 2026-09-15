@@ -17,6 +17,7 @@ import {
   voirLesAutres,
 } from '@/textes/gerer-a-faire';
 import { TEXTES_GERER } from '@/textes/gerer-ecrans';
+import { accordEnAttenteDe, emailAVerifierDe } from '@/textes/gerer-envois';
 import { bienEtChambre } from '@/textes/gerer-loyers';
 
 interface Ligne {
@@ -55,6 +56,18 @@ function ligneDe(action: ActionAFaire): Ligne {
         point: 'bg-surveiller',
       };
     }
+    case 'email_a_verifier':
+      return {
+        vers: lienFicheLocataire(action.locataire.id, { modifier: true }),
+        libelle: emailAVerifierDe(action.locataire.prenom),
+        point: 'bg-probleme',
+      };
+    case 'accord':
+      return {
+        vers: lienFicheLocataire(action.locataire.id),
+        libelle: accordEnAttenteDe(`${action.locataire.prenom} ${action.locataire.nom}`),
+        point: 'bg-accent',
+      };
   }
 }
 

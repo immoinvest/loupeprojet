@@ -7,11 +7,19 @@ import type {
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 
+import { REGLES_ENVOIS } from '@loupe/gestion';
+
+import { useEnvois } from '@/gestion/envois/EnvoisContext';
+import { quittancePartira } from '@/gestion/envois/logique';
 import { useGestion } from '@/gestion/GestionContext';
 import { cheminDe, lienDocument } from '@/gestion/parcours';
 import { ERREURS_GESTION } from '@/textes/gerer';
 import { loyerRecu, TEXTES_GERER } from '@/textes/gerer-ecrans';
+import { TEXTES_ENVOIS } from '@/textes/gerer-envois';
 import { paiementEnregistre } from '@/textes/gerer-loyers';
+
+/** La quittance part 12 s après « Reçu » (ADR-G43) : sa trace est relue un peu après. */
+const RELECTURE_APRES_RECU_MS = (REGLES_ENVOIS.delaiQuittanceSecondes + 4) * 1000;
 
 /** Durée pendant laquelle « Annuler » reste proposé après un paiement. */
 export const DUREE_ANNULATION_MS = 10_000;
@@ -56,6 +64,7 @@ function prenomDe(ligne: LigneLoyer): string {
 /** Les actions d'un loyer, partagées par l'accueil de Gérer et la page Loyers. */
 export function useActionsLoyer(aujourdhui: string): ActionsLoyer {
   const { payer, annulerPaiement, emettreDocument, enregistrerBailleur } = useGestion();
+  const envois = useEnvois();
   const naviguer = useNavigate();
   // La page où l'on ouvre un document : son lien de retour y ramène (ADR-G20).
   const location = useLocation();
@@ -114,7 +123,13 @@ export function useActionsLoyer(aujourdhui: string): ActionsLoyer {
         montant: ligne.resteDu,
         date: aujourdhui,
       };
-      await enregistrer(paiement, loyerRecu(prenomDe(ligne)));
+      const partira = quittancePartira(envois.donnees, ligne.location);
+      const message = partira
+        ? `${loyerRecu(prenomDe(ligne))} ${TEXTES_ENVOIS.quittancePartira}`
+        : loyerRecu(prenomDe(ligne));
+      if ((await enregistrer(paiement, message)) && partira) {
+        envois.rechargerDans(RELECTURE_APRES_RECU_MS);
+      }
     },
     enregistrerPartiel: async (paiement) => {
       if (await enregistrer(paiement, paiementEnregistre(paiement.montant))) setEnPartie(null);

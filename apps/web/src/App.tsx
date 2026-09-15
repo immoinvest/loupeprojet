@@ -10,6 +10,11 @@ import { clientReseau } from './compte/reseau';
 import type { ClientCompte } from './compte/types';
 import { AppLayout } from './coque/AppLayout';
 import { GestionProvider } from './gestion/GestionContext';
+import { EnvoisProvider } from './gestion/envois/EnvoisContext';
+import { clientAccordMemoire, clientEnvoisMemoire } from './gestion/envois/memoire';
+import { clientAccordReseau, clientEnvoisReseau } from './gestion/envois/reseau';
+import type { ClientAccord, ClientEnvois } from './gestion/envois/types';
+import { Accord } from './ecrans/accord/Accord';
 import { clientGestionMemoire } from './gestion/memoire';
 import { clientGestionReseau } from './gestion/reseau';
 import type { ClientGestion } from './gestion/types';
@@ -65,6 +70,7 @@ export const routes: RouteObject[] = [
   { path: 'connexion', element: <Connexion /> },
   { path: 'projets/:id/imprimer', element: <Imprimer /> },
   { path: 'gerer/documents/:id', element: <ImprimerDocument /> },
+  { path: 'accord', element: <Accord /> },
   { path: 'simulateur-pret/imprimer', element: <SimulateurImprimer /> },
   {
     element: <AppLayout />,
@@ -135,6 +141,10 @@ const CLIENT_PROJETS = clientProjetsReseau();
 /** Les liens de partage courts : l'API /api/partage du même worker, même origine (ADR-009). */
 const CLIENT_PARTAGE = clientPartageReseau();
 
+/** Les quittances envoyées par e-mail : /api/gestion/envois et la page publique /api/accord. */
+const CLIENT_ENVOIS = clientEnvoisReseau();
+const CLIENT_ACCORD = clientAccordReseau();
+
 /** Invite d'installation et mode application, écoutés dès le chargement, avant le premier rendu. */
 const SUIVI_INSTALLATION = creerSuiviInstallation(window);
 
@@ -147,11 +157,13 @@ export function App(): JSX.Element {
           <CompteProvider client={CLIENT_COMPTE}>
             <SynchroProvider client={CLIENT_PROJETS}>
               <GestionProvider client={CLIENT_GESTION}>
-                <InstallationProvider suivi={SUIVI_INSTALLATION}>
-                  <BrowserRouter>
-                    <Racine />
-                  </BrowserRouter>
-                </InstallationProvider>
+                <EnvoisProvider client={CLIENT_ENVOIS} accord={CLIENT_ACCORD}>
+                  <InstallationProvider suivi={SUIVI_INSTALLATION}>
+                    <BrowserRouter>
+                      <Racine />
+                    </BrowserRouter>
+                  </InstallationProvider>
+                </EnvoisProvider>
               </GestionProvider>
             </SynchroProvider>
           </CompteProvider>
@@ -173,6 +185,8 @@ export function AppEnMemoire({
   gestion,
   projets,
   partage,
+  envois,
+  accord,
   installation = suiviIndisponible,
 }: {
   chemin?: string;
@@ -182,8 +196,12 @@ export function AppEnMemoire({
   gestion?: ClientGestion;
   projets?: ClientProjets;
   partage?: ClientPartage;
+  envois?: ClientEnvois;
+  accord?: ClientAccord;
   installation?: SuiviInstallation;
 }): JSX.Element {
+  const clientEnvois = useMemo(() => envois ?? clientEnvoisMemoire(), [envois]);
+  const clientAccord = useMemo(() => accord ?? clientAccordMemoire(), [accord]);
   const clientCompte = useMemo(() => compte ?? clientMemoire(), [compte]);
   const clientGestion = useMemo(() => gestion ?? clientGestionMemoire(), [gestion]);
   const clientProjets = useMemo(() => projets ?? clientProjetsMemoire(), [projets]);
@@ -195,11 +213,13 @@ export function AppEnMemoire({
           <CompteProvider client={clientCompte}>
             <SynchroProvider client={clientProjets} delaiMs={0}>
               <GestionProvider client={clientGestion} stockage={stockage}>
-                <InstallationProvider suivi={installation}>
-                  <MemoryRouter initialEntries={[chemin]}>
-                    <Racine />
-                  </MemoryRouter>
-                </InstallationProvider>
+                <EnvoisProvider client={clientEnvois} accord={clientAccord}>
+                  <InstallationProvider suivi={installation}>
+                    <MemoryRouter initialEntries={[chemin]}>
+                      <Racine />
+                    </MemoryRouter>
+                  </InstallationProvider>
+                </EnvoisProvider>
               </GestionProvider>
             </SynchroProvider>
           </CompteProvider>

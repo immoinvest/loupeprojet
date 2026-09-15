@@ -17,6 +17,7 @@ import { titreLouer } from '@/textes/gerer-louer';
 import { TEXTES_PARCOURS as P } from '@/textes/gerer-parcours';
 
 import { EcranAttente } from './EcranAttente';
+import { BailleurDuBien } from './envois/BailleurDuBien';
 import { FilAriane } from './FilAriane';
 import { CarteLocation } from './fiche/CarteLocation';
 import { FriseMois } from './fiche/FriseMois';
@@ -97,6 +98,8 @@ function Fiche({
         actions={actions}
         bienId={bien.id}
       />
+
+      <BailleurDuBien bien={bien} bailleurCompte={donnees.bailleur} />
 
       <SupprimerBien bien={bien} />
     </Page>

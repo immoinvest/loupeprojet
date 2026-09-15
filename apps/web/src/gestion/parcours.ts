@@ -12,6 +12,8 @@ export const CHEMIN_MES_BIENS = '/gerer/biens';
 export const CHEMIN_MES_LOCATAIRES = '/gerer/locataires';
 export const CHEMIN_NOUVEAU_LOCATAIRE = '/gerer/locataires/nouveau';
 export const CHEMIN_LOYERS = '/gerer/loyers';
+/** La page publique où le locataire accepte les quittances par e-mail ; le jeton suit dans le fragment. */
+export const CHEMIN_ACCORD = '/accord';
 
 function avecRecherche(
   chemin: string,

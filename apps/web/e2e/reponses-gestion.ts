@@ -72,6 +72,28 @@ export async function simulerGestion(page: Page): Promise<void> {
     }),
   );
 
+  // Quittances par e-mail (quittances-auto) : Julie a accepté, Antoine n'a pas d'e-mail.
+  await page.route('**/api/gestion/envois', (route) =>
+    route.fulfill({
+      json: {
+        mode: 'reel',
+        invitations: true,
+        accords: [
+          { locataireId: 'julie', statut: 'accorde', le: creeLe },
+          { locataireId: 'antoine', statut: 'sans_email' },
+        ],
+        envois: [],
+        contacts: [{ locataireId: 'julie', telephone: '06 12 34 56 78' }],
+        bailleursBiens: [],
+      },
+    }),
+  );
+  await page.route('**/api/accord/lire', (route) =>
+    route.fulfill({
+      json: { prenom: 'Julie', bailleur: 'Camille Martin', logement: 'T2 Lices, 12 rue des Lices' },
+    }),
+  );
+
   // La quittance du mois de Julie, telle que l'API la rend : contenu figé complet.
   const periode = aujourdhui.slice(0, 7);
   const numero = `Q-${periode.replace('-', '')}-LOCATION`;
