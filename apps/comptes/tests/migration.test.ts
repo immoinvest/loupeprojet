@@ -121,6 +121,7 @@ describe('migration 0002 : gestion locative', () => {
       '0006_partage.sql',
       '0007_gestion_depenses.sql',
       '0008_gestion_bail.sql',
+      '0011_gestion_fin_bail.sql',
     ]);
   });
 
@@ -228,14 +229,20 @@ describe('migration 0003 : paiements partiels, bailleur, documents', () => {
       'gestion_bien_legal',
       'gestion_changement',
       'gestion_colocataire',
+      'gestion_colocation_mouvement',
+      'gestion_conge',
+      'gestion_decompte',
       'gestion_depense',
+      'gestion_depot_restitution',
       'gestion_document',
       'gestion_locataire',
       'gestion_location',
+      'gestion_location_charges',
       'gestion_location_revision',
       'gestion_paiement',
       'gestion_preference',
       'gestion_pret',
+      'gestion_regularisation',
       'partage',
       'projet',
       'session',
@@ -249,16 +256,23 @@ describe('migration 0003 : paiements partiels, bailleur, documents', () => {
       'gestion_bien_userId_idx',
       'gestion_changement_userId_idx',
       'gestion_colocataire_userId_idx',
+      'gestion_colocation_mouvement_locationId_idx',
+      'gestion_colocation_mouvement_userId_idx',
+      'gestion_conge_userId_idx',
+      'gestion_decompte_locationId_idx',
       'gestion_depense_bienId_idx',
       'gestion_depense_userId_idx',
+      'gestion_depot_restitution_userId_idx',
       'gestion_document_userId_idx',
       'gestion_locataire_userId_idx',
       'gestion_location_bienId_idx',
+      'gestion_location_charges_userId_idx',
       'gestion_location_revision_userId_idx',
       'gestion_location_userId_idx',
       'gestion_paiement_location_periode_idx',
       'gestion_paiement_userId_idx',
       'gestion_pret_userId_idx',
+      'gestion_regularisation_userId_idx',
       'partage_expireLe_idx',
       'partage_ipHash_creeLe_idx',
       'projet_userId_revision_idx',
@@ -377,7 +391,7 @@ describe('migration 0003 : paiements partiels, bailleur, documents', () => {
       "select name, sql from sqlite_master where name not like '%gestion_bien_legal%' and name not like '%gestion_location_revision%' and name not like '%gestion_bail_lettre%' order by name";
     const schemaAvant = base.prepare(sansBail).all();
     const donneesAvant = base.prepare('select * from gestion_location').all();
-    appliquerMigrations(base);
+    appliquerMigrations(base, 8);
     expect(base.prepare(sansBail).all()).toEqual(schemaAvant);
     expect(base.prepare('select * from gestion_location').all()).toEqual(donneesAvant);
 
@@ -410,6 +424,70 @@ describe('migration 0003 : paiements partiels, bailleur, documents', () => {
       'gestion_location_revision',
       'gestion_bail_lettre',
     ]) {
+      expect(base.prepare(`select count(*) as n from ${table}`).get()).toEqual({ n: 0 });
+    }
+  });
+
+  const TABLES_0011 = [
+    'gestion_conge',
+    'gestion_location_charges',
+    'gestion_depot_restitution',
+    'gestion_regularisation',
+    'gestion_colocation_mouvement',
+    'gestion_decompte',
+  ];
+
+  it('migration 0011 : additive, les tables existantes restent identiques ; la fin du bail part avec le bien', () => {
+    const base = baseDeG1a();
+    appliquerMigrations(base, 8);
+    const sansFinBail = `select name, sql from sqlite_master where ${TABLES_0011.map(
+      (table) => `name not like '%${table}%'`,
+    ).join(' and ')} order by name`;
+    const schemaAvant = base.prepare(sansFinBail).all();
+    const donneesAvant = base.prepare('select * from gestion_location').all();
+    appliquerMigrations(base);
+    expect(base.prepare(sansFinBail).all()).toEqual(schemaAvant);
+    expect(base.prepare('select * from gestion_location').all()).toEqual(donneesAvant);
+
+    const conge = base.prepare(
+      'insert into gestion_conge (locationId, userId, recuLe, fin, reduit, modifieLe) values (?, ?, ?, ?, ?, ?)',
+    );
+    conge.run('l1', 'u1', '2026-12-05', '2027-01-05', 0, H);
+    base
+      .prepare(
+        'insert into gestion_location_charges (locationId, userId, mode, modifieLe) values (?, ?, ?, ?)',
+      )
+      .run('l1', 'u1', 'provision', H);
+    base
+      .prepare(
+        'insert into gestion_depot_restitution (locationId, userId, clesLe, conforme, retenues, depot, aRendre, dateLimite, decompteId, rendueLe, modifieLe) values (?, ?, ?, ?, ?, ?, ?, ?, ?, null, ?)',
+      )
+      .run('l1', 'u1', '2027-01-05', 1, '[]', 130_000, 130_000, '2027-02-05', 'd1', H);
+    base
+      .prepare(
+        'insert into gestion_colocation_mouvement (id, userId, locationId, locataireId, sens, date, creeLe) values (?, ?, ?, ?, ?, ?, ?)',
+      )
+      .run('m1', 'u1', 'l1', 't1', 'depart', '2027-01-05', H);
+    const decompte = base.prepare(
+      'insert into gestion_decompte (id, userId, locationId, cle, type, numero, contenu, emisLe) values (?, ?, ?, ?, ?, ?, ?, ?)',
+    );
+    decompte.run('d1', 'u1', 'l1', 'restitution:l1', 'restitution', 'D-1', '{}', H);
+    expect(() =>
+      decompte.run('d2', 'u1', 'l1', 'restitution:l1', 'restitution', 'D-1', '{}', H),
+    ).toThrow(/UNIQUE constraint failed/);
+    const regularisation = base.prepare(
+      'insert into gestion_regularisation (id, userId, locationId, annee, solde, aPartirDe, decompteId, regleeLe, creeLe) values (?, ?, ?, ?, ?, ?, ?, null, ?)',
+    );
+    regularisation.run('r1', 'u1', 'l1', 2026, -6_000, '2027-06', 'd1', H);
+    expect(() => regularisation.run('r2', 'u1', 'l1', 2026, -6_000, '2027-06', 'd1', H)).toThrow(
+      /UNIQUE constraint failed/,
+    );
+    expect(() => conge.run('inconnue', 'u1', '2026-12-05', '2027-01-05', 0, H)).toThrow(
+      /FOREIGN KEY constraint failed/,
+    );
+
+    base.prepare('delete from gestion_bien where id = ?').run('b1');
+    for (const table of TABLES_0011) {
       expect(base.prepare(`select count(*) as n from ${table}`).get()).toEqual({ n: 0 });
     }
   });

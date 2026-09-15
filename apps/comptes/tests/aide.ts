@@ -9,6 +9,7 @@ import type { Envoyeur, Message } from '../src/courriel';
 import type { Dependances } from '../src/dependances';
 import { depotArgentD1, type OptionsDepotArgent } from '../src/gestion/argent/depot-d1';
 import { depotBailD1 } from '../src/gestion/bail/depot-d1';
+import { depotFinBailD1 } from '../src/gestion/fin-bail/depot-d1';
 import { depotD1, type OptionsDepot } from '../src/gestion/depot-d1';
 import { journalMemoire } from '../src/journal';
 import { depotPartagesD1, type OptionsDepotPartages } from '../src/partage/depot-d1';
@@ -115,6 +116,7 @@ export function banc(surcharges: Partial<Dependances> = {}, origine = ORIGINE): 
     gestion: depotD1(d1SurSqlite(new DatabaseSync(':memory:')).base),
     argent: depotArgentD1(d1SurSqlite(new DatabaseSync(':memory:')).base),
     bail: depotBailD1(d1SurSqlite(new DatabaseSync(':memory:')).base),
+    finBail: depotFinBailD1(d1SurSqlite(new DatabaseSync(':memory:')).base),
     projets: depotProjetsD1(d1SurSqlite(new DatabaseSync(':memory:')).base),
     partages: depotPartagesD1(d1SurSqlite(new DatabaseSync(':memory:')).base, 'sel-de-test'),
     courriel,
@@ -187,6 +189,7 @@ export function bancD1(options: OptionsBancD1 = {}): BancD1 {
       gestion: depotD1(d1.base, options.optionsDepot),
       argent: depotArgentD1(d1.base, options.optionsArgent),
       bail: depotBailD1(d1.base, options.optionsDepot),
+      finBail: depotFinBailD1(d1.base, options.optionsDepot),
       projets: depotProjetsD1(d1.base, options.optionsProjets),
       partages: depotPartagesD1(d1.base, 'sel-de-test', options.optionsPartages),
       ...options.surcharges,

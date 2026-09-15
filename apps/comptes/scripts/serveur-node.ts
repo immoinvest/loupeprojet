@@ -7,6 +7,7 @@ import { creerApp } from '../src/app';
 import { envoyeurJournal } from '../src/courriel';
 import { depotArgentD1 } from '../src/gestion/argent/depot-d1';
 import { depotBailD1 } from '../src/gestion/bail/depot-d1';
+import { depotFinBailD1 } from '../src/gestion/fin-bail/depot-d1';
 import { depotD1 } from '../src/gestion/depot-d1';
 import {
   lireOriginesSupplementaires,
@@ -44,6 +45,7 @@ const app = creerApp({
   gestion: depotD1(d1SurSqlite(base).base),
   argent: depotArgentD1(d1SurSqlite(base).base),
   bail: depotBailD1(d1SurSqlite(base).base),
+  finBail: depotFinBailD1(d1SurSqlite(base).base),
   projets: depotProjetsD1(d1SurSqlite(base).base),
   partages: depotPartagesD1(d1SurSqlite(base).base, SECRET_DEV),
   courriel: envoyeurJournal(journalConsole),

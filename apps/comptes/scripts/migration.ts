@@ -7,6 +7,7 @@ import { optionsAuth } from '../src/auth';
 import type { Dependances } from '../src/dependances';
 import { depotArgentD1 } from '../src/gestion/argent/depot-d1';
 import { depotBailD1 } from '../src/gestion/bail/depot-d1';
+import { depotFinBailD1 } from '../src/gestion/fin-bail/depot-d1';
 import { depotD1 } from '../src/gestion/depot-d1';
 import { journalMemoire } from '../src/journal';
 import { depotPartagesD1 } from '../src/partage/depot-d1';
@@ -29,6 +30,7 @@ export const MIGRATIONS: readonly { readonly fichier: string; readonly table: st
   { fichier: '0006_partage.sql', table: 'partage' },
   { fichier: '0007_gestion_depenses.sql', table: 'gestion_depense' },
   { fichier: '0008_gestion_bail.sql', table: 'gestion_bien_legal' },
+  { fichier: '0011_gestion_fin_bail.sql', table: 'gestion_conge' },
 ];
 
 export function lireMigrationNommee(fichier: string): string {
@@ -60,6 +62,7 @@ export async function compilerMigration(): Promise<string> {
     gestion: depotD1(d1SurSqlite(new DatabaseSync(':memory:')).base),
     argent: depotArgentD1(d1SurSqlite(new DatabaseSync(':memory:')).base),
     bail: depotBailD1(d1SurSqlite(new DatabaseSync(':memory:')).base),
+    finBail: depotFinBailD1(d1SurSqlite(new DatabaseSync(':memory:')).base),
     projets: depotProjetsD1(d1SurSqlite(new DatabaseSync(':memory:')).base),
     partages: depotPartagesD1(d1SurSqlite(new DatabaseSync(':memory:')).base, ''),
     courriel: null,

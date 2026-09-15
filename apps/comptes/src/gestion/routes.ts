@@ -19,6 +19,7 @@ import { messageDe, reponseErreur } from '../erreurs';
 import { acces, type EnvGestion } from './acces';
 import { routeurArgent } from './argent/routes';
 import { routeurBail } from './bail/routes';
+import { routeurFinBail } from './fin-bail/routes';
 import { ErreurGestion, estTableAbsente } from './depot';
 
 /** Un corps de requête plus gros est refusé avant d'être lu (l'instantané d'un projet pèse quelques Ko). */
@@ -155,6 +156,8 @@ export function routeurGestion(
   app.route('/', routeurArgent(deps));
   // Vie du bail (B1) : DPE, révision, lettres, dans leurs propres tables (migration 0008).
   app.route('/bail', routeurBail(deps));
+  // Fin du bail (B2) : congé, dépôt, charges, colocataires, dans leurs propres tables (migration 0011).
+  app.route('/fin-bail', routeurFinBail(deps));
 
   app.onError((erreur, c) => {
     if (erreur instanceof ErreurGestion) {
