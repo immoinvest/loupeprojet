@@ -1,0 +1,36 @@
+{
+  "feature_slug": "liens-courts-domaine",
+  "started_at": "2026-09-15T00:00:00+02:00",
+  "current_step": "implement",
+  "scope": "fullstack",
+  "session": "S10 (nuit du 14-15/09/2026), auto-validation des points de contrôle",
+  "backlog": ".product/backlog/23-liens-courts-domaine.md",
+  "steps": {
+    "discovery": {
+      "status": "completed",
+      "output": ".product/features/liens-courts-domaine-discovery.md"
+    },
+    "specs": {
+      "status": "completed",
+      "output": ".product/specs/liens-courts-domaine-specs.md",
+      "stories_count": 6
+    },
+    "architecture": {
+      "status": "completed",
+      "output": ".product/architecture/liens-courts-domaine.md",
+      "adr": ".product/adr/009-liens-de-partage-courts.md"
+    },
+    "implement": {
+      "status": "in_progress",
+      "stories_completed": 5,
+      "stories_total": 6,
+      "commits": []
+    },
+    "qa_tests": { "status": "pending" },
+    "security": { "status": "pending" },
+    "push": {
+      "status": "pending",
+      "merge": "manuel, après la migration 0006 en production (Pierre)"
+    }
+  }
+}
