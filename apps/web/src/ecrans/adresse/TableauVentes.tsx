@@ -1,44 +1,29 @@
-import { Fragment, useMemo, useState, type JSX } from 'react';
+import { useEffect, useMemo, useRef, useState, type JSX } from 'react';
 
 import { Bouton, Carte, Pastille } from '@/composants/ui';
 import { useProjetCourant } from '@/coque/ProjetLayout';
 import {
   CLES_TRI,
-  filtrerVentes,
+  cleVente,
   pageDe,
-  prixAujourdhui,
-  SANS_FILTRE,
+  pageDeLaVente,
   TRI_DEFAUT,
   trierVentes,
   triSuivant,
+  ventesVisibles,
   type CleTri,
   type FiltresVentes,
   type ReponseAdresse,
   type Tri,
-  type VenteProcheAdresse,
 } from '@/enrichissement';
-import { dateCourte, euros, nombre } from '@/formatage/nombres';
-import { LIBELLES_GROUPES, prixM2 } from '@/textes/adresse';
-import {
-  LIBELLES_COLONNES,
-  LIBELLES_FILTRES,
-  libelleFiltrePieces,
-  phraseNombreVentes,
-  phrasePage,
-  PHRASES_VENTES,
-  phraseTri,
-  phraseTronquees,
-} from '@/textes/ventes';
+import { phrasePage, PHRASES_VENTES, LIBELLES_COLONNES, phraseTronquees } from '@/textes/ventes';
 
-import { DetailVente } from './DetailVente';
+import { FiltresTableauVentes } from './FiltresTableauVentes';
+import { COLLANTE, LigneVente, type VenteNumerotee } from './LigneVente';
+import type { LiaisonVentes } from './useLiaisonVentes';
 
-const CELLULE = 'border-b border-bordure-douce px-3 py-2 text-left align-top';
 const ENTETE =
   'border-b border-bordure px-3 py-2 text-left text-xs font-bold text-encre-3 uppercase';
-/** Première colonne collante : elle reste visible quand le tableau défile au doigt. */
-const COLLANTE = 'sticky left-0 z-[1]';
-
-type VenteNumerotee = VenteProcheAdresse & { readonly numero: number };
 
 const ARIA_SORT = { croissant: 'ascending', decroissant: 'descending' } as const;
 const FLECHE = { croissant: '↑', decroissant: '↓' } as const;
@@ -78,21 +63,30 @@ function EnteteTriable({
 }
 
 /**
- * Les ventes comparables autour du bien (jusqu'à 300) : tri par colonne, filtres rapides, 20 par page, détail
- * dépliable. Tri, filtres et pages reviennent à zéro quand l'analyse change.
+ * Les ventes comparables autour du bien (jusqu'à 300) : tri par colonne, filtres rapides et rayon partagés avec la
+ * carte, 20 par page, détail dépliable. « Voir dans le tableau » depuis la carte amène la ligne à l'écran.
+ * Tri, pages et détails reviennent à zéro quand l'analyse change.
  */
-export function TableauVentes({ analyse }: { analyse: ReponseAdresse }): JSX.Element | null {
+export function TableauVentes({
+  analyse,
+  liaison,
+}: {
+  analyse: ReponseAdresse;
+  liaison: LiaisonVentes;
+}): JSX.Element | null {
   const { enregistre } = useProjetCourant();
   const piecesBien = enregistre.projet.bien.pieces;
+  const { etat, envoyer, clesCarte } = liaison;
   const [source, setSource] = useState(analyse);
   const [tri, setTri] = useState<Tri>(TRI_DEFAUT);
-  const [filtres, setFiltres] = useState<FiltresVentes>(SANS_FILTRE);
   const [page, setPage] = useState(1);
   const [ouverts, setOuverts] = useState<ReadonlySet<number>>(new Set());
+  const conteneur = useRef<HTMLDivElement>(null);
+  const derniereDemande = useRef(etat.demande);
+  const [aAmener, setAAmener] = useState(false);
   if (source !== analyse) {
     setSource(analyse);
     setTri(TRI_DEFAUT);
-    setFiltres(SANS_FILTRE);
     setPage(1);
     setOuverts(new Set());
   }
@@ -102,21 +96,38 @@ export function TableauVentes({ analyse }: { analyse: ReponseAdresse }): JSX.Ele
     [analyse],
   );
   const avecDpe = analyse.dpeVentes !== undefined;
-  const dpeConnus = numerotees.some((v) => v.dpe != null);
   const colonnes = CLES_TRI.filter((cle) => cle !== 'dpe' || avecDpe);
   const affichees = useMemo(
-    () => trierVentes(filtrerVentes(numerotees, filtres, piecesBien), tri),
-    [numerotees, filtres, piecesBien, tri],
+    () => trierVentes(ventesVisibles(numerotees, etat, piecesBien), tri),
+    [numerotees, etat, piecesBien, tri],
   );
-  if (numerotees.length === 0) return null;
   const pagee = pageDe(affichees, page);
+
+  // « Voir dans le tableau » : la page de la vente, puis la ligne amenée à l'écran une fois affichée.
+  useEffect(() => {
+    if (etat.demande === derniereDemande.current) return;
+    derniereDemande.current = etat.demande;
+    if (etat.afficher !== 'tableau' || etat.selection === null) return;
+    const pageVente = pageDeLaVente(affichees, etat.selection);
+    if (pageVente !== null) setPage(pageVente);
+    setAAmener(true);
+  }, [etat.demande]);
+  useEffect(() => {
+    if (!aAmener) return;
+    setAAmener(false);
+    const ligne = conteneur.current?.querySelector<HTMLElement>('tr[aria-current="true"]');
+    if (typeof ligne?.scrollIntoView === 'function') ligne.scrollIntoView({ block: 'center' });
+    ligne?.focus({ preventScroll: true });
+  }, [aAmener, pagee.page]);
+
+  if (numerotees.length === 0) return null;
 
   const trier = (cle: CleTri): void => {
     setTri(triSuivant(tri, cle));
     setPage(1);
   };
   const basculerFiltre = (cle: keyof FiltresVentes): void => {
-    setFiltres({ ...filtres, [cle]: !filtres[cle] });
+    envoyer({ type: 'filtres', filtres: { ...etat.filtres, [cle]: !etat.filtres[cle] } });
     setPage(1);
   };
   const basculerDetail = (numero: number): void => {
@@ -125,17 +136,6 @@ export function TableauVentes({ analyse }: { analyse: ReponseAdresse }): JSX.Ele
     else suivants.add(numero);
     setOuverts(suivants);
   };
-
-  const boutonsFiltres: [keyof FiltresVentes, string][] = [
-    ['memeImmeuble', LIBELLES_FILTRES.memeImmeuble],
-    ['recentes', LIBELLES_FILTRES.recentes],
-    ...(piecesBien > 0
-      ? [['memesPieces', libelleFiltrePieces(piecesBien)] as [keyof FiltresVentes, string]]
-      : []),
-    ...(dpeConnus
-      ? [['passoires', LIBELLES_FILTRES.passoires] as [keyof FiltresVentes, string]]
-      : []),
-  ];
   // Date, adresse, colonnes triables sauf la date, place, détail.
   const nombreColonnes = colonnes.length + 3;
 
@@ -148,32 +148,21 @@ export function TableauVentes({ analyse }: { analyse: ReponseAdresse }): JSX.Ele
         </p>
       )}
 
-      <div
-        role="group"
-        aria-label={PHRASES_VENTES.filtres}
-        className="flex flex-wrap items-center gap-2 print:hidden"
-      >
-        {boutonsFiltres.map(([cle, libelle]) => (
-          <button
-            key={cle}
-            type="button"
-            aria-pressed={filtres[cle]}
-            onClick={() => {
-              basculerFiltre(cle);
-            }}
-            className={`min-h-[36px] rounded-full border px-3 text-sm font-semibold survol-fond pointer-coarse:min-h-11 ${
-              filtres[cle]
-                ? 'border-accent bg-accent-fond text-accent'
-                : 'border-bordure bg-surface text-encre-2'
-            }`}
-          >
-            {libelle}
-          </button>
-        ))}
-        <span className="text-sm text-encre-3" aria-live="polite">
-          {phraseNombreVentes(affichees.length)} · {phraseTri(tri.cle, tri.sens === 'croissant')}
-        </span>
-      </div>
+      <FiltresTableauVentes
+        filtres={etat.filtres}
+        rayon={etat.rayon}
+        piecesBien={piecesBien}
+        dpeConnus={numerotees.some((v) => v.dpe != null)}
+        avecDistances={numerotees.some((v) => v.distanceMetres !== null)}
+        nombreAffichees={affichees.length}
+        cleTri={tri.cle}
+        croissant={tri.sens === 'croissant'}
+        onFiltre={basculerFiltre}
+        onRayon={(rayon) => {
+          envoyer({ type: 'rayon', rayon });
+          setPage(1);
+        }}
+      />
       {analyse.dpeVentes === 'indisponible' && (
         <Pastille ton="surveiller" compacte>
           {PHRASES_VENTES.dpeIndisponible}
@@ -185,7 +174,7 @@ export function TableauVentes({ analyse }: { analyse: ReponseAdresse }): JSX.Ele
       ) : (
         // `relative` : les textes pour lecteurs d'écran (sr-only, en position absolue) restent dans le
         // conteneur qui défile au lieu d'élargir la page sur téléphone.
-        <div className="relative overflow-x-auto">
+        <div ref={conteneur} className="relative overflow-x-auto">
           <table className="w-full border-collapse text-[15px]">
             <thead>
               <tr>
@@ -208,62 +197,23 @@ export function TableauVentes({ analyse }: { analyse: ReponseAdresse }): JSX.Ele
             </thead>
             <tbody>
               {pagee.lignes.map((v) => {
-                const ouvert = ouverts.has(v.numero);
-                const idDetail = `vente-detail-${String(v.numero)}`;
+                const cle = cleVente(v);
                 return (
-                  <Fragment key={v.numero}>
-                    <tr>
-                      <td className={`${CELLULE} ${COLLANTE} bg-surface`}>{dateCourte(v.date)}</td>
-                      <td className={CELLULE}>{v.adresse ?? PHRASES_VENTES.inconnu}</td>
-                      <td className={CELLULE}>{nombre(v.surface)} m²</td>
-                      <td className={CELLULE}>
-                        {v.pieces > 0 ? nombre(v.pieces) : PHRASES_VENTES.inconnu}
-                      </td>
-                      <td className={CELLULE}>{euros(v.prix)}</td>
-                      <td className={CELLULE}>{prixM2(v.prixM2)}</td>
-                      <td className={CELLULE}>{prixM2(prixAujourdhui(v))}</td>
-                      <td className={CELLULE}>
-                        {v.distanceMetres === null
-                          ? PHRASES_VENTES.inconnu
-                          : `${String(v.distanceMetres)} m`}
-                      </td>
-                      {avecDpe && (
-                        <td className={CELLULE}>{v.dpe?.etiquetteDpe ?? PHRASES_VENTES.inconnu}</td>
-                      )}
-                      <td className={CELLULE}>
-                        <div className="flex flex-wrap gap-1">
-                          {v.groupes
-                            .filter((code) => !code.startsWith('rayon_'))
-                            .map((code) => (
-                              <Pastille key={code} ton="neutre" compacte>
-                                {LIBELLES_GROUPES[code]}
-                              </Pastille>
-                            ))}
-                        </div>
-                      </td>
-                      <td className={`${CELLULE} print:hidden`}>
-                        <button
-                          type="button"
-                          aria-expanded={ouvert}
-                          aria-controls={idDetail}
-                          onClick={() => {
-                            basculerDetail(v.numero);
-                          }}
-                          className="rounded-sm text-sm font-semibold text-accent survol-texte pointer-coarse:min-h-11 pointer-coarse:min-w-11"
-                        >
-                          {PHRASES_VENTES.detail}
-                          <span className="sr-only"> {dateCourte(v.date)}</span>
-                        </button>
-                      </td>
-                    </tr>
-                    {ouvert && (
-                      <tr id={idDetail}>
-                        <td colSpan={nombreColonnes} className={`${CELLULE} bg-accent-fond`}>
-                          <DetailVente vente={v} />
-                        </td>
-                      </tr>
-                    )}
-                  </Fragment>
+                  <LigneVente
+                    key={v.numero}
+                    vente={v}
+                    avecDpe={avecDpe}
+                    ouvert={ouverts.has(v.numero)}
+                    selectionnee={etat.selection === cle}
+                    surCarte={clesCarte.has(cle)}
+                    nombreColonnes={nombreColonnes}
+                    onDetail={() => {
+                      basculerDetail(v.numero);
+                    }}
+                    onVoirCarte={() => {
+                      envoyer({ type: 'voir', cle, dans: 'carte' });
+                    }}
+                  />
                 );
               })}
             </tbody>
