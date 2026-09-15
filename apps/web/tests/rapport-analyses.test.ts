@@ -76,7 +76,8 @@ describe('multiple sur apport', () => {
   it('gain total ÷ mise de départ sur l’exemple', () => {
     const r = calculer(projetExemple);
     expect(r.rendement.enrichissement.miseDeDepart).toBe(19_337);
-    expect(multipleSurApport(r)).toBeCloseTo(13_646.75 / 19_337, 4);
+    // 13 646,75 € − 417,86 € d'impôt sur les amortissements réintégrés (ordre d'imputation LMNP).
+    expect(multipleSurApport(r)).toBeCloseTo(13_228.9 / 19_337, 4);
   });
 
   it('sans mise de départ : null', () => {

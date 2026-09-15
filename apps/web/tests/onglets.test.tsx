@@ -29,7 +29,8 @@ describe('Fiscalité', () => {
     expect(screen.getByText('le plus avantageux au total')).toBeInTheDocument();
     expect(n(screen.getAllByText(/26 928 €/)[0]?.textContent)).toContain('26 928 €');
     expect(
-      screen.getByRole('img', { name: /0 années imposées sur 10, sans impôt à la revente/ }),
+      // Amortissements déduits avant le déficit (CE, 15/04/2015) : réintégrés, ils créent 418 € d'impôt.
+      screen.getByRole('img', { name: /0 années imposées sur 10, puis impôt à la revente/ }),
     ).toBeInTheDocument();
     expect(screen.getByText(/Pas avant l'année 11/)).toBeInTheDocument();
     expect(screen.getByText(/taux à confirmer/)).toBeInTheDocument();
@@ -135,9 +136,11 @@ describe('Revente', () => {
       'Dans 20 ans',
     ]);
     expect(reperes[1]).toHaveAttribute('aria-pressed', 'true');
-    expect(n(screen.getAllByText(/58 217 €/)[0]?.textContent)).toContain('58 217 €');
+    expect(n(screen.getAllByText(/57 799 €/)[0]?.textContent)).toContain('57 799 €');
     expect(screen.getByRole('heading', { name: 'Revente dans 10 ans' })).toBeInTheDocument();
-    expect(screen.getByText(/Pas de plus-value imposable/)).toBeInTheDocument();
+    // 19 486 € d'amortissements du bâti réintégrés : plus-value brute 1 437 €.
+    expect(screen.getByText('amortissements réintégrés (réforme 2025)')).toBeInTheDocument();
+    expect(screen.getByText('1 437 €')).toBeInTheDocument();
     expect(screen.getByText(/Ce qu'il vous reste en poche/)).toBeInTheDocument();
   });
 
@@ -150,7 +153,7 @@ describe('Revente', () => {
     expect(curseur).toHaveValue('20');
     expect(screen.getByRole('heading', { name: 'Revente dans 20 ans' })).toBeInTheDocument();
     expect(screen.getByText('Cash-flows cumulés sur 20 ans')).toBeInTheDocument();
-    expect(n(screen.getAllByText(/147 662 €/)[0]?.textContent)).toContain('147 662 €');
+    expect(n(screen.getAllByText(/144 957 €/)[0]?.textContent)).toContain('144 957 €');
     expect(screen.getByRole('button', { name: /Dans 20 ans/ })).toHaveAttribute(
       'aria-pressed',
       'true',
