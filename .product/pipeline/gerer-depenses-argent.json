@@ -1,0 +1,36 @@
+{
+  "feature_slug": "gerer-depenses-argent",
+  "title": "Gérer : dépenses (G5-4), prêt du bien, Argent (G5-1)",
+  "started_at": "2026-09-15T22:30:00Z",
+  "current_step": "implement",
+  "scope": "packages/gestion, apps/comptes (migration 0007, sous-routeur argent), apps/web (gestion/argent, ecrans/gerer/argent, fiche, menu, À faire), e2e",
+  "branch": "feat/gerer-depenses-argent",
+  "worktree": "C:\\Users\\errei\\Claude\\loupeprojet\\.claude\\worktrees\\admiring-stonebraker-eb756d",
+  "base": "master (12642727)",
+  "prerequis": "aucun",
+  "migration": "0007_gestion_depenses.sql (réservée), fusionnée sans application en production",
+  "steps": {
+    "discovery": {
+      "status": "completed",
+      "output": ".product/architecture/gerer-depenses-argent.md § 1"
+    },
+    "specs": {
+      "status": "completed",
+      "output": ".product/architecture/gerer-depenses-argent.md § 2",
+      "stories_count": 7
+    },
+    "architecture": {
+      "status": "completed",
+      "output": ".product/architecture/gerer-depenses-argent.md"
+    },
+    "implement": {
+      "status": "in_progress",
+      "stories_completed": 0,
+      "stories_total": 7,
+      "commits": []
+    },
+    "qa_tests": { "status": "pending" },
+    "security": { "status": "pending" },
+    "push": { "status": "pending" }
+  }
+}
