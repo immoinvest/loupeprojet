@@ -3,6 +3,18 @@ export const TEXTES_INSTALLATION = {
   bouton: "Installer l'application",
 } as const;
 
+/** La carte « Deklic sur vos appareils » de Mon compte : l'extension et l'application. */
+export const TEXTES_APPAREILS = {
+  titre: 'Deklic sur vos appareils',
+  extension: 'Extension navigateur',
+  extensionDetail: 'Lit une annonce en un clic, sur ordinateur.',
+  installerExtension: "Installer l'extension",
+  application: 'Application',
+  applicationDetail: "Sur l'écran d'accueil, même sans réseau.",
+  commentInstaller: "Comment l'installer",
+  installee: 'installée',
+} as const;
+
 /** Une annonce reçue par la feuille de partage du téléphone (cible de partage du manifeste). */
 export const TEXTES_PARTAGE_RECU = {
   pastille: 'reçue par partage',

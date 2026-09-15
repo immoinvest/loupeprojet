@@ -103,6 +103,39 @@ describe('Rapport : autofinancement au centre', () => {
   });
 });
 
+describe('Rapport : disposition serrée', () => {
+  it('à côté du prix, les rendements puis « Avant de faire une offre » dans une même colonne', async () => {
+    await ouvrirRapport();
+    const prix = carte("Est-ce que c'est cher ?");
+    const rendements = carte('Combien ça rapporte ?');
+    const vigilance = carte('Avant de faire une offre');
+    const colonne = rendements.parentElement!;
+    expect(vigilance.parentElement).toBe(colonne);
+    expect([...colonne.children]).toEqual([rendements, vigilance]);
+    expect(colonne).toHaveClass('flex', 'flex-col');
+    // La colonne est la voisine du prix dans la rangée à deux cartes.
+    expect(prix.parentElement).toBe(colonne.parentElement);
+    expect([...prix.parentElement!.children]).toEqual([prix, colonne]);
+    // La dernière carte s'étire jusqu'au bas du prix ; son lien descend en bas.
+    expect(vigilance).toHaveClass('flex-1');
+    expect(
+      within(vigilance)
+        .getByRole('link', { name: /visite/i })
+        .closest('p'),
+    ).toHaveClass('mt-auto');
+
+    const titres = screen.getAllByRole('heading', { level: 2 }).map((h) => h.textContent);
+    expect(titres).toEqual([
+      "Est-ce que ça s'autofinance ?",
+      "Est-ce que c'est cher ?",
+      'Combien ça rapporte ?',
+      'Avant de faire une offre',
+      "Combien d'impôts ?",
+      "Qu'est-ce qu'il vous restera ?",
+    ]);
+  });
+});
+
 describe('Rapport : prix, impôts et revente', () => {
   it('chaque carte mène à son onglet par un lien distinct de l’icône', async () => {
     await ouvrirRapport();
@@ -118,6 +151,9 @@ describe('Rapport : prix, impôts et revente', () => {
       'href',
       '/projets/exemple/revente',
     );
+    // Prix jugé bon : la carte ne s'allonge plus d'une phrase sur la visite (la question reste dans Visite).
+    expect(within(carte("Est-ce que c'est cher ?")).getByText('Non.')).toBeInTheDocument();
+    expect(screen.queryByText(/Un prix aussi bas/)).not.toBeInTheDocument();
     // Les faux liens d'avant ont disparu.
     expect(screen.queryByText('Pourquoi ?')).not.toBeInTheDocument();
     expect(screen.queryByText('Comparer les 4 régimes')).not.toBeInTheDocument();

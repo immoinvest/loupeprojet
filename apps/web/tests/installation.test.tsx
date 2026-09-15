@@ -1,10 +1,25 @@
-import { act, render, screen } from '@testing-library/react';
+import { act, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { AppEnMemoire } from '@/App';
+import { detecterExtension } from '@/annonces/extension';
 import { creerSuiviInstallation, type FenetreInstallation } from '@/application';
-import { TEXTES_INSTALLATION } from '@/textes/application';
+import { clientMemoire } from '@/compte/memoire';
+import type { Utilisateur } from '@/compte/types';
+import { TEXTES_APPAREILS as T, TEXTES_INSTALLATION } from '@/textes/application';
+
+vi.mock('@/annonces/extension', () => ({
+  detecterExtension: vi.fn(),
+  lireParExtension: vi.fn(),
+}));
+
+const CAMILLE: Utilisateur = {
+  id: 'u_1',
+  nom: 'Camille Durand',
+  email: 'camille@example.org',
+  image: null,
+};
 
 /** Une fenêtre qui émet `beforeinstallprompt` à la demande. */
 function navigateurQuiPropose(): { fenetre: FenetreInstallation; proposer: () => void } {
@@ -24,25 +39,92 @@ function navigateurQuiPropose(): { fenetre: FenetreInstallation; proposer: () =>
   return { fenetre, proposer };
 }
 
-describe('Installer l’application', () => {
-  it('le bouton n’apparaît que si le navigateur propose l’installation, et disparaît après', async () => {
+function barreLaterale(): HTMLElement {
+  return screen.getAllByRole('complementary').at(-1)!;
+}
+
+async function carte(): Promise<HTMLElement> {
+  const titre = await screen.findByRole('heading', { level: 2, name: T.titre });
+  const section = titre.closest('section');
+  if (section === null) throw new Error('carte « Deklic sur vos appareils » introuvable');
+  return section;
+}
+
+/** Le menu ne porte plus ni l'extension ni l'installation : elles sont dans Mon compte. */
+function menuSansAppareils(): void {
+  const barre = barreLaterale();
+  expect(within(barre).queryByRole('link', { name: T.extension })).toBeNull();
+  expect(within(barre).queryByRole('button', { name: TEXTES_INSTALLATION.bouton })).toBeNull();
+  expect(within(barre).queryByRole('navigation', { name: 'Aide' })).toBeNull();
+}
+
+beforeEach(() => {
+  vi.mocked(detecterExtension).mockReset().mockResolvedValue(false);
+});
+
+describe('Mon compte : Deklic sur vos appareils', () => {
+  it('sans extension ni invite du navigateur : un lien vers chaque marche à suivre', async () => {
+    render(<AppEnMemoire chemin="/compte" compte={clientMemoire({ utilisateur: CAMILLE })} />);
+    const appareils = await carte();
+    expect(within(appareils).getByRole('heading', { level: 3, name: T.extension })).toBeVisible();
+    expect(within(appareils).getByRole('heading', { level: 3, name: T.application })).toBeVisible();
+    expect(within(appareils).getByRole('link', { name: T.installerExtension })).toHaveAttribute(
+      'href',
+      '/extension',
+    );
+    expect(within(appareils).getByRole('link', { name: T.commentInstaller })).toHaveAttribute(
+      'href',
+      '/extension',
+    );
+    expect(within(appareils).queryByText(T.installee)).toBeNull();
+    expect(detecterExtension).toHaveBeenCalledWith(window);
+    menuSansAppareils();
+  });
+
+  it('l’extension qui répond est dite installée', async () => {
+    vi.mocked(detecterExtension).mockResolvedValue(true);
+    render(<AppEnMemoire chemin="/compte" compte={clientMemoire({ utilisateur: CAMILLE })} />);
+    const appareils = await carte();
+    expect(await within(appareils).findByText(T.installee)).toBeInTheDocument();
+    expect(within(appareils).queryByRole('link', { name: T.installerExtension })).toBeNull();
+  });
+
+  it('le bouton n’apparaît que si le navigateur propose l’installation, puis « installée »', async () => {
     const utilisateur = userEvent.setup();
     const { fenetre, proposer } = navigateurQuiPropose();
-    render(<AppEnMemoire chemin="/projets" installation={creerSuiviInstallation(fenetre)} />);
-    await screen.findByRole('heading', { level: 1, name: 'Mes projets' });
-    expect(screen.queryByRole('button', { name: TEXTES_INSTALLATION.bouton })).toBeNull();
+    render(
+      <AppEnMemoire
+        chemin="/compte"
+        compte={clientMemoire({ utilisateur: CAMILLE })}
+        installation={creerSuiviInstallation(fenetre)}
+      />,
+    );
+    const appareils = await carte();
+    expect(
+      within(appareils).queryByRole('button', { name: TEXTES_INSTALLATION.bouton }),
+    ).toBeNull();
 
     act(() => {
       proposer();
     });
-    await utilisateur.click(screen.getByRole('button', { name: TEXTES_INSTALLATION.bouton }));
-    expect(await screen.findByText(/Gratuit · 1 projet/)).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: TEXTES_INSTALLATION.bouton })).toBeNull();
+    menuSansAppareils();
+    await utilisateur.click(
+      within(appareils).getByRole('button', { name: TEXTES_INSTALLATION.bouton }),
+    );
+    expect(await within(appareils).findByText(T.installee)).toBeInTheDocument();
+    expect(
+      within(appareils).queryByRole('button', { name: TEXTES_INSTALLATION.bouton }),
+    ).toBeNull();
+    expect(within(appareils).queryByRole('link', { name: T.commentInstaller })).toBeNull();
   });
 
-  it('sans suivi fourni, aucune proposition', async () => {
-    render(<AppEnMemoire chemin="/projets" />);
+  it('sans compte, le menu ne propose rien non plus, même quand le navigateur le permet', async () => {
+    const { fenetre, proposer } = navigateurQuiPropose();
+    render(<AppEnMemoire chemin="/projets" installation={creerSuiviInstallation(fenetre)} />);
     await screen.findByRole('heading', { level: 1, name: 'Mes projets' });
-    expect(screen.queryByRole('button', { name: TEXTES_INSTALLATION.bouton })).toBeNull();
+    act(() => {
+      proposer();
+    });
+    menuSansAppareils();
   });
 });
