@@ -169,7 +169,10 @@ describe('lecture des DPE des ventes', () => {
     expect(appels[0]?.origin).toBe('https://data.ademe.fr');
     expect(appels[0]?.searchParams.get('size')).toBe(String(MAX_DPE_PAR_PAQUET));
     expect(appels[0]?.searchParams.get('select')).toContain('conso_5_usages_par_m2_ep');
-    expect(appels[2]?.searchParams.get('identifiant_ban_in')?.split(',')).toHaveLength(20);
+    // Les paquets partent en parallèle (empreinte et cache asynchrones) : l'ordre des appels n'est pas garanti.
+    const paquets = appels.map((a) => a.searchParams.get('identifiant_ban_in')?.split(',') ?? []);
+    expect(paquets.map((p) => p.length).sort((a, b) => a - b)).toEqual([20, 50, 50]);
+    expect(new Set(paquets.flat()).size).toBe(120);
     expect(r.complet).toBe(true);
     expect(r.parCle.size).toBe(120);
     expect(r.parCle.get('13205_6659_00001')).toHaveLength(1);
