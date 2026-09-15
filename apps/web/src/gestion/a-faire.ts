@@ -17,6 +17,8 @@ type Donnees = Pick<EtatGestion, 'biens' | 'locataires' | 'locations' | 'paiemen
 export type ActionAFaire =
   | { readonly type: 'retard'; readonly ligne: LigneLoyer }
   | { readonly type: 'vacant'; readonly bien: BienGere }
+  /** Un bien acheté depuis une analyse avec emprunt, dont le prêt n'est pas encore enregistré. */
+  | { readonly type: 'pret'; readonly bien: BienGere }
   | { readonly type: 'email'; readonly locataire: Locataire }
   /** Vie du bail (B1) : alertes de conformité urgentes, puis révisions à valider. */
   | ActionBail;
@@ -26,13 +28,15 @@ export const A_FAIRE_VISIBLES = 3;
 
 /**
  * Dans l'ordre d'urgence : les loyers en retard du mois en cours (les plus anciennes échéances
- * d'abord), les biens sans location en cours ni à venir (par nom), puis les locataires en place
- * ou qui arrivent sans e-mail (par nom). Un ancien locataire sans e-mail n'en crée pas. Enfin, les
- * lignes de la vie du bail (`actionsBail`), calculées à part quand ses données sont chargées.
+ * d'abord), les biens sans location en cours ni à venir (par nom), les prêts à enregistrer (biens
+ * déjà triés, calculés par la page Argent), puis les locataires en place ou qui arrivent sans
+ * e-mail (par nom). Un ancien locataire sans e-mail n'en crée pas. Enfin, les lignes de la vie du
+ * bail (`actionsBail`), calculées à part quand ses données sont chargées.
  */
 export function actionsAFaire(
   donnees: Donnees,
   aujourdhui: string,
+  pretsAEnregistrer: readonly BienGere[] = [],
   bail: readonly ActionBail[] = [],
 ): readonly ActionAFaire[] {
   const retards = resumeDuMois(donnees, periodeDe(aujourdhui), aujourdhui)
@@ -45,7 +49,8 @@ export function actionsAFaire(
   const emails = groupesDeLocataires(donnees, aujourdhui)
     .enCeMoment.filter((ligne) => ligne.locataire.email === undefined)
     .map((ligne): ActionAFaire => ({ type: 'email', locataire: ligne.locataire }));
-  return [...retards, ...vacants, ...emails, ...bail];
+  const prets = pretsAEnregistrer.map((bien): ActionAFaire => ({ type: 'pret', bien }));
+  return [...retards, ...vacants, ...prets, ...emails, ...bail];
 }
 
 /** Une clé stable par action (un même locataire peut être en retard et sans e-mail). */
@@ -55,6 +60,8 @@ export function cleAction(action: ActionAFaire): string {
       return `retard-${action.ligne.location.id}`;
     case 'vacant':
       return `vacant-${action.bien.id}`;
+    case 'pret':
+      return `pret-${action.bien.id}`;
     case 'email':
       return `email-${action.locataire.id}`;
     case 'alerte': {

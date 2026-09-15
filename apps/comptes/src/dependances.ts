@@ -6,6 +6,8 @@ import { z } from 'zod';
 import { envoyeurJournal, envoyeurResend, type Envoyeur } from './courriel';
 import { ErreurConfiguration } from './erreurs';
 import { lireConfigFournisseurs, type ConfigFournisseurs } from './fournisseurs';
+import type { DepotArgent } from './gestion/argent/depot';
+import { depotArgentD1 } from './gestion/argent/depot-d1';
 import type { DepotBail } from './gestion/bail/depot';
 import { depotBailD1 } from './gestion/bail/depot-d1';
 import type { DepotGestion } from './gestion/depot';
@@ -48,6 +50,8 @@ export interface Dependances {
   readonly base: BetterAuthOptions['database'];
   /** Les données de gestion locative : les tables gestion_* de la même base D1. */
   readonly gestion: DepotGestion;
+  /** Dépenses et prêts des biens gérés : les tables de la migration 0007, lues par leurs seules routes. */
+  readonly argent: DepotArgent;
   /** DPE, révision et lettres (vie du bail) : les tables de la migration 0008 de la même base D1. */
   readonly bail: DepotBail;
   /** Les projets d'analyse synchronisés : la table projet de la même base D1. */
@@ -152,6 +156,7 @@ export function dependancesDepuisEnv(env: Bindings): Dependances {
     secret,
     base,
     gestion: depotD1(base),
+    argent: depotArgentD1(base),
     bail: depotBailD1(base),
     projets: depotProjetsD1(base),
     partages: depotPartagesD1(base, secret),

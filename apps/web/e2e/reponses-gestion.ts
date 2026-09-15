@@ -72,6 +72,48 @@ export async function simulerGestion(page: Page): Promise<void> {
     }),
   );
 
+  // Dépenses et prêts (G5-4, G5-1) : la taxe foncière du T2 Lices et son prêt, qui commence ce mois-ci.
+  await page.route('**/api/gestion/argent', (route) =>
+    route.fulfill({
+      json: {
+        depenses: [
+          {
+            id: 'depense-taxe',
+            bienId: 'bien-lices',
+            categorie: 'taxe_fonciere',
+            montant: 84_000,
+            date: aujourdhui,
+            libelle: 'Taxe foncière',
+            recuperable: false,
+            creeLe,
+            modifieLe: creeLe,
+          },
+          {
+            id: 'depense-assurance',
+            categorie: 'assurance',
+            montant: 1_200,
+            date: '2025-10-03',
+            recuperable: false,
+            recurrence: { frequence: 'mensuelle' },
+            creeLe,
+            modifieLe: creeLe,
+          },
+        ],
+        prets: [
+          {
+            bienId: 'bien-lices',
+            capital: 15_000_000,
+            tauxAnnuel: 0.0335,
+            dureeMois: 300,
+            debut: aujourdhui.slice(0, 7),
+            assuranceMensuelle: 3_125,
+            modifieLe: creeLe,
+          },
+        ],
+      },
+    }),
+  );
+
   // Vie du bail (B1) : DPE du T2 Lices et une lettre de révision déjà émise pour Julie.
   const bailleur = { nom: 'Camille Martin', adresse: '3 rue Paradis, 13006 Marseille' };
   const lettre = {

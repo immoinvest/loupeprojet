@@ -34,7 +34,7 @@
         "US-3 à US-5 web : client, contexte, cartes Conformité et Révision, À faire, lettre, e2e"
       ],
       "ecarts": [
-        "zone tendue en saisie seule (ADR-G27) : liste des communes non vérifiable cette nuit",
+        "zone tendue en saisie seule (ADR-G32) : liste des communes non vérifiable cette nuit",
         "AppEnMemoire utilise par défaut un client du bail « indisponible » : les tests existants de Gérer restent inchangés, comme la production avant la migration",
         "la carte Révision n'apparaît que si la vie du bail est chargée ; sans migration, seule la carte Conformité dit « Bientôt disponible »",
         "export JSON des nouvelles données non ajouté (l'export lit l'état existant ; A2 s'occupe de l'export)"
@@ -51,6 +51,6 @@
   "auto_revue": {
     "discovery": "trois objectifs de la fiche couverts ; zone tendue en saisie seule (source non vérifiable cette nuit), sans effet sur B1",
     "specs": "cinq stories Must, cas pièges testables (gel, indice attendu, demande tardive, mois payé, double clic), deux clics comptés",
-    "architecture": "ADR-G24 à G28 ; tables latérales et sous-routeur ; lot D1 conditionné ; une seule année d'IRL comparée (renonciation art. 17-1 I, à relire par Pierre)"
+    "architecture": "ADR-G29 à G33 (G24 à G28 pris par A1) ; tables latérales et sous-routeur ; lot D1 conditionné ; une seule année d'IRL comparée (renonciation art. 17-1 I, à relire par Pierre)"
   }
 }

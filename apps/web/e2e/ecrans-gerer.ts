@@ -94,6 +94,34 @@ export const ECRANS_GERER_BIENS: readonly Ecran[] = [
   },
 ];
 
+/** Les écrans ajoutés par `gerer-depenses-argent` (G5-4, G5-1) : Argent, une dépense, le prêt d'un bien. */
+export const ECRANS_GERER_ARGENT: readonly Ecran[] = [
+  {
+    nom: 'Argent',
+    chemin: '/gerer/argent',
+    ouvrir: async (page) => {
+      await expect(
+        page.getByRole('list', { name: 'Cash-flow des 12 derniers mois' }),
+      ).toBeVisible();
+    },
+  },
+  {
+    nom: 'Nouvelle dépense',
+    chemin: '/gerer/depenses/nouvelle?bien=bien-lices',
+    ouvrir: async (page) => {
+      await expect(page.getByRole('form', { name: 'Nouvelle dépense' })).toBeVisible();
+    },
+  },
+  {
+    nom: 'Prêt d’un bien',
+    chemin: '/gerer/biens/bien-baille',
+    ouvrir: async (page) => {
+      await page.getByRole('button', { name: 'Ajouter le prêt' }).click();
+      await expect(page.getByRole('form', { name: 'Le prêt du bien' })).toBeVisible();
+    },
+  },
+];
+
 /** Les écrans ajoutés par `gerer-bail-revision` (B1) : réglages de la révision, conformité, lettre. */
 export const ECRANS_GERER_BAIL: readonly Ecran[] = [
   {
@@ -121,5 +149,6 @@ export const ECRANS_GERER: readonly Ecran[] = [
   ...ECRANS_QUITTANCES_FICHES,
   ...ECRANS_GERER_BIENS,
   ...ECRANS_GERER_PARCOURS,
+  ...ECRANS_GERER_ARGENT,
   ...ECRANS_GERER_BAIL,
 ];

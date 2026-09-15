@@ -9,6 +9,10 @@ import { clientMemoire } from './compte/memoire';
 import { clientReseau } from './compte/reseau';
 import type { ClientCompte } from './compte/types';
 import { AppLayout } from './coque/AppLayout';
+import { ArgentProvider } from './gestion/argent/ArgentContext';
+import { clientArgentMemoire } from './gestion/argent/memoire';
+import { clientArgentReseau } from './gestion/argent/reseau';
+import type { ClientArgent } from './gestion/argent/types';
 import { BailProvider } from './gestion/bail/BailContext';
 import { clientBailIndisponible } from './gestion/bail/memoire';
 import { clientBailReseau } from './gestion/bail/reseau';
@@ -29,6 +33,8 @@ import { Extension } from './ecrans/Extension';
 import { Financement } from './ecrans/Financement';
 import { Fiscalite } from './ecrans/Fiscalite';
 import { AjouterMain } from './ecrans/gerer/AjouterMain';
+import { Argent } from './ecrans/gerer/argent/Argent';
+import { ModifierDepense, NouvelleDepense } from './ecrans/gerer/argent/PagesDepense';
 import { ImprimerLettre } from './ecrans/gerer/bail/ImprimerLettre';
 import { FicheBien } from './ecrans/gerer/FicheBien';
 import { FicheLocataire } from './ecrans/gerer/FicheLocataire';
@@ -100,6 +106,9 @@ export const routes: RouteObject[] = [
       { path: 'gerer/locataires/:id', element: <FicheLocataire /> },
       { path: 'gerer/biens/:id', element: <FicheBien /> },
       { path: 'gerer/pret/:id', element: <PretAGerer /> },
+      { path: 'gerer/argent', element: <Argent /> },
+      { path: 'gerer/depenses/nouvelle', element: <NouvelleDepense /> },
+      { path: 'gerer/depenses/:id', element: <ModifierDepense /> },
       { path: 'compte', element: <Compte /> },
       { path: 'partage', element: <Partage /> },
       { path: 'p/:id', element: <PartageCourt /> },
@@ -135,6 +144,8 @@ const CLIENT_COMPTE = clientReseau();
 /** Le client de la gestion locative : l'API /api/gestion du même worker, même origine. */
 const CLIENT_GESTION = clientGestionReseau();
 
+/** Dépenses et prêts des biens gérés : les routes Argent de la même API (ADR-G25). */
+const CLIENT_ARGENT = clientArgentReseau();
 /** La vie du bail (DPE, révision, lettres) : l'API /api/gestion/bail du même worker, même origine. */
 const CLIENT_BAIL = clientBailReseau();
 
@@ -156,13 +167,15 @@ export function App(): JSX.Element {
           <CompteProvider client={CLIENT_COMPTE}>
             <SynchroProvider client={CLIENT_PROJETS}>
               <GestionProvider client={CLIENT_GESTION}>
-                <BailProvider client={CLIENT_BAIL}>
-                  <InstallationProvider suivi={SUIVI_INSTALLATION}>
-                    <BrowserRouter>
-                      <Racine />
-                    </BrowserRouter>
-                  </InstallationProvider>
-                </BailProvider>
+                <ArgentProvider client={CLIENT_ARGENT}>
+                  <BailProvider client={CLIENT_BAIL}>
+                    <InstallationProvider suivi={SUIVI_INSTALLATION}>
+                      <BrowserRouter>
+                        <Racine />
+                      </BrowserRouter>
+                    </InstallationProvider>
+                  </BailProvider>
+                </ArgentProvider>
               </GestionProvider>
             </SynchroProvider>
           </CompteProvider>
@@ -182,6 +195,7 @@ export function AppEnMemoire({
   client = clientHorsLigne,
   compte,
   gestion,
+  argent,
   // Comme en production sans la migration 0008 : les écrans existants de Gérer restent inchangés.
   bail = clientBailIndisponible,
   projets,
@@ -193,6 +207,7 @@ export function AppEnMemoire({
   client?: ClientWorker;
   compte?: ClientCompte;
   gestion?: ClientGestion;
+  argent?: ClientArgent;
   bail?: ClientBail;
   projets?: ClientProjets;
   partage?: ClientPartage;
@@ -200,6 +215,7 @@ export function AppEnMemoire({
 }): JSX.Element {
   const clientCompte = useMemo(() => compte ?? clientMemoire(), [compte]);
   const clientGestion = useMemo(() => gestion ?? clientGestionMemoire(), [gestion]);
+  const clientArgent = useMemo(() => argent ?? clientArgentMemoire(), [argent]);
   const clientProjets = useMemo(() => projets ?? clientProjetsMemoire(), [projets]);
   const clientPartage = useMemo(() => partage ?? clientPartageMemoire(), [partage]);
   return (
@@ -209,13 +225,15 @@ export function AppEnMemoire({
           <CompteProvider client={clientCompte}>
             <SynchroProvider client={clientProjets} delaiMs={0}>
               <GestionProvider client={clientGestion} stockage={stockage}>
-                <BailProvider client={bail}>
-                  <InstallationProvider suivi={installation}>
-                    <MemoryRouter initialEntries={[chemin]}>
-                      <Racine />
-                    </MemoryRouter>
-                  </InstallationProvider>
-                </BailProvider>
+                <ArgentProvider client={clientArgent}>
+                  <BailProvider client={bail}>
+                    <InstallationProvider suivi={installation}>
+                      <MemoryRouter initialEntries={[chemin]}>
+                        <Racine />
+                      </MemoryRouter>
+                    </InstallationProvider>
+                  </BailProvider>
+                </ArgentProvider>
               </GestionProvider>
             </SynchroProvider>
           </CompteProvider>

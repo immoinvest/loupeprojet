@@ -84,19 +84,18 @@ export function CarteConformite({
       {legal !== null && (
         <>
           <div>
-            <Ligne
-              libelle={T.dpe}
-              valeur={
-                <span className="inline-flex flex-wrap items-center justify-end gap-2">
-                  {dpeEnLettres(legal.dpeClasse, legal.dpeDate)}
-                  {legal.provenance !== 'aucune' && (
-                    <Pastille ton="neutre" compacte>
-                      {PROVENANCES[legal.provenance]}
-                    </Pastille>
-                  )}
-                </span>
-              }
-            />
+            {/* Valeur longue (« Classe D, réalisé le 1er mars 2024 ») : elle passe à la ligne sur téléphone. */}
+            <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 border-b border-bordure-douce py-2 text-[15px]">
+              <span>{T.dpe}</span>
+              <span className="flex min-w-0 flex-wrap items-center justify-end gap-2 text-right">
+                <span>{dpeEnLettres(legal.dpeClasse, legal.dpeDate)}</span>
+                {legal.provenance !== 'aucune' && (
+                  <Pastille ton="neutre" compacte>
+                    {PROVENANCES[legal.provenance]}
+                  </Pastille>
+                )}
+              </span>
+            </div>
             <Ligne libelle={T.zoneTendue} valeur={zoneEnLettres(legal.zoneTendue)} />
           </div>
           {ouvert && (

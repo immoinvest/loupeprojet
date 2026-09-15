@@ -119,6 +119,7 @@ describe('migration 0002 : gestion locative', () => {
       '0004_projets.sql',
       '0005_gestion_changements.sql',
       '0006_partage.sql',
+      '0007_gestion_depenses.sql',
       '0008_gestion_bail.sql',
     ]);
   });
@@ -227,12 +228,14 @@ describe('migration 0003 : paiements partiels, bailleur, documents', () => {
       'gestion_bien_legal',
       'gestion_changement',
       'gestion_colocataire',
+      'gestion_depense',
       'gestion_document',
       'gestion_locataire',
       'gestion_location',
       'gestion_location_revision',
       'gestion_paiement',
       'gestion_preference',
+      'gestion_pret',
       'partage',
       'projet',
       'session',
@@ -246,6 +249,8 @@ describe('migration 0003 : paiements partiels, bailleur, documents', () => {
       'gestion_bien_userId_idx',
       'gestion_changement_userId_idx',
       'gestion_colocataire_userId_idx',
+      'gestion_depense_bienId_idx',
+      'gestion_depense_userId_idx',
       'gestion_document_userId_idx',
       'gestion_locataire_userId_idx',
       'gestion_location_bienId_idx',
@@ -253,6 +258,7 @@ describe('migration 0003 : paiements partiels, bailleur, documents', () => {
       'gestion_location_userId_idx',
       'gestion_paiement_location_periode_idx',
       'gestion_paiement_userId_idx',
+      'gestion_pret_userId_idx',
       'partage_expireLe_idx',
       'partage_ipHash_creeLe_idx',
       'projet_userId_revision_idx',
@@ -320,5 +326,91 @@ describe('migration 0003 : paiements partiels, bailleur, documents', () => {
     );
     base.prepare('delete from gestion_location where id = ?').run('l1');
     expect(base.prepare('select count(*) as n from gestion_changement').get()).toEqual({ n: 0 });
+  });
+
+  it('migration 0007 : additive, les tables existantes restent identiques ; dépenses et prêt partent avec le bien et le compte', () => {
+    const base = baseDeG1a();
+    appliquerMigrations(base, 6);
+    const schemaAvant = base
+      .prepare(
+        "select name, sql from sqlite_master where name not like '%gestion_depense%' and name not like '%gestion_pret%' order by name",
+      )
+      .all();
+    const donneesAvant = base.prepare('select * from gestion_location').all();
+    appliquerMigrations(base, 7);
+    expect(
+      base
+        .prepare(
+          "select name, sql from sqlite_master where name not like '%gestion_depense%' and name not like '%gestion_pret%' order by name",
+        )
+        .all(),
+    ).toEqual(schemaAvant);
+    expect(base.prepare('select * from gestion_location').all()).toEqual(donneesAvant);
+
+    const depense = base.prepare(
+      'insert into gestion_depense (id, userId, bienId, categorie, montant, date, recuperable, creeLe, modifieLe) values (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+    );
+    depense.run('d1', 'u1', 'b1', 'taxe_fonciere', 84_000, '2026-10-15', 0, H, H);
+    depense.run('d2', 'u1', null, 'gestion', 30_000, '2026-10-02', 0, H, H);
+    expect(() => depense.run('d3', 'u1', 'inconnu', 'autre', 1, '2026-10-02', 0, H, H)).toThrow(
+      /FOREIGN KEY constraint failed/,
+    );
+    const pret = base.prepare(
+      'insert into gestion_pret (bienId, userId, capital, tauxAnnuel, dureeMois, debut, assuranceMensuelle, modifieLe) values (?, ?, ?, ?, ?, ?, ?, ?)',
+    );
+    pret.run('b1', 'u1', 15_000_000, 0.0335, 300, '2026-11', 3_125, H);
+    expect(() => pret.run('b1', 'u1', 1, 0, 1, '2026-11', 0, H)).toThrow(
+      /UNIQUE constraint failed/,
+    );
+
+    base.prepare('delete from gestion_bien where id = ?').run('b1');
+    expect(base.prepare('select id from gestion_depense').all()).toEqual([{ id: 'd2' }]);
+    expect(base.prepare('select count(*) as n from gestion_pret').get()).toEqual({ n: 0 });
+    base.prepare('delete from "user" where id = ?').run('u1');
+    expect(base.prepare('select count(*) as n from gestion_depense').get()).toEqual({ n: 0 });
+  });
+
+  it('migration 0008 : additive, les tables existantes restent identiques ; DPE, révision et lettre partent avec le bien, la location et le compte', () => {
+    const base = baseDeG1a();
+    appliquerMigrations(base, 7);
+    const sansBail =
+      "select name, sql from sqlite_master where name not like '%gestion_bien_legal%' and name not like '%gestion_location_revision%' and name not like '%gestion_bail_lettre%' order by name";
+    const schemaAvant = base.prepare(sansBail).all();
+    const donneesAvant = base.prepare('select * from gestion_location').all();
+    appliquerMigrations(base);
+    expect(base.prepare(sansBail).all()).toEqual(schemaAvant);
+    expect(base.prepare('select * from gestion_location').all()).toEqual(donneesAvant);
+
+    base
+      .prepare(
+        'insert into gestion_bien_legal (bienId, userId, dpeClasse, dpeDate, zoneTendue, modifieLe) values (?, ?, ?, ?, ?, ?)',
+      )
+      .run('b1', 'u1', 'D', null, null, H);
+    base
+      .prepare(
+        'insert into gestion_location_revision (locationId, userId, active, anniversaire, trimestre, formeBail, derniereRevision, modifieLe) values (?, ?, ?, ?, ?, ?, ?, ?)',
+      )
+      .run('l1', 'u1', 1, '2026-10-01', '2026-T2', 'classique', null, H);
+    const lettre = base.prepare(
+      'insert into gestion_bail_lettre (id, userId, locationId, cle, numero, anniversaire, contenu, emisLe) values (?, ?, ?, ?, ?, ?, ?, ?)',
+    );
+    lettre.run('v1', 'u1', 'l1', 'revision:l1:2027-10-01', 'V-1', '2027-10-01', '{}', H);
+    expect(() =>
+      lettre.run('v2', 'u1', 'l1', 'revision:l1:2027-10-01', 'V-1', '2027-10-01', '{}', H),
+    ).toThrow(/UNIQUE constraint failed/);
+    expect(() =>
+      base
+        .prepare('insert into gestion_bien_legal (bienId, userId, modifieLe) values (?, ?, ?)')
+        .run('inconnu', 'u1', H),
+    ).toThrow(/FOREIGN KEY constraint failed/);
+
+    base.prepare('delete from gestion_bien where id = ?').run('b1');
+    for (const table of [
+      'gestion_bien_legal',
+      'gestion_location_revision',
+      'gestion_bail_lettre',
+    ]) {
+      expect(base.prepare(`select count(*) as n from ${table}`).get()).toEqual({ n: 0 });
+    }
   });
 });

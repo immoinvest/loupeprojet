@@ -1,3 +1,4 @@
+export * from './argent';
 export * from './bail';
 export * from './baux';
 export * from './conformite';
@@ -6,9 +7,12 @@ export * from './lettre';
 export * from './regles-bail';
 export * from './creation';
 export * from './dates';
+export * from './depenses';
 export * from './documents';
 export * from './loyers';
 export * from './mois';
 export * from './montants';
+export * from './pret';
 export * from './regles';
+export * from './regles-argent';
 export * from './schemas';

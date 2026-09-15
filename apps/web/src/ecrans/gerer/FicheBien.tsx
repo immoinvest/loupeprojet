@@ -16,6 +16,7 @@ import { statutDuBien, TEXTES_FICHE as F, TONS_BIEN } from '@/textes/gerer-fiche
 import { titreLouer } from '@/textes/gerer-louer';
 import { TEXTES_PARCOURS as P } from '@/textes/gerer-parcours';
 
+import { CarteArgent } from './argent/CarteArgent';
 import { CarteConformite } from './bail/CarteConformite';
 import { CarteRevision } from './bail/CarteRevision';
 import { EcranAttente } from './EcranAttente';
@@ -109,6 +110,8 @@ function Fiche({
           {titreLouer(vacant)}
         </LienBouton>
       </div>
+
+      <CarteArgent bien={bien} donnees={donnees} />
 
       <FriseMois
         frise={friseDuBien(donnees, bien.id, aujourdhui)}

@@ -20,7 +20,7 @@ export const TEXTES_CONFORMITE = {
   titre: 'Conformité',
   dpe: 'DPE',
   zoneTendue: 'Zone tendue',
-  modifier: 'Modifier',
+  modifier: 'Modifier le DPE',
   formulaire: 'Modifier la conformité',
   classe: 'Classe du DPE',
   dateDpe: 'Date du DPE',

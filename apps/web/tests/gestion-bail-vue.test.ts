@@ -143,7 +143,7 @@ describe('alertes et actions de la vie du bail', () => {
     const revision = actions[2];
     expect(revision?.type === 'revision' ? revision.locataire : 'autre').toBeUndefined();
 
-    const toutes = actionsAFaire(etat, AUJOURDHUI, actions);
+    const toutes = actionsAFaire(etat, AUJOURDHUI, [], actions);
     expect(toutes.slice(-3).map(cleAction)).toEqual([
       'alerte-bien-baille-dpe_perime',
       'alerte-bien-lices-location_interdite',
