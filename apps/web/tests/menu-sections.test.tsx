@@ -110,7 +110,7 @@ describe('menu à deux sections', () => {
     expect(ligne.parentElement).not.toHaveClass('bg-accent-doux');
   });
 
-  it('connecté : Ajouter un bien, Loyers du mois avec les retards, puis Tous les loyers', async () => {
+  it('connecté : « Mes biens · N » et son « + », Loyers du mois avec les retards, Tous les loyers, Mes locataires', async () => {
     render(
       <AppEnMemoire
         chemin="/projets"
@@ -119,10 +119,13 @@ describe('menu à deux sections', () => {
       />,
     );
     const gerer = await screen.findByRole('navigation', { name: 'Gérer' });
-    expect(within(gerer).getByRole('link', { name: 'Ajouter un bien' })).toHaveAttribute(
-      'href',
-      '/gerer/ajouter',
-    );
+    // Une seule ligne en tête : le libellé ouvre Mes biens, le « + » ajoute un bien.
+    await within(gerer).findByRole('link', { name: 'Mes biens · 2' });
+    const liens = within(gerer).getAllByRole('link');
+    expect(liens[0]).toHaveAccessibleName('Mes biens · 2');
+    expect(liens[1]).toHaveAccessibleName('Ajouter un bien');
+    expect(liens[1]).toHaveAttribute('href', '/gerer/ajouter');
+    expect(liens[1]).toHaveAttribute('title', 'Ajouter un bien');
     const loyers = await within(gerer).findByRole('link', { name: /Loyers du mois/ });
     expect(loyers).toHaveAttribute('href', '/gerer');
     expect(await within(loyers).findByLabelText('1 loyer en retard')).toHaveTextContent('1');
@@ -139,6 +142,23 @@ describe('menu à deux sections', () => {
     expect(within(gerer).getByRole('link', { name: 'Mes locataires' })).toHaveAttribute(
       'href',
       '/gerer/locataires',
+    );
+  });
+
+  it('connecté, sur la fiche d’un bien : la ligne « Mes biens » reste surlignée', async () => {
+    render(
+      <AppEnMemoire
+        chemin="/gerer/biens/bien-lices"
+        compte={clientMemoire({ utilisateur: CAMILLE })}
+        gestion={clientGestionMemoire({ etat: ETAT_SEPTEMBRE })}
+      />,
+    );
+    const gerer = await screen.findByRole('navigation', { name: 'Gérer' });
+    const ligne = await within(gerer).findByRole('link', { name: 'Mes biens · 2' });
+    expect(ligne).toHaveAttribute('aria-current', 'page');
+    expect(ligne.parentElement).toHaveClass('bg-accent-doux');
+    expect(within(gerer).getByRole('link', { name: 'Ajouter un bien' })).not.toHaveAttribute(
+      'aria-current',
     );
   });
 });

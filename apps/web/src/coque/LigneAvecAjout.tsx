@@ -15,16 +15,19 @@ export function LigneAvecAjout({
   libelle,
   versAjout,
   libelleAjout,
+  end = true,
 }: {
   readonly vers: string;
   readonly libelle: string;
   readonly versAjout: string;
   readonly libelleAjout: string;
+  /** `false` : les pages sous `vers` (la fiche d'un bien) gardent la ligne active. */
+  readonly end?: boolean;
 }): JSX.Element {
-  const ligneActive = useMatch({ path: vers, end: true }) !== null;
+  const ligneActive = useMatch({ path: vers, end }) !== null;
   return (
     <div className={classeLigneAvecAjout(ligneActive)}>
-      <NavLink to={vers} end className={classeLibelleLigne}>
+      <NavLink to={vers} end={end} className={classeLibelleLigne}>
         <span className="flex-1 truncate">{libelle}</span>
       </NavLink>
       <NavLink
