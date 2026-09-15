@@ -58,12 +58,13 @@ describe('Comparer', () => {
     expect(screen.getByRole('checkbox', { name: /Écarté cher/ })).not.toBeChecked();
     expect(colonnes()).toEqual(['Marseille', 'Lyon rentable']);
     const table = screen.getByRole('table');
-    expect(within(table).getAllByRole('row')).toHaveLength(16);
+    expect(within(table).getAllByRole('row')).toHaveLength(17);
     expect(within(table).getByRole('link', { name: 'Marseille' })).toHaveAttribute(
       'href',
       '/projets/marseille',
     );
-    expect(screen.getAllByText('Meublé au réel · 10 ans')).toHaveLength(2);
+    // Sous l'impôt du régime retenu et sous l'impôt total, pour chacun des deux projets.
+    expect(screen.getAllByText('Meublé au réel · 10 ans')).toHaveLength(4);
 
     // Tri par cash-flow : le meilleur d'abord, puis l'inverse.
     await utilisateur.click(screen.getByRole('button', { name: 'Cash-flow mensuel' }));

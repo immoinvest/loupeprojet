@@ -40,8 +40,8 @@ src/
 ├── financement/             frais-acquisition (base = prix retenu − honoraires acquéreur), mensualite, amortissement (différés), taeg, effort (HCSF), ira
 ├── location/                loyerMensuelHc, loyerMensuelReference, defautsPourMode (valeurs de départ par type), vacanceSemaines, tauxProportionnel
 ├── cashflow/                recettes (5 types : loyers bruts, charges récupérées, vacance, nuitées, séjours), charges (par régime et par type), point mort, couverture, projection annuelle
-├── fiscalite/               amortissements, deficits, interets, micro-bic, lmnp-reel (39 C), micro-foncier, nu-reel, index (4 régimes)
-├── revente/                 valeur, plus-value (abattements, surtaxe, réintégration), index
+├── fiscalite/               amortissements, deficits, interets, micro-bic, lmnp-reel (39 C), micro-foncier, nu-reel (ProjectionRegime), bilan (revente, impôt total, reste au total), index (4 régimes, meilleurAuTotal)
+├── revente/                 valeur, plus-value (abattements, surtaxe, réintégration), par-regime (reventeDuRegime, reventeParRegime), index (calculerRevente = régime retenu)
 ├── rendement/               rendements, tri, enrichissement, index
 ├── verdict/                 feux (5), vigilance (codes financiers), index
 ├── estimation/              estimerPrix, confiance, travaux (estimerTravaux, recalerTravaux, choisirTravaux : barème `regles.travaux`, `achat.travauxChoix`)
