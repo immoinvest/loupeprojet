@@ -38,6 +38,10 @@
       "status": "completed",
       "note": "aucun appel réseau, aucune donnée, aucun HTML injecté ; le lien de l'annonce garde le contrôle surUnPortail + resoudreAnnonce, target _blank avec rel noopener noreferrer"
     },
-    "push": { "status": "pending" }
+    "push": {
+      "status": "in_progress",
+      "pr": "https://github.com/immoinvest/loupeprojet/pull/98",
+      "note": "fusion automatique armée (protection de master vérifiée : verify requis, branche à jour, administrateurs) ; master (#96 compte-appareils) fusionnée dans la branche, conflits de CLAUDE.md et du registre résolus en gardant les deux côtés ; lint complet vert, typecheck vert ; e2e lancés avec un serveur démarré à l'avance (le webServer de 60 s échouait sous charge)"
+    }
   }
 }
