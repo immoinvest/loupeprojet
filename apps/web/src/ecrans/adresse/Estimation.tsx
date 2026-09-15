@@ -1,4 +1,4 @@
-import { ETATS, type CodeCorrection, type EtatBien } from '@loupe/moteur';
+import { ETATS, recalerTravaux, type CodeCorrection, type EtatBien } from '@loupe/moteur';
 import type { JSX } from 'react';
 
 import { Carte, Pastille } from '@/composants/ui';
@@ -17,6 +17,7 @@ import {
   SOURCES_CORRECTIONS,
   TON_CONFIANCE,
 } from '@/textes/estimation';
+import { phraseTravauxEtat } from '@/textes/travaux';
 
 const CELLULE = 'border-b border-bordure-douce px-3 py-2 text-left align-top';
 
@@ -39,13 +40,18 @@ export function CarteEstimation(): JSX.Element {
     );
   }
 
+  // Les travaux qui suivent l'estimation suivent aussi l'état choisi ici.
   const choisirEtat = (etat: EtatBien): void => {
-    mettreAJour(enregistre.id, {
-      ...projet,
-      bien: { ...projet.bien, etat },
-      provenance: { ...projet.provenance, 'bien.etat': 'utilisateur' },
-    });
+    mettreAJour(
+      enregistre.id,
+      recalerTravaux({
+        ...projet,
+        bien: { ...projet.bien, etat },
+        provenance: { ...projet.provenance, 'bien.etat': 'utilisateur' },
+      }),
+    );
   };
+  const travauxEtat = e.etatSuppose ? null : phraseTravauxEtat(resultats.travaux);
 
   const basculer = (code: CodeCorrection): void => {
     const ignorees = projet.estimation.correctionsIgnorees;
@@ -101,6 +107,7 @@ export function CarteEstimation(): JSX.Element {
           );
         })}
       </div>
+      {travauxEtat !== null && <p className="m-0 text-sm text-encre-2">{travauxEtat}</p>}
 
       {e.corrections.length === 0 ? (
         <p className="m-0 text-sm text-encre-2">{PHRASES_ESTIMATION.aucuneCorrection}</p>
