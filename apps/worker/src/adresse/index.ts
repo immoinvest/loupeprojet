@@ -1,10 +1,8 @@
 export {
-  adresseDe,
   analyserAdresse,
   estComparable,
   GROUPES,
   groupesDe,
-  MAX_VENTES_PROCHES,
   MIN_VENTES_PENTE,
   ORDRE_REFERENCE,
   PENTE_MIN,
@@ -23,8 +21,33 @@ export {
   type Periode,
   type Reference,
   type StatistiquesPrix,
-  type VenteProche,
+  type VenteSituee,
 } from './analyse';
+export {
+  adresseDe,
+  MAX_VENTES_PROCHES,
+  ventesProchesDe,
+  type VenteProche,
+  type VentesProches,
+} from './ventes-proches';
+export {
+  avecDpe,
+  candidatsDepuisAdeme,
+  cleBanVente,
+  FENETRE_DPE_MOIS,
+  lireDpeVentes,
+  MAX_DPE_PAR_PAQUET,
+  MAX_PAQUETS_DPE,
+  moisAvant,
+  NUMERO_FISCAL_MIN,
+  rapprocherDpe,
+  TAILLE_PAQUET_DPE,
+  TOLERANCE_SURFACE_DPE_VENTE,
+  TTL_DPE_VENTES_SECONDES,
+  type DpeCandidat,
+  type DpeDesVentes,
+  type DpeVente,
+} from './dpe-ventes';
 export {
   anneauxDe,
   boiteAutour,
