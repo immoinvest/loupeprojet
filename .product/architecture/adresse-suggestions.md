@@ -34,6 +34,16 @@ ChampAdresse (Combobox de S3)
 | `ecrans/Adresse.tsx`                 | Formulaire seulement : `ChampAdresse`, choix → `choisir(suggestion)` ; `chercher()` garde le géocodage et le message cadastre pour un numéro ≥ 9000.                                                                                                                                                                                                               |
 | `textes/adresse.ts`                  | Phrases : cadastre, sans numéro, aucune suggestion, indisponible, contexte.                                                                                                                                                                                                                                                                                        |
 
+## Écarts constatés pendant l'implémentation
+
+- **Pas de `ttlSecondes: 0`** : la fiche 13 (PR #81) a livré l'option `enCache(parametres)` des services ; `adresses` la règle à `false` (aucune lecture ni écriture KV), `proxy.ts` n'est pas modifié.
+- **Débit** : `limiterDebit` accepte un limiteur ou une fonction « chemin → limiteur » ; `/proxy/*` choisit `limiteurSuggestions` pour `/proxy/adresses`. Le binding `LIMITEUR_SUGGESTIONS` est facultatif (repli sur `LIMITEUR`) : un Worker déployé sans lui reste correct, et les environnements de test existants n'ont pas changé.
+- **Contexte de l'écran** : le projet enregistré ne garde ni code postal ni ville (seulement `bien.departement`). `ContexteAdresse` = `{ departement, adresse? }` : les suggestions du département du projet passent d'abord (`dansLeDepartement`, qui réutilise `departementDuCodePostal`), la phrase d'aide dit « Suggestions d'abord dans le département 13. », la commune du cadastre vient de la première suggestion située, sinon de l'adresse enregistrée. Biais de position : le point de l'adresse enregistrée.
+- **`Adresse.tsx` sous 300 lignes** : le choix (rue en attente, note, `chercher`, `choisir`, `numeroDeRue`) est dans `ecrans/adresse/useChoixAdresse.ts`.
+- **Accessibilité** : l'annonce du Combobox sans résultat est courte (« Aucune suggestion ») ; la phrase complète est affichée sous le champ et le décrit (`aria-describedby`).
+- **Numéro inconnu de la BAN pour une rue choisie** : analyse au point de la rue avec ce numéro et le code de voie de la rue (groupes « même côté » et « en face ») ; numéro fiscal → message du cadastre.
+- Worker **0.12.0** (0.11.0 était déjà pris par la fiche 13, non déployée).
+
 ## Décisions
 
 - Suggestions BAN sans KV ni Cache API (réponses rapides, pas d'état à gérer) ; cache navigateur 5 min.

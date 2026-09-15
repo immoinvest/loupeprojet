@@ -1,6 +1,6 @@
 # 21 — Estimation : l'adresse du bien avec suggestions
 
-Statut : `idée` · Notée le 14/09/2026 · Dépend de : rien ; à coordonner avec 13 (champ « Commune » du formulaire, même composant) et 14 (adresse en tête de l'onglet) · Taille : une session
+Statut : `livrée` (15/09/2026, feature `adresse-suggestions` : [discovery](../features/adresse-suggestions-discovery.md), [specs](../specs/adresse-suggestions-specs.md), [architecture](../architecture/adresse-suggestions.md)) · Notée le 14/09/2026 · Dépend de : rien ; à coordonner avec 13 (champ « Commune » du formulaire, même composant) et 14 (adresse en tête de l'onglet) · Taille : une session
 
 ## La demande de Pierre
 

@@ -23,13 +23,29 @@
       "output": ".product/architecture/adresse-suggestions.md"
     },
     "implement": {
-      "status": "in_progress",
-      "stories_completed": 1,
+      "status": "completed",
+      "stories_completed": 5,
       "stories_total": 5,
-      "commits": []
+      "commits": [
+        { "etape": "docs", "hash": "59509cd" },
+        { "etape": "US-1 worker /marche/adresses-dvf", "hash": "39a0c82" },
+        { "etape": "US-2 worker /proxy/adresses + limiteur dédié", "hash": "0d45020" },
+        { "etape": "US-3, US-4 web suggestions et cadastre", "hash": "62e1daa" },
+        { "etape": "US-5 e2e", "hash": "915db75" }
+      ]
     },
-    "qa_tests": { "status": "pending" },
-    "security": { "status": "pending" },
+    "refactor": {
+      "status": "completed",
+      "note": "choix de l'adresse extrait dans ecrans/adresse/useChoixAdresse.ts (Adresse.tsx sous 300 lignes) ; conversion géocodage → AdresseBien factorisée"
+    },
+    "qa_tests": {
+      "status": "completed",
+      "note": "Worker : 181 tests, couverture 100 % ; web : logique pure suggestions.ts 100 %, 6 tests d'écran nouveaux, 3 anciens inchangés et verts ; e2e adresse-suggestions.spec.ts vert sur ordinateur, téléphone et tablette"
+    },
+    "security": {
+      "status": "completed",
+      "note": "aucune écriture KV par frappe ; paramètres validés par Zod (texte 3-200, code INSEE, limite 1-10) ; réponses revalidées par Zod côté web ; libellés rendus comme texte ; journal sans le texte tapé ; limite de débit dédiée"
+    },
     "push": { "status": "pending" }
   },
   "prerequis": {
