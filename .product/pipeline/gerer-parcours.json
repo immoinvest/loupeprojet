@@ -48,7 +48,12 @@
       ],
       "notes": "machine chargée (autre session Vitest, CPU 100 %) : tests d'écran lancés fichier par fichier sur un seul processus ; délais de 10 s ajoutés aux premiers rendus des tests Fiche et Loyers ; vrai défaut trouvé par les tests : nom accessible du lien « Louer » de Mes biens (espace perdue avant le sr-only)"
     },
-    "qa_tests": { "status": "pending" },
+    "qa_tests": {
+      "status": "completed",
+      "fusion": "b636531a fusion de master (28 commits : site vitrine, menu lisible, correctif impôt global) ; conflits de architecture-overview, features-registry et functional-spec résolus en reprenant master puis en y reportant G1d ; npm ci refait",
+      "verification": "comme la CI le 15/09/2026 à 21 h 33 : lint, format, typecheck, 328 fichiers et 2 760 tests avec les seuils de couverture, build de tous les espaces",
+      "incident": "premier passage tué à 17 h 28 pendant les tests (code 0x40010004), shells indisponibles ensuite ; relancé après la reprise de session"
+    },
     "security": {
       "status": "completed",
       "score": "98/100",
