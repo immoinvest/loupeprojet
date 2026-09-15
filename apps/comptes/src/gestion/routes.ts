@@ -18,7 +18,10 @@ import type { Dependances } from '../dependances';
 import { messageDe, reponseErreur } from '../erreurs';
 import { acces, type EnvGestion } from './acces';
 import { routeurArgent } from './argent/routes';
+import { routeurBail } from './bail/routes';
 import { ErreurGestion, estTableAbsente } from './depot';
+import { declencheursEnvois } from './envois/declencheurs';
+import { routeurEnvois } from './envois/routes';
 
 /** Un corps de requête plus gros est refusé avant d'être lu (l'instantané d'un projet pèse quelques Ko). */
 export const TAILLE_MAX_OCTETS = 64 * 1024;
@@ -60,6 +63,9 @@ export function routeurGestion(
       onError: () => reponseErreur(413, 'CORPS_TROP_GROS'),
     }),
   );
+  // Quittances envoyées par e-mail (quittances-auto) : déclencheurs et routes, sans toucher aux routes ci-dessous.
+  app.use('*', declencheursEnvois(deps));
+  app.route('/envois', routeurEnvois(deps));
 
   app.get('/etat', async (c) => c.json(await deps.gestion.etat(c.get('userId'))));
 
@@ -152,6 +158,8 @@ export function routeurGestion(
 
   // Dépenses et prêt d'un bien : leurs propres routes et leur propre 503 (G5-4, G5-1).
   app.route('/', routeurArgent(deps));
+  // Vie du bail (B1) : DPE, révision, lettres, dans leurs propres tables (migration 0008).
+  app.route('/bail', routeurBail(deps));
 
   app.onError((erreur, c) => {
     if (erreur instanceof ErreurGestion) {

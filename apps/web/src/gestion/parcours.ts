@@ -12,6 +12,8 @@ export const CHEMIN_MES_BIENS = '/gerer/biens';
 export const CHEMIN_MES_LOCATAIRES = '/gerer/locataires';
 export const CHEMIN_NOUVEAU_LOCATAIRE = '/gerer/locataires/nouveau';
 export const CHEMIN_LOYERS = '/gerer/loyers';
+/** La page publique où le locataire accepte les quittances par e-mail ; le jeton suit dans le fragment. */
+export const CHEMIN_ACCORD = '/accord';
 
 function avecRecherche(
   chemin: string,
@@ -106,6 +108,27 @@ export function lienDepense(id: string, retour?: string): string {
 /** Une quittance ou un reçu, avec la page où revenir. */
 export function lienDocument(id: string, retour: string): string {
   return avecRecherche(`/gerer/documents/${encodeURIComponent(id)}`, { retour });
+}
+
+/** Une lettre de révision du loyer (B1), avec la page où revenir. */
+export function lienLettre(id: string, retour: string): string {
+  return avecRecherche(`/gerer/lettres/${encodeURIComponent(id)}`, { retour });
+}
+
+/** La carte « Conformité » de la fiche d'un bien. */
+export function lienConformite(bienId: string): string {
+  return `${lienFicheBien(bienId)}#${ANCRE_CONFORMITE}`;
+}
+
+/** La carte « Révision du loyer » d'une location, sur la fiche de son bien. */
+export function lienRevision(bienId: string, locationId: string): string {
+  return `${lienFicheBien(bienId)}#${ancreRevision(locationId)}`;
+}
+
+export const ANCRE_CONFORMITE = 'conformite';
+
+export function ancreRevision(locationId: string): string {
+  return `revision-${locationId}`;
 }
 
 /** La page affichée, telle qu'on la passe en `retour`. */

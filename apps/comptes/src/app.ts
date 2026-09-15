@@ -5,6 +5,7 @@ import type { Dependances } from './dependances';
 import { reponseErreur } from './erreurs';
 import { disponibles } from './fournisseurs';
 import { garde } from './garde';
+import { routeurAccord } from './gestion/envois/public';
 import { routeurGestion } from './gestion/routes';
 import { routeurPartage } from './partage/routes';
 import { routeurProjets } from './projets/routes';
@@ -38,6 +39,9 @@ export function creerApp(deps: Dependances): Hono {
 
   // Liens de partage courts, sans compte (ADR-009) : même base, sans garde de session.
   app.route('/api/partage', routeurPartage(deps));
+
+  // Accord du locataire pour les quittances par e-mail, sans compte, par lien signé (ADR-G41).
+  app.route('/api/accord', routeurAccord(deps));
 
   app.notFound(() => reponseErreur(404, 'INTROUVABLE'));
   app.onError((erreur, c) => {

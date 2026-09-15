@@ -1,0 +1,36 @@
+{
+  "feature": "quittances-auto",
+  "session": "C1, nuit du 15-16/09/2026",
+  "branche": "feat/quittances-auto",
+  "migration": "0009_gestion_envois.sql",
+  "etapes": {
+    "discovery": "valide (auto-revue)",
+    "specs": "valide (auto-revue)",
+    "architecture": "valide (auto-revue) : .product/architecture/quittances-auto.md",
+    "implement": "fait (5 stories commitées, découpage de taches.ts)",
+    "qa": "fait en local : lint, format, typecheck, build, 2 854 tests, couverture 100 % sur apps/comptes/src et packages/gestion ; couverture web complète relancée ; Playwright CI=1 responsive (12) et gerer-parcours + accueil (12)",
+    "securite": "fait : HTML des e-mails échappé, jetons HMAC à usage unique dans le fragment, Origin exigé sur la page publique, aucune adresse ni nom dans les journaux, aucun secret dans le code, aucun dangerouslySetInnerHTML",
+    "cleanup": "fait : docs communes (CLAUDE.md, README, registre, specs, vue d'ensemble), .dev.vars.example",
+    "pr": "en attente de la file vide (PR #103 d'une autre session ouverte)"
+  },
+  "stories": {
+    "US-1": "fait — 2cf75ede (règles pures, 100 % de couverture, article 21 vérifié sur Légifrance)",
+    "US-2": "fait — 777ec64c (migration 0009 additive, preuve sans migration)",
+    "US-3": "fait — 49e11ec8 (envoyeur, gabarits par instantané, PDF sans bibliothèque, jetons HMAC)",
+    "US-4": "fait — 777ec64c (API des envois, page publique, déclencheurs, bailleur par bien)",
+    "US-5": "fait — 98e6aa16 (écrans web, trois écrans e2e)"
+  },
+  "mesures": {
+    "bundleComptes": "2660 Kio bruts, 468 Kio compressés (limite Workers : 3 Mio compressés)",
+    "tests": "2 854 (comptes 203, gestion 134)"
+  },
+  "decisions": [
+    "ADR-G40 PDF sans bibliotheque",
+    "ADR-G41 jetons HMAC",
+    "ADR-G42 accord lie a l'adresse",
+    "ADR-G43 envoi differe 12 s",
+    "ADR-G44 declencheurs en intergiciel",
+    "ADR-G45 traces minimales",
+    "ADR-G46 donnees laterales et bailleur par bien"
+  ]
+}

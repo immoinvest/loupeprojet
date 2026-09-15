@@ -68,6 +68,8 @@ export interface ContexteGestion {
     locataireId: string,
     locataire: NouveauLocataire,
   ) => Promise<ResultatGestion<Locataire>>;
+  /** Une location modifiée par un autre module (révision du loyer, B1) : elle remplace l'ancienne. */
+  readonly integrerLocation: (location: LocationGeree) => void;
 }
 
 const Contexte = createContext<ContexteGestion | null>(null);
@@ -242,6 +244,9 @@ export function GestionProvider({
           }));
         }
         return r;
+      },
+      integrerLocation: (location) => {
+        remplacerLocation({ ok: true, valeur: location });
       },
     };
   }, [client, etatCompte, chargement, donnees, erreur, preferences, store]);

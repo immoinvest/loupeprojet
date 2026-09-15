@@ -8,8 +8,13 @@ import { ErreurConfiguration } from './erreurs';
 import { lireConfigFournisseurs, type ConfigFournisseurs } from './fournisseurs';
 import type { DepotArgent } from './gestion/argent/depot';
 import { depotArgentD1 } from './gestion/argent/depot-d1';
+import type { DepotBail } from './gestion/bail/depot';
+import { depotBailD1 } from './gestion/bail/depot-d1';
 import type { DepotGestion } from './gestion/depot';
 import { depotD1 } from './gestion/depot-d1';
+import type { DepotEnvois } from './gestion/envois/depot';
+import { depotEnvoisD1 } from './gestion/envois/depot-d1';
+import { signatureJetons, type SignatureJetons } from './gestion/envois/jetons';
 import { journalConsole, type Journal } from './journal';
 import type { DepotPartages } from './partage/depot';
 import { depotPartagesD1 } from './partage/depot-d1';
@@ -38,6 +43,7 @@ export interface Bindings {
   readonly APPLE_KEY_ID?: string | undefined;
   readonly APPLE_PRIVATE_KEY?: string | undefined;
   readonly ORIGINES_AUTORISEES?: string | undefined;
+  readonly JETON_COURRIEL_SECRET?: string | undefined;
 }
 
 export interface Dependances {
@@ -50,11 +56,19 @@ export interface Dependances {
   readonly gestion: DepotGestion;
   /** Dépenses et prêts des biens gérés : les tables de la migration 0007, lues par leurs seules routes. */
   readonly argent: DepotArgent;
+  /** DPE, révision et lettres (vie du bail) : les tables de la migration 0008 de la même base D1. */
+  readonly bail: DepotBail;
   /** Les projets d'analyse synchronisés : la table projet de la même base D1. */
   readonly projets: DepotProjets;
   /** Les liens de partage courts, sans compte : la table partage de la même base D1 (ADR-009). */
   readonly partages: DepotPartages;
-  /** Envoi des codes : Resend avec une clé, le journal en dev, sinon null (l'e-mail n'est pas proposé). */
+  /** Accords, traces d'envoi, téléphones, identités par bien : tables de la migration 0009. */
+  readonly envois: DepotEnvois;
+  /** Signature des liens d'accord : JETON_COURRIEL_SECRET, un secret fixe en dev, sinon null (aucune invitation). */
+  readonly jetons: SignatureJetons | null;
+  /** L'attente avant l'envoi d'une quittance (ADR-G43) ; immédiate en test. */
+  readonly attendre: (ms: number) => Promise<void>;
+  /** Envoi des codes et des e-mails de Gérer : Resend avec une clé, le journal en dev, sinon null. */
   readonly courriel: Envoyeur | null;
   readonly fournisseurs: ConfigFournisseurs;
   /** Origines connues : le site et ses previews, localhost en dev, plus ORIGINES_AUTORISEES. */
@@ -65,6 +79,13 @@ export interface Dependances {
 
 /** Secret de développement : jamais hors dev (le worker refuse de démarrer sans BETTER_AUTH_SECRET). */
 export const SECRET_DEV = 'deklic-dev-secret-ne-jamais-utiliser-en-production';
+
+/** Clé des liens d'accord en dev : jamais hors dev (sans JETON_COURRIEL_SECRET, aucune invitation). */
+export const SECRET_JETONS_DEV = 'deklic-dev-jetons-ne-jamais-utiliser-en-production';
+
+export function attendreVraiment(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 /**
  * Le site : l'adresse historique, app.deklic.pro (prête avant la bascule) et les previews
@@ -90,6 +111,7 @@ const VariablesSchema = z.object({
   APPLE_KEY_ID: Optionnelle,
   APPLE_PRIVATE_KEY: Optionnelle,
   ORIGINES_AUTORISEES: Optionnelle,
+  JETON_COURRIEL_SECRET: z.string().min(32).optional(),
 });
 
 export type Variables = z.infer<typeof VariablesSchema>;
@@ -141,6 +163,11 @@ function lireCourriel(v: Variables, journal: Journal): Envoyeur | null {
   return v.ENVIRONNEMENT === 'dev' ? envoyeurJournal(journal) : null;
 }
 
+function lireJetons(v: Variables): SignatureJetons | null {
+  if (v.JETON_COURRIEL_SECRET !== undefined) return signatureJetons(v.JETON_COURRIEL_SECRET);
+  return v.ENVIRONNEMENT === 'dev' ? signatureJetons(SECRET_JETONS_DEV) : null;
+}
+
 /** Construit les dépendances de production à partir de l'environnement Cloudflare. */
 export function dependancesDepuisEnv(env: Bindings): Dependances {
   const v = lireVariables(env);
@@ -153,8 +180,12 @@ export function dependancesDepuisEnv(env: Bindings): Dependances {
     base,
     gestion: depotD1(base),
     argent: depotArgentD1(base),
+    bail: depotBailD1(base),
     projets: depotProjetsD1(base),
     partages: depotPartagesD1(base, secret),
+    envois: depotEnvoisD1(base),
+    jetons: lireJetons(v),
+    attendre: attendreVraiment,
     courriel: lireCourriel(v, journalConsole),
     fournisseurs: lireConfigFournisseurs(v),
     origines: [...ORIGINES_SITE, ...locales, ...lireOriginesSupplementaires(v.ORIGINES_AUTORISEES)],
