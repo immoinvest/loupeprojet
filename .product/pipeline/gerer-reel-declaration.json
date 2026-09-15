@@ -1,0 +1,36 @@
+{
+  "feature_slug": "gerer-reel-declaration",
+  "title": "Gérer : réel contre prévu (G5-2), aide à la déclaration (G5-3), export de l'année (G5-5), export avant suppression du compte (G1-9)",
+  "started_at": "2026-09-16T00:40:00Z",
+  "current_step": "implement",
+  "scope": "packages/gestion (reel-prevu, declaration, regles-declaration, export-annee), apps/web (gestion/declaration, ecrans/gerer/declaration, carte de la fiche, menu, Mon compte, Nouveau projet prérempli), e2e",
+  "branch": "feat/gerer-reel-declaration",
+  "worktree": "C:\\Users\\errei\\Claude\\loupeprojet\\.claude\\worktrees\\festive-knuth-9ee9a6",
+  "base": "master (aedf4aea, après la PR #104)",
+  "prerequis": "feat/gerer-depenses-argent (PR #104, fusionnée)",
+  "migration": "0010 réservée, non utilisée (ADR-G34)",
+  "steps": {
+    "discovery": {
+      "status": "completed",
+      "output": ".product/architecture/gerer-reel-declaration.md § 1"
+    },
+    "specs": {
+      "status": "completed",
+      "output": ".product/architecture/gerer-reel-declaration.md § 2",
+      "stories_count": 7
+    },
+    "architecture": {
+      "status": "completed",
+      "output": ".product/architecture/gerer-reel-declaration.md"
+    },
+    "implement": {
+      "status": "in_progress",
+      "stories_completed": 0,
+      "stories_total": 7,
+      "commits": []
+    },
+    "qa_tests": { "status": "pending" },
+    "security": { "status": "pending" },
+    "push": { "status": "pending" }
+  }
+}

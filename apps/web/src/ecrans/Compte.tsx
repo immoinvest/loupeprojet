@@ -6,6 +6,8 @@ import { useCompte } from '@/compte/CompteContext';
 import type { CodeErreurCompte, Resultat } from '@/compte/types';
 import { Page, TitrePage } from '@/composants/mise-en-page';
 import { Bouton, Carte, Ligne, TitreCarte } from '@/composants/ui';
+import { useGestion } from '@/gestion/GestionContext';
+import { CHEMIN_EXPORT } from '@/gestion/reseau';
 import { useSynchro } from '@/stockage/synchro/SynchroContext';
 import { ERREURS_COMPTE, initiales, nomAffiche } from '@/textes/compte';
 import { TEXTES_MON_COMPTE as T } from '@/textes/mon-compte';
@@ -27,6 +29,8 @@ const ALLER_A_LA_CONNEXION = '/connexion?retour=/compte';
 export function Compte(): JSX.Element {
   const compte = useCompte();
   const alerte = alerteSynchro(useSynchro().statut);
+  // G1-9 : un compte qui gère des biens a des quittances à garder ; l'export est proposé d'abord.
+  const gereDesBiens = (useGestion().donnees?.biens.length ?? 0) > 0;
   const [nom, setNom] = useState<string | null>(null);
   const [message, setMessage] = useState<Message | null>(null);
   const [confirmation, setConfirmation] = useState(false);
@@ -164,7 +168,22 @@ export function Compte(): JSX.Element {
 
       <Carte>
         <TitreCarte>{T.supprimer}</TitreCarte>
-        <p className="m-0 text-sm text-encre-2">{T.explicationSuppression}</p>
+        <p className="m-0 text-sm text-encre-2">
+          {gereDesBiens ? T.explicationSuppressionGestion : T.explicationSuppression}
+        </p>
+        {confirmation && gereDesBiens && (
+          <div className="flex flex-col gap-2 rounded-encart bg-surveiller-fond p-3">
+            <p className="m-0 text-sm text-surveiller-texte">{T.exporterAvant}</p>
+            <div>
+              <a
+                href={CHEMIN_EXPORT}
+                className="inline-flex min-h-[44px] items-center justify-center rounded-full bg-accent px-4 text-sm font-semibold text-white no-underline survol-plein"
+              >
+                {T.exporterGestion}
+              </a>
+            </div>
+          </div>
+        )}
         <div className="flex flex-wrap gap-2">
           {confirmation ? (
             <>
