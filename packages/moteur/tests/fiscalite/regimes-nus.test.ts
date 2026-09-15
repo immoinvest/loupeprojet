@@ -64,28 +64,39 @@ describe('nu réel — T3 Marseille (loyer nu 850 €)', () => {
   const ctx = contexteNu(projetExemple, 'nu_reel', 850);
   const r = projeterNuReel(ctx);
 
-  it('année 1 : travaux déduits, déficit dû aux intérêts → rien sur le revenu global, tout reporté', () => {
+  it('année 1 : travaux et frais d’emprunt déduits ; les loyers compensent d’abord le financier (§ 110)', () => {
     const a1 = r.annees[0]!;
-    // charges : 3 085 (ni comptable ni CFE) + assurance 402,5 + travaux 6 000 = 9 487,5 < loyers 9 611,5
-    expect(a1.chargesDeductibles).toBeCloseTo(
-      3_085 + ctx.financement.assuranceMensuelle * 12 + 6_000,
-      4,
-    );
+    const assurance = ctx.financement.assuranceMensuelle * 12;
+    // charges : 3 085 (ni comptable ni CFE) + travaux 6 000 + assurance + dossier 850 + garantie 1 500
+    expect(a1.chargesDeductibles).toBeCloseTo(3_085 + 6_000 + assurance + 2_350, 4);
     expect(a1.interetsDeductibles).toBeGreaterThan(5_000);
-    expect(a1.deficitImputeRevenuGlobal).toBe(0);
-    expect(a1.impot).toBe(0);
+    // Loyers 9 611,5 − financier (intérêts + assurance + 2 350) = reste ; autres charges 9 085 − reste.
+    const reste = Math.max(0, a1.recettes - a1.interetsDeductibles - assurance - 2_350);
+    const revenuGlobal = Math.min(9_085 - reste, 10_700);
+    expect(revenuGlobal).toBeGreaterThan(0);
+    expect(a1.deficitImputeRevenuGlobal).toBeCloseTo(revenuGlobal, 6);
+    expect(a1.impot).toBeCloseTo(-revenuGlobal * 0.3, 6);
     expect(a1.stocks.deficitReportable).toBeCloseTo(
-      a1.chargesDeductibles + a1.interetsDeductibles - a1.recettes,
+      a1.chargesDeductibles + a1.interetsDeductibles - a1.recettes - revenuGlobal,
       6,
     );
   });
 
-  it('les années suivantes imputent le report puis paient IR + PS 17,2 %', () => {
+  it('les années suivantes imputent le report éventuel puis paient IR + PS 17,2 %', () => {
     const imposable = r.annees.find((a) => a.impot > 0)!;
     expect(r.premiereAnneeImposable).toBe(imposable.annee);
     expect(imposable.prelevementsSociaux).toBeCloseTo(imposable.baseImposable * 0.172, 6);
     expect(imposable.impotRevenu).toBeCloseTo(imposable.baseImposable * 0.3, 6);
-    expect(r.annees[1]!.deficitImpute).toBeGreaterThan(0);
+    // Le report de l'année 1 (part financière non compensée) est imputé l'année 2, dans la limite du stock.
+    const a1 = r.annees[0]!;
+    const a2 = r.annees[1]!;
+    expect(a2.deficitImpute).toBeCloseTo(
+      Math.min(
+        a1.stocks.deficitReportable,
+        Math.max(0, a2.recettes - a2.chargesDeductibles - a2.interetsDeductibles),
+      ),
+      6,
+    );
     expect(r.amortissementsImmeubleDeduits).toBe(0);
   });
 });
@@ -137,7 +148,9 @@ describe('nu réel — déficit foncier imputable sur le revenu global', () => {
       850,
     );
     const a1 = projeterNuReel(ctx).annees[0]!;
-    expect(a1.baseImposable).toBeCloseTo(a1.recettes - 3_085, 4);
+    // Frais de dossier (850 €) et de garantie (1 500 €) de l'hypothèse du prêt déduits l'année 1,
+    // comme en LMNP réel (fraisDeductiblesAnnee1).
+    expect(a1.baseImposable).toBeCloseTo(a1.recettes - 3_085 - 2_350, 4);
     expect(a1.impot).toBeCloseTo(a1.baseImposable * 0.472, 4);
     expect(a1.stocks.deficitReportable).toBe(0);
   });

@@ -15,9 +15,12 @@ interface AnneeNuReel {
 }
 
 /**
- * Nu au réel : charges et intérêts déductibles, pas d'amortissement.
- * Un déficit hors intérêts s'impute sur le revenu global (plafonné) ; la part liée
- * aux intérêts et l'excédent se reportent 10 ans sur les revenus fonciers.
+ * Nu au réel : charges, intérêts et frais d'emprunt déductibles, pas d'amortissement.
+ * Frais de dossier et de garantie déduits l'année où ils sont payés, la première
+ * (BOI-RFPI-BASE-20-80 § 190 et 240). Avec l'assurance emprunteur, ils suivent le régime des
+ * intérêts, et le revenu brut compense d'abord ces frais financiers (BOI-RFPI-BASE-30-20 § 110) :
+ * la part du déficit qui vient des autres charges s'impute sur le revenu global (plafonnée),
+ * le reste se reporte 10 ans sur les revenus fonciers.
  */
 function anneeNuReel(
   ctx: ContexteFiscal,
@@ -30,10 +33,12 @@ function anneeNuReel(
   const { projet, financement, regles } = ctx;
   const { tmi, psFoncier } = projet.hypotheses.fiscalite;
   const { deficitFoncier } = regles.fiscalite;
-  const { achat } = projet.hypotheses;
+  const { achat, pret } = projet.hypotheses;
   const interets = interetsPayesAnnee(financement, annee);
-  const charges =
-    chargesExploitation + assuranceAnnee(financement, annee) + (annee === 1 ? achat.travaux : 0);
+  const fraisEmprunt =
+    assuranceAnnee(financement, annee) + (annee === 1 ? pret.fraisDossier + pret.fraisGarantie : 0);
+  const autresCharges = chargesExploitation + (annee === 1 ? achat.travaux : 0);
+  const charges = autresCharges + fraisEmprunt;
   const resultat = recettes - charges - interets;
 
   let nouveauStock = stock;
@@ -45,7 +50,8 @@ function anneeNuReel(
     const plafond = achat.travauxRenovationEnergetique
       ? deficitFoncier.plafondRenovationEnergetique
       : deficitFoncier.plafondRevenuGlobal;
-    const deficitHorsInterets = Math.max(0, charges - recettes);
+    const recettesApresFinancier = Math.max(0, recettes - interets - fraisEmprunt);
+    const deficitHorsInterets = Math.max(0, autresCharges - recettesApresFinancier);
     deficitImputeRevenuGlobal = Math.min(deficitHorsInterets, plafond);
     nouveauStock = ajouterDeficit(
       stock,
