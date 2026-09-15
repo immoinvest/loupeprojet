@@ -19,6 +19,9 @@ import {
 } from '@/enrichissement';
 import { lireProjets } from '@/stockage/projets';
 import { PHRASES_DONNEES_ADRESSE } from '@/textes/donnees-adresse';
+import { ESPACE_MILLIERS } from '@/composants/saisie/montant';
+
+import { ESTIMES, ouvrirGroupe } from './aides-verifier';
 
 const n = (s: string | null): string => (s ?? '').replace(/\s/g, ' ');
 const ok = <T,>(valeur: T): Promise<Resultat<T>> => Promise.resolve({ ok: true, valeur });
@@ -308,12 +311,13 @@ describe('Formulaire Vérifier : estimer le loyer', () => {
     const u = userEvent.setup();
     await u.click(screen.getByRole('button', { name: 'Estimer le loyer' }));
     expect(await screen.findByText(/Loyer de marché \(ANIL\)/)).toBeInTheDocument();
-    expect(champ(container, 'loyerHc').value).toBe('1032');
+    expect(champ(container, 'loyerHc').value).toBe(`1${ESPACE_MILLIERS}032`);
     expect(demandes).toEqual([
       ['13005 Marseille', '13005'],
       { codeInsee: '13055', codePostal: '13005', type: 'maison', pieces: 3 },
     ]);
 
+    await ouvrirGroupe(u, ESTIMES);
     await u.clear(champ(container, 'apport'));
     await u.type(champ(container, 'apport'), '10000');
     await u.click(screen.getByRole('button', { name: /Créer le projet/ }));

@@ -8,6 +8,8 @@ import { clientHorsLigne, type ClientWorker, type Resultat } from '@/enrichissem
 import type { PageLue } from '@/enrichissement/contrat';
 import { lireProjets } from '@/stockage/projets';
 
+import { LUS, ouvrirGroupe } from './aides-verifier';
+
 vi.mock('@/annonces/extension', () => ({
   detecterExtension: vi.fn(),
   lireParExtension: vi.fn(),
@@ -91,7 +93,8 @@ describe('Nouveau projet — Deklic lit l’annonce sans extension', () => {
 
       await screen.findByRole('heading', { name: /Vérifiez, corrigez/ });
       expect(screen.getByText('lue par Deklic')).toBeInTheDocument();
-      expect(screen.getByLabelText(/Prix affiché/)).toHaveValue('249000');
+      await ouvrirGroupe(utilisateur, LUS);
+      expect(screen.getByLabelText(/Prix affiché/)).toHaveValue('249 000');
       expect(screen.getByLabelText(/Surface/)).toHaveValue('47');
       expect(lireExtension).not.toHaveBeenCalled();
 

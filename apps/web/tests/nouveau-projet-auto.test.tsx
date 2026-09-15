@@ -5,7 +5,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { AppEnMemoire } from '@/App';
 import { detecterExtension, lireParExtension } from '@/annonces/extension';
+import { ESPACE_MILLIERS } from '@/composants/saisie/montant';
 import { lireProjets } from '@/stockage/projets';
+
+import { LUS, ouvrirGroupe, radioDans, saisirApport } from './aides-verifier';
 
 vi.mock('@/annonces/extension', () => ({
   detecterExtension: vi.fn(),
@@ -84,17 +87,17 @@ describe('Nouveau projet — coller le lien suffit (extension installée)', () =
 
       await screen.findByRole('heading', { name: /Vérifiez, corrigez/ });
       expect(screen.getByText("lue par l'extension")).toBeInTheDocument();
-      expect(screen.getByLabelText(/Prix affiché/)).toHaveValue('155000');
-      expect(screen.getByLabelText(/Type de bien/)).toHaveValue('appartement');
-      expect(screen.getByLabelText(/^GES/)).toHaveValue('B');
+      await ouvrirGroupe(utilisateur, LUS);
+      expect(screen.getByLabelText(/Prix affiché/)).toHaveValue(`155${ESPACE_MILLIERS}000`);
+      expect(radioDans('Type de bien', 'Appartement')).toBeChecked();
+      expect(radioDans('GES', 'B')).toBeChecked();
       expect(screen.getByLabelText(/Lots de copropriété/)).toHaveValue('24');
-      expect(screen.getByLabelText(/Copropriété en procédure/)).toHaveValue('non');
+      expect(radioDans('Copropriété en procédure', 'Non')).toBeChecked();
       expect(screen.getByLabelText(/Charges de copropriété/)).toHaveValue('90');
-      expect(screen.getByLabelText(/Taxe foncière/)).toHaveValue('1050');
+      expect(screen.getByLabelText(/Taxe foncière/)).toHaveValue(`1${ESPACE_MILLIERS}050`);
 
       await utilisateur.type(screen.getByLabelText(/Loyer visé/), '980');
-      await utilisateur.clear(screen.getByLabelText(/^Apport/));
-      await utilisateur.type(screen.getByLabelText(/^Apport/), '15000');
+      await saisirApport(utilisateur, '15000');
       await utilisateur.click(screen.getByRole('button', { name: /Créer le projet/ }));
 
       // Le rapport se calcule à l'ouverture : sous charge (suite complète), cela peut prendre plusieurs secondes.
@@ -127,6 +130,7 @@ describe('Nouveau projet — coller le lien suffit (extension installée)', () =
     expect(screen.getByRole('button', { name: 'Saisir à la main' })).toBeInTheDocument();
     await utilisateur.click(screen.getByRole('button', { name: 'Réessayer la lecture' }));
     await screen.findByRole('heading', { name: /Vérifiez, corrigez/ });
+    await ouvrirGroupe(utilisateur, LUS);
     expect(screen.getByLabelText(/Surface/)).toHaveValue('65');
     expect(lire).toHaveBeenCalledTimes(2);
   });

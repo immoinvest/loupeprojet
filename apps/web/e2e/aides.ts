@@ -47,6 +47,12 @@ export function carte(page: Page, titre: string): Locator {
   });
 }
 
+/** Dans le formulaire Vérifier, déplie un résumé (« Estimé pour vous », « Lu dans l'annonce »…) s'il est replié. */
+export async function ouvrirGroupe(page: Page, nom: RegExp): Promise<void> {
+  const bouton = page.getByRole('button', { name: nom });
+  if ((await bouton.getAttribute('aria-expanded')) !== 'true') await bouton.click();
+}
+
 /** Nom donné par l'app au projet saisi à la main dans `creerProjetManuel`. */
 export const NOM_LYON = '40 m² · Lyon';
 
@@ -66,12 +72,15 @@ export async function creerProjetMinimal(
 
   await page.getByLabel('Prix affiché').fill('120000');
   await page.getByLabel('Surface').fill('40');
-  await page.getByLabel('Code postal').fill('69003');
-  await page.getByLabel('Ville').fill('Lyon');
+  // Sans Worker joignable, « code postal ville » dans le champ unique suffit.
+  await page.getByLabel('Commune').fill('69003 Lyon');
   if (saisie.loyer !== undefined) {
     await page.getByLabel('Loyer visé, hors charges').fill(saisie.loyer);
   }
-  if (saisie.apport !== undefined) await page.getByLabel('Apport').fill(saisie.apport);
+  if (saisie.apport !== undefined) {
+    await ouvrirGroupe(page, /^Estimé pour vous/);
+    await page.getByLabel('Apport', { exact: true }).fill(saisie.apport);
+  }
   await page.getByRole('button', { name: 'Créer le projet et voir le rapport' }).click();
 
   await expect(

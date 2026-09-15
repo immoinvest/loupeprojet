@@ -35,6 +35,22 @@
   --color-probleme-texte: #a3302a;
   --color-probleme-fond: #fbe5e3;
 
+  /* Étiquettes énergie (DPE, vert → rouge) et climat (GES, mauve), teintes des étiquettes officielles. */
+  --color-dpe-a: #009c6d;
+  --color-dpe-b: #52b153;
+  --color-dpe-c: #78bd76;
+  --color-dpe-d: #f4e70f;
+  --color-dpe-e: #f0b50f;
+  --color-dpe-f: #eb8235;
+  --color-dpe-g: #d7221f;
+  --color-ges-a: #f6edfd;
+  --color-ges-b: #e4c7fa;
+  --color-ges-c: #d4aaf6;
+  --color-ges-d: #c396f3;
+  --color-ges-e: #a774dc;
+  --color-ges-f: #8a4fc4;
+  --color-ges-g: #6b2d96;
+
   --radius-carte: 20px;
   --radius-encart: 12px;
   --shadow-carte: 0 6px 24px rgba(35, 39, 47, 0.05);

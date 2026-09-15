@@ -59,7 +59,7 @@ describe('carte « L’achat » : négociation', () => {
     await utilisateur.clear(champNegociation());
     await utilisateur.type(champNegociation(), '40');
     expect(projetEnregistre().hypotheses.achat.negociationTaux).toBe(0.04);
-    expect(champNegociation().closest('label')?.textContent).toMatch(/0\.3/);
+    expect(champNegociation().closest('div')?.textContent).toMatch(/0\.3/);
   });
 
   it('« Viser le prix estimé » n’apparaît que si l’estimation est sous le prix affiché', async () => {

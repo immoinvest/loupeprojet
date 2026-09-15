@@ -291,6 +291,8 @@ export interface ApercuApport {
   readonly texte: string;
   /** « Soit 10 % du coût total du projet (124 000 €). » */
   readonly indication: string;
+  /** Coût total du bien saisi, base des tuiles 0 · 10 · 20 % ; `null` tant que le bien n'est pas lisible. */
+  readonly coutTotal: number | null;
 }
 
 /**
@@ -311,5 +313,6 @@ export function apercuApport(v: Valeurs, provenance: ProvenanceValeurs): ApercuA
   return {
     texte: estime ? (apportCalcule === null ? '' : String(apportCalcule)) : v.apport,
     indication: texteApport(estime ? apportCalcule : (nombre(v.apport) ?? null), cout),
+    coutTotal: cout,
   };
 }

@@ -16,6 +16,7 @@ export const GROUPE_FINANCEMENT: Groupe = {
       aToi: true,
       aideSelon: (projet) =>
         texteApport(projet.hypotheses.pret.apport ?? null, coutTotalDuProjet(projet)),
+      terme: 'apport',
     },
     {
       chemin: 'hypotheses.pret.dureeAnnees',
@@ -31,31 +32,42 @@ export const GROUPE_FINANCEMENT: Groupe = {
       type: 'pourcent',
       unite: '%',
       obligatoire: true,
+      terme: 'tauxNominal',
     },
     {
       chemin: 'hypotheses.pret.tauxAssurance',
       libelle: 'Assurance emprunteur',
       type: 'pourcent',
       unite: '% du capital / an',
+      terme: 'assuranceEmprunteur',
     },
     {
       chemin: 'hypotheses.pret.fraisDossier',
       libelle: 'Frais de dossier',
       type: 'euros',
       unite: '€',
+      terme: 'fraisDossier',
     },
-    { chemin: 'hypotheses.pret.fraisGarantie', libelle: 'Garantie', type: 'euros', unite: '€' },
+    {
+      chemin: 'hypotheses.pret.fraisGarantie',
+      libelle: 'Garantie',
+      type: 'euros',
+      unite: '€',
+      terme: 'garantie',
+    },
     {
       chemin: 'hypotheses.pret.differeTotalMois',
       libelle: 'Différé total',
       type: 'entier',
       unite: 'mois',
+      terme: 'differeTotal',
     },
     {
       chemin: 'hypotheses.pret.differePartielMois',
       libelle: 'Différé partiel',
       type: 'entier',
       unite: 'mois',
+      terme: 'differePartiel',
     },
   ],
 };
@@ -74,15 +86,29 @@ export const GROUPE_CHARGES: Groupe = {
       libelle: 'Copropriété (part propriétaire)',
       type: 'euros',
       unite: '€/an',
+      terme: 'chargesCopro',
     },
     {
       chemin: 'hypotheses.charges.pno',
       libelle: 'Assurance propriétaire',
       type: 'euros',
       unite: '€/an',
+      terme: 'pno',
     },
-    { chemin: 'hypotheses.charges.comptable', libelle: 'Comptable', type: 'euros', unite: '€/an' },
-    { chemin: 'hypotheses.charges.cfe', libelle: 'CFE', type: 'euros', unite: '€/an' },
+    {
+      chemin: 'hypotheses.charges.comptable',
+      libelle: 'Comptable',
+      type: 'euros',
+      unite: '€/an',
+      terme: 'comptable',
+    },
+    {
+      chemin: 'hypotheses.charges.cfe',
+      libelle: 'CFE',
+      type: 'euros',
+      unite: '€/an',
+      terme: 'cfe',
+    },
     {
       chemin: 'hypotheses.charges.energieMensuel',
       libelle: 'Énergie payée par le propriétaire',
@@ -100,6 +126,7 @@ export const GROUPE_CHARGES: Groupe = {
       libelle: 'Provision entretien',
       type: 'pourcent',
       unite: '% du prix / an',
+      terme: 'entretien',
     },
   ],
 };
@@ -119,6 +146,7 @@ export const GROUPE_FISCALITE: Groupe = {
         { v: '0.41', l: '41 %' },
         { v: '0.45', l: '45 %' },
       ],
+      terme: 'tmi',
     },
     {
       chemin: 'hypotheses.fiscalite.regime',
@@ -134,18 +162,21 @@ export const GROUPE_FISCALITE: Groupe = {
       // Colocation, courte et moyenne durée : régimes du meublé seulement (le moteur refuse les autres).
       optionVisibleSi: (v, projet) =>
         (regimesCompatibles(projet.hypotheses.location.mode) as readonly string[]).includes(v),
+      terme: 'regimeFiscal',
     },
     {
       chemin: 'hypotheses.fiscalite.psBic',
       libelle: 'Prélèvements sociaux meublé',
       type: 'pourcent',
       unite: '%',
+      terme: 'prelevementsSociaux',
     },
     {
       chemin: 'hypotheses.fiscalite.psFoncier',
       libelle: 'Prélèvements sociaux nu',
       type: 'pourcent',
       unite: '%',
+      terme: 'prelevementsSociaux',
     },
     { chemin: 'hypotheses.revente.annees', libelle: 'Revente dans', type: 'entier', unite: 'ans' },
     {
@@ -153,6 +184,7 @@ export const GROUPE_FISCALITE: Groupe = {
       libelle: 'Évolution du prix',
       type: 'pourcent',
       unite: '% / an',
+      terme: 'evolutionPrix',
     },
     {
       chemin: 'hypotheses.revente.fraisAgenceTaux',

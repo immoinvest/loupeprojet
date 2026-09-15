@@ -70,7 +70,8 @@ export function creerProxy(deps: Dependances): Handler<BlankEnv, '/proxy/:servic
     if (!lecture.ok) return reponseErreur(400, 'PARAMETRES_INVALIDES', { champs: lecture.champs });
 
     const cle = await cleCache(service.nom, lecture.parametres);
-    const enCache = await lireCache(deps, cle);
+    const garder = service.enCache(lecture.parametres);
+    const enCache = garder ? await lireCache(deps, cle) : null;
     if (enCache !== null) return repondre(c, enCache, 'HIT');
 
     const amont = await appelerAmont(deps, service, lecture.url);
@@ -81,7 +82,7 @@ export function creerProxy(deps: Dependances): Handler<BlankEnv, '/proxy/:servic
       donnees: amont.donnees,
     };
     const texte = JSON.stringify(enveloppe);
-    await ecrireCache(deps, cle, texte, service.ttlSecondes);
+    if (garder) await ecrireCache(deps, cle, texte, service.ttlSecondes);
     return repondre(c, texte, 'MISS');
   };
 }
